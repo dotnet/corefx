@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Net.Cache;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -27,6 +29,14 @@ namespace System.Net.Tests
         public HttpWebRequestTest(ITestOutputHelper output)
         {
             _output = output;
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                // On .NET Framework, the default limit for connections/server is very low (2). 
+                // On .NET Core, the default limit is higher. Since these tests run in parallel,
+                // the limit needs to be increased to avoid timeouts when running the tests.
+                System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -34,10 +44,12 @@ namespace System.Net.Tests
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             Assert.Null(request.Accept);
+            Assert.True(request.AllowAutoRedirect);
             Assert.False(request.AllowReadStreamBuffering);
             Assert.True(request.AllowWriteStreamBuffering);
             Assert.Null(request.ContentType);
             Assert.Equal(350, request.ContinueTimeout);
+            Assert.NotNull(request.ClientCertificates);
             Assert.Null(request.CookieContainer);
             Assert.Null(request.Credentials);
             Assert.False(request.HaveResponse);
@@ -49,9 +61,11 @@ namespace System.Net.Tests
             Assert.Equal(HttpWebRequest.DefaultMaximumResponseHeadersLength, 64);
             Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
             Assert.Equal(HttpWebRequest.DefaultCachePolicy.Level, RequestCacheLevel.BypassCache);
+            Assert.Equal(PlatformDetection.IsFullFramework ? 64 : 0, HttpWebRequest.DefaultMaximumErrorResponseLength);
             Assert.NotNull(request.Proxy);
             Assert.Equal(remoteServer, request.RequestUri);
             Assert.True(request.SupportsCookieContainer);
+            Assert.Equal(100000, request.Timeout);
             Assert.False(request.UseDefaultCredentials);
         }
 
@@ -268,6 +282,49 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
+        public void TimeOut_SetThenGet_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Timeout = 100;
+            Assert.Equal(100, request.Timeout);
+
+            request.Timeout = Threading.Timeout.Infinite;
+            Assert.Equal(Threading.Timeout.Infinite, request.Timeout);
+
+            request.Timeout = int.MaxValue;
+            Assert.Equal(int.MaxValue, request.Timeout);
+        }
+
+        [Fact]
+        public void Timeout_SetTenMillisecondsOnLoopback_ThrowsWebException()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                s.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                s.Listen(0);
+
+                IPEndPoint ep = (IPEndPoint)s.LocalEndPoint;
+                Uri uri = new Uri($"http://{ep.Address}:{ep.Port}");
+
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.Timeout = 10; // ms.
+
+                var sw = Stopwatch.StartNew();
+                WebException exception = Assert.Throws<WebException>(() =>
+                {
+                    var response = (HttpWebResponse)request.GetResponse();
+                });
+
+                sw.Stop();
+
+                Assert.InRange(sw.ElapsedMilliseconds, 1, 60 * 1000); // Allow a very wide range as this has taken over 10 seconds occasionally
+                Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
+                Assert.Equal(null, exception.InnerException);
+                Assert.Equal(null, exception.Response);
+            }
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
         public void Address_CtorAddress_ValuesMatch(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
@@ -403,6 +460,38 @@ namespace System.Net.Tests
             Assert.False(request.KeepAlive);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19225")]
+        public void KeepAlive_CorrectConnectionHeaderSent(bool? keepAlive)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(System.Net.Test.Common.Configuration.Http.RemoteEchoServer);
+
+            if (keepAlive.HasValue)
+            {
+                request.KeepAlive = keepAlive.Value;
+            }
+
+            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var body = new StreamReader(response.GetResponseStream()))
+            {
+                string content = body.ReadToEnd();
+                if (!keepAlive.HasValue || keepAlive.Value)
+                {
+                    // Validate that the request doesn't contain Connection: "close", but we can't validate
+                    // that it does contain Connection: "keep-alive", as that's optional as of HTTP 1.1.
+                    Assert.DoesNotContain("\"Connection\": \"close\"", content, StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    Assert.Contains("\"Connection\": \"close\"", content, StringComparison.OrdinalIgnoreCase);
+                    Assert.DoesNotContain("\"Keep-Alive\"", content, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void AutomaticDecompression_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
         {
@@ -446,8 +535,18 @@ namespace System.Net.Tests
         public void ConnectionGroupName_SetAndGetGroup_ValuesMatch(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.ConnectionGroupName = "Group";
-            Assert.Equal("Group", request.ConnectionGroupName);
+            
+
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName);
+            }
+            else
+            {
+                Assert.Null(request.ConnectionGroupName);
+                request.ConnectionGroupName = "Group";
+                Assert.Equal("Group", request.ConnectionGroupName);
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -458,6 +557,18 @@ namespace System.Net.Tests
             Assert.True(request.PreAuthenticate);
             request.PreAuthenticate = false;
             Assert.False(request.PreAuthenticate);
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19225")]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void PreAuthenticate_SetAndGetBooleanResponse_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.PreAuthenticate = true;
+            using (var response = (HttpWebResponse)request.GetResponse())
+            {
+                Assert.True(request.PreAuthenticate);
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -613,11 +724,17 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "ServicePoint resolution isn't implemented in Core")]
-        public void ServicePoint_GetNotNull_ThrowsPlatformNotSupportedException(Uri remoteServer)
+        public void ServicePoint_GetValue_ExpectedResult(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            Assert.NotNull(request.ServicePoint);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotNull(request.ServicePoint);
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint);
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -715,6 +832,17 @@ namespace System.Net.Tests
             request.Credentials = _explicitCredential;
             request.UseDefaultCredentials = false;
             Assert.Equal(null, request.Credentials);
+        }
+
+        [OuterLoop]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
+        [MemberData(nameof(EchoServers))]
+        public void UseDefaultCredentials_SetGetResponse_ExpectSuccess(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.UseDefaultCredentials = true;
+            WebResponse response = request.GetResponse();
+            response.Dispose();
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -859,6 +987,27 @@ namespace System.Net.Tests
             }
         }
 
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void CookieContainer_Count_Add(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            DateTime now = DateTime.UtcNow;
+            request.CookieContainer = new CookieContainer();
+            request.CookieContainer.Add(remoteServer, new Cookie("1", "cookie1"));
+            request.CookieContainer.Add(remoteServer, new Cookie("2", "cookie2"));
+            Assert.True(request.SupportsCookieContainer);
+            Assert.Equal(request.CookieContainer.GetCookies(remoteServer).Count, 2);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Range_Add_Success(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.AddRange(1, 5);
+            Assert.Equal(request.Headers["Range"], "bytes=1-5");
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_PostRequestStream_ContainsData(Uri remoteServer)
         {
@@ -972,6 +1121,17 @@ namespace System.Net.Tests
             Assert.Throws<ArgumentException>("value", () => request.Method = "Method(2");
         }
 
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Proxy_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            using (var response = (HttpWebResponse)request.GetResponse())
+            {
+                Assert.Throws<InvalidOperationException>(() => request.Proxy = WebRequest.DefaultWebProxy);
+            }
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void Proxy_GetDefault_ExpectNotNull(Uri remoteServer)
         {
@@ -1062,6 +1222,26 @@ namespace System.Net.Tests
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.MediaType = mediaType;
             Assert.Equal(mediaType, request.MediaType);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_EndGetRequestStreamContext_ExpectedValue(Uri remoteServer)
+        {
+            System.Net.TransportContext context;
+            HttpWebRequest httpWebRequest = HttpWebRequest.CreateHttp(remoteServer);
+            httpWebRequest.Method = "POST";
+
+            using (httpWebRequest.EndGetRequestStream(httpWebRequest.BeginGetRequestStream(null, null), out context))
+            {
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.NotNull(context);
+                }
+                else
+                {
+                    Assert.Null(context);
+                }
+            }
         }
 
         [ActiveIssue(19083)]
