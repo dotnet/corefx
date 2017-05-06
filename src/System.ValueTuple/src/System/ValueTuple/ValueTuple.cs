@@ -338,6 +338,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1);
         }
 
@@ -379,6 +380,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             return comparer.Compare(Item1, objTuple.Item1);
         }
 
@@ -393,6 +395,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.GetHashCode(Item1);
         }
 
@@ -511,6 +514,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2);
         }
@@ -554,6 +558,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -572,6 +577,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -686,6 +692,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3);
@@ -733,6 +740,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -755,6 +763,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -876,6 +885,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
@@ -927,6 +937,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -953,6 +964,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -1083,6 +1095,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
@@ -1138,6 +1151,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -1168,6 +1182,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -1307,6 +1322,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
@@ -1366,6 +1382,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -1400,6 +1417,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -1548,6 +1566,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6, T7>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
@@ -1611,6 +1630,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6, T7>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -1649,6 +1669,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
@@ -1812,6 +1833,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>)other;
 
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
@@ -1879,6 +1901,7 @@ namespace System
 
             var objTuple = (ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>)other;
 
+            if (comparer == null) comparer = Comparer<object>.Default;
             int c = comparer.Compare(Item1, objTuple.Item1);
             if (c != 0) return c;
 
@@ -1980,6 +2003,7 @@ namespace System
 
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
+            if (comparer == null) comparer = EqualityComparer<object>.Default;
             return GetHashCodeCore(comparer);
         }
 
