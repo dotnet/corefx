@@ -316,14 +316,7 @@ namespace System.Net
                 else
                 {
                     int endOfIPv6Address = value.IndexOf(']');
-                    if (endOfIPv6Address == -1)
-                    {
-                        _hostHasPort = true;
-                    }
-                    else
-                    {
-                        _hostHasPort = value.LastIndexOf(':') > endOfIPv6Address;
-                    }
+                    _hostHasPort = endOfIPv6Address == -1 || value.LastIndexOf(':') > endOfIPv6Address;
                 }
             }
         }

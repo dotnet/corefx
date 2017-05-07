@@ -29,14 +29,10 @@ namespace System.Net.Tests
         public HttpWebRequestTest(ITestOutputHelper output)
         {
             _output = output;
-
-            if (PlatformDetection.IsFullFramework)
-            {
-                // On .NET Framework, the default limit for connections/server is very low (2). 
-                // On .NET Core, the default limit is higher. Since these tests run in parallel,
-                // the limit needs to be increased to avoid timeouts when running the tests.
-                System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
-            }
+            // On .NET Framework, the default limit for connections/server is very low (2). 
+            // On .NET Core, the default limit is higher. Since these tests run in parallel,
+            // the limit needs to be increased to avoid timeouts when running the tests.
+            System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -160,10 +156,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void ContentLength_SetThenGetOne_Success(Uri remoteServer)
         {
-            const int contentLength = 1;
+            const int ContentLength = 1;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.ContentLength = contentLength;
-            Assert.Equal(contentLength, request.ContentLength);
+            request.ContentLength = ContentLength;
+            Assert.Equal(ContentLength, request.ContentLength);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -608,12 +604,12 @@ namespace System.Net.Tests
         public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
         {
             int defaultMaximumResponseHeadersLength = HttpWebRequest.DefaultMaximumResponseHeadersLength;
-            int newDefaultMaximumResponseHeadersLength = 255;
+            const int NewDefaultMaximumResponseHeadersLength = 255;
 
             try
             {
-                HttpWebRequest.DefaultMaximumResponseHeadersLength = newDefaultMaximumResponseHeadersLength;
-                Assert.Equal(newDefaultMaximumResponseHeadersLength, HttpWebRequest.DefaultMaximumResponseHeadersLength);
+                HttpWebRequest.DefaultMaximumResponseHeadersLength = NewDefaultMaximumResponseHeadersLength;
+                Assert.Equal(NewDefaultMaximumResponseHeadersLength, HttpWebRequest.DefaultMaximumResponseHeadersLength);
             }
             finally
             {
