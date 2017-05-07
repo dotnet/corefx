@@ -160,10 +160,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void ContentLength_SetThenGetOne_Success(Uri remoteServer)
         {
-            const int contentLength = 1;
+            const int ContentLength = 1;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.ContentLength = contentLength;
-            Assert.Equal(contentLength, request.ContentLength);
+            request.ContentLength = ContentLength;
+            Assert.Equal(ContentLength, request.ContentLength);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -203,10 +203,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void MaximumResponseHeadersLength_SetThenGetNegativeOne_Success(Uri remoteServer)
         {
-            const int maximumResponseHeaderLength = -1;
+            const int MaximumResponseHeaderLength = -1;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.MaximumResponseHeadersLength = maximumResponseHeaderLength;
-            Assert.Equal(maximumResponseHeaderLength, request.MaximumResponseHeadersLength);
+            request.MaximumResponseHeadersLength = MaximumResponseHeaderLength;
+            Assert.Equal(MaximumResponseHeaderLength, request.MaximumResponseHeadersLength);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -220,10 +220,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void MaximumAutomaticRedirections_SetThenGetOne_Success(Uri remoteServer)
         {
-            const int maximumAutomaticRedirections = 1;
+            const int MaximumAutomaticRedirections = 1;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.MaximumAutomaticRedirections = maximumAutomaticRedirections;
-            Assert.Equal(maximumAutomaticRedirections, request.MaximumAutomaticRedirections);
+            request.MaximumAutomaticRedirections = MaximumAutomaticRedirections;
+            Assert.Equal(MaximumAutomaticRedirections, request.MaximumAutomaticRedirections);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -261,10 +261,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void Timeout_SetThenGetZero_ExpectZero(Uri remoteServer)
         {
-            const int timeout = 0;
+            const int Timeout = 0;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Timeout = timeout;
-            Assert.Equal(timeout, request.Timeout);
+            request.Timeout = Timeout;
+            Assert.Equal(Timeout, request.Timeout);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -330,10 +330,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void UserAgent_SetThenGetWindows_ValuesMatch(Uri remoteServer)
         {
-            const string userAgent = "Windows";
+            const string UserAgent = "Windows";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.UserAgent = userAgent;
-            Assert.Equal(userAgent, request.UserAgent);
+            request.UserAgent = UserAgent;
+            Assert.Equal(UserAgent, request.UserAgent);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -370,19 +370,19 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void Host_SetThenGetCustomUri_ValuesMatch(Uri remoteServer)
         {
-            const string host = "localhost";
+            const string Host = "localhost";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Host = host;
-            Assert.Equal(host, request.Host);
+            request.Host = Host;
+            Assert.Equal(Host, request.Host);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
         public void Host_SetThenGetCustomUriWithPort_ValuesMatch(Uri remoteServer)
         {
-            const string host = "localhost:8080";
+            const string Host = "localhost:8080";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Host = host;
-            Assert.Equal(host, request.Host);
+            request.Host = Host;
+            Assert.Equal(Host, request.Host);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -414,20 +414,20 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void Referer_SetThenGetReferer_ValuesMatch(Uri remoteServer)
         {
-            const string referer = "Referer";
+            const string Referer = "Referer";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Referer = referer;
-            Assert.Equal(referer, request.Referer);
+            request.Referer = Referer;
+            Assert.Equal(Referer, request.Referer);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
         public void TransferEncoding_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
         {
-            const string transferEncoding = "xml";
+            const string TransferEncoding = "xml";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.SendChunked = true;
-            request.TransferEncoding = transferEncoding;
-            Assert.Equal(transferEncoding, request.TransferEncoding);
+            request.TransferEncoding = TransferEncoding;
+            Assert.Equal(TransferEncoding, request.TransferEncoding);
             request.TransferEncoding = null;
             Assert.Equal(null, request.TransferEncoding);
         }
@@ -570,10 +570,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void Connection_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
         {
-            const string connection = "connect";
+            const string Connection = "connect";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Connection = connection;
-            Assert.Equal(connection, request.Connection);
+            request.Connection = Connection;
+            Assert.Equal(Connection, request.Connection);
             request.Connection = null;
             Assert.Equal(null, request.Connection);
         }
@@ -589,10 +589,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void Expect_SetNullOrWhiteSpace_ValuesMatch(Uri remoteServer)
         {
-            const string expect = "101-go";
+            const string Expect = "101-go";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Expect = expect;
-            Assert.Equal(expect, request.Expect);
+            request.Expect = Expect;
+            Assert.Equal(Expect, request.Expect);
             request.Expect = null;
             Assert.Equal(null, request.Expect);
         }
@@ -625,12 +625,12 @@ namespace System.Net.Tests
         public void DefaultMaximumErrorResponseLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
         {
             int defaultMaximumErrorsResponseLength = HttpWebRequest.DefaultMaximumErrorResponseLength;
-            const int newDefaultMaximumErrorsResponseLength = 255;
+            const int NewDefaultMaximumErrorsResponseLength = 255;
 
             try
             {
-                HttpWebRequest.DefaultMaximumErrorResponseLength = newDefaultMaximumErrorsResponseLength;
-                Assert.Equal(newDefaultMaximumErrorsResponseLength, HttpWebRequest.DefaultMaximumErrorResponseLength);
+                HttpWebRequest.DefaultMaximumErrorResponseLength = NewDefaultMaximumErrorsResponseLength;
+                Assert.Equal(NewDefaultMaximumErrorsResponseLength, HttpWebRequest.DefaultMaximumErrorResponseLength);
             }
             finally
             {
@@ -1195,9 +1195,9 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
         {
-            const string contentType = "text/plain; charset=utf-8";
+            const string ContentType = "text/plain; charset=utf-8";
             HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.ContentType = contentType;
+            request.ContentType = ContentType;
 
             using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
             using (Stream responseStream = response.GetResponseStream())
@@ -1207,17 +1207,17 @@ namespace System.Net.Tests
                 _output.WriteLine(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(responseBody.Contains($"\"Content-Type\": \"{contentType}\""));
+                Assert.True(responseBody.Contains($"\"Content-Type\": \"{ContentType}\""));
             }            
         }
 
         [Theory, MemberData(nameof(EchoServers))]
         public void MediaType_SetThenGet_ValuesMatch(Uri remoteServer)
         {
-            const string mediaType = "text/plain";
+            const string MediaType = "text/plain";
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.MediaType = mediaType;
-            Assert.Equal(mediaType, request.MediaType);
+            request.MediaType = MediaType;
+            Assert.Equal(MediaType, request.MediaType);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
