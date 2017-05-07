@@ -160,10 +160,10 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public void ContentLength_SetThenGetOne_Success(Uri remoteServer)
         {
-            const int ContentLength = 1;
+            const int contentLength = 1;
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.ContentLength = ContentLength;
-            Assert.Equal(ContentLength, request.ContentLength);
+            request.ContentLength = contentLength;
+            Assert.Equal(contentLength, request.ContentLength);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -311,7 +311,7 @@ namespace System.Net.Tests
                 
                 sw.Stop();
 
-                Assert.InRange(sw.ElapsedMilliseconds, 1, 5 * 1000);
+                Assert.InRange(sw.ElapsedMilliseconds, 1, 15 * 1000);
                 Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
                 Assert.Equal(null, exception.InnerException);
                 Assert.Equal(null, exception.Response);
