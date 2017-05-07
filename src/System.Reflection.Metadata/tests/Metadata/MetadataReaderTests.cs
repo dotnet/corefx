@@ -2432,6 +2432,37 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
+        public void OtherAccessors()
+        {
+            var reader = GetMetadataReader(Interop.OtherAccessors);
+            var typeDef = reader.GetTypeDefinition(reader.TypeDefinitions.First());
+            Assert.Equal(reader.GetString(typeDef.Name), "<Module>");
+
+            typeDef = reader.GetTypeDefinition(reader.TypeDefinitions.Skip(1).First());
+            Assert.Equal(reader.GetString(typeDef.Name), "IContainerObject");
+
+            var propertyDef = reader.GetPropertyDefinition(typeDef.GetProperties().First());
+            var propertyAccessors = propertyDef.GetAccessors();
+
+            Assert.False(propertyAccessors.Getter.IsNil);
+            Assert.False(propertyAccessors.Setter.IsNil);
+            Assert.NotEmpty(propertyAccessors.Others);
+            Assert.False(propertyAccessors.Others.First().IsNil);
+
+            typeDef = reader.GetTypeDefinition(reader.TypeDefinitions.Skip(2).First());
+            Assert.Equal(reader.GetString(typeDef.Name), "IEventSource");
+
+            var eventDef = reader.GetEventDefinition(typeDef.GetEvents().First());
+            var eventAccessors = eventDef.GetAccessors();
+
+            Assert.False(eventAccessors.Adder.IsNil);
+            Assert.False(eventAccessors.Remover.IsNil);
+            Assert.True(eventAccessors.Raiser.IsNil);
+            Assert.NotEmpty(eventAccessors.Others);
+            Assert.False(eventAccessors.Others.First().IsNil);
+        }
+
+        [Fact]
         public void GetCustomDebugInformation()
         {
             using (var provider = MetadataReaderProvider.FromPortablePdbStream(new MemoryStream(PortablePdbs.DocumentsPdb)))
