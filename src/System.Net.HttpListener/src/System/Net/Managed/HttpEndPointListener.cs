@@ -55,12 +55,7 @@ namespace System.Net
             if (secure)
             {
                 _secure = secure;
-                // TODO #14691: Implement functionality to read SSL certificate.
-#if MONO
                 _cert = _listener.LoadCertificateAndKey (addr, port);
-#else
-                _cert = null;
-#endif
             }
 
             _endpoint = new IPEndPoint(addr, port);
