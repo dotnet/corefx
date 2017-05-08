@@ -39,24 +39,28 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void CurrentDomain_Not_Null()
         {
             Assert.NotNull(AppDomain.CurrentDomain);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void CurrentDomain_Idempotent()
         {
             Assert.Equal(AppDomain.CurrentDomain, AppDomain.CurrentDomain);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void BaseDirectory_Same_As_AppContext()
         {
             Assert.Equal(AppDomain.CurrentDomain.BaseDirectory, AppContext.BaseDirectory);
         } 
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void RelativeSearchPath_Is_Null()
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
@@ -64,6 +68,7 @@ namespace System.Tests
 
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void UnhandledException_Add_Remove()
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
@@ -71,6 +76,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void UnhandledException_NotCalled_When_Handled()
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(NotExpectedToBeCalledHandler);
@@ -114,12 +120,14 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void DynamicDirectory_Null()
         {
             Assert.Null(AppDomain.CurrentDomain.DynamicDirectory);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void FriendlyName()
         {
             string s = AppDomain.CurrentDomain.FriendlyName;
@@ -129,24 +137,28 @@ namespace System.Tests
         }        
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void Id()
         {
             Assert.Equal(1, AppDomain.CurrentDomain.Id);
         }        
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void IsFullyTrusted()
         {
             Assert.True(AppDomain.CurrentDomain.IsFullyTrusted);
         }        
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void IsHomogenous()
         {
             Assert.True(AppDomain.CurrentDomain.IsHomogenous);
         }        
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void FirstChanceException_Add_Remove()
         {
             EventHandler<FirstChanceExceptionEventArgs> handler = (sender, e) =>
@@ -186,6 +198,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ProcessExit_Add_Remove()
         {
             EventHandler handler = (sender, e) =>
@@ -196,6 +209,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ProcessExit_Called()
         {
             string path = GetTestFilePath();
@@ -214,6 +228,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ApplyPolicy()
         {
             AssertExtensions.Throws<ArgumentNullException>("assemblyName", () => { AppDomain.CurrentDomain.ApplyPolicy(null); });
@@ -222,6 +237,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void CreateDomain()
         {
             AssertExtensions.Throws<ArgumentNullException>("friendlyName", () => { AppDomain.CreateDomain(null); });
@@ -229,6 +245,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ExecuteAssemblyByName()
         {
             string name = "TestApp";
@@ -242,6 +259,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ExecuteAssembly()
         {
             string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
@@ -253,6 +271,7 @@ namespace System.Tests
         }        
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void GetData_SetData()
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => { AppDomain.CurrentDomain.SetData(null, null); });
@@ -263,6 +282,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void IsCompatibilitySwitchSet()
         {
             Assert.Throws<ArgumentNullException>(() => { AppDomain.CurrentDomain.IsCompatibilitySwitchSet(null); });
@@ -271,18 +291,21 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void IsDefaultAppDomain()
         {
             Assert.True(AppDomain.CurrentDomain.IsDefaultAppDomain());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void IsFinalizingForUnload()
         {
             Assert.False(AppDomain.CurrentDomain.IsFinalizingForUnload());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void toString()
         {
             string actual = AppDomain.CurrentDomain.ToString();
@@ -291,6 +314,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void Unload()
         {
             AssertExtensions.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null);});
@@ -298,6 +322,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void Load()
         {
             AssemblyName assemblyName = typeof(AppDomainTests).Assembly.GetName();
@@ -311,12 +336,14 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ReflectionOnlyGetAssemblies()
         {
             Assert.Equal(Array.Empty<Assembly>(), AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void MonitoringIsEnabled()
         {
             Assert.False(AppDomain.MonitoringIsEnabled);
@@ -325,24 +352,28 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void MonitoringSurvivedMemorySize()
         {
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringSurvivedMemorySize; });
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void MonitoringSurvivedProcessMemorySize()
         {
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.MonitoringSurvivedProcessMemorySize; });
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void MonitoringTotalAllocatedMemorySize()
         {
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize; } );
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void MonitoringTotalProcessorTime()
         {
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringTotalProcessorTime; } );
@@ -350,48 +381,56 @@ namespace System.Tests
 
 #pragma warning disable 618
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void GetCurrentThreadId()
         {
             Assert.True(AppDomain.GetCurrentThreadId() == Environment.CurrentManagedThreadId);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ShadowCopyFiles()
         {
             Assert.False(AppDomain.CurrentDomain.ShadowCopyFiles);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void AppendPrivatePath()
         {
             AppDomain.CurrentDomain.AppendPrivatePath("test");
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ClearPrivatePath()
         {
             AppDomain.CurrentDomain.ClearPrivatePath();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ClearShadowCopyPath()
         {
             AppDomain.CurrentDomain.ClearShadowCopyPath();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void SetCachePath()
         {
             AppDomain.CurrentDomain.SetCachePath("test");
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void SetShadowCopyFiles()
         {
             AppDomain.CurrentDomain.SetShadowCopyFiles();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void SetShadowCopyPath()
         {
             AppDomain.CurrentDomain.SetShadowCopyPath("test");
@@ -399,6 +438,7 @@ namespace System.Tests
 #pragma warning restore 618
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void GetAssemblies()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -433,6 +473,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void AssemblyLoad()
         {
             bool AssemblyLoadFlag = false;
@@ -458,6 +499,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void AssemblyResolve()
         {
             RemoteInvoke(() =>
@@ -476,6 +518,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void AssemblyResolve_RequestingAssembly()
         {
             RemoteInvoke(() =>
@@ -498,6 +541,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void TypeResolve()
         {
             Assert.Throws<TypeLoadException>(() => Type.GetType("Program", true));
@@ -522,6 +566,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void ResourceResolve()
         {
             ResourceManager res = new ResourceManager(typeof(FxResources.TestApp.SR));
@@ -546,7 +591,8 @@ namespace System.Tests
             Assert.Equal(s, "Happy Halloween");
         }
 
-        [Fact]       
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
         public void SetThreadPrincipal()
         {
             Assert.Throws<ArgumentNullException>(() => {AppDomain.CurrentDomain.SetThreadPrincipal(null);});
