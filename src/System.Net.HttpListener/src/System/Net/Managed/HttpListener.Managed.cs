@@ -18,10 +18,13 @@ namespace System.Net
         private List<ListenerAsyncResult> _asyncWaitQueue = new List<ListenerAsyncResult>();
         private Dictionary<HttpConnection, HttpConnection> _connections = new Dictionary<HttpConnection, HttpConnection>();
 
+#if !MONO
+        // We have a custom version of this method.
         internal SslStream CreateSslStream(Stream innerStream, bool ownsStream, RemoteCertificateValidationCallback callback)
         {
             return new SslStream(innerStream, ownsStream, callback);
         }
+#endif
 
         public HttpListenerTimeoutManager TimeoutManager
         {
