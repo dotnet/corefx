@@ -529,12 +529,8 @@ namespace System.IO.Tests
         [InlineData(@"C  :\somedir")]
         public static void GetFullPath_Windows_NotSupportedExceptionPaths(string path)
         {
-            // Full Framework TFM < 4.6.2 throws ArgumentException. .Net Core and Full Framework TFM >= 4.6.2 throws NotSupportedException
-            if (PathFeatures.IsUsingLegacyPathNormalization())
-            {
-                Assert.Throws<ArgumentException>(() => Path.GetFullPath(path));
-            }
-            else
+            // Old path normalization throws ArgumentException, new one throws NotSupportedException
+            if (!PathFeatures.IsUsingLegacyPathNormalization())
             {
                 Assert.Throws<NotSupportedException>(() => Path.GetFullPath(path));
             }
