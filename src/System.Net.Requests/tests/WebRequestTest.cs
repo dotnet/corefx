@@ -145,7 +145,7 @@ namespace System.Net.Tests
 
         public void GetSystemWebProxy_NoArguments_ExpectNotNull()
         {
-            var webProxy = WebRequest.GetSystemWebProxy();
+            IWebProxy webProxy = WebRequest.GetSystemWebProxy();
             Assert.NotNull(webProxy);
         }
 
@@ -165,15 +165,7 @@ namespace System.Net.Tests
         private class FakeRequest : WebRequest
         {
             private readonly Uri _uri;
-            public override Uri RequestUri
-            {
-                get
-                {
-                    if (_uri == null)
-                        return base.RequestUri;
-                    return _uri;
-                }
-            }
+            public override Uri RequestUri => _uri ?? base.RequestUri;
 
             public FakeRequest(Uri uri = null)
             {
