@@ -516,12 +516,7 @@ namespace System.IO.Tests
         public static void GetFullPath_Windows_URIFormatNotSupported(string path)
         {
             // Throws via our invalid colon filtering
-            // Full Framework TFM < 4.6.2 throws ArgumentException. .Net Core and Full Framework TFM >= 4.6.2 throws NotSupportedException
-            if (PathFeatures.IsUsingLegacyPathNormalization())
-            {
-                Assert.Throws<ArgumentException>(() => Path.GetFullPath(path));
-            }
-            else
+            if (!PathFeatures.IsUsingLegacyPathNormalization())
             {
                 Assert.Throws<NotSupportedException>(() => Path.GetFullPath(path));
             }
