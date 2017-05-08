@@ -101,7 +101,6 @@ namespace System.Net.Sockets.Tests
         public void SendFile_Synchronous(IPAddress listenAt, bool sendPreAndPostBuffers, int bytesToSend)
         {
             const int ListenBacklog = 1;
-            const int LingerTime = 10;
             const int TestTimeout = 30000;
 
             // Create file to send
@@ -153,7 +152,6 @@ namespace System.Net.Sockets.Tests
             {
                 client.SendFile(filename, preBuffer, postBuffer, TransmitFileOptions.UseDefaultWorkerThread);
 
-                client.LingerState = new LingerOption(true, LingerTime);
                 client.Shutdown(SocketShutdown.Send);
             }
 
