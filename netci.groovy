@@ -387,7 +387,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                     // On Windows, use different architectures for Debug and Release.
                     archGroup = buildArchConfiguration[configurationGroup]
                 }
-                def targetGroupString = targetGroup != 'netcoreapp' ? '${targetGroup}_' : '';
+                def targetGroupString = targetGroup != 'netcoreapp' ? "${targetGroup}_" : '';
                 def newJobName = "${targetGroupString}${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
