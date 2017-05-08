@@ -154,6 +154,7 @@ namespace System.Net.Sockets.Tests
                 client.SendFile(filename, preBuffer, postBuffer, TransmitFileOptions.UseDefaultWorkerThread);
 
                 client.LingerState = new LingerOption(true, LingerTime);
+                client.Shutdown(SocketShutdown.Send);
             }
 
             Assert.True(serverThread.Join(TestTimeout), "Completed within allowed time");
