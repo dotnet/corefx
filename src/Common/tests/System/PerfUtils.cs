@@ -44,7 +44,7 @@ namespace System
                 // Add path separator so folders aren't too long.
                 if (i%20 == 0)
                 {
-                    str[i] = '\\';
+                    str[i] = Path.DirectorySeparatorChar;
                 }
                 else
                 {
