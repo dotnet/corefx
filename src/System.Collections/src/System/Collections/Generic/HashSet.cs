@@ -1656,7 +1656,7 @@ namespace System.Collections.Generic
         /// to specified comparer.
         /// 
         /// Because items are hashed according to a specific equality comparer, we have to resort
-        /// to n^2 search if they're using different equality comparers.
+        /// to building a new set if neither use that equality comparer.
         /// </summary>
         /// <param name="set1"></param>
         /// <param name="set2"></param>
@@ -1664,54 +1664,31 @@ namespace System.Collections.Generic
         /// <returns></returns>
         internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
         {
-            // handle null cases first
-            if (set1 == null)
+            if (set1 == set2)
             {
-                return (set2 == null);
+                return true;
             }
-            else if (set2 == null)
+
+            if (set1 == null | set2 == null || set1.Count != set2.Count)
             {
-                // set1 != null
                 return false;
             }
 
-            // all comparers are the same; this is faster
-            if (AreEqualityComparersEqual(set1, set2))
+            if (comparer.Equals(set1._comparer))
             {
-                if (set1.Count != set2.Count)
-                {
-                    return false;
-                }
-                // suffices to check subset
-                foreach (T item in set2)
-                {
-                    if (!set1.Contains(item))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return set1.ContainsAllElements(set2);
             }
-            else
-            {  // n^2 search because items are hashed according to their respective ECs
-                foreach (T set2Item in set2)
-                {
-                    bool found = false;
-                    foreach (T set1Item in set1)
-                    {
-                        if (comparer.Equals(set2Item, set1Item))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        return false;
-                    }
-                }
-                return true;
+
+            if (comparer.Equals(set2._comparer))
+            {
+                return set2.ContainsAllElements(set1);
             }
+            
+            // Creating a new set is O(n), but allows us to then do the
+            // equality comparison as an O(n) check rather than an O(n2)
+            // comparison of each element in the first set with each in
+            // the second.
+            return new HashSet<T>(set1, comparer).ContainsAllElements(set2);
         }
 
         /// <summary>

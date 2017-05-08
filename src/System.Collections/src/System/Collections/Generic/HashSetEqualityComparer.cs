@@ -31,14 +31,17 @@ namespace System.Collections.Generic
 
         public int GetHashCode(HashSet<T> obj)
         {
-            int hashCode = 0;
-            if (obj != null)
+            if (obj == null)
             {
-                foreach (T t in obj)
-                {
-                    hashCode = hashCode ^ (_comparer.GetHashCode(t) & 0x7FFFFFFF);
-                }
-            } // else returns hashcode of 0 for null hashsets
+                return 0;
+            }
+
+            int hashCode = -889270259;
+            foreach (T t in obj)
+            {
+                hashCode = hashCode ^ _comparer.GetHashCode(t);
+            }
+
             return hashCode;
         }
 
