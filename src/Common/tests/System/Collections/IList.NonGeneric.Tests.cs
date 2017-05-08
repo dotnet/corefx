@@ -1067,7 +1067,7 @@ namespace System.Collections.Tests
         // Test Enumerator.Current at end after new elements was added
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
+        public virtual void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
         {
             if (!IsReadOnly && !ExpectedFixedSize)
             {

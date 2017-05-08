@@ -114,6 +114,38 @@ namespace System.CodeDom.Tests
             Assert.Same(value2, collection[0]);
         }
 
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17130")]
+        public override void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType(int count)
+        {
+            base.ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType(count);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17130")]
+        public override void ICollection_NonGeneric_CopyTo_ArrayOfEnumType(int count)
+        {
+            base.ICollection_NonGeneric_CopyTo_ArrayOfEnumType(count);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17130")]
+        public override void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
+        {
+            base.IList_NonGeneric_CurrentAtEnd_AfterAdd(count);   
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17130")]
+        public override void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(int count)
+        {
+            base.ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(count);
+        }
+
         private static void VerifyCollection(CodeNamespaceCollection collection, CodeNamespace[] contents)
         {
             Assert.Equal(contents.Length, collection.Count);

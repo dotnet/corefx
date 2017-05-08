@@ -237,7 +237,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(int count)
+        public virtual void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(int count)
         {
             if (count > 0)
             {
