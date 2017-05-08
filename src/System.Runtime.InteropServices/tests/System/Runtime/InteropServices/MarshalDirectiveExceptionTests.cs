@@ -12,6 +12,7 @@ namespace System.Runtime.InteropServices.Tests
     public class MarshalDirectiveExceptionTests
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19467")]
         public void SerializationRoundTrip()
         {
             var ex = new MarshalDirectiveException("E_BAD_PIZZA");
