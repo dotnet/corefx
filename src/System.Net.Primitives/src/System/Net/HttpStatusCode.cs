@@ -56,6 +56,8 @@ namespace System.Net
         ExpectationFailed = 417,
 
         UpgradeRequired = 426,
+        
+        TooManyRequests = 429,
 
         // Server Error 5xx
         InternalServerError = 500,
