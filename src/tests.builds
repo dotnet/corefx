@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!-- When building build-tests.cmd -framework:netfx the tests where built against 462 and 47 (not only net461) which we don't want to do. Disable here to not build tests against those target groups when TargetGroup = netfx -->
     <BuildNet462AndNewer Condition="'$(TargetGroup)' == 'netfx' AND '$(BuildNet462AndNewer)' == ''">false</BuildNet462AndNewer>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
