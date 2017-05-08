@@ -298,7 +298,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
 // Define target group vertical builds that will run on every merge.
 // **************************
 [true, false].each { isPR ->
-    ['uap', 'uapaot', 'netfx'].each { targetGroup ->
+    ['uap', 'uapaot'].each { targetGroup ->
         ['Debug'].each { configurationGroup ->
             ['Windows_NT'].each { osName ->
                 def osGroup = osGroupMap[osName]
@@ -368,9 +368,9 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
 // that don't run per PR can be requested via a magic phrase.
 // **************************
 [true, false].each { isPR ->
-    ['netcoreapp'].each { targetGroup ->
-        ['Debug', 'Release'].each { configurationGroup ->
-            ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'Debian8.4', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 'Fedora24', 'RHEL7.2', 'OSX10.12', 'PortableLinux'].each { osName ->
+    ['netcoreapp', 'netfx'].each { targetGroup ->
+        (targetGroupOsMap[targetGroup]).each { osName ->
+            ['Debug', 'Release'].each { configurationGroup ->
                 def osGroup = osGroupMap[osName]
                 def osForMachineAffinity = osName
                 
@@ -383,7 +383,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                     // On Windows, use different architectures for Debug and Release.
                     archGroup = buildArchConfiguration[configurationGroup]
                 }
-                def newJobName = "${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
+                def newJobName = "${targetGroup}_${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     // On Windows we use the packer to put together everything. On *nix we use tar
@@ -425,10 +425,10 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 if (isPR) {
                     // Set PR trigger, we run Windows_NT, Ubuntu 14.04, CentOS 7.1, PortableLinux and OSX on every PR.
                     if ( osName == 'Windows_NT' || osName == 'Ubuntu14.04' || osName == 'CentOS7.1' || osName == 'OSX10.12' || osName== 'PortableLinux') {
-                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${osName} ${configurationGroup} ${archGroup} Build and Test")
+                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroup} ${osName} ${configurationGroup} ${archGroup} Build and Test")
                     }
                     else {
-                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${osName}\\W+${configurationGroup}.*")
+                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroup} ${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${targetGroup} ${osName}\\W+${configurationGroup}.*")
                     }
                 }
                 else {
