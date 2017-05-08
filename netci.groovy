@@ -387,7 +387,8 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                     // On Windows, use different architectures for Debug and Release.
                     archGroup = buildArchConfiguration[configurationGroup]
                 }
-                def newJobName = "${targetGroup}_${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
+                def targetGroupString = targetGroup != 'netcoreapp' ? '${targetGroup}_' : '';
+                def newJobName = "${targetGroupString}${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     // On Windows we use the packer to put together everything. On *nix we use tar
@@ -427,12 +428,13 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                 Utilities.addArchival(newJob, archiveContents, '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
                 // Set up triggers
                 if (isPR) {
+                    targetGroupString = targetGroupString.replaceAll('_', ' ');
                     // Set PR trigger, we run Windows_NT, Ubuntu 14.04, CentOS 7.1, PortableLinux and OSX on every PR.
                     if ( osName == 'Windows_NT' || osName == 'Ubuntu14.04' || osName == 'CentOS7.1' || osName == 'OSX10.12' || osName== 'PortableLinux') {
-                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroup} ${osName} ${configurationGroup} ${archGroup} Build and Test")
+                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroupString}${osName} ${configurationGroup} ${archGroup} Build and Test")
                     }
                     else {
-                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroup} ${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${targetGroup} ${osName}\\W+${configurationGroup}.*")
+                        Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroupString}${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${targetGroupString}${osName}\\W+${configurationGroup}.*")
                     }
                 }
                 else {
