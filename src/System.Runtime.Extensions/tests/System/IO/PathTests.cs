@@ -753,7 +753,7 @@ namespace System.IO.Tests
                     string shortName = sb.ToString();
 
                     // Make sure the shortened name expands back to the original one
-                    // Sometimes shortening or GetFullPath is changing  the casing of "temp" on some test machines: normalize both sides
+                    // Sometimes shortening or GetFullPath is changing the casing of "temp" on some test machines: normalize both sides
                     tempFilePath = Regex.Replace(tempFilePath, @"\temp\\", @"\TEMP\\",  RegexOptions.IgnoreCase);
                     shortName = Regex.Replace(Path.GetFullPath(shortName), @"\temp\\", @"\TEMP\\",  RegexOptions.IgnoreCase);
                     Assert.Equal(tempFilePath, shortName);
