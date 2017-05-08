@@ -47,7 +47,11 @@ def osShortName = ['Windows 10': 'win10',
 def buildArchConfiguration = ['Debug': 'x86',
                               'Release': 'x64']
 
-def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 
+def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 
+                                        'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux'],
+                        'netfx': ['Windows_NT']]
+
+def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 
                                         'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux'],
                         'netfx': ['Windows_NT']]
 
@@ -212,7 +216,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
 // **************************
 [true, false].each { isPR ->
     ['netcoreapp', 'netfx'].each { targetGroup ->
-        (targetGroupOsMap[targetGroup]).each { osName ->
+        (targetGroupOsMapOuterloop[targetGroup]).each { osName ->
             ['Debug', 'Release'].each { configurationGroup ->
 
                 def osForMachineAffinity = osName
@@ -369,7 +373,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
 // **************************
 [true, false].each { isPR ->
     ['netcoreapp', 'netfx'].each { targetGroup ->
-        (targetGroupOsMap[targetGroup]).each { osName ->
+        (targetGroupOsMapInnerloop[targetGroup]).each { osName ->
             ['Debug', 'Release'].each { configurationGroup ->
                 def osGroup = osGroupMap[osName]
                 def osForMachineAffinity = osName
