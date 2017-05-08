@@ -33,6 +33,13 @@ namespace Microsoft.Win32
         /// <summary>Current Config Root Key. This is where current configuration information is stored.</summary>
         public static readonly RegistryKey CurrentConfig = RegistryKey.OpenBaseKey(RegistryHive.CurrentConfig, RegistryView.Default);
 
+        /// <summary>
+        /// Dynamic Data Root Key.
+        /// This is where dynamic performance data is stored on Win9X. This does not exist on NT.
+        /// </summary>
+        [Obsolete("The DynData registry key only works on Win9x, which is no longer supported by the CLR.  On NT-based operating systems, use the PerformanceData registry key instead.")]
+        public static readonly RegistryKey DynData = RegistryKey.OpenBaseKey(RegistryHive.DynData, RegistryView.Default);
+
         public static object GetValue(string keyName, string valueName, object defaultValue)
         {
             string subKeyName;

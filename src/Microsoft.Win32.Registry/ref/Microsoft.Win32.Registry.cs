@@ -13,6 +13,8 @@ namespace Microsoft.Win32
         public static readonly Microsoft.Win32.RegistryKey ClassesRoot;
         public static readonly Microsoft.Win32.RegistryKey CurrentConfig;
         public static readonly Microsoft.Win32.RegistryKey CurrentUser;
+        [System.Obsolete("The DynData registry key only works on Win9x, which is no longer supported by the CLR.  On NT-based operating systems, use the PerformanceData registry key instead.")]
+        public static readonly Microsoft.Win32.RegistryKey DynData;
         public static readonly Microsoft.Win32.RegistryKey LocalMachine;
         public static readonly Microsoft.Win32.RegistryKey PerformanceData;
         public static readonly Microsoft.Win32.RegistryKey Users;
@@ -28,6 +30,7 @@ namespace Microsoft.Win32
         LocalMachine = -2147483646,
         PerformanceData = -2147483644,
         Users = -2147483645,
+        DynData = -2147483642,
     }
     public sealed partial class RegistryKey : System.MarshalByRefObject, System.IDisposable
     {
