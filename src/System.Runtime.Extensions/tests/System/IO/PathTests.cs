@@ -534,6 +534,10 @@ namespace System.IO.Tests
             {
                 Assert.Throws<NotSupportedException>(() => Path.GetFullPath(path));
             }
+            else
+            {
+                Assert.Throws<ArgumentException>(() => Path.GetFullPath(path));
+            }
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests legitimate Windows paths that are now allowed
