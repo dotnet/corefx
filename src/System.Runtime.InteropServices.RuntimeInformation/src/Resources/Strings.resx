@@ -61,4 +61,7 @@
   <data name="Argument_EmptyValue" xml:space="preserve">
     <value>Value cannot be empty.</value>
   </data>
+  <data name="PlatformNotSupported_RuntimeInformation" xml:space="preserve">
+    <value>RuntimeInformation is a stub implementation assembly for PCLs, where runtime rids are not supported by packages.config.</value>
+  </data>
 </root>
