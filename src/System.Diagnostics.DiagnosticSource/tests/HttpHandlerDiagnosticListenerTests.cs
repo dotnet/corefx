@@ -149,7 +149,6 @@ namespace System.Diagnostics.Tests
         /// Test request cancellation: reflection hook does not throw
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19286")]
         public async Task TestCanceledRequest()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
