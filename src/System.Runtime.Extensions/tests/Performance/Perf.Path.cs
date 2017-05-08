@@ -123,10 +123,46 @@ namespace System.IO.Tests
         [InlineData(10000)]
         [InlineData(20000)]
         [InlineData(30000)]
-        public void GetFullPath(int innerIterations)
+        public void GetFullPathForLegacyLength(int innerIterations)
         {
             PerfUtils utils = new PerfUtils();
-            string testPath = utils.GetTestFilePath();
+            string testPath = utils.CreateString(length: 200);
+            foreach (var iteration in Benchmark.Iterations)
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < innerIterations; i++)
+                    {
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                    }
+        }
+
+        [Benchmark]
+        [InlineData(10000)]
+        [InlineData(20000)]
+        [InlineData(30000)]
+        public void GetFullPathForTypicalLongPath(int innerIterations)
+        {
+            PerfUtils utils = new PerfUtils();
+            string testPath = utils.CreateString(length: 500);
+            foreach (var iteration in Benchmark.Iterations)
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < innerIterations; i++)
+                    {
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                    }
+        }
+
+        [Benchmark]
+        [InlineData(10000)]
+        [InlineData(20000)]
+        [InlineData(30000)]
+        public void GetFullPathForReallyLongPath(int innerIterations)
+        {
+            PerfUtils utils = new PerfUtils();
+            string testPath = utils.CreateString(length: 1000);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < innerIterations; i++)
