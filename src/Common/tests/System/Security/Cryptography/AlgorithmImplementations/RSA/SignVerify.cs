@@ -10,6 +10,8 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public class SignVerify
     {
+        public static bool BadKeyFormatDoesntThrow => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer();
+
         [Fact]
         public static void InvalidKeySize_DoesNotInvalidateKey()
         {
@@ -472,7 +474,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(BadKeyFormatDoesntThrow))]
         public static void NegativeVerify_BadKeysize()
         {
             byte[] signature;
