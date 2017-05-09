@@ -620,8 +620,8 @@ namespace System.Net.Tests
             }).Dispose();
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void DefaultMaximumErrorResponseLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
+        [Fact]
+        public void DefaultMaximumErrorResponseLength_SetAndGetLength_ValuesMatch()
         {
             RemoteInvoke(() =>
             {
@@ -642,8 +642,8 @@ namespace System.Net.Tests
             }).Dispose();
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void DefaultCachePolicy_SetAndGetPolicyReload_ValuesMatch(Uri remoteServer)
+        [Fact]
+        public void DefaultCachePolicy_SetAndGetPolicyReload_ValuesMatch()
         {
             RemoteInvoke(() =>
             {
