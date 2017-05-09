@@ -63,4 +63,6 @@
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
   </ItemGroup>
+  
+  <Import Condition="'$(MSBuildProjectExtension)' == '.pkgproj'" Project="$(MSBuildThisFileDirectory)pkg/disableUap10.1.targets" />
 </Project>
