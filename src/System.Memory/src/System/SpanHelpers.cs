@@ -130,10 +130,10 @@ namespace System
 
         private static bool IsReferenceOrContainsReferencesCore(Type type)
         {
-            if (type.GetTypeInfo().IsPrimitive) // This is hopefully the common case. All types that return true for this are value types w/out embedded references.
+            if (type.IsPrimitive) // This is hopefully the common case. All types that return true for this are value types w/out embedded references.
                 return false;
 
-            if (!type.GetTypeInfo().IsValueType)
+            if (!type.IsValueType)
                 return true;
 
             // If type is a Nullable<> of something, unwrap it first.
@@ -141,7 +141,7 @@ namespace System
             if (underlyingNullable != null)
                 type = underlyingNullable;
 
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
                 return false;
 
             foreach (FieldInfo field in type.GetTypeInfo().DeclaredFields)
