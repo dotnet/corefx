@@ -3,7 +3,7 @@ Cross-Platform Cryptography
 
 Cryptographic operations in .NET are performed by existing system libraries.
 As with most technological decisions, there are various pros and cons.
-Since the system already has a vested interested in making the cryptography libraries safe from security vulnerabilities,
+Since the system already has a vested interest in making the cryptography libraries safe from security vulnerabilities,
 and already has an update mechanism that system administrators should be using, .NET gets to benefit from this reliability.
 Users who have requirements to use FIPS-validated algorithm implementations also get that benefit for free (when the system
 libraries are FIPS-validated, of course).
@@ -14,16 +14,17 @@ While the core capabilities are present across the various platforms, there are 
 
 In .NET Core 1.0 and .NET Core 1.1 the macOS implementation of the cryptography classes was based on OpenSSL.
 In .NET Core 2.0 the dependency was changed to use Apple's Security.framework.
-Within this document "macOS" should use the values for "Linux" if running .NET Core 1.x.
+Within this document "macOS" should use the values for "Linux" if running .NET Core 1.x, as .NET Core uses OpenSSL in all Linux versions.
 
 ## Hash Algorithms
 
 Hash algorithms, and HMAC algorithms, are very standard bytes-in-bytes-out operations.
-All hash algorithm (and HMAC) classes in .NET Core are deferred to the system libraries (including the \*Managed classes).
+All hash algorithm (and HMAC) classes in .NET Core defer to the system libraries (including the \*Managed classes).
 
 While the various system libraries may have different performance, there should not be concerns of compatibility.
 
-In the future there is a possibility that new hash algorithms may be added to .NET Core before one (or more) supported platforms have system support for the algorithm.This would result in a `PlatformNotSupportedException` when invoking the `.Create()` method for the algorithm.
+In the future there is a possibility that new hash algorithms may be added to .NET Core before one (or more) supported platforms have system support for the algorithm.
+This would result in a `PlatformNotSupportedException` when invoking the `.Create()` method for the algorithm.
 
 ## Symmetric Encryption
 
@@ -66,10 +67,16 @@ Not all platforms support the same padding options.
 | PKCS1 Signature (SHA-2) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :question: |
 | PSS |  :white_check_mark: | :x: | :x: | :x: |
 
-Windows CNG is used on Windows whenever `RSA.Create()` or `new RSACng()` is used, as well as the `.GetRSAPublicKey()` extension method for `X509Certificate2` and when possible for the `.GetRSAPrivateKey()` extension method for `X509Certificate2`.
-Windows CAPI is used on Windows whenever `new RSACryptoServiceProvider()` is used, as well as the `GetRSAPrivateKey()` extension method when the private key is not able to be opened with CNG (which requires a hardware-backed key with no CNG-capable driver).
-
 Windows CAPI is capable of PKCS1 signature with a SHA-2 algorithm, but the individual RSA object may be loaded in a CSP which does not support it.
+
+#### RSA on Windows
+
+ * Windows CNG is used on Windows whenever `new RSACng()` is used.
+ * Windows CAPI is used on Windows whenever `new RSACryptoServiceProvider()` is used.
+ * The object returned by `RSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
+ * The `.GetRSAPublicKey()` extension method for X509Certificate2 will currently always return an RSACng instance, but this could change as the platform evolves.
+ * The `.GetRSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an RSACng instance, but if RSACng cannot open the key RSACryptoServiceProvider will be attempted.
+   * In the future other providers could be preferred over RSACng.
 
 #### Native Interop
 
@@ -82,7 +89,7 @@ The types involved do not translate between platforms, and should only be direct
 | RSACng | :white_check_mark: | :x: | :x: |
 | RSAOpenSsl | :x: | :white_check_mark: | :question: |
 
-RSAOpenSsl on macOS works if OpenSSL is installed in the system and an appropriate libcrypto dylib can be found via dynamic library loading, otherwise exceptions will be raised.
+RSAOpenSsl on macOS works if OpenSSL is installed in the system and an appropriate libcrypto dylib can be found via dynamic library loading, otherwise exceptions will be thrown.
 
 On non-Windows systems RSACryptoServiceProvider can be used for compatibility with existing programs, but a `PlatformNotSupportedException` will be thrown from any method which requires system interop, such as opening a named key.
 
@@ -91,15 +98,15 @@ On non-Windows systems RSACryptoServiceProvider can be used for compatibility wi
 ECDSA key generation is performed by the system libraries, and is subject to size limitations and performance characteristics thereof.
 ECDSA key curves are defined by the system libraries, and are subject to the limitations thereof.
 
-| EC Curve | Windows 10 | Linux | macOS | Windows 7 - 8.1 |
+| EC Curve | Windows 10 | Windows 7 - 8.1 | Linux | macOS |
 |----------|------------|-------|-------|-----------------|
 | NIST P-256 (secp256r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | NIST P-384 (secp384r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | NIST P-521 (secp521r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| brainpool curves (as named curves) | :white_check_mark: | :question: | :x: | :x: |
-| other named curves | :question: | :question: | :x: | :x: |
-| explicit curves | :white_check_mark: | :white_check_mark: | :x: | :x: |
-| Export or import as explicit | :white_check_mark: | :white_check_mark: | :x: | :x: |
+| brainpool curves (as named curves) | :white_check_mark: | :x: | :question: | :x: |
+| other named curves | :question: | :x: | :question: | :x: |
+| explicit curves | :white_check_mark: | :x: | :white_check_mark: | :x: |
+| Export or import as explicit | :white_check_mark: | :x: | :white_check_mark: | :x: |
 
 Support for named curves was added to Windows CNG in Windows 10, and is not available in prior OSes, with the exception of the three curves which had special support in Windows 7.
 See [CNG Named Elliptic Curves](https://msdn.microsoft.com/en-us/library/windows/desktop/mt632245(v=vs.85).aspx) for the expected support.
@@ -133,10 +140,16 @@ DSA key generation is performed by the system libraries, and is subject to size 
 | FIPS 186-2 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | FIPS 186-3 (SHA-2 signatures) | :white_check_mark: | :white_check_mark: | :x: | :x: |
 
-Windows CNG is used on Windows whenever `DSA.Create()` or `new DSACng()` is used, as well as the `.GetDSAPublicKey()` extension method for `X509Certificate2` and when possible for the `.GetDSAPrivateKey()` extension method for `X509Certificate2`.
-Windows CAPI is used on Windows whenever `new DSACryptoServiceProvider()` is used, as well as the `GetDSAPrivateKey()` extension method when the private key is not able to be opened with CNG (which requires a hardware-backed key with no CNG-capable driver).
-
 macOS seems to be capable of loading DSA keys whose size exceeds 1024-bit, but does not perform FIPS 186-3 behaviors with those keys, so the behavior of those keys is undefined.
+
+#### DSA on Windows
+
+ * Windows CNG is used on Windows whenever `new DSACng()` is used.
+ * Windows CAPI is used on Windows whenever `new DSACryptoServiceProvider()` is used.
+ * The object returned by `DSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
+ * The `.GetDSAPublicKey()` extension method for X509Certificate2 will currently always return an DSACng instance, but this could change as the platform evolves.
+ * The `.GetDSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an DSACng instance, but if DSACng cannot open the key DSACryptoServiceProvider will be attempted.
+   * In the future other providers could be preferred over DSACng.
 
 #### Native Interop
 
