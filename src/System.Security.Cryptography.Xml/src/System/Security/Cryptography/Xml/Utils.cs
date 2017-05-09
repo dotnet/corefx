@@ -681,6 +681,7 @@ namespace System.Security.Cryptography.Xml
                         }
                     }
                     catch (CryptographicException) { }
+                    catch (PlatformNotSupportedException) { }
 
                     if (filters != null)
                         collection.AddRange(filters);
