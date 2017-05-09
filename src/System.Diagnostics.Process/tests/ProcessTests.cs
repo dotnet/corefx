@@ -873,7 +873,6 @@ namespace System.Diagnostics.Tests
             Assert.All(processes, process => Assert.Equal(machineName, process.MachineName));
         }
 
-        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
         [MemberData(nameof(MachineName_Remote_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)] // Accessing processes on remote machines is only supported on Windows.
         public void GetProcessesByName_RemoteMachineNameWindows_ReturnsExpected(string machineName)
@@ -919,37 +918,17 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
         }
 
-        private static bool ProcessPerformanceCounterEnabled()
-        {
-            try
-            {
-                using (Microsoft.Win32.RegistryKey perfKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\PerfProc\Performance"))
-                {
-                    if (perfKey == null)
-                        return false;
-                    int? value = (int?)perfKey.GetValue("Disable Performance Counters", null);
-                    return !value.HasValue || value.Value == 0;
-                }
-            }
-            catch (Exception)
-            {
-                // Ignore exceptions, and just assume the counter is disabled.
-                return false;
-            }
-        }
-
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
         public void TestProcessOnRemoteMachineWindows()
         {
-            Process currentProcess = Process.GetCurrentProcess();
+            Process currentProccess = Process.GetCurrentProcess();
 
             void TestRemoteProccess(Process remoteProcess)
             {
-                Assert.Equal(currentProcess.Id, remoteProcess.Id);
-                Assert.Equal(currentProcess.BasePriority, remoteProcess.BasePriority);
-                Assert.Equal(currentProcess.EnableRaisingEvents, remoteProcess.EnableRaisingEvents);
+                Assert.Equal(currentProccess.Id, remoteProcess.Id);
+                Assert.Equal(currentProccess.BasePriority, remoteProcess.BasePriority);
+                Assert.Equal(currentProccess.EnableRaisingEvents, remoteProcess.EnableRaisingEvents);
                 Assert.Equal("127.0.0.1", remoteProcess.MachineName);
                 // This property throws exception only on remote processes.
                 Assert.Throws<NotSupportedException>(() => remoteProcess.MainModule);
@@ -957,8 +936,8 @@ namespace System.Diagnostics.Tests
 
             try
             {
-                TestRemoteProccess(Process.GetProcessById(currentProcess.Id, "127.0.0.1"));
-                TestRemoteProccess(Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProcess.Id).Single());
+                TestRemoteProccess(Process.GetProcessById(currentProccess.Id, "127.0.0.1"));
+                TestRemoteProccess(Process.GetProcessesByName(currentProccess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProccess.Id).Single());
             }
             catch (InvalidOperationException)
             {
