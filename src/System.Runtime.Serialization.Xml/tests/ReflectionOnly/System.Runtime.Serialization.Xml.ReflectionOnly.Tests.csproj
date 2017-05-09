@@ -53,17 +53,11 @@
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\DCRImplVariations.cs">
       <Link>SerializationTestTypes\DCRImplVariations.cs</Link>
     </Compile>
-    <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\Globals.cs">
-      <Link>SerializationTestTypes\Globals.cs</Link>
-    </Compile>
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InheritenceCases.cs">
       <Link>SerializationTestTypes\InheritenceCases.cs</Link>
     </Compile>
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InheritenceObjectRef.cs">
       <Link>SerializationTestTypes\InheritenceObjectRef.cs</Link>
-    </Compile>
-    <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InstanceCreator.cs">
-      <Link>SerializationTestTypes\InstanceCreator.cs</Link>
     </Compile>
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\SampleIObjectRef.cs">
       <Link>SerializationTestTypes\SampleIObjectRef.cs</Link>

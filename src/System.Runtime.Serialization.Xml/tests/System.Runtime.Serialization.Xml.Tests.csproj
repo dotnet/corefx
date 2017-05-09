@@ -34,10 +34,8 @@
     <Compile Include="SerializationTestTypes\Collections.cs" />
     <Compile Include="SerializationTestTypes\DataContract.cs" />
     <Compile Include="SerializationTestTypes\DCRImplVariations.cs" />
-    <Compile Include="SerializationTestTypes\Globals.cs" />
     <Compile Include="SerializationTestTypes\InheritenceCases.cs" />
     <Compile Include="SerializationTestTypes\InheritenceObjectRef.cs" />
-    <Compile Include="SerializationTestTypes\InstanceCreator.cs" />
     <Compile Include="SerializationTestTypes\SampleIObjectRef.cs" />
     <Compile Include="SerializationTestTypes\SampleTypes.cs" />
     <Compile Include="SerializationTestTypes\SelfRefAndCycles.cs" />
