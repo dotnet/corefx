@@ -811,6 +811,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers, "dotnet/corefx #19516")]
     public static void DCS_TypeWithPrivateFieldAndPrivateGetPublicSetProperty()
     {
         TypeWithPrivateFieldAndPrivateGetPublicSetProperty x = new TypeWithPrivateFieldAndPrivateGetPublicSetProperty
