@@ -62,6 +62,6 @@
     <value>A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.</value>
   </data>
   <data name="PlatformNotSupported_AccessControl" xml:space="preserve">
-    <value>Access Control List (ACL) APIs are specific to the way in which Windows manages access to resources, and are not supported on this platform.</value>
+    <value>Access Control List (ACL) APIs are part of resource management on Windows and are not supported on this platform.</value>
   </data>
 </root>

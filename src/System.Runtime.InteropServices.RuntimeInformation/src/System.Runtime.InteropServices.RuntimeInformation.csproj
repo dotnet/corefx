@@ -100,7 +100,7 @@
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <ItemGroup Condition="'$(GeneratePlatformNotSupportedAssemblyMessage)' == ''">
+  <ItemGroup Condition="'$(TargetGroup)'!='netstandard1.1' OR '$(OSGroup)'!='AnyOS'">
     <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.cs" />
     <Compile Include="System\Runtime\InteropServices\RuntimeInformation\Architecture.cs" />
     <Compile Include="System\Runtime\InteropServices\RuntimeInformation\OSPlatform.cs" />

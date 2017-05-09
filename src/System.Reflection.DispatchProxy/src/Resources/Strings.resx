@@ -71,6 +71,6 @@
     <value>The base type '{0}' cannot be abstract.</value>
   </data>
   <data name="PlatformNotSupported_ReflectionDispatchProxy" xml:space="preserve">
-    <value>This operation is only supported where Reflection.Emit is supported.</value>
+    <value>This operation is not supported on .NET Standard as Reflection.Emit is not available.</value>
   </data>
 </root>

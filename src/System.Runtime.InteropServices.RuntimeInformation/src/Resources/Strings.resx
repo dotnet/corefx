@@ -62,6 +62,6 @@
     <value>Value cannot be empty.</value>
   </data>
   <data name="PlatformNotSupported_RuntimeInformation" xml:space="preserve">
-    <value>RuntimeInformation is a stub implementation assembly for PCLs, where runtime rids are not supported by packages.config.</value>
+    <value>RuntimeInformation is not supported for Portable Class Libraries.</value>
   </data>
 </root>
