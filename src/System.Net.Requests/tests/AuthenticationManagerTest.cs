@@ -55,15 +55,6 @@ namespace System.Net.Tests
             }).Dispose();
         }
 
-        public void Register_UnregisterByScheme_ModuleCountUnchanged()
-        {
-            int initialCount = GetModuleCount();
-            IAuthenticationModule module = new CustomModule();
-            AuthenticationManager.Register(module);
-            AuthenticationManager.Unregister("custom");
-            Assert.Equal(initialCount, GetModuleCount());
-        }
-
         [Fact]
         public void RegisteredModules_DefaultCount_ExpectedValue()
         {
@@ -112,7 +103,7 @@ namespace System.Net.Tests
             }).Dispose();            
         }
 
-        private int GetModuleCount()
+        private static int GetModuleCount()
         {
             int count = 0;
             IEnumerator modules = AuthenticationManager.RegisteredModules;

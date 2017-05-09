@@ -598,8 +598,8 @@ namespace System.Net.Tests
             Assert.Throws<ArgumentException>("value", () => request.Expect = "100-continue");
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
+        [Fact]
+        public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch()
         {
             RemoteInvoke(() =>
             {
