@@ -137,7 +137,6 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19466")] // Sometimes it timesout
         public void ContentLength_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
