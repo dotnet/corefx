@@ -185,19 +185,28 @@ namespace System.Net.Tests
         [Fact]
         public void Add_AlreadyStarted_ReturnsExpected()
         {
-            using (var factory1 = new HttpListenerFactory())
-            using (var factory2 = new HttpListenerFactory())
+            using (var factory = new HttpListenerFactory())
             {
-                HttpListener listener = factory1.GetListener();
-                string uriPrefix = Assert.Single(listener.Prefixes);
+                HttpListener listener = factory.GetListener();
+                Assert.Single(listener.Prefixes);
 
-                HttpListener listener2 = factory2.GetListener();
-                string uriPrefix2 = Assert.Single(listener2.Prefixes);
-                listener2.Close();
+                // Try to find a port that is not being used.
+                for (int port = 1024; port <= IPEndPoint.MaxPort; port++)
+                {
+                    string uriPrefix = $"http://localhost:{port}/{factory.Path}/";
+                    try
+                    {
+                        listener.Prefixes.Add(uriPrefix);
+                        Assert.True(listener.Prefixes.Contains(uriPrefix));
+                        Assert.Equal(2, listener.Prefixes.Count);
 
-                listener.Prefixes.Add(uriPrefix2);
-                Assert.True(listener.Prefixes.Contains(uriPrefix2));
-                Assert.Equal(2, listener.Prefixes.Count);
+                        break;
+                    }
+                    catch (HttpListenerException)
+                    {
+                        // This port is already in use. Skip it and find a port that's not being used.
+                    }
+                }
             }
         }
 
@@ -224,6 +233,7 @@ namespace System.Net.Tests
                 string uriPrefix = Assert.Single(listener.Prefixes);
 
                 Assert.Throws<HttpListenerException>(() => listener.Prefixes.Add(uriPrefix));
+                Assert.Throws<HttpListenerException>(() => listener.Prefixes.Add(uriPrefix + "/sub_path/"));
             }
         }
 
@@ -240,12 +250,6 @@ namespace System.Net.Tests
             yield return new object[] { "http://localhost/invalid%path/" };
             yield return new object[] { "http://./" };
             yield return new object[] { "http://\\/" };
-
-            // https://github.com/dotnet/corefx/issues/18128
-            if (PlatformDetection.IsWindows)
-            {
-                yield return new object[] { "http://192./" };
-            }
         }
 
         [Theory]
@@ -271,6 +275,15 @@ namespace System.Net.Tests
 
                 Assert.Throws<HttpListenerException>(() => listener.Prefixes.Add(uriPrefix));
             }
+        }
+
+        [Theory]
+        [ActiveIssue(18128, TestPlatforms.AnyUnix)] // Fails by design on Windows but is allowed by the managed implementation
+        [InlineData("http://192./")]
+        public void Add_InvalidPrefix_ThrowsHttpListenerException_Windows(string uriPrefix)
+        {
+            Add_InvalidPrefixNotStarted_ThrowsHttpListenerExceptionOnStart(uriPrefix);
+            Add_InvalidPrefixAlreadyStarted_ThrowsHttpListenerExceptionOnAdd(uriPrefix);
         }
 
         [Theory]

@@ -520,10 +520,9 @@ namespace System.Net
             }
         }
 
-        private bool RemovePrefixCore(string uriPrefix)
+        private void RemovePrefixCore(string uriPrefix)
         {
-            uint statusCode = Interop.HttpApi.HttpRemoveUrlFromUrlGroup(_urlGroupId, uriPrefix, 0);
-            return statusCode != Interop.HttpApi.ERROR_NOT_FOUND;
+            Interop.HttpApi.HttpRemoveUrlFromUrlGroup(_urlGroupId, uriPrefix, 0);
         }
 
         private void AddAllPrefixes()
@@ -540,6 +539,8 @@ namespace System.Net
 
         private void AddPrefixCore(string registeredPrefix)
         {
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Calling Interop.HttpApi.HttpAddUrl[ToUrlGroup]");
+
             uint statusCode = Interop.HttpApi.HttpAddUrlToUrlGroup(
                                   _urlGroupId,
                                   registeredPrefix,

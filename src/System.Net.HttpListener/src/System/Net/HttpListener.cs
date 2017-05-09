@@ -14,7 +14,7 @@ namespace System.Net
 
         private readonly object _internalLock;
         private volatile State _state; // _state is set only within lock blocks, but often read outside locks. 
-        private HttpListenerPrefixCollection _prefixes;
+        private readonly HttpListenerPrefixCollection _prefixes;
         internal Hashtable _uriPrefixes = new Hashtable();
         private bool _ignoreWriteExceptions;
         private ServiceNameStore _defaultServiceNames;
@@ -123,7 +123,6 @@ namespace System.Net
                     throw new ArgumentNullException(nameof(uriPrefix));
                 }
                 CheckDisposed();
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "uriPrefix:" + uriPrefix);
                 int i;
                 if (string.Compare(uriPrefix, 0, "http://", 0, 7, StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -174,10 +173,9 @@ namespace System.Net
                         i++;
                     }
                 }
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "mapped uriPrefix:" + uriPrefix + " to registeredPrefix:" + registeredPrefix);
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"mapped uriPrefix: {uriPrefix} to registeredPrefix: {registeredPrefix}");
                 if (_state == State.Started)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Calling Interop.HttpApi.HttpAddUrl[ToUrlGroup]");
                     AddPrefixCore(registeredPrefix);
                 }
                 _uriPrefixes[uriPrefix] = registeredPrefix;
@@ -185,7 +183,7 @@ namespace System.Net
             }
             catch (Exception exception)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"AddPrefix {exception}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, exception);
                 throw;
             }
             finally
@@ -223,7 +221,7 @@ namespace System.Net
             }
             catch (Exception exception)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"RemovePrefix {exception}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, exception);
                 throw;
             }
             finally
@@ -246,7 +244,6 @@ namespace System.Net
                     {
                         foreach (string registeredPrefix in _uriPrefixes.Values)
                         {
-                            // ignore possible failures
                             RemovePrefixCore(registeredPrefix);
                         }
                     }

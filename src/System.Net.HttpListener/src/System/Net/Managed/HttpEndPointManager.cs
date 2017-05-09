@@ -208,7 +208,7 @@ namespace System.Net
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)
                 return;
 
-            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool dummy);
+            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool ignored);
             epl.RemovePrefix(lp, listener);
         }
     }
