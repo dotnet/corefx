@@ -54,6 +54,9 @@ namespace System.IO.Compression.Tests
         [InlineData("NullCharFileName_FromUnix.zip", "a\06b6d")]
         public static async Task ZipWithInvalidFileNames_ParsedBasedOnSourceOS(string zipName, string fileName)
         {
+            if(PathFeatures.IsUsingLegacyPathNormalization())
+                return;
+
             using (Stream stream = await StreamHelpers.CreateTempCopyStream(compat(zipName)))
             using (ZipArchive archive = new ZipArchive(stream))
             {
