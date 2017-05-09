@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Xml;
-using System.Xml.Schema;
+using System.Collections;
 using System.Xml.Serialization;
+using System.Xml.Schema;
+using System.Xml;
 
 namespace SerializationTestTypes
 {
@@ -221,6 +221,7 @@ namespace SerializationTestTypes
         public string Data33;
     }
 
+
     [DataContract(IsReference = false)]
     public class Derived2DC : DerivedDC
     {
@@ -278,6 +279,7 @@ namespace SerializationTestTypes
         }
     }
 
+    //POCO
     public class DerivedPOCOBaseDCISRef : BaseDC
     {
         public SimpleDCWithRef SimpleDCWithRefData;
@@ -311,6 +313,8 @@ namespace SerializationTestTypes
 
     public class DerivedIXmlSerializable_POCOBaseDCNOISRef : DerivedPOCOBaseDCNOISRef, IXmlSerializable
     {
+        #region IXmlSerializable Members
+
         public System.Xml.Schema.XmlSchema GetSchema()
         {
             XmlSchema schema = new XmlSchema();
@@ -333,13 +337,17 @@ namespace SerializationTestTypes
             XmlDictionaryWriter xmlWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer);
             xmlWriter.WriteString(DateTime.MinValue.ToShortTimeString());
         }
+
+        #endregion
     }
 
     [CollectionDataContract(IsReference = false)]
     public class DerivedCDCFromBaseDC : BaseDC, IList<string>
     {
         public string Data223 = String.Empty;
+
         private List<string> _internalData = new List<string>();
+        #region IList<string> Members
 
         public int IndexOf(string item)
         {
@@ -366,6 +374,10 @@ namespace SerializationTestTypes
                 _internalData[index] = value;
             }
         }
+
+        #endregion
+
+        #region ICollection<string> Members
 
         public void Add(string item)
         {
@@ -400,15 +412,25 @@ namespace SerializationTestTypes
             throw new NotImplementedException();
         }
 
+        #endregion
+
+        #region IEnumerable<string> Members
+
         public IEnumerator<string> GetEnumerator()
         {
             return _internalData.GetEnumerator();
         }
 
+        #endregion
+
+        #region IEnumerable Members
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalData.GetEnumerator();
         }
+
+        #endregion
 
         public static DerivedCDCFromBaseDC CreateInstance()
         {
@@ -543,6 +565,7 @@ namespace SerializationTestTypes
         public Derived3Derived2Serializable(bool init) : base(init) { }
     }
 
+    //POCO
     public class Derived31Derived2SerializablePOCO : Derived2Serializable
     {
         public SimpleDCWithRef SimpleDCWithRefData;
@@ -571,6 +594,7 @@ namespace SerializationTestTypes
         public Derived5Derived2Serializable(bool init) : base(init) { }
     }
 
+    //POCO
     public class Derived6Derived2SerializablePOCO : Derived3Derived2Serializable
     {
         public SimpleDCWithRef SimpleDCWithRefData;

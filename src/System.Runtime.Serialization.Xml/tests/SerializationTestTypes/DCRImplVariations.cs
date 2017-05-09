@@ -4,6 +4,10 @@ using System.Xml;
 
 namespace SerializationTestTypes
 {
+    /// <summary>
+    /// Resolved by DCR "DCR_NegativeScenarios"
+    /// ResolveName returns  null type and ResolveType valid out params 
+    /// </summary>
     [DataContract]
     public class Person1
     {
@@ -47,6 +51,9 @@ namespace SerializationTestTypes
         }
     }
 
+    /// <summary>
+    /// Valid resolution by DCR
+    /// </summary>
     public class Kid : Person1
     {
         [DataMember]

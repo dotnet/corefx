@@ -1,8 +1,8 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace SerializationTestTypes
+﻿namespace SerializationTestTypes
 {
+    using System;
+    using System.Runtime.Serialization;
+
     [Serializable]
     [KnownType(typeof(PublicDC))]
     public class SerIObjRef : IObjectReference
@@ -10,10 +10,14 @@ namespace SerializationTestTypes
         [NonSerialized]
         private static PublicDC s_containedData = new PublicDC();
 
+        #region IObjectReference Members
+
         object IObjectReference.GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
+
+        #endregion
 
         public override bool Equals(object obj)
         {
@@ -42,10 +46,14 @@ namespace SerializationTestTypes
             data = new SelfRef1(true);
         }
 
+        #region IObjectReference Members
+
         object IObjectReference.GetRealObject(StreamingContext context)
         {
             return containedData;
         }
+
+        #endregion
 
         public override bool Equals(object obj)
         {
@@ -71,10 +79,14 @@ namespace SerializationTestTypes
         public DCIObjRef() { }
         public DCIObjRef(bool init) { }
 
+        #region IObjectReference Members
+
         public object GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
+
+        #endregion
 
         public override bool Equals(object obj)
         {
@@ -94,10 +106,14 @@ namespace SerializationTestTypes
         [NonSerialized]
         private static PrivateDC s_containedData = new PrivateDC();
 
+        #region IObjectReference Members
+
         object IObjectReference.GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
+
+        #endregion
 
         public override bool Equals(object obj)
         {
@@ -117,11 +133,14 @@ namespace SerializationTestTypes
         [NonSerialized]
         private static PrivateDC s_containedData = new PrivateDC();
 
+        #region IObjectReference Members
+
         object IObjectReference.GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
 
+        #endregion
         public override bool Equals(object obj)
         {
             return DCRUtils.CompareIObjectRefTypes(s_containedData, obj);
@@ -143,11 +162,14 @@ namespace SerializationTestTypes
         [NonSerialized]
         private static PrivateDC s_containedData = new PrivateDC();
 
+        #region IObjectReference Members
+
         object IObjectReference.GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
 
+        #endregion
         public override bool Equals(object obj)
         {
             return DCRUtils.CompareIObjectRefTypes(s_containedData, obj);
@@ -169,10 +191,13 @@ namespace SerializationTestTypes
         [NonSerialized]
         private static PrivateDC s_containedData = new PrivateDC();
 
+        #region IObjectReference Members
+
         public object GetRealObject(StreamingContext context)
         {
             return s_containedData;
         }
+        #endregion
 
         public override bool Equals(object obj)
         {

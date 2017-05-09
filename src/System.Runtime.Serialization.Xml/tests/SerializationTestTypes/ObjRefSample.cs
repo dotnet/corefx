@@ -3,6 +3,8 @@ using System.Runtime.Serialization;
 
 namespace SerializationTestTypes
 {
+    #region Simple Class Structs with Ref
+
     [DataContract(IsReference = true)]
     public class SimpleDC
     {
@@ -14,6 +16,7 @@ namespace SerializationTestTypes
             Data = DateTime.MaxValue.ToLongTimeString();
         }
     }
+
 
     [DataContract(IsReference = true)]
     public class SimpleDCWithSimpleDMRef
@@ -47,6 +50,7 @@ namespace SerializationTestTypes
             Data = new SimpleDC(true);
             RefData = Data;
         }
+
     }
 
     [DataContract(IsReference = true)]
@@ -66,7 +70,7 @@ namespace SerializationTestTypes
         }
     }
 
-    [DataContract]
+    [DataContract]//(IsReference = true)]
     public struct SimpleStructDC
     {
         [DataMember]
@@ -128,6 +132,7 @@ namespace SerializationTestTypes
         }
     }
 
+
     [DataContract(IsReference = true)]
     public enum EnumNegative1
     {
@@ -154,8 +159,9 @@ namespace SerializationTestTypes
         [EnumMember]
         One
     }
-    
-    [DataContract]
+
+
+    [DataContract]//(IsReference = true)]
     public struct SimpleStructDCWithRef
     {
         [DataMember]
@@ -199,6 +205,9 @@ namespace SerializationTestTypes
         }
     }
 
+
+    #endregion
+
     [DataContract(IsReference = true, Name = "DCVersioned", Namespace = "SerializationTestTypes.ExtensionData")]
     public class DCVersioned1 : IExtensibleDataObject
     {
@@ -215,6 +224,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -227,6 +237,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [DataContract(IsReference = true, Name = "DCVersioned2", Namespace = "SerializationTestTypes.ExtensionData")]
@@ -242,6 +254,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -254,6 +267,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [DataContract(IsReference = true, Name = "DCVersionedContainer", Namespace = "SerializationTestTypes.ExtensionData")]
@@ -269,6 +284,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -281,6 +297,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [DataContract(IsReference = true, Name = "DCVersionedContainerV1", Namespace = "SerializationTestTypes.ExtensionData")]
@@ -310,6 +328,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -322,6 +341,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [DataContract(IsReference = true, Name = "DCVersionedContainerV2", Namespace = "SerializationTestTypes.ExtensionData")]
@@ -341,6 +362,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -353,6 +375,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [DataContract(IsReference = true, Name = "DCVersionedContainerV3", Namespace = "SerializationTestTypes.ExtensionData")]
@@ -368,6 +392,7 @@ namespace SerializationTestTypes
         [DataMember]
         public DCVersioned1 NewRefDataVersion1;
 
+        //[DataMember]
         public DCVersioned2 NewDataVersion2;
 
         public DCVersionedContainerVersion3() { }
@@ -379,6 +404,7 @@ namespace SerializationTestTypes
         }
 
         private ExtensionDataObject _extensionData;
+        #region IExtensibleDataObject Members
 
         public ExtensionDataObject ExtensionData
         {
@@ -391,6 +417,8 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
+
+        #endregion
     }
 
     [Serializable]
@@ -417,13 +445,23 @@ namespace SerializationTestTypes
             return base.GetHashCode();
         }
 
+
+        #region ISerializable Members
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("containedData", containedData);
         }
+
+        #endregion
     }
 
+
+    /// <summary>
+    /// Apply this attribute to skip a field while creating instance
+    /// </summary>
     public class IgnoreMemberAttribute : Attribute
     {
     }
+
 }
