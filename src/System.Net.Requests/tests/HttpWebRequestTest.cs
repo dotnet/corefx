@@ -29,10 +29,13 @@ namespace System.Net.Tests
         public HttpWebRequestTest(ITestOutputHelper output)
         {
             _output = output;
-            // On .NET Framework, the default limit for connections/server is very low (2). 
-            // On .NET Core, the default limit is higher. Since these tests run in parallel,
-            // the limit needs to be increased to avoid timeouts when running the tests.
-            System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+            if (PlatformDetection.IsFullFramework)
+            {
+                // On .NET Framework, the default limit for connections/server is very low (2). 
+                // On .NET Core, the default limit is higher. Since these tests run in parallel,
+                // the limit needs to be increased to avoid timeouts when running the tests.
+                System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
