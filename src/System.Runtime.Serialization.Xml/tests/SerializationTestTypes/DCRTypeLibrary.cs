@@ -171,7 +171,6 @@ namespace SerializationTestTypes
         }
     }
 
-
     public class TypeNotFound { };
 
     public class TypeLibraryManager
@@ -202,8 +201,6 @@ namespace SerializationTestTypes
                 return _allTypeHashTable;
             }
         }
-
-        #region List
 
         public List<Type> FxPrimitivesInCollectionList
         {
@@ -660,12 +657,10 @@ namespace SerializationTestTypes
                 return _sampleTypeList;
             }
         }
-        #endregion
     }
 
     public static class DCRUtils
     {
-        // This is specifically used for IObjectRef types only for comparison purposes.
         public static bool CompareIObjectRefTypes(object serialized, object deSerialized)
         {
             Dictionary<DataContract, List<RefData>> alreadyRefdValues = ObjectRefUtil.GetReferenceCounts(serialized);
@@ -729,7 +724,6 @@ namespace SerializationTestTypes
         public static bool IsEqual(Dictionary<DataContract, List<RefData>> alreadyRefdValues1, Dictionary<DataContract, List<RefData>> alreadyRefdValues2)
         {
             if (alreadyRefdValues1.Count != alreadyRefdValues2.Count) return false;
-
             foreach (KeyValuePair<DataContract, List<RefData>> kp in alreadyRefdValues1)
             {
                 if (alreadyRefdValues2.ContainsKey(kp.Key))
@@ -756,7 +750,6 @@ namespace SerializationTestTypes
 
         static Stack<RefData> refStack = new Stack<RefData>();
         /// <summary>
-        /// This method will be called recursively through the helper methods.
         /// </summary>
         /// <param name="data"></param>
         /// <param name="dataContract"></param>
@@ -766,27 +759,21 @@ namespace SerializationTestTypes
                                         , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             RefData refData = new RefData(data);
-
             FindRefUpdateRef(refData, dataContract, ref alreadyRefdValues, ref nonRefdValues);
-
             if (refStack.Contains(refData))
             {
-                return; // Stop Cycles
+                return;
             }
             else
             {
                 refStack.Push(refData);
             }
-
             FindRefHandleMembers(data, dataContract, ref alreadyRefdValues, ref nonRefdValues);
-
             refStack.Pop();
         }
 
-        #region Helper Methods for FindAndAddRefd
         public static bool supportCollectionDataContract = true;
-        static void FindRefUpdateRef(RefData refData, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
-                                        , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        static void FindRefUpdateRef(RefData refData, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             if (dataContract.IsReference)
             {
@@ -808,7 +795,7 @@ namespace SerializationTestTypes
                     alreadyRefdValues.Add(dataContract, list);
                 }
             }
-            else if (!(dataContract is PrimitiveDataContract)) // Dont track references for Primitives
+            else if (!(dataContract is PrimitiveDataContract))
             {
                 if (nonRefdValues.ContainsKey(dataContract))
                 {
@@ -829,20 +816,13 @@ namespace SerializationTestTypes
                 }
             }
         }
-        static void FindRefHandleMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
-                                        , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        static void FindRefHandleMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
-            if (typeof(IXmlSerializable).IsAssignableFrom(dataContract.UnderlyingType))
-            {
-                // DO Nothing
-            }
-            else if (dataContract is ClassDataContract)
+            if (dataContract is ClassDataContract)
             {
                 ClassDataContract classContract = dataContract as ClassDataContract;
-
                 foreach (DataMember member in classContract.Members)
                 {
-                    // Not using member.MemberTypeContract to accomodate polymorphic cases with known types
                     object memberData = member.GetMemberValue(data);
                     if (memberData != null)
                     {
@@ -857,7 +837,6 @@ namespace SerializationTestTypes
                 {
                     if (obj != null)
                     {
-                        // Not taking the itemContract to accomodate polymorphic cases with known types
                         FindAndAddRefd(obj, DataContract.GetDataContract(obj.GetType(), supportCollectionDataContract), ref alreadyRefdValues, ref nonRefdValues);
                     }
                 }
@@ -876,8 +855,7 @@ namespace SerializationTestTypes
             }
         }
 
-        static void FindRefHandleCollectionDataContractMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
-                                        , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        static void FindRefHandleCollectionDataContractMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             CollectionDataContract collectionContract = dataContract as CollectionDataContract;
             if (!collectionContract.IsDictionary)
@@ -886,7 +864,6 @@ namespace SerializationTestTypes
                 {
                     if (obj != null)
                     {
-                        // Not taking the itemContract to accomodate polymorphic cases with known types
                         FindAndAddRefd(obj, DataContract.GetDataContract(obj.GetType(), supportCollectionDataContract), ref alreadyRefdValues, ref nonRefdValues);
                     }
                 }
@@ -896,7 +873,6 @@ namespace SerializationTestTypes
                 IDictionary dictionary = data as IDictionary;
                 if (dictionary != null)
                 {
-
                     foreach (object key in dictionary.Keys)
                     {
                         if (key != null)
@@ -937,7 +913,6 @@ namespace SerializationTestTypes
                                     FindAndAddRefd(dictEnum.Value, DataContract.GetDataContract(dictEnum.Value.GetType(), supportCollectionDataContract), ref alreadyRefdValues, ref nonRefdValues);
                                 }
                             }
-
                         }
                     }
                     else
@@ -945,11 +920,7 @@ namespace SerializationTestTypes
                         throw new Exception("TestDriver Exception: Dictionary CollectionDataCotnract Type Not Supported");
                     }
                 }
-
             }
         }
-
-        #endregion
-
     }
 }

@@ -1,17 +1,17 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Security.Cryptography;
+using System.Text;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
+
 namespace SerializationTestTypes
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Reflection;
-    using System.Xml;
-    using System.Runtime.Serialization;
-    using System.Security.Cryptography;
-    using System.Threading;
-    using System.Text;
-    using DataContractDictionary = System.Collections.Generic.Dictionary<System.Xml.XmlQualifiedName, DataContract>;
-
     interface IGenericNameProvider
     {
         int GetParameterCount();
@@ -24,7 +24,7 @@ namespace SerializationTestTypes
     class GenericNameProvider : IGenericNameProvider
     {
         string genericTypeName;
-        object[] genericParams;//Type or DataContract
+        object[] genericParams;
         internal GenericNameProvider(Type type)
             : this(type.GetGenericTypeDefinition().FullName, type.GetGenericArguments())
         {
@@ -211,7 +211,7 @@ namespace SerializationTestTypes
         bool isValueType;
         XmlQualifiedName stableName;
         protected internal bool supportCollectionDataContract;
-        
+
         public static DataContract GetDataContract(Type type, bool supportCollectionDataContract)
         {
             return GetDataContract(type.TypeHandle, type, supportCollectionDataContract);
@@ -329,7 +329,6 @@ namespace SerializationTestTypes
             return type;
         }
 
-        //would throw if no data contract found 
         public static DataContract CreateDataContract(Type type, bool supportCollectionDataContract)
         {
             DataContract primitiveContract = PrimitiveDataContract.GetPrimitiveDataContract(type);
@@ -379,9 +378,6 @@ namespace SerializationTestTypes
                 hasDataContract = false;
                 return primitiveContract.StableName;
             }
-
-            //TODO, joezhou: add logic for handling of IXmlSerializable 
-
 
             string name = null, ns = null;
             if (type.IsArray)
@@ -463,7 +459,6 @@ namespace SerializationTestTypes
                 }
                 else
                 {
-
                     object[] collectionDataContractAttributes = type.GetCustomAttributes(Globals.TypeOfCollectionDataContractAttribute, false);
                     if (supportCollectionDataContract && collectionDataContractAttributes != null && collectionDataContractAttributes.Length > 0)
                     {
@@ -503,12 +498,11 @@ namespace SerializationTestTypes
                                 throw new Exception("InvalidNamespace" + type.FullName + " :" + Globals.SerializationNamespace + " :" + Globals.SchemaNamespace + " :" + Globals.SchemaInstanceNamespace);
                         }
                     }
-                    else // Support POCO
+                    else
                     {
                         hasDataContract = false;
                         name = GetDefaultStableLocalName(type);
                         ns = GetDefaultStableNamespace(type);
-                        //throw new Exception("TypeNotSerializable" + type.FullName);
                     }
                 }
             }
@@ -521,7 +515,7 @@ namespace SerializationTestTypes
                 return type.Name;
             int nsLen = (type.Namespace == null) ? 0 : type.Namespace.Length;
             if (nsLen > 0)
-                nsLen++; //include the . following namespace
+                nsLen++;
             return type.FullName.Substring(nsLen).Replace('+', '.');
         }
 
@@ -646,7 +640,7 @@ namespace SerializationTestTypes
         {
             get { return stableName; }
             set { stableName = value; }
-        }        
+        }
 
         public virtual bool IsISerializable
         {
@@ -712,14 +706,11 @@ namespace SerializationTestTypes
         {
             if ((object)this == other)
                 return true;
-
             DataContract dataContract = other as DataContract;
-
             if (dataContract != null)
             {
                 return (StableName.Name == dataContract.StableName.Name && StableName.Namespace == dataContract.StableName.Namespace && IsValueType == dataContract.IsValueType && IsReference == dataContract.IsReference);
             }
-
             return false;
         }
 
@@ -727,9 +718,7 @@ namespace SerializationTestTypes
         {
             return base.GetHashCode();
         }
-
     }
-
 
     public class ClassDataContract : DataContract
     {
@@ -796,7 +785,6 @@ namespace SerializationTestTypes
                         if (member.MemberType == MemberTypes.Property)
                         {
                             PropertyInfo property = (PropertyInfo)member;
-
                             MethodInfo getMethod = property.GetGetMethod(true);
                             if (getMethod != null && IsMethodOverriding(getMethod))
                                 continue;
@@ -838,7 +826,6 @@ namespace SerializationTestTypes
                         {
                             memberContract.IsRequired = Globals.DefaultIsRequired;
                         }
-
                         CheckAndAddMember(members, memberContract, memberNamesTable);
                     }
                 }
@@ -1118,7 +1105,6 @@ namespace SerializationTestTypes
             if (dataMember != null)
             {
                 return (Name == dataMember.Name
-                        //&& Order == dataMember.Order //order value is not part of the data contract, order is
                         && IsNullable == dataMember.IsNullable
                         && IsRequired == dataMember.IsRequired
                         && MemberTypeContract.StableName.Equals(dataMember.MemberTypeContract.StableName));
@@ -1374,7 +1360,6 @@ namespace SerializationTestTypes
         public EnumDataContract(Type type) : base(type)
         {
             StableName = DataContract.GetStableName(type, out hasDataContract);
-
             Type baseType = Enum.GetUnderlyingType(type);
             baseContract = PrimitiveDataContract.GetPrimitiveDataContract(baseType);
             isULong = (baseType == Globals.TypeOfULong);
@@ -1531,9 +1516,7 @@ namespace SerializationTestTypes
                 return base.GetHashCode();
             }
         }
-
     }
-
 
     public enum CollectionKind : byte
     {
@@ -1579,15 +1562,10 @@ namespace SerializationTestTypes
     public class CollectionDataContract : DataContract
     {
         public CollectionKind Kind;
-
         public Type ItemType;
-
         public string ItemName;
-
         public String CollectionItemName;
-
         public string KeyName;
-
         public string ValueName;
 
         public bool IsDictionary
@@ -1648,7 +1626,6 @@ namespace SerializationTestTypes
 
             if (ItemType != null)
             {
-
                 bool isDictionary = (Kind == CollectionKind.Dictionary || Kind == CollectionKind.GenericDictionary);
                 string itemName = null, keyName = null, valueName = null;
                 if (collectionContractAttribute != null)
@@ -1677,7 +1654,6 @@ namespace SerializationTestTypes
             }
         }
 
-
         static bool IsCollectionHelper(Type type, out Type itemType, bool constructorRequired)
         {
             if (type.IsArray && DataContract.GetDataContract(type, true) == null)
@@ -1698,21 +1674,17 @@ namespace SerializationTestTypes
         {
             dataContract = null;
             itemType = Globals.TypeOfObject;
-
-
             MethodInfo addMethod, getEnumeratorMethod;
             bool hasCollectionDataContract = IsCollectionDataContract(type);
             Type baseType = type.BaseType;
             bool isBaseTypeCollection = (baseType != null && baseType != Globals.TypeOfObject
                 && baseType != Globals.TypeOfValueType && baseType != Globals.TypeOfUri) ? IsCollection(baseType) : false;
 
-
             if (!Globals.TypeOfIEnumerable.IsAssignableFrom(type) ||
                 IsDC(type) || Globals.TypeOfIXmlSerializable.IsAssignableFrom(type))
             {
                 return false;
             }
-
 
             if (type.IsInterface)
             {
@@ -1761,11 +1733,6 @@ namespace SerializationTestTypes
             if (!type.IsValueType && constructorRequired)
             {
                 defaultCtor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Globals.EmptyTypeArray, null);
-                if (defaultCtor == null)
-                {
-                    // Let SRS throw
-                    //throw new Exception("Collection Doesnt Have a Default Ctor");
-                }
             }
 
             Type knownInterfaceType = null;
@@ -1805,14 +1772,8 @@ namespace SerializationTestTypes
                     knownInterfaceType = Globals.TypeOfIEnumerable;
                 itemType = knownInterfaceType.IsGenericType ? knownInterfaceType.GetGenericArguments()[0] : Globals.TypeOfObject;
                 GetCollectionMethods(type, knownInterfaceType, new Type[] { itemType },
-                                     false /*addMethodOnInterface*/,
+                                     false,
                                      out getEnumeratorMethod, out addMethod);
-                if (addMethod == null)
-                {
-                    // No need to throw, SRS should throw
-                    //throw new Exception("SR.CollectionTypeDoesNotHaveAddMethod");
-                }
-
                 if (tryCreate)
                     dataContract = new CollectionDataContract(type, kind, itemType, getEnumeratorMethod, addMethod, defaultCtor);
             }
@@ -1846,23 +1807,20 @@ namespace SerializationTestTypes
                         addMethodTypeArray = new Type[] { itemType };
                         break;
                 }
-
                 if (tryCreate)
                 {
                     GetCollectionMethods(type, knownInterfaceType, addMethodTypeArray,
-                                     true /*addMethodOnInterface*/,
+                                     true,
                                      out getEnumeratorMethod, out addMethod);
                     dataContract = new CollectionDataContract(type, kind, itemType, getEnumeratorMethod, addMethod, defaultCtor);
                 }
             }
-
             return true;
         }
 
         internal static bool IsDC(Type type)
         {
-            if (type.GetCustomAttributes(Globals.TypeOfDataContractAttribute, false) != null
-                                                        && type.GetCustomAttributes(Globals.TypeOfDataContractAttribute, false).Length > 0)
+            if (type.GetCustomAttributes(Globals.TypeOfDataContractAttribute, false) != null && type.GetCustomAttributes(Globals.TypeOfDataContractAttribute, false).Length > 0)
             {
                 return true;
             }
@@ -1890,7 +1848,6 @@ namespace SerializationTestTypes
             {
                 if (_knownInterfaces == null)
                 {
-                    // Listed in priority order
                     _knownInterfaces = new Type[]
                     {
                         Globals.TypeOfIDictionaryGeneric,
@@ -1961,7 +1918,6 @@ namespace SerializationTestTypes
             }
             else
             {
-                // GetMethod returns Add() method with parameter closest matching T in assignability/inheritance chain
                 addMethod = type.GetMethod(Globals.AddMethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, addMethodTypeArray, null);
                 if (addMethod == null)
                     return;
@@ -2016,5 +1972,81 @@ namespace SerializationTestTypes
         {
             return base.GetHashCode();
         }
+    }
+
+    public static class Globals
+    {
+        internal static Type TypeOfObject = typeof(object);
+        internal static Type TypeOfValueType = typeof(ValueType);
+        internal static Type TypeOfArray = typeof(Array);
+        internal static Type TypeOfEnum = typeof(Enum);
+        internal static Type TypeOfString = typeof(string);
+        internal static Type TypeOfStringArray = typeof(string[]);
+        internal static Type TypeOfInt = typeof(int);
+        internal static Type TypeOfIntArray = typeof(int[]);
+        internal static Type TypeOfLong = typeof(long);
+        internal static Type TypeOfULong = typeof(ulong);
+        internal static Type TypeOfVoid = typeof(void);
+        internal static Type TypeOfDouble = typeof(double);
+        internal static Type TypeOfBool = typeof(bool);
+        internal static Type TypeOfByte = typeof(byte);
+        internal static Type TypeOfByteArray = typeof(byte[]);
+        internal static Type TypeOfTimeSpan = typeof(TimeSpan);
+        internal static Type TypeOfGuid = typeof(Guid);
+        internal static Type TypeOfUri = typeof(Uri);
+        internal static Type TypeOfIntPtr = typeof(IntPtr);
+        internal static Type TypeOfStreamingContext = typeof(StreamingContext);
+        internal static Type TypeOfISerializable = typeof(ISerializable);
+        internal static Type TypeOfIDeserializationCallback = typeof(IDeserializationCallback);
+        internal static Type TypeOfIObjectReference = typeof(IObjectReference);
+        internal static Type TypeOfBytePtr = typeof(byte*);
+        internal static Type TypeOfKnownTypeAttribute = typeof(KnownTypeAttribute);
+        internal static Type TypeOfDataContractAttribute = typeof(DataContractAttribute);
+        internal static Type TypeOfContractNamespaceAttribute = typeof(ContractNamespaceAttribute);
+        internal static Type TypeOfDataMemberAttribute = typeof(DataMemberAttribute);
+        internal static Type TypeOfOptionalFieldAttribute = typeof(OptionalFieldAttribute);
+        internal static Type TypeOfObjectArray = typeof(object[]);
+        internal static Type TypeOfOnSerializingAttribute = typeof(OnSerializingAttribute);
+        internal static Type TypeOfOnSerializedAttribute = typeof(OnSerializedAttribute);
+        internal static Type TypeOfOnDeserializingAttribute = typeof(OnDeserializingAttribute);
+        internal static Type TypeOfOnDeserializedAttribute = typeof(OnDeserializedAttribute);
+        internal static Type TypeOfFlagsAttribute = typeof(FlagsAttribute);
+        internal static Type TypeOfSerializableAttribute = typeof(SerializableAttribute);
+        internal static Type TypeOfSerializationInfo = typeof(SerializationInfo);
+        internal static Type TypeOfSerializationInfoEnumerator = typeof(SerializationInfoEnumerator);
+        internal static Type TypeOfSerializationEntry = typeof(SerializationEntry);
+        internal static Type TypeOfIXmlSerializable = typeof(IXmlSerializable);
+        internal static Type TypeOfXmlSchemaProviderAttribute = typeof(XmlSchemaProviderAttribute);
+        internal static Type TypeOfXmlRootAttribute = typeof(XmlRootAttribute);
+        internal static Type TypeOfXmlQualifiedName = typeof(XmlQualifiedName);
+        internal static Type TypeOfXmlSchemaType = typeof(XmlSchemaType);
+        internal static Type TypeOfXmlSchemaSet = typeof(XmlSchemaSet);
+        internal static object[] EmptyObjectArray = new object[0];
+        internal static Type[] EmptyTypeArray = new Type[0];
+        internal static Type TypeOfIExtensibleDataObject = typeof(IExtensibleDataObject);
+        internal static Type TypeOfExtensionDataObject = typeof(ExtensionDataObject);
+        internal static Type TypeOfNullable = typeof(Nullable<>);
+        internal static Type TypeOfCollectionDataContractAttribute = typeof(CollectionDataContractAttribute);
+        internal static Type TypeOfIEnumerable = typeof(IEnumerable);
+        internal static Type TypeOfIDictionaryGeneric = typeof(IDictionary<,>);
+        internal static Type TypeOfIEnumerableGeneric = typeof(IEnumerable<>);
+        internal static Type TypeOfIDictionary = typeof(IDictionary);
+        internal static Type TypeOfKeyValuePair = typeof(KeyValuePair<,>);
+        internal static Type TypeOfKeyValue = typeof(KeyValue<,>);
+        internal static Type TypeOfIListGeneric = typeof(IList<>);
+        internal static Type TypeOfICollectionGeneric = typeof(ICollection<>);
+        internal static Type TypeOfIList = typeof(IList);
+        internal static Type TypeOfICollection = typeof(ICollection);
+        internal static Type TypeOfIEnumerator = typeof(IEnumerator);
+        public const string KeyLocalName = "Key";
+        public const string ValueLocalName = "Value";
+        public const string AddMethodName = "Add";
+        public static string SchemaInstanceNamespace = XmlSchema.InstanceNamespace;
+        public static string SchemaNamespace = XmlSchema.Namespace;
+        public static string DefaultNamespace = "http://tempuri.org/";
+        public static bool DefaultIsRequired = false;
+        public static int DefaultVersion = 1;
+        public static string GetEnumeratorMethodName = "GetEnumerator";
+        public static string SerializationNamespace = "http://schemas.microsoft.com/2003/10/Serialization/";
     }
 }

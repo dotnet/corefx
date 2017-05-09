@@ -20,7 +20,6 @@
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedNoIsRef() { }
         public DerivedNoIsRef(bool init)
             : base(init)
@@ -34,7 +33,6 @@
     {
         [DataMember]
         public SimpleDC RefData2;
-
         public DerivedNoIsRef2() { }
         public DerivedNoIsRef2(bool init)
             : base(init)
@@ -48,7 +46,6 @@
     {
         [DataMember]
         public SimpleDC RefData3;
-
         public DerivedNoIsRef3() { }
         public DerivedNoIsRef3(bool init)
             : base(init)
@@ -62,7 +59,6 @@
     {
         [DataMember]
         public SimpleDC RefData4;
-
         public DerivedNoIsRef4() { }
         public DerivedNoIsRef4(bool init)
             : base(init)
@@ -76,7 +72,6 @@
     {
         [DataMember]
         public SimpleDC RefData5;
-
         public DerivedNoIsRef5() { }
         public DerivedNoIsRef5(bool init)
             : base(init)
@@ -90,7 +85,6 @@
     {
         [DataMember]
         public SimpleDC RefData6;
-
         public DerivedNoIsRefWithIsRefTrue6() { }
         public DerivedNoIsRefWithIsRefTrue6(bool init)
             : base(init)
@@ -99,14 +93,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse : BaseWithIsRefTrue
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefFalse() { }
         public DerivedWithIsRefFalse(bool init)
             : base(init)
@@ -115,14 +106,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse2 : DerivedWithIsRefFalse
     {
         [DataMember]
         public SimpleDC RefData2;
-
         public DerivedWithIsRefFalse2() { }
         public DerivedWithIsRefFalse2(bool init)
             : base(init)
@@ -131,14 +119,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse3 : DerivedWithIsRefFalse2
     {
         [DataMember]
         public SimpleDC RefData3;
-
         public DerivedWithIsRefFalse3() { }
         public DerivedWithIsRefFalse3(bool init)
             : base(init)
@@ -147,14 +132,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse4 : DerivedWithIsRefFalse3
     {
         [DataMember]
         public SimpleDC RefData4;
-
         public DerivedWithIsRefFalse4() { }
         public DerivedWithIsRefFalse4(bool init)
             : base(init)
@@ -163,14 +145,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse5 : DerivedWithIsRefFalse4
     {
         [DataMember]
         public SimpleDC RefData5;
-
         public DerivedWithIsRefFalse5() { }
         public DerivedWithIsRefFalse5(bool init)
             : base(init)
@@ -179,14 +158,11 @@
         }
     }
 
-    // Negative ?
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrue6 : DerivedWithIsRefFalse5
     {
         [DataMember]
         public SimpleDC RefData6;
-
         public DerivedWithIsRefTrue6() { }
         public DerivedWithIsRefTrue6(bool init)
             : base(init)
@@ -195,13 +171,11 @@
         }
     }
 
-    // Positive
     [DataContract(IsReference = true)]
     public class DerivedWithIsRefTrueExplicit : BaseWithIsRefTrue
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefTrueExplicit() { }
         public DerivedWithIsRefTrueExplicit(bool init)
             : base(init)
@@ -210,13 +184,11 @@
         }
     }
 
-    // Positive
     [DataContract(IsReference = true)]
     public class DerivedWithIsRefTrueExplicit2 : DerivedWithIsRefTrueExplicit
     {
         [DataMember]
         public SimpleDC RefData2;
-
         public DerivedWithIsRefTrueExplicit2() { }
         public DerivedWithIsRefTrueExplicit2(bool init)
             : base(init)
@@ -225,14 +197,11 @@
         }
     }
 
-    // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalseNoRefdObjects : BaseWithIsRefTrue
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefFalseNoRefdObjects() { }
         public DerivedWithIsRefFalseNoRefdObjects(bool init)
             : base(init)
@@ -240,14 +209,12 @@
             RefData = new SimpleDC(true);
         }
     }
-
-
+    
     [DataContract()]
     public class BaseNoIsRef
     {
         [DataMember]
         public SimpleDC Data;
-
         public BaseNoIsRef() { }
         public BaseNoIsRef(bool init)
         {
@@ -255,14 +222,11 @@
         }
     }
 
-    // Positive
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrue : BaseNoIsRef
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefTrue() { }
         public DerivedWithIsRefTrue(bool init)
             : base(true)
@@ -271,14 +235,11 @@
         }
     }
 
-    // Positive
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrueNoRefdObjects : BaseNoIsRef
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefTrueNoRefdObjects() { }
         public DerivedWithIsRefTrueNoRefdObjects(bool init)
             : base(true)
@@ -287,13 +248,11 @@
         }
     }
 
-    // Positive
     [DataContract]
     public class DerivedWithIsRefFalseExplicit : BaseNoIsRef
     {
         [DataMember]
         public SimpleDC RefData;
-
         public DerivedWithIsRefFalseExplicit() { }
         public DerivedWithIsRefFalseExplicit(bool init)
             : base(true)
@@ -301,17 +260,13 @@
             RefData = Data;
         }
     }
-
-    /// <summary>
-    /// Base data member refering to derived data member *having a value*
-    /// </summary>
+    
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence
     {
         private BaseDC _b;
         private DerivedDC _d;
-
         [DataMember]
         public BaseDC baseDC
         {
@@ -348,10 +303,7 @@
             baseDC = derivedDC;
         }
     }
-
-    /// <summary>
-    /// Base data member refering to derived data member *having a value*
-    /// </summary>
+    
     [DataContract]
     [KnownType(typeof(DerivedSerializable))]
     [KnownType(typeof(Derived2Serializable))]
@@ -375,15 +327,11 @@
         {
             derivedDC = new DerivedSerializable(true);
             baseDC = derivedDC;
-
             base1 = new Derived2Serializable(true);
             derived2 = (Derived2Serializable)base1;
         }
     }
 
-    /// <summary>
-    /// Base data member refering to derived data member *having a value*
-    /// </summary>
     [DataContract]
     [KnownType(typeof(DerivedSerializable))]
     [KnownType(typeof(Derived2Serializable))]
@@ -415,10 +363,6 @@
         }
     }
 
-
-    /// <summary>
-    /// Base data member refering to derived data member *that is null*
-    /// </summary>
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence5
@@ -438,10 +382,7 @@
             baseDC = derivedDC;
         }
     }
-
-    /// <summary>
-    /// Base data member refering to derived data member *that is null*
-    /// </summary>
+    
     [DataContract]
     public class TestInheritence10
     {
@@ -457,11 +398,7 @@
             baseDC = derivedDC;
         }
     }
-
-    /// <summary>
-    /// data member in base DC refering to a data member in *derived* DC
-    /// data member in base DC refering to another data member in *base* DC 
-    /// </summary>
+    
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence2
@@ -480,31 +417,18 @@
         {
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
-
-            // data member in base DC refering to a data member with the *same* name in *derived* DC
             baseDC.data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derivedDC.Data;
-
-            // data member in base DC refering to a data member with a *different* name in *derived* DC
             baseDC.data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             baseDC.Data = derivedDC.Data1;
-
-            // data member in base DC refering to another data member in *base* DC
             baseDC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             baseDC.Data = baseDC.Data2;
         }
     }
-
-    /// <summary>
-    /// data member in base DC refering to a data member in *derived* DC
-    /// data member in base DC refering to another data member in *base* DC 
-    /// </summary>
+    
     [DataContract]
     public class TestInheritence11
     {
@@ -521,31 +445,18 @@
         {
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
-
-            // data member in base DC refering to a data member with the *same* name in *derived* DC
             baseDC.data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derivedDC.Data;
-
-            // data member in base DC refering to a data member with a *different* name in *derived* DC
             baseDC.data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             baseDC.Data = derivedDC.Data1;
-
-            // data member in base DC refering to another data member in *base* DC
             baseDC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             baseDC.Data = baseDC.Data2;
         }
     }
-
-    /// <summary>
-    /// data member in derived DC refering to a data member in *base* DC
-    /// data member in derived DC refering to another data member in *derived* DC 
-    /// </summary>
+    
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence3
@@ -564,31 +475,18 @@
         {
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
-
-            // data member in derived DC refering to a data member with the *same* name in *base* DC
             derivedDC.data = baseDC.data;
-
             baseDC.Data = new DateTime().ToLongTimeString();
-            derivedDC.Data = baseDC.Data;
-
-            // data member in derived DC refering to a data member with the *different* name in *base* DC
+            derivedDC.Data = baseDC.Data;            
             derivedDC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             baseDC.Data2 = baseDC.Data2;
-
-            // data member in derived DC refering to another data member in *derived* DC
             derivedDC.data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             derivedDC.Data = derivedDC.Data1;
         }
     }
-
-    /// <summary>
-    /// data member in derived DC refering to a data member in *base* DC
-    /// data member in derived DC refering to another data member in *derived* DC 
-    /// </summary>
+    
     [DataContract]
     public class TestInheritence16
     {
@@ -605,31 +503,18 @@
         {
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
-
-            // data member in derived DC refering to a data member with the *same* name in *base* DC
             derivedDC.data = baseDC.data;
-
             baseDC.Data = new DateTime().ToLongTimeString();
             derivedDC.Data = baseDC.Data;
-
-            // data member in derived DC refering to a data member with the *different* name in *base* DC
             derivedDC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             baseDC.Data2 = baseDC.Data2;
-
-            // data member in derived DC refering to another data member in *derived* DC
             derivedDC.data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             derivedDC.Data = derivedDC.Data1;
         }
     }
-
-    /// <summary>
-    /// data member in base DC (through a DC) refering to a data member in *derived* DC
-    /// data member in base DC (through a DC) refering to another data member in *base* DC 
-    /// </summary>
+    
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence4
@@ -648,31 +533,17 @@
         {
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
-
-            // data member in base DC (through a DC) refering to a data member with the *same* name in *derived* DC
-            //((BaseDC)derivedDC).data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             ((BaseDC)derivedDC).Data = derivedDC.Data;
-
-            // data member in base DC (through a DC) refering to a data member with a *different* name in *derived* DC
             ((BaseDC)derivedDC).data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             ((BaseDC)derivedDC).Data = derivedDC.Data1;
-
-            // data member in base DC (through a DC) refering to another data member in *base* DC
             ((BaseDC)derivedDC).data = ((BaseDC)derivedDC).data2;
-
             ((BaseDC)derivedDC).Data2 = new DateTime().ToLongTimeString();
             ((BaseDC)derivedDC).Data = ((BaseDC)derivedDC).Data2;
         }
     }
-
-    /// <summary>
-    /// data member in base DC (through a DC) refering to a data member in *derived* DC
-    /// data member in base DC (through a DC) refering to another data member in *base* DC 
-    /// </summary>
+    
     [DataContract]
     public class TestInheritence12
     {
@@ -689,31 +560,17 @@
         {
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
-
-            // data member in base DC (through a DC) refering to a data member with the *same* name in *derived* DC
-            //((BaseSerializable)derivedDC).data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             ((BaseSerializable)derivedDC).Data = derivedDC.Data;
-
-            // data member in base DC (through a DC) refering to a data member with a *different* name in *derived* DC
             ((BaseSerializable)derivedDC).data = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             ((BaseSerializable)derivedDC).Data = derivedDC.Data1;
-
-            // data member in base DC (through a DC) refering to another data member in *base* DC
             ((BaseSerializable)derivedDC).data = ((BaseSerializable)derivedDC).data2;
-
             ((BaseSerializable)derivedDC).Data2 = new DateTime().ToLongTimeString();
             ((BaseSerializable)derivedDC).Data = ((BaseSerializable)derivedDC).Data2;
         }
     }
 
-    /// <summary>
-    /// data member in derived2 DC refering to a data member in *Derived* DC
-    /// data member in derived2 DC refering to another data member in *Derived2* DC 
-    /// </summary>
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     [KnownType(typeof(Derived2DC))]
@@ -738,38 +595,22 @@
             baseDC = new BaseDC(true);
             derivedDC = new DerivedDC(true);
             derived2DC = new Derived2DC(true);
-
-            // data member in derived2 DC refering to a data member with the *same* name in *derived* DC
             derived2DC.data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             derived2DC.Data = derivedDC.Data;
-
-            // data member in derived2 DC refering to a data member with the *different* name in *derived* DC
             derived2DC.data = derivedDC.data3;
-
             derivedDC.Data3 = new DateTime().ToLongTimeString();
             derived2DC.Data = derivedDC.Data3;
-
             derived2DC.data4 = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             derived2DC.Data4 = derivedDC.Data1;
-
-            // data member in derived2 DC refering to another data member in *derived* DC
             derived2DC.data1 = derived2DC.data2;
-
             derived2DC.Data2 = new DateTime().ToLongTimeString();
             derived2DC.Data1 = derived2DC.Data2;
         }
     }
 
-    /// <summary>
-    /// data member in derived2 DC refering to a data member in *Derived* DC
-    /// data member in derived2 DC refering to another data member in *Derived2* DC 
-    /// </summary>
     [DataContract]
-
     public class TestInheritence13
     {
         public BaseSerializable baseDC;
@@ -785,35 +626,21 @@
             baseDC = new BaseSerializable(true);
             derivedDC = new DerivedSerializable(true);
             derived2DC = new Derived2Serializable(true);
-
-            // data member in derived2 DC refering to a data member with the *same* name in *derived* DC
             derived2DC.data = derivedDC.data;
-
             derivedDC.Data = new DateTime().ToLongTimeString();
             derived2DC.Data = derivedDC.Data;
-
-            // data member in derived2 DC refering to a data member with the *different* name in *derived* DC
             derived2DC.data = derivedDC.data3;
-
             derivedDC.Data3 = new DateTime().ToLongTimeString();
             derived2DC.Data = derivedDC.Data3;
-
             derived2DC.data4 = derivedDC.data1;
-
             derivedDC.Data1 = new DateTime().ToLongTimeString();
             derived2DC.Data4 = derivedDC.Data1;
-
-            // data member in derived2 DC refering to another data member in *derived* DC
             derived2DC.data1 = derived2DC.data2;
-
             derived2DC.Data2 = new DateTime().ToLongTimeString();
             derived2DC.Data1 = derived2DC.Data2;
         }
     }
 
-    /// <summary>
-    /// data member in derived2 DC refering to a data member in *Base* DC
-    /// </summary>
     [DataContract(IsReference = true)]
     [KnownType(typeof(Derived2DC))]
     public class TestInheritence7
@@ -833,24 +660,15 @@
         {
             baseDC = new BaseDC(true);
             derived2DC = new Derived2DC(true);
-
-            // data member in derived2 DC refering to a data member with the *same* name in *base* DC
             derived2DC.data = baseDC.data;
-
             baseDC.Data = new DateTime().ToLongTimeString();
             derived2DC.Data = baseDC.Data;
-
-            // data member in derived2 DC refering to a data member with the *different* name in *base* DC
             derived2DC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             derived2DC.Data = baseDC.Data2;
         }
     }
 
-    /// <summary>
-    /// data member in derived2 DC refering to a data member in *Base* DC
-    /// </summary>
     [DataContract]
     public class TestInheritence14
     {
@@ -867,24 +685,15 @@
         {
             baseDC = new BaseSerializable(true);
             derived2DC = new Derived2Serializable(true);
-
-            // data member in derived2 DC refering to a data member with the *same* name in *base* DC
             derived2DC.data = baseDC.data;
-
             baseDC.Data = new DateTime().ToLongTimeString();
             derived2DC.Data = baseDC.Data;
-
-            // data member in derived2 DC refering to a data member with the *different* name in *base* DC
             derived2DC.data = baseDC.data2;
-
             baseDC.Data2 = new DateTime().ToLongTimeString();
             derived2DC.Data = baseDC.Data2;
         }
     }
 
-    /// <summary>
-    /// data member in base DC refering to a data member in *derived2* DC
-    ///  </summary>
     [DataContract(IsReference = true)]
     [KnownType(typeof(Derived2DC))]
     public class TestInheritence8
@@ -902,27 +711,17 @@
         public TestInheritence8(bool init)
         {
             derived2DC = new Derived2DC(true);
-            baseDC = new BaseDC(true);
-
-            // data member in base DC refering to a data member with the *same* name in *derived2* DC
+            baseDC = new BaseDC(true);            
             baseDC.data = derived2DC.data;
-
             derived2DC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data;
-
-            // data member in base DC refering to a data member with a *different* name in *derived2* DC
             baseDC.data = derived2DC.data1;
-
             derived2DC.Data1 = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data1;
         }
     }
 
-    /// <summary>
-    /// data member in base DC refering to a data member in *derived2* DC
-    ///  </summary>
     [DataContract]
-
     public class TestInheritence15
     {
         public BaseSerializable baseDC;
@@ -935,17 +734,11 @@
         public TestInheritence15(bool init)
         {
             derived2DC = new Derived2Serializable(true);
-            baseDC = new BaseSerializable(true);
-
-            // data member in base DC refering to a data member with the *same* name in *derived2* DC
+            baseDC = new BaseSerializable(true);            
             baseDC.data = derived2DC.data;
-
             derived2DC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data;
-
-            // data member in base DC refering to a data member with a *different* name in *derived2* DC
             baseDC.data = derived2DC.data1;
-
             derived2DC.Data1 = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data1;
         }
