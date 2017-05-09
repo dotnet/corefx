@@ -680,7 +680,9 @@ namespace System.Security.Cryptography.Xml
                             }
                         }
                     }
+                    // Store doesn't exist, no read permissions, other system error
                     catch (CryptographicException) { }
+                    // Opening LocalMachine stores (other than Root or CertificateAuthority) on Linux
                     catch (PlatformNotSupportedException) { }
 
                     if (filters != null)
