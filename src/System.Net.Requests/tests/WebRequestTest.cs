@@ -159,16 +159,17 @@ namespace System.Net.Tests
         [Fact]
         public void RegisterPrefix_HttpWithFakeFactory_Success()
         {
-            bool success = WebRequest.RegisterPrefix("sta://", new FakeRequestFactory());
+            bool success = WebRequest.RegisterPrefix("sta:", new FakeRequestFactory());
             Assert.True(success);
+            Assert.IsType<FakeRequest>(WebRequest.Create("sta://anything"));
         }
 
         [Fact]
         public void RegisterPrefix_DuplicateHttpWithFakeFactory_ExpectFalse()
         {
-            bool success = WebRequest.RegisterPrefix("stb://", new FakeRequestFactory());
+            bool success = WebRequest.RegisterPrefix("stb:", new FakeRequestFactory());
             Assert.True(success);
-            success = WebRequest.RegisterPrefix("stb://", new FakeRequestFactory());
+            success = WebRequest.RegisterPrefix("stb:", new FakeRequestFactory());
             Assert.False(success);
         }
 
