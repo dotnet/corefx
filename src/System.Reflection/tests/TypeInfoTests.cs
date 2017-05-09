@@ -1046,13 +1046,6 @@ namespace System.Reflection.Tests
             Assert.True(byRefType.IsByRef);
         }
 
-        [Fact]
-        public void MakeByRefType_TypeAlreadyByRef_ThrowsTypeLoadException()
-        {
-            Type byRefType = typeof(string).GetTypeInfo().MakeByRefType();
-            Assert.Throws<TypeLoadException>(() => byRefType.GetTypeInfo().MakeByRefType());
-        }
-
         [Theory]
         [InlineData(typeof(int))]
         [InlineData(typeof(string))]
@@ -1060,13 +1053,6 @@ namespace System.Reflection.Tests
         {
             Type pointerType = type.GetTypeInfo().MakePointerType();
             Assert.True(pointerType.IsPointer);
-        }
-
-        [Fact]
-        public void MakePointerType_TypeAlreadyByRef_ThrowsTypeLoadException()
-        {
-            Type byRefType = typeof(string).GetTypeInfo().MakeByRefType();
-            Assert.Throws<TypeLoadException>(() => byRefType.MakePointerType());
         }
 
         [Theory]
