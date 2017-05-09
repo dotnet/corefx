@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{7669C397-C21C-4C08-83F1-BE6691911E88}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
-    <!-- XUnit AppDomain has different behavior when accessing AppDomain.BaseDirectory (trailing/no trailing slash) -->
+    <!-- XUnit AppDomains BaseDirectory path doesn't contain a trailing slash, which impacts our tests. -->
     <XUnitNoAppdomain>true</XUnitNoAppdomain>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
