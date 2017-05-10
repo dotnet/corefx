@@ -231,14 +231,42 @@ function cross_build_corefx_with_docker {
     fi
 
     # Cross building corefx with rootfs in Docker
-    if [ "$__buildArch" == "armel" ]; then
-        __extraCmd="/p:OverridePackageSource=https://tizen.myget.org/F/dotnet-core/api/v3/index.json"
+    __buildNativeCmd="/opt/corefx/build-native.sh -buildArch=$__buildArch -$__buildConfig -- cross $__verboseFlag"
+    if [ "$__buildArch" == "arm" ]; then
+        __buildManagedCmd="./build-managed.sh -$__buildConfig -buildArch=$__buildArch -RuntimeOS=$__runtimeOS"
+    else
+        # TODO-armel: We can use same option to arm, i.e. -buildArch and -RuntimeOS options for armel,
+        #              when CoreCLR packages are also available at NuGet server for armel.
+        __buildManagedCmd="./build-managed.sh -$__buildConfig -BuildPackages=false"
+
     fi
-
-    __buildCmd="./build.sh -buildArch=$__buildArch -$__buildConfig -RuntimeOS=$__runtimeOS -- $__extraCmd"
-    $__dockerCmd $__buildCmd
-
+    $__dockerCmd $__buildNativeCmd
+    $__dockerCmd $__buildManagedCmd
     sudo chown -R $(id -u -n) ./bin
+
+    if [ "$__buildArch" == "armel" ]; then
+        # TODO-armel: This is a workaround. We don't need this if we can build managed for armel in above.
+        # Construct runtime directory
+        if [[ "$__buildConfig" == "release" ]]; then
+            __runtimePath="./bin/runtime/netcoreapp-Linux-Release-armel"
+            __nativePath="./bin/Linux.armel.Release/native"
+            __managedPath="./bin/runtime/netcoreapp-Linux-Release-x64"
+        else
+            __runtimePath="./bin/runtime/netcoreapp-Linux-Debug-armel"
+            __nativePath="./bin/Linux.armel.Debug/native"
+            __managedPath="./bin/runtime/netcoreapp-Linux-Debug-x64"
+        fi
+
+        mkdir $__runtimePath
+        pushd $__managedPath
+        rm apphost corerun dotnet
+        rm *.so
+        rm *.ni.dll
+        popd
+        cp $__nativePath/* $__runtimePath/
+        mv $__managedPath/* $__runtimePath/
+        rmdir $__managedPath
+    fi 
 }
 
 #Define script variables
