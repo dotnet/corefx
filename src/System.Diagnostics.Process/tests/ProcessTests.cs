@@ -138,6 +138,18 @@ namespace System.Diagnostics.Tests
             {
                 Assert.False(exitedInvoked);
             }
+
+            // HasExited can raise Exited events too
+            Assert.True(p.HasExited);
+
+            if (enable.GetValueOrDefault())
+            {
+                Assert.True(exitedInvoked);
+            }
+            else
+            {
+                Assert.False(exitedInvoked);
+            }
         }
 
         [Fact]
