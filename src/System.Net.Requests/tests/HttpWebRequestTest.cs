@@ -973,7 +973,6 @@ namespace System.Net.Tests
             Assert.Equal(WebExceptionStatus.RequestCanceled, ex.Status);
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetRequestStreamAsync_WriteAndDisposeRequestStreamThenOpenRequestStream_ThrowsArgumentException(Uri remoteServer)
         {
@@ -986,7 +985,6 @@ namespace System.Net.Tests
             }            
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetRequestStreamAsync_SetPOSTThenGet_ExpectNotNull(Uri remoteServer)
         {
@@ -998,7 +996,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_GetResponseStream_ExpectNotNull(Uri remoteServer)
         {
@@ -1009,7 +1006,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_GetResponseStream_ContainsHost(Uri remoteServer)
         {
@@ -1049,7 +1045,6 @@ namespace System.Net.Tests
             Assert.Equal(request.Headers["Range"], "bytes=1-5");
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_PostRequestStream_ContainsData(Uri remoteServer)
         {
@@ -1070,7 +1065,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
         [MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
@@ -1096,7 +1090,6 @@ namespace System.Net.Tests
             new object[] { System.Net.Test.Common.Configuration.Http.StatusCodeUri(true, 404) },
         };
 
-        [OuterLoop]
         [Theory, MemberData(nameof(StatusCodeServers))]
         public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException(Uri remoteServer)
         {
@@ -1105,7 +1098,6 @@ namespace System.Net.Tests
             Assert.Equal(WebExceptionStatus.ProtocolError, ex.Status);
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task HaveResponse_GetResponseAsync_ExpectTrue(Uri remoteServer)
         {
@@ -1116,7 +1108,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [Fact]
         public async Task Headers_SetAfterRequestSubmitted_ThrowsInvalidOperationException()
         {
@@ -1132,7 +1123,6 @@ namespace System.Net.Tests
             });
         }
 
-        [OuterLoop]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
         [MemberData(nameof(EchoServers))]
         public async Task Headers_GetResponseHeaders_ContainsExpectedValue(Uri remoteServer)
@@ -1171,7 +1161,6 @@ namespace System.Net.Tests
             Assert.Throws<ArgumentException>("value", () => request.Method = "Method(2");
         }
 
-        [OuterLoop]
         [Fact]
         public async Task Proxy_SetAfterRequestSubmitted_ThrowsInvalidOperationException()
         {
@@ -1201,7 +1190,6 @@ namespace System.Net.Tests
             Assert.Equal(remoteServer, request.RequestUri);
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ResponseUri_GetResponseAsync_ExpectSameUri(Uri remoteServer)
         {
@@ -1219,7 +1207,6 @@ namespace System.Net.Tests
             Assert.True(request.SupportsCookieContainer);
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task SimpleScenario_UseGETVerb_Success(Uri remoteServer)
         {
@@ -1233,7 +1220,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task SimpleScenario_UsePOSTVerb_Success(Uri remoteServer)
         {
@@ -1254,7 +1240,6 @@ namespace System.Net.Tests
             }
         }
 
-        [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
         {
