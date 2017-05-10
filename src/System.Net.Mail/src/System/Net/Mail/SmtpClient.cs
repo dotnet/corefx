@@ -136,7 +136,16 @@ namespace System.Net.Mail
                 // machine connecting to public server).
 
                 // SMTP RFC's require ASCII only host names in the HELO/EHLO message.
-                string clientDomainRaw = IPGlobalProperties.GetIPGlobalProperties().HostName;
+                string clientDomainRaw;
+                try
+                {
+                    clientDomainRaw = IPGlobalProperties.GetIPGlobalProperties().HostName;
+                }
+                catch (NotSupportedException)
+                {
+                    clientDomainRaw = "LocalHost";
+                }
+
                 IdnMapping mapping = new IdnMapping();
                 try
                 {
