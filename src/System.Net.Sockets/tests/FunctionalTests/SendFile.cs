@@ -101,7 +101,6 @@ namespace System.Net.Sockets.Tests
         public void SendFile_Synchronous(IPAddress listenAt, bool sendPreAndPostBuffers, int bytesToSend)
         {
             const int ListenBacklog = 1;
-            const int LingerTime = 10;
             const int TestTimeout = 30000;
 
             // Create file to send
@@ -152,7 +151,6 @@ namespace System.Net.Sockets.Tests
             using (client)
             {
                 client.SendFile(filename, preBuffer, postBuffer, TransmitFileOptions.UseDefaultWorkerThread);
-                client.LingerState = new LingerOption(true, LingerTime);
                 client.Shutdown(SocketShutdown.Send);
             }
 
@@ -170,7 +168,7 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(SendFile_MemberData))]
         public void SendFile_APM(IPAddress listenAt, bool sendPreAndPostBuffers, int bytesToSend)
         {
-            const int ListenBacklog = 1, LingerTime = 10, TestTimeout = 30000;
+            const int ListenBacklog = 1, TestTimeout = 30000;
 
             // Create file to send
             byte[] preBuffer, postBuffer;
@@ -208,7 +206,6 @@ namespace System.Net.Sockets.Tests
                             (callback, state) => client.BeginSendFile(filename, preBuffer, postBuffer, TransmitFileOptions.UseDefaultWorkerThread, callback, state),
                             iar => client.EndSendFile(iar),
                             null);
-                        client.LingerState = new LingerOption(true, LingerTime);
                         client.Shutdown(SocketShutdown.Send);
                     }
                 });
