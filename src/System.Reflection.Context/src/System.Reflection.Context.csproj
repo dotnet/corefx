@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Release|AnyCPU'" />
   <ItemGroup>
     <Reference Include="System.Reflection" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

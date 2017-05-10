@@ -22,6 +22,9 @@
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
+    <Reference Include="System.Resources.ResourceManager" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="Microsoft\Win32\RegistryAclExtensions.cs" />
   </ItemGroup>
