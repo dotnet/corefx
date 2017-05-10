@@ -379,6 +379,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(19534, TestPlatforms.OSX)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
@@ -455,6 +456,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(19534, TestPlatforms.OSX)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
@@ -494,6 +496,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(19534, TestPlatforms.OSX)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
