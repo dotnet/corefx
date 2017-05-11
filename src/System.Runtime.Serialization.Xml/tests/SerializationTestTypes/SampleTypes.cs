@@ -421,7 +421,7 @@ namespace SerializationTestTypes
             this.List.Add(new Guid("881d2d4c-1342-48ee-8403-7ca8ca5b3d18"), new PublicDCClassPublicDM(true));
             this.List.Add(int.MaxValue, int.MinValue);
             this.List.Add("null", null);
-            this.List.Add(new DateTime(), DateTime.MaxValue);
+            this.List.Add(DateTime.MinValue, DateTime.MaxValue);
             this.List.Add(DateTimeOffset.MaxValue, DateTimeOffset.MinValue);
             this.List.Add(new Guid("26f71fea-e5df-4b55-97a6-0419ec4d2c7e"), new AllTypes());
         }
@@ -453,21 +453,21 @@ namespace SerializationTestTypes
         public DCHashtableContainerMixedTypes() { }
         public DCHashtableContainerMixedTypes(bool init)
         {
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PublicDC());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PublicDCClassPublicDM(true));
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PublicDCClassPrivateDM_DerivedDCClassPublic());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000000"), new PublicDC());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000001"), new PublicDCClassPublicDM(true));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000002"), new PublicDCClassPrivateDM_DerivedDCClassPublic());
 
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateDCClassPublicDM_DerivedDCClassPrivate());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateDCClassPrivateDM(true));
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateCallBackSample_IDeserializationCallback());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateCallBackSample_OnDeserialized());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateCallBackSample_OnSerialized());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateDCStruct(true));
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateDefaultCtorIXmlSerializables(true));
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new PrivateIXmlSerializables());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000003"), new PrivateDCClassPublicDM_DerivedDCClassPrivate());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000004"), new PrivateDCClassPrivateDM(true));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000005"), new PrivateCallBackSample_IDeserializationCallback());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000006"), new PrivateCallBackSample_OnDeserialized());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000007"), new PrivateCallBackSample_OnSerialized());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000008"), new PrivateDCStruct(true));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000009"), new PrivateDefaultCtorIXmlSerializables(true));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000010"), new PrivateIXmlSerializables());
             //this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new DCExplicitInterfaceIObjRefReturnsPrivate());
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new Derived_Override_Prop_GetPrivate_Private(true));
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new DerivedFromPriC(100));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000011"), new Derived_Override_Prop_GetPrivate_Private(true));
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000012"), new DerivedFromPriC(100));
 
             this.List.Add(String.Empty, String.Empty);
             this.List.Add("null", null);
@@ -475,7 +475,7 @@ namespace SerializationTestTypes
 
             this.List.Add(new DateTime(), DateTime.MaxValue);
             this.List.Add(DateTimeOffset.MaxValue, DateTimeOffset.MinValue);
-            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new AllTypes());
+            this.List.Add(new Guid("00000000-0000-0000-0000-000000000013"), new AllTypes());
         }
     }
 
@@ -7230,7 +7230,7 @@ namespace SerializationTestTypes
     public class CallBackSample_OnDeserialized_Private_Base
     {
         [DataMember]
-        public string Data = new DateTime().ToLongTimeString();
+        public string Data = "string";
 
         [OnDeserialized]
         private void OnDeserialized(System.Runtime.Serialization.StreamingContext context)
@@ -7243,7 +7243,7 @@ namespace SerializationTestTypes
     public class CallBackSample_OnDeserialized_Public_Derived : CallBackSample_OnDeserialized_Private_Base
     {
         [DataMember]
-        public string Data2 = new DateTime().ToLongTimeString();
+        public string Data2 = "string";
 
         public CallBackSample_OnDeserialized_Public_Derived() { }
         [OnDeserialized]
@@ -8565,11 +8565,11 @@ namespace SerializationTestTypes
 
     #endregion
 
-    [System.Runtime.Serialization.DataContract(IsReference = true)]
+    [DataContract(IsReference = true)]
     public class CustomGeneric2<T> where T : new()
     {
-        [System.Runtime.Serialization.DataMember]
-        public string Data = "dada";
+        [DataMember]
+        public string Data = "data";
 
         public T t = new T();
     }
@@ -8609,7 +8609,7 @@ namespace SerializationTestTypes
             dictDTO.Add(DateTimeOffset.MinValue, DateTimeOffset.MaxValue);
             dictDTO.Add(DateTimeOffset.MaxValue, DateTimeOffset.MinValue);
 
-            arrayDTO = new DateTimeOffset[] { DateTimeOffset.MinValue, DateTimeOffset.UtcNow };
+            arrayDTO = new DateTimeOffset[] { DateTimeOffset.MinValue, DateTimeOffset.MaxValue };
         }
     }
 }
