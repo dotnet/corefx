@@ -80,7 +80,7 @@ namespace System.Tests
                 // read the valid environment variable for the test
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        for (int i = 0; i < 40000; i++)
+                        for (int i = 0; i < 2000; i++)
                         {
                             Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
                             Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
@@ -101,7 +101,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 20000; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
@@ -116,7 +116,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 20000; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
@@ -131,7 +131,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 20000; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);

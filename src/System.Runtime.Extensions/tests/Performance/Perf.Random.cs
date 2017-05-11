@@ -14,7 +14,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 30000; i++)
                     {
                         new Random(); new Random(); new Random();
                         new Random(); new Random(); new Random();
@@ -28,7 +28,7 @@ namespace System.Tests
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 5000000; i++)
                     {
                         rand.Next(10000); rand.Next(10000); rand.Next(10000);
                         rand.Next(10000); rand.Next(10000); rand.Next(10000);
@@ -42,7 +42,7 @@ namespace System.Tests
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 5000000; i++)
                     {
                         rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
                         rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
@@ -57,7 +57,7 @@ namespace System.Tests
             byte[] b1 = new byte[1000];
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < 5000; i++)
                     {
                         rand.NextBytes(b1); rand.NextBytes(b1); rand.NextBytes(b1);
                         rand.NextBytes(b1); rand.NextBytes(b1); rand.NextBytes(b1);
@@ -71,7 +71,7 @@ namespace System.Tests
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < 5000000; i++)
                     {
                         rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
                         rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
