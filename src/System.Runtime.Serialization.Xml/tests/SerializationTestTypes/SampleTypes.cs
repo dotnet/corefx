@@ -6295,7 +6295,6 @@ namespace SerializationTestTypes
         [OnDeserialized]
         private void OnDeserialized(System.Runtime.Serialization.StreamingContext context)
         {
-            Console.WriteLine("Base");
         }
     }
 
@@ -6309,7 +6308,6 @@ namespace SerializationTestTypes
         [OnDeserialized]
         public void OnDeserialized(System.Runtime.Serialization.StreamingContext context)
         {
-            Console.WriteLine("Derived");
         }
     }
 

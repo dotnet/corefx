@@ -3105,7 +3105,6 @@ public static partial class DataContractSerializerTests
         var valueDCIObjRefReturnsPrivate = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCIObjRefReturnsPrivate());
         var resutDCIObjRefReturnsPrivate = SerializeAndDeserialize(valueDCIObjRefReturnsPrivate, baseline6, setting);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCIObjRefReturnsPrivate, resutDCIObjRefReturnsPrivate);
-
     }
 
     [Fact]
