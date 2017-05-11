@@ -1,16 +1,15 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
+
 namespace SerializationTestTypes
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Data;
-    using System.Runtime.Serialization;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
-
-    // Not using KnownType attribute.
     [DataContract]
     public class CircularLinkOne
     {
@@ -27,7 +26,6 @@ namespace SerializationTestTypes
             Link = new CircularLinkOne();
             Link.Link = new CircularLinkOne();
             Link.Link.Link = this;
-
             RandomHangingLink = new CircularLinkOne();
             RandomHangingLink.Link = new CircularLinkOne();
             RandomHangingLink.Link.Link = new CircularLinkOneDerived();
@@ -35,7 +33,6 @@ namespace SerializationTestTypes
         }
     }
 
-    // Not using KnownType attribute.
     [DataContract]
     public class CircularLinkOneDerived : CircularLinkOne
     {
@@ -59,7 +56,6 @@ namespace SerializationTestTypes
             Link = new CircularLink();
             Link.Link = new CircularLink();
             Link.Link.Link = this;
-
             RandomHangingLink = new CircularLink();
             RandomHangingLink.Link = new CircularLink();
             RandomHangingLink.Link.Link = new CircularLinkDerived();
@@ -74,8 +70,6 @@ namespace SerializationTestTypes
         public CircularLinkDerived(bool inti) : base() { }
     }
 
-
-    #region KT Methods
     [DataContract(IsReference = true)]
     [KnownType("GetKT")]
     public class KT1Base
@@ -116,7 +110,6 @@ namespace SerializationTestTypes
         }
     }
 
-
     [DataContract(IsReference = true)]
     public class KT1Derived : KT1Base
     {
@@ -141,7 +134,6 @@ namespace SerializationTestTypes
             return base.GetHashCode();
         }
     }
-
 
     [DataContract(IsReference = true)]
     [KnownType("GetKT")]
@@ -168,8 +160,14 @@ namespace SerializationTestTypes
             if (kt1 == null) return false;
             if (this.BData == null || kt1.BData == null)
             {
-                if (this.BData == null && kt1.BData == null) { return true; }
-                else { return false; }
+                if (this.BData == null && kt1.BData == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -182,7 +180,6 @@ namespace SerializationTestTypes
             return base.GetHashCode();
         }
     }
-
 
     [DataContract(IsReference = true)]
     [KnownType("GetKT")]
@@ -249,7 +246,6 @@ namespace SerializationTestTypes
         }
     }
 
-
     [DataContract(IsReference = true)]
     public class KT2Derived : KT2Base
     {
@@ -274,8 +270,6 @@ namespace SerializationTestTypes
             return base.GetHashCode();
         }
     }
-
-    #endregion
 
     [CollectionDataContract(IsReference = true)]
     [KnownType(typeof(PublicDC))]
@@ -344,7 +338,6 @@ namespace SerializationTestTypes
             this.List.Add(new PrivateDCStruct(true));
             this.List.Add(new PrivateDefaultCtorIXmlSerializables(true));
             this.List.Add(new PrivateIXmlSerializables());
-            //this.List.Add(new DCExplicitInterfaceIObjRefReturnsPrivate());
             this.List.Add(new Derived_Override_Prop_GetPrivate_Private(true));
             this.List.Add(new DerivedFromPriC(100));
         }
@@ -427,7 +420,6 @@ namespace SerializationTestTypes
         }
     }
 
-
     [DataContract(IsReference = true)]
     [KnownType(typeof(PublicDC))]
     [KnownType(typeof(PublicDCClassPublicDM))]
@@ -472,17 +464,11 @@ namespace SerializationTestTypes
             this.List.Add(String.Empty, String.Empty);
             this.List.Add("null", null);
             this.List.Add(double.MaxValue, double.MinValue);
-
             this.List.Add(new DateTime(), DateTime.MaxValue);
             this.List.Add(DateTimeOffset.MaxValue, DateTimeOffset.MinValue);
-            this.List.Add(new Guid("00000000-0000-0000-0000-000000000013"), new AllTypes());
+            this.List.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"), new AllTypes());
         }
     }
-
-
-    #region Custom Generics
-
-    #region Generic Type Private
 
     [DataContract(IsReference = true)]
     public class CustomGenericContainerPrivateType1
@@ -490,7 +476,6 @@ namespace SerializationTestTypes
         [DataMember]
         private CustomGeneric1<PrivateDC> _data1 = new CustomGeneric1<PrivateDC>();
     }
-
 
     [DataContract(IsReference = true)]
     public class CustomGenericContainerPrivateType2
@@ -513,14 +498,12 @@ namespace SerializationTestTypes
         private CustomGeneric2<PublicDC, PublicDCClassPrivateDM> _data1 = new CustomGeneric2<PublicDC, PublicDCClassPrivateDM>();
     }
 
-
     [DataContract(IsReference = true)]
     public class CustomGenericContainerPublicType1
     {
         [DataMember]
         public CustomGeneric1<PublicDC> data1 = new CustomGeneric1<PublicDC>();
     }
-
 
     [DataContract(IsReference = true)]
     public class CustomGenericContainerPublicType2
@@ -543,8 +526,6 @@ namespace SerializationTestTypes
         public CustomGeneric2<PublicDC, PublicDCClassPublicDM> data1 = new CustomGeneric2<PublicDC, PublicDCClassPublicDM>();
     }
 
-
-
     [DataContract(IsReference = true)]
     public class CustomGeneric1<T> where T : new()
     {
@@ -563,12 +544,6 @@ namespace SerializationTestTypes
         [DataMember]
         public K k = new K();
     }
-
-
-    #endregion
-
-    #region Generics with KnownTypes
-
 
     [DataContract(IsReference = true)]
     [KnownType(typeof(GenericBase<SimpleBaseContainer>))]
@@ -646,11 +621,6 @@ namespace SerializationTestTypes
         }
     }
 
-    #endregion
-
-    #endregion
-
-
     [DataContract(IsReference = true)]
     [KnownType(typeof(PrivateDC))]
     public class DCListPrivateTContainer2
@@ -659,7 +629,6 @@ namespace SerializationTestTypes
         public List<object> ListData = new List<object>();
         public DCListPrivateTContainer2() { ListData.Add(new PrivateDC()); }
     }
-
 
     [DataContract(IsReference = true)]
     public class DCListPrivateTContainer
@@ -691,8 +660,6 @@ namespace SerializationTestTypes
         }
     }
 
-    #region IList
-
     [DataContract(IsReference = true)]
     internal class SamplePrivateListImplicitWithDC : IList
     {
@@ -709,8 +676,6 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
-
-        #region IList Members
 
         public int Add(object value)
         {
@@ -770,13 +735,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -794,16 +754,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleListImplicitWithDC")]
@@ -823,10 +777,7 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new SimpleDCWithRef(true));
-            //this.internalList.Add(this.internalList[7]);
         }
-
-        #region IList Members
 
         public int Add(object value)
         {
@@ -886,13 +837,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -910,16 +856,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleListImplicitWithoutDC")]
@@ -939,8 +879,6 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("899288c9-8bee-41c1-a6d4-13c477ec1b29"));
         }
 
-        #region IList Members
-
         public int Add(object value)
         {
             _internalList.Add(value);
@@ -999,13 +937,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -1023,16 +956,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListImplicitWithCDC1", Namespace = "Test", ItemName = "Item")]
@@ -1052,8 +979,6 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
-        #region IList Members
-
         public int Add(object value)
         {
             _internalList.Add(value);
@@ -1112,13 +1037,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -1136,16 +1056,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -1162,7 +1076,6 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
-        #region IList Members
 
         int IList.Add(object value)
         {
@@ -1222,13 +1135,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -1246,16 +1154,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleListExplicitWithoutDC")]
@@ -1273,7 +1175,6 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
-        #region IList Members
 
         int IList.Add(object value)
         {
@@ -1331,15 +1232,10 @@ namespace SerializationTestTypes
             {
                 _internalList[index] = value;
             }
-        }
-
-        #endregion
-
-        #region ICollection Members
+        }        
 
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -1357,16 +1253,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListExplicitWithCDC2", Namespace = "Test", ItemName = "Item")]
@@ -1383,7 +1273,6 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
-        #region IList Members
 
         int IList.Add(object value)
         {
@@ -1443,13 +1332,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -1467,16 +1351,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -1495,7 +1373,6 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new PrivateDC());
         }
-        #region IList Members
 
         int IList.Add(object value)
         {
@@ -1555,13 +1432,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -1579,16 +1451,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateListExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -1606,7 +1472,6 @@ namespace SerializationTestTypes
             _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
-        #region IList Members
 
         int IList.Add(object value)
         {
@@ -1666,13 +1531,8 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -1690,21 +1550,11 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region IList<T>
 
     [DataContract(IsReference = true)]
     internal class SamplePrivateListTImplicitWithDC : IList<DC>
@@ -1720,8 +1570,6 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-        #region IList<DC> Members
-
         public int IndexOf(DC item)
         {
             return _internalList.IndexOf(item);
@@ -1748,10 +1596,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         public void Add(DC item)
         {
@@ -1788,25 +1632,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -1822,7 +1656,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         public int IndexOf(DC item)
         {
@@ -1850,10 +1683,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         public void Add(DC item)
         {
@@ -1890,25 +1719,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleListTImplicitWithoutDC")]
@@ -1923,7 +1742,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         public int IndexOf(DC item)
         {
@@ -1951,10 +1769,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         public void Add(DC item)
         {
@@ -1989,27 +1803,17 @@ namespace SerializationTestTypes
         public bool Remove(DC item)
         {
             return _internalList.Remove(item); ;
-        }
-
-        #endregion
-
-        #region IEnumerable<DC> Members
+        }        
 
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListTImplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -2024,7 +1828,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         public int IndexOf(DC item)
         {
@@ -2052,10 +1855,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         public void Add(DC item)
         {
@@ -2092,25 +1891,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -2125,7 +1914,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         int IList<DC>.IndexOf(DC item)
         {
@@ -2153,10 +1941,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         void ICollection<DC>.Add(DC item)
         {
@@ -2193,25 +1977,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleListTExplicitWithoutDC")]
@@ -2226,7 +2000,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         int IList<DC>.IndexOf(DC item)
         {
@@ -2254,10 +2027,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         void ICollection<DC>.Add(DC item)
         {
@@ -2293,26 +2062,16 @@ namespace SerializationTestTypes
         {
             return _internalList.Remove(item); ;
         }
-
-        #endregion
-
-        #region IEnumerable<DC> Members
-
+        
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -2327,7 +2086,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         int IList<DC>.IndexOf(DC item)
         {
@@ -2355,10 +2113,6 @@ namespace SerializationTestTypes
                 _internalList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<DC> Members
 
         void ICollection<DC>.Add(DC item)
         {
@@ -2395,25 +2149,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListTExplicitWithCDCContainsPublicDCClassPrivateDM", Namespace = "Test", ItemName = "Item")]
@@ -2428,7 +2172,6 @@ namespace SerializationTestTypes
             _internalList.Add(new PublicDCClassPrivateDM());
             _internalList.Add(dc1);
         }
-        #region IList<PublicDCClassPrivateDM> Members
 
         int IList<PublicDCClassPrivateDM>.IndexOf(PublicDCClassPrivateDM item)
         {
@@ -2455,11 +2198,7 @@ namespace SerializationTestTypes
             {
                 _internalList[index] = value;
             }
-        }
-
-        #endregion
-
-        #region ICollection<PublicDCClassPrivateDM> Members
+        }        
 
         void ICollection<PublicDCClassPrivateDM>.Add(PublicDCClassPrivateDM item)
         {
@@ -2496,25 +2235,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<PublicDCClassPrivateDM> Members
-
         IEnumerator<PublicDCClassPrivateDM> IEnumerable<PublicDCClassPrivateDM>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListTExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -2529,7 +2258,6 @@ namespace SerializationTestTypes
             _internalList.Add(new PrivateDC());
             _internalList.Add(dc1);
         }
-        #region IList<PrivateDC> Members
 
         int IList<PrivateDC>.IndexOf(PrivateDC item)
         {
@@ -2558,10 +2286,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<PrivateDC> Members
-
         void ICollection<PrivateDC>.Add(PrivateDC item)
         {
             _internalList.Add(item);
@@ -2597,25 +2321,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<PrivateDC> Members
-
         IEnumerator<PrivateDC> IEnumerable<PrivateDC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateListTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -2630,7 +2344,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        #region IList<DC> Members
 
         int IList<DC>.IndexOf(DC item)
         {
@@ -2659,10 +2372,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<DC> Members
-
         void ICollection<DC>.Add(DC item)
         {
             _internalList.Add(item);
@@ -2698,30 +2407,16 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region ICollection<T>
 
     [DataContract(IsReference = true)]
     internal class SamplePrivateICollectionTImplicitWithDC : ICollection<DC>
@@ -2736,10 +2431,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-
-
-
-        #region ICollection<DC> Members
 
         public void Add(DC item)
         {
@@ -2776,25 +2467,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -2811,9 +2492,6 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
-        #region ICollection<DC> Members
-
         public void Add(DC item)
         {
             _internalList.Add(item);
@@ -2849,25 +2527,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleICollectionTImplicitWithoutDC")]
@@ -2883,9 +2551,6 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
-        #region ICollection<DC> Members
-
         public void Add(DC item)
         {
             _internalList.Add(item);
@@ -2921,25 +2586,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleICollectionTImplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -2954,9 +2609,7 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-
-        #region ICollection<DC> Members
-
+        
         public void Add(DC item)
         {
             _internalList.Add(item);
@@ -2992,25 +2645,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -3025,10 +2668,7 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-
-
-        #region ICollection<DC> Members
-
+        
         void ICollection<DC>.Add(DC item)
         {
             _internalList.Add(item);
@@ -3064,25 +2704,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleICollectionTExplicitWithoutDC")]
@@ -3098,9 +2728,6 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
-        #region ICollection<DC> Members
-
         void ICollection<DC>.Add(DC item)
         {
             _internalList.Add(item);
@@ -3136,25 +2763,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleICollectionTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -3170,8 +2787,6 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-        #region ICollection<DC> Members
-
         void ICollection<DC>.Add(DC item)
         {
             _internalList.Add(item);
@@ -3207,25 +2822,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
-        }
-
-        #endregion
+        }        
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleICollectionTExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -3240,8 +2845,6 @@ namespace SerializationTestTypes
             _internalList.Add(new PrivateDC());
             _internalList.Add(dc1);
         }
-
-        #region ICollection<PrivateDC> Members
 
         void ICollection<PrivateDC>.Add(PrivateDC item)
         {
@@ -3278,25 +2881,15 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<PrivateDC> Members
-
         IEnumerator<PrivateDC> IEnumerable<PrivateDC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateICollectionTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -3311,8 +2904,6 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-
-        #region ICollection<DC> Members
 
         void ICollection<DC>.Add(DC item)
         {
@@ -3349,30 +2940,16 @@ namespace SerializationTestTypes
             return _internalList.Remove(item); ;
         }
 
-        #endregion
-
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region IEnumerable<T>
 
     [DataContract(IsReference = true)]
     internal class SamplePrivateIEnumerableTImplicitWithDC : IEnumerable<DC>
@@ -3388,24 +2965,15 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -3422,23 +2990,15 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleIEnumerableTImplicitWithoutDC")]
@@ -3459,23 +3019,15 @@ namespace SerializationTestTypes
             _internalList.Add(dc);
         }
 
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleIEnumerableTImplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -3496,23 +3048,15 @@ namespace SerializationTestTypes
             _internalList.Add(item);
         }
 
-        #region IEnumerable<DC> Members
-
         public IEnumerator<DC> GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -3528,23 +3072,15 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleIEnumerableTExplicitWithoutDC")]
@@ -3565,23 +3101,15 @@ namespace SerializationTestTypes
             _internalList.Add(dc);
         }
 
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleIEnumerableTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -3597,29 +3125,20 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
         public void Add(DC dc)
         {
             _internalList.Add(dc);
         }
-
-        #region IEnumerable<DC> Members
 
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleIEnumerableTExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -3635,29 +3154,20 @@ namespace SerializationTestTypes
             _internalList.Add(dc1);
         }
 
-
         public void Add(object PrivateDC)
         {
             _internalList.Add((PrivateDC)PrivateDC);
-        }
-
-        #region IEnumerable<PrivateDC> Members
+        }        
 
         IEnumerator<PrivateDC> IEnumerable<PrivateDC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateIEnumerableTExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -3678,28 +3188,16 @@ namespace SerializationTestTypes
             _internalList.Add(dc);
         }
 
-        #region IEnumerable<DC> Members
-
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region ICollection
 
     [DataContract(IsReference = true)]
     public class SampleICollectionImplicitWithDC : ICollection
@@ -3723,12 +3221,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -3746,25 +3240,16 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
     internal class SamplePrivateICollectionImplicitWithDC : ICollection
     {
         private List<object> _internalList = new List<object>();
-
         public SamplePrivateICollectionImplicitWithDC() { }
 
         public SamplePrivateICollectionImplicitWithDC(bool init)
@@ -3782,12 +3267,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -3805,25 +3286,16 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleICollectionImplicitWithoutDC")]
     public class SampleICollectionImplicitWithoutDC : ICollection
     {
         private List<object> _internalList = new List<object>();
-
         public SampleICollectionImplicitWithoutDC() { }
 
         public SampleICollectionImplicitWithoutDC(bool init)
@@ -3841,12 +3313,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -3864,23 +3332,16 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListImplicitWithCDC2", Namespace = "Test", ItemName = "Item")]
     public class SampleICollectionImplicitWithCDC : ICollection
     {
         private List<object> _internalList = new List<object>();
-
         public SampleICollectionImplicitWithCDC() { }
 
         public SampleICollectionImplicitWithCDC(bool init)
@@ -3898,12 +3359,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         public int Count
@@ -3921,16 +3378,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -3953,12 +3404,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -3976,16 +3423,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleICollectionExplicitWithoutDC")]
@@ -4010,13 +3451,8 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -4034,16 +3470,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListExplicitWithCDC1", Namespace = "Test", ItemName = "Item")]
@@ -4061,19 +3491,14 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -4091,16 +3516,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleICollectionExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -4123,19 +3542,14 @@ namespace SerializationTestTypes
             _internalList.Add(new PrivateDC());
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
         }
 
         int ICollection.Count
@@ -4153,16 +3567,10 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateICollectionExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -4180,19 +3588,15 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
-            //this.internalList.CopyTo(array, index);
+            
         }
 
         int ICollection.Count
@@ -4210,22 +3614,11 @@ namespace SerializationTestTypes
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-
-    #endregion
-
-    #region IEnumerable
 
     [DataContract(IsReference = true)]
     public class SampleIEnumerableImplicitWithDC : IEnumerable
@@ -4249,14 +3642,10 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -4281,14 +3670,10 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleIEnumerableImplicitWithoutDC")]
@@ -4313,21 +3698,16 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleListImplicitWithCDC3", Namespace = "Test", ItemName = "Item")]
     public class SampleIEnumerableImplicitWithCDC : IEnumerable
     {
         private List<object> _internalList = new List<object>();
-
         public SampleIEnumerableImplicitWithCDC() { }
 
         public SampleIEnumerableImplicitWithCDC(bool init)
@@ -4346,16 +3726,10 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -4378,15 +3752,10 @@ namespace SerializationTestTypes
             _internalList.Add(value);
         }
 
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "SampleIEnumerableExplicitWithoutDC")]
@@ -4411,17 +3780,10 @@ namespace SerializationTestTypes
             return _internalList.Count;
         }
 
-
-
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleIEnumerableExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
@@ -4439,24 +3801,16 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleIEnumerableExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -4476,26 +3830,17 @@ namespace SerializationTestTypes
             _internalList.Add(new PrivateDC());
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateIEnumerableExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
     internal class SamplePrivateIEnumerableExplicitWithCDC : IEnumerable
@@ -4512,30 +3857,17 @@ namespace SerializationTestTypes
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
-
         public int Add(object value)
         {
             _internalList.Add(value);
             return _internalList.Count;
         }
 
-
-
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
         }
-
-        #endregion
     }
-
-
-    #endregion
-
-    #region IDictionary
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyIDictionary4", Namespace = "MyDictNS1", ValueName = "DictValue")]
     [KnownType(typeof(PublicDC))]
@@ -4550,8 +3882,6 @@ namespace SerializationTestTypes
         {
             _data.Add(new PublicDC(), new PublicDC());
         }
-
-        #region IDictionary Members
 
         public void Add(object key, object value)
         {
@@ -4610,10 +3940,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -4634,16 +3960,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyIDictionary2", Namespace = "MyDictNS1", ValueName = "DictValue")]
@@ -4660,8 +3980,6 @@ namespace SerializationTestTypes
         {
             _data.Add(new PublicDC(), new PublicDC());
         }
-
-        #region IDictionary Members
 
         void IDictionary.Add(object key, object value)
         {
@@ -4720,10 +4038,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         void ICollection.CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -4744,16 +4058,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyIDictionary3", Namespace = "MyDictNS2", ValueName = "DictValue")]
@@ -4770,8 +4078,6 @@ namespace SerializationTestTypes
             _data.Add(new PrivateDC(), new PrivateDC());
             _data.Add(new PublicDCClassPrivateDM(), new PublicDCClassPrivateDM());
         }
-
-        #region IDictionary Members
 
         public void Add(object key, object value)
         {
@@ -4830,10 +4136,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -4854,16 +4156,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "MyGenericIDictionaryKVContainsPublicDC")]
@@ -4877,8 +4173,6 @@ namespace SerializationTestTypes
         {
             _data.Add(new PublicDC(), new PublicDC());
         }
-
-        #region IDictionary Members
 
         public void Add(PublicDC key, PublicDC value)
         {
@@ -4937,10 +4231,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -4961,19 +4251,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
-
-        #region IDictionary<PublicDC,PublicDC> Members
-
 
         public bool ContainsKey(PublicDC key)
         {
@@ -5012,10 +4293,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<PublicDC,PublicDC>> Members
-
         public void Add(KeyValuePair<PublicDC, PublicDC> item)
         {
             _data.Add(item.Key, item.Value);
@@ -5036,16 +4313,10 @@ namespace SerializationTestTypes
             return _data.Remove(item.Key);
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<PublicDC,PublicDC>> Members
-
         IEnumerator<KeyValuePair<PublicDC, PublicDC>> IEnumerable<KeyValuePair<PublicDC, PublicDC>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(Name = "MyGenericIDictionaryKVContainsPublicDCExplicit")]
@@ -5060,7 +4331,6 @@ namespace SerializationTestTypes
         {
             _data.Add(new PublicDC(), new PublicDC());
         }
-        #region IDictionary Members
 
         void IDictionary<PublicDC, PublicDC>.Add(PublicDC key, PublicDC value)
         {
@@ -5109,10 +4379,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -5133,19 +4399,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
-
-        #region IDictionary<PublicDC,PublicDC> Members
-
 
         bool IDictionary<PublicDC, PublicDC>.ContainsKey(PublicDC key)
         {
@@ -5184,10 +4441,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<PublicDC,PublicDC>> Members
-
         void ICollection<KeyValuePair<PublicDC, PublicDC>>.Add(KeyValuePair<PublicDC, PublicDC> item)
         {
             _data.Add(item.Key, item.Value);
@@ -5208,16 +4461,10 @@ namespace SerializationTestTypes
             return _data.Remove(item.Key);
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<PublicDC,PublicDC>> Members
-
         IEnumerator<KeyValuePair<PublicDC, PublicDC>> IEnumerable<KeyValuePair<PublicDC, PublicDC>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyGenericIDictionaryKVContainsPrivateDC", Namespace = "MyDictNS", ValueName = "DictValue")]
@@ -5227,12 +4474,13 @@ namespace SerializationTestTypes
         private Dictionary<Object, Object> _data = new Dictionary<Object, Object>();
 
         public MyGenericIDictionaryKVContainsPrivateDC()
-        { }
+        {
+        }
+
         public MyGenericIDictionaryKVContainsPrivateDC(bool init)
         {
             _data.Add(new PrivateDC(), new PrivateDC());
         }
-        #region IDictionary Members
 
         public void Add(Object key, Object value)
         {
@@ -5291,10 +4539,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -5315,19 +4559,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
-
-        #region IDictionary<PublicDC,PublicDC> Members
-
 
         public bool ContainsKey(Object key)
         {
@@ -5366,10 +4601,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<PublicDC,PublicDC>> Members
-
         public void Add(KeyValuePair<Object, Object> item)
         {
             _data.Add(item.Key, item.Value);
@@ -5390,16 +4621,10 @@ namespace SerializationTestTypes
             return _data.Remove(item.Key);
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<PublicDC,PublicDC>> Members
-
         IEnumerator<KeyValuePair<Object, Object>> IEnumerable<KeyValuePair<Object, Object>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
 
@@ -5410,14 +4635,14 @@ namespace SerializationTestTypes
         private Dictionary<object, object> _data = new Dictionary<object, object>();
 
         public MyPrivateIDictionaryContainsPublicDC()
-        { }
+        {
+        }
+
         public MyPrivateIDictionaryContainsPublicDC(bool init)
         {
             _data.Add(new PublicDC(), new PublicDC());
             _data.Add(new PublicDC(), new PublicDC());
         }
-
-        #region IDictionary Members
 
         public void Add(object key, object value)
         {
@@ -5476,10 +4701,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -5500,21 +4721,11 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region IDictionary<K,V>
 
     [CollectionDataContract(Name = "MyPrivateGenericIDictionaryKVContainsPublicDC")]
     internal class MyPrivateGenericIDictionaryKVContainsPublicDC : IDictionary<PublicDC, PublicDC>
@@ -5532,7 +4743,6 @@ namespace SerializationTestTypes
             _data.Add(new PublicDC(), new PublicDC());
             _data.Add(dc, new PublicDC());
         }
-        #region IDictionary Members
 
         public void Add(PublicDC key, PublicDC value)
         {
@@ -5591,10 +4801,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -5615,19 +4821,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
-
-        #region IDictionary<PublicDC,PublicDC> Members
-
 
         public bool ContainsKey(PublicDC key)
         {
@@ -5666,10 +4863,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<PublicDC,PublicDC>> Members
-
         public void Add(KeyValuePair<PublicDC, PublicDC> item)
         {
             _data.Add(item.Key, item.Value);
@@ -5690,16 +4883,10 @@ namespace SerializationTestTypes
             return _data.Remove(item.Key);
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<PublicDC,PublicDC>> Members
-
         IEnumerator<KeyValuePair<PublicDC, PublicDC>> IEnumerable<KeyValuePair<PublicDC, PublicDC>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyPrivateGenericIDictionaryKVContainsPrivateDC", Namespace = "MyDictNS", ValueName = "DictValue")]
@@ -5719,7 +4906,6 @@ namespace SerializationTestTypes
             _data.Add(new PrivateDC(), dc);
             _data.Add(dc, new PrivateDC());
         }
-        #region IDictionary Members
 
         public void Add(Object key, Object value)
         {
@@ -5778,10 +4964,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection Members
-
         public void CopyTo(Array array, int index)
         {
             throw new Exception("TEST EXCEPTION!!!!: CopyTo method or operation is not implemented.");
@@ -5802,19 +4984,10 @@ namespace SerializationTestTypes
             get { return this; }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
-
-        #region IDictionary<PublicDC,PublicDC> Members
-
 
         public bool ContainsKey(Object key)
         {
@@ -5853,10 +5026,6 @@ namespace SerializationTestTypes
             }
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<PublicDC,PublicDC>> Members
-
         public void Add(KeyValuePair<Object, Object> item)
         {
             _data.Add(item.Key, item.Value);
@@ -5877,19 +5046,11 @@ namespace SerializationTestTypes
             return _data.Remove(item.Key);
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<PublicDC,PublicDC>> Members
-
         IEnumerator<KeyValuePair<Object, Object>> IEnumerable<KeyValuePair<Object, Object>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
-
-        #endregion
     }
-
-    #region Dictionary containers
 
     [DataContract(IsReference = true)]
     public class DCDictionaryPrivateKTContainer
@@ -6047,11 +5208,9 @@ namespace SerializationTestTypes
     [DataContract(IsReference = true)]
     public class DCDictionaryMixedKTContainer14
     {
-        //[DataMember]
         private Dictionary<PrivateIXmlSerializables, PrivateDefaultCtorIXmlSerializables> _dictData = new Dictionary<PrivateIXmlSerializables, PrivateDefaultCtorIXmlSerializables>();
         public DCDictionaryMixedKTContainer14() { _dictData.Add(new PrivateIXmlSerializables(), new PrivateDefaultCtorIXmlSerializables(true)); }
     }
-    #endregion
 
     [DataContract(IsReference = true)]
     internal class PrivateDC
@@ -6071,7 +5230,6 @@ namespace SerializationTestTypes
             return Data.GetHashCode();
         }
     }
-
 
     [DataContract(IsReference = true)]
     public class PublicDC
@@ -6103,8 +5261,6 @@ namespace SerializationTestTypes
     {
     }
 
-    #endregion
-
     [DataContract(IsReference = true)]
     public class DC
     {
@@ -6122,8 +5278,6 @@ namespace SerializationTestTypes
         public readonly string Data;
     }
 
-    #region IXmlSerializables
-
     public class IReadWriteXmlWriteBinHex_EqualityDefined : IXmlSerializable
     {
         private byte[] _bits = System.Text.Encoding.UTF8.GetBytes("hello world");
@@ -6137,7 +5291,6 @@ namespace SerializationTestTypes
         {
             byte[] readBits = new byte[_bits.Length];
             reader.Read();
-            //reader.ReadToDescendant("WriteBinHex");
             int readLen = reader.ReadContentAsBinHex(readBits, 0, readBits.Length);
 
             if (_bits.Length != readLen)
@@ -6157,10 +5310,7 @@ namespace SerializationTestTypes
         public virtual void WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
 
         public override bool Equals(object obj)
@@ -6215,10 +5365,7 @@ namespace SerializationTestTypes
         public virtual void WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
     }
 
@@ -6257,10 +5404,7 @@ namespace SerializationTestTypes
         public virtual void WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
     }
 
@@ -6274,7 +5418,6 @@ namespace SerializationTestTypes
             throw new NotImplementedException();
         }
 
-        // This is the method named by the XmlSchemaProviderAttribute applied to the type.
         public static XmlQualifiedName MySchema(XmlSchemaSet xs)
         {
             return new XmlQualifiedName("MyData", "MyNameSpace");
@@ -6303,13 +5446,9 @@ namespace SerializationTestTypes
         public virtual void WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
     }
-
 
     [XmlSchemaProvider("MySchema")]
     public class PublicExplicitIXmlSerializablesWithPublicSchemaProvider : IXmlSerializable
@@ -6320,8 +5459,7 @@ namespace SerializationTestTypes
         {
             throw new NotImplementedException();
         }
-
-        // This is the method named by the XmlSchemaProviderAttribute applied to the type.
+        
         public static XmlQualifiedName MySchema(XmlSchemaSet xs)
         {
             return new XmlQualifiedName("MyData2", "MyNameSpace");
@@ -6350,10 +5488,7 @@ namespace SerializationTestTypes
         void IXmlSerializable.WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
     }
 
@@ -6367,7 +5502,6 @@ namespace SerializationTestTypes
             throw new NotImplementedException();
         }
 
-        // This is the method named by the XmlSchemaProviderAttribute applied to the type.
         private static XmlQualifiedName MySchema(XmlSchemaSet xs)
         {
             return new XmlQualifiedName("MyData3", "MyNameSpace");
@@ -6396,16 +5530,9 @@ namespace SerializationTestTypes
         public virtual void WriteXml(System.Xml.XmlWriter writer)
         {
             byte[] bits = System.Text.Encoding.UTF8.GetBytes("hello world");
-            //writer.WriteStartElement("WriteBinHex");
-            writer.WriteBinHex(bits, 0, bits.Length); //writes hello world again
-            //writer.WriteBase64(bits, 0, bits.Length);
-            //writer.WriteEndElement(); // WriteBinHex
+            writer.WriteBinHex(bits, 0, bits.Length);
         }
     }
-
-    #endregion
-
-    #region DC and DM access test sampels
 
     [DataContract(IsReference = true)]
     internal class PrivateDCClassPublicDM
@@ -6499,8 +5626,6 @@ namespace SerializationTestTypes
         public PublicDCClassMixedDM(bool init) { Data1 = "No change"; }
     }
 
-
-
     [DataContract(IsReference = true)]
     internal class PublicDCClassPublicDM_DerivedDCClassPrivate : PublicDCClassPublicDM
     {
@@ -6526,13 +5651,6 @@ namespace SerializationTestTypes
     {
     }
 
-    /** following not allowed  - cant compiler
-    [DataContract(IsReference=true)]
-    public class PrivateDCClassPublicDM_DerivedDCClassPublic : PrivateDCClassPublicDM
-    {
-    }
-    */
-
     [DataContract(IsReference = true)]
     public class PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM : PublicDCClassPublicDM
     {
@@ -6547,10 +5665,6 @@ namespace SerializationTestTypes
             _derivedData1 = String.Empty;
         }
     }
-
-    #endregion
-
-    #region property based access samples
 
     [DataContract(IsReference = true)]
     public class Prop_PublicDCClassPublicDM_PublicDCClassPrivateDM
@@ -6748,7 +5862,6 @@ namespace SerializationTestTypes
             set { _data3 = value; }
         }
 
-
         public Prop_PublicDCClassMixedDM() { }
         public Prop_PublicDCClassMixedDM(bool init) { Data1 = "No change"; }
     }
@@ -6778,13 +5891,6 @@ namespace SerializationTestTypes
     {
     }
 
-    /** following not allowed  - cant compile
-    [DataContract(IsReference=true)]
-    public class Prop_PrivateDCClassPublicDM_DerivedDCClassPublic : Prop_PrivateDCClassPublicDM
-    {
-    }
-    */
-
     [DataContract(IsReference = true)]
     public class Prop_PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM : Prop_PublicDCClassPublicDM
     {
@@ -6794,7 +5900,6 @@ namespace SerializationTestTypes
         [DataMember]
         public string DerivedData2;
     }
-
 
     [DataContract(IsReference = true)]
     public class Prop_SetPrivate_PublicDCClassPublicDM
@@ -6882,11 +5987,6 @@ namespace SerializationTestTypes
         public Derived_Override_Prop_GetPrivate_Private(bool init) { Data = "No change"; }
     }
 
-
-    #endregion
-
-    #region Versioned roundtrips
-
     [DataContract(Name = "DC1_Version")]
     public class DC1_Version1
     {
@@ -6950,8 +6050,6 @@ namespace SerializationTestTypes
     {
         private ExtensionDataObject _extensionData;
 
-        #region IExtensibleDataObject Members
-
         public ExtensionDataObject ExtensionData
         {
             get
@@ -6963,16 +6061,12 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
-
-        #endregion
     }
 
     [DataContract(Name = "DC3_Version3")]
     public class DC3_Version3 : IExtensibleDataObject
     {
         private ExtensionDataObject _extensionData;
-
-        #region IExtensibleDataObject Members
 
         ExtensionDataObject IExtensibleDataObject.ExtensionData
         {
@@ -6985,13 +6079,7 @@ namespace SerializationTestTypes
                 _extensionData = value;
             }
         }
-
-        #endregion
     }
-
-    #endregion
-
-    #region Callbacks
 
     [DataContract(IsReference = true)]
     public class CallBackSample_OnSerializing_Public
@@ -7013,7 +6101,6 @@ namespace SerializationTestTypes
         public void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
     }
 
-
     [DataContract(IsReference = true)]
     public class CallBackSample_OnDeserializing_Public
     {
@@ -7033,7 +6120,6 @@ namespace SerializationTestTypes
         [OnDeserialized]
         public void OnDeserialized(System.Runtime.Serialization.StreamingContext context) { }
     }
-
 
     [DataContract(IsReference = true)]
     public class CallBackSample_OnSerializing
@@ -7055,7 +6141,6 @@ namespace SerializationTestTypes
         internal void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
     }
 
-
     [DataContract(IsReference = true)]
     public class CallBackSample_OnDeserializing
     {
@@ -7076,22 +6161,15 @@ namespace SerializationTestTypes
         protected internal void OnDeserialized(System.Runtime.Serialization.StreamingContext context) { }
     }
 
-
-
     [DataContract(IsReference = true)]
     public class CallBackSample_IDeserializationCallback : IDeserializationCallback
     {
         [DataMember]
         public string Data;
 
-
-        #region IDeserializationCallback Members
-
         public void OnDeserialization(object sender)
         {
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -7100,17 +6178,10 @@ namespace SerializationTestTypes
         [DataMember]
         public string Data;
 
-        #region IDeserializationCallback Members
-
         void IDeserializationCallback.OnDeserialization(object sender)
         {
         }
-
-        #endregion
     }
-
-
-    #region in private types
 
     [DataContract(IsReference = true)]
     internal class PrivateCallBackSample_OnSerializing_Public
@@ -7132,7 +6203,6 @@ namespace SerializationTestTypes
         public void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
     }
 
-
     [DataContract(IsReference = true)]
     internal class PrivateCallBackSample_OnDeserializing_Public
     {
@@ -7152,7 +6222,6 @@ namespace SerializationTestTypes
         [OnDeserialized]
         public void OnDeserialized(System.Runtime.Serialization.StreamingContext context) { }
     }
-
 
     [DataContract(IsReference = true)]
     internal class PrivateCallBackSample_OnSerializing
@@ -7199,16 +6268,11 @@ namespace SerializationTestTypes
     internal class PrivateCallBackSample_IDeserializationCallback : IDeserializationCallback
     {
         [DataMember]
-        public string Data = "Data";
-
-
-        #region IDeserializationCallback Members
+        public string Data = "Data";        
 
         public void OnDeserialization(object sender)
         {
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -7217,13 +6281,9 @@ namespace SerializationTestTypes
         [DataMember]
         public string Data = "Data";
 
-        #region IDeserializationCallback Members
-
         void IDeserializationCallback.OnDeserialization(object sender)
         {
         }
-
-        #endregion
     }
 
     [DataContract(IsReference = true)]
@@ -7253,18 +6313,10 @@ namespace SerializationTestTypes
         }
     }
 
-    #endregion
-
-    #endregion
-
-    #region collection Datacontract
-
     [CollectionDataContract(IsReference = true)]
     public class CDC_Possitive : IList<string>
     {
         private List<string> _innerList = new List<string>();
-
-        #region IList<string> Members
 
         public int IndexOf(string item)
         {
@@ -7292,10 +6344,6 @@ namespace SerializationTestTypes
                 _innerList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<string> Members
 
         public void Add(string item)
         {
@@ -7332,25 +6380,15 @@ namespace SerializationTestTypes
             return _innerList.Remove(item);
         }
 
-        #endregion
-
-        #region IEnumerable<string> Members
-
         public IEnumerator<string> GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
-
-        #endregion
 
         public static CDC_Possitive CreateInstance()
         {
@@ -7360,13 +6398,10 @@ namespace SerializationTestTypes
         }
     }
 
-
     [CollectionDataContract(IsReference = true)]
     public class CDC_PrivateAdd : IEnumerable<string>
     {
         private List<string> _innerList = new List<string>();
-
-        #region IList<string> Members
 
         public int IndexOf(string item)
         {
@@ -7394,10 +6429,6 @@ namespace SerializationTestTypes
                 _innerList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<string> Members
 
         private void Add(string item)
         {
@@ -7434,26 +6465,15 @@ namespace SerializationTestTypes
             return _innerList.Remove(item);
         }
 
-        #endregion
-
-        #region IEnumerable<string> Members
-
         public IEnumerator<string> GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
-
-        #endregion
-
 
         public static CDC_PrivateAdd CreateInstance()
         {
@@ -7463,7 +6483,6 @@ namespace SerializationTestTypes
             return list;
         }
     }
-
 
     [CollectionDataContract(IsReference = true)]
     public class CDC_PrivateDefaultCtor : IList<string>
@@ -7478,8 +6497,6 @@ namespace SerializationTestTypes
         {
         }
 
-        #region IList<string> Members
-
         public int IndexOf(string item)
         {
             return _innerList.IndexOf(item);
@@ -7506,10 +6523,6 @@ namespace SerializationTestTypes
                 _innerList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<string> Members
 
         public void Add(string item)
         {
@@ -7546,35 +6559,22 @@ namespace SerializationTestTypes
             return _innerList.Remove(item);
         }
 
-        #endregion
-
-        #region IEnumerable<string> Members
-
         public IEnumerator<string> GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
-
-        #endregion
     }
-
 
     [CollectionDataContract(IsReference = true)]
     internal class CDC_Private : IList<string>
     {
         private List<string> _innerList = new List<string>();
 
-        #region IList<string> Members
-
         public int IndexOf(string item)
         {
             return _innerList.IndexOf(item);
@@ -7601,10 +6601,6 @@ namespace SerializationTestTypes
                 _innerList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<string> Members
 
         public void Add(string item)
         {
@@ -7641,34 +6637,21 @@ namespace SerializationTestTypes
             return _innerList.Remove(item);
         }
 
-        #endregion
-
-        #region IEnumerable<string> Members
-
         public IEnumerator<string> GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
-
-        #endregion
     }
-
-
+    
     [CollectionDataContract(IsReference = true)]
     public class Base_Possitive_VirtualAdd : IEnumerable<String>
     {
         private List<string> _innerList = new List<string>();
-
-        #region IList<string> Members
 
         public int IndexOf(string item)
         {
@@ -7696,10 +6679,6 @@ namespace SerializationTestTypes
                 _innerList[index] = value;
             }
         }
-
-        #endregion
-
-        #region ICollection<string> Members
 
         public virtual void Add(String item)
         {
@@ -7736,26 +6715,16 @@ namespace SerializationTestTypes
             return _innerList.Remove(item);
         }
 
-        #endregion
-
-        #region IEnumerable<string> Members
-
         public IEnumerator<string> GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _innerList.GetEnumerator();
         }
-
-        #endregion
-
+        
         public static Base_Possitive_VirtualAdd CreateInstance()
         {
             Base_Possitive_VirtualAdd list = new Base_Possitive_VirtualAdd();
@@ -7781,10 +6750,6 @@ namespace SerializationTestTypes
             return list;
         }
     }
-
-    #endregion
-
-    #region surrogates
 
     public class NonDCPerson
     {
@@ -7818,10 +6783,8 @@ namespace SerializationTestTypes
         }
     }
 
-    public class DCSurrogate //: IDataContractSurrogate
+    public class DCSurrogate
     {
-        #region IDataContractSurrogate Members
-
         public object GetCustomDataToExport(Type clrType, Type dataContractType)
         {
             throw new NotImplementedException();
@@ -7872,14 +6835,10 @@ namespace SerializationTestTypes
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 
     public class SerSurrogate : ISerializationSurrogate
     {
-        #region ISerializationSurrogate Members
-
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             if (obj is NonDCPerson)
@@ -7903,16 +6862,10 @@ namespace SerializationTestTypes
                 return obj;
             }
         }
-
-        #endregion
     }
 
-    #region explicit implementations
-
-    public class DCSurrogateExplicit //: IDataContractSurrogate
+    public class DCSurrogateExplicit
     {
-        #region IDataContractSurrogate Members
-
         private object GetCustomDataToExport(Type clrType, Type dataContractType)
         {
             throw new NotImplementedException();
@@ -7963,14 +6916,10 @@ namespace SerializationTestTypes
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 
     public class SerSurrogateExplicit : ISerializationSurrogate
     {
-        #region ISerializationSurrogate Members
-
         void ISerializationSurrogate.GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             if (obj is NonDCPerson)
@@ -7994,17 +6943,10 @@ namespace SerializationTestTypes
                 return obj;
             }
         }
-
-        #endregion
     }
 
-    #endregion
-
-    #region private surrogate type explicit implementations
     internal class PrivateSerSurrogate : ISerializationSurrogate
     {
-        #region ISerializationSurrogate Members
-
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             if (obj is NonDCPerson)
@@ -8028,14 +6970,10 @@ namespace SerializationTestTypes
                 return obj;
             }
         }
-
-        #endregion
     }
 
     internal class PrivateSerSurrogateExplicit : ISerializationSurrogate
     {
-        #region ISerializationSurrogate Members
-
         void ISerializationSurrogate.GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             if (obj is NonDCPerson)
@@ -8059,18 +6997,10 @@ namespace SerializationTestTypes
                 return obj;
             }
         }
-
-        #endregion
     }
 
-    #endregion
-
-    #region private dc
-
-    public class DCSurrogateReturnPrivate //: IDataContractSurrogate
+    public class DCSurrogateReturnPrivate
     {
-        #region IDataContractSurrogate Members
-
         public object GetCustomDataToExport(Type clrType, Type dataContractType)
         {
             throw new NotImplementedException();
@@ -8121,14 +7051,10 @@ namespace SerializationTestTypes
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 
     public class SerSurrogateReturnPrivate : ISerializationSurrogate
     {
-        #region ISerializationSurrogate Members
-
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             if (obj is NonDCPerson)
@@ -8148,14 +7074,7 @@ namespace SerializationTestTypes
                 return obj;
             }
         }
-
-        #endregion
     }
-    #endregion
-
-    #endregion
-
-    #region Nullable<T>
 
     [DataContract(IsReference = true)]
     public class NullableContainerContainsValue
@@ -8201,7 +7120,7 @@ namespace SerializationTestTypes
         }
     }
 
-    [DataContract]//(IsReference=true)]
+    [DataContract]
     public struct PublicDCStruct
     {
         [DataMember]
@@ -8211,8 +7130,6 @@ namespace SerializationTestTypes
             Data = "Data";
         }
     }
-
-    #region contains private struct
 
     [DataContract(IsReference = true)]
     [KnownType(typeof(Nullable<PrivateDCStruct>))]
@@ -8260,8 +7177,7 @@ namespace SerializationTestTypes
         }
     }
 
-
-    [DataContract]//(IsReference=true)]
+    [DataContract]
     internal struct PrivateDCStruct
     {
         [DataMember]
@@ -8273,9 +7189,6 @@ namespace SerializationTestTypes
         }
     }
 
-    #endregion
-
-    #region contains public dc containing private dm
     [DataContract(IsReference = true)]
     public class NullablePrivateDataInDMContainerContainsValue
     {
@@ -8321,7 +7234,7 @@ namespace SerializationTestTypes
         }
     }
 
-    [DataContract]//(IsReference=true)]
+    [DataContract]
     public struct PublicDCStructContainsPrivateDataInDM
     {
         [DataMember]
@@ -8332,12 +7245,6 @@ namespace SerializationTestTypes
             Data = new PublicDCClassPrivateDM(true);
         }
     }
-
-    #endregion
-
-    #endregion
-
-    #region Dataset Container
 
     [DataContract(IsReference = true)]
     public class DCPublicDatasetPublic
@@ -8372,7 +7279,6 @@ namespace SerializationTestTypes
         }
     }
 
-
     [DataContract(IsReference = true)]
     public class DCPublicDatasetPrivate
     {
@@ -8385,6 +7291,7 @@ namespace SerializationTestTypes
         public DCPublicDatasetPrivate()
         {
         }
+
         public DCPublicDatasetPrivate(bool init)
         {
             _dataSet = new DataSet("MyData");
@@ -8398,7 +7305,6 @@ namespace SerializationTestTypes
         }
     }
 
-#pragma warning disable 0659
     [Serializable]
     public class SerPublicDatasetPublic
     {
@@ -8409,6 +7315,7 @@ namespace SerializationTestTypes
         public SerPublicDatasetPublic()
         {
         }
+
         public SerPublicDatasetPublic(bool init)
         {
             dataSet = new DataSet("MyData");
@@ -8419,7 +7326,6 @@ namespace SerializationTestTypes
             row1[dc1] = "Testing";
             dt.Rows.Add(row1);
             dataSet.Tables.Add(dt);
-
             dataTable = new DataTable("MyTable");
             DataColumn dc2 = new DataColumn("Data", typeof(string));
             dataTable.Columns.Add(dc2);
@@ -8438,12 +7344,12 @@ namespace SerializationTestTypes
         public DataTable dataTable;
 
         public SerPublicDatasetPrivate()
-        { }
+        {
+        }
+
         public SerPublicDatasetPrivate(bool init)
         {
             _dataSet = new DataSet("MyData");
-
-
             DataTable dt = new DataTable("MyTable");
             DataColumn dc1 = new DataColumn("Data", typeof(string));
             dt.Columns.Add(dc1);
@@ -8451,7 +7357,6 @@ namespace SerializationTestTypes
             row1[dc1] = "Testing";
             dt.Rows.Add(row1);
             _dataSet.Tables.Add(dt);
-
             dataTable = new DataTable("MyTable");
             DataColumn dc2 = new DataColumn("Data", typeof(string));
             dataTable.Columns.Add(dc2);
@@ -8460,7 +7365,6 @@ namespace SerializationTestTypes
             dataTable.Rows.Add(row2);
         }
     }
-#pragma warning restore 0659
 
     [DataContract(IsReference = true)]
     internal class DCPrivateDatasetPublic
@@ -8472,7 +7376,9 @@ namespace SerializationTestTypes
         public DataTable dataTable;
 
         public DCPrivateDatasetPublic()
-        { }
+        {
+        }
+
         public DCPrivateDatasetPublic(bool init)
         {
             dataSet = new DataSet("MyData");
@@ -8563,12 +7469,10 @@ namespace SerializationTestTypes
         }
     }
 
-    #endregion
-
-    [DataContract(IsReference = true)]
+    [System.Runtime.Serialization.DataContract(IsReference = true)]
     public class CustomGeneric2<T> where T : new()
     {
-        [DataMember]
+        [System.Runtime.Serialization.DataMember]
         public string Data = "data";
 
         public T t = new T();
@@ -8611,42 +7515,5 @@ namespace SerializationTestTypes
 
             arrayDTO = new DateTimeOffset[] { DateTimeOffset.MinValue, DateTimeOffset.MaxValue };
         }
-    }
-}
-
-namespace SerializationTestTypes.Delegates
-{
-    using System.Runtime.Serialization;
-    using SerializationTestTypes;
-    public delegate void PublicVoidDelegate();
-    public delegate void PublicVoidDelegateContainsPublicDC(PublicDC publicDC);
-    internal delegate void PublicVoidDelegateContainsPrivateDC(PrivateDC privateDC);
-    public delegate void PublicVoidDelegateContainsPublicDCClassPrivateDM(PublicDCClassPrivateDM privateDC);
-    internal delegate void PublicVoidDelegateContainsPrivateDerived(PublicDCDerivedPrivate privateDC);
-    internal delegate void PublicVoidDelegateContainsMixed(PrivateDC privateDC, PublicDC publicDC, PublicDCClassPrivateDM privateDM, PublicDCDerivedPrivate derivedPrivate);
-
-    internal delegate void PrivateVoidDelegate();
-
-    internal delegate PrivateDC PrivateDCDelegate();
-    public delegate PublicDCClassPrivateDM PublicPublicDCClassPrivateDMDelegate();
-
-    internal delegate PrivateDC PrivateDCDelegateContainsMixed(PrivateDC privateDC, PublicDC publicDC, PublicDCClassPrivateDM privateDM, PublicDCDerivedPrivate derivedPrivate);
-
-    [DataContract(IsReference = true)]
-    public class DelegateContainer_PublicVoidDelegate
-    {
-        [DataMember]
-        public PublicVoidDelegate publicDelegate;
-
-        public DelegateContainer_PublicVoidDelegate() { }
-
-        public DelegateContainer_PublicVoidDelegate(bool init)
-        {
-            publicDelegate = new PublicVoidDelegate(PrivateMethod);
-        }
-
-        public void PublicMethod() { }
-
-        private void PrivateMethod() { }
     }
 }

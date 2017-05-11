@@ -128,7 +128,6 @@ namespace SerializationTestTypes
         public char c3;
     }
 
-
     [DataContract]
     [KnownType(typeof(MyEnum1))]
     [KnownType(typeof(PublicDCStruct))]
@@ -139,9 +138,6 @@ namespace SerializationTestTypes
             a = false;
             b = Byte.MaxValue;
             c = Byte.MinValue;
-
-            //char
-            //datetime
             e = Decimal.MaxValue;
             f = Decimal.MinusOne;
             g = Decimal.MinValue;
@@ -388,9 +384,6 @@ namespace SerializationTestTypes
             a = false;
             b = Byte.MaxValue;
             c = Byte.MinValue;
-
-            //char
-            //datetime
             e = Decimal.MaxValue;
             f = Decimal.MinusOne;
             g = Decimal.MinValue;
@@ -814,7 +807,6 @@ namespace SerializationTestTypes
     public class Base : SomeProperties
     {
         private int _a;
-
         private string _b;
 
         [DataMember]
@@ -836,7 +828,6 @@ namespace SerializationTestTypes
     public class Derived : Base
     {
         private int _a;
-
         private string _b;
 
         [DataMember]
@@ -1042,7 +1033,6 @@ namespace SerializationTestTypes
     }
 
     [DataContract]
-
     public class Array2
     {
         [DataMember]
@@ -1104,7 +1094,6 @@ namespace SerializationTestTypes
         public int[] p = new int[] { 1 };
     }
 
-
     [DataContract]
     [KnownType(typeof(VT))]
     public class BoxedPrim
@@ -1146,57 +1135,5 @@ namespace SerializationTestTypes
             m2 = b;
             m3 = u;
         }
-    }
-
-    public class POCOGenericsNullableContainer
-    {
-        public POCOGenericsNullableContainer() { }
-
-        public object member1 = InstanceCreator.CreateInstanceOf(typeof(List<System.Boolean>), new Random(12345));
-        public object member2 = InstanceCreator.CreateInstanceOf(typeof(List<System.Byte>), new Random(12345));
-        public object member3 = InstanceCreator.CreateInstanceOf(typeof(List<System.Byte[]>), new Random(12345));
-        public object member4 = InstanceCreator.CreateInstanceOf(typeof(List<System.Char>), new Random(12345));
-        public object member5 = InstanceCreator.CreateInstanceOf(typeof(List<System.DateTime>), new Random(12345));
-        public object member6 = InstanceCreator.CreateInstanceOf(typeof(List<System.DBNull>), new Random(12345));
-        public object member7 = InstanceCreator.CreateInstanceOf(typeof(List<System.Decimal>), new Random(12345));
-        public object member8 = InstanceCreator.CreateInstanceOf(typeof(List<System.Double>), new Random(12345));
-        public object member9 = InstanceCreator.CreateInstanceOf(typeof(List<System.Guid>), new Random(12345));
-        public object member10 = InstanceCreator.CreateInstanceOf(typeof(List<System.Int16>), new Random(12345));
-        public object member11 = InstanceCreator.CreateInstanceOf(typeof(List<System.Int32>), new Random(12345));
-        public object member12 = InstanceCreator.CreateInstanceOf(typeof(List<System.Int64>), new Random(12345));
-        public object member13 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Boolean>>), new Random(12345));
-        public object member14 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Byte>>), new Random(12345));
-        public object member15 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Char>>), new Random(12345));
-        public object member16 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.DateTime>>), new Random(12345));
-        public object member17 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Decimal>>), new Random(12345));
-        public object member18 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Double>>), new Random(12345));
-        public object member19 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Guid>>), new Random(12345));
-        public object member20 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Int16>>), new Random(12345));
-        public object member21 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Int32>>), new Random(12345));
-        public object member22 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Int64>>), new Random(12345));
-        public object member23 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.SByte>>), new Random(12345));
-        public object member24 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.Single>>), new Random(12345));
-        public object member25 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.TimeSpan>>), new Random(12345));
-        public object member26 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.UInt16>>), new Random(12345));
-        public object member27 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.UInt32>>), new Random(12345));
-        public object member28 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.UInt64>>), new Random(12345));
-        public object member29 = InstanceCreator.CreateInstanceOf(typeof(List<System.SByte>), new Random(12345));
-        public object member30 = InstanceCreator.CreateInstanceOf(typeof(List<System.Single>), new Random(12345));
-        public object member31 = InstanceCreator.CreateInstanceOf(typeof(List<System.String>), new Random(12345));
-        public object member32 = InstanceCreator.CreateInstanceOf(typeof(List<System.TimeSpan>), new Random(12345));
-        public object member33 = InstanceCreator.CreateInstanceOf(typeof(List<System.UInt16>), new Random(12345));
-        public object member34 = InstanceCreator.CreateInstanceOf(typeof(List<System.UInt32>), new Random(12345));
-        public object member35 = InstanceCreator.CreateInstanceOf(typeof(List<System.UInt64>), new Random(12345));
-        public object member36 = InstanceCreator.CreateInstanceOf(typeof(List<System.Xml.XmlElement>), new Random(12345));
-        public object member37 = InstanceCreator.CreateInstanceOf(typeof(List<System.Xml.XmlNode[]>), new Random(12345));
-        public object member38 = InstanceCreator.CreateInstanceOf(typeof(List<System.DateTimeOffset>), new Random(12345));
-        public object member39 = InstanceCreator.CreateInstanceOf(typeof(List<System.Nullable<System.DateTimeOffset>>), new Random(12345));
-
-        public CustomGeneric2<Person> personInstance = new CustomGeneric2<Person>();
-        public object genericOne = new CustomGeneric2<Guid, EmptyDC>();
-        public object generictwo = new CustomGeneric2<BoxedPrim, EmptyDC>();
-        public object nullableStruct = new Nullable<MyStruct>();
-        public object obj = new Drawing<Seasons1, Seasons2, CustomGeneric2<Person>>(Seasons1.Autumn, Seasons2.Summer, new CustomGeneric2<Person>());
-
     }
 }

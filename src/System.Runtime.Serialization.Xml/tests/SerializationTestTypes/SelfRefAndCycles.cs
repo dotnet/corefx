@@ -1,9 +1,7 @@
-﻿namespace SerializationTestTypes
+﻿using System.Runtime.Serialization;
+
+namespace SerializationTestTypes
 {
-    using System.Runtime.Serialization;
-
-    #region Self Ref and Cyclic
-
     [DataContract(IsReference = true)]
     public class SelfRef1
     {
@@ -391,6 +389,4 @@
             Data.Data.Data.Data = this;
         }
     }
-
-    #endregion
 }
