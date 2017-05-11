@@ -118,6 +118,15 @@ namespace System.Runtime.Serialization
         {
             return DataContractCriticalHelper.GetDataContractSkipValidation(id, typeHandle, type);
         }
+#if uapaot
+        internal static DataContract GetDataContractCreatedAtRuntime(Type type, SerializationMode mode = SerializationMode.SharedContract)
+        {
+            RuntimeTypeHandle typeHandle = type.TypeHandle;
+            int id = GetId(typeHandle);
+            DataContract dataContract = DataContractCriticalHelper.GetDataContractCreatedAtRuntime(id, typeHandle, null);
+            return dataContract.GetValidContract(mode);
+        }
+#endif
 
         internal static DataContract GetGetOnlyCollectionDataContract(int id, RuntimeTypeHandle typeHandle, Type type, SerializationMode mode)
         {
@@ -374,6 +383,9 @@ namespace System.Runtime.Serialization
         {
             private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
             private static DataContract[] s_dataContractCache = new DataContract[32];
+#if uapaot
+            private static Dictionary<int, DataContract> s_dataContractCacheCreatedAtRuntime = new Dictionary<int, DataContract>();
+#endif
             private static int s_dataContractID;
             private static Dictionary<Type, DataContract> s_typeToBuiltInContract;
             private static Dictionary<XmlQualifiedName, DataContract> s_nameToBuiltInContract;
@@ -424,6 +436,29 @@ namespace System.Runtime.Serialization
                 }
                 return dataContract;
             }
+
+#if uapaot
+            internal static DataContract GetDataContractCreatedAtRuntime(int id, RuntimeTypeHandle typeHandle, Type type)
+            {
+
+                // The generated serialization assembly uses different ids than the running code.
+                // We should have 'dataContractCache' from 'Type' to 'DataContract', since ids are not used at runtime.
+                id = GetId(typeHandle);
+
+                DataContract dataContract;
+                if (!s_dataContractCacheCreatedAtRuntime.TryGetValue(id, out dataContract))
+                {
+                    dataContract = CreateDataContract(id, typeHandle, type, skipGeneratedDataContract: true);
+                    AssignRuntimeDataContractToId(dataContract, id);
+                }
+                else
+                {
+                    return dataContract.GetValidContract();
+                }
+
+                return dataContract;
+            }
+#endif
 
             internal static DataContract GetGetOnlyCollectionDataContractSkipValidation(int id, RuntimeTypeHandle typeHandle, Type type)
             {
@@ -514,14 +549,14 @@ namespace System.Runtime.Serialization
             }
 
             // check whether a corresponding update is required in ClassDataContract.IsNonAttributedTypeValidForSerialization
-            private static DataContract CreateDataContract(int id, RuntimeTypeHandle typeHandle, Type type)
+            private static DataContract CreateDataContract(int id, RuntimeTypeHandle typeHandle, Type type, bool skipGeneratedDataContract = false)
             {
-                DataContract dataContract = s_dataContractCache[id];
+                DataContract dataContract = skipGeneratedDataContract ? null : s_dataContractCache[id];
                 if (dataContract == null)
                 {
                     lock (s_createDataContractLock)
                     {
-                        dataContract = s_dataContractCache[id];
+                        dataContract = skipGeneratedDataContract ? null : s_dataContractCache[id];
                         if (dataContract == null)
                         {
                             if (type == null)
@@ -531,7 +566,7 @@ namespace System.Runtime.Serialization
                             var originalType = type;
 
                             type = GetDataContractAdapterTypeForGeneratedAssembly(type);
-                            dataContract = DataContract.GetDataContractFromGeneratedAssembly(type);
+                            dataContract = skipGeneratedDataContract ? null : DataContract.GetDataContractFromGeneratedAssembly(type);
                             if (dataContract != null)
                             {
                                 AssignDataContractToId(dataContract, id);
@@ -588,6 +623,17 @@ namespace System.Runtime.Serialization
                     s_dataContractCache[id] = dataContract;
                 }
             }
+
+#if uapaot
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            private static void AssignRuntimeDataContractToId(DataContract dataContract, int id)
+            {
+                lock (s_cacheLock)
+                {
+                    s_dataContractCacheCreatedAtRuntime[id] = dataContract;
+                }
+            }
+#endif
 
             private static DataContract CreateGetOnlyCollectionDataContract(int id, RuntimeTypeHandle typeHandle, Type type)
             {
