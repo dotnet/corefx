@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
@@ -38,14 +38,13 @@
     <Compile Include="ServerRequireEncryptionTest.cs" />
     <Compile Include="SslStreamStreamToStreamTest.cs" />
     <Compile Include="SslStreamNetworkStreamTest.cs" />
-    <Compile Include="PinnableBufferCacheTest.cs" />
     <Compile Include="TransportContextTest.cs" />
 
     <!-- NegotiateStream Tests -->
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
     <Compile Include="ServiceNameCollectionTest.cs" />
     <Compile Include="NegotiateStreamKerberosTest.cs" />
-  
+
     <!-- Common test files -->
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
@@ -94,9 +93,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
       <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\System\PinnableBufferCache.cs">
-      <Link>ProductionCode\System\PinnableBufferCache.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
