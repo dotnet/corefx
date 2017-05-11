@@ -15,12 +15,10 @@ namespace System.Net.Security.Tests
         public void Constructor_PolicyEnforcement_NeverParam()
         {
             var paramName = "policyEnforcement";
-            var expectedMsg = $"{SR.security_ExtendedProtectionPolicy_UseDifferentConstructorForNever}\r\nParameter name: {paramName}";
             var ex = Assert.Throws<ArgumentException>(() => new ExtendedProtectionPolicy(PolicyEnforcement.Never, ProtectionScenario.TransportSelected, null));
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal(expectedMsg, ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal(paramName, ex.ParamName);
         }
@@ -30,12 +28,10 @@ namespace System.Net.Security.Tests
         {
             var paramName = "customServiceNames";
             var paramValue = new ServiceNameCollection(new List<string>());
-            var expectedMsg = $"{SR.security_ExtendedProtectionPolicy_NoEmptyServiceNameCollection}\r\nParameter name: {paramName}";
             var ex = Assert.Throws<ArgumentException>(() => new ExtendedProtectionPolicy(PolicyEnforcement.Always, ProtectionScenario.TransportSelected, paramValue));
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal(expectedMsg, ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal(paramName, ex.ParamName);
         }
@@ -44,12 +40,10 @@ namespace System.Net.Security.Tests
         public void Constructor_ChannelBinding_NullParam()
         {
             var paramName = "customChannelBinding";
-            var expectedMsg = $"Value cannot be null.\r\nParameter name: {paramName}";
             var ex = Assert.Throws<ArgumentNullException>(() => new ExtendedProtectionPolicy(PolicyEnforcement.Always, null));
             Assert.Equal(typeof(ArgumentNullException), ex.GetType());
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal(expectedMsg, ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal(paramName, ex.ParamName);
         }
