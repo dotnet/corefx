@@ -10,7 +10,6 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.ObjectModel
 {
-    [Serializable]
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
@@ -354,7 +353,6 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        [Serializable]
         private struct DictionaryEnumerator : IDictionaryEnumerator
         {
             private readonly IDictionary<TKey, TValue> _dictionary;
@@ -419,7 +417,6 @@ namespace System.Collections.ObjectModel
 
         #endregion IReadOnlyDictionary members
 
-        [Serializable]
         [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
         [DebuggerDisplay("Count = {Count}")]
         public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
@@ -528,7 +525,6 @@ namespace System.Collections.ObjectModel
             #endregion
         }
 
-        [Serializable]
         [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
         [DebuggerDisplay("Count = {Count}")]
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>

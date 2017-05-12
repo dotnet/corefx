@@ -554,7 +554,6 @@ namespace System.Collections.Generic
 
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        [Serializable]
         public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
         {
             private SortedDictionary<TKey, TValue> _dictionary;
@@ -739,7 +738,6 @@ namespace System.Collections.Generic
 
         [DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        [Serializable]
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
         {
             private SortedDictionary<TKey, TValue> _dictionary;
@@ -922,7 +920,6 @@ namespace System.Collections.Generic
             }
         }
 
-        [Serializable]
         internal sealed class KeyValuePairComparer : Comparer<KeyValuePair<TKey, TValue>>
         {
             internal IComparer<TKey> keyComparer;
@@ -956,7 +953,6 @@ namespace System.Collections.Generic
     /// The only thing that makes it different from SortedSet is that it throws on duplicates
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [Serializable]
     internal sealed class TreeSet<T> : SortedSet<T>
     {
         public TreeSet()

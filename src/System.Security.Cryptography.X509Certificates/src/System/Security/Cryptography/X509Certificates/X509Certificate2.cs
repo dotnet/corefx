@@ -12,7 +12,7 @@ using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    [Serializable]
+#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     public class X509Certificate2 : X509Certificate
     {
         private volatile byte[] _lazyRawData;

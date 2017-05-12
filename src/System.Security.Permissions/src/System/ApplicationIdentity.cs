@@ -7,7 +7,7 @@ using System.Security;
 
 namespace System
 {
-    [Serializable]
+#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     public sealed class ApplicationIdentity : ISerializable
     {
         private ApplicationIdentity() { }

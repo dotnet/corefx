@@ -13,7 +13,6 @@ namespace System.Data.SqlTypes
     /// Represents a globally unique identifier to be stored in
     /// or retrieved from a database.
     /// </summary>
-    [Serializable]
     [XmlSchemaProvider("GetXsdType")]
     public struct SqlGuid : INullable, IComparable, IXmlSerializable
     {

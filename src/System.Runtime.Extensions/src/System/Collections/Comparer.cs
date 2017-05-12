@@ -17,7 +17,6 @@ using System.Runtime.Serialization;
 
 namespace System.Collections
 {
-    [Serializable]
     public sealed class Comparer : IComparer, ISerializable
     {
         private CompareInfo _compareInfo;
