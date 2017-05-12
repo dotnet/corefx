@@ -10,6 +10,9 @@ namespace System.IO.Tests
 {
     public class Perf_Path
     {
+        private volatile string str;
+        private volatile bool b;
+
         [Benchmark(InnerIterationCount = 150000)]
         public void Combine()
         {
@@ -21,9 +24,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2);
-                        Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2);
-                        Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2);
+                        str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2);
+                        str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2);
+                        str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2); str = Path.Combine(testPath1, testPath2);
                     }
         }
 
@@ -36,9 +39,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetFileName(testPath); Path.GetFileName(testPath); Path.GetFileName(testPath);
-                        Path.GetFileName(testPath); Path.GetFileName(testPath); Path.GetFileName(testPath);
-                        Path.GetFileName(testPath); Path.GetFileName(testPath); Path.GetFileName(testPath);
+                        str = Path.GetFileName(testPath); str = Path.GetFileName(testPath); str = Path.GetFileName(testPath);
+                        str = Path.GetFileName(testPath); str = Path.GetFileName(testPath); str = Path.GetFileName(testPath);
+                        str = Path.GetFileName(testPath); str = Path.GetFileName(testPath); str = Path.GetFileName(testPath);
                     }
         }
 
@@ -51,9 +54,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath);
-                        Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath);
-                        Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath);
+                        str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath);
+                        str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath);
+                        str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath); str = Path.GetDirectoryName(testPath);
                     }
         }
 
@@ -68,9 +71,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension);
-                        Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension);
-                        Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension);
+                        str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension);
+                        str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension);
+                        str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension); str = Path.ChangeExtension(testPath, extension);
                     }
         }
 
@@ -83,9 +86,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetExtension(testPath); Path.GetExtension(testPath); Path.GetExtension(testPath);
-                        Path.GetExtension(testPath); Path.GetExtension(testPath); Path.GetExtension(testPath);
-                        Path.GetExtension(testPath); Path.GetExtension(testPath); Path.GetExtension(testPath);
+                        str = Path.GetExtension(testPath); str = Path.GetExtension(testPath); str = Path.GetExtension(testPath);
+                        str = Path.GetExtension(testPath); str = Path.GetExtension(testPath); str = Path.GetExtension(testPath);
+                        str = Path.GetExtension(testPath); str = Path.GetExtension(testPath); str = Path.GetExtension(testPath);
                     }
         }
 
@@ -98,9 +101,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath);
-                        Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath);
-                        Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath);
+                        str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath);
+                        str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath);
+                        str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath); str = Path.GetFileNameWithoutExtension(testPath);
                     }
         }
 
@@ -113,9 +116,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
                     }
         }
 
@@ -128,9 +131,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
                     }
         }
 
@@ -143,9 +146,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
-                        Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
+                        str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath); str = Path.GetFullPath(testPath);
                     }
         }
 
@@ -158,9 +161,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetPathRoot(testPath); Path.GetPathRoot(testPath); Path.GetPathRoot(testPath);
-                        Path.GetPathRoot(testPath); Path.GetPathRoot(testPath); Path.GetPathRoot(testPath);
-                        Path.GetPathRoot(testPath); Path.GetPathRoot(testPath); Path.GetPathRoot(testPath);
+                        str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath);
+                        str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath);
+                        str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath); str = Path.GetPathRoot(testPath);
                     }
         }
 
@@ -173,9 +176,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetRandomFileName(); Path.GetRandomFileName(); Path.GetRandomFileName();
-                        Path.GetRandomFileName(); Path.GetRandomFileName(); Path.GetRandomFileName();
-                        Path.GetRandomFileName(); Path.GetRandomFileName(); Path.GetRandomFileName();
+                        str = Path.GetRandomFileName(); str = Path.GetRandomFileName(); str = Path.GetRandomFileName();
+                        str = Path.GetRandomFileName(); str = Path.GetRandomFileName(); str = Path.GetRandomFileName();
+                        str = Path.GetRandomFileName(); str = Path.GetRandomFileName(); str = Path.GetRandomFileName();
                     }
         }
 
@@ -188,9 +191,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.GetTempPath(); Path.GetTempPath(); Path.GetTempPath();
-                        Path.GetTempPath(); Path.GetTempPath(); Path.GetTempPath();
-                        Path.GetTempPath(); Path.GetTempPath(); Path.GetTempPath();
+                        str = Path.GetTempPath(); str = Path.GetTempPath(); str = Path.GetTempPath();
+                        str = Path.GetTempPath(); str = Path.GetTempPath(); str = Path.GetTempPath();
+                        str = Path.GetTempPath(); str = Path.GetTempPath(); str = Path.GetTempPath();
                     }
         }
 
@@ -203,9 +206,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.HasExtension(testPath); Path.HasExtension(testPath); Path.HasExtension(testPath);
-                        Path.HasExtension(testPath); Path.HasExtension(testPath); Path.HasExtension(testPath);
-                        Path.HasExtension(testPath); Path.HasExtension(testPath); Path.HasExtension(testPath);
+                        b = Path.HasExtension(testPath); b = Path.HasExtension(testPath); b = Path.HasExtension(testPath);
+                        b = Path.HasExtension(testPath); b = Path.HasExtension(testPath); b = Path.HasExtension(testPath);
+                        b = Path.HasExtension(testPath); b = Path.HasExtension(testPath); b = Path.HasExtension(testPath);
                     }
         }
 
@@ -218,9 +221,9 @@ namespace System.IO.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Path.IsPathRooted(testPath); Path.IsPathRooted(testPath); Path.IsPathRooted(testPath);
-                        Path.IsPathRooted(testPath); Path.IsPathRooted(testPath); Path.IsPathRooted(testPath);
-                        Path.IsPathRooted(testPath); Path.IsPathRooted(testPath); Path.IsPathRooted(testPath);
+                        b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath);
+                        b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath);
+                        b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath); b = Path.IsPathRooted(testPath);
                     }
         }
     }

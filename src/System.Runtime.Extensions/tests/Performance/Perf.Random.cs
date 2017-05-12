@@ -9,6 +9,10 @@ namespace System.Tests
 {
     public class Perf_Random
     {
+        private volatile Random random;
+        private volatile int i;
+        private double d;
+
         [Benchmark(InnerIterationCount = 30000)]
         public void ctor()
         {
@@ -16,9 +20,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        new Random(); new Random(); new Random();
-                        new Random(); new Random(); new Random();
-                        new Random(); new Random(); new Random();
+                        random = new Random(); random = new Random(); random = new Random();
+                        random = new Random(); random = new Random(); random = new Random();
+                        random = new Random(); random = new Random(); random = new Random();
                     }
         }
 
@@ -30,9 +34,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        rand.Next(10000); rand.Next(10000); rand.Next(10000);
-                        rand.Next(10000); rand.Next(10000); rand.Next(10000);
-                        rand.Next(10000); rand.Next(10000); rand.Next(10000);
+                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
+                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
+                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
                     }
         }
 
@@ -44,9 +48,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
-                        rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
-                        rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
+                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
+                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
+                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
                     }
         }
 
@@ -73,9 +77,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
-                        rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
-                        rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
+                        d = rand.NextDouble(); d = rand.NextDouble(); d = rand.NextDouble();
+                        d = rand.NextDouble(); d = rand.NextDouble(); d = rand.NextDouble();
+                        d = rand.NextDouble(); d = rand.NextDouble(); d = rand.NextDouble();
                     }
         }
     }
