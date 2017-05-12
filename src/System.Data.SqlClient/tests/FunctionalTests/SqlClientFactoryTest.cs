@@ -9,41 +9,35 @@ namespace System.Data.SqlClient.Tests
     public class SqlClientFactoryTest
     {
         [Fact]
-        public void Instance_NotNullSame()
+        public void InstanceTest()
         {
             SqlClientFactory instance = SqlClientFactory.Instance;
             Assert.NotNull(instance);
             Assert.Same(instance, SqlClientFactory.Instance);
         }
 
-        [Fact]
-        public void CreateCommand_NotNull()
+        public static readonly object[][] FactoryMethodTestData =
         {
-            Assert.NotNull(SqlClientFactory.Instance.CreateCommand());
-        }
+            new object[] { new Func<object>(SqlClientFactory.Instance.CreateCommand), typeof(SqlCommand) },
+            new object[] { new Func<object>(SqlClientFactory.Instance.CreateConnection), typeof(SqlConnection) },
+            new object[] { new Func<object>(SqlClientFactory.Instance.CreateConnectionStringBuilder), typeof(SqlConnectionStringBuilder) },
+            new object[] { new Func<object>(SqlClientFactory.Instance.CreateDataAdapter), typeof(SqlDataAdapter) },
+            new object[] { new Func<object>(SqlClientFactory.Instance.CreateParameter), typeof(SqlParameter) },
+        };
 
-        [Fact]
-        public void CreateConnection_NotNull()
+        [Theory]
+        [MemberData(nameof(FactoryMethodTestData))]
+        public void FactoryMethodTest(Func<object> factory, Type expectedType)
         {
-            Assert.NotNull(SqlClientFactory.Instance.CreateConnection());
-        }
+            object value1 = factory();
+            Assert.NotNull(value1);
+            Assert.IsType(expectedType, value1);
 
-        [Fact]
-        public void CreateConnectionStringBuilder_NotNull()
-        {
-            Assert.NotNull(SqlClientFactory.Instance.CreateConnectionStringBuilder());
-        }
+            object value2 = factory();
+            Assert.NotNull(value2);
+            Assert.IsType(expectedType, value2);
 
-        [Fact]
-        public void CreateDataAdapter_NotNull()
-        {
-            Assert.NotNull(SqlClientFactory.Instance.CreateDataAdapter());
-        }
-
-        [Fact]
-        public void CreateParameter_NotNull()
-        {
-            Assert.NotNull(SqlClientFactory.Instance.CreateParameter());
+            Assert.NotSame(value1, value2);
         }
     }
 }
