@@ -16,6 +16,12 @@ namespace System.Tests
         [Benchmark(InnerIterationCount = 30000)]
         public void ctor()
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                random = new Random();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -30,6 +36,13 @@ namespace System.Tests
         public void Next_int()
         {
             Random rand = new Random(123456);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                i = rand.Next(10000);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -44,6 +57,13 @@ namespace System.Tests
         public void Next_int_int()
         {
             Random rand = new Random(123456);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                i = rand.Next(100, 10000);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -59,6 +79,13 @@ namespace System.Tests
         {
             Random rand = new Random(123456);
             byte[] b1 = new byte[1000];
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                rand.NextBytes(b1);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -73,6 +100,13 @@ namespace System.Tests
         public void NextDouble()
         {
             Random rand = new Random(123456);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                d = rand.NextDouble();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)

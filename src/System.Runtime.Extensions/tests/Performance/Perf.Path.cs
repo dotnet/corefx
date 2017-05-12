@@ -20,6 +20,12 @@ namespace System.IO.Tests
             string testPath1 = utils.GetTestFilePath();
             string testPath2 = utils.CreateString(10);
 
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.Combine(testPath1, testPath2);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -35,6 +41,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetFileName(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -50,6 +63,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetDirectoryName(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -67,6 +87,12 @@ namespace System.IO.Tests
             string testPath = utils.GetTestFilePath();
             string extension = utils.CreateString(4);
 
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.ChangeExtension(testPath, extension);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -82,6 +108,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetExtension(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -97,6 +130,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetFileNameWithoutExtension(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -112,6 +152,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 200);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetFullPath(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -127,6 +174,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 500);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetFullPath(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -142,6 +196,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 1000);
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetFullPath(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -157,6 +218,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetPathRoot(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -172,6 +240,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetRandomFileName();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -187,6 +262,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Path.GetTempPath();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -202,6 +284,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                b = Path.HasExtension(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -217,6 +306,13 @@ namespace System.IO.Tests
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
+
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                b = Path.IsPathRooted(testPath);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
