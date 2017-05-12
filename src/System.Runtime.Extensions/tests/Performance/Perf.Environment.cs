@@ -10,7 +10,7 @@ namespace System.Tests
 {
     public class Perf_Environment
     {
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 40000)]
         public void GetEnvironmentVariable()
         {
             PerfUtils utils = new PerfUtils();
@@ -23,7 +23,7 @@ namespace System.Tests
                 // read the valid environment variable for the test
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        for (int i = 0; i < 40000; i++)
+                        for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
                             Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env);
                             Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env);
@@ -37,12 +37,13 @@ namespace System.Tests
             }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 40000)]
         public void ExpandEnvironmentVariables()
         {
             PerfUtils utils = new PerfUtils();
             string env = utils.CreateString(15);
             string inputEnv = "%" + env + "%";
+
             try
             {
                 // setup the environment variable so we can read it
@@ -51,7 +52,7 @@ namespace System.Tests
                 // read the valid environment variable
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        for (int i = 0; i < 40000; i++)
+                        for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
                             Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
                             Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
@@ -67,7 +68,7 @@ namespace System.Tests
             }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 2000)]
         public void GetEnvironmentVariables()
         {
             PerfUtils utils = new PerfUtils();
@@ -80,7 +81,7 @@ namespace System.Tests
                 // read the valid environment variable for the test
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        for (int i = 0; i < 2000; i++)
+                        for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
                             Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
                             Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
@@ -94,14 +95,14 @@ namespace System.Tests
             }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 20000)]
         [PlatformSpecific(TestPlatforms.OSX)]
         [InlineData(Environment.SpecialFolder.System, Environment.SpecialFolderOption.None)]
         public void GetFolderPath_OSX(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 20000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
@@ -109,14 +110,14 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 20000)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [InlineData(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify)]
         public void GetFolderPath_Unix(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 20000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
@@ -124,14 +125,14 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 20000)]
         [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(Environment.SpecialFolder.Windows, Environment.SpecialFolderOption.None)]
         public void GetFolderPath_Windows(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 20000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
                         Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
@@ -139,13 +140,13 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 40000)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void GetLogicalDrives_Unix()
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
                         Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
@@ -153,13 +154,13 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 40000)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetLogicalDrives_Windows()
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 40000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
                         Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
