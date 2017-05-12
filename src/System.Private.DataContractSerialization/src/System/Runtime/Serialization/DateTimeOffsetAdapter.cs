@@ -11,8 +11,8 @@ using System.Globalization;
 namespace System.Runtime.Serialization
 {
     [DataContract(Name = "DateTimeOffset", Namespace = "http://schemas.datacontract.org/2004/07/System")]
-#if uapaot && DEBUG
-    internal class DateTimeOffsetAdapter
+#if USE_REFEMIT
+    public struct DateTimeOffsetAdapter
 #else
     internal struct DateTimeOffsetAdapter
 #endif
