@@ -57,6 +57,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void MoveFile()
+        {
+            // Regression https://github.com/dotnet/corefx/issues/19710
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Move(source, destination);
+            Assert.True(File.Exists(destination));
+            Assert.False(File.Exists(source));
+        }
+
+        [Fact]
         public void MoveOntoFile()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());

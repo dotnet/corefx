@@ -413,7 +413,9 @@ namespace System.IO
             if (!String.Equals(sourceRoot, destinationRoot, pathComparison))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
-            if (!Exists)
+            // Windows will throw if the source file/directory doesn't exist, we preemptively check
+            // to make sure our cross platform behavior matches NetFX behavior.
+            if (!Exists && !FileSystem.Current.FileExists(fullSourcePath))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, FullPath));
 
             if (FileSystem.Current.DirectoryExists(fullDestDirName))
