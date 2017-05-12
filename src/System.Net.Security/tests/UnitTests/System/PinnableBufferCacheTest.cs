@@ -11,11 +11,11 @@ namespace System.Net.Security.Tests
         [Fact]
         public void PinnableBufferCache_AllocateBuffer_Ok()
         {
-            var cacheName = "Test";
-            var numberOfElements = 5;
-            var p = new PinnableBufferCache(cacheName, numberOfElements);
+            string cacheName = "Test";
+            int numberOfElements = 5;
+            PinnableBufferCache p = new PinnableBufferCache(cacheName, numberOfElements);
 
-            var a = p.AllocateBuffer();
+            byte[] a = p.AllocateBuffer();
 
             Assert.Equal(numberOfElements, a.Length);
             foreach (byte t in a)
