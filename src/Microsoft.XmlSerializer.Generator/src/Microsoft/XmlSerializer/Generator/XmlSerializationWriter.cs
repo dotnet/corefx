@@ -2080,6 +2080,14 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         Writer.Write(((int)value).ToString(null, NumberFormatInfo.InvariantInfo));
                     }
+                    else if (type == typeof(TimeSpan))
+                    {
+                        Writer.Write(" new ");
+                        Writer.Write(type.FullName);
+                        Writer.Write("(");
+                        Writer.Write(((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture));
+                        Writer.Write(")");
+                    }
                     else
                     {
                         throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedDefaultType, type.FullName));

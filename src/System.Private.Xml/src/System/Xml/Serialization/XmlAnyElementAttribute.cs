@@ -88,5 +88,10 @@ namespace System.Xml.Serialization
         {
             get { return _nsSpecified; }
         }
+
+        internal bool GetNamespaceSpecified()
+        {
+            return this.NamespaceSpecified;
+        }
     }
 }

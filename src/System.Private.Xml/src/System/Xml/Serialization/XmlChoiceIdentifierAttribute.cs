@@ -51,5 +51,15 @@ namespace System.Xml.Serialization
             get { return _memberInfo; }
             set { _memberInfo = value; }
         }
+
+        internal MemberInfo GetMemberInfo()
+        {
+            return this.MemberInfo;
+        }
+
+        internal void SetMemberInfo(MemberInfo memberInfo)
+        {
+            this.MemberInfo = memberInfo;
+        }
     }
 }

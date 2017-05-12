@@ -88,9 +88,19 @@ namespace System.Xml.Serialization
             get { return _nullableSpecified; }
         }
 
+        internal bool GetIsNullableSpecified()
+        {
+            return this.IsNullableSpecified;
+        }
+
         internal string Key
         {
             get { return (_ns == null ? String.Empty : _ns) + ":" + ElementName + ":" + _nullable.ToString(); }
+        }
+
+        internal string GetKey()
+        {
+            return this.Key;
         }
     }
 }
