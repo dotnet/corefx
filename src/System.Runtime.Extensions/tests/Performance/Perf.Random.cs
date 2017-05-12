@@ -9,12 +9,12 @@ namespace System.Tests
 {
     public class Perf_Random
     {
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 30000)]
         public void ctor()
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 30000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         new Random(); new Random(); new Random();
                         new Random(); new Random(); new Random();
@@ -22,13 +22,13 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 5000000)]
         public void Next_int()
         {
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 5000000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         rand.Next(10000); rand.Next(10000); rand.Next(10000);
                         rand.Next(10000); rand.Next(10000); rand.Next(10000);
@@ -36,13 +36,13 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 5000000)]
         public void Next_int_int()
         {
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 5000000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
                         rand.Next(100, 10000); rand.Next(100, 10000); rand.Next(100, 10000);
@@ -50,14 +50,14 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 5000)]
         public void NextBytes()
         {
             Random rand = new Random(123456);
             byte[] b1 = new byte[1000];
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 5000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         rand.NextBytes(b1); rand.NextBytes(b1); rand.NextBytes(b1);
                         rand.NextBytes(b1); rand.NextBytes(b1); rand.NextBytes(b1);
@@ -65,13 +65,13 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 5000000)]
         public void NextDouble()
         {
             Random rand = new Random(123456);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 5000000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         rand.NextDouble(); rand.NextDouble(); rand.NextDouble();
                         rand.NextDouble(); rand.NextDouble(); rand.NextDouble();

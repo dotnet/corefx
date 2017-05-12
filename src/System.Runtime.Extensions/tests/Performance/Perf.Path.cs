@@ -10,7 +10,7 @@ namespace System.IO.Tests
 {
     public class Perf_Path
     {
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 150000)]
         public void Combine()
         {
             PerfUtils utils = new PerfUtils();
@@ -19,7 +19,7 @@ namespace System.IO.Tests
 
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 150000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2);
                         Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2); Path.Combine(testPath1, testPath2);
@@ -27,14 +27,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 100000)]
         public void GetFileName()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetFileName(testPath); Path.GetFileName(testPath); Path.GetFileName(testPath);
                         Path.GetFileName(testPath); Path.GetFileName(testPath); Path.GetFileName(testPath);
@@ -42,14 +42,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 80000)]
         public void GetDirectoryName()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 80000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath);
                         Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath); Path.GetDirectoryName(testPath);
@@ -57,7 +57,7 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 120000)]
         public void ChangeExtension()
         {
             PerfUtils utils = new PerfUtils();
@@ -66,7 +66,7 @@ namespace System.IO.Tests
 
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 120000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension);
                         Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension); Path.ChangeExtension(testPath, extension);
@@ -74,14 +74,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 150000)]
         public void GetExtension()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 150000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetExtension(testPath); Path.GetExtension(testPath); Path.GetExtension(testPath);
                         Path.GetExtension(testPath); Path.GetExtension(testPath); Path.GetExtension(testPath);
@@ -89,14 +89,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 100000)]
         public void GetFileNameWithoutExtension()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath);
                         Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath); Path.GetFileNameWithoutExtension(testPath);
@@ -104,14 +104,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 20000)]
         public void GetFullPathForLegacyLength()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 200);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 20000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
@@ -119,14 +119,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 10000)]
         public void GetFullPathForTypicalLongPath()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 500);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
@@ -134,14 +134,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 5000)]
         public void GetFullPathForReallyLongPath()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.CreateString(length: 1000);
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 5000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
                         Path.GetFullPath(testPath); Path.GetFullPath(testPath); Path.GetFullPath(testPath);
@@ -149,14 +149,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 100000)]
         public void GetPathRoot()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetPathRoot(testPath); Path.GetPathRoot(testPath); Path.GetPathRoot(testPath);
                         Path.GetPathRoot(testPath); Path.GetPathRoot(testPath); Path.GetPathRoot(testPath);
@@ -164,14 +164,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 150000)]
         public void GetRandomFileName()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 150000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetRandomFileName(); Path.GetRandomFileName(); Path.GetRandomFileName();
                         Path.GetRandomFileName(); Path.GetRandomFileName(); Path.GetRandomFileName();
@@ -179,14 +179,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 20000)]
         public void GetTempPath()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 20000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.GetTempPath(); Path.GetTempPath(); Path.GetTempPath();
                         Path.GetTempPath(); Path.GetTempPath(); Path.GetTempPath();
@@ -194,14 +194,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 200000)]
         public void HasExtension()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 200000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.HasExtension(testPath); Path.HasExtension(testPath); Path.HasExtension(testPath);
                         Path.HasExtension(testPath); Path.HasExtension(testPath); Path.HasExtension(testPath);
@@ -209,14 +209,14 @@ namespace System.IO.Tests
                     }
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 250000)]
         public void IsPathRooted()
         {
             PerfUtils utils = new PerfUtils();
             string testPath = utils.GetTestFilePath();
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 250000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Path.IsPathRooted(testPath); Path.IsPathRooted(testPath); Path.IsPathRooted(testPath);
                         Path.IsPathRooted(testPath); Path.IsPathRooted(testPath); Path.IsPathRooted(testPath);

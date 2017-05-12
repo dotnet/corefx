@@ -11,8 +11,8 @@ namespace System.Tests
 {
     public class Perf_Environment
     {
-        private volatile String str;
-        private volatile String[] arr;
+        private volatile string str;
+        private volatile string[] arr;
         private volatile IDictionary dict;
 
         [Benchmark(InnerIterationCount = 40000)]
