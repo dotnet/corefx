@@ -185,27 +185,6 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             Encode('>');
         }
 
-        public void EncodeProcessingInstruction(string name, string text, XmlDocumentPosition docPosition)
-        {
-            if (docPosition == XmlDocumentPosition.AfterRootElement)
-            {
-                Encode(Char10);
-            }
-            Encode("<?");
-            Encode(name);
-            if (text != null && text.Length > 0)
-            {
-                Encode(' ');
-                EncodeWithLineBreakNormalization(text);
-            }
-
-            Encode("?>");
-            if (docPosition == XmlDocumentPosition.BeforeRootElement)
-            {
-                Encode(Char10);
-            }
-        }
-
         public void EncodeStartElementOpen(string prefix, string localName)
         {
             Encode("<");

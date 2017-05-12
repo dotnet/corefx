@@ -148,7 +148,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="Boundary.xml" />
@@ -158,7 +157,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="InclusiveImport.xml" />
@@ -168,7 +166,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="InclusiveImport.xml" />
@@ -178,7 +175,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="InclusiveImport.xml" />
@@ -187,8 +183,7 @@
       <argu name="StartAtElement" value="y3" />
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
-      <argu name="Result3" value="True" />
-      <argu name="Result4" value="False" />
+      <argu name="Result3" value="False" />
     </input>
     <input>
       <argu name="FilePath" value="InclusiveImport.xml" />
@@ -198,7 +193,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="AttrNorm.xml" />
@@ -208,7 +202,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="LineFeedNorm.xml" />
@@ -218,7 +211,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="ExcC14nSpecExample1.xml" />
@@ -227,8 +219,7 @@
       <argu name="StartAtElement" value="" />
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
-      <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
+      <argu name="Result3" value="True" />     
     </input>
     <input>
       <argu name="FilePath" value="ExcC14nSpecExample2.xml" />
@@ -238,7 +229,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
     <input>
       <argu name="FilePath" value="AttrSort.xml" />
@@ -247,8 +237,7 @@
       <argu name="StartAtElement" value="" />
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
-      <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
+      <argu name="Result3" value="True" />      
     </input>
     <input>
       <argu name="FilePath" value="SoapMessage1.xml" />
@@ -257,8 +246,7 @@
       <argu name="StartAtElement" value="ds:SignedInfo" />
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
-      <argu name="Result3" value="True" />
-      <argu name="Result4" value="False" />
+      <argu name="Result3" value="False" />
     </input>
     <input>
       <argu name="FilePath" value="CharEntities.xml" />
@@ -268,7 +256,6 @@
       <argu name="Result1" value="True" />
       <argu name="Result2" value="True" />
       <argu name="Result3" value="True" />
-      <argu name="Result4" value="True" />
     </input>
   </testcase>
 </testcases>

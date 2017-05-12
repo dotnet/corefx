@@ -387,17 +387,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 xmlBuffer = new XmlBuffer(Path.Combine("baselines", input.Arguments[0].Value));
                 engine = new Engine(includeComments, inclusivePrefixes, mode == TestMode.FullDocument);
 
-                //run
-                XmlReader reader;
-
-                //desktop test:
-                //canonicalize using Idfx
-                //reader = CreateReader(mode, xmlBuffer, startAt);
-
-                //Canonicalization using reader
-                //byte[] r = engine.CanonicalizeUsingReader(reader);
-
-                reader = CreateReader(mode, xmlBuffer, startAt);
+                XmlReader reader = CreateReader(mode, xmlBuffer, startAt);
                 //Canonicalization using Dictionary writer
                 byte[] dr = engine.CanonicalizeUsingDictionaryReader(reader);
 
@@ -412,22 +402,14 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 //Canonicalization using CLR
                 byte[] c = CanonicalizeUsingClrLibrary(engine, mode, xmlBuffer, startAt);
 
-                //verify
-                //string readerOutput = r == null ? null : Encoding.UTF8.GetString(r);
                 string dicReaderOutput = dr == null ? null : Encoding.UTF8.GetString(dr);
                 string writerOutput = w == null ? null : Encoding.UTF8.GetString(w);
                 string dicWriterOutput = dw == null ? null : Encoding.UTF8.GetString(dw);
                 string clrOutput = Encoding.UTF8.GetString(c);
-
-                //desktop test:
-                //Assert.Equal((dicReaderOutput == readerOutput).ToString().ToLower(), input.Arguments[4].Value.ToLower());
-                //Assert.Equal((writerOutput == readerOutput).ToString().ToLower(), input.Arguments[5].Value.ToLower());
-                //Assert.Equal((dicWriterOutput == readerOutput).ToString().ToLower(), input.Arguments[6].Value.ToLower());
-                //Assert.Equal((clrOutput == readerOutput).ToString().ToLower(), input.Arguments[7].Value.ToLower());
-
-                Assert.Equal((dicReaderOutput == writerOutput).ToString().ToLower(), input.Arguments[4].Value.ToLower());
-                Assert.Equal((dicWriterOutput == writerOutput).ToString().ToLower(), input.Arguments[5].Value.ToLower());
-                Assert.Equal((clrOutput == writerOutput).ToString().ToLower(), input.Arguments[7].Value.ToLower());
+                
+                Assert.Equal(input.Arguments[4].Value.ToLower() == "true", dicReaderOutput == writerOutput);
+                Assert.Equal(input.Arguments[5].Value.ToLower() == "true", dicWriterOutput == writerOutput);
+                Assert.Equal(input.Arguments[6].Value.ToLower() == "true", clrOutput == writerOutput);
             }
         }
 

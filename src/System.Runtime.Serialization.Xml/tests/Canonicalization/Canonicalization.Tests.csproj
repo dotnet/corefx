@@ -3,10 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{D3AD82FC-051D-4121-8E48-B13CE8024776}</ProjectGuid>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
@@ -27,9 +26,7 @@
     <Compile Include="CryptoCanonicalization\Engine.cs" />
     <Compile Include="CryptoCanonicalization\ExclusiveCanonicalNamespaceManager.cs" />
     <Compile Include="CryptoCanonicalization\Pool.cs" />
-    <Compile Include="CryptoCanonicalization\ReflectionHelper.cs" />
     <Compile Include="CryptoCanonicalization\SimpleXmlNodeList.cs" />
-    <Compile Include="CryptoCanonicalization\XmlAttributeHolder.cs" />
     <Compile Include="CryptoCanonicalization\XmlBuffer.cs" />
     <Compile Include="CryptoCanonicalization\XPathHelper.cs" />
   </ItemGroup>

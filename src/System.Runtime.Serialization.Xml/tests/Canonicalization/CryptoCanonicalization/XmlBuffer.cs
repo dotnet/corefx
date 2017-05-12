@@ -58,7 +58,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
         public XmlDocument CreateDocument()
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.PreserveWhitespace = true;
             doc.Load(CreateTextReader());
             return doc;

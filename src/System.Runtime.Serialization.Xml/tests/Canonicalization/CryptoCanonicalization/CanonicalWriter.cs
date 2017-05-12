@@ -1212,4 +1212,22 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             }
         }
     }
+
+    internal struct XmlAttributeHolder
+    {
+        private string _prefix;
+        private string _ns;
+        private string _localName;
+        private string _value;
+
+        public static XmlAttributeHolder[] emptyArray = new XmlAttributeHolder[0];
+
+        public XmlAttributeHolder(string prefix, string localName, string ns, string value)
+        {
+            _prefix = prefix;
+            _localName = localName;
+            _ns = ns;
+            _value = value;
+        }
+    }
 }

@@ -15,11 +15,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
         private readonly bool _includeComments;
         private readonly string _inclusivePrefixes;
         private readonly string[] _tokenizedInclusivePrefixes;
-
         private readonly MemoryStream _canonicalWriterStream;
         private readonly CanonicalWriter _canonicalWriter;
         private readonly CanonicalEncoder _encoder;
-        //readonly Object canonicalizationDriverObject;
 
         public Engine(bool includeComments, string inclusivePrefixes, bool fullDocumentMode)
         {
@@ -30,28 +28,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             _canonicalWriterStream = new MemoryStream();
             _encoder = new CanonicalEncoder(_canonicalWriterStream);
             _canonicalWriter = new CanonicalWriter(_encoder, _tokenizedInclusivePrefixes, includeComments, null, 0);
-
-            //canonicalizationDriverObject = ReflectionHelper.NewIdentityModel("CanonicalizationDriver");
         }
-
-        //byte[] ConfigureReaderDriverAndCanonicalize(XmlReader reader)
-        //{
-        //    ConfigureReaderAndDocumentDriver();
-        //    ReflectionHelper.Call(canonicalizationDriverObject, "SetInput", new object[] { reader });
-        //    return (byte[])ReflectionHelper.Call(canonicalizationDriverObject, "GetBytes", new object[] { });
-        //}
-
-        //void ConfigureReaderAndDocumentDriver()
-        //{
-        //    ReflectionHelper.Call(canonicalizationDriverObject, "Reset", new object[] { });
-        //    ReflectionHelper.SetProperty(canonicalizationDriverObject, "IncludeComments",  includeComments );
-        //    ReflectionHelper.Call(canonicalizationDriverObject, "SetInclusivePrefixes", new object[] { tokenizedInclusivePrefixes });
-        //}
-
-        //public byte[] CanonicalizeUsingReader(XmlReader reader)
-        //{
-        //    return ConfigureReaderDriverAndCanonicalize(reader);
-        //}
 
         public byte[] CanonicalizeUsingDictionaryReader(XmlReader reader)
         {
@@ -116,26 +93,6 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
             return _canonicalWriterStream.ToArray();
         }
-
-        //public byte[] CanonicalizeUsingTransform(XmlReader reader)
-        //{
-        //    object srp = ReflectionHelper.NewIdentityModel("SignatureResourcePool");
-        //    object et = ReflectionHelper.NewIdentityModel("ExclusiveCanonicalizationTransform", false, includeComments);
-        //    ReflectionHelper.SetProperty(et, "InclusiveNamespacesPrefixList", inclusivePrefixes);
-
-        //    MemoryStream s = (MemoryStream)ReflectionHelper.Call(et, "Process", reader, srp, ReflectionHelper.GetStaticPropertySec("ServiceModelDictionaryManager", "Instance"));
-        //    return s.ToArray();
-        //}
-
-        //public byte[] CanonicalizeUsingClrLibrary(XmlReader reader)
-        //{
-        //    MemoryStream stream = new MemoryStream();
-        //    XmlWriter writer = new XmlTextWriter(new StreamWriter(stream, Encoding.UTF8));
-        //    writer.WriteNode(reader, false);
-        //    writer.Flush();
-        //    stream.Seek(0, SeekOrigin.Begin);
-        //    return CanonicalizeUsingClrLibrary(stream);
-        //}
 
         public byte[] CanonicalizeUsingClrLibrary(object input)
         {
