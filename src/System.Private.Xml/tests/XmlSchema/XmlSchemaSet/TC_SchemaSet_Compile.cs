@@ -118,7 +118,12 @@ namespace System.Xml.Tests
     </xs:complexType>
   </xs:element>
 </xs:schema>";
-            using (XmlWriter w = XmlWriter.Create("cham.xsd"))
+
+            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName());
+            Directory.CreateDirectory(testDirectory);
+            string chamPath = Path.Combine(testDirectory, "cham.xsd");
+
+            using (XmlWriter w = XmlWriter.Create(chamPath))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(cham)))
                     w.WriteNode(r, true);
@@ -144,7 +149,9 @@ namespace System.Xml.Tests
             }
             Assert.Equal(warningCount, 0);
             Assert.Equal(errorCount, 0);
-            return;
+
+            try { Directory.Delete(testDirectory, recursive: true); }
+            catch { }
         }
     }
 }

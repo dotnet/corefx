@@ -769,7 +769,7 @@ namespace System.Xml.Tests
  </sub>
 </root>";
 
-        public void CreateSchema1()
+        public void CreateSchema1(string testDirectory)
         {
             string commonxsd = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema  elementFormDefault='qualified'
@@ -798,21 +798,21 @@ namespace System.Xml.Tests
  <Schema:element name='sub' type='CommonType'/>
 </Schema:schema>";
 
-            using (XmlWriter w = XmlWriter.Create("commonstructure.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub2)))
                 {
@@ -821,7 +821,7 @@ namespace System.Xml.Tests
             }
         }
 
-        public void CreateSchema2()
+        public void CreateSchema2(string testDirectory)
         {
             string sub1 = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema targetNamespace='sub1'
@@ -862,28 +862,28 @@ namespace System.Xml.Tests
  </Schema:complexType>
 </Schema:schema>";
 
-            using (XmlWriter w = XmlWriter.Create("commonstructure1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("commonstructure2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd2)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub2)))
                 {
@@ -896,12 +896,16 @@ namespace System.Xml.Tests
         [Fact]
         public void XSDValidationGeneratesInvalidError_1()
         {
+            // TestDirectory path must end with a DirectorySaratorChar, otherwise it will throw in the Xml validation.
+            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(testDirectory);
+
             Initialize();
-            CreateSchema1();
+            CreateSchema1(testDirectory);
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = new XmlUrlResolver();
             settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd)));
+            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, testDirectory));
             settings.ValidationType = ValidationType.Schema;
             XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
             XmlDocument doc = new XmlDocument();
@@ -912,19 +916,26 @@ namespace System.Xml.Tests
             doc.Validate(valEventHandler);
             Assert.Equal(warningCount, 0);
             Assert.Equal(errorCount, 0);
-            return;
+            
+            try
+            { Directory.Delete(testDirectory, recursive: true); }
+            catch { }
         }
 
         //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_2()
         {
+            // TestDirectory path must end with a DirectorySaratorChar, otherwise it will throw in the Xml validation.
+            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(testDirectory);
+
             Initialize();
-            CreateSchema2();
+            CreateSchema2(testDirectory);
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = new XmlUrlResolver();
             settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd)));
+            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, testDirectory));
             settings.ValidationType = ValidationType.Schema;
             XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
             XmlDocument doc = new XmlDocument();
@@ -935,7 +946,10 @@ namespace System.Xml.Tests
             doc.Validate(valEventHandler);
             Assert.Equal(warningCount, 0);
             Assert.Equal(errorCount, 0);
-            return;
+
+            try
+            { Directory.Delete(testDirectory, recursive: true); }
+            catch { }
         }
 
         private static string xsd445844 = @"<?xml version='1.0' encoding='utf-8' ?>
