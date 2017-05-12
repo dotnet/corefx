@@ -276,6 +276,24 @@ namespace System.IO
 
         public override void MoveDirectory(string sourceFullPath, string destFullPath)
         {
+            // Windows doesn't care if you try and copy a file via "MoveDirectory"...
+            if (FileExists(sourceFullPath))
+            {
+                // ... but it doesn't like the source to have a trailing slash ...
+
+                // On Windows we end up with ERROR_INVALID_NAME, which is
+                // "The filename, directory name, or volume label syntax is incorrect."
+                //
+                // This surfaces as a IOException, if we let it go beyond here it would
+                // give DirectoryNotFound.
+
+                if (PathHelpers.EndsInDirectorySeparator(sourceFullPath))
+                    throw new IOException(SR.Format(SR.IO_PathNotFound_Path, sourceFullPath));
+
+                // ... but it doesn't care if the destination has a trailing separator.
+                destFullPath = PathHelpers.TrimEndingDirectorySeparator(destFullPath);
+            }
+
             if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
