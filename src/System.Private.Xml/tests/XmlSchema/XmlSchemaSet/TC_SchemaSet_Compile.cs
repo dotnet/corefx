@@ -119,7 +119,7 @@ namespace System.Xml.Tests
   </xs:element>
 </xs:schema>";
 
-            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName());
+            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
             Directory.CreateDirectory(testDirectory);
             string chamPath = Path.Combine(testDirectory, "cham.xsd");
 
@@ -132,10 +132,10 @@ namespace System.Xml.Tests
             ss.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
 
             ss.Add(null, XmlReader.Create(new StringReader(cham)));
-            ss.Add(null, XmlReader.Create(new StringReader(main)));
+            ss.Add(null, XmlReader.Create(new StringReader(main), null, testDirectory));
             ss.Compile();
 
-            Assert.Equal(ss.Count, 2);
+            Assert.Equal(2, ss.Count);
             foreach (XmlSchemaElement e in ss.GlobalElements.Values)
             {
                 _output.WriteLine(e.QualifiedName.ToString());
@@ -147,8 +147,8 @@ namespace System.Xml.Tests
                         _output.WriteLine("\t" + (child as XmlSchemaElement).QualifiedName);
                 }
             }
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
+            Assert.Equal(0, warningCount);
+            Assert.Equal(0, errorCount);
 
             try { Directory.Delete(testDirectory, recursive: true); }
             catch { }
