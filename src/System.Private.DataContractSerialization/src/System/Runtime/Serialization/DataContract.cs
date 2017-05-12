@@ -138,7 +138,6 @@ namespace System.Runtime.Serialization
 #if uapaot
         internal static DataContract GetDataContractCreatedAtRuntime(Type type, SerializationMode mode = SerializationMode.SharedContract)
         {
-            RuntimeTypeHandle typeHandle = type.TypeHandle;
             DataContract dataContract = DataContractCriticalHelper.GetDataContractCreatedAtRuntime(type);
             return dataContract.GetValidContract(mode);
         }
