@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using Microsoft.Xunit.Performance;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -10,6 +11,10 @@ namespace System.Tests
 {
     public class Perf_Environment
     {
+        private volatile String str;
+        private volatile String[] arr;
+        private volatile IDictionary dict;
+
         [Benchmark(InnerIterationCount = 40000)]
         public void GetEnvironmentVariable()
         {
@@ -25,9 +30,9 @@ namespace System.Tests
                     using (iteration.StartMeasurement())
                         for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
-                            Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env);
-                            Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env);
-                            Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env); Environment.GetEnvironmentVariable(env);
+                            str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env);
+                            str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env);
+                            str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env); str = Environment.GetEnvironmentVariable(env);
                         }
             }
             finally
@@ -54,11 +59,11 @@ namespace System.Tests
                     using (iteration.StartMeasurement())
                         for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
-                            Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
-                            Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
-                            Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
-                            Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
-                            Environment.ExpandEnvironmentVariables(inputEnv); Environment.ExpandEnvironmentVariables(inputEnv);
+                            str = Environment.ExpandEnvironmentVariables(inputEnv); str = Environment.ExpandEnvironmentVariables(inputEnv);
+                            str = Environment.ExpandEnvironmentVariables(inputEnv); str = Environment.ExpandEnvironmentVariables(inputEnv);
+                            str = Environment.ExpandEnvironmentVariables(inputEnv); str = Environment.ExpandEnvironmentVariables(inputEnv);
+                            str = Environment.ExpandEnvironmentVariables(inputEnv); str = Environment.ExpandEnvironmentVariables(inputEnv);
+                            str = Environment.ExpandEnvironmentVariables(inputEnv); str = Environment.ExpandEnvironmentVariables(inputEnv);
                         }
             }
             finally
@@ -83,9 +88,9 @@ namespace System.Tests
                     using (iteration.StartMeasurement())
                         for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
-                            Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
-                            Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
-                            Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables(); Environment.GetEnvironmentVariables();
+                            dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables();
+                            dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables();
+                            dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables(); dict = Environment.GetEnvironmentVariables();
                         }
             }
             finally
@@ -104,9 +109,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
                     }
         }
 
@@ -119,9 +124,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
                     }
         }
 
@@ -134,9 +139,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
-                        Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option); Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
+                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
                     }
         }
 
@@ -148,9 +153,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
                     }
         }
 
@@ -162,9 +167,9 @@ namespace System.Tests
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
-                        Environment.GetLogicalDrives(); Environment.GetLogicalDrives(); Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
+                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
                     }
         }
     }
