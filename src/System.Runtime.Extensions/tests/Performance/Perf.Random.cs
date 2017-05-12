@@ -10,7 +10,7 @@ namespace System.Tests
     public class Perf_Random
     {
         private volatile Random random;
-        private volatile int i;
+        private volatile int integer;
         private double d;
 
         [Benchmark(InnerIterationCount = 30000)]
@@ -32,7 +32,7 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark(InnerIterationCount = 5000000)]
+        [Benchmark(InnerIterationCount = 1000000)]
         public void Next_int()
         {
             Random rand = new Random(123456);
@@ -40,20 +40,20 @@ namespace System.Tests
             // warmup
             for (int i = 0; i < 100; i++)
             {
-                i = rand.Next(10000);
+                integer = rand.Next(10000);
             }
 
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
-                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
-                        i = rand.Next(10000); i = rand.Next(10000); i = rand.Next(10000);
+                        integer = rand.Next(10000); integer = rand.Next(10000); integer = rand.Next(10000);
+                        integer = rand.Next(10000); integer = rand.Next(10000); integer = rand.Next(10000);
+                        integer = rand.Next(10000); integer = rand.Next(10000); integer = rand.Next(10000);
                     }
         }
 
-        [Benchmark(InnerIterationCount = 5000000)]
+        [Benchmark(InnerIterationCount = 1000000)]
         public void Next_int_int()
         {
             Random rand = new Random(123456);
@@ -61,16 +61,16 @@ namespace System.Tests
             // warmup
             for (int i = 0; i < 100; i++)
             {
-                i = rand.Next(100, 10000);
+                integer = rand.Next(100, 10000);
             }
 
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
-                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
-                        i = rand.Next(100, 10000); i = rand.Next(100, 10000); i = rand.Next(100, 10000);
+                        integer = rand.Next(100, 10000); integer = rand.Next(100, 10000); integer = rand.Next(100, 10000);
+                        integer = rand.Next(100, 10000); integer = rand.Next(100, 10000); integer = rand.Next(100, 10000);
+                        integer = rand.Next(100, 10000); integer = rand.Next(100, 10000); integer = rand.Next(100, 10000);
                     }
         }
 
@@ -96,7 +96,7 @@ namespace System.Tests
                     }
         }
 
-        [Benchmark(InnerIterationCount = 5000000)]
+        [Benchmark(InnerIterationCount = 1000000)]
         public void NextDouble()
         {
             Random rand = new Random(123456);
