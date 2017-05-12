@@ -716,7 +716,7 @@ namespace SerializationTestTypes
             Dictionary<DataContract, List<RefData>> alreadyRefdValues = new Dictionary<DataContract, List<RefData>>();
             Type type = data.GetType();
             DataContract dataContract = DataContract.GetDataContract(type, supportCollectionDataContract);
-            refStack.Clear();
+            s_refStack.Clear();
             FindAndAddRefd(data, dataContract, ref alreadyRefdValues, ref nonRefdValues);
             return alreadyRefdValues;
         }
@@ -748,32 +748,32 @@ namespace SerializationTestTypes
             return true;
         }
 
-        static Stack<RefData> refStack = new Stack<RefData>();
+        private static Stack<RefData> s_refStack = new Stack<RefData>();
         /// <summary>
         /// </summary>
         /// <param name="data"></param>
         /// <param name="dataContract"></param>
         /// <param name="alreadyRefdValues"></param>
         /// <param name="nonRefdValues"></param>
-        static void FindAndAddRefd(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
+        private static void FindAndAddRefd(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
                                         , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             RefData refData = new RefData(data);
             FindRefUpdateRef(refData, dataContract, ref alreadyRefdValues, ref nonRefdValues);
-            if (refStack.Contains(refData))
+            if (s_refStack.Contains(refData))
             {
                 return;
             }
             else
             {
-                refStack.Push(refData);
+                s_refStack.Push(refData);
             }
             FindRefHandleMembers(data, dataContract, ref alreadyRefdValues, ref nonRefdValues);
-            refStack.Pop();
+            s_refStack.Pop();
         }
 
         public static bool supportCollectionDataContract = true;
-        static void FindRefUpdateRef(RefData refData, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        private static void FindRefUpdateRef(RefData refData, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             if (dataContract.IsReference)
             {
@@ -816,7 +816,7 @@ namespace SerializationTestTypes
                 }
             }
         }
-        static void FindRefHandleMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        private static void FindRefHandleMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             if (dataContract is ClassDataContract)
             {
@@ -855,7 +855,7 @@ namespace SerializationTestTypes
             }
         }
 
-        static void FindRefHandleCollectionDataContractMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
+        private static void FindRefHandleCollectionDataContractMembers(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues, ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {
             CollectionDataContract collectionContract = dataContract as CollectionDataContract;
             if (!collectionContract.IsDictionary)

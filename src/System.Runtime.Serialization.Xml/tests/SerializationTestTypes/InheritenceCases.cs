@@ -1,8 +1,8 @@
-﻿namespace SerializationTestTypes
-{
-    using System;
-    using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
+namespace SerializationTestTypes
+{
     [DataContract(IsReference = true)]
     public class BaseWithIsRefTrue
     {
@@ -209,7 +209,7 @@
             RefData = new SimpleDC(true);
         }
     }
-    
+
     [DataContract()]
     public class BaseNoIsRef
     {
@@ -260,7 +260,7 @@
             RefData = Data;
         }
     }
-    
+
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence
@@ -303,7 +303,7 @@
             baseDC = derivedDC;
         }
     }
-    
+
     [DataContract]
     [KnownType(typeof(DerivedSerializable))]
     [KnownType(typeof(Derived2Serializable))]
@@ -382,7 +382,7 @@
             baseDC = derivedDC;
         }
     }
-    
+
     [DataContract]
     public class TestInheritence10
     {
@@ -398,7 +398,7 @@
             baseDC = derivedDC;
         }
     }
-    
+
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence2
@@ -428,7 +428,7 @@
             baseDC.Data = baseDC.Data2;
         }
     }
-    
+
     [DataContract]
     public class TestInheritence11
     {
@@ -456,7 +456,7 @@
             baseDC.Data = baseDC.Data2;
         }
     }
-    
+
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence3
@@ -477,7 +477,7 @@
             baseDC = new BaseDC(true);
             derivedDC.data = baseDC.data;
             baseDC.Data = new DateTime().ToLongTimeString();
-            derivedDC.Data = baseDC.Data;            
+            derivedDC.Data = baseDC.Data;
             derivedDC.data = baseDC.data2;
             baseDC.Data2 = new DateTime().ToLongTimeString();
             baseDC.Data2 = baseDC.Data2;
@@ -486,7 +486,7 @@
             derivedDC.Data = derivedDC.Data1;
         }
     }
-    
+
     [DataContract]
     public class TestInheritence16
     {
@@ -514,7 +514,7 @@
             derivedDC.Data = derivedDC.Data1;
         }
     }
-    
+
     [DataContract(IsReference = true)]
     [KnownType(typeof(DerivedDC))]
     public class TestInheritence4
@@ -543,7 +543,7 @@
             ((BaseDC)derivedDC).Data = ((BaseDC)derivedDC).Data2;
         }
     }
-    
+
     [DataContract]
     public class TestInheritence12
     {
@@ -711,7 +711,7 @@
         public TestInheritence8(bool init)
         {
             derived2DC = new Derived2DC(true);
-            baseDC = new BaseDC(true);            
+            baseDC = new BaseDC(true);
             baseDC.data = derived2DC.data;
             derived2DC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data;
@@ -734,7 +734,7 @@
         public TestInheritence15(bool init)
         {
             derived2DC = new Derived2Serializable(true);
-            baseDC = new BaseSerializable(true);            
+            baseDC = new BaseSerializable(true);
             baseDC.data = derived2DC.data;
             derived2DC.Data = new DateTime().ToLongTimeString();
             baseDC.Data = derived2DC.Data;

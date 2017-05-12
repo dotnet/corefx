@@ -1232,7 +1232,7 @@ namespace SerializationTestTypes
             {
                 _internalList[index] = value;
             }
-        }        
+        }
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -1803,7 +1803,7 @@ namespace SerializationTestTypes
         public bool Remove(DC item)
         {
             return _internalList.Remove(item); ;
-        }        
+        }
 
         public IEnumerator<DC> GetEnumerator()
         {
@@ -2062,7 +2062,7 @@ namespace SerializationTestTypes
         {
             return _internalList.Remove(item); ;
         }
-        
+
         IEnumerator<DC> IEnumerable<DC>.GetEnumerator()
         {
             return _internalList.GetEnumerator();
@@ -2198,7 +2198,7 @@ namespace SerializationTestTypes
             {
                 _internalList[index] = value;
             }
-        }        
+        }
 
         void ICollection<PublicDCClassPrivateDM>.Add(PublicDCClassPrivateDM item)
         {
@@ -2609,7 +2609,7 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        
+
         public void Add(DC item)
         {
             _internalList.Add(item);
@@ -2668,7 +2668,7 @@ namespace SerializationTestTypes
             _internalList.Add(new DC());
             _internalList.Add(dc1);
         }
-        
+
         void ICollection<DC>.Add(DC item)
         {
             _internalList.Add(item);
@@ -2830,7 +2830,7 @@ namespace SerializationTestTypes
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _internalList.GetEnumerator();
-        }        
+        }
     }
 
     [CollectionDataContract(IsReference = true, Name = "SampleICollectionTExplicitWithCDCContainsPrivateDC", Namespace = "Test", ItemName = "Item")]
@@ -3157,7 +3157,7 @@ namespace SerializationTestTypes
         public void Add(object PrivateDC)
         {
             _internalList.Add((PrivateDC)PrivateDC);
-        }        
+        }
 
         IEnumerator<PrivateDC> IEnumerable<PrivateDC>.GetEnumerator()
         {
@@ -3596,7 +3596,6 @@ namespace SerializationTestTypes
 
         void ICollection.CopyTo(Array array, int index)
         {
-            
         }
 
         int ICollection.Count
@@ -5459,7 +5458,7 @@ namespace SerializationTestTypes
         {
             throw new NotImplementedException();
         }
-        
+
         public static XmlQualifiedName MySchema(XmlSchemaSet xs)
         {
             return new XmlQualifiedName("MyData2", "MyNameSpace");
@@ -6268,7 +6267,7 @@ namespace SerializationTestTypes
     internal class PrivateCallBackSample_IDeserializationCallback : IDeserializationCallback
     {
         [DataMember]
-        public string Data = "Data";        
+        public string Data = "Data";
 
         public void OnDeserialization(object sender)
         {
@@ -6645,7 +6644,7 @@ namespace SerializationTestTypes
             return _innerList.GetEnumerator();
         }
     }
-    
+
     [CollectionDataContract(IsReference = true)]
     public class Base_Possitive_VirtualAdd : IEnumerable<String>
     {
@@ -6722,7 +6721,7 @@ namespace SerializationTestTypes
         {
             return _innerList.GetEnumerator();
         }
-        
+
         public static Base_Possitive_VirtualAdd CreateInstance()
         {
             Base_Possitive_VirtualAdd list = new Base_Possitive_VirtualAdd();

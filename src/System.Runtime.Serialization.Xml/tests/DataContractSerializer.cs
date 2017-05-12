@@ -3217,14 +3217,14 @@ public static partial class DataContractSerializerTests
         //DCHashtableContainerPublic
         string baselineDCHashtableContainerPublic = "";
         var valueDCHashtableContainerPublic = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCHashtableContainerPublic(true));
-        var resultDCHashtableContainerPublic = SerializeAndDeserialize(valueDCHashtableContainerPublic, baselineDCHashtableContainerPublic, setting ,skipStringCompare:true);
+        var resultDCHashtableContainerPublic = SerializeAndDeserialize(valueDCHashtableContainerPublic, baselineDCHashtableContainerPublic, setting, skipStringCompare: true);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCHashtableContainerPublic, resultDCHashtableContainerPublic);
 
         ////not support
         ////DCHashtableContainerMixedTypes
         //string baselineDCHashtableContainerMixedTypes = "";
         //var valueDCHashtableContainerMixedTypes = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCHashtableContainerMixedTypes(true));
-        //var resultDCHashtableContainerMixedTypes = SerializeAndDeserialize(valueDCHashtableContainerMixedTypes, baselineDCHashtableContainerMixedTypes, setting,skipStringCompare:true);
+        //var resultDCHashtableContainerMixedTypes = SerializeAndDeserialize(valueDCHashtableContainerMixedTypes, baselineDCHashtableContainerMixedTypes, setting, skipStringCompare:true);
         //SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCHashtableContainerMixedTypes, resultDCHashtableContainerMixedTypes);
 
         //CustomGenericContainerPrivateType1
@@ -3477,7 +3477,7 @@ public static partial class DataContractSerializerTests
         //SampleICollectionTExplicitWithoutDC
         string baselineSampleICollectionTExplicitWithoutDC = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.SampleICollectionTExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleICollectionTExplicitWithoutDC***""><DC z:Id=""i1"" i:type=""b:SerializationTestTypes.DC***"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DC***""><Data>Monday, January 1, 0001</Data><Next i:nil=""true""/></DC><DC z:Id=""i2"" i:type=""b:SerializationTestTypes.DC***"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DC***""><Data>Monday, January 1, 0001</Data><Next i:nil=""true""/></DC><DC z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></_data><_data2 i:type=""a:SerializationTestTypes.SampleICollectionTExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleICollectionTExplicitWithoutDC***""><DC z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/><DC z:Ref=""i2"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/><DC z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></_data2></ObjectContainer>";
         var valueSampleICollectionTExplicitWithoutDC = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.SampleICollectionTExplicitWithoutDC(true));
-        var resultSampleICollectionTExplicitWithoutDC = SerializeAndDeserialize(valueSampleICollectionTExplicitWithoutDC, baselineSampleICollectionTExplicitWithoutDC, setting,skipStringCompare:true);
+        var resultSampleICollectionTExplicitWithoutDC = SerializeAndDeserialize(valueSampleICollectionTExplicitWithoutDC, baselineSampleICollectionTExplicitWithoutDC, setting, skipStringCompare: true);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(valueSampleICollectionTExplicitWithoutDC, resultSampleICollectionTExplicitWithoutDC);
 
         //???
@@ -3491,7 +3491,7 @@ public static partial class DataContractSerializerTests
         //SampleICollectionTExplicitWithCDCContainsPrivateDC
         string baselineSampleICollectionTExplicitWithCDCContainsPrivateDC = $@"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data z:Id=""i1"" i:type=""a:SerializationTestTypes.SampleICollectionTExplicitWithCDCContainsPrivateDC***"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleICollectionTExplicitWithCDCContainsPrivateDC***""><Item z:Id=""i2"" i:type=""b:SerializationTestTypes.PrivateDC"" xmlns=""Test"" xmlns:b=""{assemblyName}""><Data xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"">7b4ac88f-972b-43e5-8f6a-5ae64480eaad</Data></Item><Item z:Id=""i3"" i:type=""b:SerializationTestTypes.PrivateDC"" xmlns=""Test"" xmlns:b=""{assemblyName}""><Data xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"">7b4ac88f-972b-43e5-8f6a-5ae64480eaad</Data></Item><Item z:Ref=""i2"" xmlns=""Test""/></_data><_data2 z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></ObjectContainer>";
         var valueSampleICollectionTExplicitWithCDCContainsPrivateDC = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.SampleICollectionTExplicitWithCDCContainsPrivateDC(true));
-        var resultSampleICollectionTExplicitWithCDCContainsPrivateDC = SerializeAndDeserialize(valueSampleICollectionTExplicitWithCDCContainsPrivateDC, baselineSampleICollectionTExplicitWithCDCContainsPrivateDC, setting,skipStringCompare:true);
+        var resultSampleICollectionTExplicitWithCDCContainsPrivateDC = SerializeAndDeserialize(valueSampleICollectionTExplicitWithCDCContainsPrivateDC, baselineSampleICollectionTExplicitWithCDCContainsPrivateDC, setting, skipStringCompare: true);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(valueSampleICollectionTExplicitWithCDCContainsPrivateDC, resultSampleICollectionTExplicitWithCDCContainsPrivateDC);
 
         //SampleIEnumerableTImplicitWithDC
