@@ -25,6 +25,12 @@ namespace System.Tests
                 // setup the environment variable so we can read it
                 Environment.SetEnvironmentVariable(env, "value");
 
+                // warmup
+                for (int i = 0; i < 100; i++)
+                {
+                    str = Environment.GetEnvironmentVariable(env);
+                }
+
                 // read the valid environment variable for the test
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
@@ -53,6 +59,12 @@ namespace System.Tests
             {
                 // setup the environment variable so we can read it
                 Environment.SetEnvironmentVariable(env, "value");
+
+                // warmup
+                for (int i = 0; i < 100; i++)
+                {
+                    str = Environment.ExpandEnvironmentVariables(inputEnv);
+                }
 
                 // read the valid environment variable
                 foreach (var iteration in Benchmark.Iterations)
@@ -83,6 +95,12 @@ namespace System.Tests
                 // setup the environment variable so we can read it
                 Environment.SetEnvironmentVariable(env, "value");
 
+                // warmup
+                for (int i = 0; i < 100; i++)
+                {
+                    dict = Environment.GetEnvironmentVariables();
+                }
+
                 // read the valid environment variable for the test
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
@@ -105,6 +123,12 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.System, Environment.SpecialFolderOption.None)]
         public void GetFolderPath_OSX(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Environment.GetFolderPath(folder, option);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -120,6 +144,12 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify)]
         public void GetFolderPath_Unix(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Environment.GetFolderPath(folder, option);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -135,6 +165,12 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.Windows, Environment.SpecialFolderOption.None)]
         public void GetFolderPath_Windows(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                str = Environment.GetFolderPath(folder, option);
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -149,6 +185,12 @@ namespace System.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void GetLogicalDrives_Unix()
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                arr = Environment.GetLogicalDrives();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -163,6 +205,12 @@ namespace System.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetLogicalDrives_Windows()
         {
+            // warmup
+            for (int i = 0; i < 100; i++)
+            {
+                arr = Environment.GetLogicalDrives();
+            }
+
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
