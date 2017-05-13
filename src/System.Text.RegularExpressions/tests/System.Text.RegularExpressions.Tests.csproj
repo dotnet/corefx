@@ -43,7 +43,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Regex.Serialization.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>

@@ -920,7 +920,8 @@ namespace System.Collections.Generic
             }
         }
 
-        internal sealed class KeyValuePairComparer : Comparer<KeyValuePair<TKey, TValue>>
+        [Serializable]
+        public sealed class KeyValuePairComparer : Comparer<KeyValuePair<TKey, TValue>>
         {
             internal IComparer<TKey> keyComparer;
 
@@ -953,7 +954,8 @@ namespace System.Collections.Generic
     /// The only thing that makes it different from SortedSet is that it throws on duplicates
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal sealed class TreeSet<T> : SortedSet<T>
+    [Serializable]
+    public sealed class TreeSet<T> : SortedSet<T>
     {
         public TreeSet()
             : base()
@@ -961,7 +963,7 @@ namespace System.Collections.Generic
 
         public TreeSet(IComparer<T> comparer) : base(comparer) { }
 
-        public TreeSet(SerializationInfo siInfo, StreamingContext context) : base(siInfo, context) { }
+        private TreeSet(SerializationInfo siInfo, StreamingContext context) : base(siInfo, context) { }
 
         internal override bool AddIfNotPresent(T item)
         {

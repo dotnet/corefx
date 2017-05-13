@@ -491,7 +491,8 @@ namespace System.Collections.Specialized
             }
         }
 
-        private class DictionaryNode
+        [Serializable]
+        public class DictionaryNode
         {
             public object key;
             public object value;

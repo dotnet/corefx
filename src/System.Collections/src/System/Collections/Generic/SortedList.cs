@@ -1039,7 +1039,8 @@ namespace System.Collections.Generic
 
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        private sealed class KeyList : IList<TKey>, ICollection
+        [Serializable]
+        public sealed class KeyList : IList<TKey>, ICollection
         {
             private SortedList<TKey, TValue> _dict;
 
@@ -1157,7 +1158,8 @@ namespace System.Collections.Generic
 
         [DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        private sealed class ValueList : IList<TValue>, ICollection
+        [Serializable]
+        public sealed class ValueList : IList<TValue>, ICollection
         {
             private SortedList<TKey, TValue> _dict;
 
