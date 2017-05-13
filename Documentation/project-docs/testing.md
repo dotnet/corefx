@@ -26,7 +26,7 @@ public class HttpWebRequestTest : RemoteExecutorTestBase
 }
 ```
 
-# LoopbackServer
+ # LoopbackServer
 When writing network related tests we try to avoid running tests against a remote endpoint if possible. We provide simple APIs to create a LoopbackServer and send responses. A high number of scenarios can be tested with it. For additional information see https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Net/Http/LoopbackServer.cs
 
 Example (skipping additional usings and class scoping):
@@ -70,5 +70,24 @@ public async Task ContentLength_Get_ExpectSameAsGetResponseStream(Uri remoteServ
 {
     HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
     ...
+}
+```
+
+# Temp Directory
+To support our tests running on as many target frameworks as possible, we need to be cautious when it comes to system resource access. The best example is trying to access a file outside of an AppContainer (UWP). We should depend on APIs which are specifically designed for these scenarios to work, e.g. TempDirectory. If a test case needs to store data on the FileSystem, consider using TempDirectory and TempFile APIs.
+
+Example (skipping additional usings and class scoping):
+```cs
+using System.IO;
+
+[Fact]
+public void FileSystemWatcher_File_Changed_LastWrite()
+{
+    using (var testDirectory = new TempDirectory())
+    using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+    {
+        Directory.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+        ...
+    }
 }
 ```
