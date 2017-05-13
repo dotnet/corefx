@@ -277,9 +277,20 @@ namespace System.IO
         public override void MoveDirectory(string sourceFullPath, string destFullPath)
         {
             // Windows doesn't care if you try and copy a file via "MoveDirectory"...
-            if (!PathHelpers.EndsInDirectorySeparator(sourceFullPath) && FileExists(sourceFullPath))
+            if (FileExists(sourceFullPath))
             {
-                // ... and it doesn't care if the destination has a trailing separator.
+                // ... but it doesn't like the source to have a trailing slash ...
+
+                // On Windows we end up with ERROR_INVALID_NAME, which is
+                // "The filename, directory name, or volume label syntax is incorrect."
+                //
+                // This surfaces as a IOException, if we let it go beyond here it would
+                // give DirectoryNotFound.
+
+                if (PathHelpers.EndsInDirectorySeparator(sourceFullPath))
+                    throw new IOException(SR.Format(SR.IO_PathNotFound_Path, sourceFullPath));
+
+                // ... but it doesn't care if the destination has a trailing separator.
                 destFullPath = PathHelpers.TrimEndingDirectorySeparator(destFullPath);
             }
 
@@ -290,23 +301,6 @@ namespace System.IO
                 {
                     case Interop.Error.EACCES: // match Win32 exception
                         throw new IOException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, sourceFullPath), errorInfo.RawErrno);
-                    case Interop.Error.ENOENT:
-                        // If the source item was a file with a trailing separator on Windows we get ERROR_INVALIDNAME,
-                        // which is "The filename, directory name, or volume label syntax is incorrect."
-                        //
-                        // If there is a file that exists at sourceFullPath minus the directory separator we'll throw
-                        // as NetFX would, but use the text that DirectoryNotFound would.
-
-                        if (PathHelpers.EndsInDirectorySeparator(sourceFullPath)
-                            && FileExists(PathHelpers.TrimEndingDirectorySeparator(sourceFullPath)))
-                        {
-                            throw new IOException(SR.Format(SR.IO_PathNotFound_Path, sourceFullPath));
-                        }
-                        else
-                        {
-                            goto default;
-                        }
-
                     default:
                         throw Interop.GetExceptionForIoErrno(errorInfo, sourceFullPath, isDirectory: true);
                 }
@@ -413,7 +407,9 @@ namespace System.IO
         public override bool FileExists(string fullPath)
         {
             Interop.ErrorInfo ignored;
-            return FileExists(fullPath, Interop.Sys.FileTypes.S_IFREG, out ignored);
+
+            // Windows doesn't care about the trailing separator, str
+            return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
         private static bool FileExists(string fullPath, int fileType, out Interop.ErrorInfo errorInfo)
