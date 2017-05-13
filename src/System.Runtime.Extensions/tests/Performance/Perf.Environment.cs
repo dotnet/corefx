@@ -120,7 +120,7 @@ namespace System.Tests
 
         [Benchmark(InnerIterationCount = 20000)]
         [InlineData(Environment.SpecialFolder.System, Environment.SpecialFolderOption.None)]
-        public void GetFolderPath_OSX(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
+        public void GetFolderPath(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
             // warmup
             for (int i = 0; i < 100; i++)
