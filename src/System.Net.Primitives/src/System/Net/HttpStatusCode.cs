@@ -54,8 +54,13 @@ namespace System.Net
         UnsupportedMediaType = 415,
         RequestedRangeNotSatisfiable = 416,
         ExpectationFailed = 417,
-
+        ImATeapot = 418,
+        MisdirectedRequest = 421,
+        UnprocessableEntity = 422,
+        Locked = 423,
+        FailedDependency = 424,
         UpgradeRequired = 426,
+        TooManyRequests = 429,
 
         // Server Error 5xx
         InternalServerError = 500,
@@ -64,5 +69,13 @@ namespace System.Net
         ServiceUnavailable = 503,
         GatewayTimeout = 504,
         HttpVersionNotSupported = 505,
+        
+        // Unofficial Codes xxx
+        Checkpoint = 103,
+        EnhanceYourCalm = 420,
+        BlockedByWindowsParentalControls = 450,
+        InvalidToken = 498,
+        TokenRequired = 499,
+        SiteIsFrozen = 530,
     }
 }
