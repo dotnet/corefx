@@ -408,7 +408,7 @@ namespace System.IO
         {
             Interop.ErrorInfo ignored;
 
-            // Windows doesn't care about the trailing separator, str
+            // Windows doesn't care about the trailing separator
             return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
