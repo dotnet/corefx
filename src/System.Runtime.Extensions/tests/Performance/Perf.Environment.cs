@@ -139,28 +139,7 @@ namespace System.Tests
         }
 
         [Benchmark(InnerIterationCount = 40000)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void GetLogicalDrives_Unix()
-        {
-            // warmup
-            for (int i = 0; i < 100; i++)
-            {
-                arr = Environment.GetLogicalDrives();
-            }
-
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
-                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
-                        arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives(); arr = Environment.GetLogicalDrives();
-                    }
-        }
-
-        [Benchmark(InnerIterationCount = 40000)]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void GetLogicalDrives_Windows()
+        public void GetLogicalDrives()
         {
             // warmup
             for (int i = 0; i < 100; i++)
