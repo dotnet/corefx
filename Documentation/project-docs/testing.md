@@ -1,9 +1,9 @@
 This document provides an overview of paradigm we are using in our tests.
 
 # RemoteExecutor
-We usually run tests in parallel, unless we add an exception to the root of the project. Therefore we need to be careful to avoid possible side-effects when manipulating static members (e.g. properties).
-We use `RemoteInvoke` which is defined in `RemoteExecutorTestBase.cs` to run test cases which needs to be isolated. We mostly do this when we need to modify static members.
-RemoteExecutor is a simple console application which accepts arguments that point to an existing method in the test assembly and additional arguments you might need in your test. For additional information see https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Diagnostics/RemoteExecutorTestBase.cs
+We usually run tests fixtures in parallel, unless we add an exception to the root of the project. That mean that test cases in different test fixtures execute at the same time in random order. Therefore we need to be careful to avoid possible side-effects when manipulating static members (e.g. properties). Examples of problematic values: CurrentCulture, ServicePointManager.DefaultConnectionLimit, SetErrorMode (Windows).
+We use `RemoteInvoke` which is defined in `RemoteExecutorTestBase.cs` to run test cases which need to be isolated. We mostly do this when we need to modify static members.
+RemoteExecutor is a simple console application which accepts arguments that point to an existing method in the test assembly and additional arguments you might need in your test. For additional information see https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Diagnostics/RemoteExecutorTestBase.cs and https://xunit.github.io/docs/running-tests-in-parallel.html
 
 Example (skipping additional usings):
 ```cs
@@ -50,7 +50,7 @@ public async Task Headers_SetAfterRequestSubmitted_ThrowsInvalidOperationExcepti
 ```
 
 # Outerloop
-This one is fairly simple but often used wrong. When running tests which depend on outside influences like e.g. Hardware (Internet, SerialPort, ...) and you can't mitigate these dependencies, you might consider using the `[Outerloop]` attribute for your test. 
+This one is fairly simple but often used incorrectly. When running tests which depend on outside influences like e.g. Hardware (Internet, SerialPort, ...) and you can't mitigate these dependencies, you might consider using the `[Outerloop]` attribute for your test. 
 With this attribute, tests are executed in a dedicated CI loop and won't break the default CI loops which get created when you submit a PR.
 To run Outerloop tests locally you need to set the msbuild property "Outerloop" to true: `/p:Outerloop=true`.
 To run Outerloop tests in CI you need to mention dotnet-bot and tell him which tests you want to run. See `@dotnet-bot help` for the exact loop names.
