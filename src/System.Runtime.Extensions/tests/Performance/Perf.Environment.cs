@@ -119,51 +119,8 @@ namespace System.Tests
         }
 
         [Benchmark(InnerIterationCount = 20000)]
-        [PlatformSpecific(TestPlatforms.OSX)]
         [InlineData(Environment.SpecialFolder.System, Environment.SpecialFolderOption.None)]
         public void GetFolderPath_OSX(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
-        {
-            // warmup
-            for (int i = 0; i < 100; i++)
-            {
-                str = Environment.GetFolderPath(folder, option);
-            }
-
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                    }
-        }
-
-        [Benchmark(InnerIterationCount = 20000)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [InlineData(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify)]
-        public void GetFolderPath_Unix(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
-        {
-            // warmup
-            for (int i = 0; i < 100; i++)
-            {
-                str = Environment.GetFolderPath(folder, option);
-            }
-
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                        str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option); str = Environment.GetFolderPath(folder, option);
-                    }
-        }
-
-        [Benchmark(InnerIterationCount = 20000)]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(Environment.SpecialFolder.Windows, Environment.SpecialFolderOption.None)]
-        public void GetFolderPath_Windows(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
             // warmup
             for (int i = 0; i < 100; i++)
