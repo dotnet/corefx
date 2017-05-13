@@ -896,60 +896,52 @@ namespace System.Xml.Tests
         [Fact]
         public void XSDValidationGeneratesInvalidError_1()
         {
-            // TestDirectory path must end with a DirectorySaratorChar, otherwise it will throw in the Xml validation.
-            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(testDirectory);
+            using (var tempDirectory = new TempDirectory())
+            {
+                Initialize();
+                CreateSchema1(tempDirectory.Path);
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.XmlResolver = new XmlUrlResolver();
+                settings.Schemas.XmlResolver = new XmlUrlResolver();
+                // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                settings.ValidationType = ValidationType.Schema;
+                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
+                XmlDocument doc = new XmlDocument();
 
-            Initialize();
-            CreateSchema1(testDirectory);
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, testDirectory));
-            settings.ValidationType = ValidationType.Schema;
-            XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-            XmlDocument doc = new XmlDocument();
+                doc.Load(reader);
 
-            doc.Load(reader);
-
-            ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
-            doc.Validate(valEventHandler);
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
-            
-            try
-            { Directory.Delete(testDirectory, recursive: true); }
-            catch { }
+                ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
+                doc.Validate(valEventHandler);
+                Assert.Equal(warningCount, 0);
+                Assert.Equal(errorCount, 0);
+            }
         }
 
         //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_2()
         {
-            // TestDirectory path must end with a DirectorySaratorChar, otherwise it will throw in the Xml validation.
-            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(testDirectory);
+            using (var tempDirectory = new TempDirectory())
+            {
+                Initialize();
+                CreateSchema2(tempDirectory.Path);
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.XmlResolver = new XmlUrlResolver();
+                settings.Schemas.XmlResolver = new XmlUrlResolver();
+                // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                settings.ValidationType = ValidationType.Schema;
+                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
+                XmlDocument doc = new XmlDocument();
 
-            Initialize();
-            CreateSchema2(testDirectory);
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, testDirectory));
-            settings.ValidationType = ValidationType.Schema;
-            XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-            XmlDocument doc = new XmlDocument();
+                doc.Load(reader);
 
-            doc.Load(reader);
-
-            ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
-            doc.Validate(valEventHandler);
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
-
-            try
-            { Directory.Delete(testDirectory, recursive: true); }
-            catch { }
+                ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
+                doc.Validate(valEventHandler);
+                Assert.Equal(warningCount, 0);
+                Assert.Equal(errorCount, 0);
+            }
         }
 
         private static string xsd445844 = @"<?xml version='1.0' encoding='utf-8' ?>

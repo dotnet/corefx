@@ -119,39 +119,38 @@ namespace System.Xml.Tests
   </xs:element>
 </xs:schema>";
 
-            string testDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName() + Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(testDirectory);
-            string chamPath = Path.Combine(testDirectory, "cham.xsd");
-
-            using (XmlWriter w = XmlWriter.Create(chamPath))
+            using (var tempDirectory = new TempDirectory())
             {
-                using (XmlReader r = XmlReader.Create(new StringReader(cham)))
-                    w.WriteNode(r, true);
-            }
-            XmlSchemaSet ss = new XmlSchemaSet();
-            ss.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
+                string chamPath = Path.Combine(tempDirectory.Path, "cham.xsd");
 
-            ss.Add(null, XmlReader.Create(new StringReader(cham)));
-            ss.Add(null, XmlReader.Create(new StringReader(main), null, testDirectory));
-            ss.Compile();
-
-            Assert.Equal(2, ss.Count);
-            foreach (XmlSchemaElement e in ss.GlobalElements.Values)
-            {
-                _output.WriteLine(e.QualifiedName.ToString());
-                XmlSchemaComplexType type = e.ElementSchemaType as XmlSchemaComplexType;
-                XmlSchemaSequence seq = type.ContentTypeParticle as XmlSchemaSequence;
-                foreach (XmlSchemaObject child in seq.Items)
+                using (XmlWriter w = XmlWriter.Create(chamPath))
                 {
-                    if (child is XmlSchemaElement)
-                        _output.WriteLine("\t" + (child as XmlSchemaElement).QualifiedName);
+                    using (XmlReader r = XmlReader.Create(new StringReader(cham)))
+                        w.WriteNode(r, true);
                 }
-            }
-            Assert.Equal(0, warningCount);
-            Assert.Equal(0, errorCount);
+                XmlSchemaSet ss = new XmlSchemaSet();
+                ss.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
 
-            try { Directory.Delete(testDirectory, recursive: true); }
-            catch { }
+                ss.Add(null, XmlReader.Create(new StringReader(cham)));
+                // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
+                ss.Add(null, XmlReader.Create(new StringReader(main), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                ss.Compile();
+
+                Assert.Equal(2, ss.Count);
+                foreach (XmlSchemaElement e in ss.GlobalElements.Values)
+                {
+                    _output.WriteLine(e.QualifiedName.ToString());
+                    XmlSchemaComplexType type = e.ElementSchemaType as XmlSchemaComplexType;
+                    XmlSchemaSequence seq = type.ContentTypeParticle as XmlSchemaSequence;
+                    foreach (XmlSchemaObject child in seq.Items)
+                    {
+                        if (child is XmlSchemaElement)
+                            _output.WriteLine("\t" + (child as XmlSchemaElement).QualifiedName);
+                    }
+                }
+                Assert.Equal(0, warningCount);
+                Assert.Equal(0, errorCount);
+            }
         }
     }
 }
