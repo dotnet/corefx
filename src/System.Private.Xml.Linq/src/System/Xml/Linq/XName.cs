@@ -10,7 +10,6 @@ namespace System.Xml.Linq
     /// <summary>
     /// Represents a name of an XML element or attribute. This class cannot be inherited.
     /// </summary>
-#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Serialization", "CA2229", Justification = "Serialized with custom proxy")]
     public sealed class XName : IEquatable<XName>, ISerializable
     {

@@ -10,9 +10,9 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.ObjectModel
 {
+    [Serializable]
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
-    [Serializable]
     public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _dictionary;

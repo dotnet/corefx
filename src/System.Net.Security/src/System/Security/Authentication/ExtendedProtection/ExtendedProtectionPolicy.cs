@@ -13,7 +13,6 @@ namespace System.Security.Authentication.ExtendedProtection
     /// This class contains the necessary settings for specifying how Extended Protection 
     /// should behave. Use one of the Build* methods to create an instance of this type.
     /// </summary>
-#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     public class ExtendedProtectionPolicy : ISerializable
     {
         private const string policyEnforcementName = "policyEnforcement";

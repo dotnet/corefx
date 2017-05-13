@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.IO
 {
-#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     public sealed partial class DriveInfo : ISerializable
     {
         private readonly string _name;

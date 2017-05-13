@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 
 namespace System.Security.Policy
 {
-#pragma warning disable CA2237 // ISerializable without SerializableAttribute since we don't want this type to be serializable in Core
     public sealed partial class HashMembershipCondition : IDeserializationCallback, ISerializable, ISecurityEncodable, ISecurityPolicyEncodable, IMembershipCondition
     {
         public HashMembershipCondition(HashAlgorithm hashAlg, byte[] value) { }
