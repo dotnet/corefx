@@ -3,7 +3,7 @@ This document provides an overview of paradigm we are using in our tests.
 # RemoteExecutor
 We usually run tests in parallel, unless we add an exception to the root of the project. Therefore we need to be careful to avoid possible side-effects when manipulating static members (e.g. properties).
 We use `RemoteInvoke` which is defined in `RemoteExecutorTestBase.cs` to run test cases which needs to be isolated. We mostly do this when we need to modify static members.
-RemoteExecutor is a simple console application which accepts arguments that point to an existing method in the test assembly and additional arguments you might need in your test.
+RemoteExecutor is a simple console application which accepts arguments that point to an existing method in the test assembly and additional arguments you might need in your test. For additional information see https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Diagnostics/RemoteExecutorTestBase.cs
 
 Example (skipping additional usings):
 ```cs
