@@ -136,7 +136,8 @@ namespace System.Xml.Tests
 
                 ss.Add(null, XmlReader.Create(new StringReader(cham)));
                 // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
-                ss.Add(null, XmlReader.Create(new StringReader(main), null, tempDirectoryPath));
+                var settings = new XmlReaderSettings() { XmlResolver = new XmlUrlResolver() };
+                ss.Add(null, XmlReader.Create(new StringReader(main), settings, tempDirectoryPath));
                 ss.Compile();
 
                 Assert.Equal(2, ss.Count);
