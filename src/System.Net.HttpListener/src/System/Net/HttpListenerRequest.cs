@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.WebSockets;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -269,6 +271,14 @@ namespace System.Net
         public Uri Url => RequestUri;
 
         public Version ProtocolVersion => _version;
+
+        public Task<X509Certificate2> GetClientCertificateAsync()
+        {
+            return Task.Factory.FromAsync(
+                (callback, state) => ((HttpListenerRequest)state).BeginGetClientCertificate(callback, state),
+                iar => ((HttpListenerRequest)iar.AsyncState).EndGetClientCertificate(iar),
+                this);
+        }
 
         private static class Helpers
         {

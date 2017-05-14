@@ -33,11 +33,9 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
-using System.Net.WebSockets;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -353,16 +351,27 @@ namespace System.Net
 
         public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
         {
-            Task<X509Certificate2> getClientCertificate = new Task<X509Certificate2>(() => GetClientCertificate());
-            return TaskToApm.Begin(getClientCertificate, requestCallback, state);
+            IAsyncResult asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback, GetClientCertificate());
+            return asyncResult;
         }
 
         public X509Certificate2 EndGetClientCertificate(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
-            
-            return TaskToApm.End<X509Certificate2>(asyncResult);
+
+            GetClientCertificateAsyncResult clientCertAsyncResult = asyncResult as GetClientCertificateAsyncResult;
+            if (clientCertAsyncResult == null || clientCertAsyncResult.AsyncObject != this)
+            {
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (clientCertAsyncResult.EndCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndGetClientCertificate)));
+            }
+            clientCertAsyncResult.EndCalled = true;
+
+            return (X509Certificate2)clientCertAsyncResult.Result;
         }
 
         public X509Certificate2 GetClientCertificate() => _context.Connection.ClientCertificate;
@@ -371,12 +380,12 @@ namespace System.Net
 
         public TransportContext TransportContext => new Context();
 
-        public Task<X509Certificate2> GetClientCertificateAsync()
-        {
-            return Task<X509Certificate2>.Factory.FromAsync(BeginGetClientCertificate, EndGetClientCertificate, null);
-        }
-
         private Uri RequestUri => _requestUri;
         private bool SupportsWebSockets => true;
+
+        private class GetClientCertificateAsyncResult : LazyAsyncResult
+        {
+            public GetClientCertificateAsyncResult(object myObject, object myState, AsyncCallback myCallBack, object result) : base(myObject, myState, myCallBack, result) { }
+        }
     }
 }

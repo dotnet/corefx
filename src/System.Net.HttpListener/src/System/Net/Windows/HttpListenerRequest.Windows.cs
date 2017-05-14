@@ -14,7 +14,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -327,14 +326,6 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
             }
             return clientCertificate;
-        }
-
-        public Task<X509Certificate2> GetClientCertificateAsync()
-        {
-            return Task.Factory.FromAsync(
-                (callback, state) => ((HttpListenerRequest)state).BeginGetClientCertificate(callback, state),
-                iar => ((HttpListenerRequest)iar.AsyncState).EndGetClientCertificate(iar),
-                this);
         }
 
         public TransportContext TransportContext => new HttpListenerRequestContext(this);
