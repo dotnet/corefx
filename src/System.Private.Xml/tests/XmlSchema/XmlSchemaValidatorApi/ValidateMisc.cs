@@ -904,7 +904,7 @@ namespace System.Xml.Tests
                 settings.XmlResolver = new XmlUrlResolver();
                 settings.Schemas.XmlResolver = new XmlUrlResolver();
                 // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
-                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, EnsureTrailingSlash(tempDirectory.Path)));
                 settings.ValidationType = ValidationType.Schema;
                 XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
                 XmlDocument doc = new XmlDocument();
@@ -930,7 +930,7 @@ namespace System.Xml.Tests
                 settings.XmlResolver = new XmlUrlResolver();
                 settings.Schemas.XmlResolver = new XmlUrlResolver();
                 // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
-                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, EnsureTrailingSlash(tempDirectory.Path)));
                 settings.ValidationType = ValidationType.Schema;
                 XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
                 XmlDocument doc = new XmlDocument();
@@ -942,6 +942,16 @@ namespace System.Xml.Tests
                 Assert.Equal(warningCount, 0);
                 Assert.Equal(errorCount, 0);
             }
+        }
+
+        private string EnsureTrailingSlash(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException();
+
+            return path[path.Length - 1] == Path.DirectorySeparatorChar ? 
+                path : 
+                path + Path.DirectorySeparatorChar;
         }
 
         private static string xsd445844 = @"<?xml version='1.0' encoding='utf-8' ?>

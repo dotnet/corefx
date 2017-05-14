@@ -122,6 +122,9 @@ namespace System.Xml.Tests
             using (var tempDirectory = new TempDirectory())
             {
                 string chamPath = Path.Combine(tempDirectory.Path, "cham.xsd");
+                string tempDirectoryPath = tempDirectory.Path[tempDirectory.Path.Length - 1] == Path.DirectorySeparatorChar ?
+                    tempDirectory.Path :
+                    tempDirectory.Path + Path.DirectorySeparatorChar;
 
                 using (XmlWriter w = XmlWriter.Create(chamPath))
                 {
@@ -133,7 +136,7 @@ namespace System.Xml.Tests
 
                 ss.Add(null, XmlReader.Create(new StringReader(cham)));
                 // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
-                ss.Add(null, XmlReader.Create(new StringReader(main), null, tempDirectory.Path + Path.DirectorySeparatorChar));
+                ss.Add(null, XmlReader.Create(new StringReader(main), null, tempDirectoryPath));
                 ss.Compile();
 
                 Assert.Equal(2, ss.Count);
