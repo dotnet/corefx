@@ -292,18 +292,17 @@ namespace System.Net
             }
         }
 
-        public int ClientCertificateError
+        private void GetClientCertificateCore() => ClientCertificate = _context.Connection.ClientCertificate;
+
+        private int GetClientCertificateErrorCore()
         {
-            get
-            {
-                HttpConnection cnc = _context.Connection;
-                if (cnc.ClientCertificate == null)
-                    return 0;
-                int[] errors = cnc.ClientCertificateErrors;
-                if (errors != null && errors.Length > 0)
-                    return errors[0];
+            HttpConnection cnc = _context.Connection;
+            if (cnc.ClientCertificate == null)
                 return 0;
-            }
+            int[] errors = cnc.ClientCertificateErrors;
+            if (errors != null && errors.Length > 0)
+                return errors[0];
+            return 0;
         }
 
         public long ContentLength64
@@ -349,9 +348,14 @@ namespace System.Net
 
         public Guid RequestTraceIdentifier => Guid.Empty;
 
-        public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
+        private IAsyncResult BeginGetClientCertificateCore(AsyncCallback requestCallback, object state)
         {
-            IAsyncResult asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback, GetClientCertificate());
+            var asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback);
+
+            // The certificate is already retrieved by the time this method is called.
+            ClientCertState = ListenerClientCertState.Completed;
+            asyncResult.InvokeCallback(GetClientCertificate());
+
             return asyncResult;
         }
 
@@ -374,8 +378,6 @@ namespace System.Net
             return (X509Certificate2)clientCertAsyncResult.Result;
         }
 
-        public X509Certificate2 GetClientCertificate() => _context.Connection.ClientCertificate;
-
         public string ServiceName => null;
 
         public TransportContext TransportContext => new Context();
@@ -385,7 +387,7 @@ namespace System.Net
 
         private class GetClientCertificateAsyncResult : LazyAsyncResult
         {
-            public GetClientCertificateAsyncResult(object myObject, object myState, AsyncCallback myCallBack, object result) : base(myObject, myState, myCallBack, result) { }
+            public GetClientCertificateAsyncResult(object myObject, object myState, AsyncCallback myCallBack) : base(myObject, myState, myCallBack) { }
         }
     }
 }

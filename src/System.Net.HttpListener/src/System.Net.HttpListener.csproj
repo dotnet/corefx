@@ -60,6 +60,7 @@
     <Compile Include="System\Net\HttpListenerContext.cs" />
     <Compile Include="System\Net\HttpListenerException.cs" />
     <Compile Include="System\Net\HttpListenerResponse.cs" />
+    <Compile Include="System\Net\ListenerClientCertState.cs" />
     <Compile Include="System\Net\NetEventSource.HttpListener.cs" />
     <Compile Include="System\Net\WebSockets\HttpListenerWebSocketContext.cs" />
     <Compile Include="System\Net\WebSockets\HttpWebSocket.cs" />
@@ -111,7 +112,6 @@
     <Compile Include="System\Net\Windows\HttpListenerRequestContext.cs" />
     <Compile Include="System\Net\Windows\ListenerClientCertAsyncResult.Windows.cs" />
     <Compile Include="System\Net\Windows\AsyncRequestContext.cs" />
-    <Compile Include="System\Net\Windows\ListenerClientCertState.cs" />
     <Compile Include="System\Net\Windows\EntitySendFormat.cs" />
     <Compile Include="System\Net\Windows\RequestContextBase.cs" />
     <Compile Include="System\Net\Windows\SyncRequestContext.cs" />

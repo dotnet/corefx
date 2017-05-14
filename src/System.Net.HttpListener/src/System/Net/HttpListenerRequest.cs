@@ -271,6 +271,37 @@ namespace System.Net
         public Uri Url => RequestUri;
 
         public Version ProtocolVersion => _version;
+        
+        public X509Certificate2 GetClientCertificate()
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+            try
+            {
+                if (ClientCertState == ListenerClientCertState.InProgress)
+                    throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, "GetClientCertificate()/BeginGetClientCertificate()"));
+                ClientCertState = ListenerClientCertState.InProgress;
+
+                GetClientCertificateCore();
+
+                ClientCertState = ListenerClientCertState.Completed;
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"_clientCertificate:{ClientCertificate}");
+            }
+            finally
+            {
+                if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
+            }
+            return ClientCertificate;
+        }
+
+        public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this);
+            if (ClientCertState == ListenerClientCertState.InProgress)
+                throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, "GetClientCertificate()/BeginGetClientCertificate()"));
+            ClientCertState = ListenerClientCertState.InProgress;
+
+            return BeginGetClientCertificateCore(requestCallback, state);
+        }
 
         public Task<X509Certificate2> GetClientCertificateAsync()
         {
@@ -278,6 +309,22 @@ namespace System.Net
                 (callback, state) => ((HttpListenerRequest)state).BeginGetClientCertificate(callback, state),
                 iar => ((HttpListenerRequest)iar.AsyncState).EndGetClientCertificate(iar),
                 this);
+        }
+
+        internal ListenerClientCertState ClientCertState { get; set; } = ListenerClientCertState.NotInitialized;
+        internal X509Certificate2 ClientCertificate { get; set; }
+
+        public int ClientCertificateError
+        {
+            get
+            {
+                if (ClientCertState == ListenerClientCertState.NotInitialized)
+                    throw new InvalidOperationException(SR.Format(SR.net_listener_mustcall, "GetClientCertificate()/BeginGetClientCertificate()"));
+                else if (ClientCertState == ListenerClientCertState.InProgress)
+                    throw new InvalidOperationException(SR.Format(SR.net_listener_mustcompletecall, "GetClientCertificate()/BeginGetClientCertificate()"));
+
+                return GetClientCertificateErrorCore();
+            }
         }
 
         private static class Helpers

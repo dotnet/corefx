@@ -226,7 +226,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)] // We get the ClientCertificate during connection on Unix.
         public async Task ClientCertificateError_GetNotInitialized_ThrowsInvalidOperationException()
         {
             await GetRequest("POST", null, null, (_, request) =>
