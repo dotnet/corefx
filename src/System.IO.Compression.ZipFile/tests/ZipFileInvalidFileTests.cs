@@ -71,8 +71,10 @@ namespace System.IO.Compression.Tests
             //read mode on empty file
             Assert.Throws<InvalidDataException>(() =>
             {
-                using (ZipArchive archive = new ZipArchive(new MemoryStream()))
-                { }
+                using (var memoryStream = new MemoryStream())
+                {
+                    new ZipArchive(memoryStream);
+                }
             });
 
             //offset out of bounds
