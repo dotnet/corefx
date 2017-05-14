@@ -11,12 +11,14 @@ namespace System.IO
     public class FileSystemAclExtensionsTests
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_DirectoryInfo_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((DirectoryInfo)null));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_DirectoryInfo_ReturnsValidObject()
         {
             using (var directory = new TempDirectory())
@@ -31,12 +33,14 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_DirectoryInfo_AccessControlSections_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((DirectoryInfo)null, new AccessControlSections()));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_DirectoryInfo_AccessControlSections_ReturnsValidObject()
         {
             using (var directory = new TempDirectory())
@@ -52,12 +56,14 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_FileInfo_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((FileInfo)null));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_FileInfo_ReturnsValidObject()
         {
             using (var directory = new TempDirectory())
@@ -73,12 +79,14 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_FileInfo_AccessControlSections_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((FileInfo)null, new AccessControlSections()));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_FileInfo_AccessControlSections_ReturnsValidObject()
         {
             using (var directory = new TempDirectory())
@@ -95,12 +103,14 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void GetAccessControl_Filestream_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((FileStream)null));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SetAccessControl_DirectoryInfo_DirectorySecurity_InvalidArguments()
         {
             using (var directory = new TempDirectory())
@@ -111,6 +121,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SetAccessControl_DirectoryInfo_DirectorySecurity_Success()
         {
             using (var directory = new TempDirectory())
@@ -123,6 +134,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SetAccessControl_FileInfo_FileSecurity_InvalidArguments()
         {
             using (var directory = new TempDirectory())
@@ -134,6 +146,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SetAccessControl_FileInfo_FileSecurity_Success()
         {
             using (var directory = new TempDirectory())
@@ -147,6 +160,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SetAccessControl_FileStream_FileSecurity_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.SetAccessControl((FileStream)null, (FileSecurity)null));
