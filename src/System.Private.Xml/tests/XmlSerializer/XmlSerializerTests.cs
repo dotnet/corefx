@@ -2566,6 +2566,39 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         bool b = grouplists.Contains("GroupType") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
         Assert.True(b);
     }
+
+    [Fact]
+    public static void SoapReflectionImporterTest1()
+    {
+        SoapAttributes soapAttrs = new SoapAttributes();
+        SoapAttributeOverrides soapOverrides = new SoapAttributeOverrides();
+        SoapElementAttribute soapElement1 = new SoapElementAttribute("Truck");
+        soapAttrs.SoapElement = soapElement1;
+        soapOverrides.Add(typeof(Transportation), "Vehicle", soapAttrs);
+        SoapReflectionImporter importer = new SoapReflectionImporter(soapOverrides);
+        Assert.NotNull(importer);
+        XmlTypeMapping myTypeMapping = importer.ImportTypeMapping(typeof(Transportation));
+        Assert.NotNull(myTypeMapping);
+        Assert.Equal("Transportation", myTypeMapping.ElementName);
+    }
+
+    [Fact]
+    public static void SoapReflectionImporterTest2()
+    {
+        SoapReflectionImporter importer = new SoapReflectionImporter("http://microsoft/");
+        Assert.NotNull(importer);
+        List<XmlReflectionMember> members = new List<XmlReflectionMember>();
+        XmlReflectionMember member = new XmlReflectionMember();
+        member.MemberType = typeof(string);
+        member.MemberName = member.MemberType.Name;
+        member.SoapAttributes.SoapElement = new SoapElementAttribute() { ElementName = "abc", DataType = "string" };
+        members.Add(member);
+        string elementname = "root";
+        XmlMembersMapping mapping = importer.ImportMembersMapping(elementname, "", members.ToArray(), true, false, false);
+        Assert.NotNull(mapping);
+        Assert.Equal(elementname, mapping.ElementName);
+    }
+
     private static Stream GetStreamFromString(string s)
     {
         MemoryStream stream = new MemoryStream();
