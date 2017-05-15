@@ -28,6 +28,10 @@ namespace System.ComponentModel.DataAnnotations
             {
                 return false;
             }
+            else if (valueAsString.Length == 0)
+            {
+                return true;
+            }
 
             // only return true if there is only 1 '@' character
             // and it is neither the first nor the last character
