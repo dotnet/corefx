@@ -54,9 +54,9 @@ namespace System.Net
             int receiveBufferSize,
             TimeSpan keepAliveInterval)
         {
-            HttpWebSocket.ValidateOptions(subProtocol, receiveBufferSize, WebSocketBuffer.MinSendBufferSize, keepAliveInterval);
+            HttpWebSocket.ValidateOptions(subProtocol, receiveBufferSize, HttpWebSocket.MinSendBufferSize, keepAliveInterval);
 
-            ArraySegment<byte> internalBuffer = WebSocketBuffer.CreateInternalBufferArraySegment(receiveBufferSize, WebSocketBuffer.MinSendBufferSize, true);
+            ArraySegment<byte> internalBuffer = WebSocketBuffer.CreateInternalBufferArraySegment(receiveBufferSize, HttpWebSocket.MinSendBufferSize, true);
             return this.AcceptWebSocketAsync(subProtocol,
                 receiveBufferSize,
                 keepAliveInterval,

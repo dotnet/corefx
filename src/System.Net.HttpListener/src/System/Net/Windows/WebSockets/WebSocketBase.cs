@@ -848,7 +848,7 @@ namespace System.Net.WebSockets
                     {
                         _closeAsyncStartedReceive = true;
                         ArraySegment<byte> closeMessageBuffer =
-                            new ArraySegment<byte>(new byte[WebSocketBuffer.MinReceiveBufferSize]);
+                            new ArraySegment<byte>(new byte[HttpWebSocket.MinReceiveBufferSize]);
                         EnsureReceiveOperation();
                         Task<WebSocketReceiveResult> receiveAsyncTask = _receiveOperation.Process(closeMessageBuffer,
                             linkedCancellationToken);
