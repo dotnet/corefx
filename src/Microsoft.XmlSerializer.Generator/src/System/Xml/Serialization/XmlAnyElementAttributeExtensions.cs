@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,9 +13,15 @@ namespace System.Xml.Serialization
 {
     internal static class XmlAnyElementAttributeExtensions
     {
+        private static PropertyInfo s_NamespaceSpecifiedPropertyInfo;
         internal static bool GetNamespaceSpecified(this XmlAnyElementAttribute xmlAnyElementAtt)
         {
-            return (bool)xmlAnyElementAtt.GetType().GetProperty("NamespaceSpecified", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(xmlAnyElementAtt);
+            if(s_NamespaceSpecifiedPropertyInfo == null)
+            {
+                s_NamespaceSpecifiedPropertyInfo = typeof(XmlAnyElementAttribute).GetType().GetProperty("NamespaceSpecified", BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            return (bool)s_NamespaceSpecifiedPropertyInfo.GetValue(xmlAnyElementAtt);
         }
     }
 }
