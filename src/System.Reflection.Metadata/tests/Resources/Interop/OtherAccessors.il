@@ -49,6 +49,14 @@
   {
   }
 
+  .method public hidebysig newslot specialname abstract virtual instance void suspend_Notification() cil managed
+  {
+  }
+
+  .method public hidebysig newslot specialname abstract virtual instance void resume_Notification() cil managed
+  {
+  }
+
   .method public hidebysig newslot specialname abstract virtual instance void other_Notification() cil managed
   {
   }
@@ -58,5 +66,7 @@
     .addon instance void IEventSource::add_Notification(class [mscorlib]System.EventHandler)
     .removeon instance void IEventSource::remove_Notification(class [mscorlib]System.EventHandler)
     .other instance void IEventSource::other_Notification()
+    .other instance void IEventSource::suspend_Notification()
+    .other instance void IEventSource::resume_Notification()
   }
 }

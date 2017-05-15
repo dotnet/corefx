@@ -2444,22 +2444,24 @@ namespace System.Reflection.Metadata.Tests
             var propertyDef = reader.GetPropertyDefinition(typeDef.GetProperties().First());
             var propertyAccessors = propertyDef.GetAccessors();
 
-            Assert.False(propertyAccessors.Getter.IsNil);
-            Assert.False(propertyAccessors.Setter.IsNil);
-            Assert.NotEmpty(propertyAccessors.Others);
-            Assert.False(propertyAccessors.Others.First().IsNil);
+            Assert.Equal("get_Value", reader.GetString(reader.GetMethodDefinition(propertyAccessors.Getter).Name));
+            Assert.Equal("set_Value", reader.GetString(reader.GetMethodDefinition(propertyAccessors.Setter).Name));
+            Assert.Equal("let_Value", reader.GetString(reader.GetMethodDefinition(propertyAccessors.Others.Single()).Name));
 
             typeDef = reader.GetTypeDefinition(reader.TypeDefinitions.Skip(2).First());
             Assert.Equal(reader.GetString(typeDef.Name), "IEventSource");
 
             var eventDef = reader.GetEventDefinition(typeDef.GetEvents().First());
             var eventAccessors = eventDef.GetAccessors();
+            var otherAccessorNames = (from methodHandle in eventAccessors.Others
+                                      select reader.GetString(reader.GetMethodDefinition(methodHandle).Name)).ToArray();
 
-            Assert.False(eventAccessors.Adder.IsNil);
-            Assert.False(eventAccessors.Remover.IsNil);
+            Assert.Equal("add_Notification", reader.GetString(reader.GetMethodDefinition(eventAccessors.Adder).Name));
+            Assert.Equal("remove_Notification", reader.GetString(reader.GetMethodDefinition(eventAccessors.Remover).Name));
             Assert.True(eventAccessors.Raiser.IsNil);
-            Assert.NotEmpty(eventAccessors.Others);
-            Assert.False(eventAccessors.Others.First().IsNil);
+
+            // ilasm doesn't retain the order in which other accessors were specified in IL
+            AssertEx.SetEqual(otherAccessorNames, "suspend_Notification", "resume_Notification", "other_Notification");
         }
 
         [Fact]
