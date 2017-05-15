@@ -303,7 +303,6 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [ActiveIssue(19689)]
         public void SendAsync_ExpectedDiagnosticSourceActivityLogging()
         {
             RemoteInvoke(() =>
@@ -351,7 +350,7 @@ namespace System.Net.Http.Functional.Tests
 
                 using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
                 {
-                    diagnosticListenerObserver.Enable();
+                    diagnosticListenerObserver.Enable(s => s.Contains("HttpRequestOut"));
                     using (var client = new HttpClient())
                     {
                         LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -458,6 +457,45 @@ namespace System.Net.Http.Functional.Tests
                     WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1),
                         "Response with exception was not logged within 1 second timeout.");
                     Assert.True(exceptionLogged, "Exception was not logged");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceNewAndDeprecatedEventsLogging()
+        {
+            RemoteInvoke(() =>
+            {
+                bool requestLogged = false;
+                bool responseLogged = false;
+                bool activityStartLogged = false;
+                bool activityStopLogged = false;
+
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.Request")) { requestLogged = true; }
+                    else if (kvp.Key.Equals("System.Net.Http.Response")) { responseLogged = true; }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start")) { activityStartLogged = true;}
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop")) { activityStopLogged = true; }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+                    using (var client = new HttpClient())
+                    {
+                        var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
+                    }
+
+                    Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
+                    Assert.True(requestLogged, "Request was not logged.");
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "HttpRequestOut.Stop was not logged within 1 second timeout.");
+                    Assert.True(responseLogged, "Response was not logged.");
                     diagnosticListenerObserver.Disable();
                 }
 
