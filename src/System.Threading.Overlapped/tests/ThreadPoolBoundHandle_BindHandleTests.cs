@@ -10,6 +10,7 @@ using Xunit;
 public partial class ThreadPoolBoundHandleTests
 {
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_NullAsHandle_ThrowsArgumentNullException()
     {
         AssertExtensions.Throws<ArgumentNullException>("handle", () =>
@@ -19,6 +20,16 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    public void BindHandle_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(null));
+        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(new Win32Handle(IntPtr.Zero)));
+        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(new Win32Handle(new IntPtr(1))));
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_ZeroAsHandle_ThrowsArgumentException()
     {
         using(SafeHandle handle = HandleFactory.CreateHandle(IntPtr.Zero))
@@ -31,6 +42,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_MinusOneAsHandle_ThrowsArgumentException()
     {
         using(SafeHandle handle = HandleFactory.CreateHandle(new IntPtr(-1)))
@@ -43,6 +55,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_SyncHandleAsHandle_ThrowsArgumentException()
     {   // Can't bind a handle that was not opened for overlapped I/O
 
@@ -56,6 +69,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_ClosedSyncHandleAsHandle_ThrowsArgumentException()
     {
         using(Win32Handle handle = HandleFactory.CreateSyncFileHandleFoWrite())
@@ -70,6 +84,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_ClosedAsyncHandleAsHandle_ThrowsArgumentException()
     {
         using(Win32Handle handle = HandleFactory.CreateAsyncFileHandleForWrite())
@@ -84,6 +99,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_DisposedSyncHandleAsHandle_ThrowsArgumentException()
     {
         Win32Handle handle = HandleFactory.CreateSyncFileHandleFoWrite();
@@ -97,6 +113,7 @@ public partial class ThreadPoolBoundHandleTests
 
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_DisposedAsyncHandleAsHandle_ThrowsArgumentException()
     {
         Win32Handle handle = HandleFactory.CreateAsyncFileHandleForWrite();
@@ -109,6 +126,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_AlreadyBoundHandleAsHandle_ThrowsArgumentException()
     {
         using(SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite())
