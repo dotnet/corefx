@@ -52,8 +52,8 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
-        // The managed implementation doesn't validate that the socket is actually a web socket.
-        // This means that HttpListener can connect to a Socket masquerading as a web socket.
+        // Both the managed and Windows implementations send headers to the socket during connection.
+        // The Windows implementation fails with error code 1229: An operation was attempted on a nonexistent network connection.
         [ActiveIssue(18128, TestPlatforms.AnyUnix)]
         public async Task AcceptWebSocketAsync_SocketSpoofingAsWebSocket_ThrowsWebSocketException()
         {
