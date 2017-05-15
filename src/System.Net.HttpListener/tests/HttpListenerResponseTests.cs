@@ -12,8 +12,8 @@ namespace System.Net.Tests
 {
     public class HttpListenerResponseTests : IDisposable
     {
-        private HttpListenerFactory Factory { get; set; }
-        private HttpClient Client { get; set; }
+        private HttpListenerFactory Factory { get; }
+        private HttpClient Client { get; }
         private Task<HttpResponseMessage> Message { get; set; }
 
         public HttpListenerResponseTests()
