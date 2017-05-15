@@ -4,7 +4,7 @@
 
 internal static partial class Interop
 {
-    private static partial class Libraries
+    internal static partial class Libraries
     {
         internal const string CoreFoundationLibrary = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
         internal const string CoreServicesLibrary   = "/System/Library/Frameworks/CoreServices.framework/CoreServices";
