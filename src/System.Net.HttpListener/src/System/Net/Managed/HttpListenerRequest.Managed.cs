@@ -292,7 +292,7 @@ namespace System.Net
             }
         }
 
-        private void GetClientCertificateCore() => ClientCertificate = _context.Connection.ClientCertificate;
+        private X509Certificate2 GetClientCertificateCore() => ClientCertificate = _context.Connection.ClientCertificate;
 
         private int GetClientCertificateErrorCore()
         {
@@ -352,10 +352,10 @@ namespace System.Net
         {
             var asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback);
 
-            // The certificate is already retrieved by the time this method is called. GetClientCertificate() evaluates to
+            // The certificate is already retrieved by the time this method is called. GetClientCertificateCore() evaluates to
             // a simple member access, so this will always complete immediately.
             ClientCertState = ListenerClientCertState.Completed;
-            asyncResult.InvokeCallback(GetClientCertificate());
+            asyncResult.InvokeCallback(GetClientCertificateCore());
 
             return asyncResult;
         }
