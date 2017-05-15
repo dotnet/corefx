@@ -2,7 +2,7 @@
   <PropertyGroup>
     <PreReleaseLabel>preview2</PreReleaseLabel>
     <PackageDescriptionFile>$(ProjectDir)pkg/descriptions.json</PackageDescriptionFile>
-    <PackageLicenseFile>$(ProjectDir)pkg/dotnet_library_license.txt</PackageLicenseFile>
+    <PackageLicenseFile>$(ProjectDir)LICENSE</PackageLicenseFile>
     <PackageThirdPartyNoticesFile>$(ProjectDir)pkg/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
     <RuntimeIdGraphDefinitionFile>$(ProjectDir)pkg/Microsoft.NETCore.Platforms/runtime.json</RuntimeIdGraphDefinitionFile>
     <ReleaseNotes>https://go.microsoft.com/fwlink/?LinkID=799421</ReleaseNotes>
@@ -20,7 +20,7 @@
     <XmlDocFileRoot>$(PackagesDir)$(XmlDocPackage.ToLowerInvariant())/$(XmlDocPackageVersion)/xmldocs</XmlDocFileRoot>
     <XmlDocDir>$(BinDir)docs</XmlDocDir>
 
-    <!-- By default the packaging targets will package dekstop facades as ref,
+    <!-- By default the packaging targets will package desktop facades as ref,
          but we don't use this as we now build partial-reference-facades. -->
     <PackageDesktopAsRef>false</PackageDesktopAsRef>
 
