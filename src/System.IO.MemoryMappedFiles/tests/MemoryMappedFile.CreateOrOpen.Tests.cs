@@ -177,25 +177,24 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidArgumentCombinations_Execute(
             string mapName, long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, HandleInheritability inheritability)
         {
-            // MemoryMappedFileAccess.ReadExecute or MemoryMappedFileAccess.ReadWriteExecute isn't permitted inside an AppContainer
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 // Map doesn't exist
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access))
                 {
                     ValidateMemoryMappedFile(mmf, capacity, access);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
                 {
                     ValidateMemoryMappedFile(mmf, capacity, access, inheritability);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 // Map does exist (CreateNew)
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access))
@@ -203,16 +202,16 @@ namespace System.IO.MemoryMappedFiles.Tests
                 {
                     ValidateMemoryMappedFile(mmf2, capacity, access);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access, options, inheritability))
                 using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
                 {
                     ValidateMemoryMappedFile(mmf2, capacity, access, inheritability);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
 
             // (Avoid testing with CreateFromFile when using execute permissions.)
         }

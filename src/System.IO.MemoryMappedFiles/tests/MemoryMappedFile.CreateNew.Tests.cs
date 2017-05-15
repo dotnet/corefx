@@ -153,14 +153,13 @@ namespace System.IO.MemoryMappedFiles.Tests
                 ValidateMemoryMappedFile(mmf, 4096, MemoryMappedFileAccess.Read);
             }
 
-            // MemoryMappedFileAccess.ReadExecute or MemoryMappedFileAccess.ReadWriteExecute isn't permitted inside an AppContainer
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT, () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(name, 4096, MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileOptions.DelayAllocatePages, HandleInheritability.Inheritable))
                 {
                     ValidateMemoryMappedFile(mmf, 4096, MemoryMappedFileAccess.ReadWrite, HandleInheritability.Inheritable);
                 }
-            }, PlatformDetection.IsWinRT);
+            });
         }
 
         /// <summary>
@@ -201,22 +200,21 @@ namespace System.IO.MemoryMappedFiles.Tests
                 ValidateMemoryMappedFile(mmf, capacity);
             }
 
-            // MemoryMappedFileAccess.ReadExecute or MemoryMappedFileAccess.ReadWriteExecute isn't permitted inside an AppContainer
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access))
                 {
                     ValidateMemoryMappedFile(mmf, capacity, access);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access, options, inheritability))
                 {
                     ValidateMemoryMappedFile(mmf, capacity, access, inheritability);
                 }
-            }, PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute|| access == MemoryMappedFileAccess.ReadWriteExecute));
+            });
         }
 
         /// <summary>

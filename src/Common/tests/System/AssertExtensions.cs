@@ -105,7 +105,7 @@ namespace System
            ThrowsAny(typeof(TFirstExceptionType), typeof(TSecondExceptionType), action);
         }
 
-        public static void ThrowsIf<T>(Action action, bool condition)
+        public static void ThrowsIf<T>(bool condition, Action action)
             where T : Exception
         {
             if (condition)

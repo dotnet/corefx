@@ -77,17 +77,18 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && 
+                (mapAccess == MemoryMappedFileAccess.ReadExecute ||
+                mapAccess == MemoryMappedFileAccess.ReadWriteExecute ||
+                viewAccess == MemoryMappedFileAccess.ReadExecute ||
+                viewAccess == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
                 using (MemoryMappedViewStream s = mmf.CreateViewStream(0, Capacity, viewAccess))
                 {
                     ValidateMemoryMappedViewStream(s, Capacity, viewAccess);
                 }
-            }, PlatformDetection.IsWinRT && (mapAccess == MemoryMappedFileAccess.ReadExecute ||
-            mapAccess == MemoryMappedFileAccess.ReadWriteExecute ||
-            viewAccess == MemoryMappedFileAccess.ReadExecute ||
-            viewAccess == MemoryMappedFileAccess.ReadWriteExecute));
+            });
         }
 
         [Theory]
@@ -107,13 +108,13 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(() =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (mapAccess == MemoryMappedFileAccess.ReadExecute || mapAccess == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
                 {
                     Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
                 }
-            }, PlatformDetection.IsWinRT && (mapAccess == MemoryMappedFileAccess.ReadExecute || mapAccess == MemoryMappedFileAccess.ReadWriteExecute));
+            });
         }
 
         /// <summary>
