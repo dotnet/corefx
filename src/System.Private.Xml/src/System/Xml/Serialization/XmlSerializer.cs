@@ -446,19 +446,7 @@ namespace System.Xml.Serialization
 #if !uapaot
                 else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
-                    XmlMapping mapping;
-                    if (_mapping != null && _mapping.GenerateSerializer)
-                    {
-                        mapping = _mapping;
-                    }
-                    else
-                    {
-                        XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                        mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
-                    }
-
-                    var writer = new ReflectionXmlSerializationWriter(mapping, xmlWriter, namespaces == null || namespaces.Count == 0 ? DefaultNamespaces : namespaces, encodingStyle, id);
-                    writer.WriteObject(o);
+                    SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
                 }
                 else if (_tempAssembly == null || _typedSerializer)
                 {
@@ -479,7 +467,11 @@ namespace System.Xml.Serialization
 #else
                 else
                 {
-                    if (this.innerSerializer != null)
+                    if (ShouldUseReflectionBasedSerialization(_mapping))
+                    {
+                        SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
+                    }
+                    else if (this.innerSerializer != null)
                     {
                         if (!string.IsNullOrEmpty(this.DefaultNamespace))
                         {
@@ -499,19 +491,7 @@ namespace System.Xml.Serialization
                     }
                     else if (ReflectionMethodEnabled)
                     {
-                        XmlMapping mapping;
-                        if (_mapping != null && _mapping.GenerateSerializer)
-                        {
-                            mapping = _mapping;
-                        }
-                        else
-                        {
-                            XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                            mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
-                        }
-
-                        var writer = new ReflectionXmlSerializationWriter(mapping, xmlWriter, namespaces == null || namespaces.Count == 0 ? DefaultNamespaces : namespaces, encodingStyle, id);
-                        writer.WriteObject(o);
+                        SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
                     }
                     else
                     {
@@ -527,6 +507,23 @@ namespace System.Xml.Serialization
                 throw new InvalidOperationException(SR.XmlGenError, e);
             }
             xmlWriter.Flush();
+        }
+
+        private void SerializeUsingReflection(XmlWriter xmlWriter, object o, XmlSerializerNamespaces namespaces, string encodingStyle, string id)
+        {
+            XmlMapping mapping;
+            if (_mapping != null && _mapping.GenerateSerializer)
+            {
+                mapping = _mapping;
+            }
+            else
+            {
+                XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
+                mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
+            }
+
+            var writer = new ReflectionXmlSerializationWriter(mapping, xmlWriter, namespaces == null || namespaces.Count == 0 ? DefaultNamespaces : namespaces, encodingStyle, id);
+            writer.WriteObject(o);
         }
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.Deserialize"]/*' />
@@ -593,19 +590,7 @@ namespace System.Xml.Serialization
 #if !uapaot
                 else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
-                    XmlMapping mapping;
-                    if (_mapping != null && _mapping.GenerateSerializer)
-                    {
-                        mapping = _mapping;
-                    }
-                    else
-                    {
-                        XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                        mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
-                    }
-
-                    var reader = new ReflectionXmlSerializationReader(mapping, xmlReader, events, encodingStyle);
-                    return reader.ReadObject();
+                    return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                 }
                 else if (_tempAssembly == null || _typedSerializer)
                 {
@@ -627,7 +612,11 @@ namespace System.Xml.Serialization
 #else
                 else
                 {
-                    if (this.innerSerializer != null)
+                    if (ShouldUseReflectionBasedSerialization(_mapping))
+                    {
+                        return DeserializeUsingReflection(xmlReader, encodingStyle, events);
+                    }
+                    else if (this.innerSerializer != null)
                     {
                         if (!string.IsNullOrEmpty(this.DefaultNamespace))
                         {
@@ -647,19 +636,7 @@ namespace System.Xml.Serialization
                     }
                     else if (ReflectionMethodEnabled)
                     {
-                        XmlMapping mapping;
-                        if (_mapping != null && _mapping.GenerateSerializer)
-                        {
-                            mapping = _mapping;
-                        }
-                        else
-                        {
-                            XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                            mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
-                        }
-
-                        var reader = new ReflectionXmlSerializationReader(mapping, xmlReader, events, encodingStyle);
-                        return reader.ReadObject();
+                        return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                     }
                     else
                     {
@@ -684,6 +661,23 @@ namespace System.Xml.Serialization
                     throw new InvalidOperationException(SR.XmlSerializeError, e);
                 }
             }
+        }
+
+        private object DeserializeUsingReflection(XmlReader xmlReader, string encodingStyle, XmlDeserializationEvents events)
+        {
+            XmlMapping mapping;
+            if (_mapping != null && _mapping.GenerateSerializer)
+            {
+                mapping = _mapping;
+            }
+            else
+            {
+                XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
+                mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
+            }
+
+            var reader = new ReflectionXmlSerializationReader(mapping, xmlReader, events, encodingStyle);
+            return reader.ReadObject();
         }
 #endif
 
