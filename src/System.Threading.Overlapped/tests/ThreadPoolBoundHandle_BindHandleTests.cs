@@ -10,7 +10,6 @@ using Xunit;
 public partial class ThreadPoolBoundHandleTests
 {
     [Fact]
-    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_NullAsHandle_ThrowsArgumentNullException()
     {
         AssertExtensions.Throws<ArgumentNullException>("handle", () =>
@@ -20,16 +19,6 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public void BindHandle_ThrowsPlatformNotSupportedException()
-    {
-        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(null));
-        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(new Win32Handle(IntPtr.Zero)));
-        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(new Win32Handle(new IntPtr(1))));
-    }
-
-    [Fact]
-    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_ZeroAsHandle_ThrowsArgumentException()
     {
         using(SafeHandle handle = HandleFactory.CreateHandle(IntPtr.Zero))
@@ -42,7 +31,6 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void BindHandle_MinusOneAsHandle_ThrowsArgumentException()
     {
         using(SafeHandle handle = HandleFactory.CreateHandle(new IntPtr(-1)))
@@ -52,6 +40,13 @@ public partial class ThreadPoolBoundHandleTests
                 ThreadPoolBoundHandle.BindHandle(handle);
             });
         }
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    public void BindHandle_ValidHandle_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => ThreadPoolBoundHandle.BindHandle(new Win32Handle(new IntPtr(1))));
     }
 
     [Fact]
