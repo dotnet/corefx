@@ -133,7 +133,10 @@ namespace System.Net.WebSockets
 
         private static void ValidateWebSocketHeaders(HttpListenerContext context)
         {
-            ValidateWebSocketHeadersCore(context);
+            if (!WebSocketsSupported)
+            {
+                throw new PlatformNotSupportedException(SR.net_WebSockets_UnsupportedPlatform);
+            }
 
             if (!context.Request.IsWebSocketRequest)
             {

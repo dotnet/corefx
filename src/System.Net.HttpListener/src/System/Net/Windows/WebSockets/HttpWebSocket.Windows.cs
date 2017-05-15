@@ -14,11 +14,7 @@ namespace System.Net.WebSockets
 {
     internal static partial class HttpWebSocket
     {
-        private static readonly ArraySegment<byte> s_EmptyPayload = new ArraySegment<byte>(new byte[] { }, 0, 0);
         private static readonly Random s_keyGenerator = new Random();
-        private static readonly bool s_httpSysSupportsWebSockets = (Environment.OSVersion.Version >= new Version(6, 2));
-
-        internal static ArraySegment<byte> EmptyPayload => s_EmptyPayload;
 
         internal static Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(HttpListenerContext context,
             string subProtocol,
@@ -154,7 +150,7 @@ namespace System.Net.WebSockets
 
             return webSocketContext;
         }
-        
+
         internal static string GetTraceMsgForParameters(int offset, int count, CancellationToken cancellationToken)
         {
             return string.Format(CultureInfo.InvariantCulture,
@@ -179,7 +175,7 @@ namespace System.Net.WebSockets
             // under the caller's synchronization context.
             return task.ConfigureAwait(false);
         }
-        
+
         private static unsafe ulong SendWebSocketHeaders(HttpListenerResponse response)
         {
             return response.SendHeaders(null, null,
@@ -223,12 +219,6 @@ namespace System.Net.WebSockets
 
         private static string SupportedVersion => WebSocketProtocolComponent.SupportedVersion;
 
-        private static void ValidateWebSocketHeadersCore(HttpListenerContext context)
-        {
-            if (!s_httpSysSupportsWebSockets)
-            {
-                throw new PlatformNotSupportedException(SR.net_WebSockets_UnsupportedPlatform);
-            }
-        }
+        private static bool WebSocketsSupported { get; } = Environment.OSVersion.Version >= new Version(6, 2);
     }
 }

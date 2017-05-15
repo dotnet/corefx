@@ -77,7 +77,7 @@ namespace System.Net.WebSockets
             return webSocketContext;
         }
 
-        private static void ValidateWebSocketHeadersCore(HttpListenerContext context) { }
+        private const bool WebSocketsSupported = true;
     }
 }
 

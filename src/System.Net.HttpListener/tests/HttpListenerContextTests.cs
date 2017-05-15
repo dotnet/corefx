@@ -57,9 +57,9 @@ namespace System.Net.Tests
         [ActiveIssue(18128, TestPlatforms.AnyUnix)]
         public async Task AcceptWebSocketAsync_SocketSpoofingAsWebSocket_ThrowsWebSocketException()
         {
-            await GetSocketContext(new string[] { "Connection: Upgrade", "Upgrade: websocket", "Sec-WebSocket-Version: 13", "Sec-WebSocket-Key: Key" }, context =>
+            await GetSocketContext(new string[] { "Connection: Upgrade", "Upgrade: websocket", "Sec-WebSocket-Version: 13", "Sec-WebSocket-Key: Key" }, async context =>
             {
-                Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(null)).Wait();
+                await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(null));
             });
         }
 
@@ -83,9 +83,9 @@ namespace System.Net.Tests
         [InlineData("UnknownHeader: random")]
         public async Task AcceptWebSocketAsync_InvalidHeaders_ThrowsWebSocketException(string headers)
         {
-            await GetSocketContext(new string[] { headers }, context =>
+            await GetSocketContext(new string[] { headers }, async context =>
             {
-                Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(null)).Wait();
+                await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(null));
             });
         }
 
@@ -147,18 +147,18 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>("receiveBufferSize", () => context.AcceptWebSocketAsync(null, receiveBufferSize, TimeSpan.MaxValue));
         }
 
-        private async Task GetSocketContext(string[] headers, Action<HttpListenerContext> contextAction)
+        private async Task GetSocketContext(string[] headers, Func<HttpListenerContext, Task> contextAction)
         {
             using (Socket client = Factory.GetConnectedSocket())
             {
                 client.Send(Factory.GetContent("1.1", "POST", null, "Text", headers, true));
 
                 HttpListener listener = Factory.GetListener();
-                contextAction(await listener.GetContextAsync());
+                await contextAction(await listener.GetContextAsync());
             }
         }
 
-        private Task<HttpListenerContext> GetWebSocketContext(string[] subProtocols = null)
+        private async Task<HttpListenerContext> GetWebSocketContext(string[] subProtocols = null)
         {
             if (subProtocols != null)
             {
@@ -172,7 +172,13 @@ namespace System.Net.Tests
             Task<HttpListenerContext> serverContextTask = Factory.GetListener().GetContextAsync();
 
             Task clientConnectTask = Socket.ConnectAsync(uriBuilder.Uri, CancellationToken.None);
-            return serverContextTask;
+            if (clientConnectTask == await Task.WhenAny(serverContextTask, clientConnectTask))
+            {
+                await clientConnectTask;
+                Assert.True(false, "Client should not have completed prior to server sending response");
+            }
+
+            return await serverContextTask;
         }
     }
 }

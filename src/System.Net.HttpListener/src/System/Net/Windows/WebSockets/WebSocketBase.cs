@@ -1961,10 +1961,8 @@ namespace System.Net.WebSockets
 
                         if (bufferType == WebSocketProtocolComponent.BufferType.Close)
                         {
-                            payload = HttpWebSocket.EmptyPayload;
-                            string reason;
-                            WebSocketCloseStatus closeStatus;
-                            _webSocket._internalBuffer.ConvertCloseBuffer(action, dataBuffers[0], out closeStatus, out reason);
+                            payload = ArraySegment<byte>.Empty;
+                            _webSocket._internalBuffer.ConvertCloseBuffer(action, dataBuffers[0], out WebSocketCloseStatus closeStatus, out string reason);
 
                             receiveResult = new WebSocketReceiveResult(bytesTransferred,
                                 messageType, true, closeStatus, reason);
