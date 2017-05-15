@@ -11,9 +11,24 @@ using Xunit;
 
 namespace System.Net.Tests
 {
-    public class HttpListenerContextTests
+    public class HttpListenerContextTests : IDisposable
     {
-        public static bool IsNotWindows7 { get; } = !PlatformDetection.IsWindows7 && PlatformDetection.IsNotOneCoreUAP;
+        private HttpListenerFactory Factory { get; }
+        private ClientWebSocket Socket { get; }
+
+        public HttpListenerContextTests()
+        {
+            Factory = new HttpListenerFactory();
+            Socket = new ClientWebSocket();
+        }
+
+        public void Dispose()
+        {
+            Factory.Dispose();
+            Socket.Dispose();
+        }
+
+        public static bool IsNotWindows7OrUapCore { get; } = !PlatformDetection.IsWindows7 && PlatformDetection.IsNotOneCoreUAP;
 
         public static IEnumerable<object[]> SubProtocol_TestData()
         {
@@ -27,18 +42,16 @@ namespace System.Net.Tests
             yield return new object[] { new string[] { "MyProtocol1", "MyProtocol2" }, "MyProtocol2" };
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [MemberData(nameof(SubProtocol_TestData))]
         public async Task AcceptWebSocketAsync_ValidSubProtocol_Success(string[] clientProtocols, string serverProtocol)
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                HttpListenerWebSocketContext socketContext = context.AcceptWebSocketAsync(serverProtocol).Result;
-                Assert.Equal(serverProtocol, socketContext.WebSocket.SubProtocol);
-            }, subProtocols: clientProtocols);
+            HttpListenerContext context = await GetWebSocketContext(clientProtocols);
+            HttpListenerWebSocketContext socketContext = await context.AcceptWebSocketAsync(serverProtocol);
+            Assert.Equal(serverProtocol, socketContext.WebSocket.SubProtocol);
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         // The managed implementation doesn't validate that the socket is actually a web socket.
         // This means that HttpListener can connect to a Socket masquerading as a web socket.
         [ActiveIssue(18128, TestPlatforms.AnyUnix)]
@@ -50,16 +63,14 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_UnsupportedProtocol_ThrowsWebSocketException()
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync("MyOtherProtocol")).Wait();
-            }, subProtocols: new string[] { "MyProtocol" });
+            HttpListenerContext context = await GetWebSocketContext(new string[] { "MyProtocol" });
+            await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync("MyOtherProtocol"));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("Connection: ")]
         [InlineData("Connection: Connection\r\nUpgrade: ")]
         [InlineData("Connection: Test1\r\nUpgrade: Test2")]
@@ -78,7 +89,7 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("random(text")]
@@ -102,78 +113,66 @@ namespace System.Net.Tests
         [InlineData("\x7f")]
         public async Task AcceptWebSocketAsync_InvalidSubProtocol_ThrowsArgumentException(string subProtocol)
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                Assert.ThrowsAsync<ArgumentException>("subProtocol", () => context.AcceptWebSocketAsync(subProtocol)).Wait();
-            });
+            HttpListenerContext context = await GetWebSocketContext();
+            await Assert.ThrowsAsync<ArgumentException>("subProtocol", () => context.AcceptWebSocketAsync(subProtocol));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("!")]
         [InlineData("#")]
         [InlineData("YouDontKnowMe")]
         public async Task AcceptWebSocketAsync_NoSuchSubProtocol_ThrowsWebSocketException(string subProtocol)
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(subProtocol)).Wait();
-            });
+            HttpListenerContext context = await GetWebSocketContext();
+            await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(subProtocol));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_InvalidKeepAlive_ThrowsWebSocketException()
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                TimeSpan keepAlive = TimeSpan.FromMilliseconds(-2);
-                Assert.ThrowsAsync<ArgumentOutOfRangeException>("keepAliveInterval", () => context.AcceptWebSocketAsync(null, keepAlive)).Wait();
-            });
+            HttpListenerContext context = await GetWebSocketContext();
+
+            TimeSpan keepAlive = TimeSpan.FromMilliseconds(-2);
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keepAliveInterval", () => context.AcceptWebSocketAsync(null, keepAlive));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(255)]
         [InlineData(64 * 1024 + 1)]
         public async Task AcceptWebSocketAsync_InvalidReceiveBufferSize_ThrowsWebSocketException(int receiveBufferSize)
         {
-            await GetWebSocketContext((socket, context) =>
-            {
-                Assert.ThrowsAsync<ArgumentOutOfRangeException>("receiveBufferSize", () => context.AcceptWebSocketAsync(null, receiveBufferSize, TimeSpan.MaxValue)).Wait();
-            });
+            HttpListenerContext context = await GetWebSocketContext();
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("receiveBufferSize", () => context.AcceptWebSocketAsync(null, receiveBufferSize, TimeSpan.MaxValue));
         }
 
-        private static async Task GetSocketContext(string[] headers, Action<HttpListenerContext> contextAction)
+        private async Task GetSocketContext(string[] headers, Action<HttpListenerContext> contextAction)
         {
-            using (HttpListenerFactory factory = new HttpListenerFactory())
-            using (Socket client = factory.GetConnectedSocket())
+            using (Socket client = Factory.GetConnectedSocket())
             {
-                client.Send(factory.GetContent("1.1", "POST", null, "Text", headers, true));
+                client.Send(Factory.GetContent("1.1", "POST", null, "Text", headers, true));
 
-                HttpListener listener = factory.GetListener();
+                HttpListener listener = Factory.GetListener();
                 contextAction(await listener.GetContextAsync());
             }
         }
 
-        private static async Task GetWebSocketContext(Action<ClientWebSocket, HttpListenerContext> contextAction, string[] subProtocols = null)
+        private Task<HttpListenerContext> GetWebSocketContext(string[] subProtocols = null)
         {
-            using (HttpListenerFactory factory = new HttpListenerFactory())
-            using (ClientWebSocket clientWebSocket = new ClientWebSocket())
+            if (subProtocols != null)
             {
-                if (subProtocols != null)
+                foreach (string subProtocol in subProtocols)
                 {
-                    foreach (string subProtocol in subProtocols)
-                    {
-                        clientWebSocket.Options.AddSubProtocol(subProtocol);
-                    }
+                    Socket.Options.AddSubProtocol(subProtocol);
                 }
-
-                var uriBuilder = new UriBuilder(factory.ListeningUrl) { Scheme = "ws" };
-                Task<HttpListenerContext> serverContextTask = factory.GetListener().GetContextAsync();
-
-                Task clientConnectTask = clientWebSocket.ConnectAsync(uriBuilder.Uri, CancellationToken.None);
-                contextAction(clientWebSocket, await serverContextTask);
             }
+
+            var uriBuilder = new UriBuilder(Factory.ListeningUrl) { Scheme = "ws" };
+            Task<HttpListenerContext> serverContextTask = Factory.GetListener().GetContextAsync();
+
+            Task clientConnectTask = Socket.ConnectAsync(uriBuilder.Uri, CancellationToken.None);
+            return serverContextTask;
         }
     }
 }
