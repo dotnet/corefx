@@ -16,6 +16,8 @@ namespace System.Net.WebSockets
             TimeSpan keepAliveInterval,
             ArraySegment<byte>? internalBuffer = null)
         {
+            ValidateOptions(subProtocol, receiveBufferSize, MinSendBufferSize, keepAliveInterval);
+
             // get property will create a new response if one doesn't exist.
             HttpListenerResponse response = context.Response;
             HttpListenerRequest request = context.Request;
