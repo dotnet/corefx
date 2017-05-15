@@ -59,10 +59,7 @@ namespace System.Net
             _context = context;
         }
 
-        internal bool ForceCloseChunked
-        {
-            get { return _forceCloseChunked; }
-        }
+        internal bool ForceCloseChunked => _forceCloseChunked;
 
         public Encoding ContentEncoding
         {
@@ -89,7 +86,7 @@ namespace System.Net
 
         public long ContentLength64
         {
-            get { return _contentLength; }
+            get => _contentLength;
             set
             {
                 if (_disposed)
@@ -108,7 +105,7 @@ namespace System.Net
 
         public string ContentType
         {
-            get { return _contentType; }
+            get => _contentType;
             set
             {
                 if (_disposed)
@@ -123,7 +120,7 @@ namespace System.Net
 
         public bool KeepAlive
         {
-            get { return _keepAlive; }
+            get => _keepAlive;
             set
             {
                 if (_disposed)
@@ -148,7 +145,7 @@ namespace System.Net
 
         public Version ProtocolVersion
         {
-            get { return _version; }
+            get => _version;
             set
             {
                 if (_disposed)
@@ -169,7 +166,7 @@ namespace System.Net
 
         public string RedirectLocation
         {
-            get { return _location; }
+            get => _location;
             set
             {
                 if (_disposed)
@@ -184,7 +181,7 @@ namespace System.Net
 
         public bool SendChunked
         {
-            get { return _chunked; }
+            get => _chunked;
             set
             {
                 if (_disposed)
@@ -199,7 +196,7 @@ namespace System.Net
 
         public int StatusCode
         {
-            get { return _statusCode; }
+            get => _statusCode;
             set
             {
                 if (_disposed)
@@ -217,17 +214,11 @@ namespace System.Net
 
         public string StatusDescription
         {
-            get { return _statusDescription; }
-            set
-            {
-                _statusDescription = value;
-            }
+            get => _statusDescription;
+            set => _statusDescription = value;
         }
 
-        private void Dispose()
-        {
-            Close(true);
-        }
+        private void Dispose() => Close(true);
 
         public void Close()
         {
