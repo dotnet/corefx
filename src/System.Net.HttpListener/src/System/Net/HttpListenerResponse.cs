@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Text;
 
 namespace System.Net
 {
@@ -23,6 +24,8 @@ namespace System.Net
                 }
             }
         }
+
+        public Encoding ContentEncoding { get; set; }
 
         public CookieCollection Cookies
         {

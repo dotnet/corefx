@@ -23,8 +23,6 @@ namespace System.Net
             Closed,
         }
 
-        private Encoding _contentEncoding;
-
         private string _statusDescription;
         private bool _keepAlive;
         private ResponseState _responseState;
@@ -57,18 +55,6 @@ namespace System.Net
         private HttpListenerContext HttpListenerContext => _httpContext;
 
         private HttpListenerRequest HttpListenerRequest => HttpListenerContext.Request;
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                return _contentEncoding;
-            }
-            set
-            {
-                _contentEncoding = value;
-            }
-        }
 
         public string ContentType
         {

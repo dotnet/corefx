@@ -38,7 +38,6 @@ namespace System.Net
     public sealed partial class HttpListenerResponse : IDisposable
     {
         private bool _disposed;
-        private Encoding _contentEncoding;
         private long _contentLength;
         private bool _clSet;
         private string _contentType;
@@ -60,29 +59,6 @@ namespace System.Net
         }
 
         internal bool ForceCloseChunked => _forceCloseChunked;
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                if (_contentEncoding == null)
-                {
-                    _contentEncoding = Encoding.Default;
-                }
-
-                return _contentEncoding;
-            }
-            set
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _contentEncoding = value;
-            }
-        }
 
         public long ContentLength64
         {
@@ -292,23 +268,11 @@ namespace System.Net
 
         internal void SendHeaders(bool closing, MemoryStream ms, bool isWebSocketHandshake = false)
         {
-            Encoding encoding = _contentEncoding;
-            if (encoding == null)
-                encoding = Encoding.Default;
-
             if (!isWebSocketHandshake)
             {
                 if (_contentType != null)
                 {
-                    if (_contentEncoding != null && _contentType.IndexOf(HttpHeaderStrings.Charset, StringComparison.Ordinal) == -1)
-                    {
-                        string enc_name = _contentEncoding.WebName;
-                        _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType + "; " + HttpHeaderStrings.Charset + enc_name);
-                    }
-                    else
-                    {
-                        _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType);
-                    }
+                    _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType);
                 }
 
                 if (_webHeaders[HttpKnownHeaderNames.Server] == null)
@@ -388,6 +352,7 @@ namespace System.Net
                 }
             }
 
+            Encoding encoding = Encoding.Default;
             StreamWriter writer = new StreamWriter(ms, encoding, 256);
             writer.Write("HTTP/{0} {1} {2}\r\n", _version, _statusCode, _statusDescription);
             string headers_str = FormatHeaders(_webHeaders);
