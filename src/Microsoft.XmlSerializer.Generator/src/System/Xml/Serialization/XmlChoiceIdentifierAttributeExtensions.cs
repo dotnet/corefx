@@ -8,30 +8,21 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
-namespace System.Xml.Serialization
+namespace Microsoft.XmlSerializer.Generator
 {
     internal static class XmlChoiceIdentifierAttributeExtensions
     {
-        private static PropertyInfo s_MemberInfoPropertyInfo;
+        private static PropertyInfo s_MemberInfoPropertyInfo = typeof(XmlChoiceIdentifierAttribute).GetProperty("MemberInfo", BindingFlags.NonPublic | BindingFlags.Instance);
 
         internal static MemberInfo GetMemberInfo(this XmlChoiceIdentifierAttribute xmlChoiceIdentifierAtt)
         {
-            if(s_MemberInfoPropertyInfo == null)
-            {
-                s_MemberInfoPropertyInfo = typeof(XmlChoiceIdentifierAttribute).GetProperty("MemberInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-
             return (MemberInfo)s_MemberInfoPropertyInfo.GetValue(xmlChoiceIdentifierAtt);
         }
 
         internal static void SetMemberInfo(this XmlChoiceIdentifierAttribute xmlChoiceIdentifierAtt, MemberInfo memberInfo)
         {
-            if (s_MemberInfoPropertyInfo == null)
-            {
-                s_MemberInfoPropertyInfo = typeof(XmlChoiceIdentifierAttribute).GetProperty("MemberInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-
             s_MemberInfoPropertyInfo.SetValue(xmlChoiceIdentifierAtt, memberInfo);
         }
     }
