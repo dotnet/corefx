@@ -41,7 +41,8 @@ namespace System.Diagnostics.Tests
                 Language = GetFileVersionLanguage(0x0000),
                 LegalCopyright = "Copyright, you betcha!",
                 LegalTrademarks = "TM",
-                OriginalFilename = OriginalTestAssemblyFileName,
+                //https://github.com/dotnet/corefx/issues/19784  OriginalFilename different behavior on Unix.
+                OriginalFilename = PlatformDetection.IsWindows ? OriginalTestAssemblyFileName : TestAssemblyFileName,
                 PrivateBuild = "",
                 ProductBuildPart = 3,
                 ProductMajorPart = 1,
