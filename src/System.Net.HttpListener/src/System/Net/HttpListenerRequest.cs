@@ -278,7 +278,7 @@ namespace System.Net
             try
             {
                 if (ClientCertState == ListenerClientCertState.InProgress)
-                    throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, "GetClientCertificate()/BeginGetClientCertificate()"));
+                    throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, $"{nameof(GetClientCertificate)}()/{nameof(BeginGetClientCertificate)}()"));
                 ClientCertState = ListenerClientCertState.InProgress;
 
                 GetClientCertificateCore();
@@ -297,7 +297,7 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this);
             if (ClientCertState == ListenerClientCertState.InProgress)
-                throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, "GetClientCertificate()/BeginGetClientCertificate()"));
+                throw new InvalidOperationException(SR.Format(SR.net_listener_callinprogress, $"{nameof(GetClientCertificate)}()/{nameof(BeginGetClientCertificate)}()"));
             ClientCertState = ListenerClientCertState.InProgress;
 
             return BeginGetClientCertificateCore(requestCallback, state);

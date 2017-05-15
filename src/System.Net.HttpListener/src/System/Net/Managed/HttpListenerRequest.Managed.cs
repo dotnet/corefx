@@ -352,7 +352,8 @@ namespace System.Net
         {
             var asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback);
 
-            // The certificate is already retrieved by the time this method is called.
+            // The certificate is already retrieved by the time this method is called. GetClientCertificate() evaluates to
+            // a simple member access, so this will always complete immediately.
             ClientCertState = ListenerClientCertState.Completed;
             asyncResult.InvokeCallback(GetClientCertificate());
 
