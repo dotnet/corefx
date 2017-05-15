@@ -104,5 +104,18 @@ namespace System
         {
            ThrowsAny(typeof(TFirstExceptionType), typeof(TSecondExceptionType), action);
         }
+
+        public static void ThrowsIf<T>(Action action, bool condition)
+            where T : Exception
+        {
+            if (condition)
+            {
+                Assert.Throws<T>(action);
+            }
+            else
+            {
+                action();
+            }
+        }
     }
 }
