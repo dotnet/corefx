@@ -30,7 +30,7 @@ namespace System.Net
         public CookieCollection Cookies
         {
             get => _cookies ?? (_cookies = new CookieCollection());
-            set =>_cookies = value;
+            set => _cookies = value;
         }
 
         public void AddHeader(string name, string value)

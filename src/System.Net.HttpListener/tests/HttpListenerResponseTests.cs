@@ -24,6 +24,7 @@ namespace System.Net.Tests
 
         public void Dispose()
         {
+            Message?.Dispose();
             Factory.Dispose();
             Client.Dispose();
         }
