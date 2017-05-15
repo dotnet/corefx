@@ -10,7 +10,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private static bool IsLocalDBEnvironmentSet() => DataTestUtility.IsLocalDBInstalled();
 
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet), Skip = "MSSQLLocalDB not setup")]
         public static void LocalDBConnectionTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB");
@@ -19,7 +19,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             OpenConnection(builder.ConnectionString);
         }
 
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet), Skip = "MSSQLLocalDB not setup")]
         public static void LocalDBMarsTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB;");
@@ -29,7 +29,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             OpenConnection(builder.ConnectionString);
         }
 
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet), Skip = "MSSQLLocalDB not setup")]
         public static void InvalidDBTest()
         {
             using (var connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLOCALDB;Database=DOES_NOT_EXIST;Pooling=false;"))
