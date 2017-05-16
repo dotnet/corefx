@@ -7,7 +7,6 @@ using Xunit;
 
 namespace System.IO
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Access Control List (ACL) APIs are part of resource management on Windows and are not supported on this platform.")]
     public class FileSystemAclExtensionsTests
     {
         [Fact]
