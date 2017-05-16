@@ -13,9 +13,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         public static readonly string NpConnStr = null;
         public static readonly string TcpConnStr = null;
-        private static Assembly s_systemDotData = typeof(System.Data.SqlClient.SqlConnection).GetTypeInfo().Assembly;
-        private static Type s_tdsParserStateObjectFactory = s_systemDotData.GetType("System.Data.SqlClient.TdsParserStateObjectFactory");
-        private static PropertyInfo s_useManagedSNI = s_tdsParserStateObjectFactory.GetProperty("UseManagedSNI", BindingFlags.Static | BindingFlags.Public);
+        private static readonly Assembly s_systemDotData = typeof(System.Data.SqlClient.SqlConnection).GetTypeInfo().Assembly;
+        private static readonly Type s_tdsParserStateObjectFactory = s_systemDotData.GetType("System.Data.SqlClient.TdsParserStateObjectFactory");
+        private static readonly PropertyInfo s_useManagedSNI = s_tdsParserStateObjectFactory.GetProperty("UseManagedSNI", BindingFlags.Static | BindingFlags.Public);
 
         static DataTestUtility()
         {
