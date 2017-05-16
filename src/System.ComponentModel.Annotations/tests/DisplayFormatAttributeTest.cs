@@ -65,30 +65,30 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new object[] { "" };
             yield return new object[] { " \r \t \n " };
             yield return new object[] { "abc" };
+            yield return new object[] { "NullDisplayText" };
         }
 
         [Theory]
         [MemberData(nameof(Strings_TestData))]
-        [InlineData("NullDisplayText")]
         public void NullDisplayText_Get_Set(string input)
         {
             DisplayFormatAttribute attribute = new DisplayFormatAttribute();
             attribute.NullDisplayText = input;
 
             Assert.Equal(input, attribute.NullDisplayText);
-            Assert.Equal(input == null, attribute.GetNullDisplayText() == null);
+            Assert.NotNull(attribute.GetNullDisplayText());
 
             // Set again, to cover the setter avoiding operations if the value is the same
             attribute.NullDisplayText = input;
             Assert.Equal(input, attribute.NullDisplayText);
         }
 
-        public class FakeResourceType 
+        public class FakeResourceType
         {
             public static string Resource1
             {
                 get { return "Resource1Text"; }
-            }    
+            }
 
             public static string Resource2
             {
@@ -108,8 +108,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public void NullDisplayText_WithResource()
         {
-			DisplayFormatAttribute attribute = new DisplayFormatAttribute();
-			attribute.NullDisplayTextResourceType = typeof(FakeResourceType);
+            DisplayFormatAttribute attribute = new DisplayFormatAttribute();
+            attribute.NullDisplayTextResourceType = typeof(FakeResourceType);
 
             attribute.NullDisplayText = "Resource1";
             Assert.Equal(FakeResourceType.Resource1, attribute.GetNullDisplayText());
@@ -117,6 +117,17 @@ namespace System.ComponentModel.DataAnnotations.Tests
             // Changing target resource
             attribute.NullDisplayText = "Resource2";
             Assert.Equal(FakeResourceType.Resource2, attribute.GetNullDisplayText());
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(FakeResourceType))]
+        public void GetNullDisplayText_WhenNullDisplayTextNotSet(Type input)
+        {
+            DisplayFormatAttribute attribute = new DisplayFormatAttribute();
+            attribute.NullDisplayTextResourceType = input;
+
+            Assert.Null(attribute.GetNullDisplayText());
         }
     }
 }

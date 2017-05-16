@@ -13,8 +13,8 @@ namespace System.ComponentModel.DataAnnotations
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class DisplayFormatAttribute : Attribute
     {
-        private readonly LocalizableString nullDisplayText = new LocalizableString("NulLDisplayText");
-        private Type resourceType;
+        private readonly LocalizableString _nullDisplayText = new LocalizableString("NullDisplayText");
+        private Type _nullDisplayTextResourceType;
 
         /// <summary>
         ///     Default constructor
@@ -31,11 +31,10 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public string DataFormatString { get; set; }
 
-
         /// <summary>
         ///     Gets or sets the string to display when the value is null, which may be a resource key string.
         ///     <para>
-        ///         Consumers must use the <see cref="GetNullDisplayText" /> method to retrieve the UI display string.
+        ///         Consumers should use the <see cref="GetNullDisplayText" /> method to retrieve the UI display string.
         ///     </para>
         /// </summary>
         /// <remarks>
@@ -53,12 +52,12 @@ namespace System.ComponentModel.DataAnnotations
         /// </value>
         public string NullDisplayText
         {
-            get { return nullDisplayText.Value; }
+            get { return _nullDisplayText.Value; }
             set
             {
-                if (nullDisplayText.Value != value)
+                if (_nullDisplayText.Value != value)
                 {
-                    nullDisplayText.Value = value;
+                    _nullDisplayText.Value = value;
                 }
             }
         }
@@ -78,20 +77,20 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public bool HtmlEncode { get; set; }
 
-        /// <summary>
-        ///     Gets or sets the <see cref="System.Type" /> that contains the resources for <see cref="NullDisplayText" />.
-        ///     Using <see cref="NullDisplayTextResourceType" /> along with this property, allows the <see cref="GetNullDisplayText" />
-        ///     method to return localized values.
-        /// </summary>
-        public Type NullDisplayTextResourceType
+		/// <summary>
+		///     Gets or sets the <see cref="System.Type" /> that contains the resources for <see cref="NullDisplayText" />.
+		///     Using <see cref="NullDisplayTextResourceType" /> along with <see cref="NullDisplayText" />, allows the <see cref="GetNullDisplayText" />
+		///     method to return localized values.
+		/// </summary>
+		public Type NullDisplayTextResourceType
         {
-            get { return resourceType; }
+            get { return _nullDisplayTextResourceType; }
             set
             {
-                if (resourceType != value)
+                if (_nullDisplayTextResourceType != value)
                 {
-                    resourceType = value;
-                    nullDisplayText.ResourceType = value;
+                    _nullDisplayTextResourceType = value;
+                    _nullDisplayText.ResourceType = value;
                 }
             }
         }
@@ -112,8 +111,7 @@ namespace System.ComponentModel.DataAnnotations
         ///         represents a resource key within that resource type, then the localized value will be returned.
         ///     </para>
         ///     <para>
-        ///         Can return <c>null</c> and will not fall back onto other values, as it's more likely for the
-        ///         consumer to want to fall back onto the property name.
+        ///         When <see cref="NullDisplayText" /> and <see cref="NullDisplayTextResourceType" /> have not been set, returns <c>null</c>.
         ///     </para>
         /// </returns>
         /// <exception cref="System.InvalidOperationException">
@@ -123,7 +121,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </exception>
         public string GetNullDisplayText()
         {
-            return nullDisplayText.GetLocalizableValue();
+            return _nullDisplayText.GetLocalizableValue();
         }
     }
 }
