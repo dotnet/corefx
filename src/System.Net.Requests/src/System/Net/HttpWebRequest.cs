@@ -1022,11 +1022,6 @@ namespace System.Net
         {
             CheckAbort();
 
-            if (RequestSubmitted)
-            {
-                throw new InvalidOperationException(SR.net_reqsubmitted);
-            }
-
             // Match Desktop behavior: prevent someone from getting a request stream
             // if the protocol verb/method doesn't support it. Note that this is not
             // entirely compliant RFC2616 for the aforementioned compatibility reasons.
@@ -1035,6 +1030,11 @@ namespace System.Net
                 string.Equals("CONNECT", _originVerb, StringComparison.OrdinalIgnoreCase))
             {
                 throw new ProtocolViolationException(SR.net_nouploadonget);
+            }
+
+            if (RequestSubmitted)
+            {
+                throw new InvalidOperationException(SR.net_reqsubmitted);
             }
 
             _requestStream = new RequestStream();
@@ -1064,7 +1064,7 @@ namespace System.Net
             }
 
             _requestStreamCallback = callback;
-            _requestStreamOperation = GetRequestStreamTask().ToApm(callback, state);
+            _requestStreamOperation = InternalGetRequestStream().ToApm(callback, state);
 
             return _requestStreamOperation.Task;
         }
@@ -1094,30 +1094,6 @@ namespace System.Net
             }
 
             return stream;
-        }
-
-        private Task<Stream> GetRequestStreamTask()
-        {
-            CheckAbort();
-
-            if (RequestSubmitted)
-            {
-                throw new InvalidOperationException(SR.net_reqsubmitted);
-            }
-
-            // Match Desktop behavior: prevent someone from getting a request stream
-            // if the protocol verb/method doesn't support it. Note that this is not
-            // entirely compliant RFC2616 for the aforementioned compatibility reasons.
-            if (string.Equals(HttpMethod.Get.Method, _originVerb, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(HttpMethod.Head.Method, _originVerb, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("CONNECT", _originVerb, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ProtocolViolationException(SR.net_nouploadonget);
-            }
-
-            _requestStream = new RequestStream();
-
-            return Task.FromResult((Stream)_requestStream);
         }
 
         private async Task<WebResponse> SendRequest()
