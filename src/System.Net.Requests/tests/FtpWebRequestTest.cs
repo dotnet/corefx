@@ -70,7 +70,7 @@ namespace System.Net.Tests
         public void GetResponse_ConnectFailure_ThrowsWebException()
         {
             // This is an invalid IP address, so we should fail to connect.
-            string serverUrl = "ftp://192.0.2.1/";
+            string serverUrl = "ftp://127.0.0.1/";
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
             WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
             Assert.Equal(WebExceptionStatus.ConnectFailure, ex.Status);
