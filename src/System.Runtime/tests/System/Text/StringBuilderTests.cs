@@ -9,6 +9,7 @@ using Xunit;
 
 namespace System.Text.Tests
 {
+    [Collection("CultureTestCollection")]
     public static partial class StringBuilderTests
     {
         private static readonly string s_chunkSplitSource = new string('a', 30);

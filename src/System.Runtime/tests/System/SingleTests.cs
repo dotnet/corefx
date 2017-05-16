@@ -9,6 +9,7 @@ using Xunit;
 
 namespace System.Tests
 {
+    [Collection("CultureTestCollection")]
     public static class SingleTests
     {
         [Fact]

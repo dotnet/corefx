@@ -485,7 +485,7 @@ namespace System.Reflection.Tests
 
         private static Assembly LoadSystemCollectionsAssembly()
         {
-            // Force System.collections to be linkedally
+            // Force System.collections to be linked statically
             List<int> li = new List<int>();
             li.Add(1);
             return Assembly.Load(new AssemblyName(typeof(List<int>).GetTypeInfo().Assembly.FullName));
