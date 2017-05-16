@@ -49,42 +49,7 @@ namespace System.Xml
             }
 
             WebResponse resp = await Task<WebResponse>.Factory.FromAsync(req.BeginGetResponse, req.EndGetResponse, null).ConfigureAwait(false);
-            HttpWebRequest webReq = req as HttpWebRequest;
-            if (webReq != null)
-            {
-                lock (this)
-                {
-                    if (_connections == null)
-                    {
-                        _connections = new Hashtable();
-                    }
-                    OpenedHost openedHost = (OpenedHost)_connections[webReq.Address.Host];
-                    if (openedHost == null)
-                    {
-                        openedHost = new OpenedHost();
-                    }
-
-                    if (openedHost.nonCachedConnectionsCount < webReq.ServicePoint.ConnectionLimit - 1)
-                    {
-                        // we are not close to connection limit -> don't cache the stream
-                        if (openedHost.nonCachedConnectionsCount == 0)
-                        {
-                            _connections.Add(webReq.Address.Host, openedHost);
-                        }
-                        openedHost.nonCachedConnectionsCount++;
-                        return new XmlRegisteredNonCachedStream(resp.GetResponseStream(), this, webReq.Address.Host);
-                    }
-                    else
-                    {
-                        // cache the stream and save the connection for the next request
-                        return new XmlCachedStream(resp.ResponseUri, resp.GetResponseStream());
-                    }
-                }
-            }
-            else
-            {
-                return resp.GetResponseStream();
-            }
+            return resp.GetResponseStream();
         }
     }
 }
