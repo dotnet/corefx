@@ -488,7 +488,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Enable();
                     using (var client = new HttpClient())
                     {
-                        var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                     }
 
                     Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
