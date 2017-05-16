@@ -25,7 +25,7 @@ public static partial class XmlSerializerTests
     {
         if (!PlatformDetection.IsFullFramework)
         {
-            MethodInfo method = typeof(XmlSerializer).GetMethod(SerializationModeSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo method = typeof(XmlSerializer).GetMethod(SerializationModeSetterName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             Assert.True(method != null, $"No method named {SerializationModeSetterName}");
             method.Invoke(null, new object[] { 1 });
         }

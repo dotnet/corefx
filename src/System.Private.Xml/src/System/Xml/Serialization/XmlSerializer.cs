@@ -121,14 +121,22 @@ namespace System.Xml.Serialization
     /// </devdoc>
     public class XmlSerializer
     {
+#if uapaot
+        public enum SerializationMode
+#else
         internal enum SerializationMode
+#endif
         {
             CodeGenOnly,
             ReflectionOnly,
             ReflectionAsBackup
         }
 
+#if uapaot
+        public static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
+#else
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
+#endif
 
         private static bool ReflectionMethodEnabled
         {
