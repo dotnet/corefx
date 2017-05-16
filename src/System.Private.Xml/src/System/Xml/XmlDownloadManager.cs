@@ -47,8 +47,15 @@ namespace System.Xml
             {
                 req.CachePolicy = cachePolicy;
             }
-            WebResponse resp = req.GetResponse();
-            return resp.GetResponseStream();
+
+            using (WebResponse resp = req.GetResponse())
+            using (Stream respStream = resp.GetResponseStream())
+            {
+                var result = new MemoryStream();
+                respStream.CopyTo(result);
+                result.Position = 0;
+                return result;
+            }
         }
     }
 }

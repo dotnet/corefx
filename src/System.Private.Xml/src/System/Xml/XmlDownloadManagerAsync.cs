@@ -48,8 +48,14 @@ namespace System.Xml
                 req.CachePolicy = cachePolicy;
             }
 
-            WebResponse resp = await Task<WebResponse>.Factory.FromAsync(req.BeginGetResponse, req.EndGetResponse, null).ConfigureAwait(false);
-            return resp.GetResponseStream();
+            using (WebResponse resp = await req.GetResponseAsync().ConfigureAwait(false))
+            using (Stream respStream = resp.GetResponseStream())
+            {
+                var result = new MemoryStream();
+                await respStream.CopyToAsync(result).ConfigureAwait(false);
+                result.Position = 0;
+                return result;
+            }
         }
     }
 }
