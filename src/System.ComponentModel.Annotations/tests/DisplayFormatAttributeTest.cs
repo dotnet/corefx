@@ -19,7 +19,9 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             Assert.Null(attribute.DataFormatString);
             Assert.Null(attribute.NullDisplayText);
+#if netcoreapp
             Assert.Null(attribute.NullDisplayTextResourceType);
+#endif
         }
 
         [Theory]
@@ -76,13 +78,16 @@ namespace System.ComponentModel.DataAnnotations.Tests
             attribute.NullDisplayText = input;
 
             Assert.Equal(input, attribute.NullDisplayText);
+#if netcoreapp
             Assert.NotNull(attribute.GetNullDisplayText());
+#endif
 
             // Set again, to cover the setter avoiding operations if the value is the same
             attribute.NullDisplayText = input;
             Assert.Equal(input, attribute.NullDisplayText);
         }
 
+#if netcoreapp
         public class FakeResourceType
         {
             public static string Resource1
@@ -129,5 +134,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             Assert.Null(attribute.GetNullDisplayText());
         }
+#endif
     }
 }
