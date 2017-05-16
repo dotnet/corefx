@@ -91,7 +91,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Enable( s => !s.Contains("HttpRequestOut"));
                     using (var client = new HttpClient())
                     {
-                        var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                     }
 
                     Assert.True(requestLogged, "Request was not logged.");
@@ -150,10 +150,11 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
                                     (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
-                            Task response = client.GetAsync(url);
+                            Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 
                             AssertNoHeadersAreInjected(requestLines.Result);
+                            response.Result.Dispose();
                         }).Wait();
                     }
 
@@ -357,10 +358,11 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
                                 (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
-                            Task response = client.GetAsync(url);
+                            Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 
                             AssertHeadersAreInjected(requestLines.Result, parentActivity);
+                            response.Result.Dispose();
                         }).Wait();
                     }
 
@@ -406,7 +408,7 @@ namespace System.Net.Http.Functional.Tests
                     });
                     using (var client = new HttpClient())
                     {
-                        var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                     }
                     Assert.False(activityStartLogged, "HttpRequestOut.Start was logged while URL disabled.");
                     // Poll with a timeout since logging response is not synchronized with returning a response.
@@ -565,7 +567,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Enable(s => s.Equals("System.Net.Http.HttpRequestOut"));
                     using (var client = new HttpClient())
                     {
-                        var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
                     WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1),
