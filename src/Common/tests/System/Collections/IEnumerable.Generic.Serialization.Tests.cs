@@ -17,7 +17,7 @@ namespace System.Collections.Tests
             IEnumerable<T> expected = GenericIEnumerableFactory(count);
 
             // Not all IEnumerables are intended to be Serializable
-            if(!expected.GetType().IsSerializable)
+            if (!expected.GetType().IsSerializable)
             {
                 return;
             }
