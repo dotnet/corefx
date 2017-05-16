@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
+    [Collection("CultureTestCollection")]
     public static partial class DecimalTests
     {
         [Fact]
