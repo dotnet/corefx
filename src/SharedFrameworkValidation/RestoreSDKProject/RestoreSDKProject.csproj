@@ -61,14 +61,4 @@
     <Copy SourceFiles="%(ReferencePath.Identity)" DestinationFolder="$(_MetaPackageDestinationFolder)" />
   </Target>
 
-  <Target Name="CopyNETCoreAppVersionsFile" DependsOnTargets="ResolveLockFileCopyLocalProjectDeps" BeforeTargets="CoreCompile">
-    <PropertyGroup>
-        <NETCoreAppVersionsFilePath Condition="$([System.String]::new('%(FileDefinitions.Identity)').Contains('Microsoft.NETCore.App.versions.txt'))">%(FileDefinitions.ResolvedPath)</NETCoreAppVersionsFilePath>
-    </PropertyGroup>
-
-    <Warning Condition="!Exists('$(NETCoreAppVersionsFilePath)')" Text="Failed to get path to Microsoft.NETCore.app.versions.txt file" />
-
-    <Copy SourceFiles="$(NETCoreAppVersionsFilePath)" DestinationFolder="$(_MetaPackageDestinationFolder)" Condition="Exists('$(NETCoreAppVersionsFilePath)')" />
-  </Target>
-
 </Project>
