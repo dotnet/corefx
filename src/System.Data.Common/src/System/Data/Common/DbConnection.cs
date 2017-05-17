@@ -35,6 +35,8 @@ namespace System.Data.Common
         /// </summary>
         protected virtual DbProviderFactory DbProviderFactory => null;
 
+        internal DbProviderFactory ProviderFactory=>DbProviderFactory;
+
         [Browsable(false)]
         public abstract string ServerVersion { get; }
 
