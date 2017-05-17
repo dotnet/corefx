@@ -405,123 +405,123 @@ namespace System.Data.SqlClient
             schemaTable.Locale = CultureInfo.InvariantCulture;
             schemaTable.MinimumCapacity = md.Length;
 
-            DataColumn ColumnName = new DataColumn(SchemaTableColumn.ColumnName, typeof(System.String));
-            DataColumn Ordinal = new DataColumn(SchemaTableColumn.ColumnOrdinal, typeof(System.Int32));
-            DataColumn Size = new DataColumn(SchemaTableColumn.ColumnSize, typeof(System.Int32));
-            DataColumn Precision = new DataColumn(SchemaTableColumn.NumericPrecision, typeof(System.Int16));
-            DataColumn Scale = new DataColumn(SchemaTableColumn.NumericScale, typeof(System.Int16));
+            DataColumn columnName = new DataColumn(SchemaTableColumn.ColumnName, typeof(System.String));
+            DataColumn ordinal = new DataColumn(SchemaTableColumn.ColumnOrdinal, typeof(System.Int32));
+            DataColumn size = new DataColumn(SchemaTableColumn.ColumnSize, typeof(System.Int32));
+            DataColumn precision = new DataColumn(SchemaTableColumn.NumericPrecision, typeof(System.Int16));
+            DataColumn scale = new DataColumn(SchemaTableColumn.NumericScale, typeof(System.Int16));
 
-            DataColumn DataType = new DataColumn(SchemaTableColumn.DataType, typeof(System.Type));
-            DataColumn ProviderSpecificDataType = new DataColumn(SchemaTableOptionalColumn.ProviderSpecificDataType, typeof(System.Type));
-            DataColumn NonVersionedProviderType = new DataColumn(SchemaTableColumn.NonVersionedProviderType, typeof(System.Int32));
-            DataColumn ProviderType = new DataColumn(SchemaTableColumn.ProviderType, typeof(System.Int32));
+            DataColumn dataType = new DataColumn(SchemaTableColumn.DataType, typeof(System.Type));
+            DataColumn providerSpecificDataType = new DataColumn(SchemaTableOptionalColumn.ProviderSpecificDataType, typeof(System.Type));
+            DataColumn nonVersionedProviderType = new DataColumn(SchemaTableColumn.NonVersionedProviderType, typeof(System.Int32));
+            DataColumn providerType = new DataColumn(SchemaTableColumn.ProviderType, typeof(System.Int32));
 
-            DataColumn IsLong = new DataColumn(SchemaTableColumn.IsLong, typeof(System.Boolean));
-            DataColumn AllowDBNull = new DataColumn(SchemaTableColumn.AllowDBNull, typeof(System.Boolean));
-            DataColumn IsReadOnly = new DataColumn(SchemaTableOptionalColumn.IsReadOnly, typeof(System.Boolean));
-            DataColumn IsRowVersion = new DataColumn(SchemaTableOptionalColumn.IsRowVersion, typeof(System.Boolean));
+            DataColumn isLong = new DataColumn(SchemaTableColumn.IsLong, typeof(System.Boolean));
+            DataColumn allowDBNull = new DataColumn(SchemaTableColumn.AllowDBNull, typeof(System.Boolean));
+            DataColumn isReadOnly = new DataColumn(SchemaTableOptionalColumn.IsReadOnly, typeof(System.Boolean));
+            DataColumn isRowVersion = new DataColumn(SchemaTableOptionalColumn.IsRowVersion, typeof(System.Boolean));
 
-            DataColumn IsUnique = new DataColumn(SchemaTableColumn.IsUnique, typeof(System.Boolean));
-            DataColumn IsKey = new DataColumn(SchemaTableColumn.IsKey, typeof(System.Boolean));
-            DataColumn IsAutoIncrement = new DataColumn(SchemaTableOptionalColumn.IsAutoIncrement, typeof(System.Boolean));
-            DataColumn IsHidden = new DataColumn(SchemaTableOptionalColumn.IsHidden, typeof(System.Boolean));
+            DataColumn isUnique = new DataColumn(SchemaTableColumn.IsUnique, typeof(System.Boolean));
+            DataColumn isKey = new DataColumn(SchemaTableColumn.IsKey, typeof(System.Boolean));
+            DataColumn isAutoIncrement = new DataColumn(SchemaTableOptionalColumn.IsAutoIncrement, typeof(System.Boolean));
+            DataColumn isHidden = new DataColumn(SchemaTableOptionalColumn.IsHidden, typeof(System.Boolean));
 
-            DataColumn BaseCatalogName = new DataColumn(SchemaTableOptionalColumn.BaseCatalogName, typeof(System.String));
-            DataColumn BaseSchemaName = new DataColumn(SchemaTableColumn.BaseSchemaName, typeof(System.String));
-            DataColumn BaseTableName = new DataColumn(SchemaTableColumn.BaseTableName, typeof(System.String));
-            DataColumn BaseColumnName = new DataColumn(SchemaTableColumn.BaseColumnName, typeof(System.String));
+            DataColumn baseCatalogName = new DataColumn(SchemaTableOptionalColumn.BaseCatalogName, typeof(System.String));
+            DataColumn baseSchemaName = new DataColumn(SchemaTableColumn.BaseSchemaName, typeof(System.String));
+            DataColumn baseTableName = new DataColumn(SchemaTableColumn.BaseTableName, typeof(System.String));
+            DataColumn baseColumnName = new DataColumn(SchemaTableColumn.BaseColumnName, typeof(System.String));
 
             // unique to SqlClient
-            DataColumn BaseServerName = new DataColumn(SchemaTableOptionalColumn.BaseServerName, typeof(System.String));
-            DataColumn IsAliased = new DataColumn(SchemaTableColumn.IsAliased, typeof(System.Boolean));
-            DataColumn IsExpression = new DataColumn(SchemaTableColumn.IsExpression, typeof(System.Boolean));
-            DataColumn IsIdentity = new DataColumn("IsIdentity", typeof(System.Boolean));
-            DataColumn DataTypeName = new DataColumn("DataTypeName", typeof(System.String));
-            DataColumn UdtAssemblyQualifiedName = new DataColumn("UdtAssemblyQualifiedName", typeof(System.String));
+            DataColumn baseServerName = new DataColumn(SchemaTableOptionalColumn.BaseServerName, typeof(System.String));
+            DataColumn isAliased = new DataColumn(SchemaTableColumn.IsAliased, typeof(System.Boolean));
+            DataColumn isExpression = new DataColumn(SchemaTableColumn.IsExpression, typeof(System.Boolean));
+            DataColumn isIdentity = new DataColumn("IsIdentity", typeof(System.Boolean));
+            DataColumn dataTypeName = new DataColumn("DataTypeName", typeof(System.String));
+            DataColumn udtAssemblyQualifiedName = new DataColumn("UdtAssemblyQualifiedName", typeof(System.String));
             // Xml metadata specific
-            DataColumn XmlSchemaCollectionDatabase = new DataColumn("XmlSchemaCollectionDatabase", typeof(System.String));
-            DataColumn XmlSchemaCollectionOwningSchema = new DataColumn("XmlSchemaCollectionOwningSchema", typeof(System.String));
-            DataColumn XmlSchemaCollectionName = new DataColumn("XmlSchemaCollectionName", typeof(System.String));
+            DataColumn xmlSchemaCollectionDatabase = new DataColumn("XmlSchemaCollectionDatabase", typeof(System.String));
+            DataColumn xmlSchemaCollectionOwningSchema = new DataColumn("XmlSchemaCollectionOwningSchema", typeof(System.String));
+            DataColumn xmlSchemaCollectionName = new DataColumn("XmlSchemaCollectionName", typeof(System.String));
             // SparseColumnSet
-            DataColumn IsColumnSet = new DataColumn("IsColumnSet", typeof(System.Boolean));
+            DataColumn isColumnSet = new DataColumn("IsColumnSet", typeof(System.Boolean));
 
-            Ordinal.DefaultValue = 0;
-            IsLong.DefaultValue = false;
+            ordinal.DefaultValue = 0;
+            isLong.DefaultValue = false;
 
             DataColumnCollection columns = schemaTable.Columns;
 
             // must maintain order for backward compatibility
-            columns.Add(ColumnName);
-            columns.Add(Ordinal);
-            columns.Add(Size);
-            columns.Add(Precision);
-            columns.Add(Scale);
-            columns.Add(IsUnique);
-            columns.Add(IsKey);
-            columns.Add(BaseServerName);
-            columns.Add(BaseCatalogName);
-            columns.Add(BaseColumnName);
-            columns.Add(BaseSchemaName);
-            columns.Add(BaseTableName);
-            columns.Add(DataType);
-            columns.Add(AllowDBNull);
-            columns.Add(ProviderType);
-            columns.Add(IsAliased);
-            columns.Add(IsExpression);
-            columns.Add(IsIdentity);
-            columns.Add(IsAutoIncrement);
-            columns.Add(IsRowVersion);
-            columns.Add(IsHidden);
-            columns.Add(IsLong);
-            columns.Add(IsReadOnly);
-            columns.Add(ProviderSpecificDataType);
-            columns.Add(DataTypeName);
-            columns.Add(XmlSchemaCollectionDatabase);
-            columns.Add(XmlSchemaCollectionOwningSchema);
-            columns.Add(XmlSchemaCollectionName);
-            columns.Add(UdtAssemblyQualifiedName);
-            columns.Add(NonVersionedProviderType);
-            columns.Add(IsColumnSet);
+            columns.Add(columnName);
+            columns.Add(ordinal);
+            columns.Add(size);
+            columns.Add(precision);
+            columns.Add(scale);
+            columns.Add(isUnique);
+            columns.Add(isKey);
+            columns.Add(baseServerName);
+            columns.Add(baseCatalogName);
+            columns.Add(baseColumnName);
+            columns.Add(baseSchemaName);
+            columns.Add(baseTableName);
+            columns.Add(dataType);
+            columns.Add(allowDBNull);
+            columns.Add(providerType);
+            columns.Add(isAliased);
+            columns.Add(isExpression);
+            columns.Add(isIdentity);
+            columns.Add(isAutoIncrement);
+            columns.Add(isRowVersion);
+            columns.Add(isHidden);
+            columns.Add(isLong);
+            columns.Add(isReadOnly);
+            columns.Add(providerSpecificDataType);
+            columns.Add(dataTypeName);
+            columns.Add(xmlSchemaCollectionDatabase);
+            columns.Add(xmlSchemaCollectionOwningSchema);
+            columns.Add(xmlSchemaCollectionName);
+            columns.Add(udtAssemblyQualifiedName);
+            columns.Add(nonVersionedProviderType);
+            columns.Add(isColumnSet);
 
             for (int i = 0; i < md.Length; i++)
             {
                 _SqlMetaData col = md[i];
                 DataRow schemaRow = schemaTable.NewRow();
 
-                schemaRow[ColumnName] = col.column;
-                schemaRow[Ordinal] = col.ordinal;
+                schemaRow[columnName] = col.column;
+                schemaRow[ordinal] = col.ordinal;
                 //
                 // be sure to return character count for string types, byte count otherwise
                 // col.length is always byte count so for unicode types, half the length
                 //
                 // For MAX and XML datatypes, we get 0x7fffffff from the server. Do not divide this.
-                schemaRow[Size] = (col.metaType.IsSizeInCharacters && (col.length != 0x7fffffff)) ? (col.length / 2) : col.length;
+                schemaRow[size] = (col.metaType.IsSizeInCharacters && (col.length != 0x7fffffff)) ? (col.length / 2) : col.length;
                 
 
-                schemaRow[DataType] = GetFieldTypeInternal(col);
-                schemaRow[ProviderSpecificDataType] = GetProviderSpecificFieldTypeInternal(col);
-                schemaRow[NonVersionedProviderType] = (int)col.type; // SqlDbType enum value - does not change with TypeSystem.
-                schemaRow[DataTypeName] = GetDataTypeNameInternal(col);
+                schemaRow[dataType] = GetFieldTypeInternal(col);
+                schemaRow[providerSpecificDataType] = GetProviderSpecificFieldTypeInternal(col);
+                schemaRow[nonVersionedProviderType] = (int)col.type; // SqlDbType enum value - does not change with TypeSystem.
+                schemaRow[dataTypeName] = GetDataTypeNameInternal(col);
 
                 if (_typeSystem <= SqlConnectionString.TypeSystem.SQLServer2005 && col.IsNewKatmaiDateTimeType)
                 {
-                    schemaRow[ProviderType] = SqlDbType.NVarChar;
+                    schemaRow[providerType] = SqlDbType.NVarChar;
                     switch (col.type)
                     {
                         case SqlDbType.Date:
-                            schemaRow[Size] = TdsEnums.WHIDBEY_DATE_LENGTH;
+                            schemaRow[size] = TdsEnums.WHIDBEY_DATE_LENGTH;
                             break;
                         case SqlDbType.Time:
                             Debug.Assert(TdsEnums.UNKNOWN_PRECISION_SCALE == col.scale || (0 <= col.scale && col.scale <= 7), "Invalid scale for Time column: " + col.scale);
-                            schemaRow[Size] = TdsEnums.WHIDBEY_TIME_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
+                            schemaRow[size] = TdsEnums.WHIDBEY_TIME_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
                             break;
                         case SqlDbType.DateTime2:
                             Debug.Assert(TdsEnums.UNKNOWN_PRECISION_SCALE == col.scale || (0 <= col.scale && col.scale <= 7), "Invalid scale for DateTime2 column: " + col.scale);
-                            schemaRow[Size] = TdsEnums.WHIDBEY_DATETIME2_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
+                            schemaRow[size] = TdsEnums.WHIDBEY_DATETIME2_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
                             break;
                         case SqlDbType.DateTimeOffset:
                             Debug.Assert(TdsEnums.UNKNOWN_PRECISION_SCALE == col.scale || (0 <= col.scale && col.scale <= 7), "Invalid scale for DateTimeOffset column: " + col.scale);
-                            schemaRow[Size] = TdsEnums.WHIDBEY_DATETIMEOFFSET_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
+                            schemaRow[size] = TdsEnums.WHIDBEY_DATETIMEOFFSET_LENGTH[TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale ? col.scale : col.metaType.Scale];
                             break;
                     }
                 }
@@ -529,12 +529,12 @@ namespace System.Data.SqlClient
                 {
                     if (_typeSystem == SqlConnectionString.TypeSystem.SQLServer2005)
                     {
-                        schemaRow[ProviderType] = SqlDbType.VarBinary;
+                        schemaRow[providerType] = SqlDbType.VarBinary;
                     }
                     else
                     {
                         // TypeSystem.SQLServer2000
-                        schemaRow[ProviderType] = SqlDbType.Image;
+                        schemaRow[providerType] = SqlDbType.Image;
                     }
                 }
                 else if (_typeSystem != SqlConnectionString.TypeSystem.SQLServer2000)
@@ -542,19 +542,19 @@ namespace System.Data.SqlClient
                     // TypeSystem.SQLServer2005 and above
 
                     // SqlDbType enum value - always the actual type for SQLServer2005.
-                    schemaRow[ProviderType] = (int)col.type;
+                    schemaRow[providerType] = (int)col.type;
 
                     if (col.type == SqlDbType.Udt)
                     { // Additional metadata for UDTs.
                         Debug.Assert(Connection.IsKatmaiOrNewer, "Invalid Column type received from the server");
-                        schemaRow[UdtAssemblyQualifiedName] = col.udtAssemblyQualifiedName;
+                        schemaRow[udtAssemblyQualifiedName] = col.udtAssemblyQualifiedName;
                     }
                     else if (col.type == SqlDbType.Xml)
                     { // Additional metadata for Xml.
                         Debug.Assert(Connection.IsKatmaiOrNewer, "Invalid DataType (Xml) for the column");
-                        schemaRow[XmlSchemaCollectionDatabase] = col.xmlSchemaCollectionDatabase;
-                        schemaRow[XmlSchemaCollectionOwningSchema] = col.xmlSchemaCollectionOwningSchema;
-                        schemaRow[XmlSchemaCollectionName] = col.xmlSchemaCollectionName;
+                        schemaRow[xmlSchemaCollectionDatabase] = col.xmlSchemaCollectionDatabase;
+                        schemaRow[xmlSchemaCollectionOwningSchema] = col.xmlSchemaCollectionOwningSchema;
+                        schemaRow[xmlSchemaCollectionName] = col.xmlSchemaCollectionName;
                     }
                 }
                 else
@@ -562,86 +562,86 @@ namespace System.Data.SqlClient
                     // TypeSystem.SQLServer2000
 
                     // SqlDbType enum value - variable for certain types when SQLServer2000.
-                    schemaRow[ProviderType] = GetVersionedMetaType(col.metaType).SqlDbType;
+                    schemaRow[providerType] = GetVersionedMetaType(col.metaType).SqlDbType;
                 }
 
                 if (TdsEnums.UNKNOWN_PRECISION_SCALE != col.precision)
                 {
-                    schemaRow[Precision] = col.precision;
+                    schemaRow[precision] = col.precision;
                 }
                 else
                 {
-                    schemaRow[Precision] = col.metaType.Precision;
+                    schemaRow[precision] = col.metaType.Precision;
                 }
 
                 if (_typeSystem <= SqlConnectionString.TypeSystem.SQLServer2005 && col.IsNewKatmaiDateTimeType)
                 {
-                    schemaRow[Scale] = MetaType.MetaNVarChar.Scale;
+                    schemaRow[scale] = MetaType.MetaNVarChar.Scale;
                 }
                 else if (TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale)
                 {
-                    schemaRow[Scale] = col.scale;
+                    schemaRow[scale] = col.scale;
                 }
                 else
                 {
-                    schemaRow[Scale] = col.metaType.Scale;
+                    schemaRow[scale] = col.metaType.Scale;
                 }
 
-                schemaRow[AllowDBNull] = col.isNullable;
+                schemaRow[allowDBNull] = col.isNullable;
 
                 // If no ColInfo token received, do not set value, leave as null.
                 if (_browseModeInfoConsumed)
                 {
-                    schemaRow[IsAliased] = col.isDifferentName;
-                    schemaRow[IsKey] = col.isKey;
-                    schemaRow[IsHidden] = col.isHidden;
-                    schemaRow[IsExpression] = col.isExpression;
+                    schemaRow[isAliased] = col.isDifferentName;
+                    schemaRow[isKey] = col.isKey;
+                    schemaRow[isHidden] = col.isHidden;
+                    schemaRow[isExpression] = col.isExpression;
                 }
 
-                schemaRow[IsIdentity] = col.isIdentity;
-                schemaRow[IsAutoIncrement] = col.isIdentity;
+                schemaRow[isIdentity] = col.isIdentity;
+                schemaRow[isAutoIncrement] = col.isIdentity;
 
                 
-                schemaRow[IsLong] = col.metaType.IsLong;
+                schemaRow[isLong] = col.metaType.IsLong;
                 
                 // mark unique for timestamp columns
                 if (SqlDbType.Timestamp == col.type)
                 {
-                    schemaRow[IsUnique] = true;
-                    schemaRow[IsRowVersion] = true;
+                    schemaRow[isUnique] = true;
+                    schemaRow[isRowVersion] = true;
                 }
                 else
                 {
-                    schemaRow[IsUnique] = false;
-                    schemaRow[IsRowVersion] = false;
+                    schemaRow[isUnique] = false;
+                    schemaRow[isRowVersion] = false;
                 }
 
-                schemaRow[IsReadOnly] = (0 == col.updatability);
-                schemaRow[IsColumnSet] = col.isColumnSet;
+                schemaRow[isReadOnly] = (0 == col.updatability);
+                schemaRow[isColumnSet] = col.isColumnSet;
 
                 if (!string.IsNullOrEmpty(col.serverName))
                 {
-                    schemaRow[BaseServerName] = col.serverName;
+                    schemaRow[baseServerName] = col.serverName;
                 }
                 if (!string.IsNullOrEmpty(col.catalogName))
                 {
-                    schemaRow[BaseCatalogName] = col.catalogName;
+                    schemaRow[baseCatalogName] = col.catalogName;
                 }
                 if (!string.IsNullOrEmpty(col.schemaName))
                 {
-                    schemaRow[BaseSchemaName] = col.schemaName;
+                    schemaRow[baseSchemaName] = col.schemaName;
                 }
                 if (!string.IsNullOrEmpty(col.tableName))
                 {
-                    schemaRow[BaseTableName] = col.tableName;
+                    schemaRow[baseTableName] = col.tableName;
                 }
                 if (!string.IsNullOrEmpty(col.baseColumn))
                 {
-                    schemaRow[BaseColumnName] = col.baseColumn;
+                    schemaRow[baseColumnName] = col.baseColumn;
                 }
                 else if (!string.IsNullOrEmpty(col.column))
                 {
-                    schemaRow[BaseColumnName] = col.column;
+                    schemaRow[baseColumnName] = col.column;
                 }
 
                 schemaTable.Rows.Add(schemaRow);
@@ -1324,7 +1324,7 @@ namespace System.Data.SqlClient
             return GetSqlValues(values);
         }
 
-        override public DataTable GetSchemaTable()
+        public override DataTable GetSchemaTable()
         {
             SqlStatistics statistics = null;
             try
@@ -1334,16 +1334,11 @@ namespace System.Data.SqlClient
                 {
                     if (null != this.MetaData)
                     {
-
                         _metaData.schemaTable = BuildSchemaTable();
                         Debug.Assert(null != _metaData.schemaTable, "No schema information yet!");
                     }
                 }
-                if (null != _metaData)
-                {
-                    return _metaData.schemaTable;
-                }
-                return null;
+                return _metaData?.schemaTable;
             }
             finally
             {

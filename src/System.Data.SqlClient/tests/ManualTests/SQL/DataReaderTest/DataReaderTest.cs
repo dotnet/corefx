@@ -13,7 +13,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void LoadReaderIntoDataTableToTestGetSchemaTable()
         {
-            using(SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr)) {
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
                 connection.Open();
                 var dt = new DataTable();
                 using (SqlCommand command = connection.CreateCommand())
@@ -98,7 +99,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             string selectStatementFormat = selectBuilder.ToString();
             string createStatementFormat = createBuilder.ToString();
-            
+
             // add a row with nulls only
             using (SqlConnection con = new SqlConnection(DataTestUtility.TcpConnStr))
             {
@@ -132,7 +133,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     DataTable schemaTable = reader.GetSchemaTable();
-                    
 
                     for (int i = 0; i < schemaTable.Rows.Count; i++)
                     {
