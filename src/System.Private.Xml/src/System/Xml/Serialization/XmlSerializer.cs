@@ -451,11 +451,11 @@ namespace System.Xml.Serialization
                     }
                     SerializePrimitive(xmlWriter, o, namespaces);
                 }
-#if !uapaot
                 else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
                     SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
                 }
+#if !uapaot
                 else if (_tempAssembly == null || _typedSerializer)
                 {
                     // The contion for the block is never true, thus the block is never hit.
@@ -475,11 +475,7 @@ namespace System.Xml.Serialization
 #else
                 else
                 {
-                    if (ShouldUseReflectionBasedSerialization(_mapping))
-                    {
-                        SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
-                    }
-                    else if (this.innerSerializer != null)
+                    if (this.innerSerializer != null)
                     {
                         if (!string.IsNullOrEmpty(this.DefaultNamespace))
                         {
@@ -595,11 +591,11 @@ namespace System.Xml.Serialization
                     }
                     return DeserializePrimitive(xmlReader, events);
                 }
-#if !uapaot
                 else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
                     return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                 }
+#if !uapaot
                 else if (_tempAssembly == null || _typedSerializer)
                 {
                     XmlSerializationReader reader = CreateReader();
@@ -620,11 +616,7 @@ namespace System.Xml.Serialization
 #else
                 else
                 {
-                    if (ShouldUseReflectionBasedSerialization(_mapping))
-                    {
-                        return DeserializeUsingReflection(xmlReader, encodingStyle, events);
-                    }
-                    else if (this.innerSerializer != null)
+                    if (this.innerSerializer != null)
                     {
                         if (!string.IsNullOrEmpty(this.DefaultNamespace))
                         {
