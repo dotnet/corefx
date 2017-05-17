@@ -21,10 +21,5 @@ namespace Microsoft.Win32.SafeHandles
         {
             SetHandle(preexistingHandle);
         }
-
-        internal void SetHandle(int descriptor)
-        {
-            base.SetHandle((IntPtr)descriptor);
-        }
     }
 }
