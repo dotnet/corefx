@@ -438,6 +438,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
         [InlineData(false, OpenFlags.ReadOnly)]
         [InlineData(true, OpenFlags.ReadOnly)]
         [InlineData(false, OpenFlags.ReadWrite)]
