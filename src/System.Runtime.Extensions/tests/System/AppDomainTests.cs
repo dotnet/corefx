@@ -12,7 +12,7 @@ using Xunit;
 namespace System.Tests
 {
     // No appdomain in UWP or CoreRT
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         private string DestTestAssemblyResolvePath { get; }
@@ -23,6 +23,7 @@ namespace System.Tests
             DestTestAssemblyResolvePath = Path.Combine(base.TestDirectory, "AssemblyResolveTests.dll");
             DestTestAssemblyTPAPath = Path.Combine(base.TestDirectory, "TestAppOutsideOfTPA.exe");
 
+            // There are no additional dlls or executables in .NET Native as they are all merged into one main executable file.
             if (!PlatformDetection.IsNetNative)
             {
                 string sourceTestAssemblyResolvePath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.dll");
@@ -235,7 +236,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")] // Coreclr issue #9914
         public void ExecuteAssembly()
         {
             string name = DestTestAssemblyTPAPath;
@@ -305,7 +306,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[], ...) is not supported in AppX.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[], ...) is not supported in AppX.")] // Coreclr issue #9914
         public void Load()
         {
             AssemblyName assemblyName = typeof(AppDomainTests).Assembly.GetName();
@@ -407,7 +408,7 @@ namespace System.Tests
 #pragma warning restore 618
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")]  // Coreclr issue #9914
         public void GetAssemblies()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -442,7 +443,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyLoad()
         {
             bool AssemblyLoadFlag = false;
@@ -468,7 +469,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "No seperate dll in ILC")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyResolve()
         {
             RemoteInvoke(() =>
@@ -487,7 +488,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "No seperate dll in ILC")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyResolve_RequestingAssembly()
         {
             RemoteInvoke(() =>

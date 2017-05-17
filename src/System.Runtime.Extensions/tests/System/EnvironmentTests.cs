@@ -324,6 +324,8 @@ namespace System.Tests
             }
             else
             {
+                // If you hit this assert it means that SHGetFolderPath inside a UWP has been fixed. 
+                // Check the value is reasonable and update the test data to expect a path from now on.
                 Assert.Empty(knownFolder);
             }
 
