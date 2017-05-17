@@ -13,6 +13,8 @@ using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
+    // No appdomain in UWP or CoreRT
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         public AppDomainTests()
@@ -196,19 +198,19 @@ namespace System.Tests
         [Fact]
         public void ProcessExit_Called()
         {
-            System.IO.File.Delete("success.txt");
-            RemoteInvoke(() =>
+            string path = GetTestFilePath();
+            RemoteInvoke((pathToFile) =>
             {
                 EventHandler handler = (sender, e) => 
                 {
-                    System.IO.File.Create("success.txt");
+                    File.Create(pathToFile);
                 };
 
                 AppDomain.CurrentDomain.ProcessExit += handler;
                 return SuccessExitCode;
-            }).Dispose();
+            }, path).Dispose();
 
-            Assert.True(System.IO.File.Exists("success.txt"));
+            Assert.True(File.Exists(path));
         }
 
         [Fact]
@@ -258,6 +260,18 @@ namespace System.Tests
             Assert.Null(AppDomain.CurrentDomain.GetData(""));  
             AppDomain.CurrentDomain.SetData("randomkey", 4);
             Assert.Equal(4, AppDomain.CurrentDomain.GetData("randomkey"));
+        }
+
+        [Fact]
+        public void SetData_SameKeyMultipleTimes_ReplacesOldValue()
+        {
+            string key = Guid.NewGuid().ToString("N");
+            for (int i = 0; i < 3; i++)
+            {
+                AppDomain.CurrentDomain.SetData(key, i.ToString());
+                Assert.Equal(i.ToString(), AppDomain.CurrentDomain.GetData(key));
+            }
+            AppDomain.CurrentDomain.SetData(key, null);
         }
 
         [Fact]
@@ -412,13 +426,20 @@ namespace System.Tests
             int ctr = 0;
             foreach (var a in assemblies2)
             {
-                if (a.Location == typeof(AppDomain).Assembly.Location)
-                    ctr++;
+                // Dynamic assemblies do not support Location property.
+                if (!a.IsDynamic)
+                {
+                    if (a.Location == typeof(AppDomain).Assembly.Location)
+                        ctr++;
+                }
             }
             foreach (var a in assemblies)
             {
-                if (a.Location == typeof(AppDomain).Assembly.Location)
-                    ctr--;
+                if (!a.IsDynamic)
+                {
+                    if (a.Location == typeof(AppDomain).Assembly.Location)
+                        ctr--;
+                }
             }
             Assert.True(ctr > 0, "Assembly.LoadFile should cause file to be loaded again");
         }

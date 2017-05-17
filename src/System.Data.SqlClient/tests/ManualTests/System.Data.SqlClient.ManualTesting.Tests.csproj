@@ -6,9 +6,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition=" '$(TargetsWindows)' != 'true' ">
-    <DefineConstants>$(DefineConstants);MANAGED_SNI</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
@@ -29,11 +26,6 @@
     <Compile Include="DataCommon\DataTestUtility.cs" />
     <Compile Include="DataCommon\ProxyServer.cs" />
     <Compile Include="DataCommon\SystemDataResourceManager.cs" />
-    <Compile Include="ADO\BaseProviderAsyncTest\BaseProviderAsyncTest.cs" />
-    <Compile Include="ADO\BaseProviderAsyncTest\MockCommand.cs" />
-    <Compile Include="ADO\BaseProviderAsyncTest\MockConnection.cs" />
-    <Compile Include="ADO\BaseProviderAsyncTest\MockDataReader.cs" />
-    <Compile Include="ADO\ParametersTest\ParametersTest.cs" />
     <Compile Include="DDBasics\DDAsyncTest\DDAsyncTest.cs" />
     <Compile Include="DDBasics\DDDataTypesTest\DDDataTypesTest.cs" />
     <Compile Include="DDBasics\DDMARSTest\DDMARSTest.cs" />
@@ -43,6 +35,7 @@
     <Compile Include="SQL\CommandCancelTest\CommandCancelTest.cs" />
     <Compile Include="SQL\ConnectionPoolTest\ConnectionPoolTest.cs" />
     <Compile Include="SQL\ConnectivityTests\ConnectivityTest.cs" />
+    <Compile Include="SQL\DataReaderTest\DataReaderTest.cs" />
     <Compile Include="SQL\ExceptionTest\ExceptionTest.cs" />
     <Compile Include="SQL\DataStreamTest\DataStreamTest.cs" />
     <Compile Include="SQL\DateTimeTest\DateTimeTest.cs" />
@@ -52,6 +45,7 @@
     <Compile Include="SQL\MARSSessionPoolingTest\MARSSessionPoolingTest.cs" />
     <Compile Include="SQL\MARSTest\MARSTest.cs" />
     <Compile Include="SQL\ParallelTransactionsTest\ParallelTransactionsTest.cs" />
+    <Compile Include="SQL\ParametersTest\ParametersTest.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\ErrorOnRowsMarkedAsDeleted.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\Bug84548.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\Bug85007.cs" />

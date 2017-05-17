@@ -62,6 +62,8 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
         {
+            CreateDefaultProcess();
+
             ProcessPriorityClass originalPriority = _process.PriorityClass;
             Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
 
@@ -89,6 +91,8 @@ namespace System.Diagnostics.Tests
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestBasePriorityOnUnix()
         {
+            CreateDefaultProcess();
+            
             ProcessPriorityClass originalPriority = _process.PriorityClass;
             Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
 
@@ -194,6 +198,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestId()
         {
+            CreateDefaultProcess();
+            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.Equal(_process.Id, Interop.GetProcessId(_process.SafeHandle));
@@ -249,6 +255,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMachineName()
         {
+            CreateDefaultProcess();
+            
             // Checking that the MachineName returns some value.
             Assert.NotNull(_process.MachineName);
         }
@@ -263,20 +271,18 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMainModuleOnNonOSX()
         {
-            string fileName = "dotnet";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                fileName = "dotnet.exe";
-
             Process p = Process.GetCurrentProcess();
             Assert.True(p.Modules.Count > 0);
-            Assert.Equal(fileName, p.MainModule.ModuleName);
-            Assert.EndsWith(fileName, p.MainModule.FileName);
-            Assert.Equal(string.Format("System.Diagnostics.ProcessModule ({0})", fileName), p.MainModule.ToString());
+            Assert.Equal(HostRunnerName, p.MainModule.ModuleName);
+            Assert.EndsWith(HostRunnerName, p.MainModule.FileName);
+            Assert.Equal(string.Format("System.Diagnostics.ProcessModule ({0})", HostRunnerName), p.MainModule.ToString());
         }
 
         [Fact]
         public void TestMaxWorkingSet()
         {
+            CreateDefaultProcess();
+            
             using (Process p = Process.GetCurrentProcess())
             {
                 Assert.True((long)p.MaxWorkingSet > 0);
@@ -329,6 +335,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMinWorkingSet()
         {
+            CreateDefaultProcess();
+            
             using (Process p = Process.GetCurrentProcess())
             {
                 Assert.True((long)p.MaxWorkingSet > 0);
@@ -398,6 +406,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestNonpagedSystemMemorySize64()
         {
+            CreateDefaultProcess();
+            
             AssertNonZeroWindowsZeroUnix(_process.NonpagedSystemMemorySize64);
         }
 
@@ -411,6 +421,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPagedMemorySize64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PagedMemorySize64);
         }
 
@@ -424,6 +436,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPagedSystemMemorySize64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PagedSystemMemorySize64);
         }
 
@@ -437,6 +451,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakPagedMemorySize64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PeakPagedMemorySize64);
         }
 
@@ -450,6 +466,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakVirtualMemorySize64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize64);
         }
 
@@ -463,6 +481,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakWorkingSet64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet64);
         }
 
@@ -476,6 +496,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPrivateMemorySize64()
         {
+            CreateDefaultProcess();
+
             AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize64);
         }
 
@@ -489,6 +511,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestVirtualMemorySize64()
         {
+            CreateDefaultProcess();
+
             Assert.True(_process.VirtualMemorySize64 > 0);
         }
 
@@ -502,6 +526,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingSet64()
         {
+            CreateDefaultProcess();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // resident memory can be 0 on OSX.
@@ -522,6 +548,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessorTime()
         {
+            CreateDefaultProcess();
+            
             Assert.True(_process.UserProcessorTime.TotalSeconds >= 0);
             Assert.True(_process.PrivilegedProcessorTime.TotalSeconds >= 0);
 
@@ -560,7 +588,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.TotalProcessorTime);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/974
+        [Fact]
         public void TestProcessStartTime()
         {
             TimeSpan allowedWindow = TimeSpan.FromSeconds(3);
@@ -583,10 +611,12 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.ExitTime);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/968
+        [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // getting/setting affinity not supported on OSX
         public void TestProcessorAffinity()
         {
+            CreateDefaultProcess();
+            
             IntPtr curProcessorAffinity = _process.ProcessorAffinity;
             try
             {
@@ -603,6 +633,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPriorityBoostEnabled()
         {
+            CreateDefaultProcess();
+
             bool isPriorityBoostEnabled = _process.PriorityBoostEnabled;
             try
             {
@@ -633,6 +665,8 @@ namespace System.Diagnostics.Tests
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestPriorityClassUnix()
         {
+            CreateDefaultProcess();
+
             ProcessPriorityClass priorityClass = _process.PriorityClass;
             try
             {
@@ -651,6 +685,8 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestPriorityClassWindows()
         {
+            CreateDefaultProcess();
+
             ProcessPriorityClass priorityClass = _process.PriorityClass;
             try
             {
@@ -666,11 +702,13 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact]
-        public void TestInvalidPriorityClass()
+        [Theory]
+        [InlineData((ProcessPriorityClass)0)]
+        [InlineData(ProcessPriorityClass.Normal | ProcessPriorityClass.Idle)]
+        public void TestInvalidPriorityClass(ProcessPriorityClass priorityClass)
         {
-            Process p = new Process();
-            Assert.Throws<ArgumentException>(() => { p.PriorityClass = ProcessPriorityClass.Normal | ProcessPriorityClass.Idle; });
+            var process = new Process();
+            Assert.Throws<InvalidEnumArgumentException>(() => process.PriorityClass = priorityClass);
         }
 
         [Fact]
@@ -683,7 +721,11 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessName()
         {
-            Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(HostRunner), StringComparer.OrdinalIgnoreCase);
+            CreateDefaultProcess();
+
+            // Processes are not hosted by dotnet in the full .NET Framework.
+            string expected = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(expected), StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -696,6 +738,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestSafeHandle()
         {
+            CreateDefaultProcess();
+
             Assert.False(_process.SafeHandle.IsInvalid);
         }
 
@@ -709,6 +753,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestSessionId()
         {
+            CreateDefaultProcess();
+
             uint sessionId;
 #if TargetsWindows
                 Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
@@ -745,6 +791,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestGetProcessById()
         {
+            CreateDefaultProcess();
+
             Process p = Process.GetProcessById(_process.Id);
             Assert.Equal(_process.Id, p.Id);
             Assert.Equal(_process.ProcessName, p.ProcessName);
@@ -825,12 +873,19 @@ namespace System.Diagnostics.Tests
             Assert.All(processes, process => Assert.Equal(machineName, process.MachineName));
         }
 
-        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
         [MemberData(nameof(MachineName_Remote_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)] // Accessing processes on remote machines is only supported on Windows.
         public void GetProcessesByName_RemoteMachineNameWindows_ReturnsExpected(string machineName)
         {
-            GetProcessesByName_ProcessNameMachineName_ReturnsExpected(machineName);
+            try
+            {
+                GetProcessesByName_ProcessNameMachineName_ReturnsExpected(machineName);
+            }
+            catch (InvalidOperationException)
+            {
+                // As we can't detect reliably if performance counters are enabled 
+                // we let possible InvalidOperationExceptions pass silently.
+            }
         }
 
         [Theory]
@@ -863,44 +918,32 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
         }
 
-        public static IEnumerable<object[]> GetTestProcess()
+        [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
+        public void TestProcessOnRemoteMachineWindows()
         {
-            Process currentProcess = Process.GetCurrentProcess();
-            yield return new object[] { currentProcess, Process.GetProcessById(currentProcess.Id, "127.0.0.1") };
-            yield return new object[] { currentProcess, Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProcess.Id).Single() };
-        }
+            Process currentProccess = Process.GetCurrentProcess();
 
-        private static bool ProcessPerformanceCounterEnabled()
-        {
+            void TestRemoteProccess(Process remoteProcess)
+            {
+                Assert.Equal(currentProccess.Id, remoteProcess.Id);
+                Assert.Equal(currentProccess.BasePriority, remoteProcess.BasePriority);
+                Assert.Equal(currentProccess.EnableRaisingEvents, remoteProcess.EnableRaisingEvents);
+                Assert.Equal("127.0.0.1", remoteProcess.MachineName);
+                // This property throws exception only on remote processes.
+                Assert.Throws<NotSupportedException>(() => remoteProcess.MainModule);
+            }
+
             try
             {
-                using (Microsoft.Win32.RegistryKey perfKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\PerfProc\Performance"))
-                {
-                    if (perfKey == null)
-                        return false;
-                    int? value = (int?)perfKey.GetValue("Disable Performance Counters", null);
-                    return !value.HasValue || value.Value == 0;
-                }
+                TestRemoteProccess(Process.GetProcessById(currentProccess.Id, "127.0.0.1"));
+                TestRemoteProccess(Process.GetProcessesByName(currentProccess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProccess.Id).Single());
             }
-            catch (Exception)
+            catch (InvalidOperationException)
             {
-                // Ignore exceptions, and just assume the counter is disabled.
-                return false;
+                // As we can't detect reliably if performance counters are enabled 
+                // we let possible InvalidOperationExceptions pass silently.
             }
-        }
-
-        [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
-        [MemberData(nameof(GetTestProcess))]
-        public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)
-        {
-            Assert.Equal(currentProcess.Id, remoteProcess.Id);
-            Assert.Equal(currentProcess.BasePriority, remoteProcess.BasePriority);
-            Assert.Equal(currentProcess.EnableRaisingEvents, remoteProcess.EnableRaisingEvents);
-            Assert.Equal("127.0.0.1", remoteProcess.MachineName);
-            // This property throws exception only on remote processes.
-            Assert.Throws<NotSupportedException>(() => remoteProcess.MainModule);
         }
 
         [Fact, PlatformSpecific(TestPlatforms.AnyUnix)]  // Behavior differs on Windows and Unix
@@ -913,44 +956,75 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestStartInfo()
+        public void StartInfo_GetFileName_ReturnsExpected()
         {
+            Process process = CreateProcessLong();
+            process.Start();
+
+            // Processes are not hosted by dotnet in the full .NET Framework.
+            string expectedFileName = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            Assert.Equal(expectedFileName, process.StartInfo.FileName);
+
+            process.Kill();
+            Assert.True(process.WaitForExit(WaitInMS));
+        }
+        
+        [Fact]
+        public void StartInfo_SetOnRunningProcess_ThrowsInvalidOperationException()
+        {
+            Process process = CreateProcessLong();
+            process.Start();
+
+            // .NET Core fixes a bug where Process.StartInfo for a unrelated process would
+            // return information about the current process, not the unrelated process.
+            // See https://github.com/dotnet/corefx/issues/1100.
+            if (PlatformDetection.IsFullFramework)
             {
-                Process process = CreateProcessLong();
-                process.Start();
-
-                Assert.Equal(HostRunner, process.StartInfo.FileName);
-
-                process.Kill();
-                Assert.True(process.WaitForExit(WaitInMS));
+                var startInfo = new ProcessStartInfo();
+                process.StartInfo = startInfo;
+                Assert.Equal(startInfo, process.StartInfo);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => process.StartInfo = new ProcessStartInfo());
             }
 
+            process.Kill();
+            Assert.True(process.WaitForExit(WaitInMS));
+        }
+
+        [Fact]
+        public void StartInfo_SetGet_ReturnsExpected()
+        {
+            var process = new Process() { StartInfo = new ProcessStartInfo(TestConsoleApp) };
+            Assert.Equal(TestConsoleApp, process.StartInfo.FileName);
+        }
+
+        [Fact]
+        public void StartInfo_SetNull_ThrowsArgumentNullException()
+        {
+            var process = new Process();
+            Assert.Throws<ArgumentNullException>("value", () => process.StartInfo = null);
+        }
+
+        [Fact]
+        public void StartInfo_GetOnRunningProcess_ThrowsInvalidOperationException()
+        {
+            Process process = Process.GetCurrentProcess();
+
+            // .NET Core fixes a bug where Process.StartInfo for an unrelated process would
+            // return information about the current process, not the unrelated process.
+            // See https://github.com/dotnet/corefx/issues/1100.
+            if (PlatformDetection.IsFullFramework)
             {
-                Process process = CreateProcessLong();
-                process.Start();
-
-                Assert.Throws<System.InvalidOperationException>(() => (process.StartInfo = new ProcessStartInfo()));
-
-                process.Kill();
-                Assert.True(process.WaitForExit(WaitInMS));
+                Assert.NotNull(process.StartInfo);
             }
-
+            else
             {
-                Process process = new Process();
-                process.StartInfo = new ProcessStartInfo(TestConsoleApp);
-                Assert.Equal(TestConsoleApp, process.StartInfo.FileName);
-            }
-
-            {
-                Process process = new Process();
-                Assert.Throws<ArgumentNullException>(() => process.StartInfo = null);
-            }
-
-            {
-                Process process = Process.GetCurrentProcess();
-                Assert.Throws<System.InvalidOperationException>(() => process.StartInfo);
+                Assert.Throws<InvalidOperationException>(() => process.StartInfo);
             }
         }
+
         [Theory]
         [InlineData(@"""abc"" d e", @"abc,d,e")]
         [InlineData(@"""abc""      d e", @"abc,d,e")]
@@ -1115,6 +1189,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]  // Expected process HandleCounts differs on OSX
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Handle count change is not reliable, but seems less robust on NETFX")]
         public void HandleCountChanges()
         {
             RemoteInvoke(() =>
@@ -1148,6 +1223,8 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Windows)] // MainWindowHandle is not supported on Unix.
         public void MainWindowHandle_NoWindow_ReturnsEmptyHandle()
         {
+            CreateDefaultProcess();
+
             Assert.Equal(IntPtr.Zero, _process.MainWindowHandle);
             Assert.Equal(_process.MainWindowHandle, _process.MainWindowHandle);
         }
@@ -1156,6 +1233,8 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)] // MainWindowHandle is not supported on Unix.
         public void MainWindowHandle_GetUnix_ThrowsPlatformNotSupportedException()
         {
+            CreateDefaultProcess();
+
             Assert.Throws<PlatformNotSupportedException>(() => _process.MainWindowHandle);
         }
 
@@ -1169,6 +1248,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void MainWindowTitle_NoWindow_ReturnsEmpty()
         {
+            CreateDefaultProcess();
+
             Assert.Empty(_process.MainWindowTitle);
             Assert.Same(_process.MainWindowTitle, _process.MainWindowTitle);
         }
@@ -1184,6 +1265,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void CloseMainWindow_NoWindow_ReturnsFalse()
         {
+            CreateDefaultProcess();
+
             Assert.False(_process.CloseMainWindow());
         }
 
@@ -1230,6 +1313,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestNonpagedSystemMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.NonpagedSystemMemorySize);
 #pragma warning restore 0618
@@ -1247,6 +1332,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPagedMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PagedMemorySize);
 #pragma warning restore 0618
@@ -1264,6 +1351,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPagedSystemMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PagedSystemMemorySize);
 #pragma warning restore 0618
@@ -1281,6 +1370,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakPagedMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PeakPagedMemorySize);
 #pragma warning restore 0618
@@ -1298,6 +1389,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakVirtualMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize);
 #pragma warning restore 0618
@@ -1315,6 +1408,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPeakWorkingSet()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet);
 #pragma warning restore 0618
@@ -1332,6 +1427,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestPrivateMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize);
 #pragma warning restore 0618
@@ -1349,6 +1446,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestVirtualMemorySize()
         {
+            CreateDefaultProcess();
+
 #pragma warning disable 0618
             Assert.Equal(unchecked((int)_process.VirtualMemorySize64), _process.VirtualMemorySize);
 #pragma warning restore 0618
@@ -1366,6 +1465,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingSet()
         {
+            CreateDefaultProcess();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // resident memory can be 0 on OSX.
@@ -1422,7 +1523,8 @@ namespace System.Diagnostics.Tests
             Assert.Equal(userName, p.StartInfo.UserName);
             Assert.Same(password, p.StartInfo.Password);
             Assert.Equal(domain, p.StartInfo.Domain);
-            p.Kill();
+
+            Assert.True(p.WaitForExit(WaitInMS));
             password.Dispose();
         }
 
@@ -1451,15 +1553,17 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Starting process with authentication not supported on Unix
         public void Process_StartWithDuplicatePassword()
         {
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = "exe";
-            psi.UserName = "dummyUser";
-            psi.PasswordInClearText = "Value";
-            psi.Password = AsSecureString("Value");
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = "exe",
+                UserName = "dummyUser",
+                PasswordInClearText = "Value",
+                Password = AsSecureString("Value"),
+                UseShellExecute = false
+            };
 
-            Process p = new Process();
-            p.StartInfo = psi;
-            Assert.Throws<ArgumentException>(() => p.Start());
+            var process = new Process() { StartInfo = startInfo };
+            Assert.Throws<ArgumentException>(null, () => process.Start());
         }
 
         private string GetCurrentProcessName()

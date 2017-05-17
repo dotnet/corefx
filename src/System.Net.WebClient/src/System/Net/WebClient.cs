@@ -228,7 +228,7 @@ namespace System.Net
 
             if (_contentLength != -1)
             {
-                //request.ContentLength = _contentLength; // TODO #11881: Uncomment once member is available
+                request.ContentLength = _contentLength;
             }
 
             if (_proxySet)
@@ -246,7 +246,7 @@ namespace System.Net
 
         protected virtual WebResponse GetWebResponse(WebRequest request)
         {
-            WebResponse response = request.EndGetResponse(request.BeginGetResponse(null, null)); // request.GetResponse(); // TODO #11881: Uncomment once member is available
+            WebResponse response = request.GetResponse();
             _webResponse = response;
             return response;
         }
@@ -394,7 +394,7 @@ namespace System.Net
                 _method = method;
                 request = _webRequest = GetWebRequest(GetUri(address));
                 return new WebClientWriteStream(
-                    request.EndGetRequestStream(request.BeginGetRequestStream(null, null)), // request.GetRequestStream(); // TODO #11881: Uncomment once member is available
+                    request.GetRequestStream(),
                     request,
                     this);
             }
@@ -588,9 +588,9 @@ namespace System.Net
             foreach (string name in data.AllKeys)
             {
                 values.Append(delimiter);
-                values.Append(WebUtility.UrlEncode(name));
+                values.Append(UrlEncode(name));
                 values.Append('=');
-                values.Append(WebUtility.UrlEncode(data[name]));
+                values.Append(UrlEncode(data[name]));
                 delimiter = "&";
             }
 
@@ -734,7 +734,7 @@ namespace System.Net
 
             if (!string.IsNullOrEmpty(connection))
             {
-                //hwr.Connection = connection; // TODO #11881: Uncomment once member is available
+                hwr.Connection = connection;
             }
 
             if (!string.IsNullOrEmpty(contentType))
@@ -744,22 +744,22 @@ namespace System.Net
 
             if (!string.IsNullOrEmpty(expect))
             {
-                //hwr.Expect = expect; // TODO #11881: Uncomment once member is available
+                hwr.Expect = expect;
             }
 
             if (!string.IsNullOrEmpty(referrer))
             {
-                //hwr.Referer = referrer; // TODO #11881: Uncomment once member is available
+                hwr.Referer = referrer;
             }
 
             if (!string.IsNullOrEmpty(userAgent))
             {
-                //hwr.UserAgent = userAgent; // TODO #11881: Uncomment once member is available
+                hwr.UserAgent = userAgent;
             }
 
             if (!string.IsNullOrEmpty(host))
             {
-                //hwr.Host = host; // TODO #11881: Uncomment once member is available
+                hwr.Host = host;
             }
         }
 
@@ -934,7 +934,7 @@ namespace System.Net
                     header = footer = null;
                 }
 
-                using (Stream writeStream = request.EndGetRequestStream(request.BeginGetRequestStream(null, null))) // request.GetRequestStream() // TODO #11881: Uncomment once member is available
+                using (Stream writeStream = request.GetRequestStream())
                 {
                     if (header != null)
                     {
@@ -948,7 +948,8 @@ namespace System.Net
                             while (true)
                             {
                                 int bytesRead = readStream.Read(buffer, 0, buffer.Length);
-                                if (bytesRead <= 0) break;
+                                if (bytesRead <= 0)
+                                    break;
                                 writeStream.Write(buffer, 0, bytesRead);
                             }
                         }
@@ -1175,6 +1176,101 @@ namespace System.Net
             return string.Equals(uri.Scheme, Uri.UriSchemeFtp, StringComparison.Ordinal) ?
                 "STOR" :
                 "POST";
+        }
+        
+        private static string UrlEncode(string str)
+        {
+            if (str == null)
+                return null;
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            return Encoding.ASCII.GetString(UrlEncodeBytesToBytesInternal(bytes, 0, bytes.Length, false));
+        }
+
+        private static byte[] UrlEncodeBytesToBytesInternal(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
+        {
+            int cSpaces = 0;
+            int cUnsafe = 0;
+
+            // Count them first.
+            for (int i = 0; i < count; i++)
+            {
+                char ch = (char) bytes[offset + i];
+
+                if (ch == ' ')
+                {
+                    cSpaces++;
+                }
+                else if (!IsSafe(ch))
+                {
+                    cUnsafe++;
+                }
+            }
+
+            // If nothing to expand.
+            if (!alwaysCreateReturnValue && cSpaces == 0 && cUnsafe == 0)
+                return bytes;
+
+            // Expand not 'safe' characters into %XX, spaces to +.
+            byte[] expandedBytes = new byte[count + cUnsafe * 2];
+            int pos = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                byte b = bytes[offset+i];
+                char ch = (char) b;
+
+                if (IsSafe(ch))
+                {
+                    expandedBytes[pos++] = b;
+                }
+                else if (ch == ' ')
+                {
+                    expandedBytes[pos++] = (byte) '+';
+                }
+                else
+                {
+                    expandedBytes[pos++] = (byte) '%';
+                    expandedBytes[pos++] = (byte) IntToHex((b >> 4) & 0xf);
+                    expandedBytes[pos++] = (byte) IntToHex(b & 0x0f);
+                }
+            }
+
+            return expandedBytes;
+        }
+        
+        private static char IntToHex(int n)
+        {
+            Debug.Assert(n < 0x10);
+            
+            if (n <= 9)
+            {
+                return(char)(n + (int)'0');
+            }
+            
+            return(char)(n - 10 + (int)'a');
+        }
+
+        private static bool IsSafe(char ch)
+        {
+            if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9')
+            {
+                return true;
+            }
+
+            switch (ch)
+            {
+                case '-':
+                case '_':
+                case '.':
+                case '!':
+                case '*':
+                case '\'':
+                case '(':
+                case ')':
+                    return true;
+            }
+
+            return false;
         }
 
         private void InvokeOperationCompleted(AsyncOperation asyncOp, SendOrPostCallback callback, AsyncCompletedEventArgs eventArgs)

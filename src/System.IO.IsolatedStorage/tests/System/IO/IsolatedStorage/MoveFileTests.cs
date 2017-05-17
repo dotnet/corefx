@@ -7,6 +7,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "#18940")]
     public class MoveFileTests : IsoStorageTest
     {
         [Fact]
@@ -41,17 +42,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void MoveFile_ThrowsIsolatedStorageException()
+        public void MoveFile_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("foo", "bar"));
+                Assert.Throws<InvalidOperationException>(() => isf.MoveFile("foo", "bar"));
             }
         }
 
         [Fact]
-        public void MoveFile_ThrowsInvalidOperationException()
+        public void MoveFile_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -80,6 +81,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void MoveFile_MoveOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -93,6 +95,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void MoveFile_MovesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

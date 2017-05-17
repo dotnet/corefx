@@ -13,7 +13,6 @@ namespace System.Security.Claims
     /// <summary>
     /// An Identity that is represented by a set of claims.
     /// </summary>
-    [Serializable]
     public class ClaimsIdentity : IIdentity
     {
         private const string PreFix = "System.Security.ClaimsIdentity.";
@@ -173,7 +172,7 @@ namespace System.Security.Claims
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
 
-            _authenticationType = !string.IsNullOrWhiteSpace(authenticationType) ? authenticationType : (identity != null ? identity.AuthenticationType : null);
+            _authenticationType = (identity != null && string.IsNullOrEmpty(authenticationType)) ? identity.AuthenticationType : authenticationType;
             _nameClaimType = !string.IsNullOrEmpty(nameType) ? nameType : (claimsIdentity != null ? claimsIdentity._nameClaimType : DefaultNameClaimType);
             _roleClaimType = !string.IsNullOrEmpty(roleType) ? roleType : (claimsIdentity != null ? claimsIdentity._roleClaimType : DefaultRoleClaimType);
 

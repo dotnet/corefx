@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "#18940")]
     public class DeleteDirectoryTests : IsoStorageTest
     {
         [Fact]
@@ -29,17 +30,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void DeleteDirectory_ThrowsIsolatedStorageException()
+        public void DeleteRemovedDirectory_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.DeleteDirectory("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.DeleteDirectory("foo"));
             }
         }
 
         [Fact]
-        public void DeleteDirectory_ThrowsInvalidOperationException()
+        public void DeleteClosedDirectory_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -77,6 +78,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void DeleteDirectory_DeletesDirectory(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -104,6 +106,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void DeleteDirectory_CannotDeleteWithContent(PresetScopes scope)
         {
             TestHelper.WipeStores();

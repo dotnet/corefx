@@ -22,6 +22,7 @@ namespace System.Xml.Serialization
     using System.Collections.Generic;
     using System.Runtime.Versioning;
     using System.Xml;
+    using System.Xml.Serialization;
 
     /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlDeserializationEvents"]/*' />
     /// <devdoc>
@@ -33,7 +34,9 @@ namespace System.Xml.Serialization
         private XmlAttributeEventHandler _onUnknownAttribute;
         private XmlElementEventHandler _onUnknownElement;
         private UnreferencedObjectEventHandler _onUnreferencedObject;
+#if !XMLSERIALIZERGENERATOR
         internal object sender;
+#endif
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlDeserializationEvents.OnUnknownNode"]/*' />
         public XmlNodeEventHandler OnUnknownNode
@@ -267,7 +270,7 @@ namespace System.Xml.Serialization
                     {
                         {
                             XmlSerializerImplementation contract = null;
-                            Assembly assembly = TempAssembly.LoadGeneratedAssembly(type, null, out contract);
+                            Assembly assembly = TempAssembly.LoadGeneratedAssembly(type, defaultNamespace, out contract);
                             if (assembly == null)
                             {
                                 // need to reflect and generate new serialization assembly
@@ -361,6 +364,7 @@ namespace System.Xml.Serialization
             return new TempAssembly(new XmlMapping[] { xmlMapping }, new Type[] { type }, defaultNamespace, location);
         }
 
+#if !XMLSERIALIZERGENERATOR
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.Serialize"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
@@ -681,6 +685,7 @@ namespace System.Xml.Serialization
                 }
             }
         }
+#endif
 
         private static bool ShouldUseReflectionBasedSerialization(XmlMapping mapping)
         {
@@ -1040,16 +1045,16 @@ namespace System.Xml.Serialization
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.CreateReader"]/*' />
         ///<internalonly/>
-        protected virtual XmlSerializationReader CreateReader() { throw new PlatformNotSupportedException(); }
+        protected virtual XmlSerializationReader CreateReader() { throw new NotImplementedException(); }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.Deserialize4"]/*' />
         ///<internalonly/>
-        protected virtual object Deserialize(XmlSerializationReader reader) { throw new PlatformNotSupportedException(); }
+        protected virtual object Deserialize(XmlSerializationReader reader) { throw new NotImplementedException(); }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.CreateWriter"]/*' />
         ///<internalonly/>
-        protected virtual XmlSerializationWriter CreateWriter() { throw new PlatformNotSupportedException(); }
+        protected virtual XmlSerializationWriter CreateWriter() { throw new NotImplementedException(); }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.Serialize7"]/*' />
         ///<internalonly/>
-        protected virtual void Serialize(object o, XmlSerializationWriter writer) { throw new PlatformNotSupportedException(); }
+        protected virtual void Serialize(object o, XmlSerializationWriter writer) { throw new NotImplementedException(); }
 
         internal void SetTempAssembly(TempAssembly tempAssembly, XmlMapping mapping)
         {
@@ -1072,6 +1077,7 @@ namespace System.Xml.Serialization
             return mapping;
         }
 
+#if !XMLSERIALIZERGENERATOR
         private void SerializePrimitive(XmlWriter xmlWriter, object o, XmlSerializerNamespaces namespaces)
         {
             XmlSerializationPrimitiveWriter writer = new XmlSerializationPrimitiveWriter();
@@ -1228,6 +1234,7 @@ namespace System.Xml.Serialization
             return o;
         }
 
+#endif
         private class XmlSerializerMappingKey
         {
             public XmlMapping Mapping;
