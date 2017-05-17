@@ -51,8 +51,7 @@ namespace System.Diagnostics.Tests
 
                 // Just make sure some events are written, to confirm we successfully subscribed to it. 
                 // We should have exactly one Start and one Stop event
-                Assert.True(eventRecords.Records.Count == 2,
-                    "Didn't get two events from Http Diagnostic Listener. Something is wrong.");
+                Assert.Equal(2, eventRecords.Records.Count);
             }
         }
 
@@ -73,8 +72,7 @@ namespace System.Diagnostics.Tests
 
                 // Just make sure some events are written, to confirm we successfully subscribed to it. 
                 // We should have exactly one Start and one Stop event
-                Assert.True(eventRecords.Records.Count == 2,
-                    "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
+                Assert.Equal(2, eventRecords.Records.Count);
             }
         }
 
@@ -305,7 +303,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(0, eventRecords.Records.Count);
 
                     (await client.GetAsync(Configuration.Http.SecureRemoteEchoServer)).Dispose();
-                    Assert.True(eventRecords.Records.Count > 0);
+                    Assert.Equal(2, eventRecords.Records.Count);
                 }
             }
         }
