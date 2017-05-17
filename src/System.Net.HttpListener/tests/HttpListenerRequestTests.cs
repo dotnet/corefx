@@ -24,6 +24,7 @@ namespace System.Net.Tests
         {
             await GetRequest("POST", "", new string[] { acceptString }, (_, request) =>
             {
+                Assert.Same(request.AcceptTypes, request.AcceptTypes);
                 Assert.Equal(expected, request.AcceptTypes);
             });
         }
@@ -219,12 +220,12 @@ namespace System.Net.Tests
         {
             await GetRequest("POST", "", new string[] { userLanguageString }, (_, request) =>
             {
+                Assert.Same(request.UserLanguages, request.UserLanguages);
                 Assert.Equal(expected, request.UserLanguages);
             });
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)] // We get the ClientCertificate during connection on Unix.
         public async Task ClientCertificateError_GetNotInitialized_ThrowsInvalidOperationException()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -257,7 +258,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)] // Hangs forever.
         public async Task GetClientCertificateAsync_NoCertificate_ReturnsNull()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -276,7 +276,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)] // We get the ClientCertificate during connection on Unix.
         public async Task EndGetClientCertificate_InvalidAsyncResult_ThrowsArgumentException()
         {
             await GetRequest("POST", null, null, (socket1, request1) =>
@@ -292,7 +291,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)] // We get the ClientCertificate during connection on Unix.
         public async Task EndGetClientCertificate_AlreadyCalled_ThrowsInvalidOperationException()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -451,6 +449,47 @@ namespace System.Net.Tests
             });
         }
 
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [InlineData("1.1", new string[] { "Proxy-Connection: random" }, true)]
+        [InlineData("1.1", new string[] { "Proxy-Connection: close" }, false)]
+        [InlineData("1.1", new string[] { "proxy-connection: CLOSE" }, false)]
+        [InlineData("1.1", new string[] { "Proxy-Connection: keep-alive" }, true)]
+        [InlineData("1.1", new string[] { "Proxy-Connection: " }, true)]
+        [InlineData("1.1", new string[] { "Connection: random" }, true)]
+        [InlineData("1.1", new string[] { "Connection: close" }, false)]
+        [InlineData("1.1", new string[] { "connection: CLOSE" }, false)]
+        [InlineData("1.1", new string[] { "Connection: keep-alive" }, true)]
+        [InlineData("1.1", new string[] { "Connection: " }, true)]
+        [InlineData("1.1", new string[] { "Keep-Alive: true" }, true)]
+        [InlineData("1.1", new string[] { "Proxy-Connection: ", "Connection: close" }, false)]
+        [InlineData("1.1", new string[] { "Proxy-Connection: ", "Connection: close", "Keep-Alive: true" }, false)]
+        [InlineData("1.1", new string[] { "Connection: close", "Keep-Alive: true" }, false)]
+        [InlineData("1.1", new string[] { "UnknownHeader: random" }, true)]
+        [InlineData("1.0", new string[] { "Keep-Alive: true" }, true)]
+        [InlineData("1.0", new string[] { "Keep-Alive: " }, false)]
+        [InlineData("1.0", new string[] { "UnknownHeader: random" }, false)]
+        public async Task KeepAlive_GetProperty_ReturnsExpected(string httpVersion, string[] headers, bool expected)
+        {
+            await GetRequest("POST", "", headers, (_, request) =>
+            {
+                Assert.Equal(request.KeepAlive, request.KeepAlive);
+                Assert.Equal(expected, request.KeepAlive);
+            }, httpVersion: httpVersion);
+        }
+
+        [Theory]
+        [InlineData("1.0")]
+        [InlineData("1.1")]
+        public async Task ProtocolVersion_GetProperty_ReturnsExpected(string httpVersion)
+        {
+            var version = new Version(httpVersion);
+
+            await GetRequest("POST", "", new string[0], (_, request) =>
+            {
+                Assert.Equal(version, request.ProtocolVersion);
+            }, httpVersion: httpVersion);
+        }
+
         public static IEnumerable<object[]> Cookies_TestData()
         {
             yield return new object[]
@@ -559,12 +598,12 @@ namespace System.Net.Tests
             });
         }
 
-        private async Task GetRequest(string requestType, string query, string[] headers, Action<Socket, HttpListenerRequest> requestAction, bool sendContent = true)
+        private async Task GetRequest(string requestType, string query, string[] headers, Action<Socket, HttpListenerRequest> requestAction, bool sendContent = true, string httpVersion = "1.1")
         {
             using (HttpListenerFactory factory = new HttpListenerFactory())
             using (Socket client = factory.GetConnectedSocket())
             {
-                client.Send(factory.GetContent(requestType, query, sendContent ? "Text" : "", headers, true));
+                client.Send(factory.GetContent(httpVersion, requestType, query, sendContent ? "Text" : "", headers, true));
 
                 HttpListener listener = factory.GetListener();
                 HttpListenerContext context = await listener.GetContextAsync();
