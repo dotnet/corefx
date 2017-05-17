@@ -399,7 +399,6 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<WebException>(() => wc.DownloadStringTaskAsync(System.Net.Test.Common.Configuration.Http.RemoteEchoServer));
         }
 
-        [ActiveIssue(18680)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [InlineData("http://localhost", true)]
@@ -485,6 +484,13 @@ namespace System.Net.Tests
             "The Slings and Arrows of outrageous Fortune," +
             "Or to take Arms against a Sea of troubles," +
             "And by opposing end them:";
+        
+        const string ExpectedTextAfterUrlEncode = 
+            "To+be%2c+or+not+to+be%2c+that+is+the+question%3a" + 
+            "Whether+'tis+Nobler+in+the+mind+to+suffer" +
+            "The+Slings+and+Arrows+of+outrageous+Fortune%2c" +
+            "Or+to+take+Arms+against+a+Sea+of+troubles%2c" +
+            "And+by+opposing+end+them%3a";
 
         protected abstract bool IsAsync { get; }
 
@@ -660,7 +666,7 @@ namespace System.Net.Tests
         }
 
         [OuterLoop("Networking test talking to remote server: issue #11345")]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
+        [Theory]
         [MemberData(nameof(EchoServers))]
         public async Task UploadFile_Success(Uri echoServer)
         {
@@ -688,7 +694,6 @@ namespace System.Net.Tests
             Assert.Contains(ExpectedText, result);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18674")] // Difference in behavior.
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
@@ -696,7 +701,7 @@ namespace System.Net.Tests
         {
             var wc = new WebClient();
             byte[] result = await UploadValuesAsync(wc, echoServer.ToString(), new NameValueCollection() { { "Data", ExpectedText } });
-            Assert.Contains(WebUtility.UrlEncode(ExpectedText), Encoding.UTF8.GetString(result));
+            Assert.Contains(ExpectedTextAfterUrlEncode, Encoding.UTF8.GetString(result));
         }
     }
 

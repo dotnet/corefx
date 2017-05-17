@@ -22,31 +22,22 @@ namespace System
         /// </summary>
         public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
         {
-            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-            IntPtr tailDiff;
+            Debug.Assert(dstLength != 0);
 
-            if (srcGreaterThanDst)
-            {
-                // If the start of source is greater than the start of destination, then we need to calculate
-                // the different between the end of destination relative to the start of source.
-                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, dstLength), ref src);
-            }
-            else
-            {
-                // If the start of source is less than the start of destination, then we need to calculate
-                // the different between the end of source relative to the start of destunation.
-                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, srcLength), ref dst);
-            }
+            IntPtr srcByteCount = Unsafe.ByteOffset(ref src, ref Unsafe.Add(ref src, srcLength));
+            IntPtr dstByteCount = Unsafe.ByteOffset(ref dst, ref Unsafe.Add(ref dst, dstLength));
 
-            // If the source is entirely before or entirely after the destination and the type inside the span is not
-            // itself a reference type or containing reference types, then we can do a simple block copy of the data.
-            bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+            IntPtr diff = Unsafe.ByteOffset(ref src, ref dst);
+
+            bool isOverlapped = (sizeof(IntPtr) == sizeof(int))
+                ? (uint)diff < (uint)srcByteCount || (uint)diff > (uint)-(int)dstByteCount
+                : (ulong)diff < (ulong)srcByteCount || (ulong)diff > (ulong)-(long)dstByteCount;
+
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
                 ref byte srcBytes = ref Unsafe.As<T, byte>(ref src);
-                ulong byteCount = (ulong)srcLength * (ulong)Unsafe.SizeOf<T>();
+                ulong byteCount = (ulong)srcByteCount;
                 ulong index = 0;
 
                 while (index < byteCount)
@@ -61,22 +52,39 @@ namespace System
             }
             else
             {
-                if (srcGreaterThanDst)
+                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int))
+                    ? (uint)diff > (uint)-(int)dstByteCount
+                    : (ulong)diff > (ulong)-(long)dstByteCount;
+
+                int direction = srcGreaterThanDst ? 1 : -1;
+                int runCount = srcGreaterThanDst ? 0 : srcLength - 1;
+
+                int loopCount = 0;
+                for (; loopCount < (srcLength & ~7); loopCount += 8)
                 {
-                    // Source address greater than or equal to destination address. Can do normal copy.
-                    for (int i = 0; i < srcLength; i++)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
+                    Unsafe.Add<T>(ref dst, runCount + direction * 0) = Unsafe.Add<T>(ref src, runCount + direction * 0);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 1) = Unsafe.Add<T>(ref src, runCount + direction * 1);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 2) = Unsafe.Add<T>(ref src, runCount + direction * 2);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 3) = Unsafe.Add<T>(ref src, runCount + direction * 3);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 4) = Unsafe.Add<T>(ref src, runCount + direction * 4);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 5) = Unsafe.Add<T>(ref src, runCount + direction * 5);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 6) = Unsafe.Add<T>(ref src, runCount + direction * 6);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 7) = Unsafe.Add<T>(ref src, runCount + direction * 7);
+                    runCount += direction * 8;
                 }
-                else
+                if (loopCount < (srcLength & ~3))
                 {
-                    // Source address less than destination address. Must do backward copy.
-                    int i = srcLength;
-                    while (i-- != 0)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
+                    Unsafe.Add<T>(ref dst, runCount + direction * 0) = Unsafe.Add<T>(ref src, runCount + direction * 0);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 1) = Unsafe.Add<T>(ref src, runCount + direction * 1);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 2) = Unsafe.Add<T>(ref src, runCount + direction * 2);
+                    Unsafe.Add<T>(ref dst, runCount + direction * 3) = Unsafe.Add<T>(ref src, runCount + direction * 3);
+                    runCount += direction * 4;
+                    loopCount += 4;
+                }
+                for (; loopCount < srcLength; ++loopCount)
+                {
+                    Unsafe.Add<T>(ref dst, runCount) = Unsafe.Add<T>(ref src, runCount);
+                    runCount += direction;
                 }
             }
         }

@@ -88,7 +88,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_Roundtrip_Equal()
         {
@@ -102,7 +101,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_OutOfRange_Throws()
         {
@@ -114,7 +112,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "no exception throw on netfx")]
         [Fact]
         public async Task MaxResponseContentBufferSize_TooSmallForContent_Throws()
         {
@@ -325,14 +323,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task SendAsync_RequestContentDisposed()
+        public async Task SendAsync_RequestContentNotDisposed()
         {
             var content = new ByteArrayContent(new byte[1]);
             using (var request = new HttpRequestMessage(HttpMethod.Get, CreateFakeUri()) { Content = content }) 
             using (var client = new HttpClient(new CustomResponseHandler((r, c) => Task.FromResult(new HttpResponseMessage()))))
             {
                 await client.SendAsync(request);
-                Assert.Throws<ObjectDisposedException>(() => { content.ReadAsStringAsync(); });
+                await content.ReadAsStringAsync(); // no exception
             }
         }
 

@@ -280,7 +280,11 @@ namespace System.Collections.Immutable.Tests
             var map = ImmutableDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
             var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
-            Assert.Contains("firstKey", exception.Message);
+
+            if (!PlatformDetection.IsNetNative) //.Net Native toolchain removes exception messages.
+            {
+                Assert.Contains("firstKey", exception.Message);
+            }
         }
 
         [Fact]
@@ -342,6 +346,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableDictionary.Create<int, int>());

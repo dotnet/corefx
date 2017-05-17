@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "#18940")]
     public class DeleteFileTests : IsoStorageTest
     {
         [Fact]
@@ -29,17 +30,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void DeleteFile_ThrowsIsolatedStorageException()
+        public void DeleteRemovedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.DeleteFile("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.DeleteFile("foo"));
             }
         }
 
         [Fact]
-        public void DeleteFile_ThrowsInvalidOperationException()
+        public void DeleteClosedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -58,6 +59,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void DeleteFile_DeletesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

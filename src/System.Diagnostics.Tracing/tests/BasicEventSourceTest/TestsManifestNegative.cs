@@ -31,9 +31,16 @@ namespace BasicEventSourceTests
         private static string GetResourceStringFromReflection(string key)
         {
             BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-            Type sr = typeof(EventSource).Assembly.GetType("System.SR", throwOnError: true, ignoreCase: false);
-            PropertyInfo resourceProp = sr.GetProperty(key, flags);
-            return (string)resourceProp.GetValue(null);
+            if (!PlatformDetection.IsFullFramework)
+            {
+              Type sr = typeof(EventSource).Assembly.GetType("System.SR", throwOnError: true, ignoreCase: false);
+              PropertyInfo resourceProp = sr.GetProperty(key, flags);
+              return (string)resourceProp.GetValue(null);
+            }
+
+            Type[] paramsType = new Type[] { typeof(string) };
+            MethodInfo getResourceString = typeof(Environment).GetMethod("GetResourceString", flags, null, paramsType, null);
+            return (string)getResourceString.Invoke(null, new object[] { key });
         }
         #endregion
 
@@ -41,6 +48,7 @@ namespace BasicEventSourceTests
         /// These tests use the NuGet EventSource to validate *both* NuGet and BCL user-defined EventSources
         /// For NuGet EventSources we validate both "runtime" and "validation" behavior
         /// </summary>
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19091")]
         [Fact]
         public void Test_GenerateManifest_InvalidEventSources()
         {

@@ -15,6 +15,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using System.Reflection;
 
 namespace SerializationTypes
 {
@@ -2851,6 +2852,126 @@ namespace SerializationTypes
         [XmlElement(Order = 2)]
         public string StringField2;
     }
+
+    internal class MyFileStreamSurrogateProvider : ISerializationSurrogateProvider
+    {
+        static MyFileStreamSurrogateProvider()
+        {
+            Singleton = new MyFileStreamSurrogateProvider();
+        }
+
+        internal static MyFileStreamSurrogateProvider Singleton { get; private set; }
+
+        public Type GetSurrogateType(Type type)
+        {
+            if (type == typeof(MyFileStream))
+            {
+                return typeof(MyFileStreamReference);
+            }
+
+            return type;
+        }
+
+        public object GetObjectToSerialize(object obj, Type targetType)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            MyFileStream myFileStream = obj as MyFileStream;
+            if (null != myFileStream)
+            {
+                if (targetType != typeof(MyFileStreamReference))
+                {
+                    throw new ArgumentException("Target type for serialization must be MyFileStream");
+                }
+                return MyFileStreamReference.Create(myFileStream);
+            }
+
+            return obj;
+        }
+
+        public object GetDeserializedObject(object obj, Type targetType)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            MyFileStreamReference myFileStreamRef = obj as MyFileStreamReference;
+            if (null != myFileStreamRef)
+            {
+                if (targetType != typeof(MyFileStream))
+                {
+                    throw new ArgumentException("Target type for deserialization must be MyFileStream");
+                }
+                return myFileStreamRef.ToMyFileStream();
+            }
+            return obj;
+        }
+    }
+
+    public class MyPersonSurrogateProvider : ISerializationSurrogateProvider
+    {
+        public Type GetSurrogateType(Type type)
+        {
+            if (type == typeof(NonSerializablePerson))
+            {
+                return typeof(NonSerializablePersonSurrogate);
+            }
+            else if (type == typeof(NonSerializablePersonForStress))
+            {
+                return typeof(NonSerializablePersonForStressSurrogate);
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        public object GetDeserializedObject(object obj, Type targetType)
+        {
+            if (obj is NonSerializablePersonSurrogate)
+            {
+                NonSerializablePersonSurrogate person = (NonSerializablePersonSurrogate)obj;
+                return new NonSerializablePerson(person.Name, person.Age);
+            }
+            else if (obj is NonSerializablePersonForStressSurrogate)
+            {
+                NonSerializablePersonForStressSurrogate person = (NonSerializablePersonForStressSurrogate)obj;
+                return new NonSerializablePersonForStress(person.Name, person.Age);
+            }
+
+            return obj;
+        }
+
+        public object GetObjectToSerialize(object obj, Type targetType)
+        {
+            if (obj is NonSerializablePerson)
+            {
+                NonSerializablePerson nsp = (NonSerializablePerson)obj;
+                NonSerializablePersonSurrogate serializablePerson = new NonSerializablePersonSurrogate
+                {
+                    Name = nsp.Name,
+                    Age = nsp.Age,
+                };
+
+                return serializablePerson;
+            }
+            else if (obj is NonSerializablePersonForStress)
+            {
+                NonSerializablePersonForStress nsp = (NonSerializablePersonForStress)obj;
+                NonSerializablePersonForStressSurrogate serializablePerson = new NonSerializablePersonForStressSurrogate
+                {
+                    Name = nsp.Name,
+                    Age = nsp.Age,
+                };
+
+                return serializablePerson;
+            }
+
+            return obj;
+        }
+    }
 }
 
 namespace DuplicateTypeNamesTest.ns1
@@ -3155,6 +3276,38 @@ public class TypeWithBinaryProperty
 public class TypeWithTimeSpanProperty
 {
     public TimeSpan TimeSpanProperty;
+}
+
+public class TypeWithDefaultTimeSpanProperty
+{
+    public TypeWithDefaultTimeSpanProperty()
+    {
+        TimeSpanProperty = GetDefaultValue("TimeSpanProperty");
+        TimeSpanProperty2 = GetDefaultValue("TimeSpanProperty2");
+    }
+
+    [DefaultValue(typeof(TimeSpan), "00:01:00")]
+    public TimeSpan TimeSpanProperty { get; set; }
+
+    [DefaultValue(typeof(TimeSpan), "00:00:01")]
+    public TimeSpan TimeSpanProperty2 { get; set; }
+
+    public TimeSpan GetDefaultValue(string propertyName)
+    {
+        var property = this.GetType().GetProperty(propertyName);
+
+        var attribute = property.GetCustomAttribute(typeof(DefaultValueAttribute))
+                as DefaultValueAttribute;
+
+        if (attribute != null)
+        {
+            return (TimeSpan)attribute.Value;
+        }
+        else
+        {
+            return new TimeSpan(0, 0, 0);
+        }
+    }
 }
 
 public class TypeWithByteProperty
@@ -4945,4 +5098,92 @@ public class Group4WithXmlTextAttr
 
     [XmlText]
     public string Text = "SomeText";
+}
+
+[DataContract]
+public class DelegateClass
+{
+    public DelegateClass() { }
+
+    [DataMember]
+    public object container;
+
+    [DataMember]
+    public static string delegateVariable = "";
+
+    [DataMember]
+    public static object someType;
+
+    public static void TestingTheDelegate(People P)
+    {
+        delegateVariable = "Verifying the Delegate Test";
+        someType = P;
+    }
+}
+
+public delegate void Del(People P);
+
+[DataContract]
+public class People
+{
+    public People(string variation)
+    {
+        Age = 6;
+        Name = "smith";
+    }
+
+    public People()
+    {
+    }
+
+    [DataMember]
+    public int Age;
+
+    [DataMember]
+    public string Name;
+}
+
+public class SoapComplexType
+{
+    public bool BoolValue;
+    public string StringValue;
+}
+
+public class SoapComplexTypeWithArray
+{
+    public int[] IntArray;
+    public string[] StringArray;
+    public List<int> IntList;
+    public List<string> StringList;
+}
+[KnownType("KnownTypes")]
+[DataContract]
+public class EmployeeC
+{
+    public EmployeeC(string name)
+    {
+        Name = name;
+    }
+
+    [DataMember]
+    public string Name;
+
+    static Type[] KnownTypes()
+    {
+        return new Type[] { typeof(Manager), typeof(EmployeeC) };
+    }
+}
+
+[DataContract]
+public class Manager : EmployeeC
+{
+    public Manager(string name) : base(name)
+    {
+    }
+
+    [DataMember]
+    public int age;
+
+    [DataMember]
+    public EmployeeC[] emps;
 }

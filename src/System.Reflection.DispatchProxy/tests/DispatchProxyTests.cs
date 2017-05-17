@@ -70,7 +70,7 @@ namespace DispatchProxyTests
             Assert.NotNull(proxy1);
             Assert.NotNull(proxy2);
             Assert.False(object.ReferenceEquals(proxy1, proxy2),
-                        String.Format("First and second instance of proxy type {0} were the same instance", proxy1.GetType().Name));
+                        String.Format("First and second instance of proxy type {0} were the same instance", proxy1.GetType().ToString()));
         }
 
 
@@ -494,6 +494,34 @@ namespace DispatchProxyTests
             TestType_IIndexerService proxy = DispatchProxy.Create<TestType_IIndexerService, TestDispatchProxy>();
             PropertyInfo propertyInfo = proxy.GetType().GetTypeInfo().GetDeclaredProperty("Item");
             Assert.NotNull(propertyInfo);
+        }
+
+        static void testGenericMethodRoundTrip<T>(T testValue)
+        {
+            var proxy = DispatchProxy.Create<TypeType_GenericMethod, TestDispatchProxy>();
+            ((TestDispatchProxy)proxy).CallOnInvoke = (mi, a) =>
+            {
+                Assert.True(mi.IsGenericMethod);
+                Assert.False(mi.IsGenericMethodDefinition);
+                Assert.Equal(1, mi.GetParameters().Length);
+                Assert.Equal(typeof(T), mi.GetParameters()[0].ParameterType);
+                Assert.Equal(typeof(T), mi.ReturnType);
+                return a[0];
+            };
+            Assert.Equal(proxy.Echo(testValue), testValue);
+        }
+
+        [Fact]
+        public static void Invoke_Generic_Method()
+        {
+            //string
+            testGenericMethodRoundTrip("asdf");
+            //reference type
+            testGenericMethodRoundTrip(new Version(1, 0, 0, 0));
+            //value type
+            testGenericMethodRoundTrip(42);
+            //enum type
+            testGenericMethodRoundTrip(DayOfWeek.Monday);
         }
     }
 }

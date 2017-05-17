@@ -19,21 +19,12 @@ namespace System.Collections.ObjectModel.Tests
 
         [Theory]
         [MemberData(nameof(SerializeDeserialize_Roundtrips_MemberData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Serialization still WIP in UapAot: https://github.com/dotnet/corefx/issues/18942")]
         public void SerializeDeserialize_Roundtrips(ReadOnlyDictionary<string, string> d)
         {
             ReadOnlyDictionary<string, string> clone = BinaryFormatterHelpers.Clone(d);
             Assert.NotSame(d, clone);
             Assert.Equal(d, clone);
-
-            ReadOnlyDictionary<string, string>.KeyCollection keys = d.Keys;
-            ReadOnlyDictionary<string, string>.KeyCollection keysClone = BinaryFormatterHelpers.Clone(keys);
-            Assert.NotSame(keys, keysClone);
-            Assert.Equal(keys, keysClone);
-
-            ReadOnlyDictionary<string, string>.ValueCollection values = d.Values;
-            ReadOnlyDictionary<string, string>.ValueCollection valuesClone = BinaryFormatterHelpers.Clone(values);
-            Assert.NotSame(values, valuesClone);
-            Assert.Equal(values, valuesClone);
         }
     }
 }
