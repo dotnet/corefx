@@ -861,13 +861,12 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "request stream not allowed for GET on netfx")]
-        public void BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsInvalidOperationException(Uri remoteServer)
+        public void BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsProtocolViolationException(Uri remoteServer)
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
 
             IAsyncResult asyncResult = request.BeginGetResponse(null, null);
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<ProtocolViolationException>(() =>
             {
                 request.BeginGetRequestStream(null, null);
             });
@@ -1318,19 +1317,15 @@ namespace System.Net.Tests
                 BinaryFormatter formatter = new BinaryFormatter();
                 var hwr = HttpWebRequest.CreateHttp("http://localhost");
 
-                if (PlatformDetection.IsFullFramework)
-                {
-                    // .NET Framework throws a more detailed exception.
-                    // System.Runtime.Serialization.SerializationException):
-                    //  Type 'System.Net.WebRequest+WebProxyWrapper' in Assembly 'System, Version=4.0.0.
-                    //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
-                    Assert.Throws<System.Runtime.Serialization.SerializationException>(() => formatter.Serialize(fs, hwr));
-                }
-                else
-                {
-                    // TODO: Issue #18850. Change HttpWebRquest to throw SerializationException similar to .NET Framework.
-                    Assert.Throws<PlatformNotSupportedException>(() => formatter.Serialize(fs, hwr));
-                }
+                // .NET Framework throws 
+                // System.Runtime.Serialization.SerializationException:
+                //  Type 'System.Net.WebRequest+WebProxyWrapper' in Assembly 'System, Version=4.0.0.
+                //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
+                // While .NET Core throws 
+                // System.Runtime.Serialization.SerializationException:
+                //  Type 'System.Net.HttpWebRequest' in Assembly 'System.Net.Requests, Version=4.0.0.
+                //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
+                Assert.Throws<System.Runtime.Serialization.SerializationException>(() => formatter.Serialize(fs, hwr));
             }
         }
     }
