@@ -69,7 +69,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void CheckSparseColumnBit()
         {
             const int sparseColumns = 4095;
-            string tempTableName = "MyTempTable";
+            string tempTableName = "SparseColumnTable";
 
             // TSQL for "CREATE TABLE" with sparse columns
             // table name will be provided as an argument
