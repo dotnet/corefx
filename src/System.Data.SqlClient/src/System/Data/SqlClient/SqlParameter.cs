@@ -1079,9 +1079,8 @@ namespace System.Data.SqlClient
             peekAhead = null;
 
             object value = GetCoercedValue();
-            if (value is DataTable)
+            if (value is DataTable dt)
             {
-                DataTable dt = value as DataTable;
                 if (dt.Columns.Count <= 0)
                 {
                     throw SQL.NotEnoughColumnsInStructuredType();

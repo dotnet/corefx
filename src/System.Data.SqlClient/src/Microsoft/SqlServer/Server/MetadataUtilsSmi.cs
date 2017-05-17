@@ -610,7 +610,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Extract metadata for a single DataColumn
-        static internal SmiExtendedMetaData SmiMetaDataFromDataColumn(DataColumn column, DataTable parent)
+        internal static SmiExtendedMetaData SmiMetaDataFromDataColumn(DataColumn column, DataTable parent)
         {
             SqlDbType dbType = InferSqlDbTypeFromType_Katmai(column.DataType);
             if (InvalidSqlDbType == dbType)
@@ -628,7 +628,6 @@ namespace Microsoft.SqlServer.Server
             byte scale;
             if (column.DataType == typeof(SqlDecimal))
             {
-
                 // Must scan all values in column to determine best-fit precision & scale
                 Debug.Assert(null != parent);
                 scale = 0;
@@ -734,7 +733,7 @@ namespace Microsoft.SqlServer.Server
                                         null);
         }
 
-        static internal long AdjustMaxLength(SqlDbType dbType, long maxLength)
+        internal static long AdjustMaxLength(SqlDbType dbType, long maxLength)
         {
             if (SmiMetaData.UnlimitedMaxLengthIndicator != maxLength)
             {
