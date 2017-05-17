@@ -1337,7 +1337,6 @@ namespace System.Data.SqlClient
 
                         _metaData.schemaTable = BuildSchemaTable();
                         Debug.Assert(null != _metaData.schemaTable, "No schema information yet!");
-                        // filter table?
                     }
                 }
                 if (null != _metaData)
