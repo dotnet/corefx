@@ -420,14 +420,21 @@ namespace Internal.Cryptography.Pal
 
                 string storePath = GetStorePath(X509Store.DisallowedStoreName);
 
-                if (Directory.Exists(storePath))
+                try
                 {
-                    // If it has no files, leave it alone.
-                    foreach (string filePath in Directory.EnumerateFiles(storePath))
+                    if (Directory.Exists(storePath))
                     {
-                        string msg = SR.Format(SR.Cryptography_Unix_X509_DisallowedStoreNotEmpty, storePath);
-                        throw new CryptographicException(msg, new PlatformNotSupportedException(msg));
+                        // If it has no files, leave it alone.
+                        foreach (string filePath in Directory.EnumerateFiles(storePath))
+                        {
+                            string msg = SR.Format(SR.Cryptography_Unix_X509_DisallowedStoreNotEmpty, storePath);
+                            throw new CryptographicException(msg, new PlatformNotSupportedException(msg));
+                        }
                     }
+                }
+                catch (IOException)
+                {
+                    // Suppress the exception, treat the store as empty.
                 }
             }
 
