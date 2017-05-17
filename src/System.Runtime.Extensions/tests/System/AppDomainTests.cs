@@ -11,8 +11,6 @@ using Xunit;
 
 namespace System.Tests
 {
-    // No appdomain in UWP or CoreRT
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         private string DestTestAssemblyResolvePath { get; }
