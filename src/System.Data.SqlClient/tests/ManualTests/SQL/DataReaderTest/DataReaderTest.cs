@@ -66,7 +66,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         // Checks for the IsColumnSet bit in the GetSchemaTable for Sparse columns
         [CheckConnStrSetupFact]
-        public static void CheckSpareColumnBit()
+        public static void CheckSparseColumnBit()
         {
             const int sparseColumns = 4095;
             string tempTableName = "MyTempTable";
