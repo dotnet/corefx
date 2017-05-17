@@ -112,7 +112,7 @@ namespace Microsoft.XmlSerializer.Generator
                     return 0;
                 }
 
-                GenerateAssembly(types, assembly, proxyOnly, force, codePath);
+                GenerateFile(types, assembly, proxyOnly, force, codePath);
             }
             catch (Exception e)
             {
@@ -127,7 +127,7 @@ namespace Microsoft.XmlSerializer.Generator
             return 0;
         }
 
-        private void GenerateAssembly(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string codePath)
+        private void GenerateFile(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string codePath)
         {
             Assembly assembly = LoadAssembly(assemblyName, true);
             Type[] types;
@@ -222,7 +222,29 @@ namespace Microsoft.XmlSerializer.Generator
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, location));
                 }
 
-                bool success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, codePath);
+                if (!Directory.Exists(codePath))
+                {
+                    throw new ArgumentException(SR.Format(SR.XmlMelformMapping));
+                }
+
+                bool success;
+
+                try
+                {
+                    if (File.Exists(location))
+                    {
+                        File.Delete(location);
+                    }
+
+                    using (FileStream fs = File.Create(location))
+                    {
+                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, location));
+                }
 
                 if (success)
                 {
