@@ -72,13 +72,13 @@
 
     <!-- Windows script -->
     <ItemGroup>
-      <_CloneRepoLines Include="REM @echo off" />
+      <_CloneRepoLines Include="@echo off" />
       <_CloneRepoLines Include="pushd $(CoreFxCopyLocation.Replace('/', '\'))" />
       <_CloneRepoLines Include="git clone $(_RepoURL)" />
       <_CloneRepoLines Include="cd corefx" />
       <_CloneRepoLines Include="git reset --hard $(CoreFxHash)" />
       <_CloneRepoLines Include="call sync.cmd" />
-      <_CloneRepoLines Include="call build-tests.cmd -- /p:RefPath=$(BinDir)ref\SharedFrameworkValidation /p:RunningSharedFrameworkValidation=true /p:RuntimePath=$(BinDir)runtime\SharedFrameworkValidation\" />
+      <_CloneRepoLines Include="call build-tests.cmd -- /p:RefPath=$(BinDir)ref\SharedFrameworkValidation /p:RunningSharedFrameworkValidation=true /p:RuntimePath=$(BinDir)runtime\SharedFrameworkValidation\ /p:TestHostRootPath=$(TestHostRootPath)" />
       <_CloneRepoLines Include="popd" />
     </ItemGroup>
 
