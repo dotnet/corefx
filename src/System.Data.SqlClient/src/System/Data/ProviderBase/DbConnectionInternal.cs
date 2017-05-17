@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -548,6 +549,16 @@ namespace System.Data.ProviderBase
         internal virtual bool IsConnectionAlive(bool throwOnException = false)
         {
             return true;
+        }
+
+        virtual protected internal DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
+        {
+            Debug.Assert(outerConnection != null, "outerConnection may not be null.");
+
+            DbMetaDataFactory metaDataFactory = factory.GetMetaDataFactory(poolGroup, this);
+            Debug.Assert(metaDataFactory != null, "metaDataFactory may not be null.");
+
+            return metaDataFactory.GetSchema(outerConnection, collectionName, restrictions);
         }
     }
 }

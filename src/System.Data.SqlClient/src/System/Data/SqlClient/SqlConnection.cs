@@ -894,6 +894,22 @@ namespace System.Data.SqlClient
             }
         }
 
+        override public DataTable GetSchema()
+        {
+            return this.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
+        }
+
+        override public DataTable GetSchema(string collectionName)
+        {
+            return this.GetSchema(collectionName, null);
+        }
+
+        override public DataTable GetSchema(string collectionName, string[] restrictionValues)
+        {
+            PermissionDemand();
+            return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
+        }
+
         private class OpenAsyncRetry
         {
             private SqlConnection _parent;
