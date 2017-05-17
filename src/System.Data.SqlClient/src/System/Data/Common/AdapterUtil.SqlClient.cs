@@ -8,22 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace System
-{
-    internal static partial class SR
-    {
-        internal static string GetString(string value)
-        {
-            return value;
-        }
-
-        internal static string GetString(string format, params object[] args)
-        {
-            return SR.Format(format, args);
-        }
-    }
-}
-
 namespace System.Data.Common
 {
     internal static partial class ADP
