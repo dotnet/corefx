@@ -5142,3 +5142,48 @@ public class People
     [DataMember]
     public string Name;
 }
+
+public class SoapComplexType
+{
+    public bool BoolValue;
+    public string StringValue;
+}
+
+public class SoapComplexTypeWithArray
+{
+    public int[] IntArray;
+    public string[] StringArray;
+    public List<int> IntList;
+    public List<string> StringList;
+}
+[KnownType("KnownTypes")]
+[DataContract]
+public class EmployeeC
+{
+    public EmployeeC(string name)
+    {
+        Name = name;
+    }
+
+    [DataMember]
+    public string Name;
+
+    static Type[] KnownTypes()
+    {
+        return new Type[] { typeof(Manager), typeof(EmployeeC) };
+    }
+}
+
+[DataContract]
+public class Manager : EmployeeC
+{
+    public Manager(string name) : base(name)
+    {
+    }
+
+    [DataMember]
+    public int age;
+
+    [DataMember]
+    public EmployeeC[] emps;
+}

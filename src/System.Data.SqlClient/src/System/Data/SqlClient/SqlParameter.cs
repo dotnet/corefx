@@ -54,7 +54,7 @@ namespace System.Data.SqlClient
         }
     }
 
-    public sealed partial class SqlParameter : DbParameter, ICloneable
+    public sealed partial class SqlParameter : DbParameter, IDbDataParameter, ICloneable
     {
         private MetaType _metaType;
 
@@ -112,6 +112,37 @@ namespace System.Data.SqlClient
             this.SqlDbType = dbType;
             this.Size = size;
             this.SourceColumn = sourceColumn;
+        }
+
+        public SqlParameter(
+            string parameterName,
+            SqlDbType dbType, 
+            int size,
+            ParameterDirection direction,
+            byte precision,
+            byte scale,
+            string sourceColumn,
+            DataRowVersion sourceVersion,
+            bool sourceColumnNullMapping,
+            object value,
+            string xmlSchemaCollectionDatabase,
+            string xmlSchemaCollectionOwningSchema,
+            string xmlSchemaCollectionName
+        ) : this()
+        {
+            this.ParameterName = parameterName;
+            this.SqlDbType = dbType;
+            this.Size = size;
+            this.Direction = direction;
+            this.Precision = precision;
+            this.Scale = scale;
+            this.SourceColumn = sourceColumn;
+            this.SourceVersion = sourceVersion;
+            this.SourceColumnNullMapping = sourceColumnNullMapping;
+            this.Value = value;
+            this.XmlSchemaCollectionDatabase = xmlSchemaCollectionDatabase;
+            this.XmlSchemaCollectionOwningSchema = xmlSchemaCollectionOwningSchema;
+            this.XmlSchemaCollectionName = xmlSchemaCollectionName;
         }
 
         private SqlParameter(SqlParameter source) : this()
@@ -915,6 +946,7 @@ namespace System.Data.SqlClient
                         value = new DateTimeOffset((DateTime)value);
                     }
                     else if (TdsEnums.SQLTABLE == destinationType.TDSType && (
+                                value is DataTable ||
                                 value is DbDataReader ||
                                 value is System.Collections.Generic.IEnumerable<SqlDataRecord>))
                     {
@@ -1047,7 +1079,48 @@ namespace System.Data.SqlClient
             peekAhead = null;
 
             object value = GetCoercedValue();
-            if (value is SqlDataReader)
+            if (value is DataTable dt)
+            {
+                if (dt.Columns.Count <= 0)
+                {
+                    throw SQL.NotEnoughColumnsInStructuredType();
+                }
+                fields = new List<MSS.SmiExtendedMetaData>(dt.Columns.Count);
+                bool[] keyCols = new bool[dt.Columns.Count];
+                bool hasKey = false;
+
+                // set up primary key as unique key list
+                //  do this prior to general metadata loop to favor the primary key
+                if (null != dt.PrimaryKey && 0 < dt.PrimaryKey.Length)
+                {
+                    foreach (DataColumn col in dt.PrimaryKey)
+                    {
+                        keyCols[col.Ordinal] = true;
+                        hasKey = true;
+                    }
+                }
+
+                for (int i = 0; i < dt.Columns.Count; i++)
+                {
+                    fields.Add(MSS.MetaDataUtilsSmi.SmiMetaDataFromDataColumn(dt.Columns[i], dt));
+
+                    // DataColumn uniqueness is only for a single column, so don't add
+                    //  more than one.  (keyCols.Count first for assumed minimal perf benefit)
+                    if (!hasKey && dt.Columns[i].Unique)
+                    {
+                        keyCols[i] = true;
+                        hasKey = true;
+                    }
+                }
+
+                // Add unique key property, if any found.
+                if (hasKey)
+                {
+                    props = new SmiMetaDataPropertyCollection();
+                    props[MSS.SmiPropertySelector.UniqueKey] = new MSS.SmiUniqueKeyProperty(new List<bool>(keyCols));
+                }
+            }
+            else if (value is SqlDataReader)
             {
                 fields = new List<MSS.SmiExtendedMetaData>(((SqlDataReader)value).GetInternalSmiMetaData());
                 if (fields.Count <= 0)

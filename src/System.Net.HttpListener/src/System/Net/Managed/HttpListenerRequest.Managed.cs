@@ -33,11 +33,9 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
-using System.Net.WebSockets;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -53,14 +51,11 @@ namespace System.Net
 
         private long _contentLength;
         private bool _clSet;
-        private CookieCollection _cookies;
         private WebHeaderCollection _headers;
         private string _method;
         private Stream _inputStream;
         private HttpListenerContext _context;
         private bool _isChunked;
-        private bool _kaSet;
-        private bool _keepAlive;
 
         private static byte[] s_100continue = Encoding.ASCII.GetBytes("HTTP/1.1 100 Continue\r\n\r\n");
 
@@ -261,63 +256,6 @@ namespace System.Net
                     }
 
                     break;
-                case "cookie":
-                    if (_cookies == null)
-                        _cookies = new CookieCollection();
-
-                    string[] cookieStrings = val.Split(new char[] { ',', ';' });
-                    Cookie current = null;
-                    int version = 0;
-                    foreach (string cookieString in cookieStrings)
-                    {
-                        string str = cookieString.Trim();
-                        if (str.Length == 0)
-                            continue;
-                        if (str.StartsWith("$Version"))
-                        {
-                            version = Int32.Parse(Unquote(str.Substring(str.IndexOf('=') + 1)));
-                        }
-                        else if (str.StartsWith("$Path"))
-                        {
-                            if (current != null)
-                                current.Path = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else if (str.StartsWith("$Domain"))
-                        {
-                            if (current != null)
-                                current.Domain = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else if (str.StartsWith("$Port"))
-                        {
-                            if (current != null)
-                                current.Port = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else
-                        {
-                            if (current != null)
-                            {
-                                _cookies.Add(current);
-                            }
-                            current = new Cookie();
-                            int idx = str.IndexOf('=');
-                            if (idx > 0)
-                            {
-                                current.Name = str.Substring(0, idx).Trim();
-                                current.Value = str.Substring(idx + 1).Trim();
-                            }
-                            else
-                            {
-                                current.Name = str.Trim();
-                                current.Value = String.Empty;
-                            }
-                            current.Version = version;
-                        }
-                    }
-                    if (current != null)
-                    {
-                        _cookies.Add(current);
-                    }
-                    break;
             }
         }
 
@@ -354,18 +292,17 @@ namespace System.Net
             }
         }
 
-        public int ClientCertificateError
+        private X509Certificate2 GetClientCertificateCore() => ClientCertificate = _context.Connection.ClientCertificate;
+
+        private int GetClientCertificateErrorCore()
         {
-            get
-            {
-                HttpConnection cnc = _context.Connection;
-                if (cnc.ClientCertificate == null)
-                    return 0;
-                int[] errors = cnc.ClientCertificateErrors;
-                if (errors != null && errors.Length > 0)
-                    return errors[0];
+            HttpConnection cnc = _context.Connection;
+            if (cnc.ClientCertificate == null)
                 return 0;
-            }
+            int[] errors = cnc.ClientCertificateErrors;
+            if (errors != null && errors.Length > 0)
+                return errors[0];
+            return 0;
         }
 
         public long ContentLength64
@@ -376,16 +313,6 @@ namespace System.Net
                     _contentLength = -1;
 
                 return _contentLength;
-            }
-        }
-
-        public CookieCollection Cookies
-        {
-            get
-            {
-                if (_cookies == null)
-                    _cookies = new CookieCollection();
-                return _cookies;
             }
         }
 
@@ -415,68 +342,53 @@ namespace System.Net
 
         public bool IsSecureConnection => _context.Connection.IsSecure;
 
-        public bool KeepAlive
-        {
-            get
-            {
-                if (_kaSet)
-                    return _keepAlive;
-
-                _kaSet = true;
-                // 1. Connection header
-                // 2. Protocol (1.1 == keep-alive by default)
-                // 3. Keep-Alive header
-                string cnc = Headers[HttpKnownHeaderNames.Connection];
-                if (!String.IsNullOrEmpty(cnc))
-                {
-                    _keepAlive = string.Equals(cnc, "keep-alive", StringComparison.OrdinalIgnoreCase);
-                }
-                else if (_version == HttpVersion.Version11)
-                {
-                    _keepAlive = true;
-                }
-                else
-                {
-                    cnc = Headers[HttpKnownHeaderNames.KeepAlive];
-                    if (!String.IsNullOrEmpty(cnc))
-                        _keepAlive = !string.Equals(cnc, "closed", StringComparison.OrdinalIgnoreCase);
-                }
-                return _keepAlive;
-            }
-        }
-
         public IPEndPoint LocalEndPoint => _context.Connection.LocalEndPoint;
 
         public IPEndPoint RemoteEndPoint => _context.Connection.RemoteEndPoint;
 
         public Guid RequestTraceIdentifier => Guid.Empty;
 
-        public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
+        private IAsyncResult BeginGetClientCertificateCore(AsyncCallback requestCallback, object state)
         {
-            Task<X509Certificate2> getClientCertificate = new Task<X509Certificate2>(() => GetClientCertificate());
-            return TaskToApm.Begin(getClientCertificate, requestCallback, state);
+            var asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback);
+
+            // The certificate is already retrieved by the time this method is called. GetClientCertificateCore() evaluates to
+            // a simple member access, so this will always complete immediately.
+            ClientCertState = ListenerClientCertState.Completed;
+            asyncResult.InvokeCallback(GetClientCertificateCore());
+
+            return asyncResult;
         }
 
         public X509Certificate2 EndGetClientCertificate(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
-            
-            return TaskToApm.End<X509Certificate2>(asyncResult);
-        }
 
-        public X509Certificate2 GetClientCertificate() => _context.Connection.ClientCertificate;
+            GetClientCertificateAsyncResult clientCertAsyncResult = asyncResult as GetClientCertificateAsyncResult;
+            if (clientCertAsyncResult == null || clientCertAsyncResult.AsyncObject != this)
+            {
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (clientCertAsyncResult.EndCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndGetClientCertificate)));
+            }
+            clientCertAsyncResult.EndCalled = true;
+
+            return (X509Certificate2)clientCertAsyncResult.Result;
+        }
 
         public string ServiceName => null;
 
         public TransportContext TransportContext => new Context();
 
-        public Task<X509Certificate2> GetClientCertificateAsync()
-        {
-            return Task<X509Certificate2>.Factory.FromAsync(BeginGetClientCertificate, EndGetClientCertificate, null);
-        }
-
         private Uri RequestUri => _requestUri;
         private bool SupportsWebSockets => true;
+
+        private class GetClientCertificateAsyncResult : LazyAsyncResult
+        {
+            public GetClientCertificateAsyncResult(object myObject, object myState, AsyncCallback myCallBack) : base(myObject, myState, myCallBack) { }
+        }
     }
 }

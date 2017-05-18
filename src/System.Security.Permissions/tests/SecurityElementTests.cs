@@ -33,7 +33,6 @@ using Xunit;
 
 namespace System.Security.Permissions.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework has actual implementation, not stubs")]
     public class SecurityElementTest
     {
         private static SecurityElement CreateElement()
@@ -95,9 +94,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(tagName) != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(tagName) != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 
@@ -113,9 +115,13 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("tag", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("tag", ex.ParamName);
+                }
             }
         }
 
@@ -143,9 +149,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(invalid) != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(invalid) != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 
@@ -161,9 +170,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("tag", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("tag", ex.ParamName);
+                }
             }
         }
 
@@ -190,9 +202,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("name", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("name", ex.ParamName);
+                }
             }
         }
 
@@ -209,9 +224,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("value", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("value", ex.ParamName);
+                }
             }
         }
 
@@ -273,9 +291,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("child", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("child", ex.ParamName);
+                }
             }
         }
 
@@ -313,9 +334,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("\"invalid\"") != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf("\"invalid\"") != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 
@@ -418,9 +442,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("tag", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("tag", ex.ParamName);
+                }
             }
         }
 
@@ -452,9 +479,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("tag", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("tag", ex.ParamName);
+                }
             }
         }
 
@@ -506,9 +536,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(invalid) != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(invalid) != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 
@@ -525,9 +558,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("Tag", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("Tag", ex.ParamName);
+                }
             }
         }
 
@@ -560,9 +596,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(invalid) != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(invalid) != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 
@@ -589,9 +628,12 @@ namespace System.Security.Permissions.Tests
             {
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("xml", ex.ParamName);
+                if (!PlatformDetection.IsNetNative)  // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.NotNull(ex.ParamName);
+                    Assert.Equal("xml", ex.ParamName);
+                }
             }
         }
     }
