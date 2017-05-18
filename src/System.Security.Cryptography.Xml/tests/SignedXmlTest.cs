@@ -291,43 +291,44 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
-        [ActiveIssue(17001, TestPlatforms.OSX)]
         public void AsymmetricDSASignature()
         {
             SignedXml signedXml = MSDNSample();
 
-            DSA key = DSA.Create();
-            signedXml.SigningKey = key;
+            using (DSA key = DSA.Create())
+            {
+                signedXml.SigningKey = key;
 
-            // Add a KeyInfo.
-            KeyInfo keyInfo = new KeyInfo();
-            keyInfo.AddClause(new DSAKeyValue(key));
-            signedXml.KeyInfo = keyInfo;
+                // Add a KeyInfo.
+                KeyInfo keyInfo = new KeyInfo();
+                keyInfo.AddClause(new DSAKeyValue(key));
+                signedXml.KeyInfo = keyInfo;
 
-            Assert.Equal(1, signedXml.KeyInfo.Count);
-            Assert.Null(signedXml.SignatureLength);
-            Assert.Null(signedXml.SignatureMethod);
-            Assert.Null(signedXml.SignatureValue);
-            Assert.Null(signedXml.SigningKeyName);
+                Assert.Equal(1, signedXml.KeyInfo.Count);
+                Assert.Null(signedXml.SignatureLength);
+                Assert.Null(signedXml.SignatureMethod);
+                Assert.Null(signedXml.SignatureValue);
+                Assert.Null(signedXml.SigningKeyName);
 
-            // Compute the signature.
-            signedXml.ComputeSignature();
+                // Compute the signature.
+                signedXml.ComputeSignature();
 
-            Assert.Null(signedXml.SignatureLength);
-            Assert.Equal(SignedXml.XmlDsigDSAUrl, signedXml.SignatureMethod);
-            Assert.InRange(signedXml.SignatureValue.Length, low: 40, high: Int32.MaxValue);
-            Assert.Null(signedXml.SigningKeyName);
+                Assert.Null(signedXml.SignatureLength);
+                Assert.Equal(SignedXml.XmlDsigDSAUrl, signedXml.SignatureMethod);
+                Assert.InRange(signedXml.SignatureValue.Length, low: 40, high: Int32.MaxValue);
+                Assert.Null(signedXml.SigningKeyName);
 
-            // Get the XML representation of the signature.
-            XmlElement xmlSignature = signedXml.GetXml();
+                // Get the XML representation of the signature.
+                XmlElement xmlSignature = signedXml.GetXml();
 
-            // LAMESPEC: we must reload the signature or it won't work
-            // MS framework throw a "malformed element"
-            SignedXml vrfy = new SignedXml();
-            vrfy.LoadXml(xmlSignature);
+                // LAMESPEC: we must reload the signature or it won't work
+                // MS framework throw a "malformed element"
+                SignedXml vrfy = new SignedXml();
+                vrfy.LoadXml(xmlSignature);
 
-            // assert that we can verify our own signature
-            Assert.True(vrfy.CheckSignature(), "DSA-Compute/Verify");
+                // assert that we can verify our own signature
+                Assert.True(vrfy.CheckSignature(), "DSA-Compute/Verify");
+            }
         }
 
         [Fact]
