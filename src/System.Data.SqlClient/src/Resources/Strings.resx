@@ -1099,10 +1099,4 @@
   <data name="MDF_UnableToBuildCollection" xml:space="preserve">
     <value>Unable to build schema collection '{0}';</value>
   </data>
-  <data name="OleDb_ConfigUnableToLoadXmlMetaDataFile" xml:space="preserve">
-    <value>Unable to load the XML file specified in configuration setting '{0}'.</value>
-  </data>
-  <data name="OleDb_ConfigWrongNumberOfValues" xml:space="preserve">
-    <value>The '{0}' configuration setting has the wrong number of values.</value>
-  </data>
 </root>

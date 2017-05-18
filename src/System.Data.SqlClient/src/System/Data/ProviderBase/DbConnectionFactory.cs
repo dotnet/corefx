@@ -563,7 +563,7 @@ namespace System.Data.ProviderBase
             return metaDataFactory;
         }
 
-        virtual protected DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
+        protected virtual DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
         {
             // providers that support GetSchema must override this with a method that creates a meta data
             // factory appropriate for them.

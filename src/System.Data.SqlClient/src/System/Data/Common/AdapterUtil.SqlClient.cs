@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Configuration;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace System
 {
@@ -338,75 +336,7 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
-
-        static internal Stream GetXmlStreamFromValues(String[] values, String errorString)
-        {
-            if (values.Length != 1)
-            {
-                throw ADP.ConfigWrongNumberOfValues(errorString);
-            }
-            return ADP.GetXmlStream(values[0], errorString);
-        }
-
-        static internal ConfigurationException ConfigWrongNumberOfValues(string settingName)
-        {
-            return Configuration(SR.GetString(SR.OleDb_ConfigWrongNumberOfValues, settingName));
-        }
-        static internal ConfigurationException Configuration(string message)
-        {
-            ConfigurationException e = new ConfigurationErrorsException(message);
-            return e;
-        }
-
-        static internal Stream GetXmlStream(String value, String errorString)
-        {
-            Stream XmlStream;
-            const string config = "config\\";
-            // get location of config directory
-            string rootPath = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
-            if (rootPath == null)
-            {
-                throw ADP.ConfigUnableToLoadXmlMetaDataFile(errorString);
-            }
-            StringBuilder tempstring = new StringBuilder(rootPath.Length + config.Length + value.Length);
-            tempstring.Append(rootPath);
-            tempstring.Append(config);
-            tempstring.Append(value);
-            String fullPath = tempstring.ToString();
-
-            // don't allow relative paths
-            if (Path.GetFullPath(fullPath) != fullPath)
-            {
-                throw ADP.ConfigUnableToLoadXmlMetaDataFile(errorString);
-            }
-
-            try
-            {
-                XmlStream = ADP.GetFileStream(fullPath);
-            }
-            catch (Exception e)
-            {
-                // UNDONE - should not be catching all exceptions!!!
-                if (!ADP.IsCatchableExceptionType(e))
-                {
-                    throw;
-                }
-                throw ADP.ConfigUnableToLoadXmlMetaDataFile(errorString);
-            }
-
-            return XmlStream;
-        }
-
-        static internal Stream GetFileStream(string filename)
-        {
-            return new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-        }
-
-        static internal ConfigurationException ConfigUnableToLoadXmlMetaDataFile(string settingName)
-        {
-            return Configuration(SR.GetString(SR.OleDb_ConfigUnableToLoadXmlMetaDataFile, settingName));
-        }
-
+        
         internal static Exception CollectionNameIsNotUnique(string collectionName)
         {
             return Argument(SR.GetString(SR.MDF_CollectionNameISNotUnique, collectionName));

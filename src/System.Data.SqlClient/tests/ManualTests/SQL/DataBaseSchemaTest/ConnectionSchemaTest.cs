@@ -36,7 +36,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 DataTable table = connection.GetSchema(schemaItemName);
 
                 // Display the contents of the table.  
-                Assert.True(table.Rows.Count > 0);
+                Assert.InRange<int>(table.Rows.Count, 1, int.MaxValue);
 
                 // Get all table columns 
                 HashSet<string> columnNames = new HashSet<string>();
@@ -46,12 +46,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     columnNames.Add(column.ColumnName);
                 }
 
-                foreach(string column in testColumnNames)
-                {
-                    Assert.Contains<string>(column, columnNames);
-                }
+                Assert.All<string>(testColumnNames, column => Assert.Contains<string>(column, columnNames));
             }
         }
-
     }
 }
