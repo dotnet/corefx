@@ -17,11 +17,6 @@ namespace System.Net
             get => _webHeaders;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
                 _webHeaders = new WebHeaderCollection();
                 foreach (string headerName in value.AllKeys)
                 {

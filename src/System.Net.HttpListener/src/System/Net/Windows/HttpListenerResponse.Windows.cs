@@ -156,11 +156,6 @@ namespace System.Net
 
         public void CopyFrom(HttpListenerResponse templateResponse)
         {
-            if (templateResponse == null)
-            {
-                throw new ArgumentNullException(nameof(templateResponse));
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"templateResponse {templateResponse}");
             _nativeResponse = new Interop.HttpApi.HTTP_RESPONSE();
             _responseState = ResponseState.Created;
