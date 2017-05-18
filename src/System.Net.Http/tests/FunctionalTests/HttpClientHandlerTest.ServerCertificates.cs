@@ -211,8 +211,8 @@ namespace System.Net.Http.Functional.Tests
             new object[] { Configuration.Http.WrongHostNameCertRemoteServer , SslPolicyErrors.RemoteCertificateNameMismatch},
         };
 
-        [ActiveIssue(7812, TestPlatforms.Windows)]
-        [OuterLoop] // TODO: Issue #11345
+        // [ActiveIssue(7812, TestPlatforms.Windows)]
+        // [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(BackendSupportsCustomCertificateHandling))]
         [MemberData(nameof(CertificateValidationServersAndExpectedPolicies))]
         public async Task UseCallback_BadCertificate_ExpectedPolicyErrors(string url, SslPolicyErrors expectedErrors)

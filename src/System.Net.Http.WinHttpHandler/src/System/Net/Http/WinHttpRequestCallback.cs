@@ -306,7 +306,10 @@ namespace System.Net.Http
             Debug.Assert(state != null, "OnRequestError: state is null");
 
             Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
-
+            
+            Debug.Assert(asyncResult.dwError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "5");
+            Debug.Assert(asyncResult.dwError != Interop.SECURITY_STATUS.BufferNotEnough, "6");
+            
             switch (unchecked((uint)asyncResult.dwResult.ToInt32()))
             {
                 case Interop.WinHttp.API_SEND_REQUEST:

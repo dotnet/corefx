@@ -72,7 +72,7 @@ namespace System.Net.Security
                 inputBuffer,
                 outputBuffer,
                 ref unusedAttributes);
-
+            //Debug.Assert(1 == 0, errorCode);
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
         }
 
@@ -90,7 +90,7 @@ namespace System.Net.Security
                             inputBuffers,
                             outputBuffer,
                             ref unusedAttributes);
-
+            //Debug.Assert(1 == 0, errorCode);
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
         }
 
