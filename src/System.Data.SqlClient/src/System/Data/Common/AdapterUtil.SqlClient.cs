@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Configuration;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
@@ -350,6 +351,11 @@ namespace System.Data.Common
         static internal ConfigurationException ConfigWrongNumberOfValues(string settingName)
         {
             return Configuration(SR.GetString(SR.OleDb_ConfigWrongNumberOfValues, settingName));
+        }
+        static internal ConfigurationException Configuration(string message)
+        {
+            ConfigurationException e = new ConfigurationErrorsException(message);
+            return e;
         }
 
         static internal Stream GetXmlStream(String value, String errorString)
