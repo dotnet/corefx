@@ -58,7 +58,7 @@ namespace System.Reflection.Emit
         public void SetImplementationFlags(System.Reflection.MethodImplAttributes attributes) { }
         public override string ToString() { throw null; }
     }
-    public sealed partial class EnumBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo doesn't have a public ctor
+    public sealed partial class EnumBuilder : System.Reflection.TypeInfo
     {
         internal EnumBuilder() { }
         public override System.Reflection.Assembly Assembly { get { throw null; } }
@@ -103,7 +103,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
-//TYPEINFO        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
+        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
@@ -149,7 +149,7 @@ namespace System.Reflection.Emit
         public void SetOffset(int iOffset) { }
         public override void SetValue(object obj, object val, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Globalization.CultureInfo culture) { }
     }
-    public sealed partial class GenericTypeParameterBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo
+    public sealed partial class GenericTypeParameterBuilder : System.Reflection.TypeInfo
     {
         internal GenericTypeParameterBuilder() { }
         public override System.Reflection.Assembly Assembly { get { throw null; } }
@@ -201,7 +201,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
-//TYPEINFO:        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
+        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         public override bool IsAssignableFrom(System.Type c) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
@@ -321,7 +321,7 @@ namespace System.Reflection.Emit
         public override void SetValue(object obj, object value, object[] index) { }
         public override void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] index, System.Globalization.CultureInfo culture) { }
     }
-    public sealed partial class TypeBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo
+    public sealed partial class TypeBuilder : System.Reflection.TypeInfo
     {
         internal TypeBuilder() { }
         public const int UnspecifiedTypeSize = 0;
@@ -409,7 +409,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
-//TYPEINFO:        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
+        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         public override bool IsAssignableFrom(System.Type c) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
