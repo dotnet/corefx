@@ -67,6 +67,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // https://github.com/dotnet/corefx/issues/15065
         public void OpenExeConfiguration1_UserLevel_PerUserRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
@@ -157,6 +158,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // https://github.com/dotnet/corefx/issues/15066
         public void exePath_UserLevelPerRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
