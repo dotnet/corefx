@@ -38,12 +38,39 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Set(string.Empty, FileAttributes.Normal));
         }
 
-        [Fact]
-        public void NonExistentFile()
+        // In NetFX we ignore "not found" errors, which leaves the attributes
+        // state as invalid (0xFFFFFFFF), which makes all flags true.
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingFile(char trailingChar)
         {
-            Assert.Throws<FileNotFoundException>(() => Set(GetTestFilePath(), FileAttributes.Normal));
-            Assert.Throws<FileNotFoundException>(() => Set(IOServices.AddTrailingSlashIfNeeded(GetTestFilePath()), FileAttributes.Normal));
-            Assert.Throws<FileNotFoundException>(() => Set(IOServices.RemoveTrailingSlash(GetTestFilePath()), FileAttributes.Normal));
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "file" + trailingChar));
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingFile(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
+            Assert.Throws<FileNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "file" + trailingChar));
+            Assert.Throws<DirectoryNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
         }
 
         [Theory]

@@ -137,5 +137,37 @@ namespace System.IO.Tests
                 Set(path, Get(path) & ~FileAttributes.ReadOnly);
             }
         }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingFile(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "dir" + trailingChar));
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingFile(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
+            Assert.Throws<FileNotFoundException>(() => info.Attributes = FileAttributes.Archive);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "dir" + trailingChar));
+            Assert.Throws<DirectoryNotFoundException>(() => info.Attributes = FileAttributes.Archive);
+        }
     }
 }

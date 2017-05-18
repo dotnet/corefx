@@ -19,9 +19,9 @@ namespace System.IO.Tests
 
         public static bool UsingNewNormalization => !PathFeatures.IsUsingLegacyPathNormalization();
 
-        public static TheoryData<string> PathsWithInvalidColons => TestData.PathsWithInvalidColons;
-
-        public static TheoryData<string> PathsWithInvalidCharacters => TestData.PathsWithInvalidCharacters;
+        public static TheoryData<string> PathsWithInvalidColons = TestData.PathsWithInvalidColons;
+        public static TheoryData<string> PathsWithInvalidCharacters = TestData.PathsWithInvalidCharacters;
+        public static TheoryData<char> TrailingCharacters = TestData.TrailingCharacters;
 
         /// <summary>
         /// In some cases (such as when running without elevated privileges),

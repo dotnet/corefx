@@ -122,5 +122,40 @@ namespace System.IO.Tests
             Set(path, attr);
             Assert.Equal(FileAttributes.Normal, Get(path));
         }
+
+        // In NetFX we ignore "not found" errors, which leaves the attributes
+        // state as invalid (0xFFFFFFFF), which makes all flags true.
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingFile(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            FileInfo info = new FileInfo(path + trailingChar);
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            FileInfo info = new FileInfo(Path.Combine(path, "file" + trailingChar));
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingFile(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            FileInfo info = new FileInfo(path + trailingChar);
+            Assert.Throws<FileNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void SetAttributes_MissingDirectory(char trailingChar)
+        {
+            string path = GetTestFilePath();
+            FileInfo info = new FileInfo(Path.Combine(path, "file" + trailingChar));
+            Assert.Throws<DirectoryNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
+        }
     }
 }

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class FileStream_ctor_str_fm : RemoteExecutorTestBase
+    public class FileStream_ctor_str_fm : RemoteFileSystemTest
     {
         protected virtual FileStream CreateFileStream(string path, FileMode mode)
         {
@@ -36,6 +36,23 @@ namespace System.IO.Tests
         public void InvalidModeThrows()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsFileNotFound(char trailingChar)
+        {
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<FileNotFoundException>(() => CreateFileStream(path, FileMode.Open));
+        }
+
+
+        // Issue #19965
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => CreateFileStream(path, FileMode.Open));
         }
 
         [Fact]
