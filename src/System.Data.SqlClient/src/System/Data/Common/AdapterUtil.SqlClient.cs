@@ -309,7 +309,7 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NegativeParameter, parameterName));
         }
 
-        static internal Exception InvalidXmlMissingColumn(string collectionName, string columnName)
+        internal static Exception InvalidXmlMissingColumn(string collectionName, string columnName)
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlMissingColumn, collectionName, columnName));
         }

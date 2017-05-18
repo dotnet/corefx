@@ -894,17 +894,17 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public DataTable GetSchema()
+        public override DataTable GetSchema()
         {
             return GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
         }
 
-        override public DataTable GetSchema(string collectionName)
+        public override DataTable GetSchema(string collectionName)
         {
             return GetSchema(collectionName, null);
         }
 
-        override public DataTable GetSchema(string collectionName, string[] restrictionValues)
+        public override DataTable GetSchema(string collectionName, string[] restrictionValues)
         {
             return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
         }
