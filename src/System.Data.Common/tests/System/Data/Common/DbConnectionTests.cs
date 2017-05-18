@@ -151,7 +151,6 @@ namespace System.Data.Common.Tests
             DbProviderFactoryConnection con = new DbProviderFactoryConnection();
             PropertyInfo providerFactoryProperty = con.GetType().GetProperty("ProviderFactory", BindingFlags.NonPublic | BindingFlags.Instance);
             Assert.NotNull(providerFactoryProperty);
-            Console.WriteLine("providerFactoryProperty not null");
             DbProviderFactory factory = providerFactoryProperty.GetValue(con) as DbProviderFactory;
             Assert.NotNull(factory);
             Assert.Same(typeof(TestDbProviderFactory), factory.GetType());
