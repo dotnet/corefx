@@ -554,7 +554,7 @@ namespace System.Data.Common
 
         internal static bool IsEmptyArray(string[] array)
         {
-            return array?.Length == 0;
+            return (array == null || array.Length == 0);
         }
 
         internal static ArgumentException DbTypeNotSupported(DbType type, Type enumtype)
