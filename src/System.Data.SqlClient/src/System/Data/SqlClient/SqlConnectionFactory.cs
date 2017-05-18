@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 
+using System.Collections.Specialized;
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
@@ -12,6 +13,9 @@ namespace System.Data.SqlClient
 {
     sealed internal class SqlConnectionFactory : DbConnectionFactory
     {
+
+        private const string _metaDataXml = "MetaDataXml";
+
         private SqlConnectionFactory() : base() { }
 
         public static readonly SqlConnectionFactory SingletonInstance = new SqlConnectionFactory();
@@ -270,9 +274,24 @@ namespace System.Data.SqlClient
             Debug.Assert(internalConnection != null, "internalConnection may not be null.");
             cacheMetaDataFactory = false;
 
-            Stream XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.SqlClient.SqlMetaData.xml");
-            cacheMetaDataFactory = true;
-            
+            NameValueCollection settings = (NameValueCollection)ConfigurationManager.GetSection("system.data.sqlclient");
+            Stream XMLStream = null;
+            if (settings != null)
+            {
+                string[] values = settings.GetValues(_metaDataXml);
+                if (values != null)
+                {
+                    XMLStream = ADP.GetXmlStreamFromValues(values, _metaDataXml);
+                }
+            }
+
+            // if the xml was not obtained from machine.config use the embedded XML resource
+            if (XMLStream == null)
+            {
+                XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.SqlClient.SqlMetaData.xml");
+                cacheMetaDataFactory = true;
+            }
+
             Debug.Assert(XMLStream != null, "XMLstream may not be null.");
 
             return new SqlMetaDataFactory(XMLStream,
