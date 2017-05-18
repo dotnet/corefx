@@ -316,7 +316,7 @@ namespace System.Net.Sockets.Tests
             using (SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(type, IPAddress.IPv6Loopback, out port6))
             {
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port4);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port4);
                 args.Completed += OnConnectAsyncCompleted;
 
                 ManualResetEvent complete = new ManualResetEvent(false);
@@ -334,7 +334,7 @@ namespace System.Net.Sockets.Tests
 
                 args.ConnectSocket.Dispose();
 
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port6);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port6);
                 complete.Reset();
 
                 Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
