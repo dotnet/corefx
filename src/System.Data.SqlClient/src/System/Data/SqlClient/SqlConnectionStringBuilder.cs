@@ -664,6 +664,7 @@ namespace System.Data.SqlClient
                 case Keywords.CurrentLanguage: return CurrentLanguage;
                 case Keywords.DataSource: return DataSource;
                 case Keywords.Encrypt: return Encrypt;
+                case Keywords.Enlist: return Enlist;
                 case Keywords.FailoverPartner: return FailoverPartner;
                 case Keywords.InitialCatalog: return InitialCatalog;
                 case Keywords.IntegratedSecurity: return IntegratedSecurity;
@@ -743,6 +744,9 @@ namespace System.Data.SqlClient
                     break;
                 case Keywords.Encrypt:
                     _encrypt = DbConnectionStringDefaults.Encrypt;
+                    break;
+                case Keywords.Enlist:
+                    _enlist = DbConnectionStringDefaults.Enlist;
                     break;
                 case Keywords.FailoverPartner:
                     _failoverPartner = DbConnectionStringDefaults.FailoverPartner;
@@ -855,7 +859,6 @@ namespace System.Data.SqlClient
             DbConnectionStringKeywords.AsynchronousProcessing,
             DbConnectionStringKeywords.ConnectionReset,
             DbConnectionStringKeywords.ContextConnection,
-            DbConnectionStringKeywords.Enlist,
             DbConnectionStringKeywords.TransactionBinding,
 
             DbConnectionStringSynonyms.Async
