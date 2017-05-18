@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-    internal class MockType : NetCoreType
+    internal class MockType : Type
     {
         public override Assembly Assembly => throw Unexpected;
         public override string AssemblyQualifiedName => throw Unexpected;
@@ -90,10 +90,7 @@ namespace System
         public override bool IsSecurityTransparent => throw Unexpected;
         public override bool IsSerializable => throw Unexpected;
         public override bool IsSubclassOf(Type c) => throw Unexpected;
-        public override bool IsSZArray => throw Unexpected;
-        public override bool IsTypeDefinition => throw Unexpected;
         protected override bool IsValueTypeImpl() => throw Unexpected;
-        public override bool IsVariableBoundArray => throw Unexpected;
         public override Type MakeArrayType() => throw Unexpected;
         public override Type MakeArrayType(int rank) => throw Unexpected;
         public override Type MakeByRefType() => throw Unexpected;
@@ -107,16 +104,5 @@ namespace System
         public override RuntimeTypeHandle TypeHandle => throw Unexpected;
 
         protected virtual Exception Unexpected => new Exception("Did not expect to be called.");
-    }
-
-    internal abstract class NetCoreType : Type
-    {
-#if netcoreapp || uapaot
-#else
-        // Members that don't exist in netfx.
-        public virtual bool IsSZArray => throw new NotImplementedException();
-        public virtual bool IsVariableBoundArray => throw new NotImplementedException();
-        public virtual bool IsTypeDefinition => throw new NotImplementedException();
-#endif
     }
 }
