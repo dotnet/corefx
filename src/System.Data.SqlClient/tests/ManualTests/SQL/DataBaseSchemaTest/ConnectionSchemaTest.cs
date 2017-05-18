@@ -13,13 +13,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void GetAllTablesFromSchema()
         {
-            VerifySchemaTable("Tables", new string[] {"TABLE_CATALOG", "TABLE_SCHEMA", "TABLE_NAME", "TABLE_TYPE" });
+            VerifySchemaTable(SqlClientMetaDataCollectionNames.Tables, new string[] {"TABLE_CATALOG", "TABLE_SCHEMA", "TABLE_NAME", "TABLE_TYPE" });
         }
 
         [CheckConnStrSetupFact]
         public static void GetAllProceduresFromSchema()
         {
-            VerifySchemaTable("Procedures", new string[] { "ROUTINE_SCHEMA", "ROUTINE_NAME", "ROUTINE_TYPE" });
+            VerifySchemaTable(SqlClientMetaDataCollectionNames.Procedures, new string[] { "ROUTINE_SCHEMA", "ROUTINE_NAME", "ROUTINE_TYPE" });
         }
 
         private static void VerifySchemaTable(string schemaItemName, string[] testColumnNames)
