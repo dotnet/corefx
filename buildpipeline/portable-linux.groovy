@@ -61,7 +61,7 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
                                      'Ubuntu.1404.Amd64.Open',
                                      'Ubuntu.1604.Amd64.Open',
                                      'Ubuntu.1610.Amd64.Open',
-                                     'Ubuntu.1704.Amd64.Open',
+                                     // 'Ubuntu.1704.Amd64.Open',
                                      'suse.422.amd64.Open',
                                      'fedora.25.amd64.Open']
             
