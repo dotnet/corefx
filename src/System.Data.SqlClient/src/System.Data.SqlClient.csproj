@@ -121,6 +121,7 @@
     <Compile Include="System\Data\SqlClient\SqlInternalConnection.cs" />
     <Compile Include="System\Data\SqlClient\SqlInternalConnectionTds.cs" />
     <Compile Include="System\Data\SqlClient\sqlinternaltransaction.cs" />
+    <Compile Include="System\Data\SqlClient\sqlmetadatafactory.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameter.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollection.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollectionHelper.cs" />
