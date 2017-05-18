@@ -35,7 +35,7 @@ namespace System.Data.Common
         /// </summary>
         protected virtual DbProviderFactory DbProviderFactory => null;
 
-        internal DbProviderFactory ProviderFactory => DbProviderFactory;
+        internal DbProviderFactory ProviderFactory => DbProviderFactory; // This property is required for DbProviderFactories' API and will appear as 'dead' code till that class has been ported.
 
         [Browsable(false)]
         public abstract string ServerVersion { get; }
