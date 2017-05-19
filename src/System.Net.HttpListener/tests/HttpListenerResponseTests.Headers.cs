@@ -63,7 +63,7 @@ namespace System.Net.Tests
         [InlineData("garbage")]
         // The managed implementation should set ContentType directly in the headers instead of tracking it with its own field.
         // The managed implementation should trim the value.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task ContentType_SetAndSend_Success(string contentType)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -82,7 +82,7 @@ namespace System.Net.Tests
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
         // The managed implementation should store ContentType in Headers, not as a separate variable.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task ContentType_SetNullEmptyOrWhitespace_ResetsContentType(string contentType, string expectedContentType)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -111,7 +111,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not throw setting ContentType after the headers are sent.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task ContentType_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -129,7 +129,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should throw an ObjectDisposedException getting OutputStream when disposed.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task OutputStream_GetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -145,7 +145,7 @@ namespace System.Net.Tests
         [InlineData("http://domain:-1")]
         // The managed implementation should set Location directly in Headers rather than track it with its own variable.
         // The managed implementation should trim the value.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task RedirectLocation_SetAndSend_Success(string redirectLocation)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -164,7 +164,7 @@ namespace System.Net.Tests
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
         // The managed implementation should set Location directly in Headers rather than track it with its own variable.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task RedirectLocation_SetNullOrEmpty_ResetsRedirectLocation(string redirectLocation, string expectedRedirectLocation)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -196,7 +196,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not throw setting RedirectLocation after headers were sent.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task RedirectLocation_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -218,7 +218,7 @@ namespace System.Net.Tests
         [InlineData(401, "HTTP/1.1 401 Unauthorized")]
         [InlineData(999, "HTTP/1.1 999 ")]
         // The managed implementation should update StatusDescription when setting StatusCode.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19976, TestPlatforms.AnyUnix)]
         public async Task StatusCode_SetAndSend_Success(int statusCode, string startLine)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -245,7 +245,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not throw setting StatusCode after headers were sent.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task StatusCode_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -323,7 +323,7 @@ namespace System.Net.Tests
         [InlineData(507, "Insufficient Storage")]
         [InlineData(999, "")]
         // The managed implementation should set StatusDescription when setting the StatusCode.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19976, TestPlatforms.AnyUnix)]
         public async Task StatusDescription_GetWithCustomStatusCode_ReturnsExpected(int statusCode, string expectedDescription)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -346,7 +346,7 @@ namespace System.Net.Tests
         [InlineData("StatusDescription", "StatusDescription")]
         [InlineData("  StatusDescription  ", "  StatusDescription  ")]
         // The managed implementation should use WebHeaderEncoding to encode unicode headers.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19976, TestPlatforms.AnyUnix)]
         public async Task StatusDescription_SetCustom_Success(string statusDescription, string expectedStatusDescription)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -361,7 +361,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should throw an ArgumentNullException setting StatusDescription to null.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19976, TestPlatforms.AnyUnix)]
         public async Task StatusDescription_SetNull_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -377,7 +377,7 @@ namespace System.Net.Tests
         [InlineData("\r")]
         [InlineData("\n")]
         // The managed implementation should validate the value to make sure it contains no control characters.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19976, TestPlatforms.AnyUnix)]
         public async Task StatusDescription_SetInvalid_ThrowsArgumentException(string statusDescription)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -389,7 +389,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should throw setting StatusDescription when disposed.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task StatusDescription_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -419,7 +419,7 @@ namespace System.Net.Tests
         [InlineData(true)]
         [InlineData(false)]
         // The managed implementation should set ContentLength to -1 if sendChunked == true.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task SendChunked_GetSet_ReturnsExpected(bool sendChunked)
         {
             HttpListenerResponse response = await GetResponse();
@@ -454,7 +454,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should set SendChunked to true after sending headers.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task SendChunked_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -486,7 +486,7 @@ namespace System.Net.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should throw a ProtocolViolationException setting SendChunked to
         // true when the request is version 1.0
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19977, TestPlatforms.AnyUnix)]
         public async Task SendChunked_SetTrueAndRequestHttpVersionMinorIsZero_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -507,7 +507,7 @@ namespace System.Net.Tests
         [InlineData(false)]
         // The managed implementation should not set the Keep-Alive header ever.
         // The managed implementation should send Connection: Close if keepAlive == false.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19978, TestPlatforms.AnyUnix)]
         public async Task KeepAlive_GetSet_ReturnsExpected(bool keepAlive)
         {
             HttpListenerResponse response = await GetResponse();
@@ -544,7 +544,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not set the Keep-Alive header ever.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19978, TestPlatforms.AnyUnix)]
         public async Task KeepAlive_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -562,7 +562,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not throw setting KeepAlive after sending the headers.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task KeepAlive_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -581,7 +581,7 @@ namespace System.Net.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should set KeepAlive to false when sending headers and
         // context.Request.ProtocolVersion == 1.0.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19977, TestPlatforms.AnyUnix)]
         public async Task KeepAlive_NoBoundaryAndRequestHttpRequestVersionMinorIsZero_SetsToFalseWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -598,7 +598,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should KeepAlive directly in Headers rather than tracking it with its own field.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task KeepAlive_ContentLengthBoundaryAndRequestHttpVersionMinorIsZero_DoesNotChangeWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -620,7 +620,7 @@ namespace System.Net.Tests
         [InlineData(0)]
         [InlineData(10)]
         // The managed implementation should set SendChunked to true by default.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task ContentLength64_GetSet_ReturnsExpected(int contentLength64)
         {
             HttpListenerResponse response = await GetResponse();
@@ -657,7 +657,7 @@ namespace System.Net.Tests
         [InlineData(200, -1)]
         // The managed implementation should ContentLength to 0 after sending headers if the code is 100, 101, 204, 205 or 304.
         // The managed implementation should ContentLength to -1 after sending chunked content.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task ContentLength64_NotSetAndGetAfterSendingHeaders_ReturnValueDependsOnStatusCode(int statusCode, int expectedContentLength64)
         {
             HttpListenerResponse response = await GetResponse();
@@ -681,7 +681,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should ContentLength to -1 after sending headers if no ContentLength is specified.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task ContentLength64_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -713,7 +713,7 @@ namespace System.Net.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not pass Content-Length: 0 if it is not set.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task ContentLength64_SetNegative_ThrowsArgumentOutOfRangeException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -741,7 +741,7 @@ namespace System.Net.Tests
         [MemberData(nameof(ProtocolVersion_Set_TestData))]
         // The managed implementation should turn ProtocolVersion into a nop to match Windows.
         // The managed implementation should only set the major and minor components of ProtocolVersion.
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)]
+        [ActiveIssue(19977, TestPlatforms.AnyUnix)]
         public async Task ProtocolVersion_SetValid_ReturnsExpected(Version version)
         {
             Version expectedVersion = new Version(version.Major, version.Minor);
