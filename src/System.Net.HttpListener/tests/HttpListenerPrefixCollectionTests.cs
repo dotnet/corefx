@@ -239,7 +239,7 @@ namespace System.Net.Tests
 
         public static IEnumerable<object[]> InvalidPrefix_TestData()
         {
-            yield return new object[] { $"http://{Guid.NewGuid().ToString("N")}/" };
+            yield return new object[] { "http://0.0.0.0/" };
             yield return new object[] { "http://[]/" };
             yield return new object[] { "http://[::1%2]/" };
             yield return new object[] { "http://[::]/" };

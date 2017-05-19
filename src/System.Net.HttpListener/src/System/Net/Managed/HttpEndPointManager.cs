@@ -117,7 +117,15 @@ namespace System.Net
             IPAddress addr;
             if (host == "*")
                 addr = IPAddress.Any;
-            else if (IPAddress.TryParse(host, out addr) == false)
+            else if (IPAddress.TryParse(host, out addr))
+            {
+                if (IPAddress.Any.Equals(addr))
+                {
+                    // Throw same error code as windows, request is not supported.
+                    throw new HttpListenerException(50, SR.net_listener_not_supported);
+                }
+            }
+            else
             {
                 try
                 {
