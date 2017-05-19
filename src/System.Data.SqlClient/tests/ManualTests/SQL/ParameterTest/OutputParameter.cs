@@ -18,8 +18,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             InvalidValueInOutParam(connectionString);
         }
 
-        // Dev11 Bug #336181: Regression: Changing the value of an output parameter to a value of different type throws System.FormatException
-        // You should be able to set a Output SqlParameter to an invalid value (e.g. a string in a decimal param) since we clear its value before starting
+        // Changing the value of an output parameter to a value of different type throws System.FormatException
+        // You should be able to set an Output SqlParameter to an invalid value (e.g. a string in a decimal param) since we clear its value before starting
         private static void InvalidValueInOutParam(string connectionString)
         {
             Console.WriteLine("Test setting output SqlParameter to an invalid value");
