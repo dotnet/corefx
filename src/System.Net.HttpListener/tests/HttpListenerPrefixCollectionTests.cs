@@ -240,6 +240,7 @@ namespace System.Net.Tests
         public static IEnumerable<object[]> InvalidPrefix_TestData()
         {
             yield return new object[] { "http://0.0.0.0/" };
+            yield return new object[] { "http://192./" };
             yield return new object[] { "http://[]/" };
             yield return new object[] { "http://[::1%2]/" };
             yield return new object[] { "http://[::]/" };
@@ -277,16 +278,6 @@ namespace System.Net.Tests
 
                 Assert.Throws<HttpListenerException>(() => listener.Prefixes.Add(uriPrefix));
             }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Issue #19619
-        [Theory]
-        [ActiveIssue(18128, TestPlatforms.AnyUnix)] // Fails by design on Windows but is allowed by the managed implementation
-        [InlineData("http://192./")]
-        public void Add_InvalidPrefix_ThrowsHttpListenerException_Windows(string uriPrefix)
-        {
-            Add_InvalidPrefixNotStarted_ThrowsHttpListenerExceptionOnStart(uriPrefix);
-            Add_InvalidPrefixAlreadyStarted_ThrowsHttpListenerExceptionOnAdd(uriPrefix);
         }
 
         [Theory]

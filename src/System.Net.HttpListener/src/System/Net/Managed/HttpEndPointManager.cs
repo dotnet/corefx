@@ -117,29 +117,24 @@ namespace System.Net
             IPAddress addr;
             if (host == "*")
                 addr = IPAddress.Any;
-            else if (IPAddress.TryParse(host, out addr))
+            else
             {
-                if (IPAddress.Any.Equals(addr))
+                try
+                {
+                    addr = Dns.GetHostAddresses(host)[0];
+                    if (IPAddress.Any.Equals(addr))
+                    {
+                        // Don't support listening to 0.0.0.0, match windows behavior.
+                        throw new HttpListenerException(50, SR.net_listener_not_supported);
+                    }
+                }
+                catch
                 {
                     // Throw same error code as windows, request is not supported.
                     throw new HttpListenerException(50, SR.net_listener_not_supported);
                 }
             }
-            else
-            {
-                try
-                {
-                    IPHostEntry iphost = Dns.GetHostEntry(host);
-                    if (iphost != null)
-                        addr = iphost.AddressList[0];
-                    else
-                        addr = IPAddress.Any;
-                }
-                catch
-                {
-                    addr = IPAddress.Any;
-                }
-            }
+
             Dictionary<int, HttpEndPointListener> p = null;
             if (s_ipEndPoints.ContainsKey(addr))
             {
