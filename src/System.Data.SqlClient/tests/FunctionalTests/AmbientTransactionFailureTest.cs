@@ -23,20 +23,23 @@ namespace System.Data.SqlClient.Tests
             }
         };
 
-        private static Func<string, Task> ConnectToServerTask = (connectionString) =>
+        private static Action<string> ConnectToServerTask = (connectionString) =>
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                return connection.OpenAsync();
+                connection.OpenAsync();
             }
         };
 
         private static Func<string, Task> ConnectToServerInTransactionScopeTask = (connectionString) =>
         {
-            using (TransactionScope scope = new TransactionScope())
+            return Task.Run(() =>
             {
-                return ConnectToServerTask(connectionString);
-            }
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    ConnectToServerTask(connectionString);
+                }
+            });
         };
 
         private static Action<string> ConnectToServerInTransactionScope = (connectionString) =>
@@ -91,9 +94,11 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
-        public void TestNotSupportExceptionForTransactionScopeAsync()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework doesn't throw the Not Supported Exception")]
+        public void TestNotSupportedExceptionForTransactionScopeAsync()
         {
             Assert.ThrowsAsync<NotSupportedException>(() => ConnectToServerInTransactionScopeTask(connectionStringWithEnlistAsDefault));
         }
+
     }
 }
