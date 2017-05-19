@@ -44,33 +44,25 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void GetAttributes_MissingFile(char trailingChar)
         {
-            string path = GetTestFilePath();
-            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
-            Assert.Equal((FileAttributes)(-1), info.Attributes);
+            Assert.Equal((FileAttributes)(-1), Get(GetTestFilePath() + trailingChar));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void GetAttributes_MissingDirectory(char trailingChar)
         {
-            string path = GetTestFilePath();
-            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "file" + trailingChar));
-            Assert.Equal((FileAttributes)(-1), info.Attributes);
+            Assert.Equal((FileAttributes)(-1), Get(Path.Combine(GetTestFilePath(), "file" + trailingChar)));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void SetAttributes_MissingFile(char trailingChar)
         {
-            string path = GetTestFilePath();
-            DirectoryInfo info = new DirectoryInfo(path + trailingChar);
-            Assert.Throws<FileNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
+            Assert.Throws<FileNotFoundException>(() => Set(GetTestFilePath() + trailingChar, FileAttributes.ReadOnly));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void SetAttributes_MissingDirectory(char trailingChar)
         {
-            string path = GetTestFilePath();
-            DirectoryInfo info = new DirectoryInfo(Path.Combine(path, "file" + trailingChar));
-            Assert.Throws<DirectoryNotFoundException>(() => info.Attributes = FileAttributes.ReadOnly);
+            Assert.Throws<DirectoryNotFoundException>(() => Set(Path.Combine(GetTestFilePath(), "file" + trailingChar), FileAttributes.ReadOnly));
         }
 
         [Theory]
