@@ -28,17 +28,18 @@ namespace System.Net.Tests
             Client.Dispose();
         }
 
-        protected string GetClientResponse()
+        protected string GetClientResponse(int expectedLength)
         {
             string response = string.Empty;
 
             while (true)
             {
-                byte[] buffer = new byte[256];
+                byte[] buffer = new byte[expectedLength + 1];
                 int bytesReceived = Client.Receive(buffer);
+
                 response += Encoding.UTF8.GetString(buffer, 0, bytesReceived);
 
-                if (bytesReceived < buffer.Length)
+                if (bytesReceived == expectedLength)
                 {
                     break;
                 }
@@ -98,12 +99,12 @@ namespace System.Net.Tests
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [ActiveIssue(19972, TestPlatforms.AnyUnix)]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" \r \t \n")]
-        [InlineData("http://microsoft.com")]
-        [InlineData("  http://microsoft.com  ")]
-        public async Task Redirect_Invoke_SetsRedirectionProperties(string url)
+        [InlineData(null, 123)]
+        [InlineData("", 123)]
+        [InlineData(" \r \t \n", 123)]
+        [InlineData("http://microsoft.com", 155)]
+        [InlineData("  http://microsoft.com  ", 155)]
+        public async Task Redirect_Invoke_SetsRedirectionProperties(string url, int expectedNumberOfBytes)
         {
             string expectedUrl = url?.Trim() ?? "";
 
@@ -117,7 +118,7 @@ namespace System.Net.Tests
                 Assert.Equal("Found", response.StatusDescription);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.StartsWith("HTTP/1.1 302 Found\r\n", clientResponse);
             if (string.IsNullOrWhiteSpace(expectedUrl))
             {
@@ -174,7 +175,7 @@ namespace System.Net.Tests
             Assert.True(threwObjectDisposedException);
 
             // The connection should be forcibly terminated.
-            Assert.Throws<SocketException>(() => GetClientResponse());
+            Assert.Throws<SocketException>(() => GetClientResponse(120));
 
             // Extra calls to Abort, Close or Dispose are nops.
             response.Abort();
@@ -197,7 +198,7 @@ namespace System.Net.Tests
                 ouputStream.Write(SimpleMessage, 0, SimpleMessage.Length);
 
                 // The connection should not be forcibly terminated.
-                string clientResponse = GetClientResponse();
+                string clientResponse = GetClientResponse(120);
                 Assert.NotEmpty(clientResponse);
 
                 // Extra calls to Abort, Close or Dispose are nops.
@@ -222,7 +223,7 @@ namespace System.Net.Tests
                 ouputStream.Write(SimpleMessage, 0, SimpleMessage.Length);
 
                 // The connection should not be forcibly terminated.
-                string clientResponse = GetClientResponse();
+                string clientResponse = GetClientResponse(120);
                 Assert.NotEmpty(clientResponse);
 
                 // Extra calls to Abort, Close or Dispose are nops.
@@ -247,7 +248,7 @@ namespace System.Net.Tests
                 // Aborting the response should dispose the response.
                 Assert.Throws<ObjectDisposedException>(() => response.ContentType = null);
 
-                string clientResponse = GetClientResponse();
+                string clientResponse = GetClientResponse(106);
                 Assert.Contains("\r\nContent-Length: 0\r\n", clientResponse);
             }
         }
@@ -268,7 +269,7 @@ namespace System.Net.Tests
                 response.Close(new byte[] { (byte)'a' }, willBlock);
                 Assert.Equal(SimpleMessage.Length, response.ContentLength64);
 
-                string clientResponse = GetClientResponse();
+                string clientResponse = GetClientResponse(111);
                 Assert.EndsWith("Hello", clientResponse);
             }
         }
@@ -288,18 +289,8 @@ namespace System.Net.Tests
                 // There is space left in the stream - the responseEntity will be sent.
                 response.Close(new byte[] { (byte)'a' }, willBlock);
                 Assert.Equal(SimpleMessage.Length, response.ContentLength64);
-
-                // If we're non-blocking then it's not guaranteed that we received this when we read from the socket.
-                string clientResponse = GetClientResponse();
-                if (!clientResponse.EndsWith("Hella"))
-                {
-                    string clientResponseEntity = null;
-                    while ((clientResponseEntity = GetClientResponse()).Length != 0)
-                        ;
-
-                    clientResponse += clientResponseEntity;
-                }
-
+                
+                string clientResponse = GetClientResponse(111);
                 Assert.EndsWith("Hella", clientResponse);
             }
         }
@@ -318,7 +309,8 @@ namespace System.Net.Tests
                 response.Close(new byte[] { (byte)'a' }, willBlock);
                 Assert.Equal(-1, response.ContentLength64);
 
-                string clientResponse = GetClientResponse();
+                // If we're non-blocking then it's not guaranteed that we received this when we read from the socket.
+                string clientResponse = GetClientResponse(126);
                 Assert.EndsWith("\r\n1\r\na\r\n0\r\n\r\n", clientResponse);
             }
         }
@@ -337,8 +329,8 @@ namespace System.Net.Tests
 
                 response.Close(new byte[] { (byte)'a' }, willBlock);
                 Assert.Equal(-1, response.ContentLength64);
-
-                string clientResponse = GetClientResponse();
+                
+                string clientResponse = GetClientResponse(136);
                 Assert.EndsWith("\r\n5\r\nHello\r\n1\r\na\r\n0\r\n\r\n", clientResponse);
             }
         }
@@ -386,7 +378,7 @@ namespace System.Net.Tests
                     Assert.ThrowsAny<InvalidOperationException>(() => response.Close(new byte[] { (byte)'a', (byte)'b' }, willBlock));
                 }
 
-                string clientResponse = GetClientResponse();
+                string clientResponse = GetClientResponse(110);
                 Assert.EndsWith("Hell", clientResponse);
             }
             finally
@@ -441,6 +433,5 @@ namespace System.Net.Tests
                 }
             }
         }
-
     }
 }

@@ -24,7 +24,7 @@ namespace System.Net.Tests
             Assert.Equal(Encoding.Unicode, response.ContentEncoding);
             response.Close();
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
@@ -37,7 +37,7 @@ namespace System.Net.Tests
             response.ContentEncoding = Encoding.Unicode;
             Assert.Equal(Encoding.Unicode, response.ContentEncoding);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
@@ -53,18 +53,18 @@ namespace System.Net.Tests
                 Assert.Equal(Encoding.Unicode, response.ContentEncoding);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData("application/json")]
-        [InlineData("  applICATion/jSOn   ")]
-        [InlineData("garbage")]
+        [InlineData("application/json", 152)]
+        [InlineData("  applICATion/jSOn   ", 152)]
+        [InlineData("garbage", 143)]
         // The managed implementation should set ContentType directly in the headers instead of tracking it with its own field.
         // The managed implementation should trim the value.
         [ActiveIssue(19972, TestPlatforms.AnyUnix)]
-        public async Task ContentType_SetAndSend_Success(string contentType)
+        public async Task ContentType_SetAndSend_Success(string contentType, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
             {
@@ -73,7 +73,7 @@ namespace System.Net.Tests
                 Assert.Equal(contentType.Trim(), response.Headers[HttpResponseHeader.ContentType]);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.Contains($"\r\nContent-Type: {contentType.Trim()}\r\n", clientResponse);
         }
 
@@ -95,7 +95,7 @@ namespace System.Net.Tests
                 Assert.Equal(expectedContentType, response.Headers[HttpResponseHeader.ContentType]);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
@@ -123,7 +123,7 @@ namespace System.Net.Tests
                 Assert.Equal("application/json", response.ContentType);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Content-Type", clientResponse);
         }
 
@@ -139,14 +139,14 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData("http://microsoft.com")]
-        [InlineData("  http://MICROSOFT.com   ")]
-        [InlineData("garbage")]
-        [InlineData("http://domain:-1")]
+        [InlineData("http://microsoft.com", 152)]
+        [InlineData("  http://MICROSOFT.com   ", 152)]
+        [InlineData("garbage", 139)]
+        [InlineData("http://domain:-1", 148)]
         // The managed implementation should set Location directly in Headers rather than track it with its own variable.
         // The managed implementation should trim the value.
         [ActiveIssue(19972, TestPlatforms.AnyUnix)]
-        public async Task RedirectLocation_SetAndSend_Success(string redirectLocation)
+        public async Task RedirectLocation_SetAndSend_Success(string redirectLocation, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
             {
@@ -155,7 +155,7 @@ namespace System.Net.Tests
                 Assert.Equal(redirectLocation.Trim(), response.Headers[HttpResponseHeader.Location]);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.Contains($"\r\nLocation: {redirectLocation.Trim()}\r\n", clientResponse);
         }
 
@@ -180,7 +180,7 @@ namespace System.Net.Tests
                 Assert.Equal(200, response.StatusCode);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Location", clientResponse);
         }
 
@@ -208,18 +208,18 @@ namespace System.Net.Tests
                 Assert.Equal("http://microsoft.com", response.RedirectLocation);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Location", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData(100, "HTTP/1.1 100 Continue")]
-        [InlineData(404, "HTTP/1.1 404 Not Found")]
-        [InlineData(401, "HTTP/1.1 401 Unauthorized")]
-        [InlineData(999, "HTTP/1.1 999 ")]
+        [InlineData(100, "HTTP/1.1 100 Continue", 112)]
+        [InlineData(404, "HTTP/1.1 404 Not Found", 127)]
+        [InlineData(401, "HTTP/1.1 401 Unauthorized", 130)]
+        [InlineData(999, "HTTP/1.1 999 ", 118)]
         // The managed implementation should update StatusDescription when setting StatusCode.
         [ActiveIssue(19976, TestPlatforms.AnyUnix)]
-        public async Task StatusCode_SetAndSend_Success(int statusCode, string startLine)
+        public async Task StatusCode_SetAndSend_Success(int statusCode, string startLine, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
             {
@@ -229,7 +229,7 @@ namespace System.Net.Tests
                 Assert.Equal(statusCode, response.StatusCode);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.StartsWith($"{startLine}\r\n", clientResponse);
         }
 
@@ -257,7 +257,7 @@ namespace System.Net.Tests
                 Assert.Equal(404, response.StatusCode);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
@@ -336,18 +336,18 @@ namespace System.Net.Tests
                 Assert.Equal(expectedDescription, response.StatusDescription);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(118 + expectedDescription.Length);
             Assert.StartsWith($"HTTP/1.1 404 {expectedDescription}\r\n", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData("", "")]
-        [InlineData("A !#\t1\u1234", "A !#\t14" )] // 
-        [InlineData("StatusDescription", "StatusDescription")]
-        [InlineData("  StatusDescription  ", "  StatusDescription  ")]
+        [InlineData("", "", 118)]
+        [InlineData("A !#\t1\u1234", "A !#\t14", 125)] // 
+        [InlineData("StatusDescription", "StatusDescription", 135)]
+        [InlineData("  StatusDescription  ", "  StatusDescription  ", 139)]
         // The managed implementation should use WebHeaderEncoding to encode unicode headers.
         [ActiveIssue(19976, TestPlatforms.AnyUnix)]
-        public async Task StatusDescription_SetCustom_Success(string statusDescription, string expectedStatusDescription)
+        public async Task StatusDescription_SetCustom_Success(string statusDescription, string expectedStatusDescription, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
             {
@@ -355,7 +355,7 @@ namespace System.Net.Tests
                 Assert.Equal(statusDescription, response.StatusDescription);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.StartsWith($"HTTP/1.1 200 {expectedStatusDescription}\r\n", clientResponse);
         }
 
@@ -411,16 +411,16 @@ namespace System.Net.Tests
                 Assert.Equal("Hello", response.StatusDescription);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData(true)]
-        [InlineData(false)]
+        [InlineData(true, 120)]
+        [InlineData(false, 106)]
         // The managed implementation should set ContentLength to -1 if sendChunked == true.
         [ActiveIssue(19973, TestPlatforms.AnyUnix)]
-        public async Task SendChunked_GetSet_ReturnsExpected(bool sendChunked)
+        public async Task SendChunked_GetSet_ReturnsExpected(bool sendChunked, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
             try
@@ -441,7 +441,7 @@ namespace System.Net.Tests
             // The Transfer-Encoding: chunked header should be added to the list of headers if SendChunked == true.
             Assert.Equal(sendChunked ? "chunked" : null, response.Headers[HttpResponseHeader.TransferEncoding]);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             if (sendChunked)
             {
                 Assert.Contains("\r\nTransfer-Encoding: chunked\r\n", clientResponse);
@@ -463,7 +463,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => response.SendChunked = false);
             Assert.True(response.SendChunked);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.Contains("\r\nTransfer-Encoding: chunked\r\n", clientResponse);
         }
 
@@ -479,7 +479,7 @@ namespace System.Net.Tests
                 Assert.False(response.SendChunked);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
@@ -498,17 +498,17 @@ namespace System.Net.Tests
                 Assert.False(response.SendChunked);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(143);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData(true)]
-        [InlineData(false)]
+        [InlineData(true, 120)]
+        [InlineData(false, 139)]
         // The managed implementation should not set the Keep-Alive header ever.
         // The managed implementation should send Connection: Close if keepAlive == false.
         [ActiveIssue(19978, TestPlatforms.AnyUnix)]
-        public async Task KeepAlive_GetSet_ReturnsExpected(bool keepAlive)
+        public async Task KeepAlive_GetSet_ReturnsExpected(bool keepAlive, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
             try
@@ -531,7 +531,7 @@ namespace System.Net.Tests
             Assert.Equal(keepAlive ? null : "close", response.Headers[HttpResponseHeader.Connection]);
             Assert.Null(response.Headers[HttpResponseHeader.KeepAlive]);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             if (keepAlive)
             {
                 Assert.DoesNotContain("Connection", clientResponse);
@@ -556,7 +556,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => response.KeepAlive = false);
             Assert.True(response.KeepAlive);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Connection", clientResponse);
         }
 
@@ -574,7 +574,7 @@ namespace System.Net.Tests
                 Assert.True(response.KeepAlive);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
@@ -592,7 +592,7 @@ namespace System.Net.Tests
                 Assert.False(response.KeepAlive);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
@@ -612,16 +612,16 @@ namespace System.Net.Tests
                 Assert.Equal("true", response.Headers[HttpResponseHeader.KeepAlive]);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(148);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData(0)]
-        [InlineData(10)]
+        [InlineData(0, 106)]
+        [InlineData(10, 117)]
         // The managed implementation should set SendChunked to true by default.
         [ActiveIssue(19973, TestPlatforms.AnyUnix)]
-        public async Task ContentLength64_GetSet_ReturnsExpected(int contentLength64)
+        public async Task ContentLength64_GetSet_ReturnsExpected(int contentLength64, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
             try
@@ -643,22 +643,22 @@ namespace System.Net.Tests
             // The "Content-Length: contentLength64" header should be added to the list of headers if there is a Content-Length specified.
             Assert.Equal(contentLength64.ToString(), response.Headers[HttpResponseHeader.ContentLength]);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
             Assert.Contains($"\r\nContent-Length: {contentLength64}\r\n", clientResponse);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData(100, 0)]
-        [InlineData(101, 0)]
-        [InlineData(204, 0)]
-        [InlineData(205, 0)]
-        [InlineData(304, 0)]
-        [InlineData(200, -1)]
+        [InlineData(100, 0, 112)]
+        [InlineData(101, 0, 123)]
+        [InlineData(204, 0, 114)]
+        [InlineData(205, 0, 117)]
+        [InlineData(304, 0, 116)]
+        [InlineData(200, -1, 120)]
         // The managed implementation should ContentLength to 0 after sending headers if the code is 100, 101, 204, 205 or 304.
         // The managed implementation should ContentLength to -1 after sending chunked content.
         [ActiveIssue(19973, TestPlatforms.AnyUnix)]
-        public async Task ContentLength64_NotSetAndGetAfterSendingHeaders_ReturnValueDependsOnStatusCode(int statusCode, int expectedContentLength64)
+        public async Task ContentLength64_NotSetAndGetAfterSendingHeaders_ReturnValueDependsOnStatusCode(int statusCode, int expectedContentLength64, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
             response.StatusCode = statusCode;
@@ -666,7 +666,7 @@ namespace System.Net.Tests
 
             Assert.Equal(expectedContentLength64, response.ContentLength64);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(expectedNumberOfBytes);
             if (expectedContentLength64 == -1)
             {
                 Assert.DoesNotContain("Content-Length", clientResponse);
@@ -691,7 +691,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => response.ContentLength64 = 10);
             Assert.Equal(-1, response.ContentLength64);
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.DoesNotContain("Content-Length", clientResponse);
         }
 
@@ -707,7 +707,7 @@ namespace System.Net.Tests
                 Assert.Equal(SimpleMessage.Length, response.ContentLength64);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(111);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
@@ -722,7 +722,7 @@ namespace System.Net.Tests
                 Assert.Equal(0, response.ContentLength64);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.Contains("\r\nTransfer-Encoding: chunked\r\n", clientResponse);
             Assert.DoesNotContain("Content-Length", clientResponse);
         }
@@ -753,7 +753,7 @@ namespace System.Net.Tests
             }
 
             // It looks like HttpListenerResponse actually ignores the ProtocolVersion when sending to the client.
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(120);
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
@@ -798,7 +798,7 @@ namespace System.Net.Tests
                 Assert.Equal(headers, response.Headers);
             }
 
-            string clientResponse = GetClientResponse();
+            string clientResponse = GetClientResponse(159);
             Assert.Contains("\r\nName1: Value1\r\nName2: Value2\r\nName3: \r\n", clientResponse);
         }
 
