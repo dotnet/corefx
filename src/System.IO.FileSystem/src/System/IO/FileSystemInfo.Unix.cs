@@ -94,23 +94,28 @@ namespace System.IO
                 // just changing its permissions accordingly.
                 EnsureStatInitialized();
 
-                // Windows distinguishes between whether the directory or the file isn't found,
-                // and throws a different exception in these cases.  We attempt to approximate that
-                // here; there is a race condition here, where something could change between
-                // when the error occurs and our checks, but it's the best we can do, and the
-                // worst case in such a race condition (which could occur if the file system is
-                // being manipulated concurrently with these checks) is that we throw a
-                // FileNotFoundException instead of DirectoryNotFoundException.
-
                 if (!_exists)
                 {
-                    bool directoryError = !Directory.Exists(Path.GetDirectoryName(PathHelpers.TrimEndingDirectorySeparator(FullPath)));
-                    throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(Interop.Error.ENOENT), FullPath, directoryError);
+                    ThrowNotFound(FullPath);
                 }
 
                 IsReadOnlyAssumesInitialized = (value & FileAttributes.ReadOnly) != 0;
                 _fileStatusInitialized = -1;
             }
+        }
+
+        internal static void ThrowNotFound(string path)
+        {
+            // Windows distinguishes between whether the directory or the file isn't found,
+            // and throws a different exception in these cases.  We attempt to approximate that
+            // here; there is a race condition here, where something could change between
+            // when the error occurs and our checks, but it's the best we can do, and the
+            // worst case in such a race condition (which could occur if the file system is
+            // being manipulated concurrently with these checks) is that we throw a
+            // FileNotFoundException instead of DirectoryNotFoundException.
+
+            bool directoryError = !Directory.Exists(Path.GetDirectoryName(PathHelpers.TrimEndingDirectorySeparator(path)));
+            throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(Interop.Error.ENOENT), path, directoryError);                
         }
 
         /// <summary>Gets whether stat reported this system object as a directory.</summary>
