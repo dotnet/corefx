@@ -12,14 +12,14 @@ using Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    public static class KatmaiDateTimeVariantTest
+    public static class DateTimeVariantTest
     {
         private static string s_connStr;
 
         /// <summary>
         /// Tests all Katmai DateTime types inside sql_variant to server using sql_variant parameter, SqlBulkCopy, and TVP parameter with sql_variant inside.
         /// </summary>
-        public static void TestAllKatmaiDateTimeWithDataTypeAndVariant(string connStr)
+        public static void TestAllDateTimeWithDataTypeAndVariant(string connStr)
         {
             s_connStr = connStr;
 
@@ -75,7 +75,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlBulkCopyDataRow_Variant(paramValue, expectedTypeName, expectedBaseTypeName);
         }
 
-        // NOTE: Test Cases
         private static void TestSimpleParameter_Type(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSimpleParameter_Type";

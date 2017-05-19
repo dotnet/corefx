@@ -59,7 +59,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             ColumnBoundariesTest();
             QueryHintsTest();
             SqlVariantParam.SendAllSqlTypesInsideVariant(_connStr);
-            KatmaiDateTimeVariantTest.TestAllKatmaiDateTimeWithDataTypeAndVariant(_connStr);
+            DateTimeVariantTest.TestAllDateTimeWithDataTypeAndVariant(_connStr);
             OutputParameter.Run(_connStr);
         }
 
