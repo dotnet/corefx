@@ -130,6 +130,8 @@ namespace System.Xml.Linq
         }
 
 #if uap
+        // XmlSerializer needs to reflect on the default constructor of XElement.
+        // We need to make the ctor public on UWP to keep the metadata for it.
         public XElement()
 #else
         internal XElement()
