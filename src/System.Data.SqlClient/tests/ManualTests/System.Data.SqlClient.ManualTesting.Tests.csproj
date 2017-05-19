@@ -116,16 +116,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>MultipleResultsTest.bsl</Link>
     </Content>
-    <Content Include="SQL\ParameterTest\SqlParameterTest.bsl">
+    <Content Include="SQL\ParameterTest\SqlParameterTest_DebugMode.bsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>SqlParameterTest.bsl</Link>
+      <Link>SqlParameterTest_DebugMode.bsl</Link>
+    </Content>
+    <Content Include="SQL\ParameterTest\SqlParameterTest_ReleaseMode.bsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>SqlParameterTest_ReleaseMode.bsl</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="ProviderAgnostic\MultipleResultsTest\MultipleResultsTest.bsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SQL\ParameterTest\SqlParameterTest.bsl" />
+    <None Include="SQL\ParameterTest\SqlParameterTest_DebugMode.bsl" />
+    <None Include="SQL\ParameterTest\SqlParameterTest_ReleaseMode.bsl" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

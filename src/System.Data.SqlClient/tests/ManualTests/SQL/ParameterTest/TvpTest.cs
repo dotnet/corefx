@@ -66,7 +66,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private bool RunTestCoreAndCompareWithBaseline()
         {
             string outputPath = "SqlParameterTest.out";
-            string baselinePath = "SqlParameterTest.bsl";
+#if DEBUG
+            string baselinePath = "SqlParameterTest_DebugMode.bsl";
+#else
+            string baselinePath = "SqlParameterTest_ReleaseMode.bsl";
+#endif
 
             var fstream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read);
             var swriter = new StreamWriter(fstream, Encoding.UTF8);
@@ -211,7 +215,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        #region Main test methods
+#region Main test methods
         private void ColumnBoundariesTest()
         {
             IEnumerator<StePermutation> boundsMD = SteStructuredTypeBoundaries.AllColumnTypesExceptUdts.GetEnumerator(
@@ -545,9 +549,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region Utility Methods
+#region Utility Methods
 
         private bool AllowableDifference(string source, object result, StePermutation metadata)
         {
@@ -1366,7 +1370,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        #endregion
+#endregion
     }
 
     internal class TvpRestartableReader : DbDataReader

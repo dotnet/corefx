@@ -643,7 +643,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         }
                         catch (AggregateException ae)
                         {
-                            Console.WriteLine(ae.InnerException.Message);
+                            if(!ae.InnerException.Message.Contains("Operation cancelled by user."))
+                            {
+                                Console.WriteLine("Unexpected exception message: " + ae.InnerException.Message);
+                            }
                         }
                         finally
                         {
@@ -661,6 +664,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         {
             s_connStr = connection;
             s_useSP = false;
+            Console.WriteLine("Starting Test using AsyncDebugScope");
+#if DEBUG
             do
             {
                 Console.WriteLine("Using stored procedure {0}", s_useSP);
@@ -693,7 +698,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             TestCustomStream(10000, sync, oldTypes, 1000, error: false);
                             TestCustomStream(10000, sync, oldTypes, 0, error: false);
                             TestCustomStream(10000, sync, oldTypes, -1, error: true);
-
 
                             bool nvarchar = false;
                             do
@@ -752,6 +756,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 } while (oldTypes);
                 s_useSP = !s_useSP;
             } while (s_useSP);
+#else
+            Console.WriteLine("Tests using AsyncDebugScope are only supported in Debug mode!");
+#endif
+            Console.WriteLine("Finished Test using AsyncDebugScope");
 
             ImmediateCancelBin();
             ImmediateCancelText();
