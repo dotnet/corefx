@@ -20,6 +20,7 @@
     <Compile Include="System\Data\Common\DbDataAdapterTest.cs" />
     <Compile Include="System\Data\Common\DbDataReaderMock.cs" />
     <Compile Include="System\Data\Common\DbDataReaderTest.cs" />
+    <Compile Include="System\Data\Common\DbProviderFactoriesTests.cs" />
     <Compile Include="System\Data\Common\DbTransactionTest.cs" />
     <Compile Include="System\Data\ConstraintCollectionTest.cs" />
     <Compile Include="System\Data\ConstraintCollectionTest2.cs" />
@@ -73,7 +74,9 @@
     <Compile Include="System\Data\InRowChangingEventExceptionTest.cs" />
     <Compile Include="System\Data\InvalidConstraintExceptionTest.cs" />
     <Compile Include="System\Data\MissingPrimaryKeyExceptionTest.cs" />
-    <Compile Include="System\Data\MonkeyDataSet.cs" />
+    <Compile Include="System\Data\MonkeyDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\NoNullAllowedExceptionTest.cs" />
     <Compile Include="System\Data\ReadOnlyExceptionTest.cs" />
     <Compile Include="System\Data\RowNotInTableExceptionTest.cs" />
