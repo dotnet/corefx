@@ -5,20 +5,12 @@
   <PropertyGroup>
     <SharedFrameworkValidationRefPath>$(RefRootPath)SharedFrameworkValidation</SharedFrameworkValidationRefPath>
     <SharedFrameworkValidationRuntimePath>$(BinDir)runtime/SharedFrameworkValidation</SharedFrameworkValidationRuntimePath>
+    <_RunTestsScriptName Condition="'$(RunningOnUnix)' != 'true'">CloneAndRunTests.cmd</_RunTestsScriptName>
+    <_RunTestsScriptName Condition="'$(RunningOnUnix)' == 'true'">CloneAndRunTests.sh</_RunTestsScriptName>
     <_PublishRID Condition="'$(OSGroup)'=='Windows_NT'">win-$(ArchGroup)</_PublishRID>
     <_PublishRID Condition="'$(OSGroup)'=='OSX'">osx-$(ArchGroup)</_PublishRID>
     <_PublishRID Condition="'$(OSGroup)'=='Linux'">linux-$(ArchGroup)</_PublishRID>
     <_PublishRID Condition="'$(_PublishRID)'==''">unix-$(ArchGroup)</_PublishRID>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
-   <_MicrosoftNetCoreAppPackageName>Microsoft.NETCore.App</_MicrosoftNetCoreAppPackageName>
-   <_RunTestsScriptName>CloneAndRunTests.cmd</_RunTestsScriptName>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
-    <_MicrosoftNetCoreAppPackageName>microsoft.netcore.app</_MicrosoftNetCoreAppPackageName>
-    <_RunTestsScriptName>CloneAndRunTests.sh</_RunTestsScriptName>
   </PropertyGroup>
 
   <Target Name="RestorePackagesProject">
@@ -76,7 +68,7 @@
 
   <Target Name="GetRepoVersionHashes">
     <GetNetCoreAppVersionsFromFile 
-              PathToVersionsFile="$(PackagesDir)$(_MicrosoftNetCoreAppPackageName)/$(MicrosoftNETCoreAppPackageVersion)/Microsoft.NETCore.App.versions.txt">
+              PathToVersionsFile="$(PackagesDir)microsoft.netcore.app/$(MicrosoftNETCoreAppPackageVersion)/Microsoft.NETCore.App.versions.txt">
       <Output TaskParameter="VersionHashes" ItemName="VersionHashes" /> 
     </GetNetCoreAppVersionsFromFile>
 
@@ -87,7 +79,7 @@
     </PropertyGroup>
 
     <!-- Windows script -->
-    <ItemGroup Condition="'$(TargetsWindows)'=='true'">
+    <ItemGroup Condition="'$(RunningOnUnix)'!='true'">
       <_CloneRepoLines Include="@echo off" />
       <_CloneRepoLines Include="pushd $(CoreFxCopyLocation.Replace('/', '\'))" />
       <_CloneRepoLines Include="git clone $(_RepoURL)" />
@@ -99,7 +91,7 @@
     </ItemGroup>
 
     <!-- Unix script -->
-    <ItemGroup Condition="'$(TargetsUnix)'=='true'">
+    <ItemGroup Condition="'$(RunningOnUnix)'=='true'">
       <_CloneRepoLines Include="#!/usr/bin/env bash" />
       <_CloneRepoLines Include="__scriptpath=%24(cd %22%24(dirname %22%240%22)%22%3B pwd -P)" />
       <_CloneRepoLines Include="cd $(CorefxCopyLocation.Replace('\', '/'))" />
