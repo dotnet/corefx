@@ -672,7 +672,7 @@ namespace System.Data.Common
             return Environment.MachineName;
         }
 
-        static internal Transaction GetCurrentTransaction()
+        internal static Transaction GetCurrentTransaction()
         {
             return Transaction.Current;
         }
