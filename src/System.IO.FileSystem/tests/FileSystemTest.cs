@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public abstract partial class FileSystemTest : FileCleanupTestBase
+    public abstract partial class FileSystemTest : RemoteExecutorTestBase
     {
         public static readonly byte[] TestBuffer = { 0xBA, 0x5E, 0xBA, 0x11, 0xF0, 0x07, 0xBA, 0x11 };
 

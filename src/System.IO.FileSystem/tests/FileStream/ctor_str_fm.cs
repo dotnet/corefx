@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public class FileStream_ctor_str_fm : RemoteFileSystemTest
+    public class FileStream_ctor_str_fm : FileSystemTest
     {
         protected virtual FileStream CreateFileStream(string path, FileMode mode)
         {
