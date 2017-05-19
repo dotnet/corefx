@@ -308,7 +308,7 @@ namespace System.Net.Http
             Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
             
             Debug.Assert(asyncResult.dwError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "5 called function ID: " + unchecked((uint)asyncResult.dwResult.ToInt32()));
-            Debug.Assert(asyncResult.dwError != unchecked((int)0x80090321, "6 called function ID: " + unchecked((uint)asyncResult.dwResult.ToInt32()));
+            Debug.Assert(asyncResult.dwError != unchecked((int)0x80090321), "6 called function ID: " + unchecked((uint)asyncResult.dwResult.ToInt32()));
             
             switch (unchecked((uint)asyncResult.dwResult.ToInt32()))
             {

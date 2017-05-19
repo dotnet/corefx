@@ -1308,7 +1308,7 @@ namespace System.Net.Http
                 int lastError = Marshal.GetLastWin32Error();
                 
                 Debug.Assert(lastError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "1");
-                Debug.Assert(lastError != unchecked((int)0x80090321, "2");
+                Debug.Assert(lastError != unchecked((int)0x80090321), "2");
                 
                 if (lastError != Interop.WinHttp.ERROR_INVALID_HANDLE) // Ignore error if handle was already closed.
                 {
@@ -1348,7 +1348,7 @@ namespace System.Net.Http
                     
                     int lastError = Marshal.GetLastWin32Error();
                     Debug.Assert(lastError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "3");
-                    Debug.Assert(lastError != unchecked((int)0x80090321, "4");
+                    Debug.Assert(lastError != unchecked((int)0x80090321), "4");
                     
                     WinHttpException.ThrowExceptionUsingLastError();
                 }
