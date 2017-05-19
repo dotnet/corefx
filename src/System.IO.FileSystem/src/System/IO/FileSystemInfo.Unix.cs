@@ -100,7 +100,7 @@ namespace System.IO
                 // when the error occurs and our checks, but it's the best we can do, and the
                 // worst case in such a race condition (which could occur if the file system is
                 // being manipulated concurrently with these checks) is that we throw a
-                // FileNotFoundException instead of DirectoryNotFoundexception.
+                // FileNotFoundException instead of DirectoryNotFoundException.
 
                 if (!_exists)
                 {
