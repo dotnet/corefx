@@ -124,7 +124,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestClosingStandardInputShouldUnblockReadLineCallInChildProcess()
+        public void TestEOFReceivedWhenStdInClosed()
         {
             // This is the test for the fix of dotnet/corefx issue #13447.
             //
@@ -166,18 +166,16 @@ namespace System.Diagnostics.Tests
             p2.StartInfo.RedirectStandardInput = true;
             p2.Start();
 
-            // Close the standard input stream of the first child process.
-            // The first child process should be unblocked and write out 'NULL', and then exit.
-            p1.StandardInput.Close();
-
             try
             {
+                // Close the standard input stream of the first child process.
+                // The first child process should be unblocked and write out 'NULL', and then exit.
+                p1.StandardInput.Close();
                 Assert.True(p1.WaitForExit(WaitInMS));
             }
             finally
             {
-                // Clean up the child processes.
-                p1.Kill();
+                // Cleanup: kill the second child process
                 p2.Kill();
             }
         }
