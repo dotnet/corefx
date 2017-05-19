@@ -120,14 +120,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void TestSimpleParameter_Variant(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSimpleParameter_Variant";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string procName = DataTestUtility.GetUniqueNameForSqlServer("paramProc2");
             try
             {
@@ -221,14 +219,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void TestSqlDataRecordParameterToTVP_Variant(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSqlDataRecordParameterToTVP_Variant";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string tvpTypeName = DataTestUtility.GetUniqueNameForSqlServer("tvpVariant");
             try
             {
@@ -337,14 +333,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void TestSqlDataReaderParameterToTVP_Variant(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSqlDataReaderParameterToTVP_Variant";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string tvpTypeName = DataTestUtility.GetUniqueNameForSqlServer("tvpVariant");
             try
             {
@@ -399,14 +393,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void TestSqlDataReader_TVP_Type(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSqlDataReader_TVP_Type";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string tvpTypeName = DataTestUtility.GetUniqueNameForSqlServer("tvpType");
             string InputTableName = DataTestUtility.GetUniqueNameForSqlServer("InputTable");
             string OutputTableName = DataTestUtility.GetUniqueNameForSqlServer("OutputTable");
@@ -579,14 +571,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void TestSimpleDataReader_Type(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "TestSimpleDataReader_Type";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string inputTable = DataTestUtility.GetUniqueNameForSqlServer("inputTable");
             string procName = DataTestUtility.GetUniqueNameForSqlServer("paramProc3");
             try
@@ -934,14 +924,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void SqlBulkCopyDataTable_Variant(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "SqlBulkCopyDataTable_Variant";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string bulkCopyTableName = DataTestUtility.GetUniqueNameForSqlServer("bulkDestVariant");
             try
             {
@@ -1053,14 +1041,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        // NOTE: (VSTFDevDiv# 885217) - sql_variant parameters and sql_variant TVPs store all datetime values internally 
-        //                              as datetime hence breaking for katmai types
-        // This test case was rejected by the Triage team as it was a breaking change.
+        // sql_variant parameters and sql_variant TVPs store all datetime values internally
+        // as datetime, hence breaking for katmai types
         private static void SqlBulkCopyDataRow_Variant(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tag = "SqlBulkCopyDataRow_Variant";
             DisplayHeader(tag, paramValue, expectedBaseTypeName);
-            LogMessage(tag, "[Bug VSTFDevDiv# 885217]");
             string bulkCopyTableName = DataTestUtility.GetUniqueNameForSqlServer("bulkDestVariant");
             try
             {
