@@ -11,9 +11,9 @@ namespace System.Data.SqlClient.Tests
     public class AmbientTransactionFailureTest
     {
 
-        private static string servername = Guid.NewGuid().ToString();
-        private static string connectionStringWithEnlistAsDefault = $"Data Source={servername}; Integrated Security=true; Connect Timeout=1;";
-        private static string connectionStringWithEnlistOff = $"Data Source={servername}; Integrated Security=true; Connect Timeout=1;Enlist=False";
+        private static readonly string s_servername = Guid.NewGuid().ToString();
+        private static readonly string s_connectionStringWithEnlistAsDefault = $"Data Source={s_servername}; Integrated Security=true; Connect Timeout=1;";
+        private static readonly string s_connectionStringWithEnlistOff = $"Data Source={s_servername}; Integrated Security=true; Connect Timeout=1;Enlist=False";
 
         private static Action<string> ConnectToServer = (connectionString) =>
         {
@@ -61,15 +61,15 @@ namespace System.Data.SqlClient.Tests
 
         public static readonly object[][] ExceptionTestDataForSqlException =
         {
-            new object[] { ConnectToServerInTransactionScope, connectionStringWithEnlistOff },
-            new object[] { ConnectToServer, connectionStringWithEnlistAsDefault }
+            new object[] { ConnectToServerInTransactionScope, s_connectionStringWithEnlistOff },
+            new object[] { ConnectToServer, s_connectionStringWithEnlistAsDefault }
         };
 
         public static readonly object[][] ExceptionTestDataForNotSupportedException =
         {
-            new object[] { ConnectToServerInTransactionScope, connectionStringWithEnlistAsDefault },
-            new object[] { EnlistConnectionInTransaction, connectionStringWithEnlistAsDefault },
-            new object[] { EnlistConnectionInTransaction, connectionStringWithEnlistOff }
+            new object[] { ConnectToServerInTransactionScope, s_connectionStringWithEnlistAsDefault },
+            new object[] { EnlistConnectionInTransaction, s_connectionStringWithEnlistAsDefault },
+            new object[] { EnlistConnectionInTransaction, s_connectionStringWithEnlistOff }
         };
 
         [Theory]
@@ -97,7 +97,7 @@ namespace System.Data.SqlClient.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework doesn't throw the Not Supported Exception")]
         public void TestNotSupportedExceptionForTransactionScopeAsync()
         {
-            Assert.ThrowsAsync<NotSupportedException>(() => ConnectToServerInTransactionScopeTask(connectionStringWithEnlistAsDefault));
+            Assert.ThrowsAsync<NotSupportedException>(() => ConnectToServerInTransactionScopeTask(s_connectionStringWithEnlistAsDefault));
         }
 
     }
