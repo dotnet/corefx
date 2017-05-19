@@ -15,10 +15,10 @@ namespace System.Xml
     internal partial class XmlTextReaderImpl : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
     {
         private static UTF8Encoding s_utf8BomThrowing;
-        
+
         private static UTF8Encoding UTF8BomThrowing =>
             s_utf8BomThrowing ?? (s_utf8BomThrowing = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true, throwOnInvalidBytes: true));
-        
+
         //
         // Private helper types
         //
@@ -109,7 +109,7 @@ namespace System.Xml
         //
         private readonly bool _useAsync;
 
-        #region Later Init Fileds
+        #region Later Init Fields
 
         //later init means in the construction stage, do not open filestream and do not read any data from Stream/TextReader
         //the purpose is to make the Create of XmlReader do not block on IO.
@@ -318,14 +318,7 @@ namespace System.Xml
             _nameTable = nt;
             nt.Add(string.Empty);
 
-            if (!System.Xml.XmlReaderSettings.EnableLegacyXmlSettings())
-            {
-                _xmlResolver = null;
-            }
-            else
-            {
-                _xmlResolver = new XmlUrlResolver();
-            }
+            _xmlResolver = null;
 
             _xml = nt.Add("xml");
             _xmlNs = nt.Add("xmlns");
@@ -785,7 +778,6 @@ namespace System.Xml
             _laterInitParam = null;
         }
 
-
         // Initializes a new instance of the XmlTextReaderImpl class for fragment parsing.
         // This constructor is used by XmlBinaryReader for nested text XML
         internal XmlTextReaderImpl(string xmlFragment, XmlParserContext context, XmlReaderSettings settings)
@@ -828,11 +820,7 @@ namespace System.Xml
                 settings.DtdProcessing = _dtdProcessing;
                 settings.MaxCharactersInDocument = _maxCharactersInDocument;
                 settings.MaxCharactersFromEntities = _maxCharactersFromEntities;
-
-                if (!System.Xml.XmlReaderSettings.EnableLegacyXmlSettings())
-                {
-                    settings.XmlResolver = _xmlResolver;
-                }
+                settings.XmlResolver = _xmlResolver;
                 settings.ReadOnly = true;
                 return settings;
             }
@@ -999,8 +987,6 @@ namespace System.Xml
         {
             get
             {
-				// TODO: check if this comment is valid
-                // Project-N: why is this true given that ResolveEntity always throws an exception in SL?
                 return true;
             }
         }
@@ -3123,12 +3109,6 @@ namespace System.Xml
             _reportedEncoding = _ps.encoding;
         }
 
-        private void OpenUrlDelegate(object xmlResolver)
-        {
-            // Safe to have valid resolver here as it is not used to parse DTD
-            _ps.stream = (Stream)GetTempResolver().GetEntity(_ps.baseUri, null, typeof(Stream));
-        }
-
         // Stream input only: detect encoding from the first 4 bytes of the byte buffer starting at ps.bytes[ps.bytePos]
         private Encoding DetectEncoding()
         {
@@ -3144,7 +3124,7 @@ namespace System.Xml
 
             switch (first2Bytes)
             {
-				// Removing USC4 encoding
+                // Removing USC4 encoding
                 case 0x0000:
                     switch (next2Bytes)
                     {
@@ -3926,7 +3906,7 @@ namespace System.Xml
             if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
                 mangoQuirks = true;
 #endif
-            for (; ;)
+            for (;;)
             {
                 bool needMoreChars = false;
                 int pos = _ps.charPos;
@@ -4090,7 +4070,7 @@ namespace System.Xml
                 {
                     goto ReadData;
                 }
-                // something else -> root level whitespaces
+                // something else -> root level whitespace
                 else
                 {
                     if (_fragmentType == XmlNodeType.Document)
@@ -4161,7 +4141,7 @@ namespace System.Xml
         // Parses element content
         private bool ParseElementContent()
         {
-            for (; ;)
+            for (;;)
             {
                 int pos = _ps.charPos;
                 char[] chars = _ps.chars;
@@ -4449,7 +4429,7 @@ namespace System.Xml
             }
 
             char ch = chars[pos];
-            // white space after element name -> there are probably some attributes
+            // whitespace after element name -> there are probably some attributes
             bool isWs;
             unsafe
             {
@@ -4652,7 +4632,7 @@ namespace System.Xml
                     }
                 }
 
-                // eat whitespaces
+                // eat whitespace
                 if (chars[pos] != '>')
                 {
                     char tmpCh;
@@ -4749,7 +4729,7 @@ namespace System.Xml
 
             for (;;)
             {
-                // eat whitespaces
+                // eat whitespace
                 int lineNoDelta = 0;
                 char tmpch0;
                 unsafe
@@ -4985,7 +4965,7 @@ namespace System.Xml
                     if (_normalize)
                     {
                         string val = new string(chars, _ps.charPos, pos - _ps.charPos);
-                        Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!"); 
+                        Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!");
                     }
 #endif
                     attr.SetValue(chars, _ps.charPos, pos - _ps.charPos);
@@ -5480,9 +5460,9 @@ namespace System.Xml
             }
         }
 
-        // Parses text or white space node.
+        // Parses text or whitespace node.
         // Returns true if a node has been parsed and its data set to curNode. 
-        // Returns false when a white space has been parsed and ignored (according to current whitespace handling) or when parsing mode is not Full.
+        // Returns false when a whitespace has been parsed and ignored (according to current whitespace handling) or when parsing mode is not Full.
         // Also returns false if there is no text to be parsed.
         private bool ParseText()
         {
@@ -7153,9 +7133,9 @@ namespace System.Xml
             int wsCount = 0;
             char[] chars = _ps.chars;
 
-            for (; ;)
+            for (;;)
             {
-                for (; ;)
+                for (;;)
                 {
                     switch (chars[pos])
                     {
@@ -8249,15 +8229,15 @@ namespace System.Xml
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count) : "len");
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(index): "offset");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(index) : "offset");
             }
             if (array.Length - index < count)
             {
-                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
+                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count) : "len");
             }
 
             if (count == 0)
@@ -9447,7 +9427,7 @@ namespace System.Xml
 
             _incReadDecoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (; ;)
+            for (;;)
             {
                 // read what is already cached in curNode
                 int charsRead = 0;

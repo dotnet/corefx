@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System;
     using System.Reflection;
@@ -144,7 +148,7 @@ namespace System.Xml.Serialization
         internal MemberInfo[] GetMemberInfos()
         {
             // we use to return Type.GetMembers() here, the members were returned in a different order: fields first, properties last
-            // Current System.Reflection code returns members in oposite order: properties first, then fields.
+            // Current System.Reflection code returns members in opposite order: properties first, then fields.
             // This code make sure that returns members in the Everett order.
             MemberInfo[] members = Type.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             MemberInfo[] fieldsAndProps = new MemberInfo[members.Length];

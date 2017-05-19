@@ -129,7 +129,7 @@ namespace System.Net.Mail.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         [Fact]
         public void ServicePoint_NetFramework_AddressIsInaccessible()
         {
@@ -297,7 +297,8 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public async void TestMailDeliveryAsync()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
+        public async Task TestMailDeliveryAsync()
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
@@ -322,7 +323,8 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public async void TestCredentialsCopyInAsyncContext()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
+        public async Task TestCredentialsCopyInAsyncContext()
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);

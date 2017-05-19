@@ -111,6 +111,11 @@ namespace System.Xml.Serialization
             get { return _nullableSpecified; }
         }
 
+        internal bool GetIsNullableSpecified()
+        {
+            return IsNullableSpecified;
+        }
+
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>

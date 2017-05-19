@@ -4,13 +4,8 @@
 
 using System;
 using System.Diagnostics;
-using System.Net.Security;
 using System.Runtime.InteropServices;
-using System.Security.Authentication;
-using System.Security.Authentication.ExtendedProtection;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -45,6 +40,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetError")]
         internal static extern SslErrorCode SslGetError(IntPtr ssl, int ret);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetQuietShutdown")]
+        internal static extern void SslSetQuietShutdown(SafeSslHandle ssl, int mode);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslDestroy")]
         internal static extern void SslDestroy(IntPtr ssl);
@@ -84,6 +82,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
         internal static extern int SslShutdown(IntPtr ssl);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
+        internal static extern int SslShutdown(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetBio")]
         internal static extern void SslSetBio(SafeSslHandle ssl, SafeBioHandle rbio, SafeBioHandle wbio);
@@ -291,17 +292,16 @@ namespace Microsoft.Win32.SafeHandles
         {
             Debug.Assert(!IsInvalid, "Expected a valid context in Disconnect");
 
-            // Because we set "quiet shutdown" on the SSL_CTX, SslShutdown is supposed
-            // to always return 1 (completed success).  In "close-notify" shutdown (the
-            // opposite of quiet) there's also 0 (incomplete success) and negative
-            // (probably async IO WANT_READ/WANT_WRITE, but need to check) return codes
-            // to handle.
-            //
-            // If quiet shutdown is ever not set, see
-            // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
-            // for guidance on how to rewrite this method.
             int retVal = Interop.Ssl.SslShutdown(handle);
-            Debug.Assert(retVal == 1);
+
+            // Here, we are ignoring checking for <0 return values from Ssl_Shutdown,
+            // since the underlying memory bio is already disposed, we are not
+            // interested in reading or writing to it.
+            if (retVal == 0)
+            {
+                // Do a bi-directional shutdown.
+                retVal = Interop.Ssl.SslShutdown(handle);
+            }
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)
@@ -311,82 +311,6 @@ namespace Microsoft.Win32.SafeHandles
         internal SafeSslHandle(IntPtr validSslPointer, bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
         {
             handle = validSslPointer;
-        }
-    }
-
-    internal sealed class SafeChannelBindingHandle : SafeHandle
-    {
-        [StructLayout(LayoutKind.Sequential)]
-        private struct SecChannelBindings
-        {
-            internal int InitiatorLength;
-            internal int InitiatorOffset;
-            internal int AcceptorAddrType;
-            internal int AcceptorLength;
-            internal int AcceptorOffset;
-            internal int ApplicationDataLength;
-            internal int ApplicationDataOffset;
-        }
-
-        private const int CertHashMaxSize = 128;
-        private static readonly byte[] s_tlsServerEndPointByteArray = Encoding.UTF8.GetBytes("tls-server-end-point:");
-        private static readonly byte[] s_tlsUniqueByteArray = Encoding.UTF8.GetBytes("tls-unique:");
-        private static readonly int s_secChannelBindingSize = Marshal.SizeOf<SecChannelBindings>();
-
-        private readonly int _cbtPrefixByteArraySize;
-        internal int Length { get; private set; }
-        internal IntPtr CertHashPtr { get; private set; }
-
-        internal void SetCertHash(byte[] certHashBytes)
-        {
-            Debug.Assert(certHashBytes != null, "check certHashBytes is not null");
-            Debug.Assert(certHashBytes.Length <= CertHashMaxSize);
-
-            int length = certHashBytes.Length;
-            Marshal.Copy(certHashBytes, 0, CertHashPtr, length);
-            SetCertHashLength(length);
-        }
-
-        private byte[] GetPrefixBytes(ChannelBindingKind kind)
-        {
-            Debug.Assert(kind == ChannelBindingKind.Endpoint || kind == ChannelBindingKind.Unique);
-            return kind == ChannelBindingKind.Endpoint ?
-                s_tlsServerEndPointByteArray :
-                s_tlsUniqueByteArray;
-        }
-
-        internal SafeChannelBindingHandle(ChannelBindingKind kind)
-            : base(IntPtr.Zero, true)
-        {
-            byte[] cbtPrefix = GetPrefixBytes(kind);
-            _cbtPrefixByteArraySize = cbtPrefix.Length;
-            handle = Marshal.AllocHGlobal(s_secChannelBindingSize + _cbtPrefixByteArraySize + CertHashMaxSize);
-            IntPtr cbtPrefixPtr = handle + s_secChannelBindingSize;
-            Marshal.Copy(cbtPrefix, 0, cbtPrefixPtr, _cbtPrefixByteArraySize);
-            CertHashPtr = cbtPrefixPtr + _cbtPrefixByteArraySize;
-            Length = CertHashMaxSize;
-        }
-
-        internal void SetCertHashLength(int certHashLength)
-        {
-            int cbtLength = _cbtPrefixByteArraySize + certHashLength;
-            Length = s_secChannelBindingSize + cbtLength;
-
-            SecChannelBindings channelBindings = new SecChannelBindings()
-            {
-                ApplicationDataLength = cbtLength,
-                ApplicationDataOffset = s_secChannelBindingSize
-            };
-            Marshal.StructureToPtr(channelBindings, handle, true);
-        }
-
-        public override bool IsInvalid => handle == IntPtr.Zero;
-
-        protected override bool ReleaseHandle()
-        {
-            Marshal.FreeHGlobal(handle);
-            SetHandle(IntPtr.Zero);
-            return true;
         }
     }
 }

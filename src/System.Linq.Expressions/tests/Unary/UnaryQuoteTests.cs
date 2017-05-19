@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -64,6 +64,22 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_Action_MakeUnary(bool useInterpreter)
+        {
+            Expression<Action> e = () => Nop();
+            UnaryExpression q = MakeUnary(ExpressionType.Quote, e, null);
+            Expression<Func<LambdaExpression>> f = Lambda<Func<LambdaExpression>>(q);
+
+            var quote = f.Compile(useInterpreter)();
+
+            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Equal(ExpressionType.Call, quote.Body.NodeType);
+
+            var call = (MethodCallExpression)quote.Body;
+            Assert.Equal(typeof(UnaryQuoteTests).GetMethod(nameof(Nop)), call.Method);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
         public void Quote_Lambda_IdentityFunc(bool useInterpreter)
         {
             Expression<Func<LambdaExpression>> f = () => GetQuote<Func<int, int>>(x => x);
@@ -88,7 +104,8 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public void Quote_Lambda_Closure2(bool useInterpreter)
         {
-            Expression<Func<int, Func<int, LambdaExpression>>> f = x => y => GetQuote<Func<int>>(() => x + y);
+            // Using an unchecked addition to ensure that an Add expression is used (and not AddChecked)
+            Expression<Func<int, Func<int, LambdaExpression>>> f = x => y => GetQuote<Func<int>>(() => unchecked(x + y));
 
             var quote = f.Compile(useInterpreter)(1)(2);
 
@@ -467,7 +484,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullLambda()
         {
-            Assert.Throws<ArgumentNullException>("expression", () => Quote(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => Quote(null));
         }
 
         [Fact]
@@ -475,7 +492,7 @@ namespace System.Linq.Expressions.Tests
         {
             Func<int> zero = () => 0;
             Expression funcConst = Constant(zero);
-            Assert.Throws<ArgumentException>("expression", () => Quote(funcConst));
+            AssertExtensions.Throws<ArgumentException>("expression", () => Quote(funcConst));
         }
 
         [Fact]

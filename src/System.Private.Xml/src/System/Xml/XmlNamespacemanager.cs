@@ -11,8 +11,6 @@ namespace System.Xml
 {
     public class XmlNamespaceManager : IXmlNamespaceResolver, IEnumerable
     {
-        private static volatile IXmlNamespaceResolver s_EmptyResolver;
-
         private struct NamespaceDeclaration
         {
             public string prefix;
@@ -51,19 +49,6 @@ namespace System.Xml
 
         // Constants
         private const int MinDeclsCountForHashtable = 16;
-
-        internal static IXmlNamespaceResolver EmptyResolver
-        {
-            get
-            {
-                if (s_EmptyResolver == null)
-                {
-                    // no locking; the empty resolver is immutable so it's not a problem that it may get initialized more than once
-                    s_EmptyResolver = new XmlNamespaceManager(new NameTable());
-                }
-                return s_EmptyResolver;
-            }
-        }
 
         internal XmlNamespaceManager()
         {
@@ -179,7 +164,7 @@ namespace System.Xml
             {
                 _hashTable[prefix] = _lastDecl;
             }
-            // or create a new hashTable if the threashold has been reached
+            // or create a new hashTable if the threshold has been reached
             else if (_lastDecl >= MinDeclsCountForHashtable)
             {
                 // add all to hash table

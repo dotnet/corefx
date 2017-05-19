@@ -4,10 +4,10 @@
 
 namespace System.DirectoryServices.Protocols
 {
+    using System.Globalization;
     using System.Runtime.Serialization;
     using System.Security.Permissions;
 
-    [Serializable]
     public class DirectoryException : Exception
     {
         protected DirectoryException(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -16,21 +16,17 @@ namespace System.DirectoryServices.Protocols
 
         public DirectoryException(string message, Exception inner) : base(message, inner)
         {
-            Utility.CheckOSVersion();
         }
 
         public DirectoryException(string message) : base(message)
         {
-            Utility.CheckOSVersion();
         }
 
         public DirectoryException() : base()
         {
-            Utility.CheckOSVersion();
         }
     }
 
-    [Serializable]
     public class DirectoryOperationException : DirectoryException, ISerializable
     {
         internal DirectoryResponse response = null;
@@ -44,7 +40,7 @@ namespace System.DirectoryServices.Protocols
 
         public DirectoryOperationException(string message, Exception inner) : base(message, inner) { }
 
-        public DirectoryOperationException(DirectoryResponse response) : base(Res.GetString(Res.DefaultOperationsError))
+        public DirectoryOperationException(DirectoryResponse response) : base(String.Format(CultureInfo.CurrentCulture, SR.DefaultOperationsError))
         {
             this.response = response;
         }
@@ -74,14 +70,13 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
-    [Serializable]
     public class BerConversionException : DirectoryException
     {
         protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
-        public BerConversionException() : base(Res.GetString(Res.BerConversionError))
+        public BerConversionException() : base(String.Format(CultureInfo.CurrentCulture, SR.BerConversionError))
         {
         }
 

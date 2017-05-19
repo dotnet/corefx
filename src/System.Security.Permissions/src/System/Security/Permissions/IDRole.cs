@@ -4,7 +4,6 @@
 
 namespace System.Security.Permissions
 {
-    [Serializable]
     internal sealed class IDRole
     {
         internal bool Authenticated { get; }
@@ -48,9 +47,12 @@ namespace System.Security.Permissions
 
         public override int GetHashCode()
         {
-            return ((Authenticated ? 0 : 101) +
+            unchecked
+            {
+                return ((Authenticated ? 0 : 101) +
                         (ID == null ? 0 : ID.GetHashCode()) +
                         (Role == null ? 0 : Role.GetHashCode()));
+            }
         }
     }
 }

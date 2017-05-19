@@ -12,7 +12,6 @@ using System.Security.Permissions;
 
 namespace System.DirectoryServices.AccountManagement
 {
-    [Serializable()]
     abstract public class PrincipalException : SystemException
     {
         internal PrincipalException() : base() { }
@@ -23,12 +22,11 @@ namespace System.DirectoryServices.AccountManagement
                     base(message, innerException)
         { }
 
-        internal PrincipalException(SerializationInfo info, StreamingContext context) :
+        protected PrincipalException(SerializationInfo info, StreamingContext context) :
                     base(info, context)
         { }
     }
 
-    [Serializable()]
     public class MultipleMatchesException : PrincipalException
     {
         public MultipleMatchesException() : base() { }
@@ -44,7 +42,6 @@ namespace System.DirectoryServices.AccountManagement
         { }
     }
 
-    [Serializable()]
     public class NoMatchingPrincipalException : PrincipalException
     {
         public NoMatchingPrincipalException() : base() { }
@@ -60,7 +57,6 @@ namespace System.DirectoryServices.AccountManagement
         { }
     }
 
-    [Serializable()]
     public class PasswordException : PrincipalException
     {
         public PasswordException() : base() { }
@@ -76,7 +72,6 @@ namespace System.DirectoryServices.AccountManagement
         { }
     }
 
-    [Serializable()]
     public class PrincipalExistsException : PrincipalException
     {
         public PrincipalExistsException() : base() { }
@@ -92,7 +87,6 @@ namespace System.DirectoryServices.AccountManagement
         { }
     }
 
-    [Serializable()]
     public class PrincipalServerDownException : PrincipalException
     {
         private int _errorCode = 0;
@@ -127,9 +121,6 @@ namespace System.DirectoryServices.AccountManagement
             _serverName = (string)info.GetValue("serverName", typeof(String));
         }
 
-        // <SecurityKernel Critical="True" Ring="0">
-        // <SatisfiesLinkDemand Name="Exception.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext):System.Void" />
-        // </SecurityKernel>
         [System.Security.SecurityCritical]
         [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -140,7 +131,6 @@ namespace System.DirectoryServices.AccountManagement
         }
     }
 
-    [Serializable()]
     public class PrincipalOperationException : PrincipalException
     {
         private int _errorCode = 0;
@@ -168,9 +158,6 @@ namespace System.DirectoryServices.AccountManagement
             _errorCode = info.GetInt32("errorCode");
         }
 
-        // <SecurityKernel Critical="True" Ring="0">
-        // <SatisfiesLinkDemand Name="Exception.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext):System.Void" />
-        // </SecurityKernel>
         [System.Security.SecurityCritical]
         [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -290,18 +277,12 @@ namespace System.DirectoryServices.AccountManagement
             return exception;
         }
 
-        // <SecurityKernel Critical="True" Ring="2">
-        // <ReferencesCritical Name="Method: GetExceptionFromErrorCode(Int32, String):Exception" Ring="2" />
-        // </SecurityKernel>
         [System.Security.SecuritySafeCritical]
         internal static Exception GetExceptionFromErrorCode(int errorCode)
         {
             return GetExceptionFromErrorCode(errorCode, null);
         }
 
-        // <SecurityKernel Critical="True" Ring="1">
-        // <ReferencesCritical Name="Method: GetErrorMessage(Int32, Boolean):String" Ring="1" />
-        // </SecurityKernel>
         [System.Security.SecurityCritical]
         internal static Exception GetExceptionFromErrorCode(int errorCode, string targetName)
         {
@@ -325,9 +306,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        // <SecurityKernel Critical="True" Ring="0">
-        // <CallsSuppressUnmanagedCode Name="UnsafeNativeMethods.FormatMessageW(System.Int32,System.IntPtr,System.Int32,System.Int32,System.Text.StringBuilder,System.Int32,System.IntPtr):System.Int32" />
-        // </SecurityKernel>
         [System.Security.SecurityCritical]
         internal static string GetErrorMessage(int errorCode, bool hresult)
         {

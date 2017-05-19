@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
@@ -28,14 +24,6 @@ namespace System.Net.Sockets
         {
             _cleanupCount = 1;
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, socket);
-        }
-
-        internal SafeNativeOverlapped NativeOverlapped
-        {
-            get
-            {
-                return _nativeOverlapped;
-            }
         }
 
         // SetUnmanagedStructures
@@ -59,14 +47,15 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(s.GetType().FullName);
             }
 
-            ThreadPoolBoundHandle boundHandle = s.SafeHandle.GetOrAllocateThreadPoolBoundHandle();
+            ThreadPoolBoundHandle boundHandle = s.GetOrAllocateThreadPoolBoundHandle();
 
             unsafe
             {
                 NativeOverlapped* overlapped = boundHandle.AllocateNativeOverlapped(s_ioCallback, this, objectsToPin);
                 _nativeOverlapped = new SafeNativeOverlapped(s.SafeHandle, overlapped);
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"{boundHandle}::AllocateNativeOverlapped. return={_nativeOverlapped}");
             }
+
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"{boundHandle}::AllocateNativeOverlapped. return={_nativeOverlapped}");
         }
 
         private static unsafe void CompletionPortCallback(uint errorCode, uint numBytes, NativeOverlapped* nativeOverlapped)
@@ -77,8 +66,6 @@ namespace System.Net.Sockets
             {
 #endif
                 BaseOverlappedAsyncResult asyncResult = (BaseOverlappedAsyncResult)ThreadPoolBoundHandle.GetNativeOverlappedState(nativeOverlapped);
-
-                object returnObject = null;
 
                 if (asyncResult.InternalPeekCompleted)
                 {
@@ -115,7 +102,7 @@ namespace System.Net.Sockets
                             SocketFlags ignore;
                             bool success = Interop.Winsock.WSAGetOverlappedResult(
                                 socket.SafeHandle,
-                                asyncResult.NativeOverlapped,
+                                nativeOverlapped,
                                 out numBytes,
                                 false,
                                 out ignore);
@@ -135,29 +122,65 @@ namespace System.Net.Sockets
                         }
                     }
                 }
-                asyncResult.ErrorCode = (int)socketError;
-                returnObject = asyncResult.PostCompletion((int)numBytes);
-                asyncResult.ReleaseUnmanagedStructures();
-                asyncResult.InvokeCallback(returnObject);
+
+                // Set results and invoke callback
+                asyncResult.CompletionCallback((int)numBytes, socketError);
 #if DEBUG
             }
 #endif
         }
 
-        // The following property returns the Win32 unsafe pointer to
-        // whichever Overlapped structure we're using for IO.
-        internal SafeHandle OverlappedHandle
+        // Called either synchronously from SocketPal async routines or asynchronously via CompletionPortCallback above. 
+        private void CompletionCallback(int numBytes, SocketError socketError)
         {
-            get
-            {
-                // On WinNT we need to use (due to the current implementation)
-                // an Overlapped object in order to bind the socket to the
-                // ThreadPool's completion port, so return the native handle
-                return _nativeOverlapped == null ? SafeNativeOverlapped.Zero : _nativeOverlapped;
-            }
+            ErrorCode = (int)socketError;
+            object result = PostCompletion(numBytes);
+            ReleaseUnmanagedStructures(); // must come after PostCompletion, as overrides may use these resources
+            InvokeCallback(result);
         }
 
-        private void ReleaseUnmanagedStructures()
+        internal unsafe NativeOverlapped* DangerousOverlappedPointer => (NativeOverlapped*)_nativeOverlapped.DangerousGetHandle();
+
+        // Check the result of the overlapped operation.
+        // Handle synchronous success by completing the asyncResult here.
+        // Handle synchronous failure by cleaning up and returning a SocketError.
+        internal SocketError ProcessOverlappedResult(bool success, int bytesTransferred)
+        {
+            if (success)
+            {
+                // Synchronous success.
+                Socket socket = (Socket)AsyncObject;
+                if (socket.SafeHandle.SkipCompletionPortOnSuccess)
+                {
+                    // The socket handle is configured to skip completion on success, 
+                    // so we can complete this asyncResult right now.
+                    CompletionCallback(bytesTransferred, SocketError.Success);
+                    return SocketError.Success;
+                }
+
+                // Socket handle is going to post a completion to the completion port (may have done so already).
+                // Return pending and we will continue in the completion port callback.
+                return SocketError.IOPending;
+            }
+
+            // Get the socket error (which may be IOPending)
+            SocketError errorCode = SocketPal.GetLastSocketError();
+
+            if (errorCode == SocketError.IOPending)
+            {
+                // Operation is pending.
+                // We will continue when the completion arrives (may have already at this point).
+                return SocketError.IOPending;
+            }
+
+            // Synchronous failure.
+            // Release overlapped and pinned structures.
+            ReleaseUnmanagedStructures();
+
+            return errorCode;
+        }
+
+        internal void ReleaseUnmanagedStructures()
         {
             if (Interlocked.Decrement(ref _cleanupCount) == 0)
             {

@@ -3,14 +3,53 @@
 // See the LICENSE file in the project root for more information.
 
 using Internal.Runtime.Augments;
+using System.Collections;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System
 {
     public static partial class Environment
     {
+        public static string GetEnvironmentVariable(string variable)
+        {
+            return EnvironmentAugments.GetEnvironmentVariable(variable);
+        }
+
+        public static string GetEnvironmentVariable(string variable, EnvironmentVariableTarget target)
+        {
+            return EnvironmentAugments.GetEnvironmentVariable(variable, target);
+        }
+
+        public static IDictionary GetEnvironmentVariables()
+        {
+            // To maintain complete compatibility with prior versions we need to return a Hashtable.
+            // We did ship a prior version of Core with LowLevelDictionary, which does iterate the
+            // same (e.g. yields DictionaryEntry), but it is not a public type.
+            //
+            // While we could pass Hashtable back from CoreCLR the type is also defined here. We only
+            // want to surface the local Hashtable.
+            return new Hashtable(EnvironmentAugments.GetEnvironmentVariables());
+        }
+
+        public static IDictionary GetEnvironmentVariables(EnvironmentVariableTarget target)
+        {
+            // See comments in GetEnvironmentVariables()
+            return new Hashtable(EnvironmentAugments.GetEnvironmentVariables(target));
+        }
+
+        public static void SetEnvironmentVariable(string variable, string value)
+        {
+            EnvironmentAugments.SetEnvironmentVariable(variable, value);
+        }
+
+        public static void SetEnvironmentVariable(string variable, string value, EnvironmentVariableTarget target)
+        {
+            EnvironmentAugments.SetEnvironmentVariable(variable, value, target);
+        }
+
         public static string CommandLine
         {
             get
@@ -116,7 +155,14 @@ namespace System
 
         public static OperatingSystem OSVersion => s_osVersion.Value;
 
-        public static string StackTrace => EnvironmentAugments.StackTrace;
+        public static string StackTrace
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)] // Prevent inlining from affecting where the stacktrace starts
+            get
+            {
+                return EnvironmentAugments.StackTrace;
+            }
+        }
 
         public static int TickCount => EnvironmentAugments.TickCount;
 

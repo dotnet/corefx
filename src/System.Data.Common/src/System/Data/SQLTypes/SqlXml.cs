@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace System.Data.SqlTypes
 {
-    [Serializable, XmlSchemaProvider("GetXsdType")]
+    [XmlSchemaProvider("GetXsdType")]
     public sealed class SqlXml : INullable, IXmlSerializable
     {
         private static readonly Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> s_sqlReaderDelegate = CreateSqlReaderDelegate();
@@ -198,7 +198,7 @@ namespace System.Data.SqlTypes
             XmlWriter ww = XmlWriter.Create(writerStream, writerSettings);
 
             if (reader.ReadState == ReadState.Closed)
-                throw new InvalidOperationException(SQLResource.s_closedXmlReaderMessage);
+                throw new InvalidOperationException(SQLResource.ClosedXmlReaderMessage);
 
             if (reader.ReadState == ReadState.Initial)
                 reader.Read();

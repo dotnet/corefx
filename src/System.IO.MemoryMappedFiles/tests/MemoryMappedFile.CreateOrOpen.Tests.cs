@@ -16,9 +16,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_MapName()
         {
             // null is an invalid map name with CreateOrOpen (it's valid with CreateNew and CreateFromFile)
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096));
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite));
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
 
             // Empty string is always an invalid map name
             Assert.Throws<ArgumentException>(() => MemoryMappedFile.CreateOrOpen(string.Empty, 4096));
@@ -29,7 +29,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// <summary>
         /// Test to verify that map names are left unsupported on Unix.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Map names not supported on Unix
         [Theory]
         [MemberData(nameof(CreateValidMapNames))]
         public void MapNamesNotSupported_Unix(string mapName)
@@ -47,9 +47,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData(-1)] // negative capacities don't make sense
         public void InvalidArguments_Capacity(long capacity)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity));
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity, MemoryMappedFileAccess.ReadWrite));
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity, MemoryMappedFileAccess.ReadWrite));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
         /// <summary>
@@ -61,9 +61,9 @@ namespace System.IO.MemoryMappedFiles.Tests
             // On 32-bit, values larger than uint.MaxValue aren't allowed
             if (IntPtr.Size == 4)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue));
-                Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
-                Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
             }
         }
 
@@ -75,8 +75,8 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData((MemoryMappedFileAccess)(42))]
         public void InvalidArgument_Access(MemoryMappedFileAccess access)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, access));
-            Assert.Throws<ArgumentOutOfRangeException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, access, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, access));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, access, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData((MemoryMappedFileOptions)(42))]
         public void InvalidArgument_Options(MemoryMappedFileOptions options)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.ReadWrite, options, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.ReadWrite, options, HandleInheritability.None));
         }
 
         /// <summary>
@@ -98,14 +98,14 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData((HandleInheritability)(42))]
         public void InvalidArgument_Inheritability(HandleInheritability inheritability)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("inheritability", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, inheritability));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritability", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, inheritability));
         }
 
         /// <summary>
         /// Test various combinations of arguments to CreateOrOpen, validating the created maps each time they're created,
         /// focusing on accesses that don't involve execute permissions.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Theory]
         [MemberData(nameof(MemberData_ValidArgumentCombinations),
             new string[] { "CreateUniqueMapName()" },
@@ -166,7 +166,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test various combinations of arguments to CreateOrOpen, validating the created maps each time they're created,
         /// focusing on accesses that involve execute permissions.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Theory]
         [MemberData(nameof(MemberData_ValidArgumentCombinations),
             new string[] { "CreateUniqueMapName()" },
@@ -177,27 +177,41 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidArgumentCombinations_Execute(
             string mapName, long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, HandleInheritability inheritability)
         {
-            // Map doesn't exist
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access))
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
-                ValidateMemoryMappedFile(mmf, capacity, access);
-            }
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
-            {
-                ValidateMemoryMappedFile(mmf, capacity, access, inheritability);
-            }
+                // Map doesn't exist
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access))
+                {
+                    ValidateMemoryMappedFile(mmf, capacity, access);
+                }
+            });
 
-            // Map does exist (CreateNew)
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access))
-            using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateOrOpen(mapName, capacity, access))
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
-                ValidateMemoryMappedFile(mmf2, capacity, access);
-            }
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access, options, inheritability))
-            using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
+                {
+                    ValidateMemoryMappedFile(mmf, capacity, access, inheritability);
+                }
+            });
+
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
-                ValidateMemoryMappedFile(mmf2, capacity, access, inheritability);
-            }
+                // Map does exist (CreateNew)
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access))
+                using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateOrOpen(mapName, capacity, access))
+                {
+                    ValidateMemoryMappedFile(mmf2, capacity, access);
+                }
+            });
+
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
+            {
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access, options, inheritability))
+                using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateOrOpen(mapName, capacity, access, options, inheritability))
+                {
+                    ValidateMemoryMappedFile(mmf2, capacity, access, inheritability);
+                }
+            });
 
             // (Avoid testing with CreateFromFile when using execute permissions.)
         }
@@ -251,13 +265,13 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// <summary>
         /// Test to validate behavior with MemoryMappedFileAccess.Write.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void OpenWrite()
         {
             // Write-only access fails when the map doesn't exist
-            Assert.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write));
-            Assert.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write));
+            AssertExtensions.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write, MemoryMappedFileOptions.None, HandleInheritability.None));
 
             // Write-only access works when the map does exist
             const int Capacity = 4096;
@@ -272,13 +286,13 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// <summary>
         /// Test the exceptional behavior when attempting to create a map so large it's not supported.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void TooLargeCapacity()
         {
             if (IntPtr.Size == 4)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 1 + (long)uint.MaxValue));
             }
             else
             {
@@ -290,7 +304,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test that the capacity of a view matches the original capacity, not that specified when opening the new map,
         /// and that the original capacity doesn't change from opening another map with a different capacity.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void OpenedCapacityMatchesOriginal()
         {
@@ -328,7 +342,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void OpenedAccessibilityLimitedToOriginal()
         {
@@ -348,7 +362,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void OpenedAccessibilityLimitedBeyondOriginal()
         {

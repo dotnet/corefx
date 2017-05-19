@@ -203,7 +203,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
@@ -296,7 +296,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
@@ -370,7 +370,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
@@ -413,7 +413,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
@@ -501,7 +501,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
-            return ReturnReadOnly(ref _expressions);
+            return ExpressionUtils.ReturnReadOnly(ref _expressions);
         }
 
         internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
@@ -527,7 +527,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeVariables()
         {
-            return ReturnReadOnly(ref _variables);
+            return ExpressionUtils.ReturnReadOnly(ref _variables);
         }
 
         protected IReadOnlyList<ParameterExpression> VariablesList => _variables;
@@ -577,7 +577,7 @@ namespace System.Linq.Expressions
                 using (IEnumerator<Expression> en = expressions.GetEnumerator())
                 {
                     en.MoveNext();
-                    return ReturnObject<Expression>(_body) == en.Current;
+                    return ExpressionUtils.ReturnObject<Expression>(_body) == en.Current;
                 }
             }
 
@@ -588,7 +588,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_body);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_body);
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
@@ -636,7 +636,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
-            return ReturnReadOnly(ref _body);
+            return ExpressionUtils.ReturnReadOnly(ref _body);
         }
 
         internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
@@ -775,12 +775,25 @@ namespace System.Linq.Expressions
             return IndexOf(item) != -1;
         }
 
-        public void CopyTo(Expression[] array, int arrayIndex)
+        public void CopyTo(Expression[] array, int index)
         {
-            array[arrayIndex++] = _arg0;
-            for (int i = 1; i < _block.ExpressionCount; i++)
+            ContractUtils.RequiresNotNull(array, nameof(array));
+            if (index < 0)
             {
-                array[arrayIndex++] = _block.GetExpression(i);
+                throw Error.ArgumentOutOfRange(nameof(index));
+            }
+
+            int n = _block.ExpressionCount;
+            Debug.Assert(n > 0);
+            if (index + n > array.Length)
+            {
+                throw new ArgumentException();
+            }
+
+            array[index++] = _arg0;
+            for (int i = 1; i < n; i++)
+            {
+                array[index++] = _block.GetExpression(i);
             }
         }
 
@@ -839,8 +852,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
 
             return new Block2(arg0, arg1);
         }
@@ -854,9 +867,9 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
             return new Block3(arg0, arg1, arg2);
         }
 
@@ -870,10 +883,10 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
-            RequiresCanRead(arg3, nameof(arg3));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg3, nameof(arg3));
             return new Block4(arg0, arg1, arg2, arg3);
         }
 
@@ -888,11 +901,11 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2, Expression arg3, Expression arg4)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
-            RequiresCanRead(arg3, nameof(arg3));
-            RequiresCanRead(arg4, nameof(arg4));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg3, nameof(arg3));
+            ExpressionUtils.RequiresCanRead(arg4, nameof(arg4));
 
             return new Block5(arg0, arg1, arg2, arg3, arg4);
         }

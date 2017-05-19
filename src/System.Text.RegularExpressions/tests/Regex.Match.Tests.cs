@@ -1,14 +1,15 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
 {
-    public class RegexMatchTests
+    public class RegexMatchTests : RemoteExecutorTestBase
     {
         public static IEnumerable<object[]> Match_Basic_TestData()
         {
@@ -70,10 +71,10 @@ namespace System.Text.RegularExpressions.Tests
             // Actual - "abc(?(1)111|222)"
             yield return new object[] { "(abbc)(?(1)111|222)", "abbc222", RegexOptions.None, 0, 7, false, string.Empty };
 
-            // "x" option. Removes unescaped white space from the pattern: Actual - " ([^/]+) ","x"
+            // "x" option. Removes unescaped whitespace from the pattern: Actual - " ([^/]+) ","x"
             yield return new object[] { "            ((.)+)      ", "abc", RegexOptions.IgnorePatternWhitespace, 0, 3, true, "abc" };
 
-            // "x" option. Removes unescaped white space from the pattern. : Actual - "\x20([^/]+)\x20","x"
+            // "x" option. Removes unescaped whitespace from the pattern. : Actual - "\x20([^/]+)\x20","x"
             yield return new object[] { "\x20([^/]+)\x20\x20\x20\x20\x20\x20\x20", " abc       ", RegexOptions.IgnorePatternWhitespace, 0, 10, true, " abc      " };
 
             // Turning on case insensitive option in mid-pattern : Actual - "aaa(?i:match this)bbb"
@@ -137,7 +138,7 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { @"foo\d+", "0123456789foo4567890foo         ", RegexOptions.RightToLeft, 10, 22, true, "foo4567890" };
             yield return new object[] { @"foo\d+", "0123456789foo4567890foo         ", RegexOptions.RightToLeft, 10, 4, true, "foo4" };
 
-            // Trim leading and trailing white spaces
+            // Trim leading and trailing whitespace
             yield return new object[] { @"\s*(.*?)\s*$", " Hello World ", RegexOptions.None, 0, 13, true, " Hello World " };
 
             // < in group
@@ -177,7 +178,15 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "(?<!)", "(?<!)cat", RegexOptions.None, 0, 8, false, string.Empty };
 
             // Alternation construct
+            yield return new object[] { "(?(cat)|dog)", "cat", RegexOptions.None, 0, 3, true, string.Empty };
+            yield return new object[] { "(?(cat)|dog)", "catdog", RegexOptions.None, 0, 6, true, string.Empty };
+            yield return new object[] { "(?(cat)dog1|dog2)", "catdog1", RegexOptions.None, 0, 7, false, string.Empty };
+            yield return new object[] { "(?(cat)dog1|dog2)", "catdog2", RegexOptions.None, 0, 7, true, "dog2" };
+            yield return new object[] { "(?(cat)dog1|dog2)", "catdog1dog2", RegexOptions.None, 0, 11, true, "dog2" };
+            yield return new object[] { "(?(dog2))", "dog2", RegexOptions.None, 0, 4, true, string.Empty };
             yield return new object[] { "(?(cat)|dog)", "oof", RegexOptions.None, 0, 3, false, string.Empty };
+            yield return new object[] { "(?(a:b))", "a", RegexOptions.None, 0, 1, true, string.Empty };
+            yield return new object[] { "(?(a:))", "a", RegexOptions.None, 0, 1, true, string.Empty };
 
             // No Negation
             yield return new object[] { "[abcd-[abcd]]+", "abcxyzABCXYZ`!@#$%^&*()_-+= \t\n", RegexOptions.None, 0, 30, false, string.Empty };
@@ -676,7 +685,7 @@ namespace System.Text.RegularExpressions.Tests
         public void Result_Invalid()
         {
             Match match = Regex.Match("foo", "foo");
-            Assert.Throws<ArgumentNullException>("replacement", () => match.Result(null));
+            AssertExtensions.Throws<ArgumentNullException>("replacement", () => match.Result(null));
 
             Assert.Throws<NotSupportedException>(() => RegularExpressions.Match.Empty.Result("any"));
         }
@@ -684,11 +693,9 @@ namespace System.Text.RegularExpressions.Tests
         [Fact]
         public void Match_SpecialUnicodeCharacters()
         {
-            CultureInfo currentCulture = CultureInfo.CurrentCulture;
-            CultureInfo enUSCulture = new CultureInfo("en-US");
-            try
+            RemoteInvoke(() =>
             {
-                CultureInfo.CurrentCulture = enUSCulture;
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Match("\u0131", "\u0049", RegexOptions.IgnoreCase, 0, 1, false, string.Empty);
                 Match("\u0131", "\u0069", RegexOptions.IgnoreCase, 0, 1, false, string.Empty);
 
@@ -697,29 +704,27 @@ namespace System.Text.RegularExpressions.Tests
                 Match("\u0131", "\u0069", RegexOptions.IgnoreCase, 0, 1, false, string.Empty);
                 Match("\u0130", "\u0049", RegexOptions.IgnoreCase, 0, 1, false, string.Empty);
                 Match("\u0130", "\u0069", RegexOptions.IgnoreCase, 0, 1, false, string.Empty);
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = currentCulture;
-            }
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public void Match_Invalid()
         {
             // Input is null
-            Assert.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern"));
-            Assert.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern", RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern", RegexOptions.None, TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern"));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern", RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.Match(null, "pattern", RegexOptions.None, TimeSpan.FromSeconds(1)));
 
-            Assert.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null));
-            Assert.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null, 0));
-            Assert.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => new Regex("pattern").Match(null, 0, 0));
 
             // Pattern is null
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null));
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null, RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null, RegexOptions.None, TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null, RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.Match("input", null, RegexOptions.None, TimeSpan.FromSeconds(1)));
 
             // Start is invalid
             Assert.Throws<ArgumentOutOfRangeException>(() => new Regex("pattern").Match("input", -1));
@@ -728,8 +733,8 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new Regex("pattern").Match("input", 6, 0));
 
             // Length is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, 6));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, 6));
         }
 
         [Theory]
@@ -754,17 +759,17 @@ namespace System.Text.RegularExpressions.Tests
         public void IsMatch_Invalid()
         {
             // Input is null
-            Assert.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern"));
-            Assert.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern", RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern", RegexOptions.None, TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern"));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern", RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => Regex.IsMatch(null, "pattern", RegexOptions.None, TimeSpan.FromSeconds(1)));
 
-            Assert.Throws<ArgumentNullException>("input", () => new Regex("pattern").IsMatch(null));
-            Assert.Throws<ArgumentNullException>("input", () => new Regex("pattern").IsMatch(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => new Regex("pattern").IsMatch(null));
+            AssertExtensions.Throws<ArgumentNullException>("input", () => new Regex("pattern").IsMatch(null, 0));
 
             // Pattern is null
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null));
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null, RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null, RegexOptions.None, TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null, RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => Regex.IsMatch("input", null, RegexOptions.None, TimeSpan.FromSeconds(1)));
 
             // Start is invalid
             Assert.Throws<ArgumentOutOfRangeException>(() => new Regex("pattern").IsMatch("input", -1));

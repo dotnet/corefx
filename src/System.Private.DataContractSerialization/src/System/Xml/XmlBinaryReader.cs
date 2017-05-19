@@ -183,7 +183,7 @@ namespace System.Xml
 
         private bool CanOptimizeReadElementContent()
         {
-            return (_arrayState == ArrayState.None);
+            return (_arrayState == ArrayState.None && !Signing);
         }
 
         public override float ReadElementContentAsFloat()
@@ -364,6 +364,8 @@ namespace System.Xml
         {
             if (this.Node.ReadState == ReadState.Closed)
                 return false;
+
+            SignNode();
             if (_isTextWithEndElement)
             {
                 _isTextWithEndElement = false;
@@ -1003,11 +1005,14 @@ namespace System.Xml
         {
             byte[] buffer = new byte[5];
             buffer[0] = (byte)nodeType;
-            buffer[1] = (byte)length;
-            length >>= 8;
-            buffer[2] = (byte)length;
-            length >>= 8;
-            buffer[3] = (byte)length;
+            unchecked
+            {
+                buffer[1] = (byte)length;
+                length >>= 8;
+                buffer[2] = (byte)length;
+                length >>= 8;
+                buffer[3] = (byte)length;
+            }
             length >>= 8;
             buffer[4] = (byte)length;
             BufferReader.InsertBytes(buffer, 0, buffer.Length);
@@ -1201,12 +1206,12 @@ namespace System.Xml
 
         private bool IsStartArray(string localName, string namespaceUri, XmlBinaryNodeType nodeType)
         {
-            return IsStartElement(localName, namespaceUri) && _arrayState == ArrayState.Element && _arrayNodeType == nodeType;
+            return IsStartElement(localName, namespaceUri) && _arrayState == ArrayState.Element && _arrayNodeType == nodeType && !Signing;
         }
 
         private bool IsStartArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, XmlBinaryNodeType nodeType)
         {
-            return IsStartElement(localName, namespaceUri) && _arrayState == ArrayState.Element && _arrayNodeType == nodeType;
+            return IsStartElement(localName, namespaceUri) && _arrayState == ArrayState.Element && _arrayNodeType == nodeType && !Signing;
         }
 
         private void CheckArray(Array array, int offset, int count)
@@ -1491,6 +1496,11 @@ namespace System.Xml
             None,
             Element,
             Content
+        }
+
+        protected override XmlSigningNodeWriter CreateSigningNodeWriter()
+        {
+            return new XmlSigningNodeWriter(false);
         }
     }
 }

@@ -14,7 +14,6 @@ namespace System.Text
 {
     // DBCSCodePageEncoding
     //
-    [Serializable]
     internal class DBCSCodePageEncoding : BaseCodePageEncoding
     {
         // Pointers to our memory section parts
@@ -79,7 +78,9 @@ namespace System.Text
         [System.Security.SecurityCritical]  // auto-generated
         protected override unsafe void LoadManagedCodePage()
         {
-            fixed (byte* pBytes = m_codePageHeader)
+            Debug.Assert(m_codePageHeader?.Length > 0);
+
+            fixed (byte* pBytes = &m_codePageHeader[0])
             {
                 CodePageHeader* pCodePage = (CodePageHeader*)pBytes;
 
@@ -1159,7 +1160,6 @@ namespace System.Text
             return new DBCSDecoder(this);
         }
 
-        [Serializable]
         internal class DBCSDecoder : DecoderNLS
         {
             // Need a place for the last left over byte

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -134,7 +134,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x + y, dX + dY);
+            Assert.Equal(unchecked(x + y), unchecked(dX + dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -251,7 +251,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x * y, dX * dY);
+            Assert.Equal(unchecked(x * y), unchecked(dX * dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -302,7 +302,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x - y, dX - dY);
+            Assert.Equal(unchecked(x - y), unchecked(dX - dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -329,8 +329,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX += dY;
-            Assert.Equal(x + y, dX);
+
+            unchecked
+            {
+                dX += dY;
+                Assert.Equal(x + y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -420,8 +424,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX *= dY;
-            Assert.Equal(x * y, dX);
+
+            unchecked
+            {
+                dX *= dY;
+                Assert.Equal(x * y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -468,8 +476,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX -= dY;
-            Assert.Equal(x - y, dX);
+
+            unchecked
+            {
+                dX -= dY;
+                Assert.Equal(x - y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -632,7 +644,7 @@ namespace System.Dynamic.Tests
         [Theory, MemberData(nameof(NonBinaryExpressionTypes))]
         public void NonBinaryOperations(ExpressionType type)
         {
-            Assert.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
+            AssertExtensions.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
         }
 
         [Theory, MemberData(nameof(BinaryExpressionTypes))]
@@ -652,7 +664,7 @@ namespace System.Dynamic.Tests
         {
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
+            AssertExtensions.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
         }
 
         [Fact]
@@ -660,7 +672,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
         }
 
         [Fact]
@@ -668,7 +680,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
         }
 
         [Fact]
@@ -678,7 +690,7 @@ namespace System.Dynamic.Tests
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg0 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var arg1 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
         }
 
         [Fact]
@@ -686,7 +698,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
         }
 
         [Fact]
@@ -698,6 +710,26 @@ namespace System.Dynamic.Tests
             dX = 23;
             dY = 49;
             Assert.Throws<RuntimeBinderException>(() => dX && dY);
+        }
+
+        [Fact]
+        public void LiteralDoubleNaN()
+        {
+            dynamic d = double.NaN;
+            Assert.False(d == double.NaN);
+            Assert.True(d != double.NaN);
+            d = 3.0;
+            Assert.True(double.IsNaN(d + double.NaN));
+        }
+
+        [Fact]
+        public void LiteralSingleNaN()
+        {
+            dynamic d = float.NaN;
+            Assert.False(d == float.NaN);
+            Assert.True(d != float.NaN);
+            d = 3.0F;
+            Assert.True(float.IsNaN(d + float.NaN));
         }
 
         [Theory]

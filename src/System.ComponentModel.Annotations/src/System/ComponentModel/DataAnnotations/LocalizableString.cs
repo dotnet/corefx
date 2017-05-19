@@ -122,15 +122,13 @@ namespace System.ComponentModel.DataAnnotations
                 else
                 {
                     // Get the property from the resource type for this resource key
-                    // TODO - check that GetRuntimeProperty() returns the same as old GetProperty()
-                    // in all situations regardless of property modifiers
                     var property = _resourceType.GetRuntimeProperty(_propertyValue);
 
                     // We need to detect bad configurations so that we can throw exceptions accordingly
                     var badlyConfigured = false;
 
                     // Make sure we found the property and it's the correct type, and that the type itself is public
-                    if (!_resourceType.GetTypeInfo().IsVisible || property == null ||
+                    if (!_resourceType.IsVisible || property == null ||
                         property.PropertyType != typeof(string))
                     {
                         badlyConfigured = true;

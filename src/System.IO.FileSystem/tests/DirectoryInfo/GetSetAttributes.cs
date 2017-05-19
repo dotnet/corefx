@@ -48,7 +48,7 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(FileAttributes.ReadOnly)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix file attributes
         public void UnixAttributeSetting(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -59,12 +59,23 @@ namespace System.IO.Tests
         }
 
         [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void UnixDirectoryBeginningWithPeriodIsHidden(bool endsWithSlash)
+        {
+            string testDir = "." + GetTestFileName();
+            Directory.CreateDirectory(Path.Combine(TestDirectory, testDir));
+            Assert.True(0 != (new DirectoryInfo(Path.Combine(TestDirectory, testDir) + (endsWithSlash ? "/" : "")).Attributes & FileAttributes.Hidden));
+        }
+
+        [Theory]
         [InlineData(FileAttributes.ReadOnly)]
         [InlineData(FileAttributes.Hidden)]
         [InlineData(FileAttributes.System)]
         [InlineData(FileAttributes.Archive)]
         [InlineData(FileAttributes.ReadOnly | FileAttributes.Hidden)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows file attributes
         public void WindowsAttributeSetting(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -81,7 +92,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.SparseFile)]
         [InlineData(FileAttributes.ReparsePoint)]
         [InlineData(FileAttributes.Compressed)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that don't get set
         public void UnixInvalidAttributes(FileAttributes attr)
         {
             var path = GetTestFilePath();
@@ -96,7 +107,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.SparseFile)]
         [InlineData(FileAttributes.ReparsePoint)]
         [InlineData(FileAttributes.Compressed)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that don't get set
         public void WindowsInvalidAttributes(FileAttributes attr)
         {
             var path = GetTestFilePath();
@@ -108,7 +119,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(~FileAttributes.ReadOnly)]
         [InlineData(-1)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that throw
         public void UnixInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -120,7 +131,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.Temporary)]
         [InlineData(~FileAttributes.ReadOnly)]
         [InlineData(-1)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that throw
         public void WindowsInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());

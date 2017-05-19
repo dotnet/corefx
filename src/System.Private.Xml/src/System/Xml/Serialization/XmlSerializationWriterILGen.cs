@@ -13,7 +13,7 @@ using System.Text;
 using System.Xml.Schema;
 using System.Xml.Extensions;
 
-#if !NET_NATIVE
+#if !uapaot
 namespace System.Xml.Serialization
 {
     internal class XmlSerializationWriterILGen : XmlSerializationILGen
@@ -92,7 +92,7 @@ namespace System.Xml.Serialization
 
         private void WriteQualifiedNameElement(string name, string ns, object defaultValue, SourceInfo source, bool nullable, TypeMapping mapping)
         {
-            bool hasDefault = defaultValue != null && !Globals.IsDBNullValue(defaultValue);
+            bool hasDefault = defaultValue != null && defaultValue != DBNull.Value;
             if (hasDefault)
             {
                 throw Globals.NotSupported("XmlQualifiedName DefaultValue not supported.  Fail in WriteValue()");
@@ -195,7 +195,7 @@ namespace System.Xml.Serialization
         private void WritePrimitive(string method, string name, string ns, object defaultValue, SourceInfo source, TypeMapping mapping, bool writeXsiType, bool isElement, bool isNullable)
         {
             TypeDesc typeDesc = mapping.TypeDesc;
-            bool hasDefault = defaultValue != null && !Globals.IsDBNullValue(defaultValue) && mapping.TypeDesc.HasDefaultSupport;
+            bool hasDefault = defaultValue != null && defaultValue != DBNull.Value && mapping.TypeDesc.HasDefaultSupport;
             if (hasDefault)
             {
                 if (mapping is EnumMapping)
@@ -377,7 +377,7 @@ namespace System.Xml.Serialization
             ilg.Ldarg(0);
             ilg.Call(XmlSerializationWriter_TopLevelElement);
 
-            // in the top-level method add check for the parameters length, 
+            // in the top-level method add check for the parameters length,
             // because visual basic does not have a concept of an <out> parameter it uses <ByRef> instead
             // so sometime we think that we have more parameters then supplied
             LocalBuilder pLengthLoc = ilg.DeclareLocal(typeof(int), "pLength");
@@ -571,7 +571,7 @@ namespace System.Xml.Serialization
             ilg.GotoMethodEnd();
             ilg.EndIf();
 
-            if (!mapping.TypeDesc.IsValueType && !mapping.TypeDesc.Type.GetTypeInfo().IsPrimitive)
+            if (!mapping.TypeDesc.IsValueType && !mapping.TypeDesc.Type.IsPrimitive)
             {
                 MethodInfo XmlSerializationWriter_TopLevelElement = typeof(XmlSerializationWriter).GetMethod(
                       "TopLevelElement",
@@ -745,7 +745,7 @@ namespace System.Xml.Serialization
 
 #if DEBUG
                 // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                if (methodName == null) throw new InvalidOperationException("deriaved from " + mapping.TypeDesc.FullName + ", " + SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
+                if (methodName == null) throw new InvalidOperationException("derived from " + mapping.TypeDesc.FullName + ", " + SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
 #endif
 
                 List<Type> argTypes = new List<Type>();
@@ -1143,7 +1143,7 @@ namespace System.Xml.Serialization
         private bool CanOptimizeWriteListSequence(TypeDesc listElementTypeDesc)
         {
             // check to see if we can write values of the attribute sequentially
-            // currently we have only one data type (XmlQualifiedName) that we can not write "inline", 
+            // currently we have only one data type (XmlQualifiedName) that we can not write "inline",
             // because we need to output xmlns:qx="..." for each of the qnames
 
             return (listElementTypeDesc != null && listElementTypeDesc != QnameTypeDesc);
@@ -2129,7 +2129,7 @@ namespace System.Xml.Serialization
                     ilg.Load(null);
                     ilg.Cne();
                 }
-                else if (value.GetType().GetTypeInfo().IsPrimitive)
+                else if (value.GetType().IsPrimitive)
                 {
                     source.Load(null);
                     ilg.Ldc(Convert.ChangeType(value, source.Type, CultureInfo.InvariantCulture));
@@ -2187,7 +2187,7 @@ namespace System.Xml.Serialization
         private void WriteNullCheckBegin(string source, ElementAccessor element)
         {
             LocalBuilder local = ilg.GetLocal(source);
-            Debug.Assert(!local.LocalType.GetTypeInfo().IsValueType);
+            Debug.Assert(!local.LocalType.IsValueType);
             ilg.Load(local);
             ilg.Load(null);
             ilg.If(Cmp.EqualTo);
@@ -2373,7 +2373,7 @@ namespace System.Xml.Serialization
                     ilg.New(ctor);
                 else
                 {
-                    Debug.Assert(type.GetTypeInfo().IsValueType);
+                    Debug.Assert(type.IsValueType);
                     LocalBuilder tmpLoc = ilg.GetTempLocal(type);
                     ilg.Ldloca(tmpLoc);
                     ilg.InitObj(type);
@@ -2387,9 +2387,9 @@ namespace System.Xml.Serialization
         internal void ILGenForCreateInstance(CodeGenerator ilg, Type type, Type cast, bool nonPublic)
         {
             // Special case DBNull
-            if (type == Globals.TypeOfDBNull)
+            if (type == typeof(DBNull))
             {
-                FieldInfo DBNull_Value = Globals.TypeOfDBNull.GetField("Value", CodeGenerator.StaticBindingFlags);
+                FieldInfo DBNull_Value = type.GetField("Value", CodeGenerator.StaticBindingFlags);
                 ilg.LoadMember(DBNull_Value);
                 return;
             }
@@ -2398,7 +2398,7 @@ namespace System.Xml.Serialization
             // codegen the same as 'internal XElement : this("default") { }'
             if (type.FullName == "System.Xml.Linq.XElement")
             {
-                Type xName = type.GetTypeInfo().Assembly.GetType("System.Xml.Linq.XName");
+                Type xName = type.Assembly.GetType("System.Xml.Linq.XName");
                 if (xName != null)
                 {
                     MethodInfo XName_op_Implicit = xName.GetMethod(
@@ -2554,7 +2554,7 @@ namespace System.Xml.Serialization
         {
             Debug.Assert(typeName == arrayTypeDesc.CSharpName || typeName == arrayTypeDesc.CSharpName + "[]");
             Type localType = (typeName == arrayTypeDesc.CSharpName) ? arrayTypeDesc.Type : arrayTypeDesc.Type.MakeArrayType();
-            // This may need reused varialble to get code compat?
+            // This may need reused variable to get code compat?
             LocalBuilder local = initValue.ILG.DeclareOrGetLocal(localType, variableName);
             if (initValue != null)
             {

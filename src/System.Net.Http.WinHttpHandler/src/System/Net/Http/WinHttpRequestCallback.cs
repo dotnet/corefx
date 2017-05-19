@@ -67,7 +67,7 @@ namespace System.Net.Http
                         return;
 
                     case Interop.WinHttp.WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE:
-                        Debug.Assert(statusInformationLength == Marshal.SizeOf<int>());
+                        Debug.Assert(statusInformationLength == sizeof(int));
                         int bytesAvailable = Marshal.ReadInt32(statusInformation);
                         OnRequestDataAvailable(state, bytesAvailable);
                         return;
@@ -305,9 +305,9 @@ namespace System.Net.Http
             
             Debug.Assert(state != null, "OnRequestError: state is null");
 
-            Exception innerException = WinHttpException.CreateExceptionUsingError((int)asyncResult.dwError);
+            Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
 
-            switch ((uint)asyncResult.dwResult.ToInt32())
+            switch (unchecked((uint)asyncResult.dwResult.ToInt32()))
             {
                 case Interop.WinHttp.API_SEND_REQUEST:
                     state.LifecycleAwaitable.SetException(innerException);

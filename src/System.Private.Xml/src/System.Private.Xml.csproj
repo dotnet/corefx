@@ -1,34 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <PropertyGroup>
-	<Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{C427CE0D-0740-41F3-9C3A-552BEA3DDB0D}</ProjectGuid>
     <AssemblyName>System.Private.Xml</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <RootNamespace>System.Xml</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn),649</NoWarn>
-    <DefineConstants>$(DefineConstants);ASYNC;ASTORIA_LIGHT</DefineConstants>
-    <!--<DefineConstants Condition="'$(TargetGroup)' == 'uap101aot'">$(DefineConstants);NET_NATIVE</DefineConstants> TODO: Bring this back when uap101aot support is added -->
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <Compile Include="$(CommonPath)\System\ValueTuple.cs">
-      <Link>Common\System\ValueTuple.cs</Link>
-    </Compile>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>System\StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="System\Xml\BinaryXml\XmlBinaryReader.cs" />
+    <Compile Include="System\Xml\BinaryXml\BinXmlToken.cs" />
+    <Compile Include="System\Xml\BinaryXml\SqlUtils.cs" />
     <Compile Include="Misc\HResults.cs" />
-    <Compile Include="Misc\InvariantComparer.cs" />
     <Compile Include="System\Xml\AsyncHelper.cs" />
     <Compile Include="System\Xml\Base64Decoder.cs" />
     <Compile Include="System\Xml\Base64Encoder.cs" />
@@ -125,7 +122,6 @@
     <Compile Include="System\Xml\Core\XmlSubtreeReader.cs" />
     <Compile Include="System\Xml\Core\XmlSubtreeReaderAsync.cs" />
     <Compile Include="System\Xml\Core\XmlTextEncoder.cs" />
-    <Compile Include="System\Xml\Core\BinaryCompatibility.cs" />
     <Compile Include="System\Xml\Core\XmlTextReader.cs" />
     <Compile Include="System\Xml\Core\XmlTextReaderImpl.cs" />
     <Compile Include="System\Xml\Core\XmlTextReaderImplAsync.cs" />
@@ -190,10 +186,6 @@
     <Compile Include="System\Xml\Dom\XmlUnspecifiedAttribute.cs" />
     <Compile Include="System\Xml\Dom\XmlWhitespace.cs" />
     <Compile Include="System\Xml\Dom\XPathNodeList.cs" />
-    <Compile Include="System\Xml\BinaryXml\BinXmltoken.cs" />
-    <Compile Include="System\Xml\BinaryXml\SqlUtils.cs" />
-    <Compile Include="System\Xml\BinaryXml\XmlBinaryReader.cs" />
-    <Compile Include="System\Xml\BinaryXml\XmlBinaryReaderAsync.cs" />
     <Compile Include="System\Xml\Cache\XPathDocumentBuilder.cs" />
     <Compile Include="System\Xml\Cache\XPathDocumentIterator.cs" />
     <Compile Include="System\Xml\Cache\XPathDocumentNavigator.cs" />
@@ -399,7 +391,6 @@
     <Compile Include="System\Xml\Schema\XsdValidator.cs" />
     <Compile Include="System\Xml\Schema\Inference\Infer.cs" />
     <Compile Include="System\Xml\Schema\Inference\XmlSchemaInferenceException.cs" />
-    <Compile Include="System\Xml\Serialization\AppSettings.cs" />
     <Compile Include="System\Xml\Serialization\CodeGenerationoptions.cs" />
     <Compile Include="System\Xml\Serialization\CodeGenerator.cs" />
     <Compile Include="System\Xml\Serialization\CodeIdentifier.cs" />
@@ -505,11 +496,37 @@
       <LogicalName>rss-0.91.dtd</LogicalName>
     </EmbeddedResource>-->
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+  <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <ProjectReference Include="..\..\System.Threading.Tasks.Extensions\src\System.Threading.Tasks.Extensions.csproj" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.Console" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Requests" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Reflection.Emit" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
+    <Reference Include="System.Reflection.Emit.Lightweight" />
+    <Reference Include="System.Reflection.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Xml\Xsl\IlGen\GenerateHelper.cs" />
@@ -559,7 +576,6 @@
     <Compile Include="System\Xml\Xsl\QIL\QilUnary.cs" />
     <Compile Include="System\Xml\Xsl\QIL\QilValidationVisitor.cs" />
     <Compile Include="System\Xml\Xsl\QIL\QilVisitor.cs" />
-    <Compile Include="System\Xml\Xsl\QIL\QilXmlReader.cs" />
     <Compile Include="System\Xml\Xsl\QIL\QilXmlWriter.cs" />
     <Compile Include="System\Xml\Xsl\QIL\SerializationHints.cs" />
     <Compile Include="System\Xml\Xsl\QIL\SubstitutionList.cs" />
@@ -601,7 +617,6 @@
     <Compile Include="System\Xml\Xsl\Runtime\XsltFunctions.cs" />
     <Compile Include="System\Xml\Xsl\Runtime\XsltLibrary.cs" />
     <Compile Include="System\Xml\Xsl\SourceLineInfo.cs" />
-    <Compile Include="System\Xml\Xsl\XmlCommand.cs" />
     <Compile Include="System\Xml\Xsl\XmlILCommand.cs" />
     <Compile Include="System\Xml\Xsl\XmlIlGenerator.cs" />
     <Compile Include="System\Xml\Xsl\XmlNodeKindFlags.cs" />
@@ -653,7 +668,6 @@
     <Compile Include="System\Xml\Xsl\XsltOld\IfAction.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\InputScope.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\InputScopeManager.cs" />
-    <Compile Include="System\Xml\Xsl\XsltOld\Keywords.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\MessageAction.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\NamespaceDecl.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\NameSpaceEvent.cs" />
@@ -713,7 +727,6 @@
     <Compile Include="System\Xml\Xsl\Xslt\XslAst.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\XslAstAnalyzer.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\XslFlags.cs" />
-    <Compile Include="System\Xml\Xsl\Xslt\XsltAnnotation.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\XsltInput.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\XsltLoader.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\XsltQilFactory.cs" />
@@ -721,7 +734,6 @@
     <Compile Include="$(CommonPath)\System\LocalAppContext.cs" />
     <Compile Include="System\Xml\Core\LocalAppContextSwitches.cs" />
     <Compile Include="$(CommonPath)\System\CSharpHelpers.cs" />
-    <Compile Include="Misc\ThisAssembly.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)'=='true'">
     <Compile Include="System\Xml\Xsl\Runtime\XmlCollation.Windows.cs" />

@@ -18,7 +18,7 @@ namespace System.Runtime.Serialization
     using DataContractDictionary = System.Collections.Generic.Dictionary<System.Xml.XmlQualifiedName, DataContract>;
     using System.Linq;
 
-#if USE_REFEMIT || NET_NATIVE
+#if USE_REFEMIT || uapaot
     public sealed class ClassDataContract : DataContract
 #else
     internal sealed class ClassDataContract : DataContract
@@ -36,7 +36,7 @@ namespace System.Runtime.Serialization
 
         private bool _isScriptObject;
 
-#if NET_NATIVE
+#if uapaot
         public ClassDataContract() : base(new ClassDataContractCriticalHelper())
         {
             InitClassDataContract();
@@ -129,7 +129,7 @@ namespace System.Runtime.Serialization
             get { return _helper.ExtensionDataSetMethod; }
         }
 
-#if !NET_NATIVE
+#if !uapaot
         public override DataContractDictionary KnownDataContracts
         {
             get
@@ -149,7 +149,7 @@ namespace System.Runtime.Serialization
             { return _helper.IsNonAttributedType; }
         }
 
-#if NET_NATIVE
+#if uapaot
         public bool HasDataContract
         {
             get
@@ -242,7 +242,7 @@ namespace System.Runtime.Serialization
             return true;
         }
 
-#if NET_NATIVE
+#if uapaot
         private XmlFormatClassWriterDelegate _xmlFormatWriterDelegate;
         public XmlFormatClassWriterDelegate XmlFormatWriterDelegate
 #else
@@ -251,7 +251,7 @@ namespace System.Runtime.Serialization
         {
             get
             {
-#if NET_NATIVE
+#if uapaot
                 if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
                 || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatWriterDelegate != null))
                 {
@@ -274,13 +274,13 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if NET_NATIVE
+#if uapaot
                 _xmlFormatWriterDelegate = value;
 #endif
             }
         }
 
-#if NET_NATIVE
+#if uapaot
         private XmlFormatClassReaderDelegate _xmlFormatReaderDelegate;
         public XmlFormatClassReaderDelegate XmlFormatReaderDelegate
 #else
@@ -289,7 +289,7 @@ namespace System.Runtime.Serialization
         {
             get
             {
-#if NET_NATIVE
+#if uapaot
                 if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
                 || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatReaderDelegate != null))
                 {
@@ -312,7 +312,7 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if NET_NATIVE
+#if uapaot
                 _xmlFormatReaderDelegate = value;
 #endif
             }
@@ -329,7 +329,7 @@ namespace System.Runtime.Serialization
             {
                 ClassDataContract cloned = cdc.Clone();
                 cloned.UpdateNamespaceAndMembers(type, ns, memberNames);
-                return cloned;                
+                return cloned;
             }
         }
 
@@ -340,7 +340,7 @@ namespace System.Runtime.Serialization
             {
                 Type declaringType = memberContract.MemberInfo.DeclaringType;
                 DataContract.ThrowInvalidDataContractException(
-                    SR.Format((declaringType.GetTypeInfo().IsEnum ? SR.DupEnumMemberValue : SR.DupMemberName),
+                    SR.Format((declaringType.IsEnum ? SR.DupEnumMemberValue : SR.DupMemberName),
                         existingMemberContract.MemberInfo.Name,
                         memberContract.MemberInfo.Name,
                         DataContract.GetClrTypeFullName(declaringType),
@@ -354,7 +354,7 @@ namespace System.Runtime.Serialization
         internal static XmlDictionaryString GetChildNamespaceToDeclare(DataContract dataContract, Type childType, XmlDictionary dictionary)
         {
             childType = DataContract.UnwrapNullableType(childType);
-            if (!childType.GetTypeInfo().IsEnum && !Globals.TypeOfIXmlSerializable.IsAssignableFrom(childType)
+            if (!childType.IsEnum && !Globals.TypeOfIXmlSerializable.IsAssignableFrom(childType)
                 && DataContract.GetBuiltInDataContract(childType) == null && childType != Globals.TypeOfDBNull)
             {
                 string ns = DataContract.GetStableName(childType).Namespace;
@@ -366,7 +366,7 @@ namespace System.Runtime.Serialization
 
         private static bool IsArraySegment(Type t)
         {
-            return t.GetTypeInfo().IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
+            return t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
         }
 
         /// <SecurityNote>
@@ -381,7 +381,7 @@ namespace System.Runtime.Serialization
             if (type.IsArray)
                 return false;
 
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
                 return false;
 
             if (type.IsGenericParameter)
@@ -393,7 +393,7 @@ namespace System.Runtime.Serialization
             if (type.IsPointer)
                 return false;
 
-            if (type.GetTypeInfo().IsDefined(Globals.TypeOfCollectionDataContractAttribute, false))
+            if (type.IsDefined(Globals.TypeOfCollectionDataContractAttribute, false))
                 return false;
 
             Type[] interfaceTypes = type.GetInterfaces();
@@ -413,15 +413,15 @@ namespace System.Runtime.Serialization
             if (Globals.TypeOfISerializable.IsAssignableFrom(type))
                 return false;
 
-            if (type.GetTypeInfo().IsDefined(Globals.TypeOfDataContractAttribute, false))
+            if (type.IsDefined(Globals.TypeOfDataContractAttribute, false))
                 return false;
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
-                return type.GetTypeInfo().IsVisible;
+                return type.IsVisible;
             }
             else
             {
-                return (type.GetTypeInfo().IsVisible &&
+                return (type.IsVisible &&
                     type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, Array.Empty<Type>()) != null);
             }
         }
@@ -448,9 +448,8 @@ namespace System.Runtime.Serialization
 
         private static string GetGeneralTypeName(Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
-            return typeInfo.IsGenericType && !typeInfo.IsGenericParameter
-                ? typeInfo.GetGenericTypeDefinition().FullName
+            return type.IsGenericType && !type.IsGenericParameter
+                ? type.GetGenericTypeDefinition().FullName
                 : type.FullName;
         }
 
@@ -763,7 +762,7 @@ namespace System.Runtime.Serialization
                     EnsureMethodsImported();
                     return;
                 }
-                Type baseType = type.GetTypeInfo().BaseType;
+                Type baseType = type.BaseType;
                 _isISerializable = (Globals.TypeOfISerializable.IsAssignableFrom(type));
                 SetIsNonAttributedType(type);
                 if (_isISerializable)
@@ -774,10 +773,26 @@ namespace System.Runtime.Serialization
                         baseType = null;
                 }
                 SetKeyValuePairAdapterFlags(type);
-                this.IsValueType = type.GetTypeInfo().IsValueType;
+                this.IsValueType = type.IsValueType;
                 if (baseType != null && baseType != Globals.TypeOfObject && baseType != Globals.TypeOfValueType && baseType != Globals.TypeOfUri)
                 {
+                    // dotnet/corefx#19629: a DataContract created at runtime does not work with the base DataContract
+                    // pre-generated by SG. It's because the runtime DataContract requires full information of a base DataContract
+                    // while a pre-generated DataContract is incomplete.
+                    //
+                    // At this point in code, we're in the midlle of creating a new DataContract at runtime, so we need to make
+                    // sure that we create our own base type DataContract when the base type could potentially have SG generated 
+                    // DataContract. 
+                    //
+                    // We wanted to enable the fix for the issue described above only when SG generated DataContracts are available.
+                    // Currently we don't have a good way of detecting usage of SG (either globally or per data contract). 
+                    // But since SG is currently only used by .NET Native, so we used the "#if uapaot" to target the fix for .Net
+                    // Native only.
+#if uapaot
+                    DataContract baseContract = DataContract.GetDataContractCreatedAtRuntime(baseType);
+#else
                     DataContract baseContract = DataContract.GetDataContract(baseType);
+#endif
                     if (baseContract is CollectionDataContract)
                         this.BaseContract = ((CollectionDataContract)baseContract).SharedTypeContract as ClassDataContract;
                     else
@@ -901,7 +916,7 @@ namespace System.Runtime.Serialization
                         isReference = dataContractAttribute.IsReference;
                 }
 
-                if (isReference && type.GetTypeInfo().IsValueType)
+                if (isReference && type.IsValueType)
                 {
                     DataContract.ThrowInvalidDataContractException(
                             SR.Format(SR.ValueTypeCannotHaveIsReference,
@@ -1045,7 +1060,7 @@ namespace System.Runtime.Serialization
 
                         // Previously System.SerializableAttribute was not available in NetCore, so we had
                         // a list of known [Serializable] types for type in the framework. Although now SerializableAttribute
-                        // is available in NetCore, some framework types still do not have [Serializable] 
+                        // is available in NetCore, some framework types still do not have [Serializable]
                         // yet, e.g. ReadOnlyDictionary<TKey, TValue>. So, we still need to maintain the known serializable
                         // type list.
                         if (IsKnownSerializableType(type))
@@ -1096,7 +1111,7 @@ namespace System.Runtime.Serialization
             private bool SetIfGetOnlyCollection(DataMember memberContract)
             {
                 //OK to call IsCollection here since the use of surrogated collection types is not supported in get-only scenarios
-                if (CollectionDataContract.IsCollection(memberContract.MemberType, false /*isConstructorRequired*/) && !memberContract.MemberType.GetTypeInfo().IsValueType)
+                if (CollectionDataContract.IsCollection(memberContract.MemberType, false /*isConstructorRequired*/) && !memberContract.MemberType.IsValueType)
                 {
                     memberContract.IsGetOnlyCollection = true;
                     return true;
@@ -1119,6 +1134,7 @@ namespace System.Runtime.Serialization
                 while (currContract != null)
                 {
                     baseTypeIndex++;
+
                     foreach (DataMember member in currContract.Members)
                     {
                         membersInHierarchy.Add(new Member(member, currContract.StableName.Namespace, baseTypeIndex));
@@ -1173,7 +1189,7 @@ namespace System.Runtime.Serialization
             /// <SecurityNote>
             /// RequiresReview - marked SRR because callers may need to depend on isNonAttributedType for a security decision
             ///            isNonAttributedType must be calculated correctly
-            ///            SetIsNonAttributedType should not be called before GetStableNameAndSetHasDataContract since it 
+            ///            SetIsNonAttributedType should not be called before GetStableNameAndSetHasDataContract since it
             ///            is dependent on the correct calculation of hasDataContract
             /// Safe - does not let caller influence isNonAttributedType calculation; no harm in leaking value
             /// </SecurityNote>
@@ -1362,7 +1378,7 @@ namespace System.Runtime.Serialization
             internal bool HasDataContract
             {
                 get { return _hasDataContract; }
-#if NET_NATIVE
+#if uapaot
                 set { _hasDataContract = value; }
 #endif
             }
@@ -1380,7 +1396,7 @@ namespace System.Runtime.Serialization
 
             private void SetKeyValuePairAdapterFlags(Type type)
             {
-                if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == Globals.TypeOfKeyValuePairAdapter)
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == Globals.TypeOfKeyValuePairAdapter)
                 {
                     _isKeyValuePairAdapter = true;
                     _keyValuePairGenericArguments = type.GetGenericArguments();
@@ -1438,7 +1454,7 @@ namespace System.Runtime.Serialization
 
                 Type type = UnderlyingType;
 
-                if (type.GetTypeInfo().IsValueType)
+                if (type.IsValueType)
                     return null;
 
                 ConstructorInfo ctor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, Array.Empty<Type>());
@@ -1552,7 +1568,7 @@ namespace System.Runtime.Serialization
             internal static DataMemberComparer Singleton = new DataMemberComparer();
         }
 
-#if !NET_NATIVE
+#if !uapaot
         /// <summary>
         ///  Get object type for Xml/JsonFormmatReaderGenerator
         /// </summary>
@@ -1561,7 +1577,7 @@ namespace System.Runtime.Serialization
             get
             {
                 Type type = UnderlyingType;
-                if (type.GetTypeInfo().IsValueType && !IsNonAttributedType)
+                if (type.IsValueType && !IsNonAttributedType)
                 {
                     type = Globals.TypeOfValueType;
                 }

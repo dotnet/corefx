@@ -12,17 +12,27 @@ namespace System.Net.Primitives.Functional.Tests
     {
         public static IEnumerable<object[]> SerializeDeserialize_Roundtrip_MemberData()
         {
-            yield return new object[] { IPAddress.Parse("127.0.0.1") };
-            yield return new object[] { new IPEndPoint(IPAddress.Loopback, 12345) };
             yield return new object[] { new Cookie("somekey", "somevalue") };
             yield return new object[] { new CookieCollection() { new Cookie("somekey", "somevalue") } };
         }
 
         [Theory]
         [MemberData(nameof(SerializeDeserialize_Roundtrip_MemberData))]
-        public static void SerializeDeserialize_Roundtrip(object obj)
+        public static void SerializeDeserialize_Roundtrip_EqualObjects(object obj)
         {
             Assert.Equal(obj, BinaryFormatterHelpers.Clone(obj));
+        }
+
+        [Fact]
+        public static void SerializeDeserialize_CookieContainerRoundtrip_EqualValues()
+        {
+            CookieContainer cookies1 = new CookieContainer();
+            CookieContainer cookies2 = BinaryFormatterHelpers.Clone(cookies1);
+
+            Assert.Equal(cookies1.Capacity, cookies2.Capacity);
+            Assert.Equal(cookies1.Count, cookies2.Count);
+            Assert.Equal(cookies1.MaxCookieSize, cookies2.MaxCookieSize);
+            Assert.Equal(cookies1.PerDomainCapacity, cookies2.PerDomainCapacity);
         }
     }
 }

@@ -131,9 +131,9 @@ namespace System.Net.Http
             GetStringAsync(CreateUri(requestUri));
 
         public Task<string> GetStringAsync(Uri requestUri) =>
-            GeStringAsyncCore(GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead));
+            GetStringAsyncCore(GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead));
 
-        private async Task<string> GeStringAsyncCore(Task<HttpResponseMessage> getTask)
+        private async Task<string> GetStringAsyncCore(Task<HttpResponseMessage> getTask)
         {
             // Wait for the response message.
             using (HttpResponseMessage responseMessage = await getTask.ConfigureAwait(false))
@@ -145,6 +145,9 @@ namespace System.Net.Http
                 HttpContent c = responseMessage.Content;
                 if (c != null)
                 {
+#if NET46
+                    return await c.ReadAsStringAsync().ConfigureAwait(false);
+#else
                     HttpContentHeaders headers = c.Headers;
 
                     // Since the underlying byte[] will never be exposed, we use an ArrayPool-backed
@@ -159,6 +162,7 @@ namespace System.Net.Http
                             return HttpContent.ReadBufferAsString(buffer.GetBuffer(), headers);
                         }
                     }
+#endif
                 }
 
                 // No content to return.
@@ -184,6 +188,9 @@ namespace System.Net.Http
                 HttpContent c = responseMessage.Content;
                 if (c != null)
                 {
+#if NET46
+                    return await c.ReadAsByteArrayAsync().ConfigureAwait(false);
+#else
                     HttpContentHeaders headers = c.Headers;
                     using (Stream responseStream = await c.ReadAsStreamAsync().ConfigureAwait(false))
                     {
@@ -220,6 +227,7 @@ namespace System.Net.Http
                             finally { buffer.Dispose(); }
                         }
                     }
+#endif
                 }
 
                 // No content to return.
@@ -455,7 +463,7 @@ namespace System.Net.Http
             }
             finally
             {
-                HandleFinishSendAsyncCleanup(request, cts, disposeCts);
+                HandleFinishSendAsyncCleanup(cts, disposeCts);
             }
         }
 
@@ -480,7 +488,7 @@ namespace System.Net.Http
             }
             finally
             {
-                HandleFinishSendAsyncCleanup(request, cts, disposeCts);
+                HandleFinishSendAsyncCleanup(cts, disposeCts);
             }
         }
 
@@ -497,22 +505,31 @@ namespace System.Net.Http
             }
         }
 
-        private void HandleFinishSendAsyncCleanup(HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts)
+        private void HandleFinishSendAsyncCleanup(CancellationTokenSource cts, bool disposeCts)
         {
-            try
+            // Dispose of the CancellationTokenSource if it was created specially for this request
+            // rather than being used across multiple requests.
+            if (disposeCts)
             {
-                // When a request completes, dispose the request content so the user doesn't have to. This also
-                // helps ensure that a HttpContent object is only sent once using HttpClient (similar to HttpRequestMessages
-                // that can also be sent only once).
-                request.Content?.Dispose();
+                cts.Dispose();
             }
-            finally
-            {
-                if (disposeCts)
-                {
-                    cts.Dispose();
-                }
-            }
+
+            // This method used to also dispose of the request content, e.g.:
+            //     request.Content?.Dispose();
+            // This has multiple problems:
+            // 1. It prevents code from reusing request content objects for subsequent requests,
+            //    as disposing of the object likely invalidates it for further use.
+            // 2. It prevents the possibility of partial or full duplex communication, even if supported
+            //    by the handler, as the request content may still be in use even if the response
+            //    (or response headers) has been received.
+            // By changing this to not dispose of the request content, disposal may end up being
+            // left for the finalizer to handle, or the developer can explicitly dispose of the
+            // content when they're done with it.  But it allows request content to be reused,
+            // and more importantly it enables handlers that allow receiving of the response before
+            // fully sending the request.  Prior to this change, a handler like CurlHandler would
+            // fail trying to access certain sites, if the site sent its response before it had
+            // completely received the request: CurlHandler might then find that the request content
+            // was disposed of while it still needed to read from it.
         }
 
         public void CancelPendingRequests()

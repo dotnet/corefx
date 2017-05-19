@@ -20,7 +20,6 @@ namespace System.Text
     // class are typically obtained through calls to the GetEncoder method
     // of Encoding objects.
     //
-    [Serializable]
     internal class EncoderNLS : Encoder, ISerializable
     {
         // Need a place for the last left over character, most of our encodings use this
@@ -49,7 +48,6 @@ namespace System.Text
             info.SetType(typeof(EncoderNLSSurrogate));
         }
 
-        [Serializable]
         internal sealed class EncoderNLSSurrogate : ISerializable, IObjectReference
         {
             internal const string EncodingKey = "Encoding";
@@ -159,7 +157,7 @@ namespace System.Text
 
             // Just call the pointer version
             int result = -1;
-            fixed (char* pChars = chars)
+            fixed (char* pChars = &chars[0])
             {
                 result = GetByteCount(pChars + index, count, flush);
             }
@@ -208,8 +206,8 @@ namespace System.Text
                 bytes = new byte[1];
 
             // Just call pointer version
-            fixed (char* pChars = chars)
-                fixed (byte* pBytes = bytes)
+            fixed (char* pChars = &chars[0])
+                fixed (byte* pBytes = &bytes[0])
 
                     // Remember that charCount is # to decode, not size of array.
                     return GetBytes(pChars + charIndex, charCount,
@@ -264,9 +262,9 @@ namespace System.Text
                 bytes = new byte[1];
 
             // Just call the pointer version (can't do this for non-msft encoders)
-            fixed (char* pChars = chars)
+            fixed (char* pChars = &chars[0])
             {
-                fixed (byte* pBytes = bytes)
+                fixed (byte* pBytes = &bytes[0])
                 {
                     Convert(pChars + charIndex, charCount, pBytes + byteIndex, byteCount, flush,
                         out charsUsed, out bytesUsed, out completed);

@@ -19,7 +19,6 @@ using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
@@ -196,7 +195,7 @@ namespace System.Security.Cryptography.Xml
                 // If the reference is not a Uri reference with a DataObject target, return an empty hashtable.
                 if (reference != null &&
                     ((reference.ReferenceTargetType != ReferenceTargetType.UriReference) ||
-                     (reference.Uri == null || reference.Uri.Length == 0 || reference.Uri[0] != '#')))
+                     (string.IsNullOrEmpty(reference.Uri) || reference.Uri[0] != '#')))
                 {
                     _propagatedNamespaces = new Hashtable(0);
                     return _propagatedNamespaces;
@@ -205,7 +204,7 @@ namespace System.Security.Cryptography.Xml
                 CanonicalXmlNodeList namespaces = null;
                 if (reference != null)
                     namespaces = reference._namespaces;
-                else if (signedXml._context != null)
+                else if (signedXml?._context != null)
                     namespaces = Utils.GetPropagatedAttributes(signedXml._context);
 
                 // if no namespaces have been propagated, return an empty hashtable.

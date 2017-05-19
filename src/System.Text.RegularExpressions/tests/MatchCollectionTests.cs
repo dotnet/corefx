@@ -60,8 +60,8 @@ namespace System.Text.RegularExpressions.Tests
         {
             Regex regex = new Regex("e");
             MatchCollection matches = regex.Matches("dotnet");
-            Assert.Throws<ArgumentOutOfRangeException>("i", () => matches[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("i", () => matches[matches.Count]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("i", () => matches[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("i", () => matches[matches.Count]);
         }
 
         [Fact]
@@ -105,21 +105,24 @@ namespace System.Text.RegularExpressions.Tests
             ICollection collection = regex.Matches("dotnet");
 
             // Array is null
-            Assert.Throws<ArgumentNullException>("dest", () => collection.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => collection.CopyTo(null, 0));
 
             // Array is multidimensional
-            Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new object[10, 10], 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new object[10, 10], 0));
 
-            // Array has a non-zero lower bound
-            Array o = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
-            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => collection.CopyTo(o, 0));
+            if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
+            {
+                // Array has a non-zero lower bound
+                Array o = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => collection.CopyTo(o, 0));
+            }
 
             // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => collection.CopyTo(new object[collection.Count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => collection.CopyTo(new object[collection.Count], -1));
 
             // Invalid index + length
-            Assert.Throws<ArgumentException>("", () => collection.CopyTo(new object[collection.Count], 1));
-            Assert.Throws<ArgumentException>("", () => collection.CopyTo(new object[collection.Count + 1], 2));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collection.CopyTo(new object[collection.Count], 1));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collection.CopyTo(new object[collection.Count + 1], 2));
         }
 
         private static MatchCollection CreateCollection() => new Regex("t").Matches("dotnet");

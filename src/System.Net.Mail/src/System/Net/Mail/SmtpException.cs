@@ -5,11 +5,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace System.Net.Mail
 {
-    [Serializable]
     public class SmtpException : Exception, ISerializable
     {
         private SmtpStatusCode _statusCode = SmtpStatusCode.GeneralFailure;
@@ -110,13 +108,11 @@ namespace System.Net.Mail
         {
         }
 
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             GetObjectData(serializationInfo, streamingContext);
         }
 
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);

@@ -563,26 +563,27 @@ namespace System.Net
             if (ipParts != null && ipParts.Length == 4 && ipParts[0] == "127")
             {
                 int i;
-                for (i = 1; i < 4; i++)
+                for (i = 1; i < ipParts.Length; i++)
                 {
-                    switch (ipParts[i].Length)
+                    string part = ipParts[i];
+                    switch (part.Length)
                     {
                         case 3:
-                            if (ipParts[i][2] < '0' || ipParts[i][2] > '9')
+                            if (part[2] < '0' || part[2] > '9')
                             {
                                 break;
                             }
                             goto case 2;
 
                         case 2:
-                            if (ipParts[i][1] < '0' || ipParts[i][1] > '9')
+                            if (part[1] < '0' || part[1] > '9')
                             {
                                 break;
                             }
                             goto case 1;
 
                         case 1:
-                            if (ipParts[i][0] < '0' || ipParts[i][0] > '9')
+                            if (part[0] < '0' || part[0] > '9')
                             {
                                 break;
                             }
@@ -726,6 +727,11 @@ namespace System.Net
 
         internal CookieCollection InternalGetCookies(Uri uri)
         {
+            if (_count == 0)
+            {
+                return null;
+            }
+
             bool isSecure = (uri.Scheme == UriScheme.Https);
             int port = uri.Port;
             CookieCollection cookies = null;
@@ -954,7 +960,7 @@ namespace System.Net
 
             optCookie2 = cookies.IsOtherVersionSeen ?
                           (Cookie.SpecialAttributeLiteral +
-                           Cookie.VersionAttributeName +
+                           CookieFields.VersionAttributeName +
                            Cookie.EqualsLiteral +
                            Cookie.MaxSupportedVersionString) : string.Empty;
 
@@ -975,7 +981,6 @@ namespace System.Net
         }
     }
 
-    [Serializable]
     internal struct PathList
     {
         // Usage of PathList depends on it being shallowly immutable;
@@ -1053,7 +1058,6 @@ namespace System.Net
             }
         }
 
-        [Serializable]
         private sealed class PathListComparer : IComparer<string>
         {
             internal static readonly PathListComparer StaticInstance = new PathListComparer();

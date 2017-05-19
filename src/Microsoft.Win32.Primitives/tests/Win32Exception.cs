@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Tests;
 using System.Text;
 using Xunit;
 
@@ -77,7 +81,7 @@ namespace System.ComponentModel.Tests
         private const int E_FAIL = unchecked((int)0x80004005);
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to check whether the exception resource length >256 chars
         public static void InstantiateExceptionWithLongErrorString()
         {
             // This test checks that Win32Exception supports error strings greater than 256 characters.
@@ -98,5 +102,11 @@ namespace System.ComponentModel.Tests
             }
         }
 
+        [Fact]
+        public static void GetObjectData_InvalidArgs_Throws()
+        {
+            var e = new Win32Exception();
+            AssertExtensions.Throws<ArgumentNullException>("info", () => e.GetObjectData(null, default(StreamingContext)));
+        }
     }
 }

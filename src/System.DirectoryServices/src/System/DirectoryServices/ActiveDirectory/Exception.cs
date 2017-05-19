@@ -14,6 +14,8 @@ namespace System.DirectoryServices.ActiveDirectory
     using System.Collections;
     using System.Runtime.Serialization;
     using System.Security.Permissions;
+    using System.Globalization;
+
 
     public class SyncFromAllServersErrorInformation
     {
@@ -73,7 +75,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryObjectNotFoundException : Exception, ISerializable
     {
         private Type _objectType;
@@ -116,7 +117,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryOperationException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -135,7 +135,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectoryOperationException(string message) : base(message) { }
 
-        public ActiveDirectoryOperationException() : base(Res.GetString(Res.DSUnknownFailure)) { }
+        public ActiveDirectoryOperationException() : base(SR.DSUnknownFailure) { }
 
         protected ActiveDirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
@@ -154,7 +154,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryServerDownException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -203,7 +202,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 String s = base.Message;
                 if (!((_name == null) ||
                        (_name.Length == 0)))
-                    return s + Environment.NewLine + Res.GetString(Res.Name, _name) + Environment.NewLine;
+                    return s + Environment.NewLine + String.Format(CultureInfo.CurrentCulture, SR.Name , _name) + Environment.NewLine;
                 else
                     return s;
             }
@@ -216,7 +215,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryObjectExistsException : Exception
     {
         public ActiveDirectoryObjectExistsException(string message, Exception inner) : base(message, inner) { }
@@ -228,7 +226,6 @@ namespace System.DirectoryServices.ActiveDirectory
         protected ActiveDirectoryObjectExistsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
-    [Serializable]
     public class SyncFromAllServersOperationException : ActiveDirectoryOperationException, ISerializable
     {
         private SyncFromAllServersErrorInformation[] _errors = null;
@@ -242,7 +239,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public SyncFromAllServersOperationException(string message) : base(message) { }
 
-        public SyncFromAllServersOperationException() : base(Res.GetString(Res.DSSyncAllFailure)) { }
+        public SyncFromAllServersOperationException() : base(SR.DSSyncAllFailure) { }
 
         protected SyncFromAllServersOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
@@ -268,7 +265,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ForestTrustCollisionException : ActiveDirectoryOperationException, ISerializable
     {
         private ForestTrustRelationshipCollisionCollection _collisions = new ForestTrustRelationshipCollisionCollection();
@@ -282,7 +278,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ForestTrustCollisionException(string message) : base(message) { }
 
-        public ForestTrustCollisionException() : base(Res.GetString(Res.ForestTrustCollision)) { }
+        public ForestTrustCollisionException() : base(SR.ForestTrustCollision) { }
 
         protected ForestTrustCollisionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
@@ -451,7 +447,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             else
             {
-                errorMsg = Res.GetString(Res.DSUnknown, Convert.ToString(temp, 16));
+                errorMsg = String.Format(CultureInfo.CurrentCulture, SR.DSUnknown , Convert.ToString(temp, 16));
             }
 
             return errorMsg;
@@ -479,7 +475,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 else
                 {
                     SyncFromAllServersErrorInformation managedError = new SyncFromAllServersErrorInformation(error.error, error.dwWin32Err, message, source, target);
-                    return new SyncFromAllServersOperationException(Res.GetString(Res.DSSyncAllFailure), null, new SyncFromAllServersErrorInformation[] { managedError });
+                    return new SyncFromAllServersOperationException(SR.DSSyncAllFailure, null, new SyncFromAllServersErrorInformation[] { managedError });
                 }
             }
             else
@@ -504,7 +500,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
 
                     i++;
-                    tempPtr = Marshal.ReadIntPtr(errorInfo, i * Marshal.SizeOf(typeof(IntPtr)));
+                    tempPtr = Marshal.ReadIntPtr(errorInfo, i * IntPtr.Size);
                 }
                 // no error information, so we should not throw exception.
                 if (errorList.Count == 0)
@@ -517,7 +513,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     info[j] = new SyncFromAllServersErrorInformation(tmp.ErrorCategory, tmp.ErrorCode, tmp.ErrorMessage, tmp.SourceServer, tmp.TargetServer);
                 }
 
-                return new SyncFromAllServersOperationException(Res.GetString(Res.DSSyncAllFailure), null, info);
+                return new SyncFromAllServersOperationException(SR.DSSyncAllFailure, null, info);
             }
         }
 
@@ -531,7 +527,7 @@ namespace System.DirectoryServices.ActiveDirectory
             IntPtr addr = (IntPtr)0;
             for (int i = 0; i < count; i++)
             {
-                addr = Marshal.ReadIntPtr(collision.Entries, i * Marshal.SizeOf(typeof(IntPtr)));
+                addr = Marshal.ReadIntPtr(collision.Entries, i * IntPtr.Size);
                 LSA_FOREST_TRUST_COLLISION_RECORD record = new LSA_FOREST_TRUST_COLLISION_RECORD();
                 Marshal.PtrToStructure(addr, record);
 
@@ -551,7 +547,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 collection.Add(tmp);
             }
 
-            ForestTrustCollisionException exception = new ForestTrustCollisionException(Res.GetString(Res.ForestTrustCollision), null, collection);
+            ForestTrustCollisionException exception = new ForestTrustCollisionException(SR.ForestTrustCollision, null, collection);
             return exception;
         }
     }

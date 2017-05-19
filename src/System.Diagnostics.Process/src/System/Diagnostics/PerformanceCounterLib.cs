@@ -2,41 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if FEATURE_REGISTRY
 using Microsoft.Win32;
+#endif
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Diagnostics
 {
     internal sealed class PerformanceCounterLib
     {
-        private static volatile string s_computerName;
+        private static string s_computerName;
 
         private PerformanceMonitor _performanceMonitor;
         private string _machineName;
         private string _perfLcid;
 
-        private static volatile Dictionary<String, PerformanceCounterLib> s_libraryTable;
+        private static Dictionary<String, PerformanceCounterLib> s_libraryTable;
         private Dictionary<int, string> _nameTable;
         private readonly object _nameTableLock = new Object();
 
         private static Object s_internalSyncObject;
-        private static Object InternalSyncObject
-        {
-            get
-            {
-                if (s_internalSyncObject == null)
-                {
-                    Object o = new Object();
-                    Interlocked.CompareExchange(ref s_internalSyncObject, o, null);
-                }
-                return s_internalSyncObject;
-            }
-        }
 
         internal PerformanceCounterLib(string machineName, string lcid)
         {
@@ -45,24 +34,7 @@ namespace System.Diagnostics
         }
 
         /// <internalonly/>
-        internal static string ComputerName
-        {
-            get
-            {
-                if (s_computerName == null)
-                {
-                    lock (InternalSyncObject)
-                    {
-                        if (s_computerName == null)
-                        {
-                            s_computerName = Interop.Kernel32.GetComputerName();
-                        }
-                    }
-                }
-
-                return s_computerName;
-            }
-        }
+        internal static string ComputerName => LazyInitializer.EnsureInitialized(ref s_computerName, ref s_internalSyncObject, () => Interop.Kernel32.GetComputerName());
 
         internal Dictionary<int, string> NameTable
         {
@@ -95,14 +67,7 @@ namespace System.Diagnostics
             else
                 machineName = machineName.ToLowerInvariant();
 
-            if (PerformanceCounterLib.s_libraryTable == null)
-            {
-                lock (InternalSyncObject)
-                {
-                    if (PerformanceCounterLib.s_libraryTable == null)
-                        PerformanceCounterLib.s_libraryTable = new Dictionary<string, PerformanceCounterLib>();
-                }
-            }
+            LazyInitializer.EnsureInitialized(ref s_libraryTable, ref s_internalSyncObject, () => new Dictionary<string, PerformanceCounterLib>());
 
             string libraryKey = machineName + ":" + lcidString;
             PerformanceCounterLib library;
@@ -118,7 +83,7 @@ namespace System.Diagnostics
         {
             if (_performanceMonitor == null)
             {
-                lock (InternalSyncObject)
+                lock (LazyInitializer.EnsureInitialized(ref s_internalSyncObject))
                 {
                     if (_performanceMonitor == null)
                         _performanceMonitor = new PerformanceMonitor(_machineName);
@@ -130,6 +95,7 @@ namespace System.Diagnostics
 
         private Dictionary<int, string> GetStringTable(bool isHelp)
         {
+#if FEATURE_REGISTRY
             Dictionary<int, string> stringTable;
             RegistryKey libraryKey;
 
@@ -223,11 +189,16 @@ namespace System.Diagnostics
             }
 
             return stringTable;
+#else
+            return new Dictionary<int, string>();
+#endif
         }
 
         internal class PerformanceMonitor
         {
+#if FEATURE_REGISTRY
             private RegistryKey _perfDataKey = null;
+#endif
             private string _machineName;
 
             internal PerformanceMonitor(string machineName)
@@ -238,7 +209,9 @@ namespace System.Diagnostics
 
             private void Init()
             {
+#if FEATURE_REGISTRY
                 _perfDataKey = Registry.PerformanceData;
+#endif
             }
 
             // Win32 RegQueryValueEx for perf data could deadlock (for a Mutex) up to 2mins in some 
@@ -252,6 +225,7 @@ namespace System.Diagnostics
             // in this case with InvalidOperationException after the wait time expires.
             internal byte[] GetData(string item)
             {
+#if FEATURE_REGISTRY
                 int waitRetries = 17;   //2^16*10ms == approximately 10mins
                 int waitSleep = 0;
                 byte[] data = null;
@@ -302,6 +276,9 @@ namespace System.Diagnostics
                 }
 
                 throw new Win32Exception(error);
+#else
+                return Array.Empty<byte>();
+#endif
             }
         }
     }

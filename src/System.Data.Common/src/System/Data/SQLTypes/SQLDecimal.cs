@@ -16,7 +16,6 @@ namespace System.Data.SqlTypes
     /// Represents a fixed precision and scale numeric value between -10<superscript term='38'/>
     /// -1 and 10<superscript term='38'/> -1 to be stored in or retrieved from a database.
     /// </summary>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
     public struct SqlDecimal : INullable, IComparable, IXmlSerializable
@@ -488,12 +487,16 @@ namespace System.Data.SqlTypes
             // m_data2 = *pInt++; // mid part
 
             int[] bits = decimal.GetBits(value);
+            uint sgnscl;
 
-            uint sgnscl = (uint)bits[3];
-            _data1 = (uint)bits[0];
-            _data2 = (uint)bits[1];
-            _data3 = (uint)bits[2];
-            _data4 = s_uiZero;
+            unchecked
+            {
+                sgnscl = (uint)bits[3];
+                _data1 = (uint)bits[0];
+                _data2 = (uint)bits[1];
+                _data3 = (uint)bits[2];
+                _data4 = s_uiZero;
+            }
 
             // set the sign bit
             _bStatus |= ((sgnscl & 0x80000000) == 0x80000000) ? s_bNegative : (byte)0;
@@ -523,7 +526,7 @@ namespace System.Data.SqlTypes
             // set the null bit
             _bStatus = s_bNotNull;
 
-            uint uiValue = (uint)value;
+            uint uiValue = unchecked((uint)value);
 
             // set the sign bit
             if (value < 0)
@@ -548,7 +551,7 @@ namespace System.Data.SqlTypes
             // set the null bit
             _bStatus = s_bNotNull;
 
-            ulong dwl = (ulong)value;
+            ulong dwl = unchecked((ulong)value);
 
             // set the sign bit
             if (value < 0)
@@ -579,7 +582,7 @@ namespace System.Data.SqlTypes
             if (bits == null)
                 throw new ArgumentNullException(nameof(bits));
             else if (bits.Length != 4)
-                throw new ArgumentException(SQLResource.s_invalidArraySizeMessage, nameof(bits));
+                throw new ArgumentException(SQLResource.InvalidArraySizeMessage, nameof(bits));
 
             _bPrec = bPrecision;
             _bScale = bScale;
@@ -611,7 +614,7 @@ namespace System.Data.SqlTypes
                 SetPositive();
 
             if (bPrecision < CalculatePrecision())
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
         }
 
         public SqlDecimal(byte bPrecision, byte bScale, bool fPositive, int data1, int data2, int data3, int data4)
@@ -651,7 +654,7 @@ namespace System.Data.SqlTypes
                 SetPositive();
 
             if (bPrecision < CalculatePrecision())
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
         }
 
         public SqlDecimal(double dVal) : this(false)
@@ -668,7 +671,7 @@ namespace System.Data.SqlTypes
 
             // If it will not fit into numeric(NUMERIC_MAX_PRECISION,0), overflow.
             if (dVal >= s_DMAX_NUME)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             double dInt = Math.Floor(dVal);
             double dFrac = dVal - dInt;
@@ -861,7 +864,11 @@ namespace System.Data.SqlTypes
             {
                 if (IsNull)
                     throw new SqlNullValueException();
-                return new int[4] { (int)_data1, (int)_data2, (int)_data3, (int)_data4 };
+
+                unchecked
+                {
+                    return new int[4] { (int)_data1, (int)_data2, (int)_data3, (int)_data4 };
+                }
             }
         }
 
@@ -913,7 +920,7 @@ namespace System.Data.SqlTypes
         public override string ToString()
         {
             if (IsNull)
-                return SQLResource.s_nullString;
+                return SQLResource.NullString;
             AssertValid();
 
             // Make local copy of data to avoid modifying input.
@@ -984,7 +991,7 @@ namespace System.Data.SqlTypes
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
 
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlDecimal.Null;
 
             SqlDecimal snResult = SqlDecimal.Null;
@@ -1010,7 +1017,7 @@ namespace System.Data.SqlTypes
 
             // If string contains only spaces, stop
             if (cwchStr == 0)
-                throw new FormatException(SQLResource.s_formatMessage);
+                throw new FormatException(SQLResource.FormatMessage);
 
             // Trim leading blanks.
             while (rgwchStr[iCurChar] == ' ')
@@ -1050,7 +1057,7 @@ namespace System.Data.SqlTypes
 
             // Invalid string?
             if (cwchStr == 0 || cwchStr > s_NUMERIC_MAX_PRECISION + 1)
-                throw new FormatException(SQLResource.s_formatMessage);
+                throw new FormatException(SQLResource.FormatMessage);
 
             // Trim leading zeros.  (There shouldn't be any except for floats
             // less than 1.  e.g.  0.01)
@@ -1074,7 +1081,7 @@ namespace System.Data.SqlTypes
                     continue;
                 }
                 else
-                    throw new FormatException(SQLResource.s_formatMessage);
+                    throw new FormatException(SQLResource.FormatMessage);
 
                 snResult.MultByULong(s_ulBase10);
                 snResult.AddULong(usChar);
@@ -1094,12 +1101,12 @@ namespace System.Data.SqlTypes
 
             //Check for overflow condition
             if (snResult._bPrec > s_NUMERIC_MAX_PRECISION)
-                throw new FormatException(SQLResource.s_formatMessage);
+                throw new FormatException(SQLResource.FormatMessage);
 
             // Check for invalid precision for numeric value.
             // e.g., when string is ".", precision will be 0
             if (snResult._bPrec == 0)
-                throw new FormatException(SQLResource.s_formatMessage);
+                throw new FormatException(SQLResource.FormatMessage);
 
             // If result is -0, adjust sign to positive.
             if (snResult.FZero())
@@ -1133,9 +1140,12 @@ namespace System.Data.SqlTypes
                 throw new SqlNullValueException();
 
             if ((int)_data4 != 0 || _bScale > 28)
-                throw new OverflowException(SQLResource.s_conversionOverflowMessage);
+                throw new OverflowException(SQLResource.ConversionOverflowMessage);
 
-            return new decimal((int)_data1, (int)_data2, (int)_data3, !IsPositive, _bScale);
+            unchecked
+            {
+                return new decimal((int)_data1, (int)_data2, (int)_data3, !IsPositive, _bScale);
+            }
         }
 
         // Implicit conversion from Decimal to SqlDecimal
@@ -1272,7 +1282,7 @@ namespace System.Data.SqlTypes
                     if (iulData < culOp2)
                         dwlAccum += rglData2[iulData];
 
-                    rglData1[iulData] = (uint)dwlAccum; // equiv to mod x_lInt32Base
+                    rglData1[iulData] = unchecked((uint)dwlAccum); // equiv to mod x_lInt32Base
                     dwlAccum >>= 32; // equiv to div x_lInt32Base
                 }
 
@@ -1283,7 +1293,7 @@ namespace System.Data.SqlTypes
 
                     //Either overflowed
                     if (iulData == s_cNumeMax)
-                        throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                        throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                     // Or extended length
                     rglData1[iulData] = (uint)dwlAccum;
@@ -1317,7 +1327,7 @@ namespace System.Data.SqlTypes
                     if (iulData < culOp2)
                         dwlAccum -= rglData2[iulData];
 
-                    rglData1[iulData] = (uint)dwlAccum; // equiv to mod BaseUI4
+                    rglData1[iulData] = unchecked((uint)dwlAccum); // equiv to mod BaseUI4
                     if (rglData1[iulData] != 0)
                         iulLastNonZero = iulData;
                     dwlAccum >>= 32; // equiv to /= BaseUI4
@@ -1330,7 +1340,7 @@ namespace System.Data.SqlTypes
             SqlDecimal ret = new SqlDecimal(rglData1, bLen, (byte)ResPrec, (byte)ResScale, fResSignPos);
 
             if (ret.FGt10_38() || ret.CalculatePrecision() > s_NUMERIC_MAX_PRECISION)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             if (ret.FZero())
                 ret.SetPositive();
@@ -1474,7 +1484,7 @@ namespace System.Data.SqlTypes
                         dwlNextAccum = 0;
 
                     // Update result and accum
-                    rgulRes[idRes++] = (uint)(dwlAccum);// & x_ulInt32BaseForMod); // equiv to mod x_lInt32Base
+                    rgulRes[idRes++] = unchecked((uint)dwlAccum);// & x_ulInt32BaseForMod); // equiv to mod x_lInt32Base
                     dwlAccum = (dwlAccum >> 32) + dwlNextAccum; // equiv to div BaseUI4 + dwlNAccum
 
                     // dwlNextAccum can't overflow next iteration
@@ -1524,7 +1534,7 @@ namespace System.Data.SqlTypes
 
                     // Still do not fit?
                     if (culRes > s_cNumeMax)
-                        throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                        throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                     for (idRes = culRes; idRes < s_cNumeMax; idRes++)
                         rgulRes[idRes] = 0;
@@ -1532,7 +1542,7 @@ namespace System.Data.SqlTypes
 
                     // Is it greater than 10**38?
                     if (ret.FGt10_38())
-                        throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                        throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                     ret.AssertValid();
 
@@ -1549,7 +1559,7 @@ namespace System.Data.SqlTypes
 
                 // Otherwise call AdjustScale
                 if (culRes > s_cNumeMax)    // Do not fit now, so will not fit after asjustement
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
                 // NOTE: Have not check for value in the range (10**38..2**128),
                 // as we'll call AdjustScale with positive argument, and it'll
                 // return "normal" overflow
@@ -1570,7 +1580,7 @@ namespace System.Data.SqlTypes
             else
             {
                 if (culRes > s_cNumeMax)
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                 for (idRes = culRes; idRes < s_cNumeMax; idRes++)
                     rgulRes[idRes] = 0;
@@ -1578,7 +1588,7 @@ namespace System.Data.SqlTypes
 
                 // Is it greater than 10**38?
                 if (ret.FGt10_38())
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                 if (ret.FZero())
                     ret.SetPositive();
@@ -1641,7 +1651,7 @@ namespace System.Data.SqlTypes
 
             // 0) Check for Div by 0
             if (y.FZero())
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
 
             // 1) Figure out result prec,scale,sign..
             fResSignPos = (x.IsPositive == y.IsPositive);//sign of result
@@ -2103,14 +2113,14 @@ namespace System.Data.SqlTypes
 
             // Either overflowed
             if (iData == s_cNumeMax)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             // Or need to extend length by 1 UI4
             rguiData[iData] = (uint)dwlAccum;
             _bLen++;
 
             if (FGt10_38(rguiData))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             StoreFromWorkingArray(rguiData);
         }
@@ -2137,8 +2147,8 @@ namespace System.Data.SqlTypes
                     dwlNextAccum = s_ulInt32Base;   // how much to add to dwlAccum after div x_dwlBaseUI4
                 else
                     dwlNextAccum = 0;
-                rguiData[iData] = (uint)dwlAccum;           // equivalent to mod x_dwlBaseUI4
-                dwlAccum = (dwlAccum >> 32) + dwlNextAccum; // equivalent to div x_dwlBaseUI4
+                rguiData[iData] = unchecked((uint)dwlAccum); // equivalent to mod x_dwlBaseUI4
+                dwlAccum = (dwlAccum >> 32) + dwlNextAccum;  // equivalent to div x_dwlBaseUI4
             }
 
             // If any carry,
@@ -2147,7 +2157,7 @@ namespace System.Data.SqlTypes
                 // Either overflowed
                 Debug.Assert(dwlAccum < s_ulInt32Base, "dwlAccum < x_dwlBaseUI4", "Integer overflow");
                 if (iDataMax == s_cNumeMax)
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
 
                 // Or extend length by one uint
                 rguiData[iDataMax] = (uint)dwlAccum;
@@ -2155,7 +2165,7 @@ namespace System.Data.SqlTypes
             }
 
             if (FGt10_38(rguiData))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             StoreFromWorkingArray(rguiData);
         }
@@ -2181,7 +2191,7 @@ namespace System.Data.SqlTypes
 
             // Check for zero divisor.
             if (dwlDivisor == 0)
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
 
             // Copy into array, so that we can iterate through the data
             uint[] rguiData = new uint[4] { _data1, _data2, _data3, _data4 };
@@ -2254,7 +2264,7 @@ namespace System.Data.SqlTypes
 
             //If uphifting causes scale overflow
             if (lAdjust + _bScale > s_NUMERIC_MAX_PRECISION)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             bNewScale = (byte)(lAdjust + _bScale);
             bNewPrec = (byte)(Math.Min(s_NUMERIC_MAX_PRECISION, Math.Max(1, lAdjust + _bPrec)));
@@ -2815,13 +2825,13 @@ namespace System.Data.SqlTypes
         private static void CheckValidPrecScale(byte bPrec, byte bScale)
         {
             if (bPrec < 1 || bPrec > MaxPrecision || bScale < 0 || bScale > MaxScale || bScale > bPrec)
-                throw new SqlTypeException(SQLResource.s_invalidPrecScaleMessage);
+                throw new SqlTypeException(SQLResource.InvalidPrecScaleMessage);
         }
 
         private static void CheckValidPrecScale(int iPrec, int iScale)
         {
             if (iPrec < 1 || iPrec > MaxPrecision || iScale < 0 || iScale > MaxScale || iScale > iPrec)
-                throw new SqlTypeException(SQLResource.s_invalidPrecScaleMessage);
+                throw new SqlTypeException(SQLResource.InvalidPrecScaleMessage);
         }
 
         // Overloading comparison operators

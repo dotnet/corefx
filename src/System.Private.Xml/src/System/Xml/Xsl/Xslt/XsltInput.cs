@@ -18,7 +18,7 @@ namespace System.Xml.Xsl.Xslt
     internal class XsltInput : IErrorHelper
     {
 #if DEBUG
-        const int InitRecordsSize = 1;
+        private const int InitRecordsSize = 1;
 #else
         private const int InitRecordsSize = 1 + 21;
 #endif
@@ -602,7 +602,6 @@ namespace System.Xml.Xsl.Xslt
         public bool IsKeyword(string kwd) { return Ref.Equal(kwd, LocalName); }
         public bool IsXsltNamespace() { return IsNs(_atoms.UriXsl); }
         public bool IsNullNamespace() { return IsNs(string.Empty); }
-        public bool IsXsltAttribute(string kwd) { return IsKeyword(kwd) && IsNullNamespace(); }
         public bool IsXsltKeyword(string kwd) { return IsKeyword(kwd) && IsXsltNamespace(); }
 
         // -------------------- Scope Management --------------------
@@ -689,7 +688,7 @@ namespace System.Xml.Xsl.Xslt
             }
         }
 
-        // --------------- GetAtributes(...) -------------------------
+        // --------------- GetAttributes(...) -------------------------
         // All Xslt Instructions allows fixed set of attributes in null-ns, no in XSLT-ns and any in other ns.
         // In ForwardCompatibility mode we should ignore any of this problems.
         // We not use these functions for parseing LiteralResultElement and xsl:stylesheet

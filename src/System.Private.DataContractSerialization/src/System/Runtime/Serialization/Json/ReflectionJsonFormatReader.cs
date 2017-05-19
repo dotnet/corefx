@@ -62,6 +62,15 @@ namespace System.Runtime.Serialization.Json
             int reflectedMemberCount = ReflectionGetMembers(classContract, members);
 
             int memberIndex = -1;
+
+            ExtensionDataObject extensionData = null;
+
+            if (classContract.HasExtensionData)
+            {
+                extensionData = new ExtensionDataObject();
+                ((IExtensibleDataObject)obj).ExtensionData = extensionData;
+            }
+
             while (true)
             {
                 if (!XmlObjectSerializerReadContext.MoveToNextElement(xmlReader))
@@ -69,7 +78,7 @@ namespace System.Runtime.Serialization.Json
                     return;
                 }
 
-                memberIndex = jsonContext.GetJsonMemberIndex(xmlReader, memberNames, memberIndex, extensionData: null);
+                memberIndex = jsonContext.GetJsonMemberIndex(xmlReader, memberNames, memberIndex, extensionData);
                 // GetMemberIndex returns memberNames.Length if member not found
                 if (memberIndex < members.Length)
                 {
@@ -128,7 +137,7 @@ namespace System.Runtime.Serialization.Json
 
             int keyTypeNullableDepth = 0;
             Type keyTypeOriginal = keyType;
-            while (keyType.GetTypeInfo().IsGenericType && keyType.GetGenericTypeDefinition() == Globals.TypeOfNullable)
+            while (keyType.IsGenericType && keyType.GetGenericTypeDefinition() == Globals.TypeOfNullable)
             {
                 keyTypeNullableDepth++;
                 keyType = keyType.GetGenericArguments()[0];
@@ -143,7 +152,7 @@ namespace System.Runtime.Serialization.Json
             {
                 keyParseMode = KeyParseMode.AsString;
             }
-            else if (keyType.GetTypeInfo().IsEnum)
+            else if (keyType.IsEnum)
             {
                 keyParseMode = KeyParseMode.UsingParseEnum;
             }

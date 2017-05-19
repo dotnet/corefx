@@ -9,7 +9,7 @@ namespace System.Security.Cryptography.Dsa.Tests
 {
     public partial class DSASignVerify
     {
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void InvalidKeySize_DoesNotInvalidateKey()
         {
             using (DSA dsa = DSAFactory.Create())
@@ -23,7 +23,7 @@ namespace System.Security.Cryptography.Dsa.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void SignAndVerifyDataNew1024()
         {
             using (DSA dsa = DSAFactory.Create(1024))
@@ -63,6 +63,21 @@ namespace System.Security.Cryptography.Dsa.Tests
             {
                 dsa.ImportParameters(DSATestData.Dsa576Parameters);
                 Assert.True(dsa.VerifyData(DSATestData.HelloBytes, signature, HashAlgorithmName.SHA1));
+            }
+        }
+
+        [Fact]
+        public static void PublicKey_CannotSign()
+        {
+            DSAParameters keyParameters = DSATestData.GetDSA1024Params();
+            keyParameters.X = null;
+
+            using (DSA dsa = DSAFactory.Create())
+            {
+                dsa.ImportParameters(keyParameters);
+
+                Assert.ThrowsAny<CryptographicException>(
+                    () => dsa.SignData(DSATestData.HelloBytes, HashAlgorithmName.SHA1));
             }
         }
 
@@ -169,6 +184,45 @@ namespace System.Security.Cryptography.Dsa.Tests
             }
         }
 
+        [ConditionalFact(nameof(SupportsFips186_3))]
+        public static void Sign2048WithSha1()
+        {
+            byte[] data = { 1, 2, 3, 4 };
+
+            using (DSA dsa = DSAFactory.Create())
+            {
+                dsa.ImportParameters(DSATestData.GetDSA2048Params());
+
+                byte[] signature = dsa.SignData(data, HashAlgorithmName.SHA1);
+
+                Assert.True(dsa.VerifyData(data, signature, HashAlgorithmName.SHA1));
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsFips186_3))]
+        public static void Verify2048WithSha1()
+        {
+            byte[] data = { 1, 2, 3, 4 };
+
+            byte[] signature = (
+                "28DC05B452C8FC0E0BFE9DA067D11147D31B1F3C63E5CF95046A812417C64844868D04D3A1D23" +
+                "13E5DD07DE757B3A836E70A1C85DDC90CB62DE2E44746C760F2").HexToByteArray();
+
+            using (DSA dsa = DSAFactory.Create())
+            {
+                dsa.ImportParameters(DSATestData.GetDSA2048Params());
+
+                Assert.True(dsa.VerifyData(data, signature, HashAlgorithmName.SHA1), "Untampered data verifies");
+
+                data[0] ^= 0xFF;
+                Assert.False(dsa.VerifyData(data, signature, HashAlgorithmName.SHA1), "Tampered data verifies");
+
+                data[0] ^= 0xFF;
+                signature[signature.Length - 1] ^= 0xFF;
+                Assert.False(dsa.VerifyData(data, signature, HashAlgorithmName.SHA1), "Tampered signature verifies");
+            }
+        }
+
         private static void SignAndVerify(byte[] data, string hashAlgorithmName, DSAParameters dsaParameters, int expectedSignatureLength)
         {
             using (DSA dsa = DSAFactory.Create())
@@ -188,5 +242,6 @@ namespace System.Security.Cryptography.Dsa.Tests
                 return DSAFactory.SupportsFips186_3;
             }
         }
+        public static bool SupportsKeyGeneration => DSAFactory.SupportsKeyGeneration;
     }
 }

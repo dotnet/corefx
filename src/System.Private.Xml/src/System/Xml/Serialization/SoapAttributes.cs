@@ -97,6 +97,11 @@ namespace System.Xml.Serialization
             }
         }
 
+        internal SoapAttributeFlags GetSoapFlags()
+        {
+            return SoapFlags;
+        }
+
         /// <include file='doc\SoapAttributes.uex' path='docs/doc[@for="SoapAttributes.SoapType"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>

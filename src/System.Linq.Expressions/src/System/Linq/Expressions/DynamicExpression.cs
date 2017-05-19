@@ -22,7 +22,7 @@ namespace System.Linq.Expressions
     {
         internal DynamicExpression(Type delegateType, CallSiteBinder binder)
         {
-            Debug.Assert(delegateType.GetMethod("Invoke").GetReturnType() == typeof(object) || GetType() != typeof(DynamicExpression));
+            Debug.Assert(delegateType.GetInvokeMethod().GetReturnType() == typeof(object) || GetType() != typeof(DynamicExpression));
             DelegateType = delegateType;
             Binder = binder;
         }
@@ -135,6 +135,7 @@ namespace System.Linq.Expressions
         /// </summary>
         public ReadOnlyCollection<Expression> Arguments => GetOrMakeArguments();
 
+        [ExcludeFromCodeCoverage]
         internal virtual ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
             throw ContractUtils.Unreachable;
@@ -161,6 +162,7 @@ namespace System.Linq.Expressions
         /// This helper is provided to allow re-writing of nodes to not depend on the specific optimized
         /// subclass of DynamicExpression which is being used.
         /// </summary>
+        [ExcludeFromCodeCoverage]
         internal virtual DynamicExpression Rewrite(Expression[] args)
         {
             throw ContractUtils.Unreachable;
@@ -205,11 +207,13 @@ namespace System.Linq.Expressions
 
         #region IArgumentProvider Members
 
+        [ExcludeFromCodeCoverage]
         Expression IArgumentProvider.GetArgument(int index)
         {
             throw ContractUtils.Unreachable;
         }
 
+        [ExcludeFromCodeCoverage]
         int IArgumentProvider.ArgumentCount
         {
             get { throw ContractUtils.Unreachable; }
@@ -512,7 +516,7 @@ namespace System.Linq.Expressions
         internal TypedDynamicExpressionN(Type returnType, Type delegateType, CallSiteBinder binder, IReadOnlyList<Expression> arguments)
             : base(delegateType, binder, arguments)
         {
-            Debug.Assert(delegateType.GetMethod("Invoke").GetReturnType() == returnType);
+            Debug.Assert(delegateType.GetInvokeMethod().GetReturnType() == returnType);
             Type = returnType;
         }
 
@@ -547,7 +551,7 @@ namespace System.Linq.Expressions
                 using (IEnumerator<Expression> en = arguments.GetEnumerator())
                 {
                     en.MoveNext();
-                    return en.Current == ReturnObject<Expression>(_arg0);
+                    return en.Current == ExpressionUtils.ReturnObject<Expression>(_arg0);
                 }
             }
 
@@ -814,7 +818,7 @@ namespace System.Linq.Expressions
 
     #endregion
 
-    internal class ExpressionExtension
+    internal static class ExpressionExtension
     {
         /// <summary>
         /// Creates a <see cref="DynamicExpression" /> that represents a dynamic operation bound by the provided <see cref="CallSiteBinder" />.
@@ -849,13 +853,26 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, IEnumerable<Expression> arguments)
         {
+            IReadOnlyList<Expression> argumentList = arguments as IReadOnlyList<Expression> ?? arguments.ToReadOnly();
+            switch (argumentList.Count)
+            {
+                case 1:
+                    return MakeDynamic(delegateType, binder, argumentList[0]);
+                case 2:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1]);
+                case 3:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1], argumentList[2]);
+                case 4:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
+            }
+
             ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
             ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
 
-            var args = arguments.ToReadOnly();
+            var args = arguments.ToReadOnly(); // Ensure is TrueReadOnlyCollection when count > 4. Returns fast if it already is.
             ExpressionUtils.ValidateArgumentTypes(method, ExpressionType.Dynamic, ref args, nameof(delegateType));
 
             return DynamicExpression.Make(method.GetReturnType(), delegateType, binder, args);
@@ -997,7 +1014,7 @@ namespace System.Linq.Expressions
 
         private static MethodInfo GetValidMethodForDynamic(Type delegateType)
         {
-            var method = delegateType.GetMethod("Invoke");
+            var method = delegateType.GetInvokeMethod();
             var pi = method.GetParametersCached();
             if (pi.Length == 0 || pi[0].ParameterType != typeof(CallSite)) throw Error.FirstArgumentMustBeCallSite();
             return method;

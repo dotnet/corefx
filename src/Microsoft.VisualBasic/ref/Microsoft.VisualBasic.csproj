@@ -3,19 +3,12 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>10.0.0.0</AssemblyVersion>
-    <OutputType>Library</OutputType>
-    <NuGetTargetMoniker>.NETStandard,Version=v1.1</NuGetTargetMoniker>
-    <!-- Xamarin frameworks claim to support PCL profiles which include this assembly, 
-         but do not include this assembly in the targeting pack.
-         This causes NuGet to give them the placeholder from the portable-* folder.
-         Instead give them this assembly.  -->
-    <PackageTargetFramework>netstandard1.1;MonoAndroid10;MonoTouch10;xamarinios10;xamarintvos10;xamarinwatchos10</PackageTargetFramework>
+    <ProjectGuid>{83AAB173-0A5E-4F7A-A1B4-D847F6D49B5F}</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Microsoft.VisualBasic.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -41,6 +41,8 @@ namespace System.Net.Http
 
         public X509CertificateCollection ClientCertificates => _curlHandler.ClientCertificates;
 
+        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
+
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
             get { return _curlHandler.ServerCertificateValidationCallback; }
@@ -143,6 +145,7 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _curlHandler = new CurlHandler();
+            _diagnosticsPipeline = new DiagnosticsHandler(_curlHandler);
         }
 
         protected override void Dispose(bool disposing)
@@ -160,6 +163,10 @@ namespace System.Net.Http
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (DiagnosticsHandler.IsEnabled())
+            {
+                return _diagnosticsPipeline.SendAsync(request, cancellationToken);
+            }
             return _curlHandler.SendAsync(request, cancellationToken);
         }
 
@@ -168,6 +175,7 @@ namespace System.Net.Http
         #region Private
 
         private readonly CurlHandler _curlHandler;
+        private readonly DiagnosticsHandler _diagnosticsPipeline;
 
         #endregion Private
     }

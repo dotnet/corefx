@@ -32,7 +32,7 @@
 
 namespace Microsoft.SqlServer.Server
 {
-    public partial class SqlDataRecord
+    public partial class SqlDataRecord : System.Data.IDataRecord
     {
         public SqlDataRecord(params Microsoft.SqlServer.Server.SqlMetaData[] metaData) { }
         public virtual int FieldCount { get { throw null; } }
@@ -43,6 +43,7 @@ namespace Microsoft.SqlServer.Server
         public virtual long GetBytes(int ordinal, long fieldOffset, byte[] buffer, int bufferOffset, int length) { throw null; }
         public virtual char GetChar(int ordinal) { throw null; }
         public virtual long GetChars(int ordinal, long fieldOffset, char[] buffer, int bufferOffset, int length) { throw null; }
+        System.Data.IDataReader System.Data.IDataRecord.GetData(int ordinal) { throw null; }
         public virtual string GetDataTypeName(int ordinal) { throw null; }
         public virtual System.DateTime GetDateTime(int ordinal) { throw null; }
         public virtual System.DateTimeOffset GetDateTimeOffset(int ordinal) { throw null; }
@@ -212,8 +213,20 @@ namespace System.Data.SqlClient
         public void Close() { }
         void System.IDisposable.Dispose() { }
         public void WriteToServer(System.Data.Common.DbDataReader reader) { }
+        public void WriteToServer(System.Data.IDataReader reader) { }
+        public void WriteToServer(System.Data.DataTable table) { }
+        public void WriteToServer(System.Data.DataTable table, System.Data.DataRowState rowState) { }
+        public void WriteToServer(System.Data.DataRow[] rows) { }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataRow[] rows) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataRow[] rows, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.IDataReader reader) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.IDataReader reader, System.Threading.CancellationToken cancellationToken) { throw null; }
         public System.Threading.Tasks.Task WriteToServerAsync(System.Data.Common.DbDataReader reader) { throw null; }
         public System.Threading.Tasks.Task WriteToServerAsync(System.Data.Common.DbDataReader reader, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataTable table) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataTable table, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataTable table, System.Data.DataRowState rowState) { throw null; }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.DataTable table, System.Data.DataRowState rowState, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
     public sealed partial class SqlBulkCopyColumnMapping
     {
@@ -227,7 +240,7 @@ namespace System.Data.SqlClient
         public string SourceColumn { get { throw null; } set { } }
         public int SourceOrdinal { get { throw null; } set { } }
     }
-    public sealed partial class SqlBulkCopyColumnMappingCollection
+    public sealed partial class SqlBulkCopyColumnMappingCollection : System.Collections.CollectionBase
     {
         internal SqlBulkCopyColumnMappingCollection() { }
         public System.Data.SqlClient.SqlBulkCopyColumnMapping this[int index] { get { throw null; } }
@@ -260,9 +273,26 @@ namespace System.Data.SqlClient
         public override System.Data.Common.DbCommand CreateCommand() { throw null; }
         public override System.Data.Common.DbConnection CreateConnection() { throw null; }
         public override System.Data.Common.DbConnectionStringBuilder CreateConnectionStringBuilder() { throw null; }
+        public override System.Data.Common.DbDataAdapter CreateDataAdapter() { throw null; }
         public override System.Data.Common.DbParameter CreateParameter() { throw null; }
     }
-    public sealed partial class SqlCommand : System.Data.Common.DbCommand
+    public static partial class SqlClientMetaDataCollectionNames
+    {
+        public static readonly string Columns;
+        public static readonly string Databases;
+        public static readonly string ForeignKeys;
+        public static readonly string IndexColumns;
+        public static readonly string Indexes;
+        public static readonly string Parameters;
+        public static readonly string ProcedureColumns;
+        public static readonly string Procedures;
+        public static readonly string Tables;
+        public static readonly string UserDefinedTypes;
+        public static readonly string Users;
+        public static readonly string ViewColumns;
+        public static readonly string Views;
+    }
+    public sealed partial class SqlCommand : System.Data.Common.DbCommand, System.ICloneable
     {
         public SqlCommand() { }
         public SqlCommand(string cmdText) { }
@@ -281,6 +311,8 @@ namespace System.Data.SqlClient
         public override System.Data.UpdateRowSource UpdatedRowSource { get { throw null; } set { } }
         public event System.Data.StatementCompletedEventHandler StatementCompleted { add { } remove { } }
         public override void Cancel() { }
+        object System.ICloneable.Clone() { throw null; }
+        public SqlCommand Clone() { throw null;  }
         protected override System.Data.Common.DbParameter CreateDbParameter() { throw null; }
         public new System.Data.SqlClient.SqlParameter CreateParameter() { throw null; }
         protected override System.Data.Common.DbDataReader ExecuteDbDataReader(System.Data.CommandBehavior behavior) { throw null; }
@@ -300,11 +332,12 @@ namespace System.Data.SqlClient
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override void Prepare() { }
     }
-    public sealed partial class SqlConnection : System.Data.Common.DbConnection
+    public sealed partial class SqlConnection : System.Data.Common.DbConnection, System.ICloneable
     {
         public SqlConnection() { }
         public SqlConnection(string connectionString) { }
         public System.Guid ClientConnectionId { get { throw null; } }
+        object ICloneable.Clone() { throw null; }
         public override string ConnectionString { get { throw null; } set { } }
         public override int ConnectionTimeout { get { throw null; } }
         public override string Database { get { throw null; } }
@@ -372,6 +405,44 @@ namespace System.Data.SqlClient
         public override bool ShouldSerialize(string keyword) { throw null; }
         public override bool TryGetValue(string keyword, out object value) { throw null; }
     }
+    public sealed partial class SqlDataAdapter : System.Data.Common.DbDataAdapter, System.Data.IDbDataAdapter, System.ICloneable
+    {
+        public SqlDataAdapter() { }
+        public SqlDataAdapter(SqlCommand selectCommand) { }
+        public SqlDataAdapter(string selectCommandText, string selectConnectionString) { }
+        public SqlDataAdapter(string selectCommandText, SqlConnection selectConnection) { }
+        new public SqlCommand DeleteCommand { get { throw null; } set { } }
+        new public SqlCommand InsertCommand { get { throw null; } set { } }
+        new public SqlCommand SelectCommand { get { throw null; } set { } }
+        System.Data.IDbCommand System.Data.IDbDataAdapter.DeleteCommand { get { throw null; } set { } }
+        System.Data.IDbCommand System.Data.IDbDataAdapter.InsertCommand { get { throw null; } set { } }
+        System.Data.IDbCommand System.Data.IDbDataAdapter.SelectCommand { get { throw null; } set { } }
+        System.Data.IDbCommand System.Data.IDbDataAdapter.UpdateCommand { get { throw null; } set { } }
+        override public int UpdateBatchSize { get { throw null; } set { } }
+        new public SqlCommand UpdateCommand { get { throw null; } set { } }
+        public event SqlRowUpdatedEventHandler RowUpdated { add { } remove { } }
+        public event SqlRowUpdatingEventHandler RowUpdating { add { } remove { } }
+        protected override void OnRowUpdated(System.Data.Common.RowUpdatedEventArgs value) { }
+        protected override void OnRowUpdating(System.Data.Common.RowUpdatingEventArgs value) { }
+        object System.ICloneable.Clone() { throw null; }
+    }
+    public sealed partial class SqlRowUpdatedEventArgs : System.Data.Common.RowUpdatedEventArgs
+    {
+        public SqlRowUpdatedEventArgs(DataRow row, IDbCommand command, StatementType statementType, System.Data.Common.DataTableMapping tableMapping)
+        : base(row, command, statementType, tableMapping) { }
+
+        new public SqlCommand Command { get { throw null; } }
+    }
+    public delegate void SqlRowUpdatedEventHandler(object sender, SqlRowUpdatedEventArgs e);
+    public sealed partial class SqlRowUpdatingEventArgs : System.Data.Common.RowUpdatingEventArgs
+    {
+        public SqlRowUpdatingEventArgs(DataRow row, IDbCommand command, StatementType statementType, System.Data.Common.DataTableMapping tableMapping)
+        : base(row, command, statementType, tableMapping) { }
+
+        new public SqlCommand Command { get { throw null; } set { } }
+        protected override System.Data.IDbCommand BaseCommand { get { throw null; } set { } }
+    }
+    public delegate void SqlRowUpdatingEventHandler(object sender, SqlRowUpdatingEventArgs e);
     public partial class SqlDataReader : System.Data.Common.DbDataReader, System.IDisposable
     {
         internal SqlDataReader() { }
@@ -488,13 +559,15 @@ namespace System.Data.SqlClient
         public override string ToString() { throw null; }
     }
     public delegate void SqlInfoMessageEventHandler(object sender, System.Data.SqlClient.SqlInfoMessageEventArgs e);
-    public sealed partial class SqlParameter : System.Data.Common.DbParameter
+    public sealed partial class SqlParameter : System.Data.Common.DbParameter, System.ICloneable
     {
         public SqlParameter() { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType) { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size) { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size, string sourceColumn) { }
         public SqlParameter(string parameterName, object value) { }
+        public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size, System.Data.ParameterDirection direction, byte precision, byte scale, string sourceColumn, System.Data.DataRowVersion sourceVersion, bool sourceColumnNullMapping, object value, string xmlSchemaCollectionDatabase, string xmlSchemaCollectionOwningSchema, string xmlSchemaCollectionName) { }
+        object ICloneable.Clone() { throw null; }
         public System.Data.SqlTypes.SqlCompareOptions CompareInfo { get { throw null; } set { } }
         public override System.Data.DbType DbType { get { throw null; } set { } }
         public override System.Data.ParameterDirection Direction { get { throw null; } set { } }
@@ -507,6 +580,7 @@ namespace System.Data.SqlClient
         public override int Size { get { throw null; } set { } }
         public override string SourceColumn { get { throw null; } set { } }
         public override bool SourceColumnNullMapping { get { throw null; } set { } }
+        public override DataRowVersion SourceVersion { get { throw null; } set { } }
         public System.Data.SqlDbType SqlDbType { get { throw null; } set { } }
         public object SqlValue { get { throw null; } set { } }
         public string TypeName { get { throw null; } set { } }
@@ -571,5 +645,12 @@ namespace System.Data.SqlClient
         public override void Rollback() { }
         public void Rollback(string transactionName) { }
         public void Save(string savePointName) { }
+    }
+}
+namespace System.Data
+{
+    public sealed partial class OperationAbortedException : System.SystemException
+    {
+        internal OperationAbortedException() { }
     }
 }

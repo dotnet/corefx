@@ -14,14 +14,23 @@ namespace System.Diagnostics
     public abstract class RemoteExecutorTestBase : FileCleanupTestBase
     {
         /// <summary>The name of the test console app.</summary>
-        protected const string TestConsoleApp = "RemoteExecutorConsoleApp.exe";
-        /// <summary>The CoreCLR host used to host the test console app.</summary>
-        protected static readonly string HostRunner = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "CoreRun.exe" : "corerun";
+        protected static readonly string TestConsoleApp = "RemoteExecutorConsoleApp.exe";
+        /// <summary>The name, without an extension, of the host used to host the test console app.</summary>
+        private static readonly string HostRunnerExecutableName = IsFullFramework ? "xunit.console" : "dotnet";
+        /// <summary>The name, with an extension, of the host host used to host the test console app.</summary>
+        protected static readonly string HostRunnerName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? HostRunnerExecutableName + ".exe" : HostRunnerExecutableName;
+        /// <summary>The absolute path to the host runner executable.</summary>
+        protected static string HostRunner => Process.GetCurrentProcess().MainModule.FileName;
 
         /// <summary>A timeout (milliseconds) after which a wait on a remote operation should be considered a failure.</summary>
-        public const int FailWaitTimeoutMilliseconds = 30 * 1000;
+        public const int FailWaitTimeoutMilliseconds = 60 * 1000;
         /// <summary>The exit code returned when the test process exits successfully.</summary>
         internal const int SuccessExitCode = 42;
+
+        /// <summary>Determines if we're running on the .NET Framework (rather than .NET Core).</summary>
+        internal static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
+
+        internal static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
@@ -84,6 +93,37 @@ namespace System.Diagnostics
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
+        /// <param name="arg1">The first argument to pass to the method.</param>
+        /// <param name="arg2">The second argument to pass to the method.</param>
+        /// <param name="arg3">The third argument to pass to the method.</param>
+        /// <param name="arg4">The fourth argument to pass to the method.</param>
+        /// <param name="options">Options to use for the invocation.</param>
+        internal static RemoteInvokeHandle RemoteInvoke(
+            Func<string, string, string, string, int> method, 
+            string arg1, string arg2, string arg3, string arg4, 
+            RemoteInvokeOptions options = null)
+        {
+            return RemoteInvoke(method.GetMethodInfo(), new[] { arg1, arg2, arg3, arg4 }, options);
+        }
+
+        /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
+        /// <param name="method">The method to invoke.</param>
+        /// <param name="arg1">The first argument to pass to the method.</param>
+        /// <param name="arg2">The second argument to pass to the method.</param>
+        /// <param name="arg3">The third argument to pass to the method.</param>
+        /// <param name="arg4">The fourth argument to pass to the method.</param>
+        /// <param name="arg5">The fifth argument to pass to the method.</param>
+        /// <param name="options">Options to use for the invocation.</param>
+        internal static RemoteInvokeHandle RemoteInvoke(
+            Func<string, string, string, string, string, int> method, 
+            string arg1, string arg2, string arg3, string arg4, string arg5, 
+            RemoteInvokeOptions options = null)
+        {
+            return RemoteInvoke(method.GetMethodInfo(), new[] { arg1, arg2, arg3, arg4, arg5 }, options);
+        }
+
+        /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
+        /// <param name="method">The method to invoke.</param>
         /// <param name="args">The arguments to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         internal static RemoteInvokeHandle RemoteInvokeRaw(Delegate method, string unparsedArg,
@@ -130,15 +170,19 @@ namespace System.Diagnostics
 
             // If we need the host (if it exists), use it, otherwise target the console app directly.
             string testConsoleAppArgs = "\"" + a.FullName + "\" " + t.FullName + " " + method.Name + " " + string.Join(" ", args);
-            if (File.Exists(HostRunner))
-            {
-                psi.FileName = HostRunner;
-                psi.Arguments = TestConsoleApp + " " + testConsoleAppArgs;
-            }
-            else
+
+            if (!File.Exists(TestConsoleApp))
+                throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
+
+            if (IsFullFramework || IsNetNative)
             {
                 psi.FileName = TestConsoleApp;
                 psi.Arguments = testConsoleAppArgs;
+            }
+            else
+            {
+                psi.FileName = HostRunner;
+                psi.Arguments = TestConsoleApp + " " + testConsoleAppArgs;
             }
 
             // Return the handle to the process, which may or not be started
@@ -167,9 +211,13 @@ namespace System.Diagnostics
                     // needing to do this in every derived test and keep each test much simpler.
                     try
                     {
-                        Assert.True(Process.WaitForExit(Options.TimeOut));
+                        Assert.True(Process.WaitForExit(Options.TimeOut),
+                            $"Timed out after {Options.TimeOut}ms waiting for remote process {Process.Id}");
+
                         if (Options.CheckExitCode)
+                        {
                             Assert.Equal(SuccessExitCode, Process.ExitCode);
+                        }
                     }
                     finally
                     {

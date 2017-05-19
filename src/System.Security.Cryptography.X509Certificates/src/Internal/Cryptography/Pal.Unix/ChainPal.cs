@@ -49,6 +49,11 @@ namespace Internal.Cryptography.Pal
                 verificationTime = verificationTime.ToLocalTime();
             }
 
+            // Until we support the Disallowed store, ensure it's empty (which is done by the ctor)
+            using (new X509Store(StoreName.Disallowed, StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+            }
+
             TimeSpan remainingDownloadTime = timeout;
 
             using (var leaf = new X509Certificate2(cert.Handle))
@@ -66,7 +71,6 @@ namespace Internal.Cryptography.Pal
                 IChainPal chain = OpenSslX509ChainProcessor.BuildChain(
                     leaf,
                     candidates,
-                    downloaded,
                     systemTrusted,
                     applicationPolicy,
                     certificatePolicy,

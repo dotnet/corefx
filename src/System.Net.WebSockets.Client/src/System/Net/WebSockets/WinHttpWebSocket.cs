@@ -230,7 +230,7 @@ namespace System.Net.WebSockets
                 sessionHandle,
                 Interop.WinHttp.WINHTTP_OPTION_ASSURED_NON_BLOCKING_CALLBACKS,
                 ref optionAssuredNonBlockingTrue,
-                (uint)Marshal.SizeOf<uint>()))
+                (uint)sizeof(uint)))
             {
                 WinHttpException.ThrowExceptionUsingLastError();
             }
@@ -676,7 +676,7 @@ namespace System.Net.WebSockets
             else
             {
                 bufferLength = buffer.Length;
-                fixed (char* pBuffer = buffer)
+                fixed (char* pBuffer = &buffer[0])
                 {
                     if (QueryHeaders(headerName, pBuffer, ref bufferLength))
                     {
@@ -795,14 +795,7 @@ namespace System.Net.WebSockets
 
             if (_operation.TcsReceive != null)
             {
-                var exception = new WebSocketException(
-                    WebSocketError.InvalidState,
-                    SR.Format(
-                        SR.net_WebSockets_InvalidState_ClosedOrAborted,
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"));
-
-                _operation.TcsReceive.TrySetException(exception);
+                _operation.TcsReceive.TrySetCanceled();
             }
 
             if (_operation.TcsSend != null)

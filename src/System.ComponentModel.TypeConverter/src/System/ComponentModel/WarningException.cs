@@ -14,12 +14,11 @@ namespace System.ComponentModel
     /// <summary>
     ///    <para>Specifies an exception that is handled as a warning instead of an error.</para>
     /// </summary>
-    [Serializable]
     public class WarningException : SystemException
     {
         /// <summary>
         /// <para>Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the last Win32 error 
-        ///    that occured.</para>
+        ///    that occurred.</para>
         /// </summary>
         public WarningException() : this(null, null, null)
         {

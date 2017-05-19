@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -141,7 +141,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Add_DefaultValue(int count)
+        public virtual void ICollection_Generic_Add_DefaultValue(int count)
         {
             if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
@@ -374,7 +374,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
+        public virtual void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
         {
             if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
@@ -416,7 +416,7 @@ namespace System.Collections.Tests
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 if (DefaultValueWhenNotAllowed_Throws)
-                    Assert.Throws<ArgumentNullException>("item", () => collection.Contains(default(T)));
+                    AssertExtensions.Throws<ArgumentNullException>("item", () => collection.Contains(default(T)));
                 else
                     Assert.False(collection.Contains(default(T)));
             }
@@ -549,7 +549,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Remove_DefaultValueContainedInCollection(int count)
+        public virtual void ICollection_Generic_Remove_DefaultValueContainedInCollection(int count)
         {
             if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(T)))
             {

@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System.Reflection;
     using System;
@@ -15,6 +19,8 @@ namespace System.Xml.Serialization
     using System.Linq;
     using System.Collections.Generic;
     using System.Xml.Extensions;
+    using System.Xml;
+    using System.Xml.Serialization;
 
     ///<internalonly/>
     /// <devdoc>
@@ -31,7 +37,9 @@ namespace System.Xml.Serialization
         private NameTable _xsdAttributes;   // xmlattributetname + xmlns -> AttributeAccessor
         private Hashtable _specials;   // type -> SpecialMapping
         private Hashtable _anonymous = new Hashtable();   // type -> AnonymousMapping
+#if !XMLSERIALIZERGENERATOR
         private NameTable _serializables;  // type name --> new SerializableMapping
+#endif
         private StructMapping _root;
         private string _defaultNs;
         private ModelScope _modelScope;
@@ -94,7 +102,8 @@ namespace System.Xml.Serialization
         private void IncludeTypes(ICustomAttributeProvider provider, RecursionLimiter limiter)
         {
             object[] attrs = provider.GetCustomAttributes(typeof(XmlIncludeAttribute), false);
-            for (int i = 0; i < attrs.Length; i++) {
+            for (int i = 0; i < attrs.Length; i++)
+            {
                 Type type = ((XmlIncludeAttribute)attrs[i]).Type;
                 IncludeType(type, limiter);
             }
@@ -231,7 +240,7 @@ namespace System.Xml.Serialization
             {
                 return _defaultAttributes;
             }
-            return new XmlAttributes(type.GetTypeInfo());
+            return new XmlAttributes(type);
         }
 
         private XmlAttributes GetAttributes(MemberInfo memberInfo)
@@ -260,10 +269,10 @@ namespace System.Xml.Serialization
             {
                 if (root.ElementName.Length > 0)
                     element.Name = XmlConvert.EncodeLocalName(root.ElementName);
-                if (root.IsNullableSpecified && !root.IsNullable && model.TypeDesc.IsOptionalValue)
+                if (root.GetIsNullableSpecified() && !root.IsNullable && model.TypeDesc.IsOptionalValue)
                     //XmlInvalidNotNullable=IsNullable may not be set to 'false' for a Nullable<{0}> type. Consider using '{0}' type or removing the IsNullable property from the XmlElement attribute.
                     throw new InvalidOperationException(SR.Format(SR.XmlInvalidNotNullable, model.TypeDesc.BaseTypeDesc.FullName, "XmlRoot"));
-                element.IsNullable = root.IsNullableSpecified ? root.IsNullable : model.TypeDesc.IsNullable || model.TypeDesc.IsOptionalValue;
+                element.IsNullable = root.GetIsNullableSpecified() ? root.IsNullable : model.TypeDesc.IsNullable || model.TypeDesc.IsOptionalValue;
                 CheckNullable(element.IsNullable, model.TypeDesc, element.Mapping);
             }
             else
@@ -470,7 +479,7 @@ namespace System.Xml.Serialization
             {
                 throw new ArgumentNullException(nameof(provider.MethodName));
             }
-            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(provider.MethodName))
+            if (!CSharpHelpers.IsValidLanguageIndependentIdentifier(provider.MethodName))
                 throw new ArgumentException(SR.Format(SR.XmlGetSchemaMethodName, provider.MethodName), nameof(provider.MethodName));
 
             MethodInfo getMethod = getMethod = type.GetMethod(provider.MethodName, /* BindingFlags.DeclaredOnly | */ BindingFlags.Static | BindingFlags.Public, new Type[] { typeof(XmlSchemaSet) });
@@ -509,6 +518,7 @@ namespace System.Xml.Serialization
                     XmlQualifiedName qname = serializableMapping.XsiType;
                     if (qname != null && !qname.IsEmpty)
                     {
+#if !XMLSERIALIZERGENERATOR
                         if (_serializables == null)
                             _serializables = new NameTable();
                         SerializableMapping existingMapping = (SerializableMapping)_serializables[qname];
@@ -532,12 +542,14 @@ namespace System.Xml.Serialization
                                 SetBase(serializableMapping, xsdType.DerivedFrom);
                             _serializables[qname] = serializableMapping;
                         }
+
+#endif
                         serializableMapping.TypeName = qname.Name;
                         serializableMapping.Namespace = qname.Namespace;
                     }
                     serializableMapping.TypeDesc = typeDesc;
                     serializableMapping.Type = type;
-                    IncludeTypes(type.GetTypeInfo());
+                    IncludeTypes(type);
                 }
                 else
                 {
@@ -559,13 +571,7 @@ namespace System.Xml.Serialization
             return mapping;
         }
 
-        internal static void ValidationCallbackWithErrorCode(object sender, ValidationEventArgs args)
-        {
-            // CONSIDER: need the real type name
-            if (args.Severity == XmlSeverityType.Error)
-                throw new InvalidOperationException(SR.Format(SR.XmlSerializableSchemaError, typeof(IXmlSerializable).Name, args.Message));
-        }
-
+#if !XMLSERIALIZERGENERATOR
         internal void SetBase(SerializableMapping mapping, XmlQualifiedName baseQname)
         {
             if (baseQname.IsEmpty) return;
@@ -594,6 +600,7 @@ namespace System.Xml.Serialization
             }
             mapping.SetBaseMapping((SerializableMapping)_serializables[baseQname]);
         }
+#endif
 
         private static string GetContextName(ImportContext context)
         {
@@ -754,14 +761,14 @@ namespace System.Xml.Serialization
                     if (InitializeStructMembers(item.Mapping, item.Model, openModel, typeName, limiter))
                     {
                         //
-                        // if InitializeStructMembers returns true, then there were *no* chages to the DeferredWorkItems
+                        // if InitializeStructMembers returns true, then there were *no* changes to the DeferredWorkItems
                         //
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (index != limiter.DeferredWorkItems.Count - 1)
-                        throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "DeferredWorkItems.Count have changed"));
-                    if (item != limiter.DeferredWorkItems[index])
-                        throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "DeferredWorkItems.Top have changed"));
+                        // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                        if (index != limiter.DeferredWorkItems.Count - 1)
+                            throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "DeferredWorkItems.Count have changed"));
+                        if (item != limiter.DeferredWorkItems[index])
+                            throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "DeferredWorkItems.Top have changed"));
 #endif
                         // Remove the last work item
                         limiter.DeferredWorkItems.RemoveAt(index);
@@ -779,14 +786,14 @@ namespace System.Xml.Serialization
 
             if (model.TypeDesc.BaseTypeDesc != null)
             {
-                TypeModel baseModel = _modelScope.GetTypeModel(model.Type.GetTypeInfo().BaseType, false);
+                TypeModel baseModel = _modelScope.GetTypeModel(model.Type.BaseType, false);
                 if (!(baseModel is StructModel))
                 {
                     //XmlUnsupportedInheritance=Using '{0}' as a base type for a class is not supported by XmlSerializer.
-                    throw new NotSupportedException(SR.Format(SR.XmlUnsupportedInheritance, model.Type.GetTypeInfo().BaseType.FullName));
+                    throw new NotSupportedException(SR.Format(SR.XmlUnsupportedInheritance, model.Type.BaseType.FullName));
                 }
                 StructMapping baseMapping = ImportStructLikeMapping((StructModel)baseModel, mapping.Namespace, openModel, null, limiter);
-                // check to see if the import of the baseMapping was deffered
+                // check to see if the import of the baseMapping was deferred
                 int baseIndex = limiter.DeferredWorkItems.IndexOf(baseMapping);
                 if (baseIndex < 0)
                 {
@@ -808,7 +815,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    // the import of the baseMapping was deffered, make sure that the derived mappings is deffered as well
+                    // the import of the baseMapping was deferred, make sure that the derived mappings is deferred as well
                     if (!limiter.DeferredWorkItems.Contains(mapping))
                     {
                         limiter.DeferredWorkItems.Add(new ImportStructWorkItem(model, mapping));
@@ -846,7 +853,7 @@ namespace System.Xml.Serialization
                         if (mapping.BaseMapping.Declares(member, mapping.TypeName)) continue;
                     }
                     isSequence |= member.IsSequence;
-                    // add All memeber accessors to the scope accessors
+                    // add All member accessors to the scope accessors
                     AddUniqueAccessor(member, mapping.LocalElements, mapping.LocalAttributes, isSequence);
 
                     if (member.Text != null)
@@ -911,7 +918,7 @@ namespace System.Xml.Serialization
             if (mapping.XmlnsMember != null && mapping.BaseMapping.HasXmlnsMember)
                 throw new InvalidOperationException(SR.Format(SR.XmlMultipleXmlns, model.Type.FullName));
 
-            IncludeTypes(model.Type.GetTypeInfo(), limiter);
+            IncludeTypes(model.Type, limiter);
             _typeScope.AddTypeMapping(mapping);
             if (openModel)
                 mapping.IsOpenModel = true;
@@ -949,7 +956,7 @@ namespace System.Xml.Serialization
             if (a.XmlType != null && a.XmlType.TypeName.Length > 0)
                 typeName = a.XmlType.TypeName;
 
-            if (type.GetTypeInfo().IsGenericType && typeName.IndexOf('{') >= 0)
+            if (type.IsGenericType && typeName.IndexOf('{') >= 0)
             {
                 Type genType = type.GetGenericTypeDefinition();
                 Type[] names = genType.GetGenericArguments();
@@ -1087,7 +1094,7 @@ namespace System.Xml.Serialization
                 mapping.Elements[i] = ReconcileLocalAccessor(mapping.Elements[i], mapping.Namespace);
             }
 
-            IncludeTypes(model.Type.GetTypeInfo());
+            IncludeTypes(model.Type);
 
             // in the case of an ArrayMapping we can have more that one mapping correspond to a type
             // examples of that are ArrayList and object[] both will map tp ArrayOfur-type
@@ -1181,7 +1188,7 @@ namespace System.Xml.Serialization
                 mapping.TypeDesc = model.TypeDesc;
                 mapping.TypeName = typeName;
                 mapping.Namespace = typeNs;
-                mapping.IsFlags = model.Type.GetTypeInfo().IsDefined(typeof(FlagsAttribute), false);
+                mapping.IsFlags = model.Type.IsDefined(typeof(FlagsAttribute), false);
                 if (mapping.IsFlags && repeats)
                     throw new InvalidOperationException(SR.Format(SR.XmlIllegalAttributeFlagsArray, model.TypeDesc.FullName));
                 mapping.IsList = repeats;
@@ -1260,7 +1267,7 @@ namespace System.Xml.Serialization
                     isSequence |= mapping.IsSequence;
                     if (!xmlReflectionMembers[i].XmlAttributes.XmlIgnore)
                     {
-                        // add All memeber accessors to the scope accessors
+                        // add All member accessors to the scope accessors
                         AddUniqueAccessor(mapping, elements, attributes, isSequence);
                     }
 
@@ -1322,7 +1329,7 @@ namespace System.Xml.Serialization
                     // an XmlRoot attribute on the struct or class.
                     if (typeDesc.IsStructLike)
                     {
-                        XmlAttributes structAttrs = new XmlAttributes(xmlReflectionMember.MemberType.GetTypeInfo());
+                        XmlAttributes structAttrs = new XmlAttributes(xmlReflectionMember.MemberType);
                         if (structAttrs.XmlRoot != null)
                         {
                             if (structAttrs.XmlRoot.ElementName.Length > 0)
@@ -1330,7 +1337,7 @@ namespace System.Xml.Serialization
                             if (rpc)
                             {
                                 xmlElement.Namespace = null;
-                                if (structAttrs.XmlRoot.IsNullableSpecified)
+                                if (structAttrs.XmlRoot.GetIsNullableSpecified())
                                     xmlElement.IsNullable = structAttrs.XmlRoot.IsNullable;
                             }
                             else
@@ -1415,7 +1422,7 @@ namespace System.Xml.Serialization
                 throw new InvalidOperationException(SR.Format(SR.XmlChoiceIdentifierArrayType, identifierName, memberName, type.FullName));
             }
 
-            if (!type.GetTypeInfo().IsEnum)
+            if (!type.IsEnum)
             {
                 // Choice identifier '{0}' must be an enum.
                 throw new InvalidOperationException(SR.Format(SR.XmlChoiceIdentifierTypeEnum, identifierName));
@@ -1443,7 +1450,7 @@ namespace System.Xml.Serialization
             MemberInfo[] infos = structModel.Type.GetMember(choice.MemberName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             if (infos == null || infos.Length == 0)
             {
-                // if we can not find the choice identifier between fields, check proerties
+                // if we can not find the choice identifier between fields, check properties
                 PropertyInfo info = structModel.Type.GetProperty(choice.MemberName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
 
                 if (info == null)
@@ -1455,7 +1462,7 @@ namespace System.Xml.Serialization
             }
             else if (infos.Length > 1)
             {
-                // Ambiguous choice identifer: there are several members named '{0}'.
+                // Ambiguous choice identifier: there are several members named '{0}'.
                 throw new InvalidOperationException(SR.Format(SR.XmlChoiceIdentiferAmbiguous, choice.MemberName));
             }
 
@@ -1465,7 +1472,7 @@ namespace System.Xml.Serialization
                 // Missing '{0}' needed for serialization of choice '{1}'.
                 throw new InvalidOperationException(SR.Format(SR.XmlChoiceIdentiferMemberMissing, choice.MemberName, accessorName));
             }
-            choice.MemberInfo = member.MemberInfo;
+            choice.SetMemberInfo(member.MemberInfo);
             Type enumType = member.FieldType;
             enumType = CheckChoiceIdentifierType(enumType, isArrayLike, choice.MemberName, accessorName);
             return enumType;
@@ -1486,7 +1493,7 @@ namespace System.Xml.Serialization
                 arrayItemElement.Namespace = xmlArrayItem.Namespace == null ? arrayElementNs : xmlArrayItem.Namespace;
                 arrayItemElement.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(targetType), arrayItemElement.Namespace, ImportContext.Element, xmlArrayItem.DataType, null, limiter);
                 arrayItemElement.Name = xmlArrayItem.ElementName.Length == 0 ? arrayItemElement.Mapping.DefaultElementName : XmlConvert.EncodeLocalName(xmlArrayItem.ElementName);
-                arrayItemElement.IsNullable = xmlArrayItem.IsNullableSpecified ? xmlArrayItem.IsNullable : targetTypeDesc.IsNullable || targetTypeDesc.IsOptionalValue;
+                arrayItemElement.IsNullable = xmlArrayItem.GetIsNullableSpecified() ? xmlArrayItem.IsNullable : targetTypeDesc.IsNullable || targetTypeDesc.IsOptionalValue;
                 arrayItemElement.Form = xmlArrayItem.Form == XmlSchemaForm.None ? XmlSchemaForm.Qualified : xmlArrayItem.Form;
                 CheckForm(arrayItemElement.Form, arrayElementNs != arrayItemElement.Namespace);
                 CheckNullable(arrayItemElement.IsNullable, targetTypeDesc, arrayItemElement.Mapping);
@@ -1530,7 +1537,7 @@ namespace System.Xml.Serialization
             {
                 accessor.ChoiceIdentifier = new ChoiceIdentifierAccessor();
                 accessor.ChoiceIdentifier.MemberName = a.XmlChoiceIdentifier.MemberName;
-                accessor.ChoiceIdentifier.MemberInfo = a.XmlChoiceIdentifier.MemberInfo;
+                accessor.ChoiceIdentifier.MemberInfo = a.XmlChoiceIdentifier.GetMemberInfo();
                 accessor.ChoiceIdentifier.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(choiceIdentifierType), ns, ImportContext.Element, String.Empty, null, limiter);
                 CheckChoiceIdentifierMapping((EnumMapping)accessor.ChoiceIdentifier.Mapping);
             }
@@ -1626,10 +1633,10 @@ namespace System.Xml.Serialization
                             element.Name = xmlElement.ElementName.Length == 0 ? element.Mapping.DefaultElementName : XmlConvert.EncodeLocalName(xmlElement.ElementName);
                         }
                         element.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
-                        if (xmlElement.IsNullableSpecified && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
+                        if (xmlElement.GetIsNullableSpecified() && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
                             //XmlInvalidNotNullable=IsNullable may not be set to 'false' for a Nullable<{0}> type. Consider using '{0}' type or removing the IsNullable property from the XmlElement attribute.
                             throw new InvalidOperationException(SR.Format(SR.XmlInvalidNotNullable, typeModel.TypeDesc.BaseTypeDesc.FullName, "XmlElement"));
-                        element.IsNullable = xmlElement.IsNullableSpecified ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
+                        element.IsNullable = xmlElement.GetIsNullableSpecified() ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
                         element.Form = rpc ? XmlSchemaForm.Unqualified : xmlElement.Form == XmlSchemaForm.None ? elementFormDefault : xmlElement.Form;
 
                         CheckNullable(element.IsNullable, targetTypeDesc, element.Mapping);
@@ -1655,7 +1662,7 @@ namespace System.Xml.Serialization
                         if (!arrayElementType.IsAssignableFrom(targetType))
                             throw new InvalidOperationException(SR.Format(SR.XmlIllegalAnyElement, arrayElementType.FullName));
                         string anyName = xmlAnyElement.Name.Length == 0 ? xmlAnyElement.Name : XmlConvert.EncodeLocalName(xmlAnyElement.Name);
-                        string anyNs = xmlAnyElement.NamespaceSpecified ? xmlAnyElement.Namespace : null;
+                        string anyNs = xmlAnyElement.GetNamespaceSpecified() ? xmlAnyElement.Namespace : null;
                         if (anys[anyName, anyNs] != null)
                         {
                             // ignore duplicate anys
@@ -1801,10 +1808,10 @@ namespace System.Xml.Serialization
                                 element.Any = true;
                             }
                             element.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
-                            if (xmlElement.IsNullableSpecified && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
+                            if (xmlElement.GetIsNullableSpecified() && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
                                 //XmlInvalidNotNullable=IsNullable may not be set to 'false' for a Nullable<{0}> type. Consider using '{0}' type or removing the IsNullable property from the XmlElement attribute.
                                 throw new InvalidOperationException(SR.Format(SR.XmlInvalidNotNullable, typeModel.TypeDesc.BaseTypeDesc.FullName, "XmlElement"));
-                            element.IsNullable = xmlElement.IsNullableSpecified ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
+                            element.IsNullable = xmlElement.GetIsNullableSpecified() ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
                             element.Form = rpc ? XmlSchemaForm.Unqualified : xmlElement.Form == XmlSchemaForm.None ? elementFormDefault : xmlElement.Form;
 
                             CheckNullable(element.IsNullable, accessor.TypeDesc, element.Mapping);
@@ -1869,10 +1876,10 @@ namespace System.Xml.Serialization
                             element.Name = xmlElement.ElementName.Length == 0 ? element.Mapping.DefaultElementName : XmlConvert.EncodeLocalName(xmlElement.ElementName);
                         }
                         element.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
-                        if (xmlElement.IsNullableSpecified && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
+                        if (xmlElement.GetIsNullableSpecified() && !xmlElement.IsNullable && typeModel.TypeDesc.IsOptionalValue)
                             //XmlInvalidNotNullable=IsNullable may not be set to 'false' for a Nullable<{0}> type. Consider using '{0}' type or removing the IsNullable property from the XmlElement attribute.
                             throw new InvalidOperationException(SR.Format(SR.XmlInvalidNotNullable, typeModel.TypeDesc.BaseTypeDesc.FullName, "XmlElement"));
-                        element.IsNullable = xmlElement.IsNullableSpecified ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
+                        element.IsNullable = xmlElement.GetIsNullableSpecified() ? xmlElement.IsNullable : typeModel.TypeDesc.IsOptionalValue;
                         element.Form = rpc ? XmlSchemaForm.Unqualified : xmlElement.Form == XmlSchemaForm.None ? elementFormDefault : xmlElement.Form;
                         CheckNullable(element.IsNullable, targetTypeDesc, element.Mapping);
 
@@ -1899,7 +1906,7 @@ namespace System.Xml.Serialization
                             throw new InvalidOperationException(SR.Format(SR.XmlIllegalAnyElement, accessorType.FullName));
 
                         string anyName = xmlAnyElement.Name.Length == 0 ? xmlAnyElement.Name : XmlConvert.EncodeLocalName(xmlAnyElement.Name);
-                        string anyNs = xmlAnyElement.NamespaceSpecified ? xmlAnyElement.Namespace : null;
+                        string anyNs = xmlAnyElement.GetNamespaceSpecified() ? xmlAnyElement.Namespace : null;
                         if (anys[anyName, anyNs] != null)
                         {
                             // ignore duplicate anys
@@ -2229,7 +2236,7 @@ namespace System.Xml.Serialization
         // will create a shallow type mapping for a top-level type
         internal static XmlTypeMapping GetTopLevelMapping(Type type, string defaultNamespace)
         {
-            XmlAttributes a = new XmlAttributes(type.GetTypeInfo());
+            XmlAttributes a = new XmlAttributes(type);
             TypeDesc typeDesc = new TypeScope().GetTypeDesc(type);
             ElementAccessor element = new ElementAccessor();
 
@@ -2328,7 +2335,11 @@ namespace System.Xml.Serialization
         internal RecursionLimiter()
         {
             _depth = 0;
+#if XMLSERIALIZERGENERATOR
+            _maxDepth = int.MaxValue;
+#else
             _maxDepth = DiagnosticsSwitches.NonRecursiveTypeLoading.Enabled ? 1 : int.MaxValue;
+#endif
         }
 
         internal bool IsExceededLimit { get { return _depth > _maxDepth; } }

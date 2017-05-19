@@ -17,14 +17,14 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void NullQuery()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).AsParallel());
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable)null).AsParallel());
-            Assert.Throws<ArgumentNullException>("source", () => ((Partitioner<int>)null).AsParallel());
-            Assert.Throws<ArgumentNullException>("source", () => ((int[])null).AsParallel());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).AsParallel());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable)null).AsParallel());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((Partitioner<int>)null).AsParallel());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((int[])null).AsParallel());
 
-            Assert.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsOrdered((ParallelQuery<int>)null));
-            Assert.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsOrdered((ParallelQuery)null));
-            Assert.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsUnordered<int>((ParallelQuery<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsOrdered((ParallelQuery<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsOrdered((ParallelQuery)null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ParallelEnumerable.AsUnordered<int>((ParallelQuery<int>)null));
         }
 
         //
@@ -68,8 +68,8 @@ namespace System.Linq.Parallel.Tests
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count).AsOrdered();
 
             int current = start;
-            Assert.All(query, x => Assert.Equal(current++, x));
-            Assert.Equal(count, current - start);
+            Assert.All(query, x => Assert.Equal(unchecked(current++), x));
+            Assert.Equal(count, unchecked(current - start));
         }
 
         [Theory]
@@ -79,8 +79,8 @@ namespace System.Linq.Parallel.Tests
             IEnumerable<int> query = ParallelEnumerable.Range(start, count).AsSequential();
 
             int current = start;
-            Assert.All(query, x => Assert.Equal(current++, x));
-            Assert.Equal(count, current - start);
+            Assert.All(query, x => Assert.Equal(unchecked(current++), x));
+            Assert.Equal(count, unchecked(current - start));
         }
 
         [Theory]
@@ -259,6 +259,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [MemberData(nameof(EmptyData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "This causes assertion failure on UAPAoT")]
         public static void Empty<T>(T def)
         {
             Assert.Empty(ParallelEnumerable.Empty<T>());

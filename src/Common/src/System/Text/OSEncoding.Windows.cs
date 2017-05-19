@@ -9,7 +9,6 @@ using System.Diagnostics.Contracts;
 
 namespace System.Text
 {
-    [Serializable]
     internal sealed class OSEncoding : Encoding
     {
         private readonly int _codePage;
@@ -78,7 +77,7 @@ namespace System.Text
             }
             
             fixed (char* pChars = s)
-            fixed (byte *pBytes = bytes)
+            fixed (byte *pBytes = &bytes[0])
             {
                 return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
             }
@@ -107,7 +106,7 @@ namespace System.Text
             }
             
             fixed (char* pChars = chars)
-            fixed (byte *pBytes = bytes)
+            fixed (byte *pBytes = &bytes[0])
             {
                 return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
             }
@@ -154,7 +153,7 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException(SR.Argument_EncodingConversionOverflowChars);
 
             fixed (byte* pBytes = bytes)
-            fixed (char* pChars = chars)
+            fixed (char* pChars = &chars[0])
             {
                 return MultiByteToWideChar(_codePage, pBytes+byteIndex, byteCount, pChars+charIndex, chars.Length - charIndex);
             }

@@ -31,13 +31,12 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Net
 {
     public sealed partial class HttpListenerResponse : IDisposable
     {
-        private bool _disposed;
-        private Encoding _contentEncoding;
         private long _contentLength;
         private bool _clSet;
         private string _contentType;
@@ -49,7 +48,6 @@ namespace System.Net
         private string _statusDescription = "OK";
         private bool _chunked;
         private HttpListenerContext _context;
-        internal bool _headersSent;
         internal object _headersLock = new object();
         private bool _forceCloseChunked;
 
@@ -58,44 +56,15 @@ namespace System.Net
             _context = context;
         }
 
-        internal bool ForceCloseChunked
-        {
-            get { return _forceCloseChunked; }
-        }
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                if (_contentEncoding == null)
-                {
-                    _contentEncoding = Encoding.Default;
-                }
-
-                return _contentEncoding;
-            }
-            set
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _contentEncoding = value;
-            }
-        }
+        internal bool ForceCloseChunked => _forceCloseChunked;
 
         public long ContentLength64
         {
-            get { return _contentLength; }
+            get => _contentLength;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(nameof(value), SR.net_clsmall);
@@ -107,14 +76,11 @@ namespace System.Net
 
         public string ContentType
         {
-            get { return _contentType; }
+            get => _contentType;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 _contentType = value;
             }
@@ -122,14 +88,11 @@ namespace System.Net
 
         public bool KeepAlive
         {
-            get { return _keepAlive; }
+            get => _keepAlive;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 _keepAlive = value;
             }
@@ -147,14 +110,11 @@ namespace System.Net
 
         public Version ProtocolVersion
         {
-            get { return _version; }
+            get => _version;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 if (value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -168,14 +128,11 @@ namespace System.Net
 
         public string RedirectLocation
         {
-            get { return _location; }
+            get => _location;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 _location = value;
             }
@@ -183,14 +140,11 @@ namespace System.Net
 
         public bool SendChunked
         {
-            get { return _chunked; }
+            get => _chunked;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 _chunked = value;
             }
@@ -198,14 +152,11 @@ namespace System.Net
 
         public int StatusCode
         {
-            get { return _statusCode; }
+            get => _statusCode;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 if (value < 100 || value > 999)
                     throw new ProtocolViolationException(SR.net_invalidstatus);
@@ -216,21 +167,15 @@ namespace System.Net
 
         public string StatusDescription
         {
-            get { return _statusDescription; }
-            set
-            {
-                _statusDescription = value;
-            }
+            get => _statusDescription;
+            set => _statusDescription = value;
         }
 
-        private void Dispose()
-        {
-            Close(true);
-        }
+        private void Dispose() => Close(true);
 
         public void Close()
         {
-            if (_disposed)
+            if (Disposed)
                 return;
 
             Close(false);
@@ -238,7 +183,7 @@ namespace System.Net
 
         public void Abort()
         {
-            if (_disposed)
+            if (Disposed)
                 return;
 
             Close(true);
@@ -246,13 +191,13 @@ namespace System.Net
 
         private void Close(bool force)
         {
-            _disposed = true;
+            Disposed = true;
             _context.Connection.Close(force);
         }
 
         public void Close(byte[] responseEntity, bool willBlock)
         {
-            if (_disposed)
+            if (Disposed)
                 return;
 
             if (responseEntity == null)
@@ -298,102 +243,93 @@ namespace System.Net
             return false;
         }
 
-        internal void SendHeaders(bool closing, MemoryStream ms)
+        internal void SendHeaders(bool closing, MemoryStream ms, bool isWebSocketHandshake = false)
         {
-            Encoding encoding = _contentEncoding;
-            if (encoding == null)
-                encoding = Encoding.Default;
-
-            if (_contentType != null)
+            if (!isWebSocketHandshake)
             {
-                if (_contentEncoding != null && _contentType.IndexOf(HttpHeaderStrings.Charset, StringComparison.Ordinal) == -1)
-                {
-                    string enc_name = _contentEncoding.WebName;
-                    _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType + "; " + HttpHeaderStrings.Charset + enc_name);
-                }
-                else
+                if (_contentType != null)
                 {
                     _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType);
                 }
-            }
 
-            if (_webHeaders[HttpKnownHeaderNames.Server] == null)
-                _webHeaders.Set(HttpKnownHeaderNames.Server, HttpHeaderStrings.NetCoreServerName);
+                if (_webHeaders[HttpKnownHeaderNames.Server] == null)
+                    _webHeaders.Set(HttpKnownHeaderNames.Server, HttpHeaderStrings.NetCoreServerName);
+                CultureInfo inv = CultureInfo.InvariantCulture;
+                if (_webHeaders[HttpKnownHeaderNames.Date] == null)
+                    _webHeaders.Set(HttpKnownHeaderNames.Date, DateTime.UtcNow.ToString("r", inv));
 
-            CultureInfo inv = CultureInfo.InvariantCulture;
-            if (_webHeaders[HttpKnownHeaderNames.Date] == null)
-                _webHeaders.Set(HttpKnownHeaderNames.Date, DateTime.UtcNow.ToString("r", inv));
-
-            if (!_chunked)
-            {
-                if (!_clSet && closing)
+                if (!_chunked)
                 {
-                    _clSet = true;
-                    _contentLength = 0;
+                    if (!_clSet && closing)
+                    {
+                        _clSet = true;
+                        _contentLength = 0;
+                    }
+
+                    if (_clSet)
+                        _webHeaders.Set(HttpKnownHeaderNames.ContentLength, _contentLength.ToString(inv));
                 }
 
-                if (_clSet)
-                    _webHeaders.Set(HttpKnownHeaderNames.ContentLength, _contentLength.ToString(inv));
-            }
+                Version v = _context.Request.ProtocolVersion;
+                if (!_clSet && !_chunked && v >= HttpVersion.Version11)
+                    _chunked = true;
 
-            Version v = _context.Request.ProtocolVersion;
-            if (!_clSet && !_chunked && v >= HttpVersion.Version11)
-                _chunked = true;
+                /* Apache forces closing the connection for these status codes:
+                 *	HttpStatusCode.BadRequest 		        400
+                 *	HttpStatusCode.RequestTimeout 		    408
+                 *	HttpStatusCode.LengthRequired 		    411
+                 *	HttpStatusCode.RequestEntityTooLarge 	413
+                 *	HttpStatusCode.RequestUriTooLong 	    414
+                 *	HttpStatusCode.InternalServerError      500
+                 *	HttpStatusCode.ServiceUnavailable 	    503
+                 */
+                bool conn_close = (_statusCode == (int)HttpStatusCode.BadRequest || _statusCode == (int)HttpStatusCode.RequestTimeout
+                        || _statusCode == (int)HttpStatusCode.LengthRequired || _statusCode == (int)HttpStatusCode.RequestEntityTooLarge
+                        || _statusCode == (int)HttpStatusCode.RequestUriTooLong || _statusCode == (int)HttpStatusCode.InternalServerError
+                        || _statusCode == (int)HttpStatusCode.ServiceUnavailable);
 
-            /* Apache forces closing the connection for these status codes:
-			 *	HttpStatusCode.BadRequest 		        400
-			 *	HttpStatusCode.RequestTimeout 		    408
-			 *	HttpStatusCode.LengthRequired 		    411
-			 *	HttpStatusCode.RequestEntityTooLarge 	413
-			 *	HttpStatusCode.RequestUriTooLong 	    414
-			 *	HttpStatusCode.InternalServerError      500
-			 *	HttpStatusCode.ServiceUnavailable 	    503
-			 */
-            bool conn_close = (_statusCode == (int)HttpStatusCode.BadRequest || _statusCode == (int)HttpStatusCode.RequestTimeout
-                    || _statusCode == (int)HttpStatusCode.LengthRequired || _statusCode == (int)HttpStatusCode.RequestEntityTooLarge
-                    || _statusCode == (int)HttpStatusCode.RequestUriTooLong || _statusCode == (int)HttpStatusCode.InternalServerError
-                    || _statusCode == (int)HttpStatusCode.ServiceUnavailable);
+                if (conn_close == false)
+                    conn_close = !_context.Request.KeepAlive;
 
-            if (conn_close == false)
-                conn_close = !_context.Request.KeepAlive;
-
-            // They sent both KeepAlive: true and Connection: close
-            if (!_keepAlive || conn_close)
-            {
-                _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.Close);
-                conn_close = true;
-            }
-
-            if (_chunked)
-                _webHeaders.Set(HttpKnownHeaderNames.TransferEncoding, HttpHeaderStrings.Chunked);
-
-            int reuses = _context.Connection.Reuses;
-            if (reuses >= 100)
-            {
-                _forceCloseChunked = true;
-                if (!conn_close)
+                // They sent both KeepAlive: true and Connection: close
+                if (!_keepAlive || conn_close)
                 {
                     _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.Close);
                     conn_close = true;
                 }
+
+                if (_chunked)
+                    _webHeaders.Set(HttpKnownHeaderNames.TransferEncoding, HttpHeaderStrings.Chunked);
+
+                int reuses = _context.Connection.Reuses;
+                if (reuses >= 100)
+                {
+                    _forceCloseChunked = true;
+                    if (!conn_close)
+                    {
+                        _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.Close);
+                        conn_close = true;
+                    }
+                }
+
+                if (!conn_close)
+                {
+                    _webHeaders.Set(HttpKnownHeaderNames.KeepAlive, String.Format("timeout=15,max={0}", 100 - reuses));
+                    if (_context.Request.ProtocolVersion <= HttpVersion.Version10)
+                        _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.KeepAlive);
+                }
+
+                if (_location != null)
+                    _webHeaders.Set(HttpKnownHeaderNames.Location, _location);
+
+                if (_cookies != null)
+                {
+                    foreach (Cookie cookie in _cookies)
+                        _webHeaders.Set(HttpKnownHeaderNames.SetCookie, CookieToClientString(cookie));
+                }
             }
 
-            if (!conn_close)
-            {
-                _webHeaders.Set(HttpKnownHeaderNames.KeepAlive, String.Format("timeout=15,max={0}", 100 - reuses));
-                if (_context.Request.ProtocolVersion <= HttpVersion.Version10)
-                    _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.KeepAlive);
-            }
-
-            if (_location != null)
-                _webHeaders.Set(HttpKnownHeaderNames.Location, _location);
-
-            if (_cookies != null)
-            {
-                foreach (Cookie cookie in _cookies)
-                    _webHeaders.Set(HttpKnownHeaderNames.SetCookie, CookieToClientString(cookie));
-            }
-
+            Encoding encoding = Encoding.Default;
             StreamWriter writer = new StreamWriter(ms, encoding, 256);
             writer.Write("HTTP/{0} {1} {2}\r\n", _version, _statusCode, _statusDescription);
             string headers_str = FormatHeaders(_webHeaders);
@@ -405,7 +341,7 @@ namespace System.Net
 
             /* Assumes that the ms was at position 0 */
             ms.Position = preamble;
-            _headersSent = true;
+            SentHeaders = !isWebSocketHandshake;
         }
 
         private static string FormatHeaders(WebHeaderCollection headers)
@@ -470,6 +406,9 @@ namespace System.Net
             }
             return true;
         }
+
+        private bool Disposed { get; set; }
+        internal bool SentHeaders { get; set; }
     }
 }
 

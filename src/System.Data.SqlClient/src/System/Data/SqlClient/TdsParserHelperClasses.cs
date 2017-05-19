@@ -13,8 +13,6 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
 
-using Res = System.SR;
-
 
 namespace System.Data.SqlClient
 {
@@ -276,6 +274,7 @@ namespace System.Data.SqlClient
         internal bool isHidden;
         internal bool isExpression;
         internal bool isIdentity;
+        internal bool isColumnSet;
         internal string baseColumn;
         internal _SqlMetaData(int ordinal) : base()
         {
@@ -338,6 +337,7 @@ namespace System.Data.SqlClient
             result.isKey = isKey;
             result.isHidden = isHidden;
             result.isIdentity = isIdentity;
+            result.isColumnSet = isColumnSet;
             return result;
         }
     }
@@ -347,6 +347,7 @@ namespace System.Data.SqlClient
         internal ushort id;             // for altrow-columns only
         internal int[] indexMap;
         internal int visibleColumns;
+        internal DataTable schemaTable;
         private readonly _SqlMetaData[] _metaDataArray;
         internal ReadOnlyCollection<DbColumn> dbColumnSchema;
 
@@ -600,7 +601,7 @@ namespace System.Data.SqlClient
         {
             if (null != _multipartName)
             {
-                string[] parts = MultipartIdentifier.ParseMultipartIdentifier(_multipartName, "[\"", "]\"", Res.SQL_TDSParserTableName, false);
+                string[] parts = MultipartIdentifier.ParseMultipartIdentifier(_multipartName, "[\"", "]\"", SR.SQL_TDSParserTableName, false);
                 _serverName = parts[0];
                 _catalogName = parts[1];
                 _schemaName = parts[2];

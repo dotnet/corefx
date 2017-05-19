@@ -10,7 +10,7 @@ using System.Xml.Schema;
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_XmlResolver", Desc = "")]
-    public class TC_SchemaSet_XmlResolver
+    public class TC_SchemaSet_XmlResolver : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -19,8 +19,6 @@ namespace System.Xml.Tests
             _output = output;
         }
 
-
-        //todo: use rootpath
         public bool bWarningCallback;
 
         public bool bErrorCallback;
@@ -94,7 +92,6 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v4 - schema(Local)->schema(Local)", Priority = 1)]
-        [ActiveIssue(14918)]
         [Fact]
         public void v4()
         {
@@ -110,7 +107,6 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v5 - schema(Local)->schema(Local)->schema(Local)", Priority = 1)]
-        [ActiveIssue(14918)]
         [Fact]
         public void v5()
         {
@@ -126,6 +122,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v6 - schema(Local)->schema(Local), but resolving external URI is not allowed", Priority = 1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework doesn't have the switch AllowDefaultResolver and false is not default behavior")]
         [Fact]
         public void v6()
         {
@@ -142,7 +139,3 @@ namespace System.Xml.Tests
         }
     }
 }
-
-//todo: add tests for include
-//add tests for intranet
-//add tests for custom resolver

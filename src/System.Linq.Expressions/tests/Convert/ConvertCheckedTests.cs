@@ -18402,26 +18402,61 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void OpenGenericnType()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>)));
         }
 
         [Fact]
         public static void TypeContainingGenericParameters()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>.Enumerator)));
-            Assert.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>).MakeGenericType(typeof(List<>))));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>.Enumerator)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(List<>).MakeGenericType(typeof(List<>))));
         }
 
         [Fact]
         public static void ByRefType()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(object).MakeByRefType()));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(object).MakeByRefType()));
         }
 
         [Fact]
         public static void PointerType()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(int*)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.ConvertChecked(Expression.Constant(null), typeof(int*)));
+        }
+
+        public static IEnumerable<object[]> Conversions()
+        {
+            yield return new object[] { 3, 3 };
+            yield return new object[] { (byte)3, 3 };
+            yield return new object[] { 3, 3.0 };
+            yield return new object[] { 3.0, 3 };
+            yield return new object[] { 24910, (short)24910 };
+        }
+
+        [Theory, PerCompilationType(nameof(Conversions))]
+        public static void ConvertCheckedMakeUnary(object source, object result, bool useInterpreter)
+        {
+            LambdaExpression lambda = Expression.Lambda(
+                Expression.MakeUnary(ExpressionType.ConvertChecked, Expression.Constant(source), result.GetType())
+                );
+            Delegate del = lambda.Compile(useInterpreter);
+            Assert.Equal(result, del.DynamicInvoke());
+        }
+
+        [Fact]
+        public static void CannotConvertNonVoidToVoid()
+        {
+            Assert.Throws<InvalidOperationException>(() => Expression.ConvertChecked(Expression.Constant(1), typeof(void)));
+            Assert.Throws<InvalidOperationException>(() => Expression.ConvertChecked(Expression.Constant("a"), typeof(void)));
+            Assert.Throws<InvalidOperationException>(() => Expression.ConvertChecked(Expression.Constant(DateTime.MinValue), typeof(void)));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertVoidToVoid(bool useInterpreter)
+        {
+            Action act = Expression.Lambda<Action>(Expression.ConvertChecked(Expression.Empty(), typeof(void)))
+                .Compile(useInterpreter);
+            act();
         }
     }
 }

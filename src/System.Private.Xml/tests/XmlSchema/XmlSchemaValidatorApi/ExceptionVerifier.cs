@@ -107,7 +107,7 @@ namespace System.Xml.Tests
                     case "SYSTEM.XML":
                         {
                             var dom = new XmlDocument();
-                            _asm = dom.GetType().GetTypeInfo().Assembly;
+                            _asm = dom.GetType().Assembly;
                         }
                         break;
                     default:
@@ -187,7 +187,7 @@ namespace System.Xml.Tests
         private static string GetRuntimeInstallDir()
         {
             // Get mscorlib path
-            var s = typeof(object).GetTypeInfo().Module.FullyQualifiedName;
+            var s = typeof(object).Module.FullyQualifiedName;
             // Remove mscorlib.dll from the path
             return Directory.GetParent(s).ToString();
         }
@@ -201,7 +201,7 @@ namespace System.Xml.Tests
             // Use reflection to obtain "res" property value
             var exceptionType = _ex.GetType();
             var fInfo = exceptionType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase) ??
-                        exceptionType.GetTypeInfo().BaseType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+                        exceptionType.BaseType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
 
             if (fInfo == null)
                 throw new VerifyException("Cannot obtain Resource ID from Exception.");
@@ -260,16 +260,21 @@ namespace System.Xml.Tests
             // ignore case
             _expectedMessage = _expectedMessage.ToLowerInvariant();
             _actualMessage = _actualMessage.ToLowerInvariant();
-            if (Regex.Match(_actualMessage, _expectedMessage, RegexOptions.Singleline).ToString() != _actualMessage)
+
+
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
             {
-                // Unescape before printing the expected message string
-                _expectedMessage = Regex.Unescape(_expectedMessage);
-                _output.WriteLine("Mismatch in error message");
-                _output.WriteLine("===== Expected Message =====\n" + _expectedMessage);
-                _output.WriteLine("===== Expected Message Length =====\n" + _expectedMessage.Length);
-                _output.WriteLine("===== Actual Message =====\n" + _actualMessage);
-                _output.WriteLine("===== Actual Message Length =====\n" + _actualMessage.Length);
-                throw new VerifyException("Mismatch in error message");
+                if (Regex.Match(_actualMessage, _expectedMessage, RegexOptions.Singleline).ToString() != _actualMessage)
+                {
+                    // Unescape before printing the expected message string
+                    _expectedMessage = Regex.Unescape(_expectedMessage);
+                    _output.WriteLine("Mismatch in error message");
+                    _output.WriteLine("===== Expected Message =====\n" + _expectedMessage);
+                    _output.WriteLine("===== Expected Message Length =====\n" + _expectedMessage.Length);
+                    _output.WriteLine("===== Actual Message =====\n" + _actualMessage);
+                    _output.WriteLine("===== Actual Message Length =====\n" + _actualMessage.Length);
+                    throw new VerifyException("Mismatch in error message");
+                }
             }
         }
 

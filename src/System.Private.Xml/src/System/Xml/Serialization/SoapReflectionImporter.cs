@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System.Reflection;
     using System;
@@ -12,6 +16,8 @@ namespace System.Xml.Serialization
     using System.ComponentModel;
     using System.Threading;
     using System.Linq;
+    using System.Xml;
+    using System.Xml.Serialization;
 
     /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter"]/*' />
     /// <devdoc>
@@ -80,7 +86,8 @@ namespace System.Xml.Serialization
         private void IncludeTypes(ICustomAttributeProvider provider, RecursionLimiter limiter)
         {
             object[] attrs = provider.GetCustomAttributes(typeof(SoapIncludeAttribute), false);
-            for (int i = 0; i < attrs.Length; i++) {
+            for (int i = 0; i < attrs.Length; i++)
+            {
                 IncludeType(((SoapIncludeAttribute)attrs[i]).Type, limiter);
             }
         }
@@ -182,7 +189,7 @@ namespace System.Xml.Serialization
         {
             SoapAttributes attrs = _attributeOverrides[type];
             if (attrs != null) return attrs;
-            return new SoapAttributes(type.GetTypeInfo());
+            return new SoapAttributes(type);
         }
 
         private SoapAttributes GetAttributes(MemberInfo memberInfo)
@@ -218,7 +225,7 @@ namespace System.Xml.Serialization
 
             SoapAttributes a = GetAttributes(model.Type);
 
-            if ((a.SoapFlags & ~SoapAttributeFlags.Type) != 0)
+            if ((a.GetSoapFlags() & ~SoapAttributeFlags.Type) != 0)
                 throw new InvalidOperationException(SR.Format(SR.XmlInvalidTypeAttributes, model.Type.FullName));
 
             switch (model.TypeDesc.Kind)
@@ -365,7 +372,7 @@ namespace System.Xml.Serialization
                     if (InitializeStructMembers(item.Mapping, item.Model, limiter))
                     {
                         //
-                        // if InitializeStructMembers returns true, then there were *no* chages to the DeferredWorkItems
+                        // if InitializeStructMembers returns true, then there were *no* changes to the DeferredWorkItems
                         //
 #if DEBUG
                         // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
@@ -390,9 +397,9 @@ namespace System.Xml.Serialization
                 return true;
             if (model.TypeDesc.BaseTypeDesc != null)
             {
-                StructMapping baseMapping = ImportStructLikeMapping((StructModel)_modelScope.GetTypeModel(model.Type.GetTypeInfo().BaseType, false), limiter);
+                StructMapping baseMapping = ImportStructLikeMapping((StructModel)_modelScope.GetTypeModel(model.Type.BaseType, false), limiter);
 
-                // check to see if the import of the baseMapping was deffered
+                // check to see if the import of the baseMapping was deferred
                 int baseIndex = limiter.DeferredWorkItems.IndexOf(mapping.BaseMapping);
                 if (baseIndex < 0)
                 {
@@ -400,7 +407,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    // the import of the baseMapping was deffered, make sure that the derived mappings is deffered as well
+                    // the import of the baseMapping was deferred, make sure that the derived mappings is deferred as well
                     if (!limiter.DeferredWorkItems.Contains(mapping))
                     {
                         limiter.DeferredWorkItems.Add(new ImportStructWorkItem(model, mapping));
@@ -443,7 +450,7 @@ namespace System.Xml.Serialization
             }
             mapping.Members = (MemberMapping[])members.ToArray(typeof(MemberMapping));
             if (mapping.BaseMapping == null) mapping.BaseMapping = GetRootMapping();
-            IncludeTypes(model.Type.GetTypeInfo(), limiter);
+            IncludeTypes(model.Type, limiter);
 
             return true;
         }
@@ -482,7 +489,7 @@ namespace System.Xml.Serialization
             }
             _typeScope.AddTypeMapping(mapping);
             _types.Add(mapping.TypeName, mapping.Namespace, mapping);
-            IncludeTypes(model.Type.GetTypeInfo());
+            IncludeTypes(model.Type);
             return mapping;
         }
 
@@ -602,7 +609,7 @@ namespace System.Xml.Serialization
                 mapping.TypeDesc = model.TypeDesc;
                 mapping.TypeName = typeName;
                 mapping.Namespace = typeNs;
-                mapping.IsFlags = model.Type.GetTypeInfo().IsDefined(typeof(FlagsAttribute), false);
+                mapping.IsFlags = model.Type.IsDefined(typeof(FlagsAttribute), false);
                 _typeScope.AddTypeMapping(mapping);
                 _types.Add(typeName, typeNs, mapping);
                 ArrayList constants = new ArrayList();
@@ -624,7 +631,7 @@ namespace System.Xml.Serialization
         {
             SoapAttributes a = GetAttributes(model.FieldInfo);
             if (a.SoapIgnore) return null;
-            if ((a.SoapFlags & ~SoapAttributeFlags.Enum) != 0)
+            if ((a.GetSoapFlags() & ~SoapAttributeFlags.Enum) != 0)
                 throw new InvalidOperationException(SR.XmlInvalidEnumAttribute);
             if (a.SoapEnum == null)
                 a.SoapEnum = new SoapEnumAttribute();
@@ -720,7 +727,7 @@ namespace System.Xml.Serialization
                 throw new InvalidOperationException(SR.XmlInvalidVoid);
             }
 
-            SoapAttributeFlags flags = a.SoapFlags;
+            SoapAttributeFlags flags = a.GetSoapFlags();
             if ((flags & SoapAttributeFlags.Attribute) == SoapAttributeFlags.Attribute)
             {
                 if (!accessor.TypeDesc.IsPrimitive && !accessor.TypeDesc.IsEnum)
@@ -801,7 +808,7 @@ namespace System.Xml.Serialization
             if (a.SoapType != null && a.SoapType.TypeName.Length > 0)
                 typeName = a.SoapType.TypeName;
 
-            if (type.GetTypeInfo().IsGenericType && typeName.IndexOf('{') >= 0)
+            if (type.IsGenericType && typeName.IndexOf('{') >= 0)
             {
                 Type genType = type.GetGenericTypeDefinition();
                 Type[] names = genType.GetGenericArguments();

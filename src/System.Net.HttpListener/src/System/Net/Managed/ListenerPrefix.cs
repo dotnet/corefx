@@ -125,51 +125,5 @@ namespace System.Net
             if (_path.Length != 1)
                 _path = _path.Substring(0, _path.Length - 1);
         }
-
-        public static void CheckUri(string uri)
-        {
-            if (uri == null)
-                throw new ArgumentNullException("uriPrefix");
-
-            if (!uri.StartsWith("http://") && !uri.StartsWith("https://"))
-                throw new ArgumentException(SR.net_listener_scheme);
-
-            int length = uri.Length;
-            int start_host = uri.IndexOf(':') + 3;
-            if (start_host >= length)
-                throw new ArgumentException(SR.net_listener_host);
-
-            int colon = uri.IndexOf(':', start_host, length - start_host);
-            if (start_host == colon)
-                throw new ArgumentException(SR.net_listener_host);
-
-            int root;
-            if (colon > 0)
-            {
-                root = uri.IndexOf('/', colon, length - colon);
-                if (root == -1)
-                    throw new ArgumentException(SR.net_invalid_path);
-
-                try
-                {
-                    int p = int.Parse(uri.Substring(colon + 1, root - colon - 1));
-                    if (p <= 0 || p >= 65536)
-                        throw new ArgumentException(SR.net_invalid_port);
-                }
-                catch
-                {
-                    throw new ArgumentException(SR.net_invalid_port);
-                }
-            }
-            else
-            {
-                root = uri.IndexOf('/', start_host, length - start_host);
-                if (root == -1)
-                    throw new ArgumentException(SR.net_invalid_path);
-            }
-
-            if (uri[uri.Length - 1] != '/')
-                throw new ArgumentException(SR.net_listener_slash);
-        }
     }
 }

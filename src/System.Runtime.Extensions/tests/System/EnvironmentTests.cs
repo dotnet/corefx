@@ -20,13 +20,13 @@ namespace System.Tests
         [Fact]
         public void CurrentDirectory_Null_Path_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => Environment.CurrentDirectory = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => Environment.CurrentDirectory = null);
         }
 
         [Fact]
         public void CurrentDirectory_Empty_Path_Throws_ArgumentException()
         {
-            Assert.Throws<ArgumentException>("value", () => Environment.CurrentDirectory = string.Empty);
+            AssertExtensions.Throws<ArgumentException>("value", null, () => Environment.CurrentDirectory = string.Empty);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         public void Is64BitOperatingSystem_Unix_TrueIff64BitProcess()
         {
             Assert.Equal(Environment.Is64BitProcess, Environment.Is64BitOperatingSystem);
@@ -161,7 +161,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         public void UserDomainName_Unix_MatchesMachineName()
         {
             Assert.Equal(Environment.MachineName, Environment.UserDomainName);
@@ -198,7 +198,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         public void GetFolderPath_Unix_PersonalIsHomeAndUserProfile()
         {
             Assert.Equal(Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.Personal));
@@ -209,11 +209,22 @@ namespace System.Tests
         [Fact]
         public void GetSystemDirectory()
         {
+            if (PlatformDetection.IsWindowsNanoServer)
+            {
+                // https://github.com/dotnet/corefx/issues/19110
+                // On Windows Nano, ShGetKnownFolderPath currently doesn't give
+                // the correct result for SystemDirectory.
+                // Assert that it's wrong, so that if it's fixed, we don't forget to
+                // enable this test for Nano.
+                Assert.NotEqual(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
+                return;
+            }
+
             Assert.Equal(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         [InlineData(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.None)]
         [InlineData(Environment.SpecialFolder.Personal, Environment.SpecialFolderOption.None)]
         [InlineData(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None)]
@@ -240,7 +251,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]  // Tests OS-specific environment
         [InlineData(Environment.SpecialFolder.Favorites, Environment.SpecialFolderOption.DoNotVerify)]
         [InlineData(Environment.SpecialFolder.InternetCache, Environment.SpecialFolderOption.DoNotVerify)]
         [InlineData(Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolderOption.None)]
@@ -302,21 +313,42 @@ namespace System.Tests
         // [InlineData(Environment.SpecialFolder.LocalizedResources)]
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests OS-specific environment
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);
-            Assert.NotEmpty(knownFolder);
+
+            if (!PlatformDetection.IsWindowsNanoServer)
+            {
+                // See Nano comment below
+                Assert.NotEmpty(knownFolder);
+            }
 
             // Call the older folder API to compare our results.
             char* buffer = stackalloc char[260];
             SHGetFolderPathW(IntPtr.Zero, (int)folder, IntPtr.Zero, 0, buffer);
             string folderPath = new string(buffer);
+
+            if (PlatformDetection.IsWindowsNanoServer)
+            {
+                // https://github.com/dotnet/corefx/issues/19110
+                // On Windows Nano, ShGetKnownFolderPath currently isn't supported.
+                // It currently gives bogus results for everything except
+                // UserProfile. Assert that continues to be true, so if and when the fix the API,
+                // we will know to remove this Nano-specific path and protect their fix.
+                if (folder != Environment.SpecialFolder.UserProfile)
+                {
+                    Assert.NotEqual(folderPath, knownFolder);
+                }
+
+                return; // Even for UserProfile -- since the API is not supported the result may change
+            }
+
             Assert.Equal(folderPath, knownFolder);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes
         public void GetLogicalDrives_Unix_AtLeastOneIsRoot()
         {
             string[] drives = Environment.GetLogicalDrives();
@@ -327,7 +359,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public void GetLogicalDrives_Windows_MatchesExpectedLetters()
         {
             string[] drives = Environment.GetLogicalDrives();

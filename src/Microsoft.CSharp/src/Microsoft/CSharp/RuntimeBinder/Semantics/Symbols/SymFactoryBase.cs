@@ -10,12 +10,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // SymFactory, TypeFactory and MiscSymFactory. This provides a common
     // way of creating syms that all three classes use.
 
-    internal class SymFactoryBase
+    internal abstract class SymFactoryBase
     {
         // Members.
-        protected SYMTBL m_pSymTable;
-        protected Name m_pMissingNameNode;
-        protected Name m_pMissingNameSym;
+        private SYMTBL m_pSymTable;
+        private Name m_pMissingNameNode;
+        private Name m_pMissingNameSym;
 
         protected Symbol newBasicSym(
             SYMKIND kind,
@@ -130,14 +130,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // This class should never be created on its own.
-        protected SymFactoryBase(SYMTBL symtable, NameManager namemgr)
+        protected SymFactoryBase(SYMTBL symtable, bool loadNames)
         {
             m_pSymTable = symtable;
 
-            if (namemgr != null)
+            if (loadNames)
             {
-                m_pMissingNameNode = namemgr.GetPredefName(PredefinedName.PN_MISSING);
-                m_pMissingNameSym = namemgr.GetPredefName(PredefinedName.PN_MISSINGSYM);
+                m_pMissingNameNode = NameManager.GetPredefinedName(PredefinedName.PN_MISSING);
+                m_pMissingNameSym = NameManager.GetPredefinedName(PredefinedName.PN_MISSINGSYM);
             }
         }
     }

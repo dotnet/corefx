@@ -37,13 +37,11 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
-    [Serializable]
     public class ConcurrentStack<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
         /// <summary>
         /// A simple (internal) node type used to store elements of concurrent stacks and queues.
         /// </summary>
-        [Serializable]
         private class Node
         {
             internal readonly T _value; // Value of the node.
@@ -653,7 +651,7 @@ namespace System.Collections.Concurrent
             Node head;
             Node next;
             int backoff = 1;
-            Random r = new Random(Environment.TickCount & Int32.MaxValue); // avoid the case where TickCount could return Int32.MinValue
+            Random r = null;
             while (true)
             {
                 head = _head;
@@ -694,7 +692,18 @@ namespace System.Collections.Concurrent
                     spin.SpinOnce();
                 }
 
-                backoff = spin.NextSpinWillYield ? r.Next(1, BACKOFF_MAX_YIELDS) : backoff * 2;
+                if (spin.NextSpinWillYield)
+                {
+                    if (r == null)
+                    {
+                        r = new Random();
+                    }
+                    backoff = r.Next(1, BACKOFF_MAX_YIELDS);
+                }
+                else
+                {
+                    backoff *= 2;
+                }
             }
         }
 #pragma warning restore 0420

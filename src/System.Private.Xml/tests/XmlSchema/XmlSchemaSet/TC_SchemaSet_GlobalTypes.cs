@@ -10,7 +10,7 @@ using System.Xml.Schema;
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_GlobalTypes", Desc = "")]
-    public class TC_SchemaSet_GlobalTypes
+    public class TC_SchemaSet_GlobalTypes : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -269,6 +269,3 @@ namespace System.Xml.Tests
         }
     }
 }
-
-//todo: add sanity test for include
-//todo: copy count checks from element

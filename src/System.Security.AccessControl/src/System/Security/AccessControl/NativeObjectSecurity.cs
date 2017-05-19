@@ -152,6 +152,10 @@ nameof(name));
                     {
                         exception = new NotSupportedException(SR.AccessControl_NoAssociatedSecurity);
                     }
+                    else if (error == Interop.Errors.ERROR_PIPE_NOT_CONNECTED)
+                    {
+                        exception = new InvalidOperationException(SR.InvalidOperation_DisconnectedPipe);
+                    }
                     else
                     {
                         Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32GetSecurityInfo() failed with unexpected error code {0}", error));
@@ -234,7 +238,7 @@ nameof(name));
 
                     if ((_securityDescriptor.ControlFlags & ControlFlags.DiscretionaryAclProtected) != 0)
                     {
-                        securityInfo = (SecurityInfos)((uint)securityInfo | ProtectedDiscretionaryAcl);
+                        securityInfo = unchecked((SecurityInfos)((uint)securityInfo | ProtectedDiscretionaryAcl));
                     }
                     else
                     {

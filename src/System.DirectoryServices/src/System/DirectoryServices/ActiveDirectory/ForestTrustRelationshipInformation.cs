@@ -11,7 +11,6 @@ namespace System.DirectoryServices.ActiveDirectory
     using System.Diagnostics;
     using System.Security.Permissions;
 
-    [DirectoryServicesPermission(SecurityAction.LinkDemand, Unrestricted = true)]
     public class ForestTrustRelationshipInformation : TrustRelationshipInformation
     {
         private TopLevelNameCollection _topLevelNames = new TopLevelNameCollection();
@@ -117,7 +116,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
 
                 // allocate the memory for all the records
-                records = Marshal.AllocHGlobal(count * Marshal.SizeOf(typeof(IntPtr)));
+                records = Marshal.AllocHGlobal(count * IntPtr.Size);
             }
 
             try
@@ -149,7 +148,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         ptrList.Add(tmpPtr);
                         Marshal.StructureToPtr(record, tmpPtr, false);
 
-                        Marshal.WriteIntPtr(records, Marshal.SizeOf(typeof(IntPtr)) * currentCount, tmpPtr);
+                        Marshal.WriteIntPtr(records, IntPtr.Size * currentCount, tmpPtr);
 
                         currentCount++;
                     }
@@ -178,7 +177,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         ptrList.Add(tmpPtr);
                         Marshal.StructureToPtr(record, tmpPtr, false);
 
-                        Marshal.WriteIntPtr(records, Marshal.SizeOf(typeof(IntPtr)) * currentCount, tmpPtr);
+                        Marshal.WriteIntPtr(records, IntPtr.Size * currentCount, tmpPtr);
 
                         currentCount++;
                     }
@@ -215,7 +214,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         ptrList.Add(tmpPtr);
                         Marshal.StructureToPtr(record, tmpPtr, false);
 
-                        Marshal.WriteIntPtr(records, Marshal.SizeOf(typeof(IntPtr)) * currentCount, tmpPtr);
+                        Marshal.WriteIntPtr(records, IntPtr.Size * currentCount, tmpPtr);
 
                         currentCount++;
                     }
@@ -229,7 +228,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         tmpPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LSA_FOREST_TRUST_RECORD)));
                         ptrList.Add(tmpPtr);
                         Marshal.StructureToPtr(lastRecord, tmpPtr, false);
-                        Marshal.WriteIntPtr(records, Marshal.SizeOf(typeof(IntPtr)) * currentCount, tmpPtr);
+                        Marshal.WriteIntPtr(records, IntPtr.Size * currentCount, tmpPtr);
                         currentCount++;
 
                         for (int i = 0; i < binaryDataCount; i++)
@@ -253,7 +252,7 @@ namespace System.DirectoryServices.ActiveDirectory
                             ptrList.Add(tmpPtr);
                             Marshal.StructureToPtr(record, tmpPtr, false);
 
-                            Marshal.WriteIntPtr(records, Marshal.SizeOf(typeof(IntPtr)) * currentCount, tmpPtr);
+                            Marshal.WriteIntPtr(records, IntPtr.Size * currentCount, tmpPtr);
 
                             currentCount++;
                         }
@@ -399,7 +398,7 @@ namespace System.DirectoryServices.ActiveDirectory
                             IntPtr addr = (IntPtr)0;
                             for (int i = 0; i < count; i++)
                             {
-                                addr = Marshal.ReadIntPtr(trustInfo.Entries, i * Marshal.SizeOf(typeof(IntPtr)));
+                                addr = Marshal.ReadIntPtr(trustInfo.Entries, i * IntPtr.Size);
                                 LSA_FOREST_TRUST_RECORD record = new LSA_FOREST_TRUST_RECORD();
                                 Marshal.PtrToStructure(addr, record);
 

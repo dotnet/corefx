@@ -1,33 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A28B0064-EFB2-4B77-B97C-DECF5DAB074E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Security.Cryptography.X509Certificates.Tests</AssemblyName>
-    <RootNamespace>System.Security.Cryptography.X509Certificates.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
-    <DefineConstants Condition="'$(TargetGroup)'==''">$(DefineConstants);netstandard17</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp1.1'">$(DefineConstants);netstandard17;netcoreapp11</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Security.Cryptography.X509Certificates.pkgproj">
-      <Project>{6f8576c2-6cd0-4df3-8394-00b002d82e40}</Project>
-      <Name>System.Security.Cryptography.X509Certificates</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Cert.cs" />
+    <Compile Include="CertificateCreation\CertificateRequestApiTests.cs" />
+    <Compile Include="CertificateCreation\CertificateRequestChainTests.cs" />
+    <Compile Include="CertificateCreation\CertificateRequestUsageTests.cs" />
+    <Compile Include="CertificateCreation\DSAX509SignatureGenerator.cs" />
+    <Compile Include="CertificateCreation\EccTestData.cs" />
+    <Compile Include="CertificateCreation\ECDsaX509SignatureGeneratorTests.cs" />
+    <Compile Include="CertificateCreation\PrivateKeyAssociationTests.cs" />
+    <Compile Include="CertificateCreation\RSAPkcs1X509SignatureGeneratorTests.cs" />
+    <Compile Include="CertificateCreation\RSAPssX509SignatureGeneratorTests.cs" />
+    <Compile Include="CertificateCreation\SubjectAltNameBuilderTests.cs" />
     <Compile Include="CertTests.cs" />
     <Compile Include="ChainHolder.cs" />
     <Compile Include="ChainTests.cs" />
@@ -35,6 +31,8 @@
     <Compile Include="CollectionTests.cs" />
     <Compile Include="ContentTypeTests.cs" />
     <Compile Include="CtorTests.cs" />
+    <Compile Include="DSAOther.cs" />
+    <Compile Include="ECDsaOther.cs" />
     <Compile Include="ExportTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="FindTests.cs" />
@@ -44,10 +42,16 @@
     <Compile Include="PfxTests.cs" />
     <Compile Include="PropsTests.cs" />
     <Compile Include="PublicKeyTests.cs" />
+    <Compile Include="RSAOther.cs" />
     <Compile Include="TestData.cs" />
+    <Compile Include="TestEnvironmentConfiguration.cs" />
     <Compile Include="X500DistinguishedNameEncodingTests.cs" />
     <Compile Include="X500DistinguishedNameTests.cs" />
+    <Compile Include="X509StoreMutableTests.OSX.cs" />
     <Compile Include="X509StoreTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>
     </Compile>
@@ -55,14 +59,13 @@
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='' OR '$(TargetGroup)'=='netcoreapp1.1'">
-    <Compile Include="ChainTests.netstandard17.cs" />
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard' OR '$(TargetGroup)'=='netcoreapp'">
     <Compile Include="ImportTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
     <Compile Include="X509FilesystemTests.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -76,15 +79,25 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPwUid.cs">
       <Link>Common\Interop\Unix\Interop.GetPwUid.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.FChMod.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.FChMod.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Permissions.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Permissions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Stat.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
     </Compile>
+    <Compile Include="TestEnvironmentConfiguration.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)System.Security.Cryptography.X509Certificates.TestData\1.0.2-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.security.cryptography.x509certificates.testdata\1.0.2-prerelease\content\**\*.*" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

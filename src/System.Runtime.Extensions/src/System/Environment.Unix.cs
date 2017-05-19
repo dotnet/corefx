@@ -200,7 +200,7 @@ namespace System
             // Use the user-dirs.dirs file to look up the right config.
             // Note that the docs also highlight a list of directories in which to look for this file:
             // "$XDG_CONFIG_DIRS defines the preference-ordered set of base directories to search for configuration files in addition
-            //  to the $XDG_CONFIG_HOME base directory. The directories in $XDG_CONFIG_DIRS should be seperated with a colon ':'. If
+            //  to the $XDG_CONFIG_HOME base directory. The directories in $XDG_CONFIG_DIRS should be separated with a colon ':'. If
             //  $XDG_CONFIG_DIRS is either not set or empty, a value equal to / etc / xdg should be used."
             // For simplicity, we don't currently do that.  We can add it if/when necessary.
 
@@ -327,6 +327,8 @@ namespace System
                 revision = FindAndParseNextNumber(release, ref i);
             }
 
+            // For compatibility reasons with Mono, PlatformID.Unix is returned on MacOSX. PlatformID.MacOSX
+            // is hidden from the editor and shouldn't be used.
             return new OperatingSystem(PlatformID.Unix, new Version(major, minor, build, revision));
         });
 
@@ -382,7 +384,7 @@ namespace System
                 {
                     lastBufLen *= 2;
                     byte[] heapBuf = new byte[lastBufLen];
-                    fixed (byte* buf = heapBuf)
+                    fixed (byte* buf = &heapBuf[0])
                     {
                         if (TryGetUserNameFromPasswd(buf, heapBuf.Length, out username))
                         {

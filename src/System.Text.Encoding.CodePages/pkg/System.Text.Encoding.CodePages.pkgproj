@@ -1,13 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Text.Encoding.CodePages.csproj">
-      <SupportedFramework>net461;netcoreapp1.1;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp2.0;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Text.Encoding.CodePages.builds" />
+    <ProjectReference Include="..\src\System.Text.Encoding.CodePages.csproj" />
+    <HarvestIncludePaths Include="lib/net46" />
+    <HarvestIncludePaths Include="ref/netstandard1.3;runtimes/win/lib/netstandard1.3" />
+    <HarvestIncludePaths Include="runtimes/unix/lib/netstandard1.3">
+      <!-- package unix impl (which is actually platform agnostic) as RID agnostic -->
+      <TargetPath>lib/netstandard1.3</TargetPath>
+    </HarvestIncludePaths>
   </ItemGroup>
   <ItemGroup>
+    <InboxOnTargetFramework Include="uap10.1">
+      <PackageTargetRuntime>win</PackageTargetRuntime>
+    </InboxOnTargetFramework>
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
     <InboxOnTargetFramework Include="xamarinios10" />

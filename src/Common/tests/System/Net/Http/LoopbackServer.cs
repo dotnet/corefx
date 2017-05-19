@@ -195,6 +195,6 @@ namespace System.Net.Test.Common
                 
                 return null;
             }), out localEndPoint);
-        }
+        }        
     }
 }

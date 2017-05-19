@@ -10,7 +10,7 @@ namespace System.Drawing
 {
     [DebuggerDisplay("{NameAndARGBValue}")]
     [Serializable]
-    public struct Color
+    public struct Color : IEquatable<Color>
     {
         public static readonly Color Empty = new Color();
 
@@ -363,13 +363,11 @@ namespace System.Drawing
 
         public byte A => (byte)((Value >> ARGBAlphaShift) & 0xFF);
 
-        public bool IsKnownColor => ((state & StateKnownColorValid) != 0);
+        private bool IsKnownColor => ((state & StateKnownColorValid) != 0);
 
         public bool IsEmpty => state == 0;
 
         public bool IsNamedColor => ((state & StateNameValid) != 0) || IsKnownColor;
-
-        public bool IsSystemColor => IsKnownColor && ((((KnownColor)knownColor) <= KnownColor.WindowText) || (((KnownColor)knownColor) > KnownColor.YellowGreen));
 
         // Not localized because it's only used for the DebuggerDisplayAttribute, and the values are
         // programmatic items.
@@ -451,10 +449,10 @@ namespace System.Drawing
 
         public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
 
-        public static Color FromKnownColor(KnownColor color)
+        private static Color FromKnownColor(KnownColor color)
         {
             var value = (int)color;
-            if (value < (int)KnownColor.ActiveBorder || value > (int)KnownColor.MenuHighlight)
+            if (value < (int)KnownColor.FirstColor || value > (int)KnownColor.LastColor)
             {
                 return FromName(color.ToString());
             }
@@ -576,7 +574,7 @@ namespace System.Drawing
 
         public int ToArgb() => unchecked((int)Value);
 
-        public KnownColor ToKnownColor() => (KnownColor)knownColor;
+        private KnownColor ToKnownColor() => (KnownColor)knownColor;
 
         public override string ToString()
         {
@@ -602,7 +600,9 @@ namespace System.Drawing
 
         public static bool operator !=(Color left, Color right) => !(left == right);
 
-        public override bool Equals(object obj) => obj is Color && this == (Color)obj;
+        public override bool Equals(object obj) => obj is Color && Equals((Color)obj);
+
+        public bool Equals(Color other) => this == other;
 
         public override int GetHashCode()
         {

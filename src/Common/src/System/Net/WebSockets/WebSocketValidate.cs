@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -15,6 +16,34 @@ namespace System.Net.WebSockets
         private const int InvalidCloseStatusCodesFrom = 0;
         private const int InvalidCloseStatusCodesTo = 999;
         private const string Separators = "()<>@,;:\\\"/[]?={} ";
+
+        internal static void ThrowIfInvalidState(WebSocketState currentState, bool isDisposed, WebSocketState[] validStates)
+        {
+            string validStatesText = string.Empty;
+
+            if (validStates != null && validStates.Length > 0)
+            {
+                foreach (WebSocketState validState in validStates)
+                {
+                    if (currentState == validState)
+                    {
+                        // Ordering is important to maintain .NET 4.5 WebSocket implementation exception behavior.
+                        if (isDisposed)
+                        {
+                            throw new ObjectDisposedException(nameof(ClientWebSocket));
+                        }
+
+                        return;
+                    }
+                }
+
+                validStatesText = string.Join(", ", validStates);
+            }
+
+            throw new WebSocketException(
+                WebSocketError.InvalidState,
+                SR.Format(SR.net_WebSockets_InvalidState, currentState, validStatesText));
+        }
 
         internal static void ValidateSubprotocol(string subProtocol)
         {
@@ -95,9 +124,37 @@ namespace System.Net.WebSockets
 
         internal static void ValidateArraySegment(ArraySegment<byte> arraySegment, string parameterName)
         {
+            Debug.Assert(!string.IsNullOrEmpty(parameterName), "'parameterName' MUST NOT be NULL or string.Empty");
+
             if (arraySegment.Array == null)
             {
-                throw new ArgumentNullException(parameterName + ".Array");
+                throw new ArgumentNullException(parameterName + "." + nameof(arraySegment.Array));
+            }
+            if (arraySegment.Offset < 0 || arraySegment.Offset > arraySegment.Array.Length)
+            {
+                throw new ArgumentOutOfRangeException(parameterName + "." + nameof(arraySegment.Offset));
+            }
+            if (arraySegment.Count < 0 || arraySegment.Count > (arraySegment.Array.Length - arraySegment.Offset))
+            {
+                throw new ArgumentOutOfRangeException(parameterName + "." + nameof(arraySegment.Count));
+            }
+        }
+
+        internal static void ValidateBuffer(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            if (offset < 0 || offset > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (count < 0 || count > (buffer.Length - offset))
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
         }
     }

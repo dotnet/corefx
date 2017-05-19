@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using Xunit;
+using Microsoft.Xunit.Performance;
 using Xunit.Abstractions;
 
 namespace System.Numerics.Tests
@@ -20,8 +21,7 @@ namespace System.Numerics.Tests
             _output = output;
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 64)]
         [InlineData(1000000, 256, 256)]
@@ -29,13 +29,13 @@ namespace System.Numerics.Tests
         [InlineData(100000, 4096, 4096)]
         [InlineData(100000, 16384, 16384)]
         [InlineData(100000, 65536, 65536)]
+        [ActiveIssue(18248)]
         public void Add(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.Add(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 64)]
         [InlineData(1000000, 256, 256)]
@@ -43,13 +43,13 @@ namespace System.Numerics.Tests
         [InlineData(100000, 4096, 4096)]
         [InlineData(100000, 16384, 16384)]
         [InlineData(100000, 65536, 65536)]
+        [ActiveIssue(18248)]
         public void Subtract(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.Subtract(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 64)]
         [InlineData(1000000, 256, 256)]
@@ -57,13 +57,13 @@ namespace System.Numerics.Tests
         [InlineData(10000, 4096, 4096)]
         [InlineData(1000, 16384, 16384)]
         [InlineData(100, 65536, 65536)]
+        [ActiveIssue(18248)]
         public void Multiply(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.Multiply(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16)]
         [InlineData(1000000, 64)]
         [InlineData(1000000, 256)]
@@ -71,13 +71,13 @@ namespace System.Numerics.Tests
         [InlineData(10000, 4096)]
         [InlineData(1000, 16384)]
         [InlineData(100, 65536)]
+        [ActiveIssue(18248)]
         public void Square(int count, int bits)
         {
             RunBenchmark(count, bits, v => BigInteger.Multiply(v, v));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 16)]
         [InlineData(1000000, 256, 128)]
@@ -85,13 +85,13 @@ namespace System.Numerics.Tests
         [InlineData(10000, 4096, 2048)]
         [InlineData(1000, 16384, 8192)]
         [InlineData(100, 65536, 32768)]
+        [ActiveIssue(18248)]
         public void Divide(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.Divide(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 16)]
         [InlineData(1000000, 256, 128)]
@@ -99,13 +99,13 @@ namespace System.Numerics.Tests
         [InlineData(10000, 4096, 2048)]
         [InlineData(1000, 16384, 8192)]
         [InlineData(100, 65536, 32768)]
+        [ActiveIssue(18248)]
         public void Remainder(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.Remainder(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(1000000, 16, 16)]
         [InlineData(1000000, 64, 64)]
         [InlineData(100000, 256, 256)]
@@ -113,19 +113,20 @@ namespace System.Numerics.Tests
         [InlineData(10000, 4096, 4096)]
         [InlineData(1000, 16384, 16384)]
         [InlineData(100, 65536, 65536)]
+        [ActiveIssue(18248)]
         public void GreatestCommonDivisor(int count, int leftBits, int rightBits)
         {
             RunBenchmark(count, leftBits, rightBits, (l, r) => BigInteger.GreatestCommonDivisor(l, r));
         }
 
-        [Theory]
-        [ActiveIssue("PerformanceTest")]
+        [Benchmark] //PerformanceTest
         [InlineData(100000, 16, 16, 16)]
         [InlineData(10000, 64, 64, 64)]
         [InlineData(1000, 256, 256, 256)]
         [InlineData(100, 1024, 1024, 1024)]
         [InlineData(10, 4096, 4096, 4096)]
         [InlineData(1, 16384, 16384, 16384)]
+        [ActiveIssue(18248)]
         public void ModPow(int count, int leftBits, int rightBits, int otherBits)
         {
             RunBenchmark(count, leftBits, rightBits, otherBits, (l, r, o) => BigInteger.ModPow(l, r, o));

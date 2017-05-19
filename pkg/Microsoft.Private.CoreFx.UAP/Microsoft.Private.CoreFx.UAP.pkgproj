@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <PropertyGroup>
+    <TargetFrameworkName>uap</TargetFrameworkName>
+    <TargetFrameworkVersion>10.1</TargetFrameworkVersion>
+    <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
+
+    <RefBinDir>$(UAPPackageRefPath)</RefBinDir>
+    <LibBinDir>$(UAPPackageRuntimePath)</LibBinDir>
+    <LibBinDir Condition="$(PackageTargetRuntime.EndsWith('-aot'))">$(UAPAOTPackageRuntimePath)</LibBinDir>
+
+    <IsFrameworkPackage>true</IsFrameworkPackage>
+
+    <!-- Private packages need symbols -->
+    <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <IgnoredReference Include="System.Private.CoreLib" />
+    <IgnoredReference Include="Windows" />
+    <IgnoredReference Include="System.Private.Interop" />
+    <IgnoredReference Include="Microsoft.Win32.Registry" /> <!-- Ignore for now since it's being exclude from closure below. Issue https://github.com/dotnet/corefx/issues/15966 -->
+    <IgnoredReference Include="System.IO.IsolatedStorage" /> <!-- Ignore for now since it's being exclude from closure below. Issue https://github.com/dotnet/corefx/issues/15968 -->
+
+    <ExcludeFromClosure Include="System.IO.IsolatedStorage" /> <!-- IsolatedStorage depends on AccessControl which is not available for UAP -->
+    <ExcludeFromClosure Include="Microsoft.Win32.Registry" /> <!-- Most likely this one will be removed from the package, it's just there today for the closure -->
+    <!-- Exclude shims from the closure verification -->
+    <ExcludeFromClosure Include="mscorlib" />
+    <ExcludeFromClosure Include="System" />
+    <ExcludeFromClosure Include="System.Core" />
+    <ExcludeFromClosure Include="System.Data" />
+    <ExcludeFromClosure Include="System.Drawing" />
+    <ExcludeFromClosure Include="System.Net" />
+    <ExcludeFromClosure Include="System.Transactions" />
+
+    <ExcludeFromDuplicateTypes Include="System.Private.Reflection.Metadata.Ecma335" />
+
+    <!-- Permit the following implementation-only assemblies -->
+    <ValidatePackageSuppression Condition="'$(PackageTargetRuntime)' != ''" Include="PermitInbox">
+      <Value>
+        Microsoft.VisualBasic;
+        System.Diagnostics.DiagnosticSource;
+        System.Private.DataContractSerialization;
+        System.Private.Uri;
+        System.Private.Xml;
+        System.Private.Xml.Linq;
+        System.Reflection.Emit.ILGeneration;
+        System.Reflection.Emit.Lightweight;
+        System.Reflection.Emit;
+        System.Security.AccessControl;
+        System.Security.Cryptography.Cng;
+        System.Security.Principal.Windows;
+        System.Threading.Tasks.Extensions;
+      </Value>
+    </ValidatePackageSuppression>
+    <ValidatePackageSuppression Condition="'$(PackageTargetRuntime)' != '' AND '$(TargetGroup)' == 'uapaot'" Include="PermitInbox">
+      <Value>
+        System.Private.Reflection.Metadata.Ecma335;
+      </Value>
+    </ValidatePackageSuppression>
+  </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

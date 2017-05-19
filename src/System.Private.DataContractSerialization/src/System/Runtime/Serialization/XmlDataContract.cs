@@ -15,7 +15,7 @@ namespace System.Runtime.Serialization
     using System.Security;
     using System.Linq;
 
-#if NET_NATIVE
+#if uapaot
     public delegate IXmlSerializable CreateXmlSerializableDelegate();
     public sealed class XmlDataContract : DataContract
 #else
@@ -84,14 +84,20 @@ namespace System.Runtime.Serialization
             { _helper.TopLevelElementNamespace = value; }
         }
 
-#if NET_NATIVE
+        internal bool IsTopLevelElementNullable
+        {
+            get { return _helper.IsTopLevelElementNullable; }
+            set { _helper.IsTopLevelElementNullable = value; }
+        }
+
+#if uapaot
         private CreateXmlSerializableDelegate _createXmlSerializableDelegate;
         public CreateXmlSerializableDelegate CreateXmlSerializableDelegate        
 #else
         internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
 #endif
         {
-#if !NET_NATIVE
+#if !uapaot
             get
             {
                 // We create XmlSerializableDelegate via CodeGen when CodeGen is enabled;
@@ -143,6 +149,7 @@ namespace System.Runtime.Serialization
             private bool _isKnownTypeAttributeChecked;
             private XmlDictionaryString _topLevelElementName;
             private XmlDictionaryString _topLevelElementNamespace;
+            private bool _isTopLevelElementNullable;
             private bool _hasRoot;
             private CreateXmlSerializableDelegate _createXmlSerializable;
             private XmlSchemaType _xsdType;
@@ -153,9 +160,9 @@ namespace System.Runtime.Serialization
 
             internal XmlDataContractCriticalHelper(Type type) : base(type)
             {
-                if (type.GetTypeInfo().IsDefined(Globals.TypeOfDataContractAttribute, false))
+                if (type.IsDefined(Globals.TypeOfDataContractAttribute, false))
                     throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.IXmlSerializableCannotHaveDataContract, DataContract.GetClrTypeFullName(type))));
-                if (type.GetTypeInfo().IsDefined(Globals.TypeOfCollectionDataContractAttribute, false))
+                if (type.IsDefined(Globals.TypeOfCollectionDataContractAttribute, false))
                     throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.IXmlSerializableCannotHaveCollectionDataContract, DataContract.GetClrTypeFullName(type))));
                 XmlSchemaType xsdType;
                 bool hasRoot;
@@ -166,13 +173,14 @@ namespace System.Runtime.Serialization
                 XmlDictionary dictionary = new XmlDictionary();
                 this.Name = dictionary.Add(StableName.Name);
                 this.Namespace = dictionary.Add(StableName.Namespace);
-                object[] xmlRootAttributes = (UnderlyingType == null) ? null : UnderlyingType.GetTypeInfo().GetCustomAttributes(Globals.TypeOfXmlRootAttribute, false).ToArray();
+                object[] xmlRootAttributes = (UnderlyingType == null) ? null : UnderlyingType.GetCustomAttributes(Globals.TypeOfXmlRootAttribute, false).ToArray();
                 if (xmlRootAttributes == null || xmlRootAttributes.Length == 0)
                 {
                     if (hasRoot)
                     {
                         _topLevelElementName = Name;
                         _topLevelElementNamespace = (this.StableName.Namespace == Globals.SchemaNamespace) ? DictionaryGlobals.EmptyString : Namespace;
+                        _isTopLevelElementNullable = true;
                     }
                 }
                 else
@@ -180,6 +188,7 @@ namespace System.Runtime.Serialization
                     if (hasRoot)
                     {
                         XmlRootAttribute xmlRootAttribute = (XmlRootAttribute)xmlRootAttributes[0];
+                        _isTopLevelElementNullable = xmlRootAttribute.IsNullable;
                         string elementName = xmlRootAttribute.ElementName;
                         _topLevelElementName = (elementName == null || elementName.Length == 0) ? Name : dictionary.Add(DataContract.EncodeLocalName(elementName));
                         string elementNs = xmlRootAttribute.Namespace;
@@ -247,6 +256,13 @@ namespace System.Runtime.Serialization
                 set
                 { _topLevelElementNamespace = value; }
             }
+
+            internal bool IsTopLevelElementNullable
+            {
+                get { return _isTopLevelElementNullable; }
+                set { _isTopLevelElementNullable = value; }
+            }
+
             internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
             {
                 get { return _createXmlSerializable; }
@@ -258,7 +274,7 @@ namespace System.Runtime.Serialization
         {
             Type type = UnderlyingType;
 
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
                 return null;
 
             ConstructorInfo ctor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, Array.Empty<Type>());
@@ -268,7 +284,7 @@ namespace System.Runtime.Serialization
             return ctor;
         }
 
-#if !NET_NATIVE
+#if !uapaot
         internal CreateXmlSerializableDelegate GenerateCreateXmlSerializableDelegate()
         {
             Type type = this.UnderlyingType;
@@ -289,7 +305,7 @@ namespace System.Runtime.Serialization
                     throw;
                 }
             }
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 System.Reflection.Emit.LocalBuilder local = ilg.DeclareLocal(type, type.Name + "Value");
                 ilg.Ldloca(local);
@@ -303,7 +319,7 @@ namespace System.Runtime.Serialization
                 ConstructorInfo ctor = GetConstructor();
                 if (!ctor.IsPublic && type.FullName == "System.Xml.Linq.XElement")
                 {
-                    Type xName = type.GetTypeInfo().Assembly.GetType("System.Xml.Linq.XName");
+                    Type xName = type.Assembly.GetType("System.Xml.Linq.XName");
                     if (xName != null)
                     {
                         MethodInfo XName_op_Implicit = xName.GetMethod(
@@ -365,7 +381,7 @@ namespace System.Runtime.Serialization
 
         internal IXmlSerializable ReflectionCreateXmlSerializable(Type type)
         {
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 throw new NotImplementedException("ReflectionCreateXmlSerializable - value type");
             }

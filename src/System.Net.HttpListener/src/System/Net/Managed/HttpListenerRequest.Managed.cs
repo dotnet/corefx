@@ -30,15 +30,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Security.Authentication.ExtendedProtection;
-using System.Threading.Tasks;
-using System.Net;
 
 namespace System.Net
 {
@@ -52,26 +49,13 @@ namespace System.Net
             }
         }
 
-        private string[] _accept_types;
-        private Encoding _content_encoding;
-        private long _content_length;
-        private bool _cl_set;
-        private CookieCollection _cookies;
+        private long _contentLength;
+        private bool _clSet;
         private WebHeaderCollection _headers;
         private string _method;
-        private Stream _input_stream;
-        private Version _version;
-        private NameValueCollection _query_string; // check if null is ok, check if read-only, check case-sensitiveness
-        private string _raw_url;
-        private Uri _url;
-        private Uri _referrer;
-        private string[] _user_languages;
+        private Stream _inputStream;
         private HttpListenerContext _context;
-        private bool _is_chunked;
-        private bool _ka_set;
-        private bool _keep_alive;
-        private delegate X509Certificate2 GCCDelegate();
-        private GCCDelegate _gccDelegate;
+        private bool _isChunked;
 
         private static byte[] s_100continue = Encoding.ASCII.GetBytes("HTTP/1.1 100 Continue\r\n\r\n");
 
@@ -109,7 +93,7 @@ namespace System.Net
                 return;
             }
 
-            _raw_url = parts[1];
+            _rawUrl = parts[1];
             if (parts[2].Length != 8 || !parts[2].StartsWith("HTTP/"))
             {
                 _context.ErrorMessage = "Invalid request line (version).";
@@ -126,35 +110,6 @@ namespace System.Net
             {
                 _context.ErrorMessage = "Invalid request line (version).";
                 return;
-            }
-        }
-
-        private void CreateQueryString(string query)
-        {
-            if (query == null || query.Length == 0)
-            {
-                _query_string = new NameValueCollection(1);
-                return;
-            }
-
-            _query_string = new NameValueCollection();
-            if (query[0] == '?')
-                query = query.Substring(1);
-            string[] components = query.Split('&');
-            foreach (string kv in components)
-            {
-                int pos = kv.IndexOf('=');
-                if (pos == -1)
-                {
-                    _query_string.Add(null, WebUtility.UrlDecode(kv));
-                }
-                else
-                {
-                    string key = WebUtility.UrlDecode(kv.Substring(0, pos));
-                    string val = WebUtility.UrlDecode(kv.Substring(pos + 1));
-
-                    _query_string.Add(key, val);
-                }
             }
         }
 
@@ -177,20 +132,20 @@ namespace System.Net
 
             char c = scheme[0];
             if (c == 'h')
-                return (scheme == "http" || scheme == "https");
+                return (scheme == UriScheme.Http ||  scheme == UriScheme.Https);
             if (c == 'f')
-                return (scheme == "file" || scheme == "ftp");
+                return (scheme == UriScheme.File || scheme == UriScheme.Ftp);
 
             if (c == 'n')
             {
                 c = scheme[1];
                 if (c == 'e')
-                    return (scheme == "news" || scheme == "net.pipe" || scheme == "net.tcp");
-                if (scheme == "nntp")
+                    return (scheme == UriScheme.News || scheme == UriScheme.NetPipe || scheme == UriScheme.NetTcp);
+                if (scheme == UriScheme.Nntp)
                     return true;
                 return false;
             }
-            if ((c == 'g' && scheme == "gopher") || (c == 'm' && scheme == "mailto"))
+            if ((c == 'g' && scheme == UriScheme.Gopher) || (c == 'm' && scheme == UriScheme.Mailto))
                 return true;
 
             return false;
@@ -207,10 +162,10 @@ namespace System.Net
 
             string path;
             Uri raw_uri = null;
-            if (MaybeUri(_raw_url.ToLowerInvariant()) && Uri.TryCreate(_raw_url, UriKind.Absolute, out raw_uri))
+            if (MaybeUri(_rawUrl.ToLowerInvariant()) && Uri.TryCreate(_rawUrl, UriKind.Absolute, out raw_uri))
                 path = raw_uri.PathAndQuery;
             else
-                path = _raw_url;
+                path = _rawUrl;
 
             if ((host == null || host.Length == 0))
                 host = UserHostAddress;
@@ -222,44 +177,40 @@ namespace System.Net
             if (colon >= 0)
                 host = host.Substring(0, colon);
 
-            string base_uri = String.Format("{0}://{1}:{2}",
-                                (IsSecureConnection) ? "https" : "http",
-                                host, LocalEndPoint.Port);
+            string base_uri = string.Format("{0}://{1}:{2}", RequestScheme, host, LocalEndPoint.Port);
 
-            if (!Uri.TryCreate(base_uri + path, UriKind.Absolute, out _url))
+            if (!Uri.TryCreate(base_uri + path, UriKind.Absolute, out _requestUri))
             {
                 _context.ErrorMessage = WebUtility.HtmlEncode("Invalid url: " + base_uri + path);
                 return;
             }
 
-            CreateQueryString(_url.Query);
-
-            _url = HttpListenerRequestUriBuilder.GetRequestUri(_raw_url, _url.Scheme,
-                                _url.Authority, _url.LocalPath, _url.Query);
+            _requestUri = HttpListenerRequestUriBuilder.GetRequestUri(_rawUrl, _requestUri.Scheme,
+                                _requestUri.Authority, _requestUri.LocalPath, _requestUri.Query);
 
             if (_version >= HttpVersion.Version11)
             {
-                string t_encoding = Headers["Transfer-Encoding"];
-                _is_chunked = (t_encoding != null && String.Compare(t_encoding, "chunked", StringComparison.OrdinalIgnoreCase) == 0);
+                string t_encoding = Headers[HttpKnownHeaderNames.TransferEncoding];
+                _isChunked = (t_encoding != null && string.Equals(t_encoding, "chunked", StringComparison.OrdinalIgnoreCase));
                 // 'identity' is not valid!
-                if (t_encoding != null && !_is_chunked)
+                if (t_encoding != null && !_isChunked)
                 {
                     _context.Connection.SendError(null, 501);
                     return;
                 }
             }
 
-            if (!_is_chunked && !_cl_set)
+            if (!_isChunked && !_clSet)
             {
-                if (String.Compare(_method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
-                    String.Compare(_method, "PUT", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(_method, "POST", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(_method, "PUT", StringComparison.OrdinalIgnoreCase))
                 {
                     _context.Connection.SendError(null, 411);
                     return;
                 }
             }
 
-            if (String.Compare(Headers["Expect"], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(Headers[HttpKnownHeaderNames.Expect], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 HttpResponseStream output = _context.Connection.GetResponseStream();
                 output.InternalWrite(s_100continue, 0, s_100continue.Length);
@@ -291,93 +242,19 @@ namespace System.Net
             _headers.Set(name, val);
             switch (lower)
             {
-                case "accept-language":
-                    _user_languages = val.Split(','); // yes, only split with a ','
-                    break;
-                case "accept":
-                    _accept_types = val.Split(','); // yes, only split with a ','
-                    break;
                 case "content-length":
                     try
                     {
-                        _content_length = long.Parse(val.Trim());
-                        if (_content_length < 0)
+                        _contentLength = long.Parse(val.Trim());
+                        if (_contentLength < 0)
                             _context.ErrorMessage = "Invalid Content-Length.";
-                        _cl_set = true;
+                        _clSet = true;
                     }
                     catch
                     {
                         _context.ErrorMessage = "Invalid Content-Length.";
                     }
 
-                    break;
-                case "referer":
-                    try
-                    {
-                        _referrer = new Uri(val);
-                    }
-                    catch
-                    {
-                        _referrer = null;
-                    }
-                    
-                    break;
-                case "cookie":
-                    if (_cookies == null)
-                        _cookies = new CookieCollection();
-
-                    string[] cookieStrings = val.Split(new char[] { ',', ';' });
-                    Cookie current = null;
-                    int version = 0;
-                    foreach (string cookieString in cookieStrings)
-                    {
-                        string str = cookieString.Trim();
-                        if (str.Length == 0)
-                            continue;
-                        if (str.StartsWith("$Version"))
-                        {
-                            version = Int32.Parse(Unquote(str.Substring(str.IndexOf('=') + 1)));
-                        }
-                        else if (str.StartsWith("$Path"))
-                        {
-                            if (current != null)
-                                current.Path = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else if (str.StartsWith("$Domain"))
-                        {
-                            if (current != null)
-                                current.Domain = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else if (str.StartsWith("$Port"))
-                        {
-                            if (current != null)
-                                current.Port = str.Substring(str.IndexOf('=') + 1).Trim();
-                        }
-                        else
-                        {
-                            if (current != null)
-                            {
-                                _cookies.Add(current);
-                            }
-                            current = new Cookie();
-                            int idx = str.IndexOf('=');
-                            if (idx > 0)
-                            {
-                                current.Name = str.Substring(0, idx).Trim();
-                                current.Value = str.Substring(idx + 1).Trim();
-                            }
-                            else
-                            {
-                                current.Name = str.Trim();
-                                current.Value = String.Empty;
-                            }
-                            current.Version = version;
-                        }
-                    }
-                    if (current != null)
-                    {
-                        _cookies.Add(current);
-                    }
                     break;
             }
         }
@@ -389,8 +266,8 @@ namespace System.Net
                 return true;
 
             int length = 2048;
-            if (_content_length > 0)
-                length = (int)Math.Min(_content_length, (long)length);
+            if (_contentLength > 0)
+                length = (int)Math.Min(_contentLength, (long)length);
 
             byte[] bytes = new byte[length];
             while (true)
@@ -405,7 +282,7 @@ namespace System.Net
                 }
                 catch (ObjectDisposedException)
                 {
-                    _input_stream = null;
+                    _inputStream = null;
                     return true;
                 }
                 catch
@@ -415,196 +292,72 @@ namespace System.Net
             }
         }
 
-        public string[] AcceptTypes
-        {
-            get { return _accept_types; }
-        }
+        private X509Certificate2 GetClientCertificateCore() => ClientCertificate = _context.Connection.ClientCertificate;
 
-        public int ClientCertificateError
+        private int GetClientCertificateErrorCore()
         {
-            get
-            {
-                HttpConnection cnc = _context.Connection;
-                if (cnc.ClientCertificate == null)
-                    throw new InvalidOperationException(SR.net_no_client_certificate);
-                int[] errors = cnc.ClientCertificateErrors;
-                if (errors != null && errors.Length > 0)
-                    return errors[0];
+            HttpConnection cnc = _context.Connection;
+            if (cnc.ClientCertificate == null)
                 return 0;
-            }
-        }
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                if (_content_encoding == null)
-                    _content_encoding = Encoding.Default;
-                return _content_encoding;
-            }
+            int[] errors = cnc.ClientCertificateErrors;
+            if (errors != null && errors.Length > 0)
+                return errors[0];
+            return 0;
         }
 
         public long ContentLength64
         {
-            get { return _content_length; }
-        }
-
-        public string ContentType
-        {
-            get { return _headers["content-type"]; }
-        }
-
-        public CookieCollection Cookies
-        {
             get
             {
-                if (_cookies == null)
-                    _cookies = new CookieCollection();
-                return _cookies;
+                if (_isChunked)
+                    _contentLength = -1;
+
+                return _contentLength;
             }
         }
 
-        public bool HasEntityBody
-        {
-            get { return (_content_length > 0 || _is_chunked); }
-        }
+        public bool HasEntityBody => (_contentLength > 0 || _isChunked);
 
-        public NameValueCollection Headers
-        {
-            get { return _headers; }
-        }
+        public NameValueCollection Headers => _headers;
 
-        public string HttpMethod
-        {
-            get { return _method; }
-        }
+        public string HttpMethod => _method;
 
         public Stream InputStream
         {
             get
             {
-                if (_input_stream == null)
+                if (_inputStream == null)
                 {
-                    if (_is_chunked || _content_length > 0)
-                        _input_stream = _context.Connection.GetRequestStream(_is_chunked, _content_length);
+                    if (_isChunked || _contentLength > 0)
+                        _inputStream = _context.Connection.GetRequestStream(_isChunked, _contentLength);
                     else
-                        _input_stream = Stream.Null;
+                        _inputStream = Stream.Null;
                 }
 
-                return _input_stream;
+                return _inputStream;
             }
         }
 
-        public bool IsAuthenticated
-        {
-            get { return false; }
-        }
+        public bool IsAuthenticated => false;
 
-        public bool IsLocal
-        {
-            get { return LocalEndPoint.Address.Equals(RemoteEndPoint.Address); }
-        }
+        public bool IsSecureConnection => _context.Connection.IsSecure;
 
-        public bool IsSecureConnection
-        {
-            get { return _context.Connection.IsSecure; }
-        }
+        public IPEndPoint LocalEndPoint => _context.Connection.LocalEndPoint;
 
-        public bool KeepAlive
-        {
-            get
-            {
-                if (_ka_set)
-                    return _keep_alive;
+        public IPEndPoint RemoteEndPoint => _context.Connection.RemoteEndPoint;
 
-                _ka_set = true;
-                // 1. Connection header
-                // 2. Protocol (1.1 == keep-alive by default)
-                // 3. Keep-Alive header
-                string cnc = _headers["Connection"];
-                if (!String.IsNullOrEmpty(cnc))
-                {
-                    _keep_alive = (0 == String.Compare(cnc, "keep-alive", StringComparison.OrdinalIgnoreCase));
-                }
-                else if (_version == HttpVersion.Version11)
-                {
-                    _keep_alive = true;
-                }
-                else
-                {
-                    cnc = _headers["keep-alive"];
-                    if (!String.IsNullOrEmpty(cnc))
-                        _keep_alive = (0 != String.Compare(cnc, "closed", StringComparison.OrdinalIgnoreCase));
-                }
-                return _keep_alive;
-            }
-        }
+        public Guid RequestTraceIdentifier => Guid.Empty;
 
-        public IPEndPoint LocalEndPoint
+        private IAsyncResult BeginGetClientCertificateCore(AsyncCallback requestCallback, object state)
         {
-            get { return _context.Connection.LocalEndPoint; }
-        }
+            var asyncResult = new GetClientCertificateAsyncResult(this, state, requestCallback);
 
-        public Version ProtocolVersion
-        {
-            get { return _version; }
-        }
+            // The certificate is already retrieved by the time this method is called. GetClientCertificateCore() evaluates to
+            // a simple member access, so this will always complete immediately.
+            ClientCertState = ListenerClientCertState.Completed;
+            asyncResult.InvokeCallback(GetClientCertificateCore());
 
-        public NameValueCollection QueryString
-        {
-            get { return _query_string; }
-        }
-
-        public string RawUrl
-        {
-            get { return _raw_url; }
-        }
-
-        public IPEndPoint RemoteEndPoint
-        {
-            get { return _context.Connection.RemoteEndPoint; }
-        }
-
-        public Guid RequestTraceIdentifier
-        {
-            get { return Guid.Empty; }
-        }
-
-        public Uri Url
-        {
-            get { return _url; }
-        }
-
-        public Uri UrlReferrer
-        {
-            get { return _referrer; }
-        }
-
-        public string UserAgent
-        {
-            get { return _headers["user-agent"]; }
-        }
-
-        public string UserHostAddress
-        {
-            get { return LocalEndPoint.ToString(); }
-        }
-
-        public string UserHostName
-        {
-            get { return _headers["host"]; }
-        }
-
-        public string[] UserLanguages
-        {
-            get { return _user_languages; }
-        }
-
-        public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
-        {
-            if (_gccDelegate == null)
-                _gccDelegate = new GCCDelegate(GetClientCertificate);
-            return _gccDelegate.BeginInvoke(requestCallback, state);
+            return asyncResult;
         }
 
         public X509Certificate2 EndGetClientCertificate(IAsyncResult asyncResult)
@@ -612,45 +365,30 @@ namespace System.Net
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            if (_gccDelegate == null)
-                throw new InvalidOperationException();
-
-            return _gccDelegate.EndInvoke(asyncResult);
-        }
-
-        public X509Certificate2 GetClientCertificate()
-        {
-            return _context.Connection.ClientCertificate;
-        }
-
-        public string ServiceName
-        {
-            get
+            GetClientCertificateAsyncResult clientCertAsyncResult = asyncResult as GetClientCertificateAsyncResult;
+            if (clientCertAsyncResult == null || clientCertAsyncResult.AsyncObject != this)
             {
-                return null;
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
-        }
-
-        public TransportContext TransportContext
-        {
-            get
+            if (clientCertAsyncResult.EndCalled)
             {
-                return new Context();
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndGetClientCertificate)));
             }
+            clientCertAsyncResult.EndCalled = true;
+
+            return (X509Certificate2)clientCertAsyncResult.Result;
         }
 
-        public bool IsWebSocketRequest
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public string ServiceName => null;
 
-        public Task<X509Certificate2> GetClientCertificateAsync()
+        public TransportContext TransportContext => new Context();
+
+        private Uri RequestUri => _requestUri;
+        private bool SupportsWebSockets => true;
+
+        private class GetClientCertificateAsyncResult : LazyAsyncResult
         {
-            return Task<X509Certificate2>.Factory.FromAsync(BeginGetClientCertificate, EndGetClientCertificate, null);
+            public GetClientCertificateAsyncResult(object myObject, object myState, AsyncCallback myCallBack) : base(myObject, myState, myCallBack) { }
         }
     }
 }
-

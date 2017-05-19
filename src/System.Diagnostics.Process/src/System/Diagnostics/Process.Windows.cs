@@ -250,7 +250,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets the time the associated process was started.</summary>
-        public DateTime StartTime
+        internal DateTime StartTimeCore
         {
             get { return GetProcessTimes().StartTime; }
         }
@@ -1044,7 +1044,7 @@ namespace System.Diagnostics
             }
         }
 
-        private static byte[] EnvironmentVariablesToByteArray(Dictionary<string, string> sd)
+        private static byte[] EnvironmentVariablesToByteArray(IDictionary<string, string> sd)
         {
             // get the keys
             string[] keys = new string[sd.Count];

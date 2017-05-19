@@ -172,7 +172,7 @@ namespace System.Linq.Expressions.Compiler
 
             if (cr.Action == RewriteAction.SpillStack)
             {
-                RequireNoRefArgs(node.DelegateType.GetMethod("Invoke"));
+                RequireNoRefArgs(node.DelegateType.GetInvokeMethod());
             }
 
             return cr.Finish(cr.Rewrite ? node.Rewrite(cr[0, -1]) : expr);
@@ -1108,7 +1108,7 @@ namespace System.Linq.Expressions.Compiler
             // Primitive value types are okay because they are all read-only,
             // but we can't rely on this for non-primitive types. So we have
             // to either throw NotSupported or use ref locals.
-            return instance != null && instance.Type.GetTypeInfo().IsValueType && instance.Type.GetTypeCode() == TypeCode.Object;
+            return instance != null && instance.Type.IsValueType && instance.Type.GetTypeCode() == TypeCode.Object;
         }
     }
 }

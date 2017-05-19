@@ -19,7 +19,6 @@ namespace System.Text.RegularExpressions
     /// contains static methods that allow use of regular expressions without instantiating
     /// a Regex explicitly.
     /// </summary>
-    [Serializable]
     public class Regex : ISerializable
     {
         protected internal string pattern;                   // The string pattern provided
@@ -392,7 +391,7 @@ namespace System.Text.RegularExpressions
                 int max = capsize;
                 result = new int[max];
 
-                for (int i = 0; i < max; i++)
+                for (int i = 0; i < result.Length; i++)
                 {
                     result[i] = i;
                 }

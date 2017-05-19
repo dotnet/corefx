@@ -30,6 +30,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace System.Net
 {
@@ -75,7 +76,25 @@ namespace System.Net
 
         private static void AddPrefixInternal(string p, HttpListener listener)
         {
+            int start = p.IndexOf(':') + 3;
+            int colon = p.IndexOf(':', start);
+            if (colon != -1)
+            {
+                // root can't be -1 here, since we've already checked for ending '/' in ListenerPrefix.
+                int root = p.IndexOf('/', colon, p.Length - colon);
+                string portString = p.Substring(colon + 1, root - colon - 1);
+                
+                int port;
+                if (!int.TryParse(portString, out port) || port <= 0 || port >= 65536)
+                {
+                    throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_port);
+                }
+            }
+
             ListenerPrefix lp = new ListenerPrefix(p);
+            if (lp.Host != "*" && lp.Host != "+" && Uri.CheckHostName(lp.Host) == UriHostNameType.Unknown)
+                throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_listener_host);
+
             if (lp.Path.IndexOf('%') != -1)
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
@@ -83,12 +102,18 @@ namespace System.Net
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
             // listens on all the interfaces if host name cannot be parsed by IPAddress.
-            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure);
+            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool alreadyExists);
+            if (alreadyExists)
+            {
+                throw new HttpListenerException(98, SR.Format(SR.net_listener_already, p));
+            }
             epl.AddPrefix(lp, listener);
         }
 
-        private static HttpEndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure)
+        private static HttpEndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure, out bool alreadyExists)
         {
+            alreadyExists = false;
+
             IPAddress addr;
             if (host == "*")
                 addr = IPAddress.Any;
@@ -121,11 +146,19 @@ namespace System.Net
             HttpEndPointListener epl = null;
             if (p.ContainsKey(port))
             {
+                alreadyExists = true;
                 epl = p[port];
             }
             else
             {
-                epl = new HttpEndPointListener(listener, addr, port, secure);
+                try
+                {
+                    epl = new HttpEndPointListener(listener, addr, port, secure);
+                }
+                catch (SocketException ex)
+                {
+                    throw new HttpListenerException(ex.ErrorCode, ex.Message);
+                }
                 p[port] = epl;
             }
 
@@ -175,7 +208,7 @@ namespace System.Net
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)
                 return;
 
-            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure);
+            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool ignored);
             epl.RemovePrefix(lp, listener);
         }
     }

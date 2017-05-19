@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -596,7 +595,7 @@ namespace System.IO
             }
 
             // Return the results.
-            return tcs.Task.Status == TaskStatus.RanToCompletion ?
+            return tcs.Task.IsCompletedSuccessfully ?
                 tcs.Task.Result :
                 WaitForChangedResult.TimedOutResult;
         }
@@ -643,17 +642,6 @@ namespace System.IO
         {
             get
             {
-                if (_synchronizingObject == null && DesignMode)
-                {
-                    IDesignerHost host = (IDesignerHost)GetService(typeof(IDesignerHost));
-                    if (host != null)
-                    {
-                        object baseComponent = host.RootComponent;
-                        if (baseComponent != null && baseComponent is ISynchronizeInvoke)
-                            _synchronizingObject = (ISynchronizeInvoke)baseComponent;
-                    }
-                }
-
                 return _synchronizingObject;
             }
 

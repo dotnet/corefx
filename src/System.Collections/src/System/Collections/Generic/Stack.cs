@@ -12,6 +12,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -81,7 +82,10 @@ namespace System.Collections.Generic
         // Removes all Objects from the Stack.
         public void Clear()
         {
-            Array.Clear(_array, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Array.Clear(_array, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+            }
             _size = 0;
             _version++;
         }
@@ -122,8 +126,10 @@ namespace System.Collections.Generic
             Debug.Assert(array != _array);
             int srcIndex = 0;
             int dstIndex = arrayIndex + _size;
-            for (int i = 0; i < _size; i++)
+            while(srcIndex < _size)
+            {
                 array[--dstIndex] = _array[srcIndex++];
+            }
         }
 
         void ICollection.CopyTo(Array array, int arrayIndex)
@@ -225,7 +231,10 @@ namespace System.Collections.Generic
             
             _version++;
             T item = _array[--_size];
-            _array[_size] = default(T);     // Free memory quicker.
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _array[_size] = default(T);     // Free memory quicker.
+            }
             return item;
         }
 
@@ -239,7 +248,10 @@ namespace System.Collections.Generic
 
             _version++;
             result = _array[--_size];
-            _array[_size] = default(T);     // Free memory quicker.
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _array[_size] = default(T);     // Free memory quicker.
+            }
             return true;
         }
 
@@ -277,7 +289,6 @@ namespace System.Collections.Generic
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
         {
             private readonly Stack<T> _stack;

@@ -1,0 +1,87 @@
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e)' referenced by the implementation assembly 'Microsoft.Cci.DummyModule'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)' referenced by the contract assembly 'Assembly(Name=System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)' referenced by the contract assembly 'Assembly(Name=System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)' referenced by the contract assembly 'Assembly(Name=System.ServiceModel.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35)'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Web.ApplicationServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35)' referenced by the contract assembly 'Assembly(Name=System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)' referenced by the contract assembly 'Assembly(Name=System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)'.
+ApiCompat Error: 0 : Unable to resolve assembly 'Assembly(Name=System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)' referenced by the contract assembly 'Assembly(Name=System.Xml.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)'.
+Compat issues with assembly mscorlib:
+TypesMustExist : Type 'System.ArgIterator' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Console.Write(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Console.WriteLine(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.String.Concat(System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System:
+MembersMustExist : Member 'System.CodeDom.Compiler.CompilerParameters.Evidence.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.CodeDom.Compiler.CompilerParameters.Evidence.set(System.Security.Policy.Evidence)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.CodeDom.Compiler.CompilerResults.Evidence.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.CodeDom.Compiler.CompilerResults.Evidence.set(System.Security.Policy.Evidence)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Data:
+MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.String, System.Data.SqlDbType, System.Type)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.String, System.Data.SqlDbType, System.Type, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.String, System.Data.SqlDbType, System.Type, System.String, System.Boolean, System.Boolean, System.Data.SqlClient.SortOrder, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData.DbType.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData.Type.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.Common.DbProviderFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.Odbc.OdbcConnection.EnlistDistributedTransaction(System.EnterpriseServices.ITransaction)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.Odbc.OdbcFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlBulkCopyOptions System.Data.SqlClient.SqlBulkCopyOptions.AllowEncryptedValueModifications' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlClientFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand..ctor(System.String, System.Data.SqlClient.SqlConnection, System.Data.SqlClient.SqlTransaction, System.Data.SqlClient.SqlCommandColumnEncryptionSetting)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteNonQuery()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteNonQuery(System.AsyncCallback, System.Object)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteReader()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteReader(System.AsyncCallback, System.Object)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteReader(System.AsyncCallback, System.Object, System.Data.CommandBehavior)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteReader(System.Data.CommandBehavior)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteXmlReader()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteXmlReader(System.AsyncCallback, System.Object)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.ColumnEncryptionSetting.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.EndExecuteNonQuery(System.IAsyncResult)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.EndExecuteReader(System.IAsyncResult)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.EndExecuteXmlReader(System.IAsyncResult)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.Notification.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.Notification.set(System.Data.Sql.SqlNotificationRequest)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.NotificationAutoEnlist.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.NotificationAutoEnlist.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.ResetCommandTimeout()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection..ctor(System.String, System.Data.SqlClient.SqlCredential)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.AccessToken.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.AccessToken.set(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.ChangePassword(System.String, System.Data.SqlClient.SqlCredential, System.Security.SecureString)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.ChangePassword(System.String, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.ColumnEncryptionTrustedMasterKeyPaths.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.Credential.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.Credential.set(System.Data.SqlClient.SqlCredential)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.EnlistDistributedTransaction(System.EnterpriseServices.ITransaction)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnection.RegisterColumnEncryptionKeyStoreProviders(System.Collections.Generic.IDictionary<System.String, System.Data.SqlClient.SqlColumnEncryptionKeyStoreProvider>)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.AsynchronousProcessing.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.AsynchronousProcessing.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.Authentication.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.Authentication.set(System.Data.SqlClient.SqlAuthenticationMethod)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ColumnEncryptionSetting.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ColumnEncryptionSetting.set(System.Data.SqlClient.SqlConnectionColumnEncryptionSetting)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ConnectionReset.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ConnectionReset.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ContextConnection.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.ContextConnection.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.Enlist.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.Enlist.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.NetworkLibrary.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.NetworkLibrary.set(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.TransactionBinding.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.TransactionBinding.set(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.TransparentNetworkIPResolution.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlConnectionStringBuilder.TransparentNetworkIPResolution.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlDataReader.IsCommandBehavior(System.Data.CommandBehavior)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter..ctor(System.String, System.Data.SqlDbType, System.Int32, System.Data.ParameterDirection, System.Boolean, System.Byte, System.Byte, System.String, System.Data.DataRowVersion, System.Object)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter..ctor(System.String, System.Data.SqlDbType, System.Int32, System.Data.ParameterDirection, System.Byte, System.Byte, System.String, System.Data.DataRowVersion, System.Boolean, System.Object, System.String, System.String, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.ForceColumnEncryption.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.ForceColumnEncryption.set(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.UdtTypeName.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.UdtTypeName.set(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameterCollection.Add(System.String, System.Data.SqlDbType, System.Int32, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.SqlClient.SqlParameterCollection.Add(System.String, System.Object)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Xml:
+MembersMustExist : Member 'System.Xml.Xsl.XslCompiledTransform.TemporaryFiles.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Xml.Xsl.XslTransform.Load(System.Xml.XPath.XPathNavigator, System.Xml.XmlResolver, System.Security.Policy.Evidence)' does not exist in the implementation but it does exist in the contract.
+Total Issues: 75

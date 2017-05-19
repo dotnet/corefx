@@ -20,8 +20,8 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 
         protected override int BlockSize { get { return 128; } }
 
-#if netstandard17
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework implements this, Core does not")]
         public void ProduceLegacyHmacValues()
         {
             using (var h = new HMACSHA512())
@@ -31,7 +31,6 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 Assert.Throws<PlatformNotSupportedException>(() => h.ProduceLegacyHmacValues = true);
             }
         }
-#endif        
 
         [Fact]
         public void HmacSha512_Rfc4231_1()

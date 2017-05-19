@@ -13,6 +13,8 @@ using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
+    // No appdomain in UWP or CoreRT
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         public AppDomainTests()
@@ -196,25 +198,25 @@ namespace System.Tests
         [Fact]
         public void ProcessExit_Called()
         {
-            System.IO.File.Delete("success.txt");
-            RemoteInvoke(() =>
+            string path = GetTestFilePath();
+            RemoteInvoke((pathToFile) =>
             {
                 EventHandler handler = (sender, e) => 
                 {
-                    System.IO.File.Create("success.txt");
+                    File.Create(pathToFile);
                 };
 
                 AppDomain.CurrentDomain.ProcessExit += handler;
                 return SuccessExitCode;
-            }).Dispose();
+            }, path).Dispose();
 
-            Assert.True(System.IO.File.Exists("success.txt"));
+            Assert.True(File.Exists(path));
         }
 
         [Fact]
         public void ApplyPolicy()
         {
-            Assert.Throws<ArgumentNullException>("assemblyName", () => { AppDomain.CurrentDomain.ApplyPolicy(null); });
+            AssertExtensions.Throws<ArgumentNullException>("assemblyName", () => { AppDomain.CurrentDomain.ApplyPolicy(null); });
             Assert.Throws<ArgumentException>(() => { AppDomain.CurrentDomain.ApplyPolicy(""); });
             Assert.Equal(AppDomain.CurrentDomain.ApplyPolicy(Assembly.GetEntryAssembly().FullName), Assembly.GetEntryAssembly().FullName);
         }
@@ -222,7 +224,7 @@ namespace System.Tests
         [Fact]
         public void CreateDomain()
         {
-            Assert.Throws<ArgumentNullException>("friendlyName", () => { AppDomain.CreateDomain(null); });
+            AssertExtensions.Throws<ArgumentNullException>("friendlyName", () => { AppDomain.CreateDomain(null); });
             Assert.Throws<PlatformNotSupportedException>(() => { AppDomain.CreateDomain("test"); });
         }
 
@@ -243,7 +245,7 @@ namespace System.Tests
         public void ExecuteAssembly()
         {
             string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
             Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] {"2", "3"}, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
@@ -253,11 +255,23 @@ namespace System.Tests
         [Fact]
         public void GetData_SetData()
         {
-            Assert.Throws<ArgumentNullException>("name", () => { AppDomain.CurrentDomain.SetData(null, null); });
+            AssertExtensions.Throws<ArgumentNullException>("name", () => { AppDomain.CurrentDomain.SetData(null, null); });
             AppDomain.CurrentDomain.SetData("", null);
             Assert.Null(AppDomain.CurrentDomain.GetData(""));  
             AppDomain.CurrentDomain.SetData("randomkey", 4);
             Assert.Equal(4, AppDomain.CurrentDomain.GetData("randomkey"));
+        }
+
+        [Fact]
+        public void SetData_SameKeyMultipleTimes_ReplacesOldValue()
+        {
+            string key = Guid.NewGuid().ToString("N");
+            for (int i = 0; i < 3; i++)
+            {
+                AppDomain.CurrentDomain.SetData(key, i.ToString());
+                Assert.Equal(i.ToString(), AppDomain.CurrentDomain.GetData(key));
+            }
+            AppDomain.CurrentDomain.SetData(key, null);
         }
 
         [Fact]
@@ -291,7 +305,7 @@ namespace System.Tests
         [Fact]
         public void Unload()
         {
-            Assert.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null);});
+            AssertExtensions.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null);});
             Assert.Throws<CannotUnloadAppDomainException>(() => { AppDomain.Unload(AppDomain.CurrentDomain); });
         }
 
@@ -412,13 +426,20 @@ namespace System.Tests
             int ctr = 0;
             foreach (var a in assemblies2)
             {
-                if (a.Location == typeof(AppDomain).Assembly.Location)
-                    ctr++;
+                // Dynamic assemblies do not support Location property.
+                if (!a.IsDynamic)
+                {
+                    if (a.Location == typeof(AppDomain).Assembly.Location)
+                        ctr++;
+                }
             }
             foreach (var a in assemblies)
             {
-                if (a.Location == typeof(AppDomain).Assembly.Location)
-                    ctr--;
+                if (!a.IsDynamic)
+                {
+                    if (a.Location == typeof(AppDomain).Assembly.Location)
+                        ctr--;
+                }
             }
             Assert.True(ctr > 0, "Assembly.LoadFile should cause file to be loaded again");
         }

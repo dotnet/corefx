@@ -42,6 +42,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Throws NRE on netfx (https://github.com/dotnet/corefx/issues/18690)")]
         public static void ValidKeySizeUsesProperty()
         {
             using (AsymmetricAlgorithm aa = new DoesNotSetLegalKeySizesField())
@@ -52,7 +53,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
             }
         }
 
-#if netcoreapp11
+#if netcoreapp
         [Fact]
         public static void ClearCallsDispose()
         {

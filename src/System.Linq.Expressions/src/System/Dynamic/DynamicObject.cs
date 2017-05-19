@@ -23,7 +23,6 @@ namespace System.Dynamic
     /// If a method is not overridden then the <see cref="DynamicObject"/> does not directly support
     /// that behavior and the call site will determine how the binding should be performed.
     /// </summary>
-    [Serializable]
     public class DynamicObject : IDynamicMetaObjectProvider
     {
         /// <summary>
@@ -600,7 +599,7 @@ namespace System.Dynamic
 
                     Expression condition;
                     // If the return type can not be assigned null then just check for type assignability otherwise allow null.
-                    if (binder.ReturnType.GetTypeInfo().IsValueType && Nullable.GetUnderlyingType(binder.ReturnType) == null)
+                    if (binder.ReturnType.IsValueType && Nullable.GetUnderlyingType(binder.ReturnType) == null)
                     {
                         condition = Expression.TypeIs(resultMO.Expression, binder.ReturnType);
                     }

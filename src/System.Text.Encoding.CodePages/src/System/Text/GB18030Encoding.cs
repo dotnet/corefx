@@ -101,7 +101,6 @@ namespace System.Text
     **
     ==============================================================================*/
 
-    [Serializable]
     internal sealed class GB18030Encoding : DBCSCodePageEncoding
     {
         // This is the table of 4 byte conversions.
@@ -177,7 +176,10 @@ namespace System.Text
                         mapUnicodeToBytes[unicodeCount] = count4Byte;
                         // Set the flag saying its a 4 byte sequence
                         mapUnicodeTo4BytesFlags[unicodeCount / 8] |= unchecked((byte)(1 << (unicodeCount % 8)));
-                        unicodeCount++;
+                        unchecked
+                        {
+                            unicodeCount++;
+                        }
                         count4Byte++;
                         data--;
                     }
@@ -792,7 +794,6 @@ namespace System.Text
             return new GB18030Decoder(this);
         }
 
-        [Serializable]
         internal sealed class GB18030Decoder : DecoderNLS
         {
             internal short bLeftOver1 = -1;

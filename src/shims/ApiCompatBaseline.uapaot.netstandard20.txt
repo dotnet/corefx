@@ -1,0 +1,4 @@
+Compat issues with assembly System.Memory:
+TypesMustExist : Type 'System.ReadOnlySpan<T>' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Span<T>' does not exist in the implementation but it does exist in the contract.
+Total Issues: 2

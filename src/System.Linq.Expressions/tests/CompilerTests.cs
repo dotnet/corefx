@@ -28,6 +28,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
+        [OuterLoop("May fail with SO on Debug JIT")]
         public static void CompileDeepTree_NoStackOverflowFast(bool useInterpreter)
         {
             Expression e = Expression.Constant(0);
@@ -38,11 +39,11 @@ namespace System.Linq.Expressions.Tests
                 e = Expression.Add(e, Expression.Constant(1));
 
             Func<int> f = null;
-            // Request a stack size of 1 to get the minimum size allowed.
+            // Request a stack size of 128KiB to get very small stack.
             // This reduces the size of tree needed to risk a stack overflow.
             // This though will only risk overflow once, so the outerloop test
             // above is still needed.
-            Thread t = new Thread(() => f = Expression.Lambda<Func<int>>(e).Compile(useInterpreter), 1);
+            Thread t = new Thread(() => f = Expression.Lambda<Func<int>>(e).Compile(useInterpreter), 128 * 1024);
             t.Start();
             t.Join();
 
@@ -292,7 +293,7 @@ namespace System.Linq.Expressions.Tests
                     IL_0006: dup
                     IL_0007: ldc.i4.0
                     IL_0008: ldarg.1
-                    IL_0009: newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
+                    IL_0009: newobj     instance void class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
                     IL_000e: stelem.ref
                     IL_000f: stloc.0
                     IL_0010: ldarg.0
@@ -324,8 +325,8 @@ namespace System.Linq.Expressions.Tests
                     IL_0007: ldloc.0
                     IL_0008: ldc.i4.0
                     IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+                    IL_000a: castclass  class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>
+                    IL_000f: ldfld      class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
                     IL_0014: ret
                   }",
                 appendInnerLambdas: true);
@@ -334,7 +335,8 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void VerifyIL_Closure3()
         {
-            Expression<Func<int, Func<int, int>>> f = x => y => x + y;
+            // Using an unchecked addition to ensure that an add instruction is emitted (and not add.ovf)
+            Expression<Func<int, Func<int, int>>> f = x => y => unchecked(x + y);
 
             f.VerifyIL(
                 @".method class [System.Private.CoreLib]System.Func`2<int32,int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
@@ -349,7 +351,7 @@ namespace System.Linq.Expressions.Tests
                     IL_0006: dup
                     IL_0007: ldc.i4.0
                     IL_0008: ldarg.1
-                    IL_0009: newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
+                    IL_0009: newobj     instance void class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
                     IL_000e: stelem.ref
                     IL_000f: stloc.0
                     IL_0010: ldarg.0
@@ -381,8 +383,8 @@ namespace System.Linq.Expressions.Tests
                     IL_0007: ldloc.0
                     IL_0008: ldc.i4.0
                     IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+                    IL_000a: castclass  class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>
+                    IL_000f: ldfld      class [System.Private.CoreLib]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
                     IL_0014: ldarg.1
                     IL_0015: add
                     IL_0016: ret

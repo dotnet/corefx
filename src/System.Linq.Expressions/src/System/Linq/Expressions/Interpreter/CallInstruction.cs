@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions.Interpreter
@@ -17,8 +15,6 @@ namespace System.Linq.Expressions.Interpreter
         public abstract int ArgumentCount { get; }
 
         #region Construction
-
-        internal CallInstruction() { }
 
         public override string InstructionName => "Call";
 
@@ -52,7 +48,7 @@ namespace System.Linq.Expressions.Interpreter
 #if !FEATURE_DLG_INVOKE
             return new MethodInfoCallInstruction(info, argumentCount);
 #else
-            if (!info.IsStatic && info.DeclaringType.GetTypeInfo().IsValueType)
+            if (!info.IsStatic && info.DeclaringType.IsValueType)
             {
                 return new MethodInfoCallInstruction(info, argumentCount);
             }
@@ -258,8 +254,6 @@ namespace System.Linq.Expressions.Interpreter
         #region Instruction
 
         public override int ConsumedStack => ArgumentCount;
-
-        public override string ToString() => "Call()";
 
         #endregion
 
@@ -475,16 +469,9 @@ namespace System.Linq.Expressions.Interpreter
                 {
                     foreach (ByRefUpdater arg in _byrefArgs)
                     {
-                        if (arg.ArgumentIndex == -1)
-                        {
-                            // instance param, just copy back the exact instance invoked with, which
-                            // gets passed by reference from reflection for value types.
-                            arg.Update(frame, instance);
-                        }
-                        else
-                        {
-                            arg.Update(frame, args[arg.ArgumentIndex]);
-                        }
+                        // -1: instance param, just copy back the exact instance invoked with, which
+                        // gets passed by reference from reflection for value types.
+                        arg.Update(frame, arg.ArgumentIndex == -1 ? instance : args[arg.ArgumentIndex]);
                     }
                 }
             }

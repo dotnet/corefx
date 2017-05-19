@@ -197,6 +197,9 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Fact]
+        // skip the test on desktop as "new ObservableCollection<int>()" returns 0 length collection
+        // skip the test on UapAot as the requires Reflection on internal framework types.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttribute_Tests()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyObservableCollection<int>(new ObservableCollection<int>()));

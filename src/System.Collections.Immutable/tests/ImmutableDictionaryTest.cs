@@ -91,6 +91,18 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void ContainsValue_NoSuchValue_ReturnsFalse()
+        {
+            ImmutableDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" },
+                { 2, "b" }
+            }.ToImmutableDictionary();
+            Assert.False(dictionary.ContainsValue("c"));
+            Assert.False(dictionary.ContainsValue(null));
+        }
+
+        [Fact]
         public void EnumeratorWithHashCollisionsTest()
         {
             var emptyMap = Empty<int, GenericParameterHelper>(new BadHasher<int>());
@@ -190,9 +202,9 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(2, stringIntDictionary["2"]);
             Assert.Equal(2, intDictionary.Count);
 
-            Assert.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int>(null));
-            Assert.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int, int>(null, v => v));
-            Assert.Throws<ArgumentNullException>("elementSelector", () => list.ToImmutableDictionary<int, int, int>(k => k, null));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int, int>(null, v => v));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => list.ToImmutableDictionary<int, int, int>(k => k, null));
 
             list.ToDictionary(k => k, v => v, null); // verifies BCL behavior is to not throw.
             list.ToImmutableDictionary(k => k, v => v, null, null);
@@ -268,7 +280,11 @@ namespace System.Collections.Immutable.Tests
             var map = ImmutableDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
             var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
-            Assert.Contains("firstKey", exception.Message);
+
+            if (!PlatformDetection.IsNetNative) //.Net Native toolchain removes exception messages.
+            {
+                Assert.Contains("firstKey", exception.Message);
+            }
         }
 
         [Fact]
@@ -330,6 +346,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableDictionary.Create<int, int>());
@@ -337,6 +354,33 @@ namespace System.Collections.Immutable.Tests
 
             object rootNode = DebuggerAttributes.GetFieldValue(ImmutableDictionary.Create<string, string>(), "_root");
             DebuggerAttributes.ValidateDebuggerDisplayReferences(rootNode);
+        }
+
+        [Fact]
+        public void Clear_NoComparer_ReturnsEmptyWithoutComparer()
+        {
+            ImmutableDictionary<string, int> dictionary = new Dictionary<string, int>
+            {
+                { "a", 1 }
+            }.ToImmutableDictionary();
+            Assert.Same(ImmutableDictionary<string, int>.Empty, dictionary.Clear());
+            Assert.NotEmpty(dictionary);
+        }
+
+        [Fact]
+        public void Clear_HasComparer_ReturnsEmptyWithOriginalComparer()
+        {
+            ImmutableDictionary<string, int> dictionary = new Dictionary<string, int>
+            {
+                { "a", 1 }
+            }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+
+            ImmutableDictionary<string, int> clearedDictionary = dictionary.Clear();
+            Assert.NotSame(ImmutableDictionary<string, int>.Empty, clearedDictionary.Clear());
+            Assert.NotEmpty(dictionary);
+
+            clearedDictionary = clearedDictionary.Add("a", 1);
+            Assert.True(clearedDictionary.ContainsKey("A"));
         }
 
         protected override IImmutableDictionary<TKey, TValue> Empty<TKey, TValue>()

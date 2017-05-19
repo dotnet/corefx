@@ -73,7 +73,7 @@ namespace System.Diagnostics
                     {
                         FileName = entry.FileName,
                         ModuleName = Path.GetFileName(entry.FileName),
-                        BaseAddress = new IntPtr((void*)entry.AddressRange.Key),
+                        BaseAddress = new IntPtr(unchecked((void*)entry.AddressRange.Key)),
                         ModuleMemorySize = sizeOfImage,
                         EntryPointAddress = IntPtr.Zero // unknown
                     });
@@ -193,18 +193,27 @@ namespace System.Diagnostics
         {
             switch (c)
             {
-                case 'R':
+                case 'R': // Running
                     return ThreadState.Running;
-                case 'S':
-                case 'D':
-                case 'T':
+
+                case 'D': // Waiting on disk
+                case 'P': // Parked
+                case 'S': // Sleeping in a wait
+                case 't': // Tracing/debugging
+                case 'T': // Stopped on a signal
                     return ThreadState.Wait;
-                case 'Z':
+
+                case 'x': // dead
+                case 'X': // Dead
+                case 'Z': // Zombie
                     return ThreadState.Terminated;
-                case 'W':
+
+                case 'W': // Paging or waking
+                case 'K': // Wakekill
                     return ThreadState.Transition;
+
                 default:
-                    Debug.Fail("Unexpected status character");
+                    Debug.Fail($"Unexpected status character: {c}");
                     return ThreadState.Unknown;
             }
         }

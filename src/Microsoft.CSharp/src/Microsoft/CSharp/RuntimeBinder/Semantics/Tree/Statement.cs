@@ -4,16 +4,13 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal abstract class EXPRSTMT : EXPR
+    internal abstract class ExprStatement : Expr
     {
-        private EXPRSTMT _NextStatement;
-        public EXPRSTMT GetOptionalNextStatement()
+        public ExprStatement(ExpressionKind kind)
+            : base(kind)
         {
-            return _NextStatement;
         }
-        public void SetOptionalNextStatement(EXPRSTMT nextStatement)
-        {
-            _NextStatement = nextStatement;
-        }
+
+        public ExprStatement OptionalNextStatement { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace System.Linq.Expressions.Tests
             MethodInfo mi1 = typeof(Expression_Tests).GetMethod("Add");
             ConstantExpression ce1 = Expression.Constant(4, typeof(int));
 
-            Assert.Throws<ArgumentException>("addMethod", () => Expression.ElementInit(mi1, new Expression[] { ce1 }));
+            AssertExtensions.Throws<ArgumentException>("addMethod", () => Expression.ElementInit(mi1, new Expression[] { ce1 }));
         }
 
         public class Atom
@@ -110,7 +110,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void CheckedExpressions()
         {
-            Expression<Func<int, int, int>> exp = (a, b) => a + b;
+            Expression<Func<int, int, int>> exp = (a, b) => unchecked(a + b);
             BinaryExpression bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
             Assert.Equal(bex.NodeType, ExpressionType.Add);
@@ -120,7 +120,7 @@ namespace System.Linq.Expressions.Tests
             Assert.NotNull(bex);
             Assert.Equal(bex.NodeType, ExpressionType.AddChecked);
 
-            exp = (a, b) => a * b;
+            exp = (a, b) => unchecked(a * b);
             bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
             Assert.Equal(bex.NodeType, ExpressionType.Multiply);
@@ -130,7 +130,7 @@ namespace System.Linq.Expressions.Tests
             Assert.NotNull(bex);
             Assert.Equal(bex.NodeType, ExpressionType.MultiplyChecked);
 
-            Expression<Func<double, int>> exp2 = (a) => (int)a;
+            Expression<Func<double, int>> exp2 = (a) => unchecked((int)a);
             UnaryExpression uex = exp2.Body as UnaryExpression;
             Assert.NotNull(uex);
             Assert.Equal(uex.NodeType, ExpressionType.Convert);
@@ -160,7 +160,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void ConstantNullWithValueTypeIsInvalid()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant(null, typeof(int)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant(null, typeof(int)));
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace System.Linq.Expressions.Tests
 
         internal static bool IsNullableType(Type type)
         {
-            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
         internal static Type GetNonNullableType(Type type)
         {
@@ -389,20 +389,20 @@ namespace System.Linq.Expressions.Tests
         {
             // 1 type arg Func
             Type type = Expression.GetFuncType(new Type[] { typeof(int) });
-            Assert.True(type.GetTypeInfo().IsGenericType);
+            Assert.True(type.IsGenericType);
             Assert.Equal(1, type.GetGenericArguments().Length);
             Assert.Equal(typeof(int), type.GetGenericArguments()[0]);
 
             // 2 type arg Func
             type = Expression.GetFuncType(new Type[] { typeof(int), typeof(string) });
-            Assert.True(type.GetTypeInfo().IsGenericType);
+            Assert.True(type.IsGenericType);
             Assert.Equal(typeof(Func<,>), type.GetGenericTypeDefinition());
             Assert.Equal(typeof(int), type.GetGenericArguments()[0]);
             Assert.Equal(typeof(string), type.GetGenericArguments()[1]);
 
             // 3 type arg Func
             type = Expression.GetFuncType(new Type[] { typeof(string), typeof(int), typeof(decimal) });
-            Assert.True(type.GetTypeInfo().IsGenericType);
+            Assert.True(type.IsGenericType);
             Assert.Equal(typeof(Func<,,>), type.GetGenericTypeDefinition());
             Assert.Equal(typeof(string), type.GetGenericArguments()[0]);
             Assert.Equal(typeof(int), type.GetGenericArguments()[1]);
@@ -410,7 +410,7 @@ namespace System.Linq.Expressions.Tests
 
             // 4 type arg Func
             type = Expression.GetFuncType(new Type[] { typeof(string), typeof(int), typeof(decimal), typeof(float) });
-            Assert.True(type.GetTypeInfo().IsGenericType);
+            Assert.True(type.IsGenericType);
             Assert.Equal(typeof(Func<,,,>), type.GetGenericTypeDefinition());
             Assert.Equal(typeof(string), type.GetGenericArguments()[0]);
             Assert.Equal(typeof(int), type.GetGenericArguments()[1]);
@@ -419,7 +419,7 @@ namespace System.Linq.Expressions.Tests
 
             // 5 type arg Func
             type = Expression.GetFuncType(new Type[] { typeof(NWindProxy.Customer), typeof(string), typeof(int), typeof(decimal), typeof(float) });
-            Assert.True(type.GetTypeInfo().IsGenericType);
+            Assert.True(type.IsGenericType);
             Assert.Equal(typeof(Func<,,,,>), type.GetGenericTypeDefinition());
             Assert.Equal(typeof(NWindProxy.Customer), type.GetGenericArguments()[0]);
             Assert.Equal(typeof(string), type.GetGenericArguments()[1]);
@@ -431,13 +431,13 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void TestGetFuncTypeWithNullFails()
         {
-            Assert.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(null));
+            AssertExtensions.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(null));
         }
 
         [Fact]
         public static void TestGetFuncTypeWithTooManyArgsFails()
         {
-            Assert.Throws<ArgumentException>("typeArgs", () => Expression.GetFuncType(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
+            AssertExtensions.Throws<ArgumentException>("typeArgs", () => Expression.GetFuncType(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
         }
 
         [Fact]
@@ -718,7 +718,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(f2().Value.Name, "lhs");
 
             ConstantExpression constant = Expression.Constant(1.0, typeof(double));
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda<Func<double?>>(constant, null));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<double?>>(constant, null));
         }
 
         public static int GetBound()
@@ -1792,7 +1792,7 @@ namespace System.Linq.Expressions.Tests
         public static void InvokeNonTypedLambdaFails()
         {
             Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicLambda", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
+            AssertExtensions.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
         }
 
         public static LambdaExpression ComputeDynamicLambda()
@@ -1804,7 +1804,7 @@ namespace System.Linq.Expressions.Tests
         public static void InvokeNonTypedDelegateFails()
         {
             Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicDelegate", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
+            AssertExtensions.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
         }
 
         public static Delegate ComputeDynamicDelegate()
@@ -2021,7 +2021,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void NewClassWithMemberIntializer(bool useInterpreter)
+        public static void NewClassWithMemberInitializer(bool useInterpreter)
         {
             Expression<Func<int, ClassX>> f = v => new ClassX { A = v };
             Func<int, ClassX> d = f.Compile(useInterpreter);
@@ -2048,7 +2048,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void NewClassWithMemberIntializers(bool useInterpreter)
+        public static void NewClassWithMemberInitializers(bool useInterpreter)
         {
             Expression<Func<int, ClassX>> f = v => new ClassX { A = v, B = v };
             Func<int, ClassX> d = f.Compile(useInterpreter);
@@ -2058,7 +2058,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void NewStructWithMemberIntializer(bool useInterpreter)
+        public static void NewStructWithMemberInitializer(bool useInterpreter)
         {
             Expression<Func<int, StructX>> f = v => new StructX { A = v };
             Func<int, StructX> d = f.Compile(useInterpreter);
@@ -2067,7 +2067,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void NewStructWithMemberIntializers(bool useInterpreter)
+        public static void NewStructWithMemberInitializers(bool useInterpreter)
         {
             Expression<Func<int, StructX>> f = v => new StructX { A = v, B = v };
             Func<int, StructX> d = f.Compile(useInterpreter);
@@ -2114,7 +2114,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public void NewClassWithMemberListIntializer(bool useInterpreter)
+        public void NewClassWithMemberListInitializer(bool useInterpreter)
         {
             Expression<Func<int, ClassX>> f =
                 v => new ClassX { A = v, B = v + 1, Ys = { new ClassY { B = v + 2 } } };
@@ -2128,7 +2128,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public void NewClassWithMemberListOfStructIntializer(bool useInterpreter)
+        public void NewClassWithMemberListOfStructInitializer(bool useInterpreter)
         {
             Expression<Func<int, ClassX>> f =
                 v => new ClassX { A = v, B = v + 1, SYs = { new StructY { B = v + 2 } } };
@@ -2142,7 +2142,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void NewClassWithMemberMemberIntializer(bool useInterpreter)
+        public static void NewClassWithMemberMemberInitializer(bool useInterpreter)
         {
             Expression<Func<int, ClassX>> f =
                 v => new ClassX { A = v, B = v + 1, Y = { B = v + 2 } };
@@ -2155,7 +2155,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public void NewStructWithMemberListIntializer(bool useInterpreter)
+        public void NewStructWithMemberListInitializer(bool useInterpreter)
         {
             Expression<Func<int, StructX>> f =
                 v => new StructX { A = v, B = v + 1, Ys = { new ClassY { B = v + 2 } } };
@@ -2169,7 +2169,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public void NewStructWithStructMemberMemberIntializer(bool useInterpreter)
+        public void NewStructWithStructMemberMemberInitializer(bool useInterpreter)
         {
             Expression<Func<int, StructX>> f =
                 v => new StructX { A = v, B = v + 1, SY = new StructY { B = v + 2 } };
@@ -2780,7 +2780,8 @@ namespace System.Linq.Expressions.Tests
         [ClassData(typeof(CompilationTypes))]
         public static void TestConvertToNullable(bool useInterpreter)
         {
-            Expression<Func<int, int?>> f = x => (int?)x;
+            // Using an unchecked cast to ensure that a Convert expression is used (and not ConvertChecked)
+            Expression<Func<int, int?>> f = x => unchecked((int?)x);
             Assert.Equal(f.Body.NodeType, ExpressionType.Convert);
             Func<int, int?> d = f.Compile(useInterpreter);
             Assert.Equal(2, d(2));

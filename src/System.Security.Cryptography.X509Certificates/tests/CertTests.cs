@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,6 +12,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public class CertTests
     {
+        private const string PrivateKeySectionHeader = "[Private Key]";
+        private const string PublicKeySectionHeader = "[Public Key]";
+
         private readonly ITestOutputHelper _log;
 
         public CertTests(ITestOutputHelper output)
@@ -75,10 +80,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 Assert.Equal(notAfter, cert2.NotAfter);
                 Assert.Equal(notBefore, cert2.NotBefore);
-#if netstandard17
+
                 Assert.Equal(notAfter.ToString(), cert2.GetExpirationDateString());
                 Assert.Equal(notBefore.ToString(), cert2.GetEffectiveDateString());
-#endif
 
                 Assert.Equal("00D01E4090000046520000000100000004", cert2.SerialNumber);
                 Assert.Equal("1.2.840.113549.1.1.5", cert2.SignatureAlgorithm.Value);
@@ -87,7 +91,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-#if netstandard17
         [Fact]
         [OuterLoop("May require using the network, to download CRLs and intermediates")]
         public void TestVerify()
@@ -148,7 +151,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 _log.WriteLine($"X509Certificate2.Verify exception: {testName}, {e}");
             }
         }
-#endif
 
         [Fact]
         public static void X509CertEmptyToString()
@@ -186,6 +188,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.False(string.IsNullOrWhiteSpace(c.ToString(true)));
                     c.Dispose();
                 }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(StorageFlags))]
+        public static void X509Certificate2ToStringVerbose_WithPrivateKey(X509KeyStorageFlags keyStorageFlags)
+        {
+            using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, keyStorageFlags))
+            {
+                string certToString = cert.ToString(true);
+                Assert.Contains(PrivateKeySectionHeader, certToString);
+                Assert.Contains(PublicKeySectionHeader, certToString);
+            }
+        }
+
+        [Fact]
+        public static void X509Certificate2ToStringVerbose_NoPrivateKey()
+        {
+            using (var cert = new X509Certificate2(TestData.MsCertificatePemBytes))
+            {
+                string certToString = cert.ToString(true);
+                Assert.DoesNotContain(PrivateKeySectionHeader, certToString);
+                Assert.Contains(PublicKeySectionHeader, certToString);
             }
         }
 
@@ -277,9 +302,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => c.IssuerName);
                 Assert.ThrowsAny<CryptographicException>(() => c.PublicKey);
                 Assert.ThrowsAny<CryptographicException>(() => c.Extensions);
-#if netstandard17
                 Assert.ThrowsAny<CryptographicException>(() => c.PrivateKey);
-#endif
             }
         }
 
@@ -291,19 +314,35 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Pre-condition: There's no private key
                 Assert.False(publicOnly.HasPrivateKey);
 
-                // This won't throw.
-                byte[] pkcs12Bytes = publicOnly.Export(X509ContentType.Pkcs12);
+                // macOS 10.12 (Sierra) fails to create a PKCS#12 blob if it has no private keys within it.
+                bool shouldThrow = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
-                // Read it back as a collection, there should be only one cert, and it should
-                // be equal to the one we started with.
-                using (ImportedCollection ic = Cert.Import(pkcs12Bytes))
+                try
                 {
-                    X509Certificate2Collection fromPfx = ic.Collection;
+                    byte[] pkcs12Bytes = publicOnly.Export(X509ContentType.Pkcs12);
 
-                    Assert.Equal(1, fromPfx.Count);
-                    Assert.Equal(publicOnly, fromPfx[0]);
+                    Assert.False(shouldThrow, "PKCS#12 export of a public-only certificate threw as expected");
+
+                    // Read it back as a collection, there should be only one cert, and it should
+                    // be equal to the one we started with.
+                    using (ImportedCollection ic = Cert.Import(pkcs12Bytes))
+                    {
+                        X509Certificate2Collection fromPfx = ic.Collection;
+
+                        Assert.Equal(1, fromPfx.Count);
+                        Assert.Equal(publicOnly, fromPfx[0]);
+                    }
+                }
+                catch (CryptographicException)
+                {
+                    if (!shouldThrow)
+                    {
+                        throw;
+                    }
                 }
             }
         }
+
+        public static IEnumerable<object> StorageFlags => CollectionImportTests.StorageFlags;
     }
 }

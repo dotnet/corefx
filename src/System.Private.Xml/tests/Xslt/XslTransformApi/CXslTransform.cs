@@ -1747,7 +1747,10 @@ namespace System.Xml.Tests
             }
             catch (System.Xml.Xsl.XsltCompileException e)
             {
-                CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                if (PlatformDetection.IsFullFramework)
+                    CheckExpectedError(e.InnerException, "system.data.sqlxml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                else
+                    CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
                 return;
             }
             _output.WriteLine("No exception thrown for a loading a closed reader!");
@@ -1847,7 +1850,11 @@ namespace System.Xml.Tests
             }
             catch (System.Xml.Xsl.XsltCompileException e)
             {
-                CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
+
+                if (PlatformDetection.IsFullFramework)
+                    CheckExpectedError(e.InnerException, "system.data.sqlxml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                else
+                    CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
             }
             finally
             {
@@ -2670,7 +2677,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Output filename is \'\\\\\'")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Invalid path specific to Windows
         [InlineData(InputType.Reader, ReaderType.XmlValidatingReader)]
         [InlineData(InputType.URI, ReaderType.XmlValidatingReader)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader)]

@@ -40,44 +40,44 @@ namespace System.Net.NetworkInformation.Tests
             Ping p = new Ping();
 
             // Null address
-            Assert.Throws<ArgumentNullException>("address", () => { p.SendPingAsync((IPAddress)null); });
-            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendPingAsync((string)null); });
-            Assert.Throws<ArgumentNullException>("address", () => { p.SendAsync((IPAddress)null, null); });
-            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendAsync((string)null, null); });
-            Assert.Throws<ArgumentNullException>("address", () => { p.Send((IPAddress)null); });
-            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.Send((string)null); });
+            AssertExtensions.Throws<ArgumentNullException>("address", () => { p.SendPingAsync((IPAddress)null); });
+            AssertExtensions.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendPingAsync((string)null); });
+            AssertExtensions.Throws<ArgumentNullException>("address", () => { p.SendAsync((IPAddress)null, null); });
+            AssertExtensions.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendAsync((string)null, null); });
+            AssertExtensions.Throws<ArgumentNullException>("address", () => { p.Send((IPAddress)null); });
+            AssertExtensions.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.Send((string)null); });
 
             // Invalid address
-            Assert.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.Any); });
-            Assert.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.IPv6Any); });
-            Assert.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.Any, null); });
-            Assert.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.IPv6Any, null); });
-            Assert.Throws<ArgumentException>("address", () => { p.Send(IPAddress.Any); });
-            Assert.Throws<ArgumentException>("address", () => { p.Send(IPAddress.IPv6Any); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.Any); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.IPv6Any); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.Any, null); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.IPv6Any, null); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.Send(IPAddress.Any); });
+            AssertExtensions.Throws<ArgumentException>("address", () => { p.Send(IPAddress.IPv6Any); });
 
             // Negative timeout
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(localIpAddress, -1); });
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(TestSettings.LocalHost, -1); });
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(localIpAddress, -1, null); });
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(TestSettings.LocalHost, -1, null); });
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(localIpAddress, -1); });
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(TestSettings.LocalHost, -1); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(localIpAddress, -1); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(TestSettings.LocalHost, -1); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(localIpAddress, -1, null); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(TestSettings.LocalHost, -1, null); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(localIpAddress, -1); });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(TestSettings.LocalHost, -1); });
 
             // Null byte[]
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(localIpAddress, 0, null); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 0, null); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(localIpAddress, 0, null, null); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 0, null, null); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.Send(localIpAddress, 0, null); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { p.Send(TestSettings.LocalHost, 0, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(localIpAddress, 0, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 0, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(localIpAddress, 0, null, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 0, null, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.Send(localIpAddress, 0, null); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { p.Send(TestSettings.LocalHost, 0, null); });
 
             // Too large byte[]
-            Assert.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(localIpAddress, 1, new byte[65501]); });
-            Assert.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 1, new byte[65501]); });
-            Assert.Throws<ArgumentException>("buffer", () => { p.SendAsync(localIpAddress, 1, new byte[65501], null); });
-            Assert.Throws<ArgumentException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 1, new byte[65501], null); });
-            Assert.Throws<ArgumentException>("buffer", () => { p.Send(localIpAddress, 1, new byte[65501]); });
-            Assert.Throws<ArgumentException>("buffer", () => { p.Send(TestSettings.LocalHost, 1, new byte[65501]); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(localIpAddress, 1, new byte[65501]); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 1, new byte[65501]); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.SendAsync(localIpAddress, 1, new byte[65501], null); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 1, new byte[65501], null); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.Send(localIpAddress, 1, new byte[65501]); });
+            AssertExtensions.Throws<ArgumentException>("buffer", () => { p.Send(TestSettings.LocalHost, 1, new byte[65501]); });
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer()
         {
@@ -140,7 +140,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer_Unix()
         {
@@ -166,7 +166,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions()
         {
@@ -185,7 +185,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix()
         {
@@ -239,7 +239,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer()
         {
@@ -257,7 +257,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer_Unix()
         {
@@ -283,7 +283,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions()
         {
@@ -301,7 +301,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions_Unix()
         {
@@ -397,9 +397,16 @@ namespace System.Net.NetworkInformation.Tests
                     reset();
                     p.SendAsync(TestSettings.LocalHost, null);
                     p.SendAsyncCancel(); // will block until operation can be started again
+                    await tcs.Task;
+
+                    bool cancelled = ea.Cancelled;
+                    Exception error = ea.Error;
+                    PingReply reply = ea.Reply;
+                    Assert.True(cancelled ^ (error != null) ^ (reply != null),
+                        "Cancelled: " + cancelled +
+                        (error == null ? "" : (Environment.NewLine + "Error Message: " + error.Message + Environment.NewLine + "Error Inner Exception: " + error.InnerException)) +
+                        (reply == null ? "" : (Environment.NewLine + "Reply Address: " + reply.Address + Environment.NewLine + "Reply Status: " + reply.Status)));
                 }
-                await tcs.Task;
-                Assert.True(ea.Cancelled ^ (ea.Error != null) ^ (ea.Reply != null));
             }
         }
 

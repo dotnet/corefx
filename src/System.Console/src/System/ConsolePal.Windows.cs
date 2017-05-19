@@ -97,7 +97,7 @@ namespace System
             if (enc.CodePage != Encoding.Unicode.CodePage)
             {
                 if (!Interop.Kernel32.SetConsoleCP(enc.CodePage))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -111,7 +111,7 @@ namespace System
             if (enc.CodePage != Encoding.Unicode.CodePage)
             {
                 if (!Interop.Kernel32.SetConsoleOutputCP(enc.CodePage))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -186,7 +186,6 @@ namespace System
         // we will lose repeated keystrokes when someone switches from
         // calling ReadKey to calling Read or ReadLine.  Those methods should 
         // ideally flush this cache as well.
-        [System.Security.SecurityCritical] // auto-generated
         private static Interop.InputRecord _cachedInputRecord;
 
         // Skip non key events. Generally we want to surface only KeyDown event 
@@ -194,13 +193,11 @@ namespace System
         // where the assumption of KeyDown-KeyUp pairing for a given key press 
         // is invalid. For example in IME Unicode keyboard input, we often see
         // only KeyUp until the key is released.  
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsKeyDownEvent(Interop.InputRecord ir)
         {
-            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown);
+            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown != Interop.BOOL.FALSE);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsModKey(Interop.InputRecord ir)
         {
             // We should also skip over Shift, Control, and Alt, as well as caps lock.
@@ -230,7 +227,6 @@ namespace System
         // desired effect is to translate the sequence into one Unicode KeyPress. 
         // We need to keep track of the Alt+NumPad sequence and surface the final
         // unicode char alone when the Alt key is released. 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsAltKeyDown(Interop.InputRecord ir)
         {
             return (((ControlKeyState)ir.keyEvent.controlKeyState)
@@ -425,7 +421,7 @@ namespace System
 
                 int mode = 0;
                 if (!Interop.Kernel32.GetConsoleMode(handle, out mode))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
 
                 return (mode & Interop.Kernel32.ENABLE_PROCESSED_INPUT) == 0;
             }
@@ -448,7 +444,7 @@ namespace System
                 }
 
                 if (!Interop.Kernel32.SetConsoleMode(handle, mode))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -613,7 +609,6 @@ namespace System
 
         public static string Title
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 string title = null;
@@ -632,15 +627,8 @@ namespace System
                 return title;
             }
 
-            [System.Security.SecuritySafeCritical]  // auto-generated
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-                if (value.Length > MaxConsoleTitleLength)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_ConsoleTitleTooLong);
-                Contract.EndContractBlock();
-
                 if (!Interop.Kernel32.SetConsoleTitle(value))
                     throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
@@ -796,15 +784,6 @@ namespace System
 
         public static void SetCursorPosition(int left, int top)
         {
-            // Note on argument checking - the upper bounds are NOT correct 
-            // here!  But it looks slightly expensive to compute them.  Let
-            // Windows calculate them, then we'll give a nice error message.
-            if (left < 0 || left >= short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(left), left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-            if (top < 0 || top >= short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(top), top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-            Contract.EndContractBlock();
-
             IntPtr hConsole = OutputHandle;
             Interop.Kernel32.COORD coords = new Interop.Kernel32.COORD();
             coords.X = (short)left;
@@ -814,9 +793,9 @@ namespace System
                 // Give a nice error message for out of range sizes
                 int errorCode = Marshal.GetLastWin32Error();
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
-                if (left < 0 || left >= csbi.dwSize.X)
+                if (left >= csbi.dwSize.X)
                     throw new ArgumentOutOfRangeException(nameof(left), left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-                if (top < 0 || top >= csbi.dwSize.Y)
+                if (top >= csbi.dwSize.Y)
                     throw new ArgumentOutOfRangeException(nameof(top), top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
 
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode);
@@ -825,7 +804,6 @@ namespace System
 
         public static int BufferWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -839,7 +817,6 @@ namespace System
 
         public static int BufferHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -851,7 +828,6 @@ namespace System
             }
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public static void SetBufferSize(int width, int height)
         {
             // Ensure the new size is not smaller than the console window
@@ -873,7 +849,6 @@ namespace System
 
         public static int LargestWindowWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 
@@ -885,7 +860,6 @@ namespace System
 
         public static int LargestWindowHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 
@@ -1189,7 +1163,7 @@ namespace System
                 }
 
                 bool readSuccess;
-                fixed (byte* p = bytes)
+                fixed (byte* p = &bytes[0])
                 {
                     if (useFileAPIs)
                     {
@@ -1227,7 +1201,7 @@ namespace System
                     return Interop.Errors.ERROR_SUCCESS;
 
                 bool writeSuccess;
-                fixed (byte* p = bytes)
+                fixed (byte* p = &bytes[0])
                 {
                     if (useFileAPIs)
                     {

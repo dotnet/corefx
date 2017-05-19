@@ -32,8 +32,8 @@ namespace System.Net.Security.Tests
             return true;  // allow everything
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/19379")]
         public async Task ServerNoEncryption_ClientRequireEncryption_NoConnect()
         {
             using (var serverNoEncryption = new DummyTcpServer(
@@ -50,8 +50,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SupportsNullEncryption))]
+        [ActiveIssue(16534, TestPlatforms.Windows)]
         public async Task ServerNoEncryption_ClientAllowNoEncryption_ConnectWithNoEncryption()
         {
             using (var serverNoEncryption = new DummyTcpServer(
@@ -74,8 +74,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [ActiveIssue(16534, TestPlatforms.Windows)]
         public async Task ServerNoEncryption_ClientNoEncryption_ConnectWithNoEncryption()
         {
             using (var serverNoEncryption = new DummyTcpServer(

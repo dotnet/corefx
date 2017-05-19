@@ -2,17 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public abstract class FileSystemTest : FileCleanupTestBase
+    public abstract partial class FileSystemTest : FileCleanupTestBase
     {
         public static readonly byte[] TestBuffer = { 0xBA, 0x5E, 0xBA, 0x11, 0xF0, 0x07, 0xBA, 0x11 };
 
         protected const TestPlatforms CaseInsensitivePlatforms = TestPlatforms.Windows | TestPlatforms.OSX;
         protected const TestPlatforms CaseSensitivePlatforms = TestPlatforms.AnyUnix & ~TestPlatforms.OSX;
+
+        public static bool AreAllLongPathsAvailable => PathFeatures.AreAllLongPathsAvailable();
+
+        public static bool LongPathsAreNotBlocked => !PathFeatures.AreLongPathsBlocked();
+
+        public static bool UsingNewNormalization => !PathFeatures.IsUsingLegacyPathNormalization();
+
+        public static TheoryData<string> PathsWithInvalidColons => TestData.PathsWithInvalidColons;
+
+        public static TheoryData<string> PathsWithInvalidCharacters => TestData.PathsWithInvalidCharacters;
 
         /// <summary>
         /// In some cases (such as when running without elevated privileges),
@@ -42,11 +51,5 @@ namespace System.IO.Tests
                 return success;
             }
         }
-
-        [DllImport("libc", SetLastError = true)]
-        protected static extern int geteuid();
-
-        [DllImport("libc", SetLastError = true)]
-        protected static extern int mkfifo(string path, int mode);
     }
 }

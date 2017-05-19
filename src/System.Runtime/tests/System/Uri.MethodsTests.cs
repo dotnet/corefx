@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,6 +10,8 @@ namespace System.Tests
 {
     public class UriMethodTests
     {
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
+
         public static IEnumerable<object[]> MakeRelative_TestData()
         {
             // Path (forward x3)
@@ -67,6 +69,12 @@ namespace System.Tests
             yield return new object[] { new Uri("http://domain.com/PATH1/path2/PATH3"), new Uri("http://domain.com/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
             yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
             yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
+            // Unix paths are case sensitive
+            yield return new object[] { new Uri("file:///PATH1/path2/PATH3"), new Uri("file:///path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
+            if (!s_isWindowsSystem) // Unix path
+            {
+                yield return new object[] { new Uri("/PATH1/path2/PATH3"), new Uri("/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
+            }
 
             // Same path, but uri1 ended with a filename, but uri2 didn't
             yield return new object[] { new Uri("http://domain.com/path1/file"), new Uri("http://domain.com/path1/"), new Uri("./", UriKind.Relative) };
@@ -93,7 +101,7 @@ namespace System.Tests
         {
             var baseUri = new Uri("http://www.domain.com/");
             var relativeUri = new Uri("/path/", UriKind.Relative);
-            Assert.Throws<ArgumentNullException>("uri", () => baseUri.MakeRelativeUri(null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => baseUri.MakeRelativeUri(null)); // Uri is null
 
             Assert.Throws<InvalidOperationException>(() => relativeUri.MakeRelativeUri(baseUri)); // Base uri is relative
             Assert.Throws<InvalidOperationException>(() => baseUri.MakeRelativeUri(relativeUri)); // Uri is relative
@@ -199,25 +207,35 @@ namespace System.Tests
         [Fact]
         public void IsBaseOf_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("uri", () => new Uri("http://domain.com").IsBaseOf(null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => new Uri("http://domain.com").IsBaseOf(null)); // Uri is null
+        }
+
+        public static IEnumerable<object[]> IsWellFormedOriginalString_TestData()
+        {
+            yield return new object[] { "http://www.domain.com/path?name", true  };
+            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", true  };
+            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", true  };
+            yield return new object[] { "http://[::1]/path1/page?query#fragment", true  };
+            yield return new object[] { "unknownscheme:", true  };
+            yield return new object[] { "http://www.domain.com/path???/file name", false  };
+            yield return new object[] { @"http:\\host/path/file", false  };
+            yield return new object[] { "file:////", true  };
+            yield return new object[] { @"http:\\host/path/file", false  };
+            yield return new object[] { "http://host/path\file", false  };
+            yield return new object[] { @"c:\directory\filename", false  };
+            yield return new object[] { @"\\unchost", false  };
+            yield return new object[] { "file://C:/directory/filename", false  };
+            yield return new object[] { "file:///c|/dir", false  };
+            yield return new object[] { @"file:\\\c:\path", false  };
+             // Unix path
+            if (!s_isWindowsSystem)
+            {
+                yield return new object[] { "/directory/filename", false  };
+            }
         }
 
         [Theory]
-        [InlineData("http://www.domain.com/path?name", true)]
-        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", true)]
-        [InlineData("http://[::1]:50/path1/page?query#fragment", true)]
-        [InlineData("http://[::1]/path1/page?query#fragment", true)]
-        [InlineData("unknownscheme:", true)]
-        [InlineData("http://www.domain.com/path???/file name", false)]
-        [InlineData(@"c:\directory\filename", false)]
-        [InlineData(@"\\unchost", false)]
-        [InlineData("file://C:/directory/filename", false)]
-        [InlineData(@"http:\\host/path/file", false)]
-        [InlineData("file:////", true)]
-        [InlineData("file:///c|/dir", false)]
-        [InlineData(@"file:\\\c:\path", false)]
-        [InlineData(@"http:\\host/path/file", false)]
-        [InlineData("http://host/path\file", false)]
+        [MemberData(nameof(IsWellFormedOriginalString_TestData))]
         public void IsWellFormedOriginalString(string uriString, bool expected)
         {
             Uri uri = new Uri(uriString);
@@ -288,8 +306,8 @@ namespace System.Tests
         public void Compare_Invalid()
         {
             var uri = new Uri("http://domain.com");
-            Assert.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -330,6 +348,18 @@ namespace System.Tests
             yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\pata\file"), false };
             yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file!"), false };
 
+            // Unix path
+            if (!s_isWindowsSystem)
+            {
+                // Implicit file
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file"), true };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/File"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepata/path/file"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/pata/file"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file!"), false };
+                yield return new object[] { new Uri(@"/shar\path/path/file"), new Uri("/shar/path/path/file"), false };
+            }
+
             // Relative paths
             yield return new object[] { new Uri("/path1/path2/", UriKind.Relative), new Uri("/path1/path2/", UriKind.Relative), true };
             yield return new object[] { new Uri("/path1/path2/", UriKind.Relative), new Uri("/path1/path2", UriKind.Relative), false };
@@ -363,7 +393,8 @@ namespace System.Tests
                 Assert.Equal(expected, uri1.Equals(obj));
                 if (uri2 != null)
                 {
-                    Assert.Equal(expected, uri1.GetHashCode().Equals(uri2.GetHashCode()));
+                    bool onlyCaseDifference = string.Equals(uri1.OriginalString, uri2.OriginalString, StringComparison.OrdinalIgnoreCase);
+                    Assert.Equal(expected || onlyCaseDifference, uri1.GetHashCode().Equals(uri2.GetHashCode()));
                 }
             }
             if (!(obj is string))
@@ -392,7 +423,7 @@ namespace System.Tests
         [Fact]
         public void EscapeDataString_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null)); // StringToEscape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null)); // StringToEscape is null
             Assert.Throws<UriFormatException>(() => Uri.EscapeDataString(UriCreateStringTests.s_longString)); // StringToEscape is too long
 
             Assert.Throws<UriFormatException>(() => Uri.EscapeDataString("\uD800")); // Incomplete surrogate pair provided
@@ -412,7 +443,7 @@ namespace System.Tests
         [Fact]
         public void UnescapedDataString_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("stringToUnescape", () => Uri.UnescapeDataString(null)); // StringToUnescape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToUnescape", () => Uri.UnescapeDataString(null)); // StringToUnescape is null
         }
 
         [Theory]
@@ -434,7 +465,7 @@ namespace System.Tests
         [Fact]
         public void EscapeUriString_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeUriString(null)); // StringToEscape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeUriString(null)); // StringToEscape is null
             Assert.Throws<UriFormatException>(() => Uri.EscapeUriString(UriCreateStringTests.s_longString)); // StringToEscape is too long
 
             Assert.Throws<UriFormatException>(() => Uri.EscapeUriString("\uD800")); // Incomplete surrogate pair provided
@@ -625,7 +656,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => absoluteUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped - 1)); // Format is invalid
             Assert.Throws<ArgumentOutOfRangeException>(() => absoluteUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.SafeUnescaped + 1)); // Format is invalid
 
-            Assert.Throws<ArgumentOutOfRangeException>("components", () => absoluteUri.GetComponents(UriComponents.HostAndPort | ~UriComponents.KeepDelimiter, UriFormat.UriEscaped)); // Components is invalid
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("components", () => absoluteUri.GetComponents(UriComponents.HostAndPort | ~UriComponents.KeepDelimiter, UriFormat.UriEscaped)); // Components is invalid
 
             Assert.Throws<InvalidOperationException>(() => relativeUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.Unescaped)); // Uri is relative
             Assert.Throws<ArgumentOutOfRangeException>(() => relativeUri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped - 1)); // Uri is relative, format is invalid

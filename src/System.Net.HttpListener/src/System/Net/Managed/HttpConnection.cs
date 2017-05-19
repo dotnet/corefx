@@ -103,6 +103,9 @@ namespace System.Net
             }
 
             _timer = new Timer(OnTimeout, null, Timeout.Infinite, Timeout.Infinite);
+            if (_sslStream != null) {
+                _sslStream.AuthenticateAsServer (_cert, true, (SslProtocols)ServicePointManager.SecurityProtocol, false);
+            }
             Init();
         }
 
@@ -116,13 +119,13 @@ namespace System.Net
             get { return _clientCert; }
         }
 
+        internal SslStream SslStream
+        {
+            get { return _sslStream; }
+        }
+
         private void Init()
         {
-            if (_sslStream != null)
-            {
-                _sslStream.AuthenticateAsServer(_cert, true, (SslProtocols)ServicePointManager.SecurityProtocol, false);
-            }
-
             _contextBound = false;
             _requestStream = null;
             _responseStream = null;
@@ -134,6 +137,8 @@ namespace System.Net
             _lineState = LineState.None;
             _context = new HttpListenerContext(this);
         }
+
+        public Stream ConnectedStream => _stream;
 
         public bool IsClosed
         {
@@ -223,7 +228,7 @@ namespace System.Net
         {
             if (_responseStream == null)
             {
-                HttpListener listener = _context.Listener;
+                HttpListener listener = _context._listener;
 
                 if (listener == null)
                     return new HttpResponseStream(_stream, _context.Response, true);
@@ -291,7 +296,7 @@ namespace System.Net
                     Close(true);
                     return;
                 }
-                HttpListener listener = _context.Listener;
+                HttpListener listener = _context._listener;
                 if (_lastListener != listener)
                 {
                     RemoveConnection();
@@ -445,7 +450,7 @@ namespace System.Net
                 else
                     str = string.Format("<h1>{0}</h1>", description);
 
-                byte[] error = _context.Response.ContentEncoding.GetBytes(str);
+                byte[] error = Encoding.Default.GetBytes(str);
                 response.Close(error, false);
             }
             catch

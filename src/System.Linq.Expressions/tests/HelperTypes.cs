@@ -249,10 +249,10 @@ namespace System.Linq.Expressions.Tests
     {
         private static readonly IEnumerable<object[]> Booleans = new[]
         {
-            new object[] {false},
 #if FEATURE_COMPILE && FEATURE_INTERPRET
-            new object[] {true}
+            new object[] {false},
 #endif
+            new object[] {true},
         };
 
         public IEnumerator<object[]> GetEnumerator() => Booleans.GetEnumerator();
@@ -277,6 +277,10 @@ namespace System.Linq.Expressions.Tests
     public class GenericClass<T>
     {
         public void Method() { }
+
+        public static T Field;
+
+        public static T Property => Field;
     }
 
     public class NonGenericClass
@@ -287,6 +291,10 @@ namespace System.Linq.Expressions.Tests
 
         public void GenericMethod<T>() { }
         public static void StaticMethod() { }
+
+        public static readonly NonGenericClass NonGenericField = new NonGenericClass();
+
+        public static NonGenericClass NonGenericProperty => NonGenericField;
     }
 
     public class InvalidTypesData : IEnumerable<object[]>
@@ -346,6 +354,7 @@ namespace System.Linq.Expressions.Tests
     public enum Int64Enum : long { A = Int64.MaxValue }
     public enum UInt64Enum : ulong { A = UInt64.MaxValue }
 
+#if FEATURE_COMPILE
     public static class NonCSharpTypes
     {
         private static Type _charEnumType;
@@ -368,7 +377,7 @@ namespace System.Linq.Expressions.Tests
                     eb.DefineLiteral("A", 'A');
                     eb.DefineLiteral("B", 'B');
                     eb.DefineLiteral("C", 'C');
-                    _charEnumType = eb.CreateTypeInfo().AsType();
+                    _charEnumType = eb.CreateTypeInfo();
                 }
 
                 return _charEnumType;
@@ -384,13 +393,14 @@ namespace System.Linq.Expressions.Tests
                     EnumBuilder eb = GetModuleBuilder().DefineEnum("BoolEnumType", TypeAttributes.Public, typeof(bool));
                     eb.DefineLiteral("False", false);
                     eb.DefineLiteral("True", true);
-                    _boolEnumType = eb.CreateTypeInfo().AsType();
+                    _boolEnumType = eb.CreateTypeInfo();
                 }
 
                 return _boolEnumType;
             }
         }
     }
+#endif
 
     public class FakeExpression : Expression
     {
@@ -419,9 +429,9 @@ namespace System.Linq.Expressions.Tests
         public static readonly Number MinValue = new Number(int.MinValue);
         public static readonly Number MaxValue = new Number(int.MaxValue);
 
-        public static Number operator +(Number l, Number r) => new Number(l._value + r._value);
+        public static Number operator +(Number l, Number r) => new Number(unchecked(l._value + r._value));
         public static Number operator -(Number l, Number r) => new Number(l._value - r._value);
-        public static Number operator *(Number l, Number r) => new Number(l._value * r._value);
+        public static Number operator *(Number l, Number r) => new Number(unchecked(l._value * r._value));
         public static Number operator /(Number l, Number r) => new Number(l._value / r._value);
         public static Number operator %(Number l, Number r) => new Number(l._value % r._value);
 
@@ -449,7 +459,9 @@ namespace System.Linq.Expressions.Tests
             expression.VerifyIL(il);
 #endif
 
-#if FEATURE_INTERPRET
+            // FEATURE_COMPILE is not directly required, 
+            // but this functionality relies on private reflection and that would not work with AOT
+#if FEATURE_INTERPRET && FEATURE_COMPILE
             expression.VerifyInstructions(instructions);
 #endif
         }
@@ -473,5 +485,23 @@ namespace System.Linq.Expressions.Tests
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class Truthiness
+    {
+        private bool Value { get; }
+
+        public Truthiness(bool value)
+        {
+            Value = value;
+        }
+
+        public static implicit operator bool(Truthiness truth) => truth.Value;
+
+        public static bool operator true(Truthiness truth) => truth.Value;
+
+        public static bool operator false(Truthiness truth) => !truth.Value;
+
+        public static Truthiness operator !(Truthiness truth) => new Truthiness(!truth.Value);
     }
 }

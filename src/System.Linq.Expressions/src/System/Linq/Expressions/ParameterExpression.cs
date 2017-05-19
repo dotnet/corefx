@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions
 {
@@ -27,7 +26,7 @@ namespace System.Linq.Expressions
             }
             else
             {
-                if (!type.GetTypeInfo().IsEnum)
+                if (!type.IsEnum)
                 {
                     switch (type.GetTypeCode())
                     {

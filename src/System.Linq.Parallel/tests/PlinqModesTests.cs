@@ -66,7 +66,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         /// <summary>
-        /// Get a a combination of partitioned data sources, degree of parallelism, expected resulting dop,
+        /// Get a combination of partitioned data sources, degree of parallelism, expected resulting dop,
         /// query to execute on the data source, and mode of execution.
         /// </summary>
         /// <param name="dop">A set of the desired degrees of parallelism to be employed.</param>
@@ -167,7 +167,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void WithExecutionMode_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).WithExecutionMode(ParallelExecutionMode.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).WithExecutionMode(ParallelExecutionMode.Default));
         }
 
         /// <summary>Tracks all of the Tasks from which AddCurrent is called.</summary>

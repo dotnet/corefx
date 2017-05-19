@@ -13,7 +13,7 @@ using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
 namespace System.Net.Http
 {
-    internal class WinHttpRequestStream : Stream
+    internal sealed class WinHttpRequestStream : Stream
     {
         private static byte[] s_crLfTerminator = new byte[] { 0x0d, 0x0a }; // "\r\n"
         private static byte[] s_endChunk = new byte[] { 0x30, 0x0d, 0x0a, 0x0d, 0x0a }; // "0\r\n\r\n"
@@ -136,6 +136,12 @@ namespace System.Net.Http
             WriteAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
         }
 
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override void EndWrite(IAsyncResult asyncResult) =>
+            TaskToApm.End(asyncResult);
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
@@ -189,6 +195,11 @@ namespace System.Net.Http
 
         private Task InternalWriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
+            if (count == 0)
+            {
+                return Task.CompletedTask;
+            }
+
             return _chunkedMode ?
                 InternalWriteChunkedModeAsync(buffer, offset, count, token) :
                 InternalWriteDataAsync(buffer, offset, count, token);            
@@ -200,6 +211,7 @@ namespace System.Net.Http
             // and instead use the 'Transfer-Encoding: chunked' header. The caller is still required to encode the
             // request body according to chunking rules.
             Debug.Assert(_chunkedMode);
+            Debug.Assert(count > 0);
 
             string chunkSizeString = String.Format("{0:x}\r\n", count);
             byte[] chunkSize = Encoding.UTF8.GetBytes(chunkSizeString);
@@ -212,13 +224,8 @@ namespace System.Net.Http
 
         private Task<bool> InternalWriteDataAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
-            Debug.Assert(count >= 0);
-            
-            if (count == 0)
-            {
-                return Task.FromResult<bool>(true);
-            }
-            
+            Debug.Assert(count > 0);
+
             // TODO (Issue 2505): replace with PinnableBufferCache.
             if (!_cachedSendPinnedBuffer.IsAllocated || _cachedSendPinnedBuffer.Target != buffer)
             {
@@ -242,7 +249,7 @@ namespace System.Net.Http
                     IntPtr.Zero))
                 {
                     _state.TcsInternalWriteDataToRequestStream.TrySetException(
-                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError().InitializeStackTrace()));
+                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError()));
                 }
             }
 

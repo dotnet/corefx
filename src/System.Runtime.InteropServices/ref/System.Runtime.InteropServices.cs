@@ -314,14 +314,12 @@ namespace System.Runtime.InteropServices
         public decimal WrappedObject { get { throw null; } }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    [System.ObsoleteAttribute("CustomQueryInterfaceMode and support for ICustomQueryInterface may be unavailable in future releases.")]
     public enum CustomQueryInterfaceMode
     {
         Allow = 1,
         Ignore = 0,
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    [System.ObsoleteAttribute("CustomQueryInterfaceResult and support for ICustomQueryInterface may be unavailable in future releases.")]
     public enum CustomQueryInterfaceResult
     {
         Failed = 2,
@@ -462,11 +460,16 @@ namespace System.Runtime.InteropServices
         object MarshalNativeToManaged(System.IntPtr pNativeData);
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    [System.ObsoleteAttribute("ICustomQueryInterface may be unavailable in future releases.")]
     public partial interface ICustomQueryInterface
     {
         System.Runtime.InteropServices.CustomQueryInterfaceResult GetInterface(ref System.Guid iid, out System.IntPtr ppv);
     }
+    [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+    public sealed class ImportedFromTypeLibAttribute : Attribute
+    {
+        public ImportedFromTypeLibAttribute(String tlbFile) { }
+        public String Value { get { throw null; } }
+    }         
     [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
     public sealed partial class InAttribute : System.Attribute
     {
@@ -602,10 +605,8 @@ namespace System.Runtime.InteropServices
         public static string PtrToStringBSTR(System.IntPtr ptr) { throw null; }
         public static string PtrToStringUni(System.IntPtr ptr) { throw null; }
         public static string PtrToStringUni(System.IntPtr ptr, int len) { throw null; }
-#if netcoreapp11
         public static string PtrToStringUTF8(System.IntPtr ptr) { throw null; }
         public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { throw null; }
-#endif
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void PtrToStructure(System.IntPtr ptr, object structure) { }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -663,9 +664,7 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr StringToCoTaskMemAnsi(string s) { throw null; }
         public static System.IntPtr StringToCoTaskMemAuto(string s) { throw null; }
         public static System.IntPtr StringToCoTaskMemUni(string s) { throw null; }
-#if netcoreapp11
         public static System.IntPtr StringToCoTaskMemUTF8(string s) { throw null; }
-#endif
         public static System.IntPtr StringToHGlobalAnsi(string s) { throw null; }
         public static System.IntPtr StringToHGlobalAuto(string s) { throw null; }
         public static System.IntPtr StringToHGlobalUni(string s) { throw null; }
@@ -712,9 +711,7 @@ namespace System.Runtime.InteropServices
         public static void ZeroFreeCoTaskMemUnicode(System.IntPtr s) { }
         public static void ZeroFreeGlobalAllocAnsi(System.IntPtr s) { }
         public static void ZeroFreeGlobalAllocUnicode(System.IntPtr s) { }
-#if netcoreapp11
         public static void ZeroFreeCoTaskMemUTF8(System.IntPtr s) { }
-#endif
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited=false)]
     public sealed partial class ManagedToNativeComInteropStubAttribute : System.Attribute
@@ -831,6 +828,93 @@ namespace System.Runtime.InteropServices
         public string Identifier { get { throw null; } }
         public string Scope { get { throw null; } }
     }
+    [AttributeUsage(AttributeTargets.Interface, Inherited = false)]
+    public sealed class TypeLibImportClassAttribute : Attribute
+    {
+        public TypeLibImportClassAttribute(Type importClass) { }
+        public String Value { get { throw null; } }
+    }
+    [Flags()]
+    public enum TypeLibTypeFlags
+    {
+        FAppObject      = 0x0001,
+        FCanCreate      = 0x0002,
+        FLicensed       = 0x0004,
+        FPreDeclId      = 0x0008,
+        FHidden         = 0x0010,
+        FControl        = 0x0020,
+        FDual           = 0x0040,
+        FNonExtensible  = 0x0080,
+        FOleAutomation  = 0x0100,
+        FRestricted     = 0x0200,
+        FAggregatable   = 0x0400,
+        FReplaceable    = 0x0800,
+        FDispatchable   = 0x1000,
+        FReverseBind    = 0x2000,
+    }
+    [Flags()]
+    public enum TypeLibFuncFlags
+    {
+        FRestricted         = 0x0001,
+        FSource             = 0x0002,
+        FBindable           = 0x0004,
+        FRequestEdit        = 0x0008,
+        FDisplayBind        = 0x0010,
+        FDefaultBind        = 0x0020,
+        FHidden             = 0x0040,
+        FUsesGetLastError   = 0x0080,
+        FDefaultCollelem    = 0x0100,
+        FUiDefault          = 0x0200,
+        FNonBrowsable       = 0x0400,
+        FReplaceable        = 0x0800,
+        FImmediateBind      = 0x1000,
+    }
+    [Flags()]
+    public enum TypeLibVarFlags
+    {
+        FReadOnly           = 0x0001,
+        FSource             = 0x0002,
+        FBindable           = 0x0004,
+        FRequestEdit        = 0x0008,
+        FDisplayBind        = 0x0010,
+        FDefaultBind        = 0x0020,
+        FHidden             = 0x0040,
+        FRestricted         = 0x0080,
+        FDefaultCollelem    = 0x0100,
+        FUiDefault          = 0x0200,
+        FNonBrowsable       = 0x0400,
+        FReplaceable        = 0x0800,
+        FImmediateBind      = 0x1000,
+    }
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Struct, Inherited = false)]
+    public sealed class  TypeLibTypeAttribute : Attribute
+    {
+        public TypeLibTypeAttribute(TypeLibTypeFlags flags)  {}
+        public TypeLibTypeAttribute(short flags) { }
+        public TypeLibTypeFlags Value { get { throw null; } }
+    }
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    public sealed class TypeLibFuncAttribute : Attribute
+    {
+        public TypeLibFuncAttribute(TypeLibFuncFlags flags) { }
+        public TypeLibFuncAttribute(short flags) { }
+        public TypeLibFuncFlags Value { get { throw null; } }
+    }
+    [AttributeUsage(AttributeTargets.Field, Inherited = false)]
+    public sealed class TypeLibVarAttribute : Attribute
+    {
+        public TypeLibVarAttribute(TypeLibVarFlags flags) { }
+        public TypeLibVarAttribute(short flags) { }
+        public TypeLibVarFlags Value { get { throw null; } }
+    }
+    [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+    [System.Runtime.InteropServices.ComVisible(true)]
+    public sealed class TypeLibVersionAttribute : Attribute
+    {
+        public TypeLibVersionAttribute(int major, int minor) {}
+        public int MajorVersion { get { throw null; } }
+        public int MinorVersion { get { throw null; } }
+    }   
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("UnknownWrapper and support for marshalling to the VARIANT type may be unavailable in future releases.")]
     public sealed partial class UnknownWrapper
@@ -882,9 +966,7 @@ namespace System.Runtime.InteropServices
         LPStruct = 43,
         LPTStr = 22,
         LPWStr = 21,
-#if netcoreapp11
         LPUTF8Str = 48,
-#endif
         R4 = 11,
         R8 = 12,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -1670,9 +1752,9 @@ namespace System.Runtime.InteropServices.ComTypes
 
 namespace System.Security
 {
-    [System.CLSCompliant(false)]
     public sealed class SecureString : IDisposable {
         public SecureString() { }
+        [System.CLSCompliant(false)]
         public unsafe SecureString(char* value, int length) { }
         public int Length { get { throw null; } }
         public void AppendChar(char c) { }

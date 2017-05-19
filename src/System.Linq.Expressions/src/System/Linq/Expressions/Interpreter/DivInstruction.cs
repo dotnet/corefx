@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -30,7 +29,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (short)((short)l / (short)r);
+                    frame.Data[frame.StackIndex - 2] = unchecked((short)((short)l / (short)r));
                 }
                 frame.StackIndex--;
                 return 1;
@@ -172,7 +171,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public static Instruction Create(Type type)
         {
-            Debug.Assert(!type.GetTypeInfo().IsEnum);
+            Debug.Assert(!type.IsEnum);
             switch (type.GetNonNullableType().GetTypeCode())
             {
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new DivInt16());
@@ -184,7 +183,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Single: return s_Single ?? (s_Single = new DivSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new DivDouble());
                 default:
-                    throw Error.ExpressionNotSupportedForType("Div", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

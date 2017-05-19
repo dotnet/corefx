@@ -19,7 +19,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class XsltFunctions
     {
@@ -231,7 +230,7 @@ namespace System.Xml.Xsl.Runtime
             else if (name.Namespace == XmlReservedNs.NsMsxsl && name.Name == "version")
             {
                 // msxsl:version
-                return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), typeof(XsltLibrary).GetTypeInfo().Assembly.ImageRuntimeVersion);
+                return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), typeof(XsltLibrary).Assembly.ImageRuntimeVersion);
             }
             // If the property name is not recognized, return the empty string
             return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), string.Empty);

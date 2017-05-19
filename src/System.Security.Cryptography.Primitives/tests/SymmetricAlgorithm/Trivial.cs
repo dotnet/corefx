@@ -10,8 +10,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
 {
     public static class TrivialTests
     {
-        
-#if netstandard17 
         [Theory]
         [InlineData(-1)]
         [InlineData(0)]
@@ -60,7 +58,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
                 Assert.True(t.IsDisposed);
             }
         }
-#endif
 
         [Fact]
         public static void TestAutomaticKey()
@@ -120,7 +117,15 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
                 try
                 {
                     byte[] hugeKey = new byte[536870917]; // value chosen so that when multiplied by 8 (bits) it overflows to the value 40
-                    Assert.Throws<CryptographicException>(() => s.Key = hugeKey);
+                    if (PlatformDetection.IsFullFramework)
+                    {
+                        // This change should be ported to netfx
+                        s.Key = hugeKey;
+                    }
+                    else
+                    {
+                        Assert.Throws<CryptographicException>(() => s.Key = hugeKey);
+                    }
                 }
                 catch (OutOfMemoryException) { } // in case there isn't enough memory at test-time to allocate the large array
             }
@@ -284,6 +289,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Throws NRE on netfx (https://github.com/dotnet/corefx/issues/18690)")]
         public static void SetBlockSize_Uses_LegalBlockSizesProperty()
         {
             using (SymmetricAlgorithm s = new DoesNotSetKeySizesFields())
@@ -292,7 +298,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
                 s.BlockSize = 8;
             }
         }
-        
+
         private static byte[] GenerateRandom(int size)
         {
             byte[] data = new byte[size];
@@ -378,14 +384,10 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
                 PaddingValue = (PaddingMode)anyValue;
             }
 
-#if netstandard17
-
             public void SetFeedbackSize(int value)
             {
                 FeedbackSizeValue = value;
             }
-
-#endif
 
             public static readonly byte[] GeneratedKey = GenerateRandom(13);
             public static readonly byte[] GeneratedIV = GenerateRandom(5);

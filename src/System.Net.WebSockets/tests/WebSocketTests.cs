@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace System.Net.WebSockets.Tests
         [InlineData(0)]
         public static void CreateClientBuffer_InvalidSendValues(int size)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => WebSocket.CreateClientBuffer(256, size));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => WebSocket.CreateClientBuffer(256, size));
         }
 
         [Theory]
@@ -39,7 +40,7 @@ namespace System.Net.WebSockets.Tests
         [InlineData(0)]
         public static void CreateClientBuffer_InvalidReceiveValues(int size)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => WebSocket.CreateClientBuffer(size, 16));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => WebSocket.CreateClientBuffer(size, 16));
         }
 
         [Theory]
@@ -56,7 +57,7 @@ namespace System.Net.WebSockets.Tests
         [InlineData(0)]
         public static void CreateServerBuffer_InvalidReceiveValues(int size)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => WebSocket.CreateServerBuffer(size));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => WebSocket.CreateServerBuffer(size));
         }
 
         [Theory]
@@ -83,6 +84,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Throws<PlatformNotSupportedException>(() => WebSocket.RegisterPrefixes());
         }
 
+#if netcoreapp
         [Fact]
         public static void IsApplicationTargeting45_AlwaysTrue()
         {
@@ -90,6 +92,7 @@ namespace System.Net.WebSockets.Tests
             Assert.True(WebSocket.IsApplicationTargeting45());
 #pragma warning restore 0618
         }
+#endif // netcoreapp 
 
         [Theory]
         [InlineData(WebSocketState.None)]

@@ -28,13 +28,13 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipWhileThrowsOnNull()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).SkipWhile(i => i < 40));
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).SkipWhile((i, idx) => i == idx));
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 20).SkipWhile((Func<int, int, bool>)null));
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 20).SkipWhile((Func<int, bool>)null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).SkipWhile(i => i < 40));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).SkipWhile((i, idx) => i == idx));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 20).SkipWhile((Func<int, int, bool>)null));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 20).SkipWhile((Func<int, bool>)null));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void SkipWhilePassesPredicateExceptionWhenEnumerated()
         {
             var source = Enumerable.Range(-2, 5).SkipWhile(i => 1 / i <= 0);
@@ -141,9 +141,8 @@ namespace System.Linq.Tests
 
             Assert.Equal(expected, source.SkipWhile((element, index) => index < source.Length - 1));
         }
-        
-        [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void IndexSkipWhileOverflowBeyondIntMaxValueElements()
         {
             var skipped = new FastInfiniteEnumerator<int>().SkipWhile((e, i) => true);

@@ -379,11 +379,6 @@ namespace System.Xml
             return null;
         }
 
-        internal static string VerifyQName(string name)
-        {
-            return VerifyQName(name, ExceptionType.XmlException);
-        }
-
         internal static unsafe string VerifyQName(string name, ExceptionType exceptionType)
         {
             if (name == null || name.Length == 0)
@@ -516,16 +511,6 @@ namespace System.Xml
             return null;
         }
 
-
-        internal static string VerifyNormalizedString(string str)
-        {
-            if (str.IndexOfAny(crt) != -1)
-            {
-                throw new XmlSchemaException(SR.Sch_NotNormalizedString, str);
-            }
-            return str;
-        }
-
         internal static Exception TryVerifyNormalizedString(string str)
         {
             if (str.IndexOfAny(crt) != -1)
@@ -636,7 +621,7 @@ namespace System.Xml
             return s_xmlCharType.IsPubidChar(ch);
         }
 
-        // Valid Xml white space – as defined in XML 1.0 spec (fifth edition) production [3] S
+        // Valid Xml whitespace – as defined in XML 1.0 spec (fifth edition) production [3] S
         public static unsafe bool IsWhitespaceChar(char ch)
         {
             return s_xmlCharType.IsWhiteSpace(ch);
@@ -1747,11 +1732,6 @@ namespace System.Xml
             return sb.ToString();
         }
 
-        internal static Exception CreateException(string res, ExceptionType exceptionType)
-        {
-            return CreateException(res, exceptionType, 0, 0);
-        }
-
         internal static Exception CreateException(string res, ExceptionType exceptionType, int lineNo, int linePos)
         {
             switch (exceptionType)
@@ -1830,11 +1810,6 @@ namespace System.Xml
         internal static Exception CreateInvalidHighSurrogateCharException(char hi, ExceptionType exceptionType, int lineNo, int linePos)
         {
             return CreateException(SR.Xml_InvalidSurrogateHighChar, ((uint)hi).ToString("X", CultureInfo.InvariantCulture), exceptionType, lineNo, linePos);
-        }
-
-        internal static Exception CreateInvalidCharException(char[] data, int length, int invCharPos)
-        {
-            return CreateInvalidCharException(data, length, invCharPos, ExceptionType.ArgumentException);
         }
 
         internal static Exception CreateInvalidCharException(char[] data, int length, int invCharPos, ExceptionType exceptionType)

@@ -88,6 +88,7 @@ namespace System.IO.Tests
         [Theory]
         [MemberData(nameof(Combine_Basic_TestData))]
         [MemberData(nameof(Combine_CommonCases_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "New Wildcards support added on Core hasn't ported to NETFX. https://github.com/dotnet/corefx/pull/8669")]
         public static void Combine(string[] paths)
         {
             string expected = string.Empty;
@@ -141,7 +142,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows()
         {
             //any path contains invalid character without rooted after (AE)
@@ -159,7 +160,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows()
         {
             //any path contains invalid character with rooted after (AE)

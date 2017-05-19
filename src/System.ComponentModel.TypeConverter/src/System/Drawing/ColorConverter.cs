@@ -17,8 +17,13 @@ namespace System.Drawing
 {
     public class ColorConverter : TypeConverter
     {
-        private static object s_valuesLock = new object();
-        private static StandardValuesCollection s_values;
+        private static readonly Lazy<StandardValuesCollection> s_valuesLazy = new Lazy<StandardValuesCollection>(() => {
+            // We must take the value from each hashtable and combine them.
+            //
+            HashSet<Color> set = new HashSet<Color>(ColorTable.Colors.Values);
+
+            return new StandardValuesCollection(set.OrderBy(c => c, new ColorComparer()).ToList());
+        });
 
         public ColorConverter()
         {
@@ -168,7 +173,7 @@ namespace System.Drawing
                         // If this is a known color, then Color can provide its own
                         // name.  Otherwise, we fabricate an ARGB value for it.
                         //
-                        if (c.IsKnownColor)
+                        if (ColorTable.IsKnownNamedColor(c.Name))
                         {
                             return c.Name;
                         }
@@ -202,14 +207,14 @@ namespace System.Drawing
                             args[nArg++] = intConverter.ConvertToString(context, culture, (object)c.G);
                             args[nArg++] = intConverter.ConvertToString(context, culture, (object)c.B);
 
-                            // Now slam all of these together with the fantastic Join 
+                            // Now slam all of these together with the fantastic Join
                             // method.
                             //
                             return string.Join(sep, args);
                         }
                     }
                 }
-                
+
                 if (destinationType == typeof(InstanceDescriptor))
                 {
                     MemberInfo member = null;
@@ -221,11 +226,7 @@ namespace System.Drawing
                     {
                         member = typeof(Color).GetField("Empty");
                     }
-                    else if (c.IsSystemColor)
-                    {
-                        member = typeof(SystemColors).GetProperty(c.Name);
-                    }
-                    else if (c.IsKnownColor)
+                    else if (ColorTable.IsKnownNamedColor(c.Name))
                     {
                         member = typeof(Color).GetProperty(c.Name);
                     }
@@ -262,23 +263,7 @@ namespace System.Drawing
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            if (s_values == null)
-            {
-                lock (s_valuesLock)
-                {
-                    if (s_values == null)
-                    {
-                        // We must take the value from each hashtable and combine them.
-                        //
-                        HashSet<Color> set =
-                            new HashSet<Color>(ColorTable.Colors.Values.Concat(ColorTable.SystemColors.Values));
-
-                        s_values = new StandardValuesCollection(set.OrderBy(c => c, new ColorComparer()).ToList());
-                    }
-                }
-            }
-
-            return s_values;
+            return s_valuesLazy.Value;
         }
 
         public override bool GetStandardValuesSupported(ITypeDescriptorContext context)

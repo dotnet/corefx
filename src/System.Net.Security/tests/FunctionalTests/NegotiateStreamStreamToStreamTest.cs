@@ -20,7 +20,6 @@ namespace System.Net.Security.Tests
         protected abstract Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName);
         protected abstract Task AuthenticateAsServerAsync(NegotiateStream server);
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_Success()
         {
@@ -72,8 +71,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/19379")]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
             string targetName = "testTargetName";
@@ -127,8 +126,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core difference in behavior: https://github.com/dotnet/corefx/issues/5241")]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
             string targetName = "testTargetName";
@@ -191,7 +190,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
@@ -225,7 +223,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
@@ -262,7 +259,6 @@ namespace System.Net.Security.Tests
         }
 
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Flush_Propagated()
         {
@@ -277,8 +273,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
         public void NegotiateStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();

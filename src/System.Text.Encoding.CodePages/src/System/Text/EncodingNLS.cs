@@ -21,7 +21,6 @@ namespace System.Text
     // encodings.
     // So if you change the wrappers in this class, you must change the wrappers in the other classes
     // as well because they should have the same behavior.
-    [Serializable]
     internal abstract class EncodingNLS : Encoding
     {
         private string _encodingName;
@@ -66,7 +65,7 @@ namespace System.Text
                 return 0;
 
             // Just call the pointer version
-            fixed (char* pChars = chars)
+            fixed (char* pChars = &chars[0])
                 return GetByteCount(pChars + index, count, null);
         }
 
@@ -130,7 +129,7 @@ namespace System.Text
                 bytes = new byte[1];
 
             fixed (char* pChars = s)
-                fixed (byte* pBytes = bytes)
+                fixed (byte* pBytes = &bytes[0])
                     return GetBytes(pChars + charIndex, charCount,
                                     pBytes + byteIndex, byteCount, null);
         }
@@ -176,8 +175,8 @@ namespace System.Text
             if (bytes.Length == 0)
                 bytes = new byte[1];
 
-            fixed (char* pChars = chars)
-                fixed (byte* pBytes = bytes)
+            fixed (char* pChars = &chars[0])
+                fixed (byte* pBytes = &bytes[0])
                     // Remember that byteCount is # to decode, not size of array.
                     return GetBytes(pChars + charIndex, charCount,
                                     pBytes + byteIndex, byteCount, null);
@@ -224,7 +223,7 @@ namespace System.Text
                 return 0;
 
             // Just call pointer version
-            fixed (byte* pBytes = bytes)
+            fixed (byte* pBytes = &bytes[0])
                 return GetCharCount(pBytes + index, count, null);
         }
 
@@ -276,8 +275,8 @@ namespace System.Text
             if (chars.Length == 0)
                 chars = new char[1];
 
-            fixed (byte* pBytes = bytes)
-                fixed (char* pChars = chars)
+            fixed (byte* pBytes = &bytes[0])
+                fixed (char* pChars = &chars[0])
                     // Remember that charCount is # to decode, not size of array
                     return GetChars(pBytes + byteIndex, byteCount,
                                     pChars + charIndex, charCount, null);
@@ -322,7 +321,7 @@ namespace System.Text
             // Avoid problems with empty input buffer
             if (bytes.Length == 0) return String.Empty;
 
-            fixed (byte* pBytes = bytes)
+            fixed (byte* pBytes = &bytes[0])
                 return GetString(pBytes + index, count);
         }
 
@@ -580,7 +579,6 @@ namespace System.Text
             }
         }
 
-        [Serializable]
         protected sealed class CodePageEncodingSurrogate : ISerializable, IObjectReference
         {
             internal const string CodePageKey = "CodePage";

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
@@ -52,26 +53,26 @@ namespace System.Text.RegularExpressions.Tests
         public static void Ctor_Invalid()
         {
             // Pattern is null
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null));
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None, new TimeSpan()));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None, new TimeSpan()));
 
             // Options are invalid
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)(-1), new TimeSpan()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)(-1), new TimeSpan()));
 
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)0x400));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)0x400, new TimeSpan()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)0x400));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)0x400, new TimeSpan()));
 
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.RightToLeft));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.Singleline));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.RightToLeft));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.Singleline));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace));
 
             // MatchTimeout is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, new TimeSpan(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, TimeSpan.Zero));
-            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, TimeSpan.FromMilliseconds(int.MaxValue)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, new TimeSpan(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, TimeSpan.Zero));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => new Regex("foo", RegexOptions.None, TimeSpan.FromMilliseconds(int.MaxValue)));
         }
 
         [Fact]
@@ -96,7 +97,7 @@ namespace System.Text.RegularExpressions.Tests
         [Fact]
         public void CacheSize_Set_NegativeValue_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => Regex.CacheSize = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Regex.CacheSize = -1);
         }
 
         [Theory]
@@ -239,9 +240,46 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("[a-f-[]]+", RegexOptions.None)]
         // Not character class substraction
         [InlineData("[A-[]+", RegexOptions.None)]
+        // Invalid testgroup
+        [InlineData("(?(?e))", RegexOptions.None)]
+        [InlineData("(?(?a)", RegexOptions.None)]
+        [InlineData("(?(?", RegexOptions.None)]
+        [InlineData("(?(", RegexOptions.None)]
+        [InlineData("?(a:b)", RegexOptions.None)]
+        [InlineData("?(a)", RegexOptions.None)]
+        [InlineData("?(a|b)", RegexOptions.None)]
+        [InlineData("?((a)", RegexOptions.None)]
+        [InlineData("?((a)a", RegexOptions.None)]
+        [InlineData("?((a)a|", RegexOptions.None)]
+        [InlineData("?((a)a|b", RegexOptions.None)]
         public void Ctor_InvalidPattern(string pattern, RegexOptions options)
         {
             Assert.Throws<ArgumentException>(() => new Regex(pattern, options));
+        }
+
+        [Theory]
+        // Testgroup with options
+        [InlineData("(?(?i))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?I))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?m))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?M))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?s))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?S))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?x))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?X))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?n))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?N))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData(" (?(?n))", RegexOptions.None, typeof(OutOfMemoryException))]
+        public void Ctor_InvalidPattern(string pattern, RegexOptions options, Type exceptionType)
+        {
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws(exceptionType, () => new Regex(pattern, options));
+            }
+            else
+            {
+                Ctor_InvalidPattern(pattern, options);
+            }
         }
     }
 }

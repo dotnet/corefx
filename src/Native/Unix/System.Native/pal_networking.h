@@ -162,7 +162,7 @@ enum SocketOptionName : int32_t
     PAL_SO_IP_MULTICAST_LOOP = 11,
     PAL_SO_IP_ADD_MEMBERSHIP = 12,
     PAL_SO_IP_DROP_MEMBERSHIP = 13,
-    // PAL_SO_IP_DONTFRAGMENT = 14,
+    PAL_SO_IP_DONTFRAGMENT = 14,
     PAL_SO_IP_ADD_SOURCE_MEMBERSHIP = 15,
     PAL_SO_IP_DROP_SOURCE_MEMBERSHIP = 16,
     PAL_SO_IP_BLOCK_SOURCE = 17,
@@ -292,21 +292,6 @@ struct SocketEvent
     SocketEvents Events; // Event flags
     uint32_t Padding;    // Pad out to 8-byte alignment
 };
-
-/**
- * Converts string-representations of IP Addresses to
- */
-extern "C" int32_t SystemNative_IPv6StringToAddress(
-    const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope);
-
-extern "C" int32_t SystemNative_IPv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port);
-
-extern "C" int32_t SystemNative_IPAddressToString(const uint8_t* address,
-                                     int32_t addressLength,
-                                     bool isIPv6,
-                                     uint8_t* string,
-                                     int32_t stringLength,
-                                     uint32_t scope = 0);
 
 extern "C" int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry);
 

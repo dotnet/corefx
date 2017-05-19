@@ -34,7 +34,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentCulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
         }
 
         [Fact]
@@ -97,10 +97,10 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentUICulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Windows locale support doesn't rely on LANG variable
         [Theory]
         [InlineData("en-US.UTF-8", "en-US")]
         [InlineData("en-US", "en-US")]
@@ -128,7 +128,7 @@ namespace System.Globalization.Tests
             }, expectedCultureName, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // When LANG is empty or unset, should default to the invariant culture on Unix.
         [Theory]
         [InlineData("")]
         [InlineData(null)]

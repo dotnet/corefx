@@ -75,14 +75,14 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipThrowsOnNull()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<DateTime>)null).Skip(3));
         }
 
         [Fact]
         public void SkipThrowsOnNullIList()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((List<DateTime>)null).Skip(3));
-            Assert.Throws<ArgumentNullException>("source", () => ((IList<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((List<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IList<DateTime>)null).Skip(3));
         }
 
         [Fact]
@@ -285,8 +285,8 @@ namespace System.Linq.Tests
             Assert.Equal(3, remaining.ElementAt(0));
             Assert.Equal(4, remaining.ElementAt(1));
             Assert.Equal(6, remaining.ElementAt(3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
         }
 
         [Fact]
@@ -297,8 +297,8 @@ namespace System.Linq.Tests
             Assert.Equal(3, remaining.ElementAt(0));
             Assert.Equal(4, remaining.ElementAt(1));
             Assert.Equal(6, remaining.ElementAt(3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
         }
 
         [Fact]
@@ -507,6 +507,30 @@ namespace System.Linq.Tests
                     Assert.True(iterator.MoveNext());
                 }
             }
+        }
+
+        [Theory]
+        [InlineData(0, -1)]
+        [InlineData(0, 0)]
+        [InlineData(1, 0)]
+        [InlineData(2, 1)]
+        [InlineData(2, 2)]
+        [InlineData(2, 3)]
+        public void DisposeSource(int sourceCount, int count)
+        {
+            int state = 0;
+
+            var source = new DelegateIterator<int>(
+                moveNext: () => ++state <= sourceCount,
+                current: () => 0,
+                dispose: () => state = -1);
+
+            IEnumerator<int> iterator = source.Skip(count).GetEnumerator();
+            int iteratorCount = Math.Max(0, sourceCount - Math.Max(0, count));
+            Assert.All(Enumerable.Range(0, iteratorCount), _ => Assert.True(iterator.MoveNext()));
+
+            Assert.False(iterator.MoveNext());
+            Assert.Equal(-1, state);
         }
     }
 }

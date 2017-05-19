@@ -12,7 +12,6 @@ namespace System.Net
     ///     Provides an Internet Protocol (IP) address.
     ///   </para>
     /// </devdoc>
-    [Serializable]
     public class IPAddress
     {
         public static readonly IPAddress Any = new IPAddress(0x0000000000000000);
@@ -135,12 +134,27 @@ namespace System.Net
                 throw new ArgumentException(SR.dns_bad_ip_address, nameof(address));
             }
 
+            // Consider: Since scope is only valid for link-local and site-local
+            //           addresses we could implement some more robust checking here
+            if (scopeid < 0 || scopeid > 0x00000000FFFFFFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(scopeid));
+            }
+
             _numbers = new ushort[NumberOfLabels];
 
             for (int i = 0; i < NumberOfLabels; i++)
             {
                 _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
             }
+
+            PrivateScopeId = (uint)scopeid;
+        }
+
+        internal unsafe IPAddress(byte* address, int addressLength, long scopeid)
+        {
+            Debug.Assert(address != null);
+            Debug.Assert(addressLength == IPAddressParserStatics.IPv6AddressBytes);
 
             // Consider: Since scope is only valid for link-local and site-local
             //           addresses we could implement some more robust checking here
@@ -149,12 +163,34 @@ namespace System.Net
                 throw new ArgumentOutOfRangeException(nameof(scopeid));
             }
 
+            _numbers = new ushort[NumberOfLabels];
+            for (int i = 0; i < NumberOfLabels; i++)
+            {
+                _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
+            }
+
             PrivateScopeId = (uint)scopeid;
+        }
+
+        internal unsafe IPAddress(ushort* numbers, int numbersLength, uint scopeid)
+        {
+            Debug.Assert(numbers != null);
+            Debug.Assert(numbersLength == NumberOfLabels);
+
+            var arr = new ushort[NumberOfLabels];
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = numbers[i];
+            }
+
+            _numbers = arr;
+            PrivateScopeId = scopeid;
         }
 
         private IPAddress(ushort[] numbers, uint scopeid)
         {
             Debug.Assert(numbers != null);
+            Debug.Assert(numbers.Length == NumberOfLabels);
 
             _numbers = numbers;
             PrivateScopeId = scopeid;
@@ -184,6 +220,28 @@ namespace System.Net
             {
                 _numbers = new ushort[NumberOfLabels];
 
+                for (int i = 0; i < NumberOfLabels; i++)
+                {
+                    _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
+                }
+            }
+        }
+
+        internal unsafe IPAddress(byte* address, int addressLength)
+        {
+            Debug.Assert(address != null);
+            Debug.Assert(addressLength > 0);
+            Debug.Assert(
+                addressLength == IPAddressParserStatics.IPv4AddressBytes ||
+                addressLength == IPAddressParserStatics.IPv6AddressBytes);
+
+            if (addressLength == IPAddressParserStatics.IPv4AddressBytes)
+            {
+                PrivateAddress = (uint)((address[3] << 24 | address[2] << 16 | address[1] << 8 | address[0]) & 0x0FFFFFFFF);
+            }
+            else
+            {
+                _numbers = new ushort[NumberOfLabels];
                 for (int i = 0; i < NumberOfLabels; i++)
                 {
                     _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
@@ -224,8 +282,9 @@ namespace System.Net
             byte[] bytes;
             if (IsIPv6)
             {
-                bytes = new byte[NumberOfLabels * 2];
+                Debug.Assert(_numbers != null && _numbers.Length == NumberOfLabels);
 
+                bytes = new byte[IPAddressParserStatics.IPv6AddressBytes];
                 int j = 0;
                 for (int i = 0; i < NumberOfLabels; i++)
                 {
@@ -237,10 +296,14 @@ namespace System.Net
             {
                 uint address = PrivateAddress;
                 bytes = new byte[IPAddressParserStatics.IPv4AddressBytes];
-                bytes[0] = (byte)(address);
-                bytes[1] = (byte)(address >> 8);
-                bytes[2] = (byte)(address >> 16);
-                bytes[3] = (byte)(address >> 24);
+
+                unchecked
+                {
+                    bytes[0] = (byte)(address);
+                    bytes[1] = (byte)(address >> 8);
+                    bytes[2] = (byte)(address >> 16);
+                    bytes[3] = (byte)(address >> 24);
+                }
             }
             return bytes;
         }
@@ -300,8 +363,8 @@ namespace System.Net
             if (_toString == null)
             {
                 _toString = IsIPv4 ?
-                    IPAddressParser.IPv4AddressToString(GetAddressBytes()) :
-                    IPAddressParser.IPv6AddressToString(GetAddressBytes(), PrivateScopeId);
+                    IPAddressParser.IPv4AddressToString(PrivateAddress) :
+                    IPAddressParser.IPv6AddressToString(_numbers, PrivateScopeId);
             }
 
             return _toString;
@@ -312,8 +375,8 @@ namespace System.Net
 #if BIGENDIAN
             return host;
 #else
-            return (((long)HostToNetworkOrder((int)host) & 0xFFFFFFFF) << 32)
-                    | ((long)HostToNetworkOrder((int)(host >> 32)) & 0xFFFFFFFF);
+            return (((long)HostToNetworkOrder(unchecked((int)host)) & 0xFFFFFFFF) << 32)
+                    | ((long)HostToNetworkOrder(unchecked((int)(host >> 32))) & 0xFFFFFFFF);
 #endif
         }
 
@@ -322,8 +385,8 @@ namespace System.Net
 #if BIGENDIAN
             return host;
 #else
-            return (((int)HostToNetworkOrder((short)host) & 0xFFFF) << 16)
-                    | ((int)HostToNetworkOrder((short)(host >> 16)) & 0xFFFF);
+            return (((int)HostToNetworkOrder(unchecked((short)host)) & 0xFFFF) << 16)
+                    | ((int)HostToNetworkOrder(unchecked((short)(host >> 16))) & 0xFFFF);
 #endif
         }
 
@@ -332,7 +395,7 @@ namespace System.Net
 #if BIGENDIAN
             return host;
 #else
-            return (short)((((int)host & 0xFF) << 8) | (int)((host >> 8) & 0xFF));
+            return unchecked((short)((((int)host & 0xFF) << 8) | (int)((host >> 8) & 0xFF)));
 #endif
         }
 
@@ -469,7 +532,7 @@ namespace System.Net
                     if (PrivateAddress != value)
                     {
                         _toString = null;
-                        PrivateAddress = (uint)value;
+                        PrivateAddress = unchecked((uint)value);
                     }
                 }
             }

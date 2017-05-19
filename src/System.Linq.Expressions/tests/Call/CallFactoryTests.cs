@@ -21,6 +21,14 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Fact]
+        public static void CheckCallFactoryOptimisedInstanceNullArgumentList()
+        {
+            var instance = Expression.Constant(new MS());
+            var expr = Expression.Call(instance, typeof(MS).GetMethod(nameof(MS.I0)), default(Expression[]));
+            AssertInstanceMethodCall(0, expr);
+        }
+
+        [Fact]
         public static void CheckCallFactoryOptimizationInstance2()
         {
             MethodCallExpression expr = Expression.Call(Expression.Parameter(typeof(MS)), typeof(MS).GetMethod("I2"), Expression.Constant(0), Expression.Constant(1));
@@ -46,7 +54,10 @@ namespace System.Linq.Expressions.Tests
 
             MethodCallExpression expr = Expression.Call(obj, typeof(MS).GetMethod("I" + N), args);
 
-            Assert.Equal("InstanceMethodCallExpressionN", expr.GetType().Name);
+            if (!PlatformDetection.IsNetNative) // .Net Native blocks internal framework reflection.
+            {
+                Assert.Equal("InstanceMethodCallExpressionN", expr.GetType().Name);
+            }
 
             Assert.Same(obj, expr.Object);
 
@@ -93,6 +104,10 @@ namespace System.Linq.Expressions.Tests
         {
             AssertCallIsOptimizedStatic(arity);
         }
+
+        [Fact]
+        public static void CheckCallFactoryOptimisedStaticNullArgumentList() =>
+            AssertStaticMethodCall(0, Expression.Call(typeof(MS).GetMethod(nameof(MS.S0)), default(Expression[])));
 
         [Fact]
         public static void CheckCallFactoryOptimizationStatic1()
@@ -147,7 +162,10 @@ namespace System.Linq.Expressions.Tests
 
             MethodCallExpression expr = Expression.Call(typeof(MS).GetMethod("S" + N), args);
 
-            Assert.Equal("MethodCallExpressionN", expr.GetType().Name);
+            if (!PlatformDetection.IsNetNative) // .Net Native blocks internal framework reflection.
+            {
+                Assert.Equal("MethodCallExpressionN", expr.GetType().Name);
+            }
 
             Assert.Equal(N, expr.ArgumentCount);
             for (var i = 0; i < N; i++)
@@ -297,12 +315,18 @@ namespace System.Linq.Expressions.Tests
 
         private static void AssertStaticMethodCall(int n, object obj)
         {
-            AssertTypeName("MethodCallExpression" + n, obj);
+            if (!PlatformDetection.IsNetNative)  // .Net Native blocks internal framework reflection.
+            {
+                AssertTypeName("MethodCallExpression" + n, obj);
+            }
         }
 
         private static void AssertInstanceMethodCall(int n, object obj)
         {
-            AssertTypeName("InstanceMethodCallExpression" + n, obj);
+            if (!PlatformDetection.IsNetNative)  // .Net Native blocks internal framework reflection.
+            {
+                AssertTypeName("InstanceMethodCallExpression" + n, obj);
+            }
         }
 
         private static void AssertTypeName(string expected, object obj)
@@ -334,7 +358,7 @@ namespace System.Linq.Expressions.Tests
                 expr = Expression.Call(typeof(MS).GetMethod("S" + argNum), args);
 
                 // Should attempt to create new expression, and fail due to incorrect arguments.
-                Assert.Throws<ArgumentException>("method", () => expr.Update(null, null));
+                AssertExtensions.Throws<ArgumentException>("method", () => expr.Update(null, null));
             }
         }
 
@@ -352,7 +376,7 @@ namespace System.Linq.Expressions.Tests
                 expr = Expression.Call(instance, typeof(MS).GetMethod("I" + argNum), args);
 
                 // Should attempt to create new expression, and fail due to incorrect arguments.
-                Assert.Throws<ArgumentException>("method", () => expr.Update(instance, null));
+                AssertExtensions.Throws<ArgumentException>("method", () => expr.Update(instance, null));
             }
         }
 
@@ -366,7 +390,7 @@ namespace System.Linq.Expressions.Tests
                 MethodCallExpression expr = Expression.Call(typeof(MS).GetMethod("S" + argNum), args);
 
                 // Should attempt to create new expression, and fail due to incorrect arguments.
-                Assert.Throws<ArgumentException>("method", () => expr.Update(null, args.Append(Expression.Constant(-1))));
+                AssertExtensions.Throws<ArgumentException>("method", () => expr.Update(null, args.Append(Expression.Constant(-1))));
             }
         }
 
@@ -381,7 +405,7 @@ namespace System.Linq.Expressions.Tests
                 MethodCallExpression expr = Expression.Call(instance, typeof(MS).GetMethod("I" + argNum), args);
 
                 // Should attempt to create new expression, and fail due to incorrect arguments.
-                Assert.Throws<ArgumentException>("method", () => expr.Update(instance, args.Append(Expression.Constant(-1))));
+                AssertExtensions.Throws<ArgumentException>("method", () => expr.Update(instance, args.Append(Expression.Constant(-1))));
             }
         }
 

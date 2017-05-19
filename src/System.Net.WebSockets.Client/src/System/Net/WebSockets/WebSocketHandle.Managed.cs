@@ -85,7 +85,7 @@ namespace System.Net.WebSockets
             {
                 // Connect to the remote server
                 Socket connectedSocket = await ConnectSocketAsync(uri.Host, uri.Port, cancellationToken).ConfigureAwait(false);
-                Stream stream = new AsyncEventArgsNetworkStream(connectedSocket);
+                Stream stream = new NetworkStream(connectedSocket, ownsSocket:true);
 
                 // Upgrade to SSL if needed
                 if (uri.Scheme == UriScheme.Wss)
@@ -206,8 +206,18 @@ namespace System.Net.WebSockets
             {
                 builder.Append("GET ").Append(uri.PathAndQuery).Append(" HTTP/1.1\r\n");
 
-                // Add all of the required headers
-                builder.Append("Host: ").Append(uri.IdnHost).Append(":").Append(uri.Port).Append("\r\n");
+                // Add all of the required headers, honoring Host header if set.
+                string hostHeader = options.RequestHeaders[HttpKnownHeaderNames.Host];
+                builder.Append("Host: ");
+                if (string.IsNullOrEmpty(hostHeader))
+                {
+                    builder.Append(uri.IdnHost).Append(':').Append(uri.Port).Append("\r\n");
+                }
+                else
+                {
+                    builder.Append(hostHeader).Append("\r\n");
+                }
+
                 builder.Append("Connection: Upgrade\r\n");
                 builder.Append("Upgrade: websocket\r\n");
                 builder.Append("Sec-WebSocket-Version: 13\r\n");
@@ -216,6 +226,12 @@ namespace System.Net.WebSockets
                 // Add all of the additionally requested headers
                 foreach (string key in options.RequestHeaders.AllKeys)
                 {
+                    if (string.Equals(key, HttpKnownHeaderNames.Host, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Host header handled above
+                        continue;
+                    }
+
                     builder.Append(key).Append(": ").Append(options.RequestHeaders[key]).Append("\r\n");
                 }
 

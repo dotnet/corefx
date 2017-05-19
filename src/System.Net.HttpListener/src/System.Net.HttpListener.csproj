@@ -1,25 +1,58 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{53D09AF4-0C13-4197-B8AD-9746F0374E88}</ProjectGuid>
+    <ProjectGuid>{31E8D18B-9E7D-4924-AFD8-5BD8D75C31FB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net461'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <!-- Although we have a NS configuration, the actual UWP implementation will be fully managed, so just validate against OneCore -->
+    <UWPCompatible>false</UWPCompatible>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net461'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
+    <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Net.NameResolution" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Net.Requests" />
+    <Reference Include="System.Net.Security" />
+    <Reference Include="System.Net.WebHeaderCollection" />
+    <Reference Include="System.Net.WebSockets" />
+    <Reference Include="System.Net.WebSockets.Client" />
+    <Reference Include="System.Numerics.Vectors" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security.Claims" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Security.Principal.Windows" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Overlapped" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Timer" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Net\HttpListenerPrefixCollection.cs" />
+    <Compile Include="System\Net\HttpRequestStream.cs" />
     <Compile Include="System\Net\AuthenticationTypes.cs" />
+    <Compile Include="System\Net\HttpResponseStream.cs" />
     <Compile Include="System\Net\ServiceNameStore.cs" />
+    <Compile Include="System\Net\HttpListenerRequest.cs" />
     <Compile Include="System\Net\HttpListenerRequestUriBuilder.cs" />
     <Compile Include="System\Net\AuthenticationSchemeSelector.cs" />
     <Compile Include="System\Net\HttpListener.cs" />
@@ -27,10 +60,27 @@
     <Compile Include="System\Net\HttpListenerContext.cs" />
     <Compile Include="System\Net\HttpListenerException.cs" />
     <Compile Include="System\Net\HttpListenerResponse.cs" />
+    <Compile Include="System\Net\ListenerClientCertState.cs" />
     <Compile Include="System\Net\NetEventSource.HttpListener.cs" />
     <Compile Include="System\Net\WebSockets\HttpListenerWebSocketContext.cs" />
+    <Compile Include="System\Net\WebSockets\HttpWebSocket.cs" />
+    <Compile Include="$(CommonPath)\System\StringExtensions.cs">
+      <Link>Common\System\StringExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieComparer.cs">
+      <Link>Common\System\Net\CookieComparer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieFields.cs">
+      <Link>Common\System\Net\CookieFields.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieParser.cs">
+      <Link>Common\System\Net\CookieParser.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CaseInsensitiveAscii.cs">
+      <Link>Common\System\Net\CaseInsensitiveAscii.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpStatusDescription.cs">
       <Link>Common\System\Net\HttpStatusDescription.cs</Link>
@@ -38,9 +88,17 @@
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
+      <Link>Common\System\Net\LazyAsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
+      <Link>Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
+      <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'net461'">
-    <Compile Include="System\Net\Windows\HttpListenerPrefixCollection.Windows.cs" />
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\Windows\HttpListener.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerContext.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerRequest.Windows.cs" />
@@ -54,17 +112,10 @@
     <Compile Include="System\Net\Windows\HttpListenerRequestContext.cs" />
     <Compile Include="System\Net\Windows\ListenerClientCertAsyncResult.Windows.cs" />
     <Compile Include="System\Net\Windows\AsyncRequestContext.cs" />
-    <Compile Include="System\Net\Windows\ListenerClientCertState.cs" />
     <Compile Include="System\Net\Windows\EntitySendFormat.cs" />
     <Compile Include="System\Net\Windows\RequestContextBase.cs" />
     <Compile Include="System\Net\Windows\SyncRequestContext.cs" />
     <Compile Include="System\Net\Windows\ListenerAsyncResult.Windows.cs" />
-    <Compile Include="$(CommonPath)\System\Net\CaseInsensitiveAscii.cs">
-      <Link>Common\System\Net\CaseInsensitiveAscii.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
-      <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
@@ -74,25 +125,19 @@
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
-      <Link>Common\System\Net\LazyAsyncResult.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
-      <Link>Common\System\Net\UriScheme.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\WebHeaderEncoding.cs">
       <Link>Common\System\Net\WebHeaderEncoding.cs</Link>
     </Compile>
     <Compile Include="System\Net\Windows\HttpResponseStream.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpResponseStreamAsyncResult.cs" />
-    <Compile Include="System\Net\WebSockets\ServerWebSocket.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketBase.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketBuffer.cs" />
-    <Compile Include="System\Net\WebSockets\SafeWebSocketHandle.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketHelpers.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\ServerWebSocket.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\HttpWebSocket.Windows.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\WebSocketBase.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\WebSocketBuffer.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\SafeWebSocketHandle.cs" />
     <Compile Include="System\Net\Windows\HttpRequestStream.Windows.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketHttpListenerDuplexStream.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketProtocolComponent.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\WebSocketHttpListenerDuplexStream.cs" />
+    <Compile Include="System\Net\Windows\WebSockets\WebSocketProtocolComponent.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -288,7 +333,7 @@
       <Link>Common\Interop\Windows\sspicli\SSPIWrapper.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(TargetGroup)' != 'net461'">
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="System\Net\Managed\HttpEndPointListener.cs" />
     <Compile Include="System\Net\Managed\HttpEndPointManager.cs" />
     <Compile Include="System\Net\Managed\HttpConnection.cs" />
@@ -296,28 +341,27 @@
     <Compile Include="System\Net\Managed\ListenerPrefix.cs" />
     <Compile Include="System\Net\Managed\HttpRequestStream.Managed.cs" />
     <Compile Include="System\Net\Managed\HttpListener.Managed.cs" />
+    <Compile Include="System\Net\Managed\HttpListener.Certificates.cs" />
     <Compile Include="System\Net\Managed\HttpListenerContext.Managed.cs" />
     <Compile Include="System\Net\Managed\HttpListenerRequest.Managed.cs" />
     <Compile Include="System\Net\Managed\HttpListenerResponse.Managed.cs" />
     <Compile Include="System\Net\Managed\HttpListenerTimeoutManager.Managed.cs" />
     <Compile Include="System\Net\Managed\ListenerAsyncResult.Managed.cs" />
     <Compile Include="System\Net\Managed\HttpHeaderStrings.cs" />
-    <Compile Include="System\Net\Managed\HttpListenerPrefixCollection.Managed.cs" />
     <Compile Include="System\Net\Managed\ChunkedInputStream.cs" />
     <Compile Include="System\Net\Managed\ChunkStream.cs" />
     <Compile Include="System\Net\Managed\HttpResponseStream.Managed.cs" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(ProjectJson)' == '' ">
-    <ProjectJson>win/project.json</ProjectJson>
-    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' and '$(ProjectJson)' == '' ">
-    <ProjectJson>unix/project.json</ProjectJson>
-    <ProjectLockJson>unix/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net461'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
+    <Compile Include="System\Net\Managed\WebSockets\HttpWebSocket.Managed.cs" />
+    <Compile Include="$(CommonPath)\System\Net\WebSockets\ManagedWebSocket.cs">
+      <Link>Common\System\Net\WebSockets\ManagedWebSocket.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Net.Sockets" />
+    <Reference Include="System.Threading.ThreadPool" />
+    <Reference Include="System.Net.ServicePoint" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

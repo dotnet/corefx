@@ -293,11 +293,15 @@ namespace Internal.Cryptography.Pal.Native
         public static FILETIME FromDateTime(DateTime dt)
         {
             long fileTime = dt.ToFileTime();
-            return new FILETIME()
+
+            unchecked
             {
-                ftTimeLow = (uint)fileTime,
-                ftTimeHigh = (uint)(fileTime >> 32),
-            };
+                return new FILETIME()
+                {
+                    ftTimeLow = (uint)fileTime,
+                    ftTimeHigh = (uint)(fileTime >> 32),
+                };
+            }
         }
     }
 
@@ -397,22 +401,7 @@ namespace Internal.Cryptography.Pal.Native
         EXPORT_PRIVATE_KEYS                   = 0x00000004,
         None                                  = 0x00000000,
     }
-
-    internal enum KeyContextSpec : uint
-    {
-        AT_KEYEXCHANGE = 1,
-        AT_SIGNATURE = 2,
-        CERT_NCRYPT_KEY_SPEC = 0xFFFFFFFF,
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct CERT_KEY_CONTEXT
-    {
-        public int cbSize;
-        public IntPtr hProvOrNcryptKey;
-        public KeyContextSpec dwKeySpec;
-    }
-
+    
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct CRYPT_KEY_PROV_INFO
     {
@@ -561,15 +550,6 @@ namespace Internal.Cryptography.Pal.Native
     {
         DSS_MAGIC = 0x31535344,
     }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct BLOBHEADER
-    {
-        public byte bType;
-        public byte bVersion;
-        public short reserved;
-        public uint aiKeyAlg;
-    };
 
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct CERT_BASIC_CONSTRAINTS_INFO

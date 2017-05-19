@@ -27,7 +27,7 @@ namespace System.Collections.Immutable.Tests
             var expected = new SortedDictionary<int, bool>();
             var actual = ImmutableSortedDictionary<int, bool>.Empty;
 
-            int seed = (int)DateTime.Now.Ticks;
+            int seed = unchecked((int)DateTime.Now.Ticks);
             Debug.WriteLine("Using random seed {0}", seed);
             var random = new Random(seed);
 
@@ -311,7 +311,10 @@ namespace System.Collections.Immutable.Tests
             var map = ImmutableSortedDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
             var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
-            Assert.Contains("firstKey", exception.Message);
+            if (!PlatformDetection.IsNetNative) //.Net Native toolchain removes exception messages.
+            {
+                Assert.Contains("firstKey", exception.Message);
+            }
         }
 
         [Fact]
@@ -350,8 +353,59 @@ namespace System.Collections.Immutable.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
             enumerator.Dispose();
         }
-        
+
         [Fact]
+        public void Remove_KeyExists_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string>  dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(0, dictionary.Remove(1).Count);
+        }
+
+        [Fact]
+        public void Remove_FirstKey_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" },
+                { 2, "b" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(1).Count);
+        }
+
+        [Fact]
+        public void Remove_SecondKey_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" },
+                { 2, "b" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(2).Count);
+        }
+
+        [Fact]
+        public void Remove_KeyDoesntExist_DoesNothing()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(2).Count);
+            Assert.Equal(1, dictionary.Remove(-1).Count);
+        }
+
+        [Fact]
+        public void Remove_EmptyDictionary_DoesNothing()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = ImmutableSortedDictionary<int, string>.Empty;
+            Assert.Equal(0, dictionary.Remove(2).Count);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedDictionary.Create<string, int>());

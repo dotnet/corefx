@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
+using System.Diagnostics;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public class FileStream_ctor_str_fm : FileSystemTest
+    public class FileStream_ctor_str_fm : RemoteExecutorTestBase
     {
         protected virtual FileStream CreateFileStream(string path, FileMode mode)
         {
@@ -36,7 +35,7 @@ namespace System.IO.Tests
         [Fact]
         public void InvalidModeThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
         }
 
         [Fact]
@@ -167,7 +166,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileModeAppend()
+        public virtual void FileModeAppend()
         {
             using (FileStream fs = CreateFileStream(GetTestFilePath(), FileMode.Append))
             {
@@ -177,7 +176,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileModeAppendExisting()
+        public virtual void FileModeAppendExisting()
         {
             string fileName = GetTestFilePath();
             using (FileStream fs = CreateFileStream(fileName, FileMode.Create))

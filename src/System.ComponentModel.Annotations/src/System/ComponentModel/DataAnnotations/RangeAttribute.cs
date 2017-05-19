@@ -187,7 +187,7 @@ namespace System.ComponentModel.DataAnnotations
                             SR.RangeAttribute_Must_Set_Operand_Type);
                     }
                     Type comparableType = typeof(IComparable);
-                    if (!comparableType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (!comparableType.IsAssignableFrom(type))
                     {
                         throw new InvalidOperationException(
                             string.Format(
@@ -197,13 +197,11 @@ namespace System.ComponentModel.DataAnnotations
                                 comparableType.FullName));
                     }
 
-                    Func<object, object> conversion =
-                        value =>
-                            (value != null && value.GetType() == type)
-                                ? value
-                                : Convert.ChangeType(value, type, CultureInfo.CurrentCulture);
-                    var min = (IComparable)conversion(minimum);
-                    var max = (IComparable)conversion(maximum);
+                    TypeConverter converter = TypeDescriptor.GetConverter(type);
+                    IComparable min = (IComparable)converter.ConvertFromString((string)minimum);
+                    IComparable max = (IComparable)converter.ConvertFromString((string)maximum);
+
+                    Func<object, object> conversion = value => (value != null && value.GetType() == type) ? value : converter.ConvertFrom(value);
                     Initialize(min, max, conversion);
                 }
             }

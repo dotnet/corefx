@@ -164,6 +164,8 @@ namespace System.Net.Http
             get { return _winHttpHandler.ClientCertificates; }
         }
 
+        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
+
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
             get { return _winHttpHandler.ServerCertificateValidationCallback; }
@@ -194,9 +196,11 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _winHttpHandler = new WinHttpHandler();
+            _diagnosticsPipeline = new DiagnosticsHandler(_winHttpHandler);
 
             // Adjust defaults to match current .NET Desktop HttpClientHandler (based on HWR stack).
             AllowAutoRedirect = true;
+            AutomaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
             UseProxy = true;
             UseCookies = true;
             CookieContainer = new CookieContainer();
@@ -265,6 +269,10 @@ namespace System.Net.Http
                 }
             }
 
+            if (DiagnosticsHandler.IsEnabled())
+            {
+                return _diagnosticsPipeline.SendAsync(request, cancellationToken);
+            }
             return _winHttpHandler.SendAsync(request, cancellationToken);
         }
 
@@ -273,6 +281,7 @@ namespace System.Net.Http
         #region Private
 
         private WinHttpHandler _winHttpHandler;
+        private readonly DiagnosticsHandler _diagnosticsPipeline;
         private bool _useProxy;
         private volatile bool _disposed;
         #endregion Private

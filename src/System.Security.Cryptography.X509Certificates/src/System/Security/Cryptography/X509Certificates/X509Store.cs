@@ -10,6 +10,10 @@ namespace System.Security.Cryptography.X509Certificates
 {
     public sealed class X509Store : IDisposable
     {
+        internal const string RootStoreName = "Root";
+        internal const string IntermediateCAStoreName = "CA";
+        internal const string DisallowedStoreName = "Disallowed";
+
         private IStorePal _storePal;
 
         public X509Store()
@@ -46,16 +50,16 @@ namespace System.Security.Cryptography.X509Certificates
                     Name = "AuthRoot";
                     break;
                 case StoreName.CertificateAuthority:
-                    Name = "CA";
+                    Name = IntermediateCAStoreName;
                     break;
                 case StoreName.Disallowed:
-                    Name = "Disallowed";
+                    Name = DisallowedStoreName;
                     break;
                 case StoreName.My:
                     Name = "My";
                     break;
                 case StoreName.Root:
-                    Name = "Root";
+                    Name = RootStoreName;
                     break;
                 case StoreName.TrustedPeople:
                     Name = "TrustedPeople";
@@ -70,6 +74,12 @@ namespace System.Security.Cryptography.X509Certificates
             Location = storeLocation;
         }
 
+        public X509Store(StoreName storeName, StoreLocation storeLocation, OpenFlags flags)
+            : this(storeName, storeLocation)
+        {
+            Open(flags);
+        }
+
         public X509Store(string storeName, StoreLocation storeLocation)
         {
             if (storeLocation != StoreLocation.CurrentUser && storeLocation != StoreLocation.LocalMachine)
@@ -78,6 +88,13 @@ namespace System.Security.Cryptography.X509Certificates
             Location = storeLocation;
             Name = storeName;
         }
+
+        public X509Store(string storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.OpenFlags flags)
+            : this(storeName, storeLocation)
+        {
+            Open(flags);
+        }
+
 
         public X509Store(IntPtr storeHandle)
         {
@@ -124,6 +141,11 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
+        public bool IsOpen
+        {
+            get { return _storePal != null; }
+        }
+
         public void Add(X509Certificate2 certificate)
         {
             if (certificate == null)
@@ -131,6 +153,9 @@ namespace System.Security.Cryptography.X509Certificates
 
             if (_storePal == null)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotOpen);
+
+            if (certificate.Handle == IntPtr.Zero)
+                throw new CryptographicException(SR.Cryptography_InvalidHandle, "pCertContext");
 
             _storePal.Add(certificate.Pal);
         }

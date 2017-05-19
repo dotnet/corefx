@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <PropertyGroup>
+    <TargetFrameworkName>netcoreapp</TargetFrameworkName>
+    <TargetFrameworkVersion>2.0</TargetFrameworkVersion>
+    <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
+
+    <RefBinDir>$(NETCoreAppPackageRefPath)</RefBinDir>
+    <LibBinDir>$(NETCoreAppPackageRuntimePath)</LibBinDir>
+
+    <IsFrameworkPackage>true</IsFrameworkPackage>
+
+    <!-- Private packages need symbols -->
+    <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <IgnoredReference Include="System.Private.CoreLib" />
+
+    <!-- Exclude shims from the closure verification -->
+    <ExcludeFromClosure Include="mscorlib" />
+    <ExcludeFromClosure Include="System" />
+    <ExcludeFromClosure Include="System.Core" />
+    <ExcludeFromClosure Include="System.Data" />
+    <ExcludeFromClosure Include="System.Drawing" />
+    <ExcludeFromClosure Include="System.Net" />
+    <ExcludeFromClosure Include="System.Transactions" />
+
+    <!-- Permit the following implementation-only assemblies -->
+    <ValidatePackageSuppression Condition="'$(PackageTargetRuntime)' != ''" Include="PermitInbox">
+      <Value>
+        Microsoft.VisualBasic;
+        Microsoft.Win32.Registry;
+        System.IO.FileSystem.AccessControl;
+        System.Private.DataContractSerialization;
+        System.Private.Uri;
+        System.Private.Xml;
+        System.Private.Xml.Linq;
+        System.Security.AccessControl;
+        System.Security.Cryptography.Cng;
+        System.Security.Cryptography.OpenSsl;
+        System.Security.Principal.Windows;
+      </Value>
+    </ValidatePackageSuppression>
+  </ItemGroup>
+  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

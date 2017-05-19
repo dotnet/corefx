@@ -111,13 +111,17 @@ internal class IOServices
 
         while (path.Length < characterCount)
         {
+            // Add directory seperator after each dir but not at the end of the path
             path.Append(Path.DirectorySeparatorChar);
-            if (path.Length == characterCount)
-                break;
 
             // Continue adding guids until the character count is hit
             string guid = Guid.NewGuid().ToString();
             path.Append(guid.Substring(0, Math.Min(characterCount - path.Length, guid.Length)));
+            if (path.Length + 1 == characterCount)
+            {
+                // If only one character is missing add a k!
+                path.Append('k');
+            }
             paths.Add(path.ToString());
         }
         Assert.Equal(path.Length, characterCount);
@@ -203,23 +207,6 @@ internal class IOServices
         return result;
     }
 
-    private static string GetDriveFormat(string driveName)
-    {
-        const int volNameLen = 50;
-        StringBuilder volumeName = new StringBuilder(volNameLen);
-        const int fileSystemNameLen = 50;
-        StringBuilder fileSystemName = new StringBuilder(fileSystemNameLen);
-        int serialNumber, maxFileNameLen, fileSystemFlags;
-
-        bool r = DllImports.GetVolumeInformation(driveName, volumeName, volNameLen, out serialNumber, out maxFileNameLen, out fileSystemFlags, fileSystemName, fileSystemNameLen);
-        if (!r)
-        {
-            throw new IOException("DriveName: " + driveName + " ErrorCode:" + Marshal.GetLastWin32Error());
-        }
-
-        return fileSystemName.ToString();
-    }
-
     public static string GetCurrentDrive()
     {
         return Path.GetPathRoot(Directory.GetCurrentDirectory());
@@ -227,12 +214,15 @@ internal class IOServices
 
     public static bool IsDriveNTFS(string drive)
     {
-#if TEST_WINRT
-        // we cannot determine filesystem so assume NTFS
-        return true;
-#else
-        return GetDriveFormat(drive) == "NTFS";
-#endif
+        if (PlatformDetection.IsWinRT)
+        {
+            // we cannot determine filesystem so assume NTFS
+            return true;
+        }
+
+        var di = new DriveInfo(drive);
+
+        return string.Equals(di.DriveFormat, "NTFS", StringComparison.OrdinalIgnoreCase);
     }
 
     public static long GetAvailableFreeBytes(string drive)

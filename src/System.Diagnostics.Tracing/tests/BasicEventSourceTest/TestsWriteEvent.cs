@@ -39,6 +39,7 @@ namespace BasicEventSourceTests
         /// Tests bTraceListener path. 
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18806")]
         public void Test_WriteEvent_Manifest_EventListener()
         {
             using (var listener = new EventListenerListener())
@@ -52,6 +53,7 @@ namespace BasicEventSourceTests
         /// Tests bTraceListener path using events instead of virtual callbacks. 
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18806")]
         public void Test_WriteEvent_Manifest_EventListener_UseEvents()
         {
             Test_WriteEvent(new EventListenerListener(true), false);
@@ -75,6 +77,7 @@ namespace BasicEventSourceTests
         /// Tests both the ETW and TraceListener paths. 
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18806")]
         public void Test_WriteEvent_SelfDescribing_EventListener()
         {
             using (var listener = new EventListenerListener())
@@ -89,6 +92,7 @@ namespace BasicEventSourceTests
         /// instead of virtual callbacks. 
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18806")]
         public void Test_WriteEvent_SelfDescribing_EventListener_UseEvents()
         {
             Test_WriteEvent(new EventListenerListener(true), true);
@@ -637,6 +641,41 @@ namespace BasicEventSourceTests
                         Assert.True(Equal(blob, retBlob));
 
                         Assert.Equal(1000, (long)evt.PayloadValue(1, "lng"));
+                    }));
+
+                tests.Add(new SubTest("Write/Array/EventWithNullByteArray",
+                    delegate ()
+                    {
+                        logger.EventWithByteArrayArg(null, 0);
+                    },
+                    delegate (Event evt)
+                    {
+                        Assert.Equal(logger.Name, evt.ProviderName);
+                        Assert.Equal("EventWithByteArrayArg", evt.EventName);
+
+                        if (evt.IsEventListener)
+                        {
+                            byte[] retBlob = (byte[])evt.PayloadValue(0, "blob");
+                            Assert.Null(retBlob);
+                            Assert.Equal(0, (int)evt.PayloadValue(1, "n"));
+                        }
+                    }));
+
+                tests.Add(new SubTest("Write/Array/EventWithEmptyByteArray",
+                    delegate ()
+                    {
+                        logger.EventWithByteArrayArg(Array.Empty<byte>(), 0);
+                    },
+                    delegate (Event evt)
+                    {
+                        Assert.Equal(logger.Name, evt.ProviderName);
+                        Assert.Equal("EventWithByteArrayArg", evt.EventName);
+
+                        Assert.Equal(2, evt.PayloadCount);
+                        byte[] retBlob = (byte[])evt.PayloadValue(0, "blob");
+                        Assert.True(Equal(Array.Empty<byte>(), retBlob));
+
+                        Assert.Equal(0, (int)evt.PayloadValue(1, "n"));
                     }));
 
                 // If you only wish to run one or several of the tests you can filter them here by 

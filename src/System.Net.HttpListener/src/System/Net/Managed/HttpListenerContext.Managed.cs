@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Net.WebSockets;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -10,64 +11,30 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListenerContext
     {
-        private HttpListenerRequest _request;
-        private HttpListenerResponse _response;
-        private IPrincipal _user;
         private HttpConnection _connection;
-        private string _error;
-        private int _err_status = 400;
-        internal HttpListener Listener;
 
-        internal HttpListenerContext(HttpConnection cnc)
+        internal HttpListenerContext(HttpConnection connection)
         {
-            _connection = cnc;
-            _request = new HttpListenerRequest(this);
+            _connection = connection;
             _response = new HttpListenerResponse(this);
+            Request = new HttpListenerRequest(this);
+            ErrorStatus = 400;
         }
 
-        internal int ErrorStatus
-        {
-            get { return _err_status; }
-            set { _err_status = value; }
-        }
+        internal int ErrorStatus { get; set; }
 
-        internal string ErrorMessage
-        {
-            get { return _error; }
-            set { _error = value; }
-        }
+        internal string ErrorMessage { get; set; }
 
-        internal bool HaveError
-        {
-            get { return (_error != null); }
-        }
+        internal bool HaveError => ErrorMessage != null;
 
-        internal HttpConnection Connection
-        {
-            get { return _connection; }
-        }
-
-        public HttpListenerRequest Request
-        {
-            get { return _request; }
-        }
-
-        public HttpListenerResponse Response
-        {
-            get { return _response; }
-        }
-
-        public IPrincipal User
-        {
-            get { return _user; }
-        }
-
+        internal HttpConnection Connection => _connection;
+        
         internal void ParseAuthentication(AuthenticationSchemes expectedSchemes)
         {
             if (expectedSchemes == AuthenticationSchemes.Anonymous)
                 return;
 
-            string header = _request.Headers[HttpKnownHeaderNames.Authorization];
+            string header = Request.Headers[HttpKnownHeaderNames.Authorization];
             if (header == null || header.Length < 2)
                 return;
 
@@ -121,24 +88,16 @@ namespace System.Net
             }
         }
 
-        public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, TimeSpan keepAliveInterval)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval)
         {
-            throw new NotImplementedException();
+            return HttpWebSocket.AcceptWebSocketAsyncCore(this, subProtocol, receiveBufferSize, keepAliveInterval);
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval, ArraySegment<byte> internalBuffer)
         {
-            throw new NotImplementedException();
+            WebSocketValidate.ValidateArraySegment(internalBuffer, nameof(internalBuffer));
+            return HttpWebSocket.AcceptWebSocketAsyncCore(this, subProtocol, receiveBufferSize, keepAliveInterval, internalBuffer);
         }
     }
 }

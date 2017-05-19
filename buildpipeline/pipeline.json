@@ -3,1123 +3,897 @@
   "Definitions": {
     "Path": ".",
     "Type": "VSTS",
-    "BaseUrl":  "https://devdiv.visualstudio.com/DefaultCollection"
+    "BaseUrl": "https://devdiv.visualstudio.com/DefaultCollection"
   },
-  "Pipelines": [
-    {
-      "Name": "Trusted-All-Release",
+  "Pipelines": [{
+      "Name": "Trusted-All-Release-Linux",
       "Parameters": {
         "TreatWarningsAsErrors": "false"
       },
       "BuildParameters": {
-        "ConfigurationGroup": "Release"
+        "PB_ConfigurationGroup": "Release",
+        "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
+        "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
+        "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release  /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\"",
+        "PB_SyncArguments": "-p -- /p:ArchGroup=x64"
       },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "DockerTag": "debian82_prereqs_2"
+            "PB_DockerTag": "debian82_prereqs_2",
+            "PB_TargetQueue": "Debian.82.Amd64"
           },
           "ReportingParameters": {
             "OperatingSystem": "Debian 8.2",
-            "SubType": "native",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "DockerTag": "fedora23_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 2.3",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "fedora24_prereqs_v4"
+            "PB_DockerTag": "fedora24_prereqs_v4",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
           },
           "ReportingParameters": {
             "OperatingSystem": "Fedora 24",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },        
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "opensuse132_prereqs_v4"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "openSUSE 13.2",
-            "SubType": "native",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "DockerTag": "opensuse421_prereqs_v3"
+            "PB_DockerTag": "opensuse421_prereqs_v3",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
           },
           "ReportingParameters": {
             "OperatingSystem": "openSUSE 42.1",
-            "SubType": "native",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "DockerTag": "rhel7_prereqs_2"
+            "PB_DockerTag": "rhel7_prereqs_2",
+            "PB_TargetQueue": "Redhat.72.Amd64"
           },
           "ReportingParameters": {
             "OperatingSystem": "RedHat 7",
-            "SubType": "native",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "DockerTag": "ubuntu1404_prereqs_v3"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 14.04",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "ubuntu1604_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.04",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "ubuntu1610_prereqs_v2"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.10",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "alpine_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Alpine 3.4.3",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "rhel7_prereqs_2",
-            "portableLinux": "-portableLinux"
+            "PB_DockerTag": "rhel7_prereqs_2",
+            "PB_BuildArguments": "-buildArch=x64 -Release -portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64",
+            "PB_TargetQueue": "Centos.73.Amd64+RedHat.73.Amd64+Debian.87.Amd64+Ubuntu.1404.Amd64+Ubuntu.1604.Amd64+Ubuntu.1610.Amd64+Ubuntu.1704.Amd64+suse.422.amd64+fedora.25.amd64",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\" /p:\"HelixJobType=test/functional/portable/cli/\""
           },
           "ReportingParameters": {
             "OperatingSystem": "RedHat 7",
-            "SubType": "native",
             "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },        
-        {
-          "Name": "DotNet-CoreFx-Trusted-Mac-Native",
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "OSX",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows",
-          "ReportingParameters": {
-            "SubType": "managed",
-            "OperatingSystem": "All (Managed)",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "arm"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "arm64"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "x64"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x64",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "x86"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x86",
-            "ConfigurationGroup": "Release"
-          }
-        }
-      ]
-    },
-    {
-      "Name": "Trusted-All-Debug",
-      "Parameters": {
-        "TreatWarningsAsErrors": "false"
-      },
-      "BuildParameters": {
-        "ConfigurationGroup": "Debug"
-      },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "debian82_prereqs_2"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Debian 8.2",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "fedora23_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 2.3",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "fedora24_prereqs_v4"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 24",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },        
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "opensuse132_prereqs_v4"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "openSUSE 13.2",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "opensuse421_prereqs_v3"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "openSUSE 42.1",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "rhel7_prereqs_2"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "RedHat 7",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "ubuntu1404_prereqs_v3"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 14.04",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "ubuntu1604_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.04",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "ubuntu1610_prereqs_v2"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.10",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "alpine_prereqs"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Alpine 3.4.3",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        }, 
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
-          "Parameters": {
-            "DockerTag": "rhel7_prereqs_2",
-            "portableLinux": "-portableLinux"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "RedHat7",
-            "SubType": "native",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },        
-        {
-          "Name": "DotNet-CoreFx-Trusted-Mac-Native",
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "OSX",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows",
-          "ReportingParameters": {
-            "SubType": "managed",
-            "OperatingSystem": "All (Managed)",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "arm"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "arm64"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "x64"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x64",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
-          "Parameters": {
-            "Platform": "x86"
-          },
-          "ReportingParameters": {
-            "SubType": "native",
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x86",
-            "ConfigurationGroup": "Debug"
-          }
-        }
-      ]
-    },
-    {
-      "Name": "Build-Tests-Windows-Release",
-      "Parameters": {
-        "TreatWarningsAsErrors": "false"
-      },
-      "BuildParameters": {
-        "Branch": "corefx",
-        "ConfigurationGroup": "Release",
-        "DownloadTestContainerSuffix": "windows",
-        "FilterToOSGroup": "Windows_NT",
-        "InputOSGroup": "Windows_NT",
-        "PushToHelixOSGroup": "Windows_NT",
-        "Release": "rtm",
-        "TargetOS": "Windows_NT",
-        "TargetsWindows": "true",
-        "TestNugetRuntimeId": "win7-x64"
-      },
-      "ReportingParameters": {
-        "Type": "test/functional/cli",
-        "TargetQueue": {},
-        "TargetTestCategory": {}        
-      },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10",
-            "TargetTestCategory": "Core Tests"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10",
-            "TargetTestCategory": "Core Tests",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Core.Amd64",
-            "TestContainerSuffix": "windows10core"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Core.Amd64",
-            "TestContainerSuffix": "windows10core",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10ilc",
-            "TargetTestCategory": "UWP ILC",            
-            "FilterToTestTFM": "netcore50",
-            "TestNugetRuntimeId": "win10-x64-aot",
-            "UseDotNetNativeToolchain": "true",
-            "EnableCloudTest": "true"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10ilc",
-            "TargetTestCategory": "UWP ILC",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }            
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10uwp",
-            "TargetTestCategory": "UWP",            
-            "FilterToTestTFM": "netcore50",
-            "TestNugetRuntimeId": "win10-x64",
-            "EnableCloudTest": "true"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10uwp",
-            "TargetTestCategory": "UWP",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10desktop",
-            "TargetTestCategory": "Full Framework",
-            "FilterToTestTFM": "net46",
-            "TestNugetRuntimeId": "win-x64",
-            "EnableCloudTest": "true"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10desktop",
-            "TargetTestCategory": "Full Framework",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.7.Amd64",
-            "TestContainerSuffix": "windows7"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.7.Amd64",
-            "TestContainerSuffix": "windows7",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.81.Amd64",
-            "TestContainerSuffix": "windows81"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.81.Amd64",
-            "TestContainerSuffix": "windows81",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "FuncTestsDisabled": "true",
-            "Performance": "true",
-            "TargetQueue": "Windows.81.Amd64.Perf",
-            "TestContainerSuffix": "windows81perf"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.81.Amd64.Perf",
-            "TestContainerSuffix": "windows81perf",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        }
-      ],
-      "DependsOn": [
-        "Trusted-All-Release"
-      ]
-    },
-    {
-      "Name": "Publish-Tests-Windows-Release",
-      "Parameters": {
-        "TreatWarningsAsErrors": "false"
-      },
-      "BuildParameters": {
-        "GitHubRepositoryName": "corefx",
-        "OSGroup": "AnyOS",
-        "Platform": "AnyCPU"
-      },
-      "Definitions": [
-        {
-          "Name": "DotNet-Trusted-Tests-Publish",
-          "Parameters": {
-            "TestContainerSuffix": "windows10",
-            "TestTFM": "netcoreapp1.1"
-          },
-          "ReportingParameters": {
-            "Type": "build/publish/"
-          }
-        }
-      ],
-      "DependsOn": [
-        "Build-Tests-Windows-Release"
-      ]
-    },
-    {
-      "Name": "Build-Tests-Linux-Release",
-      "Parameters": {
-        "TreatWarningsAsErrors": "false"
-      },
-      "BuildParameters": {
-        "Branch": "corefx",
-        "ConfigurationGroup": "Release",
-        "DownloadTestContainerSuffix": "linux",
-        "FilterToOSGroup": "Linux",
-        "InputOSGroup": "Linux",
-        "PushToHelixOSGroup": "Linux",
-        "Release": "rtm",
-        "TargetOS": "Linux",
-        "TargetsWindows": "false"
-      },
-      "ReportingParameters": {
-        "Type": "test/functional/cli",
-        "TargetQueue": {}
-      },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Centos.71.Amd64",
-            "TestContainerSuffix": "centos71",
-            "TestNugetRuntimeId": "centos.7-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Centos.71.Amd64",
-            "TestContainerSuffix": "centos71",
-            "TestNugetRuntimeId": "centos.7-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Debian.82.Amd64",
-            "TestContainerSuffix": "debian82",
-            "TestNugetRuntimeId": "debian.8-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Debian.82.Amd64",
-            "TestContainerSuffix": "debian82",
-            "TestNugetRuntimeId": "debian.8-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Redhat.72.Amd64",
-            "TestContainerSuffix": "redhat72",
-            "TestNugetRuntimeId": "rhel.7-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Redhat.72.Amd64",
-            "TestContainerSuffix": "redhat72",
-            "TestNugetRuntimeId": "rhel.7-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1404.Amd64",
-            "TestContainerSuffix": "ubuntu1404",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1404.Amd64",
-            "TestContainerSuffix": "ubuntu1404",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "FuncTestsDisabled": "true",
-            "Performance": "true",
-            "TargetQueue": "Ubuntu.1404.Amd64.Perf",
-            "TestContainerSuffix": "ubuntu1404perf",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1404.Amd64.Perf",
-            "TestContainerSuffix": "ubuntu1404perf",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1604.Amd64",
-            "TestContainerSuffix": "ubuntu1604",
-            "TestNugetRuntimeId": "ubuntu.16.04-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1604.Amd64",
-            "TestContainerSuffix": "ubuntu1604",
-            "TestNugetRuntimeId": "ubuntu.16.04-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1610.Amd64",
-            "TestContainerSuffix": "ubuntu1610",
-            "TestNugetRuntimeId": "ubuntu.16.10-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1610.Amd64",
-            "TestContainerSuffix": "ubuntu1610",
-            "TestNugetRuntimeId": "ubuntu.16.10-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Fedora.23.Amd64",
-            "TestContainerSuffix": "fedora23",
-            "TestNugetRuntimeId": "fedora.23-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Fedora.23.Amd64",
-            "TestContainerSuffix": "fedora23",
-            "TestNugetRuntimeId": "fedora.23-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Suse.132.Amd64",
-            "TestContainerSuffix": "suse132",
-            "TestNugetRuntimeId": "opensuse.13.2-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Suse.132.Amd64",
-            "TestContainerSuffix": "suse132",
-            "TestNugetRuntimeId": "opensuse.13.2-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Release"
-          }
-        }
-      ],
-      "DependsOn": [
-        "Trusted-All-Release"
-      ]
-    },
-    {
-      "Name": "Build-Tests-OSX-Release",
-      "Parameters": {
-        "TreatWarningsAsErrors": "false"
-      },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "Branch": "corefx",
             "ConfigurationGroup": "Release",
-            "DownloadTestContainerSuffix": "osx",
-            "FilterToOSGroup": "OSX",
-            "InputOSGroup": "OSX",
-            "PushToHelixOSGroup": "OSX",
-            "Release": "rtm",
-            "TargetOS": "OSX",
-            "TargetQueue": "OSX.1011.Amd64",
-            "TargetsWindows": "false",
-            "TestContainerSuffix": "osx1011",
-            "TestNugetRuntimeId": "osx.10.10-x64"
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1404_prereqs_v3",
+            "PB_TargetQueue": "Ubuntu.1404.Amd64"
           },
           "ReportingParameters": {
-            "TargetQueue": "OSX.1011.Amd64",
-            "Type": "build/tests/",
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1604_prereqs",
+            "PB_TargetQueue": "Ubuntu.1604.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 16.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1610_prereqs_v2",
+            "PB_TargetQueue": "Ubuntu.1610.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 16.10",
+            "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
         }
-      ],
-      "DependsOn": [
-        "Trusted-All-Release"
       ]
     },
     {
-      "Name": "Build-Tests-Windows-Debug",
+      "Name": "Trusted-All-Release-Linux-Crossbuild",
       "Parameters": {
         "TreatWarningsAsErrors": "false"
       },
       "BuildParameters": {
-        "Branch": "corefx",
-        "ConfigurationGroup": "Debug",
-        "DownloadTestContainerSuffix": "windows",
-        "FilterToOSGroup": "Windows_NT",
-        "InputOSGroup": "Windows_NT",
-        "PushToHelixOSGroup": "Windows_NT",
-        "Release": "rtm",
-        "TargetOS": "Windows_NT",
-        "TargetsWindows": "true",
-        "TestNugetRuntimeId": "win7-x64"
+        "PB_ConfigurationGroup": "Release",
+        "PB_BuildArguments": "-stripSymbols"
       },
-      "ReportingParameters": {
-        "Type": "test/functional/cli",
-        "TargetQueue": {},
-        "TargetTestCategory": {}
-      },      
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
           "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10",
-            "TargetTestCategory": "Core Tests"
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
+            "PB_Architecture": "arm"
           },
           "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10",
-            "TargetTestCategory": "Core Tests",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release",
+            "SubType": "Crossbuild"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
           "Parameters": {
-            "TargetQueue": "Windows.10.Core.Amd64",
-            "TestContainerSuffix": "windows10core"
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
+            "PB_Architecture": "arm",
+            "PB_BuildArguments": "-portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=arm"
           },
           "ReportingParameters": {
-            "TargetQueue": "Windows.10.Core.Amd64",
-            "TestContainerSuffix": "windows10core",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
           "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10ilc",
-            "TargetTestCategory": "UWP ILC",            
-            "FilterToTestTFM": "netcore50",
-            "TestNugetRuntimeId": "win10-x64-aot",
-            "UseDotNetNativeToolchain": "true",
-            "EnableCloudTest": "true"
+            "PB_DockerTag": "ubuntu-16.04-cross-ef0ac75-20175511035548",
+            "PB_Architecture": "arm"
           },
           "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10ilc",
-            "TargetTestCategory": "UWP ILC",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }         
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10uwp",
-            "TargetTestCategory": "UWP",            
-            "FilterToTestTFM": "netcore50",
-            "TestNugetRuntimeId": "win10-x64",
-            "EnableCloudTest": "true"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10uwp",
-            "TargetTestCategory": "UWP",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10desktop",
-            "TargetTestCategory": "Full Framework",            
-            "FilterToTestTFM": "net46",
-            "TestNugetRuntimeId": "win-x64",
-            "EnableCloudTest": "true"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10desktop",
-            "TargetTestCategory": "Full Framework",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.7.Amd64",
-            "TestContainerSuffix": "windows7"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.7.Amd64",
-            "TestContainerSuffix": "windows7",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Windows.81.Amd64",
-            "TestContainerSuffix": "windows81"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Windows.81.Amd64",
-            "TestContainerSuffix": "windows81",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
+            "OperatingSystem": "Ubuntu 16.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release",
+            "SubType": "Crossbuild"
           }
         }
-      ],
-      "DependsOn": [
-        "Trusted-All-Debug"
       ]
     },
     {
-      "Name": "Build-Tests-Linux-Debug",
+      "Name": "Trusted-All-Release-OSX",
       "Parameters": {
         "TreatWarningsAsErrors": "false"
       },
       "BuildParameters": {
-        "Branch": "corefx",
-        "ConfigurationGroup": "Debug",
-        "DownloadTestContainerSuffix": "linux",
-        "FilterToOSGroup": "Linux",
-        "InputOSGroup": "Linux",
-        "PushToHelixOSGroup": "Linux",
-        "Release": "rtm",
-        "TargetOS": "Linux",
-        "TargetsWindows": "false"
+        "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
+        "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:ArchiveTests=true",
+        "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
+        "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:EnableCloudTest=false /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=OSX"
       },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-OSX",
           "Parameters": {
-            "TargetQueue": "Centos.71.Amd64",
-            "TestContainerSuffix": "centos71",
-            "TestNugetRuntimeId": "centos.7-x64"
+            "PB_TargetQueue": "OSX.1012.Amd64"
           },
           "ReportingParameters": {
-            "TargetQueue": "Centos.71.Amd64",
-            "TestContainerSuffix": "centos71",
-            "TestNugetRuntimeId": "centos.7-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
+            "OperatingSystem": "OSX",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+          "Name": "DotNet-CoreFx-Trusted-OSX",
           "Parameters": {
-            "TargetQueue": "Debian.82.Amd64",
-            "TestContainerSuffix": "debian82",
-            "TestNugetRuntimeId": "debian.8-x64"
+            "PB_BuildArguments": "-buildArch=x64 -Release -portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64",
+            "PB_TargetQueue": "OSX.1012.Amd64",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=OSX /p:\"HelixJobType=test/functional/portable/cli/\""
           },
           "ReportingParameters": {
-            "TargetQueue": "Debian.82.Amd64",
-            "TestContainerSuffix": "debian82",
-            "TestNugetRuntimeId": "debian.8-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Redhat.72.Amd64",
-            "TestContainerSuffix": "redhat72",
-            "TestNugetRuntimeId": "rhel.7-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Redhat.72.Amd64",
-            "TestContainerSuffix": "redhat72",
-            "TestNugetRuntimeId": "rhel.7-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1404.Amd64",
-            "TestContainerSuffix": "ubuntu1404",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1404.Amd64",
-            "TestContainerSuffix": "ubuntu1404",
-            "TestNugetRuntimeId": "ubuntu.14.04-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1604.Amd64",
-            "TestContainerSuffix": "ubuntu1604",
-            "TestNugetRuntimeId": "ubuntu.16.04-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1604.Amd64",
-            "TestContainerSuffix": "ubuntu1604",
-            "TestNugetRuntimeId": "ubuntu.16.04-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Ubuntu.1610.Amd64",
-            "TestContainerSuffix": "ubuntu1610",
-            "TestNugetRuntimeId": "ubuntu.16.10-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Ubuntu.1610.Amd64",
-            "TestContainerSuffix": "ubuntu1610",
-            "TestNugetRuntimeId": "ubuntu.16.10-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Fedora.23.Amd64",
-            "TestContainerSuffix": "fedora23",
-            "TestNugetRuntimeId": "fedora.23-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Fedora.23.Amd64",
-            "TestContainerSuffix": "fedora23",
-            "TestNugetRuntimeId": "fedora.23-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-          "Parameters": {
-            "TargetQueue": "Suse.132.Amd64",
-            "TestContainerSuffix": "suse132",
-            "TestNugetRuntimeId": "opensuse.13.2-x64"
-          },
-          "ReportingParameters": {
-            "TargetQueue": "Suse.132.Amd64",
-            "TestContainerSuffix": "suse132",
-            "TestNugetRuntimeId": "opensuse.13.2-x64",
-            "Type": "build/tests/",
-            "ConfigurationGroup": "Debug"
+            "OperatingSystem": "OSX",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
           }
         }
-      ],
-      "DependsOn": [
-        "Trusted-All-Debug"
       ]
     },
     {
-      "Name": "Build-Tests-OSX-Debug",
+      "Name": "Trusted-All-Release-Windows",
       "Parameters": {
         "TreatWarningsAsErrors": "false"
       },
-      "Definitions": [
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Release",
+        "PB_PipelineBuildMSBuildArguments": "/p:EnableProfileGuidedOptimization=true"
+      },
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Windows",
           "Parameters": {
-            "Branch": "corefx",
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-buildArch=arm -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm -Release -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "arm64",
+            "PB_BuildArguments": "-buildArch=arm64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm64 -Release -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm64",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64,Windows.10.Nano.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-buildArch=x86 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x86 -Release -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-buildArch=arm -Release -portable -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm -Release -SkipTests -Outerloop -portable -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=arm /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "arm64",
+            "PB_BuildArguments": "-buildArch=arm64 -Release -portable -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm64 -Release -SkipTests -Outerloop -portable -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm64",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-buildArch=x64 -Release -portable -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -portable -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64,Windows.10.Nano.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/portable/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-buildArch=x86 -Release -portable -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x86 -Release -SkipTests -Outerloop -portable -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x86 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/portable/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Release",
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-framework=uap -buildArch=arm -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=uap -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uap -buildArch=x64 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=uap",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:TargetGroup=uap /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/uwp/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-framework=uap -buildArch=x86 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-framework=uapaot -buildArch=arm -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=uapaot -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uapaot -buildArch=x64 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=uapaot",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:TargetGroup=uapaot /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_BuildArguments": "-framework=uapaot -buildArch=x86 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uapaot -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:TargetGroup=uapaot /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Release",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-allConfigurations -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release",
+            "SubType": "AllConfigurations"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=netfx -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=netfx -buildArch=x64 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=netfx",
+            "PB_CreateHelixArguments": "/p:EnableCloudTest=false /p:ArchGroup=x64 /p:TargetGroup=netfx /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/desktop/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Release",
+            "SubType": "Netfx"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_BuildArguments": "-framework=netfx -buildArch=x86 -Release -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=netfx -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10 /p:TargetGroup=netfx",
+            "PB_CreateHelixArguments": "/p:EnableCloudTest=false /p:ArchGroup=x86 /p:TargetGroup=netfx /p:ConfigurationGroup=Release /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/desktop/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Release",
+            "SubType": "Netfx"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Trusted-All-Debug-Linux",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Debug",
+        "PB_BuildArguments": "-buildArch=x64 -Debug",
+        "PB_BuildTestsArguments": "-buildArch=x64 -Debug -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
+        "PB_CreateHelixArguments": "/p:EnableCloudTest=false /p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\"",
+        "PB_SyncArguments": "-p -- /p:ArchGroup=x64"
+      },
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "debian82_prereqs_2",
+            "PB_TargetQueue": "Debian.82.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Debian 8.2",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "fedora24_prereqs_v4",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Fedora 24",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "opensuse421_prereqs_v3",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "openSUSE 42.1",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "rhel7_prereqs_2",
+            "PB_TargetQueue": "Redhat.72.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "RedHat 7",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "rhel7_prereqs_2",
+            "PB_BuildArguments": "-buildArch=x64 -Debug -portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64",
+            "PB_TargetQueue": "Centos.73.Amd64+RedHat.73.Amd64+Debian.87.Amd64+Ubuntu.1404.Amd64+Ubuntu.1604.Amd64+Ubuntu.1610.Amd64+Ubuntu.1704.Amd64+suse.422.amd64+fedora.25.amd64",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\" /p:\"HelixJobType=test/functional/portable/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "RedHat 7",
+            "Type": "build/product/",
             "ConfigurationGroup": "Debug",
-            "DownloadTestContainerSuffix": "osx",
-            "FilterToOSGroup": "OSX",
-            "InputOSGroup": "OSX",
-            "PushToHelixOSGroup": "OSX",
-            "Release": "rtm",
-            "TargetOS": "OSX",
-            "TargetQueue": "OSX.1011.Amd64",
-            "TargetsWindows": "false",
-            "TestContainerSuffix": "osx1011",
-            "TestNugetRuntimeId": "osx.10.10-x64"
+            "SubType": "PortableBuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1404_prereqs_v3",
+            "PB_TargetQueue": "Ubuntu.1404.Amd64"
           },
           "ReportingParameters": {
-            "TargetQueue": "OSX.1011.Amd64",
-            "TestContainerSuffix": "osx1011",
-            "TestNugetRuntimeId": "osx.10.10-x64",
-            "Type": "build/tests/",
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1604_prereqs",
+            "PB_TargetQueue": "Ubuntu.1604.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 16.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu1610_prereqs_v2",
+            "PB_TargetQueue": "Ubuntu.1610.Amd64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 16.10",
+            "Type": "build/product/",
             "ConfigurationGroup": "Debug"
           }
         }
-      ],
-      "DependsOn": [
-        "Trusted-All-Debug"
+      ]
+    },
+    {
+      "Name": "Trusted-All-Debug-Linux-Crossbuild",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Debug"
+      },
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
+            "PB_Architecture": "arm"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Crossbuild"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu-16.04-cross-ef0ac75-20175511035548",
+            "PB_Architecture": "arm"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 16.04",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Crossbuild"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Trusted-All-Debug-OSX",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_BuildArguments": "-buildArch=x64 -Debug",
+        "PB_BuildTestsArguments": "-buildArch=x64 -Debug -SkipTests -Outerloop -- /p:ArchiveTests=true",
+        "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
+        "PB_CreateHelixArguments": "/p:EnableCloudTest=false /p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=OSX\""
+      },
+      "Definitions": [{
+        "Name": "DotNet-CoreFx-Trusted-OSX",
+        "Parameters": {
+          "PB_TargetQueue": "OSX.1012.Amd64"
+        },
+        "ReportingParameters": {
+          "OperatingSystem": "OSX",
+          "Type": "build/product/",
+          "ConfigurationGroup": "Debug"
+        }
+      }]
+    },
+    {
+      "Name": "Trusted-All-Debug-Windows",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Debug"
+      },
+      "Definitions": [{
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-buildArch=arm -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm -Debug -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "arm64",
+            "PB_BuildArguments": "-buildArch=arm64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=arm64 -Debug -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=arm64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm64",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x64 -Debug -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64,Windows.10.Nano.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-buildArch=x86 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-buildArch=x86 -Debug -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64,Windows.7.Amd64,Windows.81.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-framework:uap -buildArch=arm -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=uap -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uap -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=uap",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:TargetGroup=uap /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/uwp/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-framework:uap -buildArch=x86 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uap"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "arm",
+            "PB_BuildArguments": "-framework:uapaot -buildArch=arm -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "arm",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework:uapaot -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uapaot -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=uapaot",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:TargetGroup=uapaot /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_TargetQueue": "Windows.10.Amd64",
+            "PB_BuildArguments": "-framework:uapaot -buildArch=x86 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=uapaot -buildArch=x86 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:TargetGroup=uapaot /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Uapaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows-NoTest",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-allConfigurations -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Debug",
+            "SubType": "AllConfigurations"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=netfx -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=netfx -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=netfx",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:TargetGroup=netfx /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/desktop/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Netfx"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_BuildArguments": "-framework=netfx -buildArch=x86 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
+            "PB_BuildTestsArguments": "-framework=netfx -buildArch=x86 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10 /p:TargetGroup=netfx",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:TargetGroup=netfx /p:ConfigurationGroup=Debug /p:\"TargetQueues=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:\"HelixJobType=test/functional/desktop/cli/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "ConfigurationGroup": "Debug",
+            "SubType": "Netfx"
+          }
+        }
       ]
     },
     {
@@ -1128,24 +902,25 @@
         "TreatWarningsAsErrors": "false"
       },
       "BuildParameters": {
-        "ConfigurationGroup": "Release"
+        "PB_ConfigurationGroup": "Release"
       },
-      "Definitions": [
-        {
-          "Name": "DotNet-Trusted-Publish",
-          "Parameters": {
-            "VstsRepositoryName": "DotNet-CoreFX-Trusted",
-            "GitHubRepositoryName": "corefx"
-          },
-          "ReportingParameters": {
-            "TaskName": "Package Publish",
-            "Type": "build/publish/",
-            "ConfigurationGroup": "Release - Push to MyGet Feed"
-          }
+      "Definitions": [{
+        "Name": "DotNet-Trusted-Publish",
+        "Parameters": {
+          "PB_VsoRepositoryName": "DotNet-CoreFX-Trusted",
+          "PB_Repo": "corefx"
+        },
+        "ReportingParameters": {
+          "TaskName": "Package Publish",
+          "Type": "build/publish/",
+          "ConfigurationGroup": "Release - Push to MyGet Feed"
         }
-      ],
+      }],
       "DependsOn": [
-        "Trusted-All-Release"
+        "Trusted-All-Release-Windows",
+        "Trusted-All-Release-OSX",
+        "Trusted-All-Release-Linux",
+        "Trusted-All-Release-Linux-Crossbuild"
       ]
     },
     {
@@ -1154,24 +929,51 @@
         "TreatWarningsAsErrors": "false"
       },
       "BuildParameters": {
-        "ConfigurationGroup": "Debug"
+        "PB_ConfigurationGroup": "Debug"
       },
-      "Definitions": [
-        {
-          "Name": "DotNet-Trusted-Publish",
-          "Parameters": {
-            "VstsRepositoryName": "DotNet-CoreFX-Trusted",
-            "GitHubRepositoryName": "corefx"
-          },
-          "ReportingParameters": {
-            "TaskName": "Package Publish",
-            "Type": "build/publish/",
-            "ConfigurationGroup": "Debug - Push to Azure Storage"
-          }
+      "Definitions": [{
+        "Name": "DotNet-Trusted-Publish",
+        "Parameters": {
+          "PB_VsoRepositoryName": "DotNet-CoreFX-Trusted",
+          "PB_Repo": "corefx"
+        },
+        "ReportingParameters": {
+          "TaskName": "Package Publish",
+          "Type": "build/publish/",
+          "ConfigurationGroup": "Debug - Push to Azure Storage"
         }
-      ],
+      }],
       "DependsOn": [
-        "Trusted-All-Debug"
+        "Trusted-All-Debug-Windows",
+        "Trusted-All-Debug-OSX",
+        "Trusted-All-Debug-Linux",
+        "Trusted-All-Debug-Linux-Crossbuild"
+      ]
+    },
+    {
+      "Name": "Publish Symbols - Release",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Release"
+      },
+      "Definitions": [{
+        "Name": "DotNet-Trusted-Publish-Symbols",
+        "Parameters": {
+          "PB_VsoRepositoryName": "DotNet-CoreFX-Trusted"
+        },
+        "ReportingParameters": {
+          "TaskName": "Symbol Publish",
+          "Type": "build/publish/",
+          "ConfigurationGroup": "Release - Publish Symbols"
+        }
+      }],
+      "DependsOn": [
+        "Trusted-All-Release-Windows",
+        "Trusted-All-Release-OSX",
+        "Trusted-All-Release-Linux",
+        "Trusted-All-Release-Linux-Crossbuild"
       ]
     }
   ]

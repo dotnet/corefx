@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
@@ -121,7 +122,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             };
             yield return new object[] { new int[,] { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } };
             yield return new object[] { new int[,,] { { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } } };
-            yield return new object[] { new int[,,,,] { { { { { 1 } } } } } };
+            yield return new object[] { new int[,,,] { { { { 1 } } } } };
             yield return new ArraySegment<int>(new int[] { 1, 2, 3, 4, 5 }, 1, 2);
             yield return Enumerable.Range(0, 10000).Select(i => (object)i).ToArray();
             yield return new object[200]; // fewer than 256 nulls
@@ -134,9 +135,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
             arr.SetValue("hello", new[] { 3, 5 });
             yield return arr;
 
-            //// Various globalization types
-            //yield return CultureInfo.CurrentCulture;
-            //yield return CultureInfo.InvariantCulture;
+            // Various globalization types
+            yield return CultureInfo.CurrentCulture;
+            yield return CultureInfo.InvariantCulture;
+
+            // Internal specialized equality comparers
+            yield return EqualityComparer<byte>.Default;
+            yield return EqualityComparer<int>.Default;
+            yield return EqualityComparer<string>.Default;
+            yield return EqualityComparer<int?>.Default;
+            yield return EqualityComparer<double?>.Default;
+            yield return EqualityComparer<object>.Default;
+            yield return EqualityComparer<Int32Enum>.Default;
 
             // Custom object
             var sealedObjectWithIntStringFields = new SealedObjectWithIntStringFields();
@@ -247,18 +257,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(obj, result);
         }
 
-        public static IEnumerable<object[]> RoundtripWithHeaders_MemberData()
-        {
-            foreach (object obj in SerializableObjects())
-            {
-                // Fails with strings as the root of the graph, both in core and on desktop:
-                // "The object with ID 1 was referenced in a fixup but does not exist"
-                if (obj is string) continue;
-
-                yield return new[] { obj };
-            }
-        }
-
         [Fact]
         public void RoundtripManyObjectsInOneStream()
         {
@@ -306,7 +304,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { new ArrayTypeMismatchException("message") };
             yield return new object[] { new BadImageFormatException("message", "filename") };
             yield return new object[] { new COMException() };
-            //yield return new object[] { new CultureNotFoundException() };
+            yield return new object[] { new CultureNotFoundException() };
             yield return new object[] { new DataMisalignedException("message") };
             yield return new object[] { new DecoderFallbackException() };
             yield return new object[] { new DirectoryNotFoundException() };
@@ -589,8 +587,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void SerializeDeserialize_InvalidArguments_ThrowsException()
         {
             var f = new BinaryFormatter();
-            Assert.Throws<ArgumentNullException>("serializationStream", () => f.Serialize(null, new object()));
-            Assert.Throws<ArgumentNullException>("serializationStream", () => f.Deserialize(null));
+            AssertExtensions.Throws<ArgumentNullException>("serializationStream", () => f.Serialize(null, new object()));
+            AssertExtensions.Throws<ArgumentNullException>("serializationStream", () => f.Deserialize(null));
             Assert.Throws<SerializationException>(() => f.Deserialize(new MemoryStream())); // seekable, 0-length
         }
 
@@ -648,7 +646,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             var rand = new Random(42);
             foreach (object obj in SerializableObjects())
             {
-                const int FuzzingsPerObject = 20;
+                const int FuzzingsPerObject = 3;
                 for (int i = 0; i < FuzzingsPerObject; i++)
                 {
                     yield return new object[] { obj, rand, i };
@@ -740,7 +738,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     b.Serialize(output, b.Deserialize(input));
                     return SuccessExitCode;
                 }
-            }, outputPath, inputPath).Dispose();
+            }, $"\"{outputPath}\"", $"\"{inputPath}\"").Dispose();
 
             // Deserialize what the other process serialized and compare it to the original
             using (FileStream fs = File.OpenRead(inputPath))
@@ -750,8 +748,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        [ActiveIssue("Fails on desktop and core: 'Unable to cast object of type 'System.UInt32[][*]' to type 'System.Object[]'")]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails when serializing arrays with non-zero lower bounds")]
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
             FormatterClone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));

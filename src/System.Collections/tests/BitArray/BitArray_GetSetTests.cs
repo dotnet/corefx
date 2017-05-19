@@ -43,22 +43,22 @@ namespace System.Collections.Tests
         public static void Get_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             BitArray bitArray = new BitArray(4);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(bitArray.Length));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(bitArray.Length));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray[bitArray.Length]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray[bitArray.Length]);
         }
 
         [Fact]
         public static void Set_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             BitArray bitArray = new BitArray(4);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Set(-1, true));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Set(bitArray.Length, true));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Set(-1, true));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Set(bitArray.Length, true));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray[-1] = true);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray[bitArray.Length] = true);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray[-1] = true);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray[bitArray.Length] = true);
         }
 
         [Theory]
@@ -157,6 +157,24 @@ namespace System.Collections.Tests
             }
         }
 
+        [Fact]
+        public static void GetEnumerator_CloneEnumerator_ReturnsUniqueEnumerator()
+        {
+            BitArray bitArray = new BitArray(1);
+            IEnumerator enumerator = bitArray.GetEnumerator();
+            ICloneable cloneableEnumerator = enumerator as ICloneable;
+            Assert.NotNull(cloneableEnumerator);
+
+            IEnumerator clonedEnumerator = (IEnumerator)cloneableEnumerator.Clone();
+            Assert.NotSame(enumerator, clonedEnumerator);
+
+            Assert.True(clonedEnumerator.MoveNext());
+            Assert.False(clonedEnumerator.MoveNext());
+
+            Assert.True(enumerator.MoveNext());
+            Assert.False(enumerator.MoveNext());
+        }
+
         public static IEnumerable<object[]> Length_Set_Data()
         {
             int[] sizes = { 1, BitsPerByte, BitsPerByte + 1, BitsPerInt32, BitsPerInt32 + 1 };
@@ -186,8 +204,8 @@ namespace System.Collections.Tests
                 Assert.False(bitArray[i]);
                 Assert.False(bitArray.Get(i));
             }
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray[newSize]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(newSize));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray[newSize]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.Get(newSize));
 
             // Decrease then increase size
             bitArray.Length = 0;
@@ -295,7 +313,7 @@ namespace System.Collections.Tests
         public static void CopyTo_Type_Invalid()
         {
             ICollection bitArray = new BitArray(10);
-            Assert.Throws<ArgumentNullException>("array", () => bitArray.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => bitArray.CopyTo(null, 0));
             Assert.Throws<ArgumentException>(() => bitArray.CopyTo(new long[10], 0));
             Assert.Throws<ArgumentException>(() => bitArray.CopyTo(new int[10, 10], 0));
         }
@@ -319,8 +337,15 @@ namespace System.Collections.Tests
         {
             ICollection bitArray = new BitArray(bits);
             T[] array = (T[])Array.CreateInstance(typeof(T), arraySize);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.CopyTo(array, -1));
-            Assert.Throws<ArgumentException>(def is int ? string.Empty : null, () => bitArray.CopyTo(array, index));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.CopyTo(array, -1));
+            if (def is int)
+            {
+                AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => bitArray.CopyTo(array, index));
+            }
+            else
+            {
+                Assert.Throws<ArgumentException>(null, () => bitArray.CopyTo(array, index));
+            }
         }
 
         [Fact]

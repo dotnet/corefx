@@ -103,7 +103,7 @@ namespace System.Net.NetworkInformation
                     byte type, code;
                     unsafe
                     {
-                        fixed (byte* bytesPtr = receiveBuffer)
+                        fixed (byte* bytesPtr = &receiveBuffer[0])
                         {
                             int icmpHeaderOffset = ipHeaderLength;
                             IcmpHeader receivedHeader = *((IcmpHeader*)(bytesPtr + icmpHeaderOffset)); // Skip IP header.
@@ -175,9 +175,9 @@ namespace System.Net.NetworkInformation
             else
             {
                 cts.Cancel();
-                if (p.ExitCode != 0)
+                if (p.ExitCode == 1 || p.ExitCode == 2)
                 {
-                    // This means no reply was received, although transmission may have been successful.
+                    // Throw timeout for known failure return codes from ping functions.
                     return CreateTimedOutPingReply();
                 }
 
@@ -262,7 +262,7 @@ namespace System.Net.NetworkInformation
                 sum = partialSum + carries;
             }
 
-            return (ushort)~sum;
+            return unchecked((ushort)~sum);
         }
     }
 }

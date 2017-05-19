@@ -1,9 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Reflection.Emit;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
@@ -149,40 +152,40 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void LambdaTypeMustBeDelegate()
         {
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<int>(Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), true));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(int), Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), true));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<int>(Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), true));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<object>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(int), Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), true));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(object), Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
 
             // Note, be derived from MulticastDelegate, not merely actually MulticastDelegate or Delegate.
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<Delegate>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<Delegate>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Delegate), Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Delegate), Expression.Constant(0), true));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<Delegate>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<Delegate>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Delegate), Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Delegate), Expression.Constant(0), true));
 
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<MulticastDelegate>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<MulticastDelegate>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(MulticastDelegate), Expression.Constant(0)));
-            Assert.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(MulticastDelegate), Expression.Constant(0), true));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<MulticastDelegate>(Expression.Constant(0), true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("TDelegate", () => Expression.Lambda<MulticastDelegate>(Expression.Constant(0), "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(MulticastDelegate), Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(MulticastDelegate), Expression.Constant(0), true));
         }
 
         [Fact]
         public void NullLambdaBody()
         {
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, true));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, "foo", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, true));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, true, Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, true));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda<Func<int, int>>(null, "foo", Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, true));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, true, Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentNullException>("body", () => Expression.Lambda(typeof(Func<int, int>), null, "foo", Enumerable.Empty<ParameterExpression>()));
         }
 
         [Fact]
@@ -201,14 +204,14 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullParameter()
         {
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), default(ParameterExpression)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), true, default(ParameterExpression)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), true, Enumerable.Repeat(default(ParameterExpression), 1)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), "foo", Enumerable.Repeat(default(ParameterExpression), 1)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), default(ParameterExpression)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), true, default(ParameterExpression)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), true, Enumerable.Repeat(default(ParameterExpression), 1)));
-            Assert.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), "foo", Enumerable.Repeat(default(ParameterExpression), 1)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), default(ParameterExpression)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), true, default(ParameterExpression)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), true, Enumerable.Repeat(default(ParameterExpression), 1)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda<Func<int, int>>(Expression.Constant(0), "foo", Enumerable.Repeat(default(ParameterExpression), 1)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), default(ParameterExpression)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), true, default(ParameterExpression)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), true, Enumerable.Repeat(default(ParameterExpression), 1)));
+            AssertExtensions.Throws<ArgumentNullException>("parameters[0]", () => Expression.Lambda(typeof(Func<int, int>), Expression.Constant(0), "foo", Enumerable.Repeat(default(ParameterExpression), 1)));
         }
 
         [Fact]
@@ -266,6 +269,9 @@ namespace System.Linq.Expressions.Tests
                 double, double, double, double,
                 bool>), exp.Type);
 
+#if FEATURE_COMPILE
+            // From this point on, the tests require FEATURE_COMPILE (RefEmit) support as SLE needs to create delegate types on the fly. 
+            // You can't instantiate Func<> over 20 arguments or over byrefs.
             ParameterExpression[] paramList = Enumerable.Range(0, 20).Select(_ => Expression.Variable(typeof(int))).ToArray();
             exp = Expression.Lambda(
                 Expression.Constant(0),
@@ -297,6 +303,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(1, delMethod.GetParameters().Length);
             Assert.Equal(typeof(int).MakeByRefType(), delMethod.GetParameters()[0].ParameterType);
             Assert.Same(delType, Expression.Lambda(Expression.Constant(3L), Expression.Parameter(typeof(int).MakeByRefType())).Type);
+#endif //FEATURE_COMPILE
         }
 
         [Fact]
@@ -323,42 +330,42 @@ namespace System.Linq.Expressions.Tests
         public void DuplicateParameters()
         {
             ParameterExpression param = Expression.Parameter(typeof(int));
-            Assert.Throws<ArgumentException>("parameters[1]", () => Expression.Lambda(Expression.Empty(), false, param, param));
-            Assert.Throws<ArgumentException>("parameters[1]",
+            AssertExtensions.Throws<ArgumentException>("parameters[1]", () => Expression.Lambda(Expression.Empty(), false, param, param));
+            AssertExtensions.Throws<ArgumentException>("parameters[1]",
                 () => Expression.Lambda<Func<int, int, int>>(Expression.Constant(0), false, param, param));
         }
 
         [Fact]
         public void IncorrectArgumentCount()
         {
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action>(Expression.Empty(), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action<int, int>>(Expression.Empty(), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int>>(Expression.Constant(1), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int, int, int>>(Expression.Constant(1), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Action), Expression.Empty(), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Func<int, int, int>), Expression.Constant(1), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
         }
 
         [Fact]
         public void ByRefParameterForValueDelegateParameter()
         {
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action<int>>(Expression.Empty(), Expression.Parameter(typeof(int).MakeByRefType())));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int, bool, int, string>>(
                     Expression.Constant(""),
                     Expression.Parameter(typeof(int)),
                     Expression.Parameter(typeof(bool).MakeByRefType()),
                     Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Action<int>), Expression.Empty(), Expression.Parameter(typeof(int).MakeByRefType())));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(
                     typeof(Func<int, bool, int, string>),
                     Expression.Constant(""),
@@ -385,8 +392,8 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void IncorrectReturnTypes()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda<Func<int>>(Expression.Constant(typeof(long))));
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Func<int>), Expression.Constant(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<int>>(Expression.Constant(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Func<int>), Expression.Constant(typeof(long))));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
@@ -730,9 +737,87 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(84, i());
         }
 
+        private static IEnumerable<object[]> LambdaTypes() =>
+            from parCount in Enumerable.Range(0, 6)
+            from name in new[] {null, "Lambda"}
+            from tailCall in new[] {false, true}
+            select new object[] {parCount, name, tailCall};
+
+        [Theory, MemberData(nameof(LambdaTypes))]
+        public void ParameterListBehavior(int parCount, string name, bool tailCall)
+        {
+            // This method contains a lot of assertions, which amount to one large assertion that
+            // the result of the Parameters property behaves correctly.
+            ParameterExpression[] pars =
+                Enumerable.Range(0, parCount).Select(_ => Expression.Parameter(typeof(int))).ToArray();
+            LambdaExpression lamda = Expression.Lambda(Expression.Empty(), name, tailCall, pars);
+            ReadOnlyCollection<ParameterExpression> parameters = lamda.Parameters;
+            Assert.Equal(parCount, parameters.Count);
+            using (var en = parameters.GetEnumerator())
+            {
+                IEnumerator nonGenEn = ((IEnumerable)parameters).GetEnumerator();
+                for (int i = 0; i != parCount; ++i)
+                {
+                    Assert.True(en.MoveNext());
+                    Assert.True(nonGenEn.MoveNext());
+                    Assert.Same(pars[i], parameters[i]);
+                    Assert.Same(pars[i], en.Current);
+                    Assert.Same(pars[i], nonGenEn.Current);
+                    Assert.Equal(i, parameters.IndexOf(pars[i]));
+                    Assert.True(parameters.Contains(pars[i]));
+                }
+
+                Assert.False(en.MoveNext());
+                Assert.False(nonGenEn.MoveNext());
+                (nonGenEn as IDisposable)?.Dispose();
+            }
+
+            ParameterExpression[] copyToTest = new ParameterExpression[parCount + 1];
+            Assert.Throws<ArgumentNullException>(() => parameters.CopyTo(null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => parameters.CopyTo(copyToTest, -1));
+            Assert.All(copyToTest, Assert.Null); // assert partial copy didn't happen before exception
+            Assert.Throws<ArgumentException>(() => parameters.CopyTo(copyToTest, 2));
+            Assert.All(copyToTest, Assert.Null);
+            parameters.CopyTo(copyToTest, 1);
+            Assert.Equal(copyToTest, pars.Prepend(null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => parameters[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => parameters[parCount]);
+            Assert.Equal(-1, parameters.IndexOf(Expression.Parameter(typeof(int))));
+            Assert.False(parameters.Contains(Expression.Parameter(typeof(int))));
+        }
+
         private static int Add(ref int var, int val)
         {
             return var += val;
         }
+
+        [Fact]
+        public void OpenGenericDelegate()
+        {
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Action<>), Expression.Empty()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Action<>), Expression.Empty(), Enumerable.Empty<ParameterExpression>()));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Action<>), Expression.Empty(), false));
+            AssertExtensions.Throws<ArgumentException>("delegateType", () => Expression.Lambda(typeof(Action<>), Expression.Empty(), false, Enumerable.Empty<ParameterExpression>()));
+        }
+
+#if FEATURE_COMPILE // When we don't have FEATURE_COMPILE we don't have the Reflection.Emit used in the tests.
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void PrivateDelegate(bool useInterpreter)
+        {
+            AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
+            ModuleBuilder module = assembly.DefineDynamicModule("Name");
+            TypeBuilder builder = module.DefineType("Type", TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(MulticastDelegate));
+            builder.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(object), typeof(IntPtr) }).SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+            builder.DefineMethod("Invoke", MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, typeof(int), Type.EmptyTypes).SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+            Type delType = builder.CreateTypeInfo();
+            LambdaExpression lambda = Expression.Lambda(delType, Expression.Constant(42));
+            Delegate del = lambda.Compile(useInterpreter);
+            Assert.IsType(delType, del);
+            Assert.Equal(42, del.DynamicInvoke());
+        }
+
+#endif
+
     }
 }
