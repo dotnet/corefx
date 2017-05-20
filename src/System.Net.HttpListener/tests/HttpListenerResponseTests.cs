@@ -107,8 +107,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(19972, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         [InlineData(null, 123)]
         [InlineData("", 123)]
         [InlineData(" \r \t \n", 123)]
@@ -140,9 +139,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should set Location directly in the Headers rather than tracking it with its own field.
-        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task Redirect_Disposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -155,10 +153,9 @@ namespace System.Net.Tests
             Assert.Equal(200, response.StatusCode);
             Assert.Equal("OK", response.StatusDescription);
         }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        
         // The managed implementation should also dispose the OutputStream after calling Abort.
-        [ActiveIssue(19975, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19975, TestPlatforms.AnyUnix)]
         public async Task Abort_Invoke_ForciblyTerminatesConnection()
         {
             Client.Send(Factory.GetContent("1.1", "POST", null, "Give me a context, please", null, headerOnly: false));
@@ -208,7 +205,8 @@ namespace System.Net.Tests
                 ouputStream.Write(SimpleMessage, 0, SimpleMessage.Length);
 
                 // The connection should not be forcibly terminated.
-                string clientResponse = GetClientResponse(120);
+                // The managed implementation should not send Keep-Alive headers: [ActiveIssue(19976, TestPlatforms.AnyUnix)]
+                string clientResponse = GetClientResponse(Helpers.IsWindowsImplementation ? 120 : 125);
                 Assert.NotEmpty(clientResponse);
 
                 // Extra calls to Abort, Close or Dispose are nops.
@@ -233,7 +231,8 @@ namespace System.Net.Tests
                 ouputStream.Write(SimpleMessage, 0, SimpleMessage.Length);
 
                 // The connection should not be forcibly terminated.
-                string clientResponse = GetClientResponse(120);
+                // The managed implementation should not send Keep-Alive headers: [ActiveIssue(19976, TestPlatforms.AnyUnix)]
+                string clientResponse = GetClientResponse(Helpers.IsWindowsImplementation ? 120 : 125);
                 Assert.NotEmpty(clientResponse);
 
                 // Extra calls to Abort, Close or Dispose are nops.
@@ -258,14 +257,14 @@ namespace System.Net.Tests
                 // Aborting the response should dispose the response.
                 Assert.Throws<ObjectDisposedException>(() => response.ContentType = null);
 
-                string clientResponse = GetClientResponse(106);
+                // The managed implementation should not send Keep-Alive headers: [ActiveIssue(19976, TestPlatforms.AnyUnix)]
+                string clientResponse = GetClientResponse(Helpers.IsWindowsImplementation ? 106 : 125);
                 Assert.Contains("\r\nContent-Length: 0\r\n", clientResponse);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not register as disposed before setting ContentLength - this causes an ObjectDisposedException.
-        [ActiveIssue(19975, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19975, TestPlatforms.AnyUnix)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task CloseResponseEntity_AllContentLengthAlreadySent_DoesNotSendEntity(bool willBlock)
@@ -284,9 +283,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should not register as disposed before setting ContentLength - this causes an ObjectDisposedException.
-        [ActiveIssue(19975, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19975, TestPlatforms.AnyUnix)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task CloseResponseEntity_NotChunkedSentHeaders_SendsEntityWithoutModifyingContentLength(bool willBlock)
@@ -317,11 +315,10 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
         // The managed implementation should set ContentLength to -1 after sending headers.
-        [ActiveIssue(19973, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task CloseResponseEntity_ChunkedNotSentHeaders_ModifiesContentLength(bool willBlock)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -348,12 +345,11 @@ namespace System.Net.Tests
                 }
             }
         }
-
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        
         [InlineData(true)]
         [InlineData(false)]
         // The managed implementation should not register as disposed before setting ContentLength - this causes an ObjectDisposedException.
-        [ActiveIssue(19975, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19975, TestPlatforms.AnyUnix)]
         public async Task CloseResponseEntity_ChunkedSentHeaders_DoesNotModifyContentLength(bool willBlock)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -381,9 +377,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         // The managed implementation should throw an ObjectDisposedException calling CloseResponseEntity when already disposed.
-        [ActiveIssue(19971, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19971, TestPlatforms.AnyUnix)]
         public async Task CloseResponseEntity_AlreadyDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -424,7 +419,8 @@ namespace System.Net.Tests
                     Assert.ThrowsAny<InvalidOperationException>(() => response.Close(new byte[] { (byte)'a', (byte)'b' }, willBlock));
                 }
 
-                string clientResponse = GetClientResponse(110);
+                // The managed implementation should not send Keep-Alive headers: [ActiveIssue(19976, TestPlatforms.AnyUnix)]
+                string clientResponse = GetClientResponse(Helpers.IsWindowsImplementation ? 110 : 129);
                 Assert.EndsWith("Hell", clientResponse);
             }
             finally
@@ -445,12 +441,11 @@ namespace System.Net.Tests
                 }
             }
         }
-
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        
         [InlineData(true)]
         [InlineData(false)]
         // The managed implementation should catch any failures (i.e. exceptions inheriting from Win32Exception) writing to the client.
-        [ActiveIssue(19975, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19975, TestPlatforms.AnyUnix)]
         public async Task CloseResponseEntity_SendToClosedConnection_DoesNotThrow(bool willBlock)
         {
             const string Text = "Some-String";
