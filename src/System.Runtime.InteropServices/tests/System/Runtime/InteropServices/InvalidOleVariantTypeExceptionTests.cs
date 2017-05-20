@@ -11,11 +11,5 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class InvalidOleVariantTypeExceptionTests
     {
-        [Fact]
-        public void SerializationRoundTrip()
-        {
-            var ex = new InvalidOleVariantTypeException("E_BAD_PIZZA");
-            BinaryFormatterHelpers.AssertRoundtrips(ex);
-        }
     }
 }

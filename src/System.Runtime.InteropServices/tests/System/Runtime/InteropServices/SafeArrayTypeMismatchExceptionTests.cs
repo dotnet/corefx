@@ -11,11 +11,5 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class SafeArrayTypeMismatchExceptionTests
     {
-        [Fact]
-        public void SerializationRoundTrip()
-        {
-            var ex = new SafeArrayTypeMismatchException("E_BAD_PIZZA");
-            BinaryFormatterHelpers.AssertRoundtrips(ex);
-        }
     }
 }

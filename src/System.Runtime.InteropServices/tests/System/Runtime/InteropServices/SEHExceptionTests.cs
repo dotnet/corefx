@@ -11,11 +11,5 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class SEHExceptionTests
     {
-        [Fact]
-        public void SerializationRoundTrip()
-        {
-            var ex = new SEHException("E_BAD_PIZZA");
-            BinaryFormatterHelpers.AssertRoundtrips(ex);
-        }
     }
 }

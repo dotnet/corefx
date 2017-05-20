@@ -11,11 +11,5 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class MarshalDirectiveExceptionTests
     {
-        [Fact]
-        public void SerializationRoundTrip()
-        {
-            var ex = new MarshalDirectiveException("E_BAD_PIZZA");
-            BinaryFormatterHelpers.AssertRoundtrips(ex);
-        }
     }
 }

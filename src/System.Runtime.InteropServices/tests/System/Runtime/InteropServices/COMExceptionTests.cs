@@ -11,11 +11,5 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class COMExceptionTests
     {
-        [Fact]
-        public void SerializationRoundTrip()
-        {
-            var ex = new COMException("E_BAD_PIZZA", -1337);
-            BinaryFormatterHelpers.AssertRoundtrips(ex);
-        }
     }
 }
