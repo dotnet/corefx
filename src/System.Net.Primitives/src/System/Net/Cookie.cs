@@ -712,7 +712,15 @@ namespace System.Net
 
         public override int GetHashCode()
         {
-            return (Name + "=" + Value + ";" + Path + "; " + Domain + "; " + Version).GetHashCode();
+            // Copied from Tuple.CombineHashCodes
+            int hash1 = Name.GetHashCode();
+            hash1 = ((hash1 << 5) + hash1) ^ Value.GetHashCode();
+            
+            int hash2 = Path.GetHashCode();
+            hash2 = ((hash2 << 5) + hash2) ^ Domain.GetHashCode();
+            
+            int hash3 = ((hash1 << 5) + hash1) ^ hash2;
+            return ((hash3 << 5) + hash3) ^ Version; // Version is already an int, no need to call GetHashCode
         }
 
         public override string ToString()
