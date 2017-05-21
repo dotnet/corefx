@@ -84,6 +84,31 @@ namespace System.Drawing
         public static SizeF operator -(SizeF sz1, SizeF sz2) => Subtract(sz1, sz2);
 
         /// <summary>
+        /// Multiplication operator that multiplies <see cref="SizeF"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// </summary>
+        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
+        /// <param name="size">Multiplicand of type <see cref="SizeF"/>.</param>
+        /// <returns>Product of type <see cref="SizeF"/>.</returns>
+        public static SizeF operator *(float multiplier, SizeF size) => Multiply(size, multiplier);
+
+        /// <summary>
+        /// Multiplication operator that multiplies <see cref="SizeF"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// </summary>
+        /// <param name="size">Multiplicand of type <see cref="SizeF"/>.</param>
+        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
+        /// <returns>Product of type <see cref="SizeF"/>.</returns>
+        public static SizeF operator *(SizeF size, float multiplier) => Multiply(size, multiplier);
+
+        /// <summary>
+        /// Division operator that divides <see cref="SizeF"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// </summary>
+        /// <param name="size">Dividend of type <see cref="SizeF"/>.</param>
+        /// <param name="divisor">Divisor of type <see cref="int"/>.</param>
+        /// <returns>Result of type <see cref="SizeF"/>.</returns>
+        public static SizeF operator /(SizeF size, float divisor) =>
+            new SizeF(unchecked(size._width / divisor), unchecked(size._height / divisor));
+
+        /// <summary>
         ///    Tests whether two <see cref='System.Drawing.SizeF'/> objects
         ///    are identical.
         /// </summary>
@@ -184,6 +209,16 @@ namespace System.Drawing
         ///    </para>
         /// </summary>
         public override string ToString() => "{Width=" + width.ToString() + ", Height=" + height.ToString() + "}";
+
+        /// <summary>
+        /// Helper method for operator * (multiply) that accepts type <see cref="SizeF"/> and <see cref="float"/>, 
+        /// returning a product of type <see cref="SizeF"/>.
+        /// </summary>
+        /// <param name="size">Multiplicand of type <see cref="SizeF"/>.</param>
+        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
+        /// <returns>Product of type SizeF.</returns>
+        private static SizeF Multiply(SizeF size, float multiplier) =>
+            new SizeF(size._width * multiplier, size._height * multiplier);
     }
 }
 

@@ -77,6 +77,57 @@ namespace System.Drawing.PrimitivesTest
         }
 
         [Theory]
+        [InlineData(1000.234, 2400.933)]
+        [InlineData(float.MaxValue, 0.0)]
+        [InlineData(float.MaxValue, 1.0)]
+        [InlineData(float.MaxValue, -1.0)]
+        [InlineData(float.MaxValue, float.MaxValue)]
+        [InlineData(float.MinValue, 0.0)]
+        [InlineData(float.MinValue, 1.0)]
+        [InlineData(float.MinValue, -1.0)]
+        [InlineData(float.MinValue, float.MinValue)]
+        [InlineData(float.MaxValue, float.MinValue)]
+        [InlineData(float.MinValue, float.MaxValue)]
+        public void MultiplicationTest(float value1, float value2)
+        {
+            SizeF sz1 = new SizeF(value1, value1);
+            SizeF sz2 = new SizeF(value2, value2);
+            SizeF mulExpected;
+
+            unchecked
+            {
+                mulExpected = new SizeF(value1 * value2, value1 * value2);
+            }
+
+            Assert.Equal(mulExpected, sz1 * value2);
+            Assert.Equal(mulExpected, value2 * sz1);
+            Assert.Equal(mulExpected, sz2 * value1);
+            Assert.Equal(mulExpected, value1 * sz2);
+        }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(1, 1.0)]
+        [InlineData(-1, 1.0)]
+        [InlineData(1, -1.0)]
+        [InlineData(-1, -1.0)]
+        [InlineData(int.MaxValue, float.MaxValue)]
+        [InlineData(int.MaxValue, float.MinValue)]
+        [InlineData(int.MinValue, float.MaxValue)]
+        [InlineData(int.MinValue, float.MinValue)]
+        [InlineData(int.MaxValue, 1.0)]
+        [InlineData(int.MinValue, 1.0)]
+        [InlineData(int.MaxValue, -1.0)]
+        [InlineData(int.MinValue, -1.0)]
+        [InlineData(int.MinValue, 0.0)]
+        public void DivideTestSizeFloat(int value1, float value2)
+        {
+            Size size = new Size(value1, value1);
+            SizeF expected = new SizeF(value1 / value2, value1 / value2);
+            Assert.Equal(expected, size / value2);
+        }
+
+        [Theory]
         [InlineData(float.MaxValue, float.MinValue)]
         [InlineData(float.MinValue, float.MinValue)]
         [InlineData(float.MaxValue, float.MaxValue)]
