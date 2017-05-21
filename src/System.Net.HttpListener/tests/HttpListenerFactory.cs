@@ -129,9 +129,9 @@ namespace System.Net.Tests
             }
         }
 
-        public HttpListener GetListener() => _processPrefixListener;
+        public HttpListener GetListener() => _processPrefixListener ?? throw new Exception("Could not reserve a port for HttpListener", _processPrefixException);
 
-        public void Dispose() => _processPrefixListener.Close();
+        public void Dispose() => _processPrefixListener?.Close();
 
         public Socket GetConnectedSocket()
         {
