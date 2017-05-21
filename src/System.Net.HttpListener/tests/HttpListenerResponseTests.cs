@@ -255,7 +255,13 @@ namespace System.Net.Tests
                 Assert.Equal(0, response.ContentLength64);
 
                 // Aborting the response should dispose the response.
-                Assert.Throws<ObjectDisposedException>(() => response.ContentType = null);
+                // If willBlock === false then it's not guaranteed that the repsonse will be immediately disposed. 
+                try
+                {
+                    response.ContentType = null;
+                    Assert.False(willBlock);
+                }
+                catch (ObjectDisposedException) { }
 
                 // The managed implementation should not send Keep-Alive headers: [ActiveIssue(19976, TestPlatforms.AnyUnix)]
                 string clientResponse = GetClientResponse(Helpers.IsWindowsImplementation ? 106 : 125);
