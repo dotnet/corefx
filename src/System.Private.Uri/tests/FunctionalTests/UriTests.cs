@@ -96,6 +96,7 @@ namespace System.PrivateUri.Tests
             string temp = Path.GetTempPath();
             string path = Path.Combine(temp);
             Uri uri = new Uri(path, UriKind.RelativeOrAbsolute);
+            Console.WriteLine($"### {uri.IsAbsoluteUri} temp path is '{temp}' path is '{path}'");
             Assert.True(uri.IsAbsoluteUri, $"Not absolute, temp path is '{temp}' path is '{path}'");
         }
 
