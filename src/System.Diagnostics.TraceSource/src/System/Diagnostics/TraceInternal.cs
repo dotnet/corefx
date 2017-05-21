@@ -40,7 +40,6 @@ namespace System.Diagnostics
                             // DefaultTraceListener to the listener collection.
                             s_listeners = new TraceListenerCollection();
                             TraceListener defaultListener = new DefaultTraceListener();
-                            defaultListener.IndentLevel = t_indentLevel;
                             defaultListener.IndentSize = s_indentSize;
                             s_listeners.Add(defaultListener);
                         }
@@ -109,13 +108,6 @@ namespace System.Diagnostics
                     }
                     t_indentLevel = value;
 
-                    if (s_listeners != null)
-                    {
-                        foreach (TraceListener listener in Listeners)
-                        {
-                            listener.IndentLevel = t_indentLevel;
-                        }
-                    }
                 }
             }
         }
@@ -169,10 +161,6 @@ namespace System.Diagnostics
                 {
                     t_indentLevel++;
                 }
-                foreach (TraceListener listener in Listeners)
-                {
-                    listener.IndentLevel = t_indentLevel;
-                }
             }
         }
 
@@ -185,10 +173,6 @@ namespace System.Diagnostics
                 if (t_indentLevel > 0)
                 {
                     t_indentLevel--;
-                }
-                foreach (TraceListener listener in Listeners)
-                {
-                    listener.IndentLevel = t_indentLevel;
                 }
             }
         }
@@ -371,6 +355,7 @@ namespace System.Diagnostics
                     {
                         foreach (TraceListener listener in Listeners)
                         {
+                            listener.IndentLevel = t_indentLevel;
                             listener.TraceEvent(EventCache, AppName, eventType, id, format);
                             if (AutoFlush) listener.Flush();
                         }
@@ -379,6 +364,7 @@ namespace System.Diagnostics
                     {
                         foreach (TraceListener listener in Listeners)
                         {
+                            listener.IndentLevel = t_indentLevel;
                             listener.TraceEvent(EventCache, AppName, eventType, id, format, args);
                             if (AutoFlush) listener.Flush();
                         }
@@ -391,6 +377,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         if (!listener.IsThreadSafe)
                         {
                             lock (listener)
@@ -410,6 +397,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         if (!listener.IsThreadSafe)
                         {
                             lock (listener)
@@ -437,6 +425,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.Write(message);
                         if (AutoFlush) listener.Flush();
                     }
@@ -446,6 +435,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -471,6 +461,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.Write(value);
                         if (AutoFlush) listener.Flush();
                     }
@@ -480,6 +471,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -505,6 +497,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.Write(message, category);
                         if (AutoFlush) listener.Flush();
                     }
@@ -514,6 +507,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -539,6 +533,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.Write(value, category);
                         if (AutoFlush) listener.Flush();
                     }
@@ -548,6 +543,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -573,6 +569,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.WriteLine(message);
                         if (AutoFlush) listener.Flush();
                     }
@@ -582,6 +579,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -607,6 +605,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.WriteLine(value);
                         if (AutoFlush) listener.Flush();
                     }
@@ -616,6 +615,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -641,6 +641,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.WriteLine(message, category);
                         if (AutoFlush) listener.Flush();
                     }
@@ -650,6 +651,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)
@@ -675,6 +677,7 @@ namespace System.Diagnostics
                 {
                     foreach (TraceListener listener in Listeners)
                     {
+                        listener.IndentLevel = t_indentLevel;
                         listener.WriteLine(value, category);
                         if (AutoFlush) listener.Flush();
                     }
@@ -684,6 +687,7 @@ namespace System.Diagnostics
             {
                 foreach (TraceListener listener in Listeners)
                 {
+                    listener.IndentLevel = t_indentLevel;
                     if (!listener.IsThreadSafe)
                     {
                         lock (listener)

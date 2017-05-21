@@ -8,6 +8,10 @@ using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
 {
+    using Collections.Generic;
+    using Text;
+    using Threading;
+    using Threading.Tasks;
     using Method = TestTraceListener.Method;
 
     public class TraceClassTests : IDisposable
@@ -58,10 +62,6 @@ namespace System.Diagnostics.TraceSourceTests
             Trace.Listeners.Add(new DefaultTraceListener());
             Trace.IndentLevel = indent;
             Assert.Equal(expected, Trace.IndentLevel);
-            foreach (TraceListener listener in Trace.Listeners)
-            {
-                Assert.Equal(expected, listener.IndentLevel);
-            }
         }
 
         [Theory]
@@ -380,6 +380,71 @@ namespace System.Diagnostics.TraceSourceTests
             String newLine = Environment.NewLine;
             var expected = "Message start." + newLine + "    This message should be indented.This should not be indented." + newLine + "      Fail: This failure is reported with a detailed message" + newLine + "      Fail: " + newLine + "      Fail: This assert is reported" + newLine + "Message end." + newLine;
             Assert.Equal(expected, textTL.Output);
+        }
+
+        static readonly Barrier barrier = new Barrier(2);
+
+        static string Thread_1()
+        {
+            StringBuilder output = new StringBuilder();
+            output.Append("2,2,2,0|");
+
+            Trace.Indent();
+            Trace.Indent();
+            output.Append(Trace.IndentLevel + ",");
+
+            barrier.SignalAndWait();
+            barrier.SignalAndWait();
+            output.Append(Trace.IndentLevel + ",");
+
+            Trace.IndentLevel = Trace.IndentLevel;
+            output.Append(Trace.IndentLevel + ",");
+
+            Trace.Unindent();
+            Trace.Unindent();
+            output.Append(Trace.IndentLevel + ",");
+
+            return output.ToString().Trim(',');
+        }
+
+        static string Thread_2()
+        {
+            StringBuilder output = new StringBuilder();
+            output.Append("0,0,2,1|");
+
+            output.Append(Trace.IndentLevel + ",");
+
+            barrier.SignalAndWait();
+            output.Append(Trace.IndentLevel + ",");
+
+            Trace.Indent();
+            Trace.Indent();
+            output.Append(Trace.IndentLevel + ",");
+
+            Trace.Unindent();
+            output.Append(Trace.IndentLevel + ",");
+
+            barrier.SignalAndWait();
+
+            return output.ToString().Trim(',');
+        }
+
+        [Fact]
+        public void TraceMutiThreadedTest()
+        {
+            List<Task<string>> tasks = new List<Task<string>>
+            {
+                new Task<string>(Thread_1),
+                new Task<string>(Thread_2)
+            };
+            tasks.ForEach(task => task.Start());
+            Task<string[]> resultsTask = Task.WhenAll(tasks.ToArray());
+            foreach (var result in resultsTask.Result)
+            {
+                var resultParts = result.Split('|');
+                Assert.Equal(2, resultParts.Length);
+                Assert.Equal(resultParts[0], resultParts[1]);
+            }
         }
     }
 }
