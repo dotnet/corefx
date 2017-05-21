@@ -20,7 +20,6 @@ namespace System.Threading
     /// <summary>
     /// The exception that is thrown when the post-phase action of a <see cref="Barrier"/> fails.
     /// </summary>
-    [Serializable]
     public class BarrierPostPhaseException : Exception
     {
         /// <summary>
@@ -149,7 +148,7 @@ namespace System.Threading
         #region Properties
 
         /// <summary>
-        /// Gets the number of participants in the barrier that haven?t yet signaled
+        /// Gets the number of participants in the barrier that haven't yet signaled
         /// in the current phase.
         /// </summary>
         /// <remarks>
@@ -361,8 +360,8 @@ namespace System.Threading
 
                     // If this participant is going to join the next phase, which means the postPhaseAction is being running, this participants must wait until this done
                     // and its event is reset.
-                    // Without that, if the postPhaseAction takes long time, this means the event which the current participant is going to wait on is still set 
-                    // (FinishPPhase didn't reset it yet) so it should wait until it reset
+                    // Without that, if the postPhaseAction takes long time, this means the event that the current participant is going to wait on is still set
+                    // (FinishPhase didn't reset it yet) so it should wait until it reset
                     if (newPhase != currPhase)
                     {
                         // Wait on the opposite event
@@ -661,10 +660,12 @@ namespace System.Threading
                 {
                     if (SetCurrentTotal(currentTotal, 0, total, !sense))
                     {
+#if !uapaot
                         if (CdsSyncEtwBCLProvider.Log.IsEnabled())
                         {
                             CdsSyncEtwBCLProvider.Log.Barrier_PhaseFinished(sense, CurrentPhaseNumber);
                         }
+#endif
                         FinishPhase(sense);
                         return true;
                     }

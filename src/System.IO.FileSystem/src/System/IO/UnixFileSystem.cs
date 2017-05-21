@@ -82,8 +82,24 @@ namespace System.IO
         {
             // The desired behavior for Move(source, dest) is to not overwrite the destination file
             // if it exists. Since rename(source, dest) will replace the file at 'dest' if it exists,
-            // link/unlink are used instead. Note that the Unix FileSystemWatcher will treat a Move 
-            // as a Creation and Deletion instead of a Rename and thus differ from Windows.
+            // link/unlink are used instead. However, if the source path and the dest path refer to
+            // the same file, then do a rename rather than a link and an unlink.  This is important
+            // for case-insensitive file systems (e.g. renaming a file in a way that just changes casing),
+            // so that we support changing the casing in the naming of the file. If this fails in any
+            // way (e.g. source file doesn't exist, dest file doesn't exist, rename fails, etc.), we
+            // just fall back to trying the link/unlink approach and generating any exceptional messages
+            // from there as necessary.
+            Interop.Sys.FileStatus sourceStat, destStat;
+            if (Interop.Sys.LStat(sourceFullPath, out sourceStat) == 0 && // source file exists
+                Interop.Sys.LStat(destFullPath, out destStat) == 0 && // dest file exists
+                sourceStat.Dev == destStat.Dev && // source and dest are on the same device
+                sourceStat.Ino == destStat.Ino && // and source and dest are the same file on that device
+                Interop.Sys.Rename(sourceFullPath, destFullPath) == 0) // try the rename
+            {
+                // Renamed successfully.
+                return;
+            }
+
             if (Interop.Sys.Link(sourceFullPath, destFullPath) < 0)
             {
                 // If link fails, we can fall back to doing a full copy, but we'll only do so for
@@ -260,6 +276,24 @@ namespace System.IO
 
         public override void MoveDirectory(string sourceFullPath, string destFullPath)
         {
+            // Windows doesn't care if you try and copy a file via "MoveDirectory"...
+            if (FileExists(sourceFullPath))
+            {
+                // ... but it doesn't like the source to have a trailing slash ...
+
+                // On Windows we end up with ERROR_INVALID_NAME, which is
+                // "The filename, directory name, or volume label syntax is incorrect."
+                //
+                // This surfaces as a IOException, if we let it go beyond here it would
+                // give DirectoryNotFound.
+
+                if (PathHelpers.EndsInDirectorySeparator(sourceFullPath))
+                    throw new IOException(SR.Format(SR.IO_PathNotFound_Path, sourceFullPath));
+
+                // ... but it doesn't care if the destination has a trailing separator.
+                destFullPath = PathHelpers.TrimEndingDirectorySeparator(destFullPath);
+            }
+
             if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
@@ -373,7 +407,9 @@ namespace System.IO
         public override bool FileExists(string fullPath)
         {
             Interop.ErrorInfo ignored;
-            return FileExists(fullPath, Interop.Sys.FileTypes.S_IFREG, out ignored);
+
+            // Windows doesn't care about the trailing separator
+            return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
         private static bool FileExists(string fullPath, int fileType, out Interop.ErrorInfo errorInfo)
@@ -636,7 +672,12 @@ namespace System.IO
 
         public override FileAttributes GetAttributes(string fullPath)
         {
-            return new FileInfo(fullPath, null).Attributes;
+            FileAttributes attributes = new FileInfo(fullPath, null).Attributes;
+
+            if (attributes == (FileAttributes)(-1))
+                FileSystemInfo.ThrowNotFound(fullPath);
+
+            return attributes;
         }
 
         public override void SetAttributes(string fullPath, FileAttributes attributes)

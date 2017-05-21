@@ -70,11 +70,27 @@ namespace System.Net.Security
             return retVal;
         }
 
-        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
+        public static ChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
-            SafeChannelBindingHandle bindingHandle = Interop.OpenSsl.QueryChannelBinding(((SafeDeleteSslContext)securityContext).SslContext, attribute);
-            var refHandle = bindingHandle == null ? null : new SafeFreeContextBufferChannelBinding(bindingHandle);
-            return refHandle;
+            ChannelBinding bindingHandle;
+
+            if (attribute == ChannelBindingKind.Endpoint)
+            {
+                bindingHandle = EndpointChannelBindingToken.Build(securityContext);
+
+                if (bindingHandle == null)
+                {
+                    throw Interop.OpenSsl.CreateSslException(SR.net_ssl_invalid_certificate);
+                }
+            }
+            else
+            {
+                bindingHandle = Interop.OpenSsl.QueryChannelBinding(
+                    ((SafeDeleteSslContext)securityContext).SslContext,
+                    attribute);
+            }
+
+            return bindingHandle;
         }
 
         public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out StreamSizes streamSizes)
@@ -164,14 +180,39 @@ namespace System.Net.Security
 
         public static SecurityStatusPal ApplyAlertToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext, TlsAlertType alertType, TlsAlertMessage alertMessage)
         {
-            // TODO (#12319): Not implemented.
+            // There doesn't seem to be an exposed API for writing an alert,
+            // the API seems to assume that all alerts are generated internally by
+            // SSLHandshake.
             return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
         }
 
         public static SecurityStatusPal ApplyShutdownToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext)
         {
-            // TODO (#12319): Not implemented.
-            return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+            SafeDeleteSslContext sslContext = ((SafeDeleteSslContext)securityContext);
+
+            // Unset the quiet shutdown option initially configured.
+            Interop.Ssl.SslSetQuietShutdown(sslContext.SslContext, 0);
+
+            int status = Interop.Ssl.SslShutdown(sslContext.SslContext);
+            if (status == 0)
+            {
+                // Call SSL_shutdown again for a bi-directional shutdown.
+                status = Interop.Ssl.SslShutdown(sslContext.SslContext);
+            }
+
+            if (status == 1)
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+
+            Interop.Ssl.SslErrorCode code = Interop.Ssl.SslGetError(sslContext.SslContext, status);
+            if (code == Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_READ ||
+                code == Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE)
+            {
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+            }
+            else
+            {
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, new Interop.OpenSsl.SslException((int)code));
+            }
         }
     }
 }

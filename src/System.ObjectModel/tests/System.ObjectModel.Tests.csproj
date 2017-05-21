@@ -9,6 +9,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerableTest.cs">
       <Link>Common\System\CollectionsIEnumerableTest.cs</Link>
     </Compile>
@@ -26,6 +29,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\IDictionaryTest.cs">
       <Link>Common\System\CollectionsIDictionaryTest.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="ComponentModel\INotifyPropertyChangingTests.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgsTests.cs" />
@@ -46,11 +52,10 @@
     <Compile Include="KeyedCollection\TestMethods.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KeyedCollection\Serialization.netstandard.cs" />
-    <Compile Include="ObservableCollection\ObservableCollection_ConstructorAndPropertyTests.netstandard.cs" />
-    <Compile Include="ObservableCollection\ObservableCollection_Serialization.netstandard.cs" />
-    <Compile Include="ReadOnlyDictionary\ReadOnlyDictionary_SerializationTests.netstandard.cs" />
-    <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_SerializationTests.netstandard.cs" />
+    <Compile Include="KeyedCollection\Serialization.cs" />
+    <Compile Include="ObservableCollection\ObservableCollection_Serialization.cs" />
+    <Compile Include="ReadOnlyDictionary\ReadOnlyDictionary_SerializationTests.cs" />
+    <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_SerializationTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>

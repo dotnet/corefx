@@ -4,6 +4,7 @@
 
 using System.Runtime.InteropServices;
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -220,7 +221,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SearchPatternLongPath()
         {
             // Create a destination path longer than the traditional Windows limit of 256 characters
@@ -251,22 +252,23 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
         }
 
-        [ActiveIssue(11584)]
+        private static char[] OldWildcards = new char[] { '*', '?' };
+        private static char[] NewWildcards = new char[] { '<', '>', '\"' };
+
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
         public void WindowsSearchPatternInvalid()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ">"));
+            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "|"));
 
-            Char[] invalidFileNames = Path.GetInvalidFileNameChars();
-            for (int i = 0; i < invalidFileNames.Length; i++)
+            Assert.All(Path.GetInvalidFileNameChars().Except(OldWildcards).Except(NewWildcards), invalidChar =>
             {
-                switch (invalidFileNames[i])
+                switch (invalidChar)
                 {
                     case '\\':
                     case '/':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         break;
                     //We don't throw in V1 too
                     case ':':
@@ -277,22 +279,48 @@ namespace System.IO.Tests
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
                             FileSystemDebugInfo.IsCurrentDriveNTFS()) // testing NTFS
                         {
-                            Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                            Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         }
                         else
                         {
-                            GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
+                            GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
                         }
                         break;
-                    case '*':
-                    case '?':
-                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
-                        break;
                     default:
-                        Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         break;
                 }
-            }
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In netcoreapp we made three new characters be treated as valid wildcards instead of invalid characters. NetFX still treats them as InvalidChars.")]
+        public void WindowsSearchPatternInvalid_Wildcards_netcoreapp()
+        {
+            Assert.All(OldWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+            Assert.All(NewWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "In netcoreapp we made three new characters be treated as valid wildcards instead of invalid characters. NetFX still treats them as InvalidChars.")]
+        public void WindowsSearchPatternInvalid_Wildcards_netfx()
+        {
+            Assert.All(OldWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+            Assert.All(NewWildcards, invalidChar =>
+            {
+                Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+            });
         }
 
         [Fact]
@@ -360,19 +388,19 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string testBase = GetTestFileName();
-            testDir.CreateSubdirectory(testBase + "aBBb");
-            testDir.CreateSubdirectory(testBase + "aBBB");
+            testDir.CreateSubdirectory(testBase + "yZZz");
+            testDir.CreateSubdirectory(testBase + "yZZZ");
 
-            File.Create(Path.Combine(testDir.FullName, testBase + "AAAA")).Dispose();
-            File.Create(Path.Combine(testDir.FullName, testBase + "aAAa")).Dispose();
+            File.Create(Path.Combine(testDir.FullName, testBase + "YYYY")).Dispose();
+            File.Create(Path.Combine(testDir.FullName, testBase + "yYYy")).Dispose();
 
             if (TestDirectories)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*BB*").Length);
+                Assert.Equal(1, GetEntries(testDir.FullName, "*ZZ*").Length);
             }
             if (TestFiles)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*AA*").Length);
+                Assert.Equal(1, GetEntries(testDir.FullName, "*YY*").Length);
             }
         }
 

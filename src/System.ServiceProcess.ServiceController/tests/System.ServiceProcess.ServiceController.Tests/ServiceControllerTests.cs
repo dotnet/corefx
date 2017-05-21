@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.Security.Principal;
 using Xunit;
@@ -22,7 +23,7 @@ namespace System.ServiceProcess.Tests
         public ServiceProvider()
         {
             TestMachineName = ".";
-            ControlTimeout = TimeSpan.FromSeconds(10);
+            ControlTimeout = TimeSpan.FromSeconds(30);
             TestServiceName = Guid.NewGuid().ToString();
             TestServiceDisplayName = "Test Service " + TestServiceName;
             DependentTestServiceNamePrefix = TestServiceName + ".Dependent";
@@ -161,7 +162,7 @@ namespace System.ServiceProcess.Tests
         public void Start_NullArg_ThrowsArgumentNullException()
         {
             var controller = new ServiceController(_testService.TestServiceName);
-            Assert.Throws<ArgumentNullException>("args[0]", () => controller.Start(new string[] { null } ));
+            AssertExtensions.Throws<ArgumentNullException>("args[0]", () => controller.Start(new string[] { null } ));
         }
 
         [ConditionalFact(nameof(RunningWithElevatedPrivileges))]

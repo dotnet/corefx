@@ -1070,6 +1070,9 @@ namespace System.Collections.Generic
             if (Count == 0)
                 return;
 
+            if (other == this)
+                return;
+
             // HashSet<T> optimizations can't be done until equality comparers and comparers are related
 
             // Technically, this would work as well with an ISorted<T>
@@ -1135,10 +1138,10 @@ namespace System.Collections.Generic
                 }
             }
 
-            if (toSave.Count < Count)
+            Clear();
+            foreach (T item in toSave)
             {
-                Clear();
-                AddAllElements(toSave);
+                AddIfNotPresent(item);
             }
         }
 
@@ -1572,7 +1575,9 @@ namespace System.Collections.Generic
 
         #region ISorted members
 
-        public T Min
+        public T Min => MinInternal;
+
+        internal virtual T MinInternal
         {
             get
             {
@@ -1591,7 +1596,9 @@ namespace System.Collections.Generic
             }
         }
 
-        public T Max
+        public T Max => MaxInternal;
+        
+        internal virtual T MaxInternal 
         {
             get
             {
@@ -1711,7 +1718,6 @@ namespace System.Collections.Generic
 
         #region Helper classes
 
-        [Serializable]
         internal sealed class Node
         {
             public Node(T item, bool isRed)
@@ -1844,7 +1850,6 @@ namespace System.Collections.Generic
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
             private static readonly Node s_dummyNode = new Node(default(T), isRed: true);

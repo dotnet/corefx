@@ -29,13 +29,15 @@ extern "C" const SSL_METHOD* CryptoNative_SslV2_3Method()
 
 extern "C" const SSL_METHOD* CryptoNative_SslV3Method()
 {
-#ifdef OPENSSL_NO_SSL3_METHOD
-    return nullptr;
-#else
-    const SSL_METHOD* method = SSLv3_method();
-    assert(method != nullptr);
-    return method;
+    const SSL_METHOD* method = nullptr;
+#ifndef OPENSSL_NO_SSL3_METHOD
+    if (API_EXISTS(SSLv3_method))
+    {
+        method = SSLv3_method();
+        assert(method != nullptr);
+    }
 #endif
+    return method;
 }
 
 extern "C" const SSL_METHOD* CryptoNative_TlsV1Method()
@@ -480,6 +482,11 @@ extern "C" void CryptoNative_SslCtxSetQuietShutdown(SSL_CTX* ctx)
     SSL_CTX_set_quiet_shutdown(ctx, 1);
 }
 
+extern "C" void CryptoNative_SslSetQuietShutdown(SSL* ssl, int mode)
+{
+    SSL_set_quiet_shutdown(ssl, mode);
+}
+
 extern "C" X509NameStack* CryptoNative_SslGetClientCAList(SSL* ssl)
 {
     return SSL_get_client_CA_list(ssl);
@@ -534,26 +541,6 @@ extern "C" void CryptoNative_SslCtxSetClientCAList(SSL_CTX* ctx, X509NameStack* 
 extern "C" void CryptoNative_SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClientCertCallback callback)
 {
     SSL_CTX_set_client_cert_cb(ctx, callback);
-}
-
-extern "C" void CryptoNative_GetStreamSizes(int32_t* header, int32_t* trailer, int32_t* maximumMessage)
-{
-    // This function is kept for compatibility with RC2 builds on a jagged upgrade path.
-    // Removal is tracked via issue #8504.
-    if (header)
-    {
-        *header = SSL3_RT_HEADER_LENGTH;
-    }
-
-    if (trailer)
-    {
-        *trailer = 68;
-    }
-
-    if (maximumMessage)
-    {
-        *maximumMessage = SSL3_RT_MAX_PLAIN_LENGTH;
-    }
 }
 
 extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)

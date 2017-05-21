@@ -3,21 +3,20 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{11AE73F7-3532-47B9-8FF6-B4F22D76456D}</ProjectGuid>
-    <UseOpenKey>true</UseOpenKey>
     <RootNamespace>System</RootNamespace>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.0-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.0-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'portable_net40+sl4+win8+wp8-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'portable_net40+sl4+win8+wp8-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' And '$(TargetGroup)' != 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' And '$(TargetGroup)' != 'uap' And '$(TargetGroup)' != 'net47'">
     <Compile Include="System.ValueTuple.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8'">
@@ -28,13 +27,13 @@
       <Link>Common\System\Reflection\AssemblyMetadataAttribute.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap' Or '$(TargetGroup)' == 'net47'">
     <Compile Include="System.ValueTuple.TypeForwards.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.0'">
     <Reference Include="System.Runtime" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8' or '$(TargetGroup)' == 'netfx' or '$(TargetGroup)' == 'net47'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

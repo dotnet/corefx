@@ -105,7 +105,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\sync.cmd",
-        "arguments": "$(PB_SyncArguments)",
+        "arguments": "$(PB_SyncArguments) $(PB_OptionalToolingSyncArguments) $(PB_PipelineBuildMSBuildArguments)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -141,7 +141,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\build.cmd",
-        "arguments": "$(PB_BuildArguments)",
+        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) $(PB_PipelineBuildMSBuildArguments)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -176,10 +176,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "$(Build.SourcesDirectory)\\corefx\\src\\tests.builds",
+        "solution": "$(Build.SourcesDirectory)\\corefx\\src\\upload-tests.proj",
         "platform": "",
         "configuration": "",
-        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:\"OfficialBuildId=$(OfficialBuildId)\"",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
@@ -195,29 +195,6 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Index symbol file sources",
-      "timeoutInMinutes": 0,
-      "task": {
-        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SymbolsPath": "",
-        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
-        "SymbolsFolder": "",
-        "SkipIndexing": "false",
-        "TreatNotIndexedAsWarning": "false",
-        "SymbolsMaximumWaitTime": "",
-        "SymbolsProduct": "",
-        "SymbolsVersion": "",
-        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
-      }
-    },
-    {
-      "enabled": true,
-      "continueOnError": false,
-      "alwaysRun": false,
       "displayName": "Push packages to Azure",
       "timeoutInMinutes": 0,
       "task": {
@@ -227,7 +204,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\publish-packages.cmd",
-        "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=true",
+        "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -249,6 +226,29 @@
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Index symbol sources",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SymbolsPath": "",
+        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
+        "SymbolsFolder": "",
+        "SkipIndexing": "false",
+        "TreatNotIndexedAsWarning": "false",
+        "SymbolsMaximumWaitTime": "",
+        "SymbolsProduct": "",
+        "SymbolsVersion": "",
+        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -311,6 +311,15 @@
     }
   ],
   "options": [
+    {
+      "enabled": false,
+      "definition": {
+        "id": "5bc3cfb7-6b54-4a4b-b5d2-a3905949f8a6"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    },
     {
       "enabled": false,
       "definition": {
@@ -409,9 +418,6 @@
     "PB_CleanAgent": {
       "value": "true"
     },
-    "PB_SymbolsBuildIdRoot": {
-      "value": "DotNet-CoreFx-"
-    },
     "PB_SyncArguments": {
       "value": "-p -- /p:ArchGroup=x64  /p:RuntimeOS=win10",
       "allowOverride": true
@@ -426,6 +432,28 @@
     },
     "PB_CreateHelixArguments": {
       "value": "/t:CloudBuild /p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=true\" /p:\"BuildMoniker=none\" /p:\"TargetQueue=Windows.10.Amd64\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:FilterToOSGroup=Windows_NT",
+      "allowOverride": true
+    },
+    "PB_OptionalToolSource": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_OptionalToolSourceUser": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_OptionalToolSourcePAT": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_OptionalToolingSyncArguments": {
+      "value": "/p:OptionalToolSource=$(PB_OptionalToolSource) /p:OptionalToolSourceUser=$(PB_OptionalToolSourceUser);OptionalToolSourcePassword=$(PB_OptionalToolSourcePAT)"
+    },
+    "PB_PipelineBuildMSBuildArguments": {
+      "value": "",
       "allowOverride": true
     }
   },
@@ -486,6 +514,6 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097459
+    "revision": 418097607
   }
 }

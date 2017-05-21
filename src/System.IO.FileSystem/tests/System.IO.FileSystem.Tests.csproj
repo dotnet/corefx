@@ -14,22 +14,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="FileInfo\Serialization.cs" />
+    <Compile Include="FileInfo\IsReadOnly.cs" />
     <Compile Include="FileInfo\Replace.cs" />
     <Compile Include="FileStream\Handle.cs" />
     <Compile Include="Directory\GetLogicalDrives.cs" />
-    <Compile Include="DirectoryInfo\Serialization.cs" />
-    <Compile Include="FileStream\BeginRead.cs" />
     <Compile Include="FileStream\EndRead.cs" />
-    <Compile Include="FileStream\BeginWrite.cs" />
     <Compile Include="FileStream\EndWrite.cs" />
     <Compile Include="FileStream\LockUnlock.cs" />
+    <Compile Include="FileSystemTest.cs" />
     <Compile Include="File\EncryptDecrypt.cs" />
     <Compile Include="File\Replace.cs" />
-    <Compile Include="File\ReadWriteAllLines.netstandard.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="FileSystemTest.Unix.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="FileSystemTest.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="File\AppendAsync.cs" />
@@ -94,12 +97,9 @@
     <Compile Include="File\Move.cs" />
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
-    <Compile Include="PathFeatures.cs" />
     <Compile Include="TestData.cs" />
-    <Compile Include="Tfm.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
-    <Compile Include="FileSystemTest.cs" />
     <!-- Ported -->
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
@@ -158,11 +158,17 @@
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\PathFeatures.cs">
+      <Link>Common\System\IO\PathFeatures.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
       <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>

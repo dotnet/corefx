@@ -12,7 +12,6 @@ namespace System.Xml
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-    [Serializable]
     public class XmlQualifiedName
     {
         private string _name;
@@ -138,7 +137,7 @@ namespace System.Xml
         {
             return ns == null || ns.Length == 0 ? name : ns + ":" + name;
         }
-		
+
         // --------- Some useful internal stuff -----------------
         internal void Init(string name, string ns)
         {

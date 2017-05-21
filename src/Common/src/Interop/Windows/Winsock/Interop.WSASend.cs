@@ -4,8 +4,9 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 internal static partial class Interop
 {
@@ -13,31 +14,21 @@ internal static partial class Interop
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
         internal static extern unsafe SocketError WSASend(
-            SafeCloseSocket socketHandle,
-            WSABuffer* buffers,
-            int bufferCount,
-            out int bytesTransferred,
-            SocketFlags socketFlags,
-            SafeNativeOverlapped overlapped,
-            IntPtr completionRoutine);
-
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern unsafe SocketError WSASend(
             IntPtr socketHandle,
             WSABuffer* buffers,
             int bufferCount,
             out int bytesTransferred,
             SocketFlags socketFlags,
-            SafeNativeOverlapped overlapped,
+            NativeOverlapped* overlapped,
             IntPtr completionRoutine);
 
         internal static unsafe SocketError WSASend(
-            SafeCloseSocket socketHandle,
+            IntPtr socketHandle,
             ref WSABuffer buffer,
             int bufferCount,
             out int bytesTransferred,
             SocketFlags socketFlags,
-            SafeNativeOverlapped overlapped,
+            NativeOverlapped* overlapped,
             IntPtr completionRoutine)
         {
             // We intentionally do NOT copy this back after the function completes:
@@ -48,31 +39,15 @@ internal static partial class Interop
         }
 
         internal static unsafe SocketError WSASend(
-            SafeCloseSocket socketHandle,
-            WSABuffer[] buffers,
-            int bufferCount,
-            out int bytesTransferred,
-            SocketFlags socketFlags,
-            SafeNativeOverlapped overlapped,
-            IntPtr completionRoutine)
-        {
-            Debug.Assert(buffers != null);
-            fixed (WSABuffer* buffersPtr = &buffers[0])
-            {
-                return WSASend(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);
-            }
-        }
-
-        internal static unsafe SocketError WSASend(
             IntPtr socketHandle,
             WSABuffer[] buffers,
             int bufferCount,
             out int bytesTransferred,
             SocketFlags socketFlags,
-            SafeNativeOverlapped overlapped,
+            NativeOverlapped* overlapped,
             IntPtr completionRoutine)
         {
-            Debug.Assert(buffers != null);
+            Debug.Assert(buffers != null && buffers.Length > 0);
             fixed (WSABuffer* buffersPtr = &buffers[0])
             {
                 return WSASend(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);

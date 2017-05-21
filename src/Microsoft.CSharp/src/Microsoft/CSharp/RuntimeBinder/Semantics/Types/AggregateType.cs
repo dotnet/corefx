@@ -19,15 +19,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray _pTypeArgsAll;         // includes args from outer types
         private AggregateSymbol _pOwningAggregate;
 
-#if ! CSEE // The EE can't cache these since the AGGSYMs may change as things are imported.
         private AggregateType _baseType;  // This is the result of calling SubstTypeArray on the aggregate's baseClass.
         private TypeArray _ifacesAll;  // This is the result of calling SubstTypeArray on the aggregate's ifacesAll.
         private TypeArray _winrtifacesAll; //This is the list of collection interfaces implemented by a WinRT object.
-#else // !CSEE
-
-        public short proxyOID; // oid for the managed proxy in the host running inside the debugee
-        public short typeConverterID;
-#endif // !CSEE
 
         public bool fConstraintsChecked;    // Have the constraints been checked yet?
         public bool fConstraintError;       // Did the constraints check produce an error?
@@ -51,21 +45,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateType GetBaseClass()
         {
-#if CSEE
-            AggregateType atsBase = getAggregate().GetBaseClass();
-            if (!atsBase || GetTypeArgsAll().size == 0 || atsBase.GetTypeArgsAll().size == 0)
-                return atsBase;
-
-            return getAggregate().GetTypeManager().SubstType(atsBase, GetTypeArgsAll()).AsAggregateType();
-#else // !CSEE
-
-            if (_baseType == null)
-            {
-                _baseType = getAggregate().GetTypeManager().SubstType(getAggregate().GetBaseClass(), GetTypeArgsAll()) as AggregateType;
-            }
-
-            return _baseType;
-#endif // !CSEE
+            return _baseType ??
+                (_baseType = getAggregate().GetTypeManager().SubstType(getAggregate().GetBaseClass(), GetTypeArgsAll()) as AggregateType);
         }
 
         public void SetTypeArgsThis(TypeArray pTypeArgsThis)
@@ -122,12 +103,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray pCheckedOuterTypeArgs = outerTypeArgs;
             TypeManager pTypeManager = getAggregate().GetTypeManager();
 
-            if (_pTypeArgsThis.Size > 0 && AreAllTypeArgumentsUnitTypes(_pTypeArgsThis))
+            if (_pTypeArgsThis.Count > 0 && AreAllTypeArgumentsUnitTypes(_pTypeArgsThis))
             {
-                if (outerTypeArgs.Size > 0 && !AreAllTypeArgumentsUnitTypes(outerTypeArgs))
+                if (outerTypeArgs.Count > 0 && !AreAllTypeArgumentsUnitTypes(outerTypeArgs))
                 {
                     // We have open placeholder types in our type, but not the parent.
-                    pCheckedOuterTypeArgs = pTypeManager.CreateArrayOfUnitTypes(outerTypeArgs.Size);
+                    pCheckedOuterTypeArgs = pTypeManager.CreateArrayOfUnitTypes(outerTypeArgs.Count);
                 }
             }
             _pTypeArgsAll = pTypeManager.ConcatenateTypeArrays(pCheckedOuterTypeArgs, _pTypeArgsThis);
@@ -135,15 +116,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool AreAllTypeArgumentsUnitTypes(TypeArray typeArray)
         {
-            if (typeArray.Size == 0)
+            if (typeArray.Count == 0)
             {
                 return true;
             }
 
-            for (int i = 0; i < typeArray.size; i++)
+            for (int i = 0; i < typeArray.Count; i++)
             {
-                Debug.Assert(typeArray.Item(i) != null);
-                if (!typeArray.Item(i).IsOpenTypePlaceholderType())
+                Debug.Assert(typeArray[i] != null);
+                if (!typeArray[i].IsOpenTypePlaceholderType())
                 {
                     return false;
                 }
@@ -177,9 +158,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 TypeArray ifaces = GetIfacesAll();
                 System.Collections.Generic.List<CType> typeList = new System.Collections.Generic.List<CType>();
 
-                for (int i = 0; i < ifaces.size; i++)
+                for (int i = 0; i < ifaces.Count; i++)
                 {
-                    AggregateType type = ifaces.Item(i).AsAggregateType();
+                    AggregateType type = ifaces[i].AsAggregateType();
                     Debug.Assert(type.isInterfaceType());
 
                     if (type.IsCollectionType())

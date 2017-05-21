@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Test.Common;
@@ -55,10 +56,10 @@ namespace System.Net.Tests
         public void InvalidArguments_Throws()
         {
             WebRequest request = WebRequest.Create("file://anything");
-            Assert.Throws<ArgumentException>("value", () => request.ContentLength = -1);
-            Assert.Throws<ArgumentException>("value", () => request.Method = null);
-            Assert.Throws<ArgumentException>("value", () => request.Method = "");
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => request.Timeout = -2);
+            AssertExtensions.Throws<ArgumentException>("value", () => request.ContentLength = -1);
+            AssertExtensions.Throws<ArgumentException>("value", () => request.Method = null);
+            AssertExtensions.Throws<ArgumentException>("value", () => request.Method = "");
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => request.Timeout = -2);
         }
 
         [Fact]
@@ -78,11 +79,11 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public void NotImplementedMembers_Throws()
+        public void UseDefaultCredentials_GetOrSet_Throws()
         {
             WebRequest request = WebRequest.Create("file://anything");
-            Assert.Throws<NotImplementedException>(() => request.UseDefaultCredentials);
-            Assert.Throws<NotImplementedException>(() => request.UseDefaultCredentials = true);
+            Assert.Throws<NotSupportedException>(() => request.UseDefaultCredentials);
+            Assert.Throws<NotSupportedException>(() => request.UseDefaultCredentials = true);
         }
     }
 
@@ -107,10 +108,8 @@ namespace System.Net.Tests
                 using (WebResponse response = await GetResponseAsync(request))
                 {
                     Assert.Equal(data.Length, response.ContentLength);
-                    Assert.Equal(data.Length.ToString(), response.Headers[HttpRequestHeader.ContentLength]);
 
                     Assert.Equal("application/octet-stream", response.ContentType);
-                    Assert.Equal("application/octet-stream", response.Headers[HttpRequestHeader.ContentType]);
 
                     Assert.True(response.SupportsHeaders);
                     Assert.NotNull(response.Headers);
@@ -230,6 +229,7 @@ namespace System.Net.Tests
 
     public abstract class AsyncFileWebRequestTestBase : FileWebRequestTestBase
     {
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Concurrent read/write only supported on .NET Core via PR 12231")]
         [Fact]
         public async Task ConcurrentReadWrite_ResponseBlocksThenGetsNullStream()
         {

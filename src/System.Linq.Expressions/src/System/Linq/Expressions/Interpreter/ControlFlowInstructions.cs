@@ -62,8 +62,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        internal BranchFalseInstruction() { }
-
         public override string InstructionName => "BranchFalse";
         public override int ConsumedStack => 1;
 
@@ -96,8 +94,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        internal BranchTrueInstruction() { }
-
         public override string InstructionName => "BranchTrue";
         public override int ConsumedStack => 1;
 
@@ -129,8 +125,6 @@ namespace System.Linq.Expressions.Interpreter
                 return s_cache;
             }
         }
-
-        internal CoalescingBranchInstruction() { }
 
         public override string InstructionName => "CoalescingBranch";
         public override int ConsumedStack => 1;
@@ -257,13 +251,11 @@ namespace System.Linq.Expressions.Interpreter
         private readonly bool _hasValue;
         private readonly bool _labelTargetGetsValue;
 
-        // The values should technically be Consumed = 1, Produced = 1 for gotos that target a label whose continuation depth
+        // Should technically return 1 for ConsumedContinuations and ProducedContinuations for gotos that target a label whose continuation depth
         // is different from the current continuation depth. This is because we will consume one continuation from the _continuations
         // and at meantime produce a new _pendingContinuation. However, in case of forward gotos, we don't not know that is the
         // case until the label is emitted. By then the consumed and produced stack information is useless.
         // The important thing here is that the stack balance is 0.
-        public override int ConsumedContinuations => 0;
-        public override int ProducedContinuations => 0;
 
         public override int ConsumedStack => _hasValue ? 1 : 0;
         public override int ProducedStack => _hasResult ? 1 : 0;
@@ -646,7 +638,6 @@ namespace System.Linq.Expressions.Interpreter
 
         public override string InstructionName => "EnterExceptionFilter";
 
-        public override int ConsumedStack => 0;
 
         // The exception is pushed onto the stack in the filter runner.
         public override int ProducedStack => 1;
@@ -664,10 +655,8 @@ namespace System.Linq.Expressions.Interpreter
 
         public override string InstructionName => "LeaveExceptionFilter";
 
-        // The boolean result is popped from the stack in the filter runner.
-        public override int ConsumedStack => 1;
-
-        public override int ProducedStack => 0;
+        // The exception and the boolean result are popped from the stack in the filter runner.
+        public override int ConsumedStack => 2;
 
         [ExcludeFromCodeCoverage] // Known to be a no-op, this instruction is skipped on execution.
         public override int Run(InterpretedFrame frame) => 1;
@@ -787,8 +776,10 @@ namespace System.Linq.Expressions.Interpreter
         {
             ConstructorInfo ctor = _runtimeWrappedExceptionCtor
                 ?? (_runtimeWrappedExceptionCtor = typeof(RuntimeWrappedException)
-                .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
-                .First(c => c.GetParametersCached().Length == 1));
+                .GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.ExactBinding, 
+                                null, 
+                                new Type[] { typeof(object) }, 
+                                null));
             return (RuntimeWrappedException)ctor.Invoke(new [] {thrown});
         }
     }
@@ -805,7 +796,6 @@ namespace System.Linq.Expressions.Interpreter
 
         public override string InstructionName => "IntSwitch";
         public override int ConsumedStack => 1;
-        public override int ProducedStack => 0;
 
         public override int Run(InterpretedFrame frame)
         {
@@ -829,7 +819,6 @@ namespace System.Linq.Expressions.Interpreter
 
         public override string InstructionName => "StringSwitch";
         public override int ConsumedStack => 1;
-        public override int ProducedStack => 0;
 
         public override int Run(InterpretedFrame frame)
         {

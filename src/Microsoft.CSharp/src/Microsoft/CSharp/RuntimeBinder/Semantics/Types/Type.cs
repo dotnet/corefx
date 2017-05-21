@@ -10,7 +10,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal abstract class CType : ITypeOrNamespace
+    internal abstract class CType
     {
         private TypeKind _typeKind;
         private Name _pName;
@@ -97,14 +97,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ArrayType:
                     ArrayType a = src.AsArrayType();
                     Type elementType = a.GetElementType().AssociatedSystemType;
-                    if (a.rank == 1)
-                    {
-                        result = elementType.MakeArrayType();
-                    }
-                    else
-                    {
-                        result = elementType.MakeArrayType(a.rank);
-                    }
+                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.rank);
                     break;
 
                 case TypeKind.TK_NullableType:
@@ -169,14 +162,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             List<Type> list = new List<Type>();
 
             // Get each type arg.
-            for (int i = 0; i < typeArgs.size; i++)
+            for (int i = 0; i < typeArgs.Count; i++)
             {
                 // Unnamed type parameter types are just placeholders.
-                if (typeArgs.Item(i).IsTypeParameterType() && typeArgs.Item(i).AsTypeParameterType().GetTypeParameterSymbol().name == null)
+                if (typeArgs[i].IsTypeParameterType() && typeArgs[i].AsTypeParameterType().GetTypeParameterSymbol().name == null)
                 {
                     return null;
                 }
-                list.Add(typeArgs.Item(i).AssociatedSystemType);
+                list.Add(typeArgs[i].AssociatedSystemType);
             }
 
             Type[] systemTypeArgs = list.ToArray();
@@ -196,12 +189,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return uninstantiatedType;
         }
-
-        // ITypeOrNamespace
-        public bool IsType() { return true; }
-        public bool IsNamespace() { return false; }
-        public AssemblyQualifiedNamespaceSymbol AsNamespace() { throw Error.InternalCompilerError(); }
-        public CType AsType() { return this; }
 
         public TypeKind GetTypeKind() { return _typeKind; }
         public void SetTypeKind(TypeKind kind) { _typeKind = kind; }
@@ -244,9 +231,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_AggregateType:
                     fBogus = AsAggregateType().getAggregate().computeCurrentBogusState();
-                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().size; i++)
+                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().Count; i++)
                     {
-                        fBogus |= AsAggregateType().GetTypeArgsAll().Item(i).computeCurrentBogusState();
+                        fBogus |= AsAggregateType().GetTypeArgsAll()[i].computeCurrentBogusState();
                     }
                     break;
 
@@ -314,14 +301,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             _fHasErrors = typePar.HasErrors();
             _fUnres = typePar.IsUnresolved();
-#if CSEE
-
-            this.typeRes = this;
-            if (!this.fUnres)
-                this.tsRes = ktsImportMax;
-            this.fDirty = typePar.fDirty;
-            this.tsDirty = typePar.tsDirty;
-#endif // CSEE
         }
 
         public bool HasErrors()
@@ -627,78 +606,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return true;
         }
-        public bool computeManagedType(SymbolLoader symbolLoader)
-        {
-            if (IsVoidType())
-                return false;
 
-            switch (fundType())
-            {
-                case FUNDTYPE.FT_NONE:
-                case FUNDTYPE.FT_REF:
-                case FUNDTYPE.FT_VAR:
-                    return true;
-
-                case FUNDTYPE.FT_STRUCT:
-                    if (IsNullableType())
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        AggregateSymbol aggT = getAggregate();
-
-                        // See if we already know.
-                        if (aggT.IsKnownManagedStructStatus())
-                        {
-                            return aggT.IsManagedStruct();
-                        }
-
-                        // Generics are always managed.
-                        if (aggT.GetTypeVarsAll().size > 0)
-                        {
-                            aggT.SetManagedStruct(true);
-                            return true;
-                        }
-
-                        // If the struct layout has an error, don't recurse its children.
-                        if (aggT.IsLayoutError())
-                        {
-                            aggT.SetUnmanagedStruct(true);
-                            return false;
-                        }
-
-                        // at this point we can only determine the managed status
-                        // if we have members defined, otherwise we don't know the result
-                        if (symbolLoader != null)
-                        {
-                            for (Symbol ps = aggT.firstChild; ps != null; ps = ps.nextChild)
-                            {
-                                if (ps.IsFieldSymbol() && !ps.AsFieldSymbol().isStatic)
-                                {
-                                    CType type = ps.AsFieldSymbol().GetType();
-                                    if (type.computeManagedType(symbolLoader))
-                                    {
-                                        aggT.SetManagedStruct(true);
-                                        return true;
-                                    }
-                                }
-                            }
-
-                            aggT.SetUnmanagedStruct(true);
-                        }
-
-                        return false;
-                    }
-                default:
-                    return false;
-            }
-        }
         public CType GetDelegateTypeOfPossibleExpression()
         {
             if (isPredefType(PredefinedType.PT_G_EXPRESSION))
             {
-                return AsAggregateType().GetTypeArgsThis().Item(0);
+                return AsAggregateType().GetTypeArgsThis()[0];
             }
 
             return this;

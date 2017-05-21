@@ -127,7 +127,10 @@ namespace System.Security.Cryptography.Xml.Tests
             doc.LoadXml(test);
 
             transform.LoadInput(doc.ChildNodes);
-            Assert.Throws<ArgumentNullException>(() => transform.GetOutput());
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Assert.Throws<ArgumentNullException>(() => transform.GetOutput());
+            }
         }
 
         [Fact]
@@ -141,7 +144,10 @@ namespace System.Security.Cryptography.Xml.Tests
 
             transform.LoadInnerXml(doc.ChildNodes);
             transform.LoadInput(doc);
-            Stream s = (Stream)transform.GetOutput();
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Stream s = (Stream)transform.GetOutput();
+            }
         }
 
         [Fact]
@@ -169,7 +175,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
         public void OnlyInner()
         {
             string test = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns=\"http://www.w3.org/TR/xhtml1/strict\" version=\"1.0\">";
@@ -182,8 +188,10 @@ namespace System.Security.Cryptography.Xml.Tests
             doc.LoadXml(test);
 
             transform.LoadInnerXml(doc.ChildNodes);
-            Stream s = (Stream)transform.GetOutput();
-            Assert.Throws<ArgumentNullException>(() => Stream2Array(s));
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Assert.Throws<ArgumentNullException>(() => transform.GetOutput());
+            }
         }
 
         private XmlDocument GetXslDoc()
@@ -206,8 +214,11 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDocument doc = GetXslDoc();
             transform.LoadInnerXml(doc.DocumentElement.ChildNodes);
             transform.LoadInput(doc);
-            Stream s = (Stream)transform.GetOutput();
-            string output = Stream2Array(s);
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Stream s = (Stream)transform.GetOutput();
+                string output = Stream2Array(s);
+            }
         }
 
         [Fact]
@@ -216,8 +227,11 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDocument doc = GetXslDoc();
             transform.LoadInnerXml(doc.DocumentElement.ChildNodes);
             transform.LoadInput(doc.ChildNodes);
-            Stream s = (Stream)transform.GetOutput();
-            string output = Stream2Array(s);
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Stream s = (Stream)transform.GetOutput();
+                string output = Stream2Array(s);
+            }
         }
 
         [Fact]
@@ -229,8 +243,11 @@ namespace System.Security.Cryptography.Xml.Tests
             doc.Save(ms);
             ms.Position = 0;
             transform.LoadInput(ms);
-            Stream s = (Stream)transform.GetOutput();
-            string output = Stream2Array(s);
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Stream s = (Stream)transform.GetOutput();
+                string output = Stream2Array(s);
+            }
         }
 
         protected void AreEqual(string msg, XmlNodeList expected, XmlNodeList actual)
@@ -266,8 +283,11 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDocument doc = GetXslDoc();
             transform.LoadInnerXml(doc.DocumentElement.ChildNodes);
             transform.LoadInput(doc);
-            Stream s = (Stream)transform.GetOutput();
-            string output = Stream2Array(s);
+            if (PlatformDetection.IsXmlDsigXsltTransformSupported)
+            {
+                Stream s = (Stream)transform.GetOutput();
+                string output = Stream2Array(s);
+            }
         }
 
         [Fact]

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -16,7 +17,6 @@ namespace System.Diagnostics.Tests
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\r\n" : "\n";
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Asserts()
         {
             VerifyLogged(() => { Debug.Assert(true); }, "");
@@ -31,7 +31,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Fail()
         {
             VerifyAssert(() => { Debug.Fail("something bad happened"); }, "something bad happened");
@@ -39,7 +38,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Write()
         {
             VerifyLogged(() => { Debug.Write(5); }, "5");
@@ -56,7 +54,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Print()
         {
             VerifyLogged(() => { Debug.Print("logged"); }, "logged");
@@ -64,7 +61,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void WriteLine()
         {
             VerifyLogged(() => { Debug.WriteLine(5); }, "5" + s_newline);
@@ -79,7 +75,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void WriteIf()
         {
             VerifyLogged(() => { Debug.WriteIf(true, 5); }, "5");
@@ -92,11 +87,10 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => { Debug.WriteIf(false, "logged"); }, "");
 
             VerifyLogged(() => { Debug.WriteIf(true, "logged", "category"); }, "category:logged");
-            VerifyLogged(() => { Debug.WriteIf(false, "logged", "category"); }, "");                
+            VerifyLogged(() => { Debug.WriteIf(false, "logged", "category"); }, "");
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void WriteLineIf()
         {
             VerifyLogged(() => { Debug.WriteLineIf(true, 5); }, "5" + s_newline);
@@ -116,7 +110,6 @@ namespace System.Diagnostics.Tests
         [InlineData(2)]
         [InlineData(4)]
         [InlineData(3)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Indentation(int indentSize)
         {
             Debug.IndentLevel = 0;
@@ -135,9 +128,11 @@ namespace System.Diagnostics.Tests
 
         static void VerifyLogged(Action test, string expectedOutput)
         {
+            FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
+
             // First use our test logger to verify the output
-            Debug.IDebugLogger oldLogger = Debug.s_logger;
-            Debug.s_logger = WriteLogger.Instance;
+            var originalWriteCoreHook = writeCoreHook.GetValue(null);
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.Instance.WriteCore));
 
             try
             {
@@ -151,7 +146,7 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                Debug.s_logger = oldLogger;
+                writeCoreHook.SetValue(null, originalWriteCoreHook);
             }
 
             // Then also use the actual logger for this platform, just to verify
@@ -161,8 +156,14 @@ namespace System.Diagnostics.Tests
 
         static void VerifyAssert(Action test, params string[] expectedOutputStrings)
         {
-            Debug.IDebugLogger oldLogger = Debug.s_logger;
-            Debug.s_logger = WriteLogger.Instance;
+            FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
+            FieldInfo showAssertDialogHook = typeof(Debug).GetField("s_ShowAssertDialog", BindingFlags.Static | BindingFlags.NonPublic);
+
+            var originalWriteCoreHook = writeCoreHook.GetValue(null);
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.Instance.WriteCore));
+
+            var originalShowAssertDialogHook = showAssertDialogHook.GetValue(null);
+            showAssertDialogHook.SetValue(null, new Action<string, string, string>(WriteLogger.Instance.ShowAssertDialog));
 
             try
             {
@@ -182,11 +183,12 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                Debug.s_logger = oldLogger;
-            }            
+                writeCoreHook.SetValue(null, originalWriteCoreHook);
+                showAssertDialogHook.SetValue(null, originalShowAssertDialogHook);
+            }
         }
 
-        class WriteLogger : Debug.IDebugLogger
+        class WriteLogger
         {
             public static readonly WriteLogger Instance = new WriteLogger();
 

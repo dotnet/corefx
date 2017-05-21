@@ -9,10 +9,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="Generic\SortedSet\SortedSet.Generic.netcoreapp.Tests.cs" />
-    <Compile Include="Generic\HashSet\HashSet.Generic.netcoreapp.Tests.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
@@ -30,8 +26,14 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.NonGeneric.Tests.cs">
       <Link>Common\System\Collections\IDictionary.NonGeneric.Tests.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.NonGeneric.Tests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'">
+      <Link>Common\System\Collections\IDictionary.NonGeneric.Tests.netcoreapp.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.Generic.Tests.cs">
       <Link>Common\System\Collections\IDictionary.Generic.Tests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'">
+      <Link>Common\System\Collections\IDictionary.Generic.Tests.netcoreapp.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.NonGeneric.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.NonGeneric.Tests.cs</Link>
@@ -69,7 +71,17 @@
     <Compile Include="$(CommonTestPath)\System\ObjectCloner.cs">
       <Link>Common\System\ObjectCloner.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" Condition="'$(TargetGroup)'!='netcoreapp'">
+      <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>CommonTest\System\PlatformDetection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
+      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+    </Compile>
     <!-- Generic tests -->
+    <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs"  Condition="'$(TargetGroup)' == 'netcoreapp'"/>
     <Compile Include="Generic\SortedSet\SortedSet.TreeSubSet.Tests.cs" />
     <Compile Include="StructuralComparisonsTests.cs" />
     <Compile Include="BitArray\BitArray_CtorTests.cs" />
@@ -87,7 +99,6 @@
     <Compile Include="Generic\Dictionary\HashCollisionScenarios\OutOfBoundsRegression.cs" />
     <Compile Include="Generic\Dictionary\Dictionary.Generic.cs" />
     <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.cs" />
-    <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)'=='netcoreapp'" />
     <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.Keys.cs" />
     <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.Values.cs" />
     <Compile Include="Generic\HashSet\HashSet.Generic.cs" />
@@ -138,6 +149,7 @@
     <Compile Include="Generic\SortedList\SortedList.Generic.Tests.cs" />
     <Compile Include="Generic\SortedSet\SortedSet.Generic.cs" />
     <Compile Include="Generic\SortedSet\SortedSet.Generic.Tests.cs" />
+    <Compile Include="Generic\SortedSet\SortedSet.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)'=='netcoreapp'" />
     <Compile Include="Generic\SortedSet\SortedSet.Tests.cs" />
     <Compile Include="Generic\Stack\Stack.Tests.cs" />
     <Compile Include="Generic\Stack\Stack.Generic.cs" />

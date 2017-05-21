@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -110,7 +111,7 @@ namespace System.Data.SqlClient.SNI
 
             try
             {
-                TimeSpan ts;
+                TimeSpan ts = default(TimeSpan);
 
                 // In case the Timeout is Infinite, we will receive the max value of Int64 as the tick count
                 // The infinite Timeout is a function of ConnectionString Timeout=0
@@ -440,7 +441,8 @@ namespace System.Data.SqlClient.SNI
 
                     if (packet.Length == 0)
                     {
-                        return ReportErrorAndReleasePacket(packet, 0, SNICommon.ConnTerminatedError, string.Empty);
+                        var e = new Win32Exception();
+                        return ReportErrorAndReleasePacket(packet, (uint)e.NativeErrorCode, 0, e.Message);
                     }
 
                     return TdsEnums.SNI_SUCCESS;

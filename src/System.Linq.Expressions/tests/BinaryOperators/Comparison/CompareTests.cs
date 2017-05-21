@@ -115,7 +115,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.GreaterThanOrEqual(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.GreaterThan(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.LessThanOrEqual(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -142,25 +142,25 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.LessThan(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public static void ThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.GreaterThanOrEqual(null, Expression.Constant(0)));
-            Assert.Throws<ArgumentNullException>("left", () => Expression.GreaterThan(null, Expression.Constant(0)));
-            Assert.Throws<ArgumentNullException>("left", () => Expression.LessThanOrEqual(null, Expression.Constant(0)));
-            Assert.Throws<ArgumentNullException>("left", () => Expression.LessThanOrEqual(null, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.GreaterThanOrEqual(null, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.GreaterThan(null, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.LessThanOrEqual(null, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.LessThanOrEqual(null, Expression.Constant(0)));
         }
 
         [Fact]
         public static void ThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.GreaterThanOrEqual(Expression.Constant(0), null));
-            Assert.Throws<ArgumentNullException>("right", () => Expression.GreaterThan(Expression.Constant(0), null));
-            Assert.Throws<ArgumentNullException>("right", () => Expression.LessThanOrEqual(Expression.Constant(0), null));
-            Assert.Throws<ArgumentNullException>("right", () => Expression.LessThan(Expression.Constant(0), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.GreaterThanOrEqual(Expression.Constant(0), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.GreaterThan(Expression.Constant(0), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.LessThanOrEqual(Expression.Constant(0), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.LessThan(Expression.Constant(0), null));
         }
 
         private static class Unreadable<T>
@@ -175,20 +175,20 @@ namespace System.Linq.Expressions.Tests
         public static void ThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.GreaterThanOrEqual(value, Expression.Constant(1)));
-            Assert.Throws<ArgumentException>("left", () => Expression.GreaterThan(value, Expression.Constant(1)));
-            Assert.Throws<ArgumentException>("left", () => Expression.LessThanOrEqual(value, Expression.Constant(1)));
-            Assert.Throws<ArgumentException>("left", () => Expression.LessThan(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.GreaterThanOrEqual(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.GreaterThan(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.LessThanOrEqual(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.LessThan(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void ThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.GreaterThanOrEqual(Expression.Constant(1), value));
-            Assert.Throws<ArgumentException>("right", () => Expression.GreaterThan(Expression.Constant(1), value));
-            Assert.Throws<ArgumentException>("right", () => Expression.LessThanOrEqual(Expression.Constant(1), value));
-            Assert.Throws<ArgumentException>("right", () => Expression.LessThan(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.GreaterThanOrEqual(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.GreaterThan(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.LessThanOrEqual(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.LessThan(Expression.Constant(1), value));
         }
 
         [Fact]

@@ -37,10 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     sym = new NamespaceSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_NamespaceDeclaration:
-                    sym = new NamespaceDeclaration();
-                    sym.name = name;
-                    break;
                 case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
                     sym = new AssemblyQualifiedNamespaceSymbol();
                     sym.name = name;
@@ -77,40 +73,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     sym = new EventSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_TransparentIdentifierMemberSymbol:
-                    sym = new TransparentIdentifierMemberSymbol();
-                    sym.name = name;
-                    break;
                 case SYMKIND.SK_Scope:
                     sym = new Scope();
-                    sym.name = name;
-                    break;
-                case SYMKIND.SK_LabelSymbol:
-                    sym = new LabelSymbol();
-                    sym.name = name;
-                    break;
-                case SYMKIND.SK_GlobalAttributeDeclaration:
-                    sym = new GlobalAttributeDeclaration();
                     sym.name = name;
                     break;
                 case SYMKIND.SK_UnresolvedAggregateSymbol:
                     sym = new UnresolvedAggregateSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_InterfaceImplementationMethodSymbol:
-                    sym = new InterfaceImplementationMethodSymbol();
-                    sym.name = name;
-                    break;
                 case SYMKIND.SK_IndexerSymbol:
                     sym = new IndexerSymbol();
-                    sym.name = name;
-                    break;
-                case SYMKIND.SK_ParentSymbol:
-                    sym = new ParentSymbol();
-                    sym.name = name;
-                    break;
-                case SYMKIND.SK_IteratorFinallyMethodSymbol:
-                    sym = new IteratorFinallyMethodSymbol();
                     sym.name = name;
                     break;
                 default:
@@ -130,14 +102,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // This class should never be created on its own.
-        protected SymFactoryBase(SYMTBL symtable, NameManager namemgr)
+        protected SymFactoryBase(SYMTBL symtable, bool loadNames)
         {
             m_pSymTable = symtable;
 
-            if (namemgr != null)
+            if (loadNames)
             {
-                m_pMissingNameNode = namemgr.GetPredefName(PredefinedName.PN_MISSING);
-                m_pMissingNameSym = namemgr.GetPredefName(PredefinedName.PN_MISSINGSYM);
+                m_pMissingNameNode = NameManager.GetPredefinedName(PredefinedName.PN_MISSING);
+                m_pMissingNameSym = NameManager.GetPredefinedName(PredefinedName.PN_MISSINGSYM);
             }
         }
     }

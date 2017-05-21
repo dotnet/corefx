@@ -4,14 +4,19 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRCAST : EXPR
+    internal sealed class ExprCast : Expr
     {
-        public EXPR Argument;
-        public EXPR GetArgument() { return Argument; }
-        public void SetArgument(EXPR expr) { Argument = expr; }
-        public EXPRTYPEORNAMESPACE DestinationType;
-        public EXPRTYPEORNAMESPACE GetDestinationType() { return DestinationType; }
-        public void SetDestinationType(EXPRTYPEORNAMESPACE expr) { DestinationType = expr; }
-        public bool IsBoxingCast() { return (flags & (EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_FORCE_BOX)) != 0; }
+        public ExprCast()
+            : base(ExpressionKind.Cast)
+        {            
+        }
+
+        public Expr Argument { get; set; }
+
+        public ExprClass DestinationType { get; set; }
+
+        public override CType Type => DestinationType.Type;
+
+        public bool IsBoxingCast => (Flags & (EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_FORCE_BOX)) != 0;
     }
 }

@@ -7,6 +7,26 @@
             "#import": [ "base" ]
         },
 
+        "android": {
+            "#import": [ "any" ]
+        },
+        "android-arm": {
+            "#import": [ "any" ]
+        },
+        "android-arm64": {
+            "#import": [ "any" ]
+        },
+
+        "android.21": {
+            "#import": [ "android" ]
+        },
+        "android.21-arm": {
+            "#import": [ "android.21", "android-arm" ]
+        },
+        "android.21-arm64": {
+            "#import": [ "android.21", "android-arm64" ]
+        },
+
         "win": {
             "#import": [ "any" ]
         },
@@ -363,6 +383,10 @@
             "#import": [ "ubuntu", "debian-arm" ]
         },
 
+        "ubuntu-arm64": {
+            "#import": [ "ubuntu", "debian-arm64" ]
+        },
+
         "ubuntu.14.04": {
             "#import": [ "ubuntu" ]
         },
@@ -427,6 +451,9 @@
         "ubuntu.16.04-arm": {
             "#import": [ "ubuntu.16.04", "ubuntu-arm" ]
         },
+        "ubuntu.16.04-arm64": {
+            "#import": [ "ubuntu.16.04", "ubuntu-arm64" ]
+        },
 
         "ubuntu.16.10": {
             "#import": [ "ubuntu" ]
@@ -439,6 +466,9 @@
         },
         "ubuntu.16.10-arm": {
             "#import": [ "ubuntu.16.10", "ubuntu-arm" ]
+        },
+        "ubuntu.16.10-arm64": {
+            "#import": [ "ubuntu.16.10", "ubuntu-arm64" ]
         },
 
         "linuxmint.17": {
@@ -538,25 +568,11 @@
             "#import": [ "opensuse.42.1", "opensuse-x64" ]
         },
 
-        "alpine": {
+        "gentoo": {
             "#import": [ "linux" ]
         },
-        "alpine-x64": {
-            "#import": [ "alpine", "linux-x64" ]
-        },
-
-        "alpine.3": {
-            "#import": [ "alpine" ]
-        },
-        "alpine.3-x64": {
-            "#import": [ "alpine.3", "alpine-x64" ]
-        },
-
-        "alpine.3.4.3": {
-            "#import": [ "alpine.3" ]
-        },
-        "alpine.3.4.3-x64": {
-            "#import": [ "alpine.3.4.3", "alpine.3-x64" ]
+        "gentoo-x64": {
+            "#import": [ "gentoo", "linux-x64" ]
         },
 
         "corert": {
@@ -587,7 +603,7 @@
             "#import": [ "win7-corert", "win8" ]
         },
         "win8-x86-corert": {
-            "#import": [ "win8-corert", "win7-x86-corert", "win8-x86"]
+            "#import": [ "win8-corert", "win7-x86-corert", "win8-x86" ]
         },
         "win8-x64-corert": {
             "#import": [ "win8-corert", "win7-x64-corert", "win8-x64" ]
@@ -899,7 +915,7 @@
             "#import": [ "opensuse-corert", "opensuse.13.2" ]
         },
         "opensuse.13.2-x64-corert": {
-            "#import": [ "opensuse.13.2-corert", "opensuse-x64-corert",  "opensuse.13.2-x64" ]
+            "#import": [ "opensuse.13.2-corert", "opensuse-x64-corert", "opensuse.13.2-x64" ]
         },
 
         "opensuse.42.1-corert": {
@@ -909,27 +925,5 @@
             "#import": [ "opensuse.42.1-corert", "opensuse.13.2-x64-corert", "opensuse.42.1-x64" ]
         },
 
-        "alpine-corert": {
-            "#import": [ "linux-corert", "alpine" ]
-        },
-        "alpine-x64-corert": {
-            "#import": [ "alpine-corert", "linux-x64-corert", "alpine-x64" ]
-        },
-
-        "alpine.3-corert": {
-            "#import": [ "alpine-corert", "alpine.3" ]
-        },
-        "alpine.3-x64-corert": {
-            "#import": [ "alpine.3-corert", "alpine-x64-corert", "alpine.3-x64" ]
-        },
-
-        "alpine.3.4.3-corert": {
-            "#import": [ "alpine.3-corert", "alpine.3.4.3" ]
-        },
-        "alpine.3.4.3-x64-corert": {
-            "#import": [ "alpine.3.4.3-corert", "alpine.3-x64-corert", "alpine.3.4.3-x64" ]
-        }
-
     }
 }
-

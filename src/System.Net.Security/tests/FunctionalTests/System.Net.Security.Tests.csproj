@@ -25,6 +25,7 @@
     <Compile Include="DummyTcpServer.cs" />
     <Compile Include="TestConfiguration.cs" />
     <!-- SslStream Tests -->
+
     <Compile Include="CertificateChainValidation.cs" />
     <Compile Include="CertificateValidationClientServer.cs" />
     <Compile Include="CertificateValidationRemoteServer.cs" />
@@ -35,20 +36,24 @@
     <Compile Include="ServerAsyncAuthenticateTest.cs" />
     <Compile Include="ServerNoEncryptionTest.cs" />
     <Compile Include="ServerRequireEncryptionTest.cs" />
-    <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamStreamToStreamTest.cs" />
     <Compile Include="SslStreamNetworkStreamTest.cs" />
     <Compile Include="TransportContextTest.cs" />
+
     <!-- NegotiateStream Tests -->
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
     <Compile Include="ServiceNameCollectionTest.cs" />
     <Compile Include="NegotiateStreamKerberosTest.cs" />
+
     <!-- Common test files -->
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
       <Link>Common\System\Net\Capability.Security.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\SslStreamCertificatePolicy.cs">
+      <Link>Common\System\Net\SslStreamCertificatePolicy.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
@@ -58,6 +63,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.Certificates.cs">
       <Link>Common\System\Net\Configuration.Certificates.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\HttpsTestClient.cs">
+      <Link>Common\System\Net\HttpsTestClient.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\HttpsTestServer.cs">
       <Link>Common\System\Net\HttpsTestServer.cs</Link>
@@ -83,10 +91,16 @@
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
     <!-- TODO #13070: Add net463 to the condition after the TFM gets updated to the actual .Net 4.6.3.-->
     <Compile Include="SslStreamAlertsTest.cs" />
+    <Compile Include="SslStreamEKUTest.cs" />
+    <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
+    <Compile Include="SslStreamCredentialCacheTest.cs" />
     <Compile Include="SslStreamSystemDefaultsTest.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -143,7 +157,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)System.Net.TestData\1.0.0-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.0-prerelease\content\**\*.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

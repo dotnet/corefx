@@ -5,11 +5,14 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System
 {
     public static class AssertExtensions
     {
+        private static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework");
+
         public static void Throws<T>(Action action, string message)
             where T : Exception
         {
@@ -21,11 +24,98 @@ namespace System
         {
             T exception = Assert.Throws<T>(action);
 
+            if (netFxParamName == null && IsFullFramework)
+            {
+                // Param name varies between NETFX versions -- skip checking it
+                return;
+            }
+
             string expectedParamName =
-                RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
+                IsFullFramework ?
                 netFxParamName : netCoreParamName;
-            
-            Assert.Equal(expectedParamName, exception.ParamName);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(expectedParamName, exception.ParamName);
+        }
+
+        public static T Throws<T>(string paramName, Action action)
+            where T : ArgumentException
+        {
+            T exception = Assert.Throws<T>(action);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
+        }
+
+        public static T Throws<T>(string paramName, Func<object> testCode)
+            where T : ArgumentException
+        {
+            T exception = Assert.Throws<T>(testCode);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
+        }
+
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, Action action) 
+            where TNetCoreExceptionType : ArgumentException 
+            where TNetFxExceptionType : ArgumentException
+        {
+            Throws<TNetCoreExceptionType, TNetFxExceptionType>(paramName, paramName, action);
+        }
+
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string netCoreParamName, string netFxParamName, Action action)
+            where TNetCoreExceptionType : ArgumentException 
+            where TNetFxExceptionType : ArgumentException
+        {
+            if (IsFullFramework)
+            {
+                Throws<TNetFxExceptionType>(netFxParamName, action);
+            }
+            else
+            {
+                Throws<TNetCoreExceptionType>(netCoreParamName, action);
+            }
+        }
+
+        public static void ThrowsAny(Type firstExceptionType, Type secondExceptionType, Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().Equals(firstExceptionType) || e.GetType().Equals(secondExceptionType))
+                {
+                    return;
+                }
+                throw new XunitException($"Expected: ({firstExceptionType}) or ({secondExceptionType}) -> Actual: ({e.GetType()})");
+            }
+            throw new XunitException("AssertExtensions.ThrowsAny<firstExceptionType, secondExceptionType> didn't throw any exception");
+        }
+
+        public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType>(Action action)
+            where TFirstExceptionType : Exception
+            where TSecondExceptionType : Exception
+        {
+           ThrowsAny(typeof(TFirstExceptionType), typeof(TSecondExceptionType), action);
+        }
+
+        public static void ThrowsIf<T>(bool condition, Action action)
+            where T : Exception
+        {
+            if (condition)
+            {
+                Assert.Throws<T>(action);
+            }
+            else
+            {
+                action();
+            }
         }
     }
 }

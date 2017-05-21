@@ -4,12 +4,15 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRBLOCK : EXPRSTMT
+    internal sealed class ExprBlock : ExprStatement
     {
-        private EXPRSTMT _OptionalStatements;
-        public EXPRSTMT GetOptionalStatements() { return _OptionalStatements; }
-        public void SetOptionalStatements(EXPRSTMT value) { _OptionalStatements = value; }
+        public ExprBlock()
+            : base(ExpressionKind.Block)
+        {
+        }
 
-        public Scope OptionalScopeSymbol;
+        public ExprStatement OptionalStatements { get; set; }
+
+        public Scope OptionalScopeSymbol { get; set; }
     }
 }

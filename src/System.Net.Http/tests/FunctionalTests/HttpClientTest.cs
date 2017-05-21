@@ -59,8 +59,8 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("ftp://onlyhttpsupported"));
-                Assert.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("/onlyabsolutesupported", UriKind.Relative));
+                AssertExtensions.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("ftp://onlyhttpsupported"));
+                AssertExtensions.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("/onlyabsolutesupported", UriKind.Relative));
             }
         }
 
@@ -82,9 +82,9 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(-2));
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(0));
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(int.MaxValue));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(-2));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.Timeout = TimeSpan.FromSeconds(int.MaxValue));
             }
         }
 
@@ -106,12 +106,13 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = -1);
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = 0);
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = 1 + (long)int.MaxValue);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = -1);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = 0);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => client.MaxResponseContentBufferSize = 1 + (long)int.MaxValue);
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "no exception throw on netfx")]
         [Fact]
         public async Task MaxResponseContentBufferSize_TooSmallForContent_Throws()
         {
@@ -306,7 +307,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient(new CustomResponseHandler((r,c) => Task.FromResult<HttpResponseMessage>(null))))
             {
-                Assert.Throws<ArgumentNullException>("request", () => { client.SendAsync(null); });
+                AssertExtensions.Throws<ArgumentNullException>("request", () => { client.SendAsync(null); });
             }
         }
 
@@ -322,14 +323,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task SendAsync_RequestContentDisposed()
+        public async Task SendAsync_RequestContentNotDisposed()
         {
             var content = new ByteArrayContent(new byte[1]);
             using (var request = new HttpRequestMessage(HttpMethod.Get, CreateFakeUri()) { Content = content }) 
             using (var client = new HttpClient(new CustomResponseHandler((r, c) => Task.FromResult(new HttpResponseMessage()))))
             {
                 await client.SendAsync(request);
-                Assert.Throws<ObjectDisposedException>(() => { content.ReadAsStringAsync(); });
+                await content.ReadAsStringAsync(); // no exception
             }
         }
 

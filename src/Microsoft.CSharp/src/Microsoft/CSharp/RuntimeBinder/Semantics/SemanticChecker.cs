@@ -73,17 +73,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // For members of AGGSYMs, atsCheck should always be specified!
             Debug.Assert(atsCheck != null);
 
-            if (atsCheck.getAggregate().IsSource())
-            {
-                // We already check the "at least as accessible as" rules.
-                // Does this always work for generics?
-                // Could we get a bad CType argument in typeThru?
-                // Maybe call CheckTypeAccess on typeThru?
-                return ACCESSERROR.ACCESSERROR_NOERROR;
-            }
-
             // Substitute on the CType.
-            if (atsCheck.GetTypeArgsAll().size > 0)
+            if (atsCheck.GetTypeArgsAll().Count > 0)
             {
                 CType = SymbolLoader.GetTypeManager().SubstType(CType, atsCheck);
             }
@@ -112,9 +103,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             TypeArray typeArgs = type.AsAggregateType().GetTypeArgsAll();
-            for (int i = 0; i < typeArgs.size; i++)
+            for (int i = 0; i < typeArgs.Count; i++)
             {
-                if (!CheckTypeAccess(typeArgs.Item(i), symWhere))
+                if (!CheckTypeAccess(typeArgs[i], symWhere))
                     return false;
             }
 
@@ -144,6 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return SymbolLoader.ErrorContext;
             }
         }
+
         public ErrorHandling GetErrorContext() { return ErrorContext; }
         public NameManager GetNameManager() { return SymbolLoader.GetNameManager(); }
         public TypeManager GetTypeManager() { return SymbolLoader.GetTypeManager(); }

@@ -50,6 +50,15 @@
     <Compile Include="..\..\src\System\Net\Sockets\AddressFamily.cs">
       <Link>ProductionCode\System\Net\Sockets\AddressFamily.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieComparer.cs">
+      <Link>ProductionCode\System\Net\CookieComparer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieFields.cs">
+      <Link>Common\System\Net\CookieFields.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieParser.cs">
+      <Link>ProductionCode\System\Net\CookieParser.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
       <Link>ProductionCode\System\Net\SocketAddress.cs</Link>
     </Compile>
@@ -66,9 +75,10 @@
 
   <ItemGroup>
     <Compile Include="CookieCollectionTest.cs" />
-    <Compile Include="Fakes\HostInformation.cs" />
-    <Compile Include="Fakes\IPAddressPal.cs" />
     <Compile Include="Fakes\CookieException.cs" />
+    <Compile Include="Fakes\HostInformation.cs" />
+    <Compile Include="Fakes\IPv4AddressHelper.cs" />
+    <Compile Include="Fakes\IPv6AddressHelper.cs" />
     <Compile Include="Fakes\Serialization.cs" Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
@@ -92,9 +102,6 @@
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
     <!-- Logging -->
-    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
-      <Link>ProductionCode\Common\System\Net\Shims\TraceSource.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>ProductionCode\Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>

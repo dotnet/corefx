@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -12,12 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Folder Include="Microsoft\CSharp\RuntimeBinder\Hosting\" />
-    <Folder Include="Microsoft\CSharp\RuntimeBinder\Semantics\Interfaces\" />
-    <Folder Include="Microsoft\CSharp\RuntimeBinder\Tokens\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Microsoft\CSharp\ExtentFlags.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\ArgumentObject.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Binder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\BinderHelper.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\CSharpArgumentInfo.cs" />
@@ -50,6 +45,7 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\MessageID.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\UserStringBuilder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ExpressionTreeCallRewriter.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\ICSharpBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ICSharpInvokeOrInvokeMemberBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ResetBindException.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinder.cs" />
@@ -57,8 +53,7 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderException.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderExtensions.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderInternalCompilerException.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\BindingContextBase.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\BindingContexts.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\BindingContext.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\BindingFlag.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Binding\Better.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Binding\ErrorReporting.cs" />
@@ -67,14 +62,10 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\BinOpSig.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\CandidateFunctionMember.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ConstVal.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ConstValFactory.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Conversion.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Conversions.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\COperators.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Declarations\AggregateDeclaration.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Declarations\Declaration.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Declarations\GlobalAttributeDeclaration.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Declarations\NamespaceDeclaration.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ExplicitConversion.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ExpressionBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ExpressionKind.cs" />
@@ -88,20 +79,15 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\GroupToArgsBinderResult.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ImplicitConversion.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\InputFile.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ITypeOrNamespace.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\LangCompiler.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MemberLookup.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MemberLookupResults.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MetadataToken.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MethodIterator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MethodKind.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MethodTypeInferrer.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\NameGenerator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Nullable.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\NullableLift.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Operators.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\OriginalExpressions.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\PredefinedAttributes.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\PredefinedMembers.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\SemanticChecker.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\SubstitutionContext.cs" />
@@ -110,7 +96,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\EventSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\FieldSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\IndexerSymbol.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\LabelSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\LocalVariableSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\MethodOrPropertySymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\MethodSymbol.cs" />
@@ -128,13 +113,11 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymbolTable.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymFactory.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymFactoryBase.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\TransparentIdentifierMemberSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\TypeParameterSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\UnresolvedAggregateSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\VariableSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ArrayIndex.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ArrayInitialization.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ArrayLength.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Assignment.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\BinaryOperator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Block.cs" />
@@ -144,14 +127,17 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Class.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\CompoundOperator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Concatenate.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ConditionalOperator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Constant.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Event.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\EXPR.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ExpressionIterator.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ExprOperator.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ExprWithType.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Field.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\FieldInfo.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\HoistedLocal.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\IExprWithArgs.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\IExprWithObject.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\List.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\LocalVariable.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\MemberGroup.cs" />
@@ -163,10 +149,8 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Return.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Statement.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\Temporary.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\This.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\TypeArguments.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\TypeOf.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\TypeOrNamespace.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\UnaryOperator.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\UnboundAnonymousFunction.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\UserDefinedConversion.cs" />
@@ -200,7 +184,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\WithType.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\SpecialNames.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\SymbolTable.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\KnownName.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\NameManager.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\Names.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\NameTable.cs" />
@@ -220,6 +203,10 @@
     <Reference Include="System.Linq" />
     <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Reflection, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile259\System.Reflection.dll</HintPath>
+    </Reference>
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

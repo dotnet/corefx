@@ -11,26 +11,31 @@ namespace System.Data.SqlClient.Tests
     {
 
         [Fact]
-        [ActiveIssue(14017)]
         public void ConnectionTest()
         {
-            Exception e = null;
-
             using (TestTdsServer server = TestTdsServer.StartTestServer())
             {
-                try
+                using (SqlConnection connection = new SqlConnection(server.ConnectionString))
                 {
-                    SqlConnection connection = new SqlConnection(server.ConnectionString);
                     connection.Open();
                 }
-                catch (Exception ce)
-                {
-                    e = ce;
-                }
             }
-            Assert.Null(e);
         }
 
+        [PlatformSpecific(TestPlatforms.Windows)]  // Integ auth on Test server is supported on Windows right now
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // https://github.com/dotnet/corefx/issues/19218
+        public void IntegratedAuthConnectionTest()
+        {
+            using (TestTdsServer server = TestTdsServer.StartTestServer())
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(server.ConnectionString);
+                builder.IntegratedSecurity = true;
+                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+                {
+                    connection.Open();
+                }
+            }
+        }
     }
 
 }

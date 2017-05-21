@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Dynamic.Utils;
+using System.Linq.Expressions;
 
 namespace System.Runtime.CompilerServices
 {
@@ -13,7 +13,6 @@ namespace System.Runtime.CompilerServices
     /// Builder for read only collections.
     /// </summary>
     /// <typeparam name="T">The type of the collection element.</typeparam>
-    [Serializable]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
     {
@@ -315,7 +314,7 @@ namespace System.Runtime.CompilerServices
             }
             catch (InvalidCastException)
             {
-                throw InvalidTypeException(value, nameof(value));
+                throw Error.InvalidTypeException(value, typeof(T), nameof(value));
             }
             return Count - 1;
         }
@@ -347,7 +346,7 @@ namespace System.Runtime.CompilerServices
             }
             catch (InvalidCastException)
             {
-                throw InvalidTypeException(value, nameof(value));
+                throw Error.InvalidTypeException(value, typeof(T), nameof(value));
             }
         }
 
@@ -377,7 +376,7 @@ namespace System.Runtime.CompilerServices
                 }
                 catch (InvalidCastException)
                 {
-                    throw InvalidTypeException(value, nameof(value));
+                    throw Error.InvalidTypeException(value, typeof(T), nameof(value));
                 }
             }
         }
@@ -486,18 +485,12 @@ namespace System.Runtime.CompilerServices
 
         private static void ValidateNullValue(object value, string argument)
         {
-            if (value == null && !(default(T) == null))
+            if (value == null && default(T) != null)
             {
-                throw new ArgumentException(Strings.InvalidNullValue(typeof(T)), argument);
+                throw Error.InvalidNullValue(typeof(T), argument);
             }
         }
 
-        private static Exception InvalidTypeException(object value, string argument)
-        {
-            return new ArgumentException(Strings.InvalidObjectType(value != null ? value.GetType() : (object)"null", typeof(T)), argument);
-        }
-
-        [Serializable]
         private class Enumerator : IEnumerator<T>, IEnumerator
         {
             private readonly ReadOnlyCollectionBuilder<T> _builder;

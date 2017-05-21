@@ -42,10 +42,83 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveOntoExistingDirectory()
+        public void MoveOntoSameDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<IOException>(() => Move(testDir.FullName, testDir.FullName));
+        }
+
+        [Fact]
+        public void MoveOntoExistingDirectory()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo secondDir = Directory.CreateDirectory(GetTestFilePath());
+            Assert.Throws<IOException>(() => Move(testDir.FullName, secondDir.FullName));
+        }
+
+        [Fact]
+        public void MoveFile()
+        {
+            // Regression https://github.com/dotnet/corefx/issues/19710
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Move(source, destination);
+            Assert.True(File.Exists(destination));
+            Assert.False(File.Exists(source));
+        }
+
+        [Fact]
+        public void MoveFile_TrailingDestinationSlash()
+        {
+            // Regression https://github.com/dotnet/corefx/issues/19710
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Move(source, destination + Path.DirectorySeparatorChar);
+            Assert.True(File.Exists(destination));
+            Assert.False(File.Exists(source));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void MoveFile_TrailingDestinationAltSlash_Windows()
+        {
+            // Regression https://github.com/dotnet/corefx/issues/19710
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Move(source, destination + Path.AltDirectorySeparatorChar);
+            Assert.True(File.Exists(destination));
+            Assert.False(File.Exists(source));
+        }
+
+        [Fact]
+        public void MoveFile_TrailingSourceSlash()
+        {
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Assert.Throws<IOException>(() => Move(source + Path.DirectorySeparatorChar, destination));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void MoveFile_TrailingSourceAltSlash_Windows()
+        {
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            Assert.Throws<IOException>(() => Move(source + Path.AltDirectorySeparatorChar, destination));
+        }
+
+        [Fact]
+        public void MoveOntoFile()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            string testFile = GetTestFilePath();
+            File.WriteAllText(testFile, "");
+            Assert.Throws<IOException>(() => Move(testDir.FullName, testFile));
         }
 
         [Fact]
@@ -62,7 +135,7 @@ namespace System.IO.Tests
             Assert.Throws<IOException>(() => Move(testDir.FullName, Path.Combine(testDir.FullName, "..")));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         public void BasicMove()
         {
             string testDirSource = Path.Combine(TestDirectory, GetTestFileName());
@@ -73,7 +146,7 @@ namespace System.IO.Tests
             Assert.True(Directory.Exists(testDirDest));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         public void MultipleMoves()
         {
             string testDir = GetTestFilePath();
@@ -89,7 +162,7 @@ namespace System.IO.Tests
             Assert.False(Directory.Exists(testDirSource));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         public void DirectoryNameWithSpaces()
         {
             string testDirSource = Path.Combine(TestDirectory, GetTestFileName());
@@ -100,7 +173,7 @@ namespace System.IO.Tests
             Assert.True(Directory.Exists(testDirDest));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         public void TrailingDirectorySeparators()
         {
             string testDirSource = Path.Combine(TestDirectory, GetTestFileName());
@@ -111,7 +184,7 @@ namespace System.IO.Tests
             Assert.True(Directory.Exists(testDirDest));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         public void IncludeSubdirectories()
         {
             string testDirSource = Path.Combine(TestDirectory, GetTestFileName());
@@ -144,7 +217,7 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Long path succeeds
         public void Path_With_Longer_Than_MaxDirectory_Succeeds()
         {
@@ -179,7 +252,7 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Move(TestDirectory, "*Test"));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Wild characters in path are allowed
         public void UnixWildCharacterPath()
         {
@@ -219,7 +292,7 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Move(testDir.FullName, "\t"));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace path allowed
         public void UnixWhitespacePath()
         {
@@ -259,31 +332,6 @@ namespace System.IO.Tests
                 Assert.Throws<IOException>(() => Move(path, "C:\\DoesntExist"));
             else
                 Assert.Throws<IOException>(() => Move(path, "D:\\DoesntExist"));
-        }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Moving to existing directory allowed for empty directory, but causes IOException for non-empty directory
-        public void UnixExistingDirectory()
-        {
-            // Moving to an-empty directory is supported on Unix, but moving to a non-empty directory is not
-            string testDirSource = GetTestFilePath();
-            string testDirDestEmpty = GetTestFilePath();
-            string testDirDestNonEmpty = GetTestFilePath();
-
-            Directory.CreateDirectory(testDirSource);
-            Directory.CreateDirectory(testDirDestEmpty);
-            Directory.CreateDirectory(testDirDestNonEmpty);
-
-            using (File.Create(Path.Combine(testDirDestNonEmpty, GetTestFileName())))
-            {
-                Assert.Throws<IOException>(() => Move(testDirSource, testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirSource));
-            }
-
-            Move(testDirSource, testDirDestEmpty);
-            Assert.True(Directory.Exists(testDirDestEmpty));
-            Assert.False(Directory.Exists(testDirSource));
         }
 
         #endregion

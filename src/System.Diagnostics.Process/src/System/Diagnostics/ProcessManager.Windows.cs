@@ -18,7 +18,7 @@ namespace System.Diagnostics
         /// <returns>true if the process is running; otherwise, false.</returns>
         public static bool IsProcessRunning(int processId)
         {
-            return IsProcessRunning(processId, GetProcessIds());
+            return IsProcessRunning(processId, ".");
         }
 
         /// <summary>Gets whether the process with the specified ID on the specified machine is currently running.</summary>
@@ -27,7 +27,21 @@ namespace System.Diagnostics
         /// <returns>true if the process is running; otherwise, false.</returns>
         public static bool IsProcessRunning(int processId, string machineName)
         {
-            return IsProcessRunning(processId, GetProcessIds(machineName));
+            // Performance optimization for the local machine: 
+            // First try to OpenProcess by id, if valid handle is returned, the process is definitely running
+            // Otherwise enumerate all processes and compare ids
+            if (!IsRemoteMachine(machineName))
+            {
+                using (SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId))
+                {
+                    if (!processHandle.IsInvalid)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return Array.IndexOf(GetProcessIds(machineName), processId) >= 0;
         }
 
         /// <summary>Gets the ProcessInfo for the specified process ID on the specified machine.</summary>
@@ -93,17 +107,8 @@ namespace System.Diagnostics
             return NtProcessManager.GetModules(processId);
         }
 
-        /// <summary>Gets whether the named machine is remote or local.</summary>
-        /// <param name="machineName">The machine name.</param>
-        /// <returns>true if the machine is remote; false if it's local.</returns>
-        public static bool IsRemoteMachine(string machineName)
+        private static bool IsRemoteMachineCore(string machineName)
         {
-            if (machineName == null)
-                throw new ArgumentNullException(nameof(machineName));
-
-            if (machineName.Length == 0)
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
-
             string baseName;
 
             if (machineName.StartsWith("\\", StringComparison.Ordinal))
@@ -112,8 +117,7 @@ namespace System.Diagnostics
                 baseName = machineName;
             if (baseName.Equals(".")) return false;
 
-            if (String.Compare(Interop.Kernel32.GetComputerName(), baseName, StringComparison.OrdinalIgnoreCase) == 0) return false;
-            return true;
+            return !string.Equals(Interop.Kernel32.GetComputerName(), baseName, StringComparison.OrdinalIgnoreCase);
         }
 
         public static IntPtr GetMainWindowHandle(int processId) 
@@ -166,11 +170,6 @@ namespace System.Diagnostics
                     tokenHandle.Dispose();
                 }
             }
-        }
-
-        private static bool IsProcessRunning(int processId, int[] processIds)
-        {
-            return Array.IndexOf(processIds, processId) >= 0;
         }
 
         public static SafeProcessHandle OpenProcess(int processId, int access, bool throwIfExited)

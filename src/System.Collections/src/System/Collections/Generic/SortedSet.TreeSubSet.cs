@@ -13,7 +13,6 @@ namespace System.Collections.Generic
         /// This class represents a subset view into the tree. Any changes to this view
         /// are reflected in the actual tree. It uses the comparer of the underlying tree.
         /// </summary>
-        [Serializable]
         internal sealed class TreeSubSet : SortedSet<T>, ISerializable, IDeserializationCallback
         {
             private SortedSet<T> _underlying;
@@ -122,6 +121,65 @@ namespace System.Collections.Generic
 
                 comp = _uBoundActive ? Comparer.Compare(_max, item) : 1;
                 return comp >= 0;
+            }
+
+            internal override T MinInternal
+            {
+                get
+                {
+                    Node current = _root;
+                    T result = default(T);
+
+                    while (current != null)
+                    {
+
+                        int comp = _lBoundActive ? Comparer.Compare(_min, current.Item) : -1;
+                        if (comp == 1)
+                        {
+                            current = current.Right;
+                        }
+                        else
+                        {
+                            result = current.Item;
+                            if (comp == 0)
+                            {
+                                break;
+                            }
+                            current = current.Left;
+                        }
+                    }
+
+                    return result;
+                }
+            }
+
+            internal override T MaxInternal
+            {
+                get
+                {
+                    Node current = _root;
+                    T result = default(T);
+
+                    while (current != null)
+                    {
+                        int comp = _uBoundActive ? Comparer.Compare(_max, current.Item) : 1;
+                        if (comp == -1)
+                        {
+                            current = current.Left;
+                        }
+                        else
+                        {
+                            result = current.Item;
+                            if (comp == 0)
+                            {
+                                break;
+                            }
+                            current = current.Right;
+                        }
+                    }
+
+                    return result;
+               }
             }
 
             internal override bool InOrderTreeWalk(TreeWalkPredicate<T> action)

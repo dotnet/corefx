@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.SpanTests
@@ -18,6 +19,44 @@ namespace System.SpanTests
             bool success = srcSpan.TryCopyTo(dst);
             Assert.True(success);
             Assert.Equal<int>(src, dst);
+        }
+
+        [Fact]
+        public static void TryCopyToSingle()
+        {
+            int[] src = { 1 };
+            int[] dst = { 99 };
+
+            Span<int> srcSpan = new Span<int>(src);
+            bool success = srcSpan.TryCopyTo(dst);
+            Assert.True(success);
+            Assert.Equal<int>(src, dst);
+        }
+
+        [Fact]
+        public static void TryCopyToArraySegmentImplicit()
+        {
+            int[] src = { 1, 2, 3 };
+            int[] dst = { 5, 99, 100, 101, 10 };
+            var segment = new ArraySegment<int>(dst, 1, 3);
+
+            Span<int> srcSpan = new Span<int>(src);
+            bool success = srcSpan.TryCopyTo(segment);
+            Assert.True(success);
+            Assert.Equal<int>(src, segment);
+        }
+
+        [Fact]
+        public static void TryCopyToEmpty()
+        {
+            int[] src = { };
+            int[] dst = { 99, 100, 101 };
+
+            Span<int> srcSpan = new Span<int>(src);
+            bool success = srcSpan.TryCopyTo(dst);
+            Assert.True(success);
+            int[] expected = { 99, 100, 101 };
+            Assert.Equal<int>(expected, dst);
         }
 
         [Fact]
@@ -82,6 +121,138 @@ namespace System.SpanTests
 
             int[] expected = { 90, 92, 93, 94, 95, 96, 97, 97 };
             Assert.Equal<int>(expected, a);
+        }
+
+        [Fact]
+        public static void CopyToArray()
+        {
+            int[] src = { 1, 2, 3 };
+            int[] dst = { 99, 100, 101 };
+
+            src.CopyTo(dst);
+            Assert.Equal<int>(src, dst);
+        }
+
+        [Fact]
+        public static void CopyToSingleArray()
+        {
+            int[] src = { 1 };
+            int[] dst = { 99 };
+
+            src.CopyTo(dst);
+            Assert.Equal<int>(src, dst);
+        }
+
+        [Fact]
+        public static void CopyToEmptyArray()
+        {
+            int[] src = { };
+            int[] dst = { 99, 100, 101 };
+
+            src.CopyTo(dst);
+            int[] expected = { 99, 100, 101 };
+            Assert.Equal<int>(expected, dst);
+
+            int[] dstEmpty = { };
+
+            src.CopyTo(dst);
+            int[] expectedEmpty = { };
+            Assert.Equal<int>(expectedEmpty, dstEmpty);
+        }
+
+        [Fact]
+        public static void CopyToLongerArray()
+        {
+            int[] src = { 1, 2, 3 };
+            int[] dst = { 99, 100, 101, 102 };
+
+            src.CopyTo(dst);
+            int[] expected = { 1, 2, 3, 102 };
+            Assert.Equal<int>(expected, dst);
+        }
+
+        [Fact]
+        public static void CopyToShorterArray()
+        {
+            int[] src = { 1, 2, 3 };
+            int[] dst = { 99, 100 };
+
+            AssertThrows<ArgumentException, int>(src, (_src) => _src.CopyTo(dst));
+            int[] expected = { 99, 100 };
+            Assert.Equal<int>(expected, dst);  // CopyTo() checks for sufficient space before doing any copying.
+        }
+
+        [Fact]
+        public static void CopyToCovariantArray()
+        {
+            string[] src = new string[] { "Hello" };
+            object[] dst = new object[] { "world" };
+
+            src.CopyTo<object>(dst);
+            Assert.Equal("Hello", dst[0]);
+        }
+
+        // This test case tests the Span.CopyTo method for large buffers of size 4GB or more. In the fast path,
+        // the CopyTo method performs copy in chunks of size 4GB (uint.MaxValue) with final iteration copying
+        // the residual chunk of size (bufferSize % 4GB). The inputs sizes to this method, 4GB and 4GB+256B,
+        // test the two size selection paths in CoptyTo method - memory size that is multiple of 4GB or,
+        // a multiple of 4GB + some more size.
+        [Theory]
+        [OuterLoop]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [InlineData(4L * 1024L * 1024L * 1024L)]
+        [InlineData((4L * 1024L * 1024L * 1024L) + 256)]
+        public static void CopyToLargeSizeTest(long bufferSize)
+        {
+            // If this test is run in a 32-bit process, the large allocation will fail.
+            if (Unsafe.SizeOf<IntPtr>() != sizeof(long))
+            {
+                return;
+            }
+
+            int GuidCount = (int)(bufferSize / Unsafe.SizeOf<Guid>());
+            bool allocatedFirst = false;
+            bool allocatedSecond = false;
+            IntPtr memBlockFirst = IntPtr.Zero;
+            IntPtr memBlockSecond = IntPtr.Zero;
+
+            unsafe
+            {
+                try
+                {
+                    allocatedFirst = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockFirst);
+                    allocatedSecond = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockSecond);
+
+                    if (allocatedFirst && allocatedSecond)
+                    {
+                        ref Guid memoryFirst = ref Unsafe.AsRef<Guid>(memBlockFirst.ToPointer());
+                        var spanFirst = new Span<Guid>(memBlockFirst.ToPointer(), GuidCount);
+
+                        ref Guid memorySecond = ref Unsafe.AsRef<Guid>(memBlockSecond.ToPointer());
+                        var spanSecond = new Span<Guid>(memBlockSecond.ToPointer(), GuidCount);
+
+                        Guid theGuid = Guid.Parse("900DBAD9-00DB-AD90-00DB-AD900DBADBAD");
+                        for (int count = 0; count < GuidCount; ++count)
+                        {
+                            Unsafe.Add(ref memoryFirst, count) = theGuid;
+                        }
+
+                        spanFirst.CopyTo(spanSecond);
+
+                        for (int count = 0; count < GuidCount; ++count)
+                        {
+                            var guidfirst = Unsafe.Add(ref memoryFirst, count);
+                            var guidSecond = Unsafe.Add(ref memorySecond, count);
+                            Assert.Equal(guidfirst, guidSecond);
+                        }
+                    }
+                }
+                finally
+                {
+                    if (allocatedFirst) AllocationHelper.ReleaseNative(ref memBlockFirst);
+                    if (allocatedSecond) AllocationHelper.ReleaseNative(ref memBlockSecond);
+                }
+            }
         }
     }
 }

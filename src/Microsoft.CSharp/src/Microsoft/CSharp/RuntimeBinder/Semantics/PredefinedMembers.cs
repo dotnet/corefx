@@ -19,8 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         PM_FIRST = 0,
 
-        PM_ARRAY_GETLENGTH,
-
         PM_DECIMAL_OPDECREMENT,
         PM_DECIMAL_OPDIVISION,
         PM_DECIMAL_OPEQUALITY,
@@ -152,7 +150,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal enum PREDEFPROP
     {
         PP_FIRST = 0,
-        PP_ARRAY_LENGTH,
         PP_G_OPTIONAL_VALUE,
         PP_COUNT,
     };
@@ -392,10 +389,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return GetSymbolLoader().GetErrorContext();
         }
-        private NameManager GetNameManager()
-        {
-            return GetSymbolLoader().GetNameManager();
-        }
         private TypeManager GetTypeManager()
         {
             return GetSymbolLoader().GetTypeManager();
@@ -407,7 +400,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Name GetPredefName(PredefinedName pn)
         {
-            return GetNameManager().GetPredefName(pn);
+            return NameManager.GetPredefinedName(pn);
         }
         private AggregateSymbol GetOptPredefAgg(PredefinedType pt)
         {
@@ -448,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             return null;
                         }
-                        return GetTypeManager().GetArray(elementType, 1);
+                        return GetTypeManager().GetArray(elementType, 1, true);
                     }
                 case MethodSignatureEnum.SIG_METH_TYVAR:
                     {
@@ -460,7 +453,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         int index = signature[indexIntoSignatures];
                         indexIntoSignatures++;
-                        return classTyVars.Item(index);
+                        return classTyVars[index];
                     }
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
                     return GetTypeManager().GetVoid();
@@ -470,8 +463,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         AggregateSymbol agg = GetOptPredefAgg((PredefinedType)current);
                         if (agg != null)
                         {
-                            CType[] typeArgs = new CType[agg.GetTypeVars().size];
-                            for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().size; iTypeArg++)
+                            CType[] typeArgs = new CType[agg.GetTypeVars().Count];
+                            for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().Count; iTypeArg++)
                             {
                                 typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
                                 if (typeArgs[iTypeArg] == null)
@@ -479,7 +472,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                     return null;
                                 }
                             }
-                            AggregateType type = GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().size, typeArgs));
+                            AggregateType type = GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().Count, typeArgs));
                             if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
                             {
                                 return GetTypeManager().GetNubFromNullable(type);
@@ -627,7 +620,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if ((methsym.GetAccess() == methodAccess || methodAccess == ACCESS.ACC_UNKNOWN) &&
                         methsym.isStatic == isStatic &&
                         methsym.isVirtual == isVirtual &&
-                        methsym.typeVars.size == cMethodTyVars &&
+                        methsym.typeVars.Count == cMethodTyVars &&
                         GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, SubstTypeFlags.DenormMeth) &&
                         GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, (TypeArray)null,
                             methsym.typeVars, SubstTypeFlags.DenormMeth) &&
@@ -704,8 +697,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // This list must be in the same order as the PREDEFPROP enum.
         private static readonly PredefinedPropertyInfo[] s_predefinedProperties = {
             new PredefinedPropertyInfo(   PREDEFPROP.PP_FIRST,                                           MethodRequiredEnum.Optional,   PredefinedName.PN_COUNT,                   PREDEFMETH.PM_COUNT,                                           PREDEFMETH.PM_COUNT  ),
-
-            new PredefinedPropertyInfo(   PREDEFPROP.PP_ARRAY_LENGTH,                                    MethodRequiredEnum.Optional,   PredefinedName.PN_LENGTH,                  PREDEFMETH.PM_ARRAY_GETLENGTH,                                 PREDEFMETH.PM_COUNT  ),
             new PredefinedPropertyInfo(   PREDEFPROP.PP_G_OPTIONAL_VALUE,                                MethodRequiredEnum.Optional,   PredefinedName.PN_CAP_VALUE,               PREDEFMETH.PM_G_OPTIONAL_GETVALUE,                             PREDEFMETH.PM_COUNT  ),
         };
 
@@ -764,7 +755,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // This list must be in the same order as the PREDEFMETH enum.
         private static readonly PredefinedMethodInfo[] s_predefinedMethods = new PredefinedMethodInfo[(int)PREDEFMETH.PM_COUNT] {
             new PredefinedMethodInfo(   PREDEFMETH.PM_FIRST,                                           MethodRequiredEnum.Optional,   PredefinedType.PT_COUNT,               PredefinedName.PN_COUNT,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_ARRAY_GETLENGTH,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_ARRAY,               PredefinedName.PN_GETLENGTH,               MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INT, 0  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDECREMENT,                             MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDECREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDIVISION,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDIVISION,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPEQUALITY,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),

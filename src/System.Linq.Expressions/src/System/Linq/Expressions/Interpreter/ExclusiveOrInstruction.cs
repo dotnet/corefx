@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -176,7 +175,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new ExclusiveOrUInt64());
                 case TypeCode.Boolean: return s_Boolean ?? (s_Boolean = new ExclusiveOrBoolean());
                 default:
-                    throw Error.ExpressionNotSupportedForType("ExclusiveOr", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

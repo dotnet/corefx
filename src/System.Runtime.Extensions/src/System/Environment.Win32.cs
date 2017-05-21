@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Internal.Runtime.Augments;
-using Microsoft.Win32;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -33,8 +30,8 @@ namespace System
             while (size > currentSize)
             {
                 currentSize = size;
-                result.Capacity = currentSize;
                 result.Length = 0;
+                result.Capacity = currentSize;
 
                 size = Interop.Kernel32.ExpandEnvironmentStringsW(name, result, currentSize);
                 if (size == 0)
@@ -217,14 +214,7 @@ namespace System
             int hr = Interop.Shell32.SHGetKnownFolderPath(folderId, (uint)option, IntPtr.Zero, out path);
             if (hr != 0) // Not S_OK
             {
-                if (hr == Interop.Shell32.COR_E_PLATFORMNOTSUPPORTED)
-                {
-                    throw new PlatformNotSupportedException();
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return string.Empty;
             }
 
             return path;

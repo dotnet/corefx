@@ -66,17 +66,27 @@ namespace System.Diagnostics.Tests
         public void SetParentId()
         {
             var parent = new Activity("parent");
-            Assert.Throws<ArgumentException>(() => parent.SetParentId(null));
-            Assert.Throws<ArgumentException>(() => parent.SetParentId(""));
+            parent.SetParentId(null);  // Error does nothing
+            Assert.Null(parent.ParentId);
+
+            parent.SetParentId("");  // Error does nothing
+            Assert.Null(parent.ParentId);
+
             parent.SetParentId("1");
             Assert.Equal("1", parent.ParentId);
-            Assert.Throws<InvalidOperationException>(() => parent.SetParentId("2"));
+
+            parent.SetParentId("2"); // Error does nothing
+            Assert.Equal("1", parent.ParentId);
 
             Assert.Equal(parent.ParentId, parent.RootId);
             parent.Start();
+
             var child = new Activity("child");
             child.Start();
-            Assert.Throws<InvalidOperationException>(() => child.SetParentId("3"));
+
+            Assert.Equal(parent.Id, child.ParentId);
+            child.SetParentId("3");  // Error does nothing;
+            Assert.Equal(parent.Id, child.ParentId);
         }
 
         /// <summary>
@@ -85,10 +95,10 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void ActivityIdOverflow()
         {
-            //check parentId /abc.1.1...1.1.1.1.1 (126 bytes) and check last .1.1.1.1 is replaced with #overflow_suffix 8 bytes long
-            var parentId = new StringBuilder("/abc");
-            while (parentId.Length < 126)
-                parentId.Append(".1");
+            //check parentId |abc.1.1...1.1.1.1.1. (1023 bytes) and check last .1.1.1.1 is replaced with #overflow_suffix 8 bytes long
+            var parentId = new StringBuilder("|abc.");
+            while (parentId.Length < 1022)
+                parentId.Append("1.");
 
             var activity = new Activity("activity")
                 .SetParentId(parentId.ToString())
@@ -97,13 +107,13 @@ namespace System.Diagnostics.Tests
             Assert.Equal(
                 parentId.ToString().Substring(0, parentId.Length - 8),
                 activity.Id.Substring(0, activity.Id.Length - 9));
-            Assert.Equal('#', activity.Id[activity.Id.Length - 9]);
+            Assert.Equal('#', activity.Id[activity.Id.Length - 1]);
 
-            //check parentId /abc.1.1...1.012345678 (128 bytes) and check last .012345678 is replaced with #overflow_suffix 8 bytes long
-            parentId = new StringBuilder("/abc");
-            while (parentId.Length < 118)
-                parentId.Append(".1");
-            parentId.Append(".012345678");
+            //check parentId |abc.1.1...1.012345678 (128 bytes) and check last .012345678 is replaced with #overflow_suffix 8 bytes long
+            parentId = new StringBuilder("|abc.");
+            while (parentId.Length < 1013)
+                parentId.Append("1.");
+            parentId.Append("012345678.");
 
             activity = new Activity("activity")
                 .SetParentId(parentId.ToString())
@@ -113,7 +123,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(
                 parentId.ToString().Substring(0, parentId.Length - 10),
                 activity.Id.Substring(0, activity.Id.Length - 9));
-            Assert.Equal('#', activity.Id[activity.Id.Length - 9]);
+            Assert.Equal('#', activity.Id[activity.Id.Length - 1]);
         }
 
         /// <summary>
@@ -140,6 +150,22 @@ namespace System.Diagnostics.Tests
         /// Tests Id generation
         /// </summary>
         [Fact]
+        public void IdGenerationNoParent()
+        {
+            var orphan1 = new Activity("orphan1");
+            var orphan2 = new Activity("orphan2");
+
+            Task.Run(() => orphan1.Start()).Wait();
+            Task.Run(() => orphan2.Start()).Wait();
+
+            Assert.NotEqual(orphan2.Id, orphan1.Id);
+            Assert.NotEqual(orphan2.RootId, orphan1.RootId);
+        }
+
+        /// <summary>
+        /// Tests Id generation
+        /// </summary>
+        [Fact]
         public void IdGenerationInternalParent()
         {
             var parent = new Activity("parent");
@@ -150,11 +176,11 @@ namespace System.Diagnostics.Tests
             Task.Run(() => child1.Start()).Wait();
             Task.Run(() => child2.Start()).Wait();
 #if DEBUG
-            Assert.Equal($"{parent.Id}.{child1.OperationName}-1", child1.Id);
-            Assert.Equal($"{parent.Id}.{child2.OperationName}-2", child2.Id);
+            Assert.Equal($"|{parent.RootId}.{child1.OperationName}-1.", child1.Id);
+            Assert.Equal($"|{parent.RootId}.{child2.OperationName}-2.", child2.Id);
 #else
-            Assert.Equal(parent.Id + ".1", child1.Id);
-            Assert.Equal(parent.Id + ".2", child2.Id);
+            Assert.Equal($"|{parent.RootId}.1.", child1.Id);
+            Assert.Equal($"|{parent.RootId}.2.", child2.Id);
 #endif
             Assert.Equal(parent.RootId, child1.RootId);
             Assert.Equal(parent.RootId, child2.RootId);
@@ -163,10 +189,19 @@ namespace System.Diagnostics.Tests
             var child3 = new Activity("child3");
             child3.Start();
 #if DEBUG
-            Assert.Equal($"{parent.Id}.{child3.OperationName}-3", child3.Id);
+            Assert.Equal($"|{parent.RootId}.{child3.OperationName}-3.", child3.Id);
 #else
-            Assert.Equal(parent.Id + ".3", child3.Id);
+            Assert.Equal($"|{parent.RootId}.3.", child3.Id);
 #endif
+
+            var grandChild = new Activity("grandChild");
+            grandChild.Start();
+#if DEBUG
+            Assert.Equal($"{child3.Id}{grandChild.OperationName}-1.", grandChild.Id);
+#else
+            Assert.Equal($"{child3.Id}1.", grandChild.Id);
+#endif
+
         }
 
         /// <summary>
@@ -179,7 +214,8 @@ namespace System.Diagnostics.Tests
             child1.SetParentId("123");
             child1.Start();
             Assert.Equal("123", child1.RootId);
-            Assert.True(child1.Id[0] == '/');
+            Assert.True(child1.Id[0] == '|');
+            Assert.True(child1.Id[child1.Id.Length - 1] == '_');
             child1.Stop();
 
             var child2 = new Activity("child2");
@@ -197,10 +233,10 @@ namespace System.Diagnostics.Tests
         {
 
             var parentIds = new []{
-                "123",   //Parent does not start with '/' and does not contain '.'
-                "123.1", //Parent does not start with '/' but contains '.'
-                "/123",  //Parent starts with '/' and does not contain '.'
-                "/123.1.1" //Parent starts with '/' and contains '.'
+                "123",   //Parent does not start with '|' and does not contain '.'
+                "123.1", //Parent does not start with '|' but contains '.'
+                "|123",  //Parent starts with '|' and does not contain '.'
+                "|123.1.1", //Parent starts with '|' and contains '.'
             };
             foreach (var parentId in parentIds)
             {
@@ -217,15 +253,23 @@ namespace System.Diagnostics.Tests
         public void StartStopWithTimestamp()
         {
             var activity = new Activity("activity");
-            Assert.Throws<InvalidOperationException>(() => activity.SetStartTime(DateTime.Now));
+            Assert.Equal(default(DateTime), activity.StartTimeUtc);
 
-            var startTime = DateTime.UtcNow.AddSeconds(-1);
+            activity.SetStartTime(DateTime.Now);    // Error Does nothing because it is not UTC
+            Assert.Equal(default(DateTime), activity.StartTimeUtc);
+
+            var startTime = DateTime.UtcNow.AddSeconds(-1); // A valid time in the past that we want to be our offical start time.  
             activity.SetStartTime(startTime);
 
             activity.Start();
-            Assert.Equal(startTime, activity.StartTimeUtc);
+            Assert.Equal(startTime, activity.StartTimeUtc); // we use our offical start time not the time now.  
+            Assert.Equal(TimeSpan.Zero, activity.Duration);
 
-            Assert.Throws<InvalidOperationException>(() => activity.SetEndTime(DateTime.Now));
+            Thread.Sleep(35);
+
+            activity.SetEndTime(DateTime.Now);      // Error does nothing because it is not UTC    
+            Assert.Equal(TimeSpan.Zero, activity.Duration);
+
             var stopTime = DateTime.UtcNow;
             activity.SetEndTime(stopTime);
             Assert.Equal(stopTime - startTime, activity.Duration);
@@ -245,7 +289,14 @@ namespace System.Diagnostics.Tests
             Assert.Equal(startTime, activity.StartTimeUtc);
 
             activity.Stop();
-            Assert.True(activity.Duration.TotalSeconds >= 1);
+
+            // DateTime.UtcNow is not precise on some platforms, but Activity stop time is precise
+            // in this test we set start time, but not stop time and check duration.
+            //
+            // Let's check that duration is 1sec - maximum DateTime.UtcNow error or bigger.
+            // There is another test (ActivityDateTimeTests.StartStopReturnsPreciseDuration) 
+            // that checks duration precision on netfx.
+            Assert.True(activity.Duration.TotalMilliseconds >= 1000 - MaxClockErrorMSec);
         }
 
         /// <summary>
@@ -309,7 +360,10 @@ namespace System.Diagnostics.Tests
         {
             var activity = new Activity("activity");
             activity.Start();
-            Assert.Throws<InvalidOperationException>(() => activity.Start());
+            var id = activity.Id;
+
+            activity.Start();       // Error already started.  Does nothing.  
+            Assert.Equal(id, activity.Id);
         }
 
         /// <summary>
@@ -318,7 +372,9 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void StopNotStarted()
         {
-            Assert.Throws<InvalidOperationException>(() => new Activity("activity").Stop());
+            var activity = new Activity("activity");
+            activity.Stop();        // Error Does Nothing
+            Assert.Equal(TimeSpan.Zero, activity.Duration);
         }
 
         /// <summary>
@@ -356,15 +412,37 @@ namespace System.Diagnostics.Tests
 
                     var activity = new Activity("activity");
 
+                    var startTime = DateTime.UtcNow;
+                    // Test Activity.Start
                     source.StartActivity(activity, arguments);
+
                     Assert.Equal(activity.OperationName + ".Start", observer.EventName);
                     Assert.Equal(arguments, observer.EventObject);
+                    Assert.NotNull(observer.Activity);
+
+                    // We 'fix' DateTime on netfx to be precise; 
+                    // comparing Activity StartTime to potentially imprecise DateTime.UtcNow is not correct
+                    // this test does not intend fo check StartTime/Duration precision, so we allow anything within 20ms.
+                    Assert.True(startTime.AddMilliseconds(-1 * MaxClockErrorMSec) <= observer.Activity.StartTimeUtc);
+                    Assert.True(observer.Activity.StartTimeUtc < DateTime.UtcNow.AddMilliseconds(MaxClockErrorMSec));
+
+                    Assert.True(observer.Activity.Duration == TimeSpan.Zero);
 
                     observer.Reset();
 
+                    Thread.Sleep(100);
+
+                    // Test Activity.Stop
                     source.StopActivity(activity, arguments);
                     Assert.Equal(activity.OperationName + ".Stop", observer.EventName);
                     Assert.Equal(arguments, observer.EventObject);
+
+                    // Confirm that duration is set. 
+                    Assert.NotNull(observer.Activity);
+                    Assert.True(TimeSpan.Zero < observer.Activity.Duration);
+
+                    // let's only check that Duration is set in StopActivity, we do not intend to check precision here
+                    Assert.True(observer.Activity.StartTimeUtc + observer.Activity.Duration <= DateTime.UtcNow.AddMilliseconds(2 * MaxClockErrorMSec));
                 } 
             }
         }
@@ -430,21 +508,27 @@ namespace System.Diagnostics.Tests
             public string EventName { get; private set; }
             public object EventObject { get; private set; }
 
+            public Activity Activity { get; private set; }
+
             public void OnNext(KeyValuePair<string, object> value)
             {
                 EventName = value.Key;
                 EventObject = value.Value;
+                Activity = Activity.Current;
             }
 
             public void Reset()
             {
                 EventName = null;
                 EventObject = null;
+                Activity = null;
             }
 
             public void OnCompleted() { }
 
             public void OnError(Exception error) { }
         }
+
+        private const int MaxClockErrorMSec = 20;
     }
 }

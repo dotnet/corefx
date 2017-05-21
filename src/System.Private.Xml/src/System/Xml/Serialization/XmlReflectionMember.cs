@@ -3,9 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Xml.Serialization;
 
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     ///<internalonly/>
     /// <devdoc>

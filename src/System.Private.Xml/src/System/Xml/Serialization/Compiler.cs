@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System.Reflection;
     using System.Reflection.Emit;
@@ -18,25 +22,17 @@ namespace System.Xml.Serialization
     using System.Globalization;
     using System.Runtime.Versioning;
     using System.Runtime.CompilerServices;
-    using Collections.Generic;
-    using Linq;
+    using System.Collections.Generic;
+    using System.Linq;
 
     internal class Compiler
     {
+#if !XMLSERIALIZERGENERATOR
         private bool _debugEnabled = DiagnosticsSwitches.KeepTempFiles.Enabled;
-        private Hashtable _imports = new Hashtable();
+#endif
         private StringWriter _writer = new StringWriter(CultureInfo.InvariantCulture);
 
-        protected string[] Imports
-        {
-            get
-            {
-                string[] array = new string[_imports.Values.Count];
-                _imports.Values.CopyTo(array, 0);
-                return array;
-            }
-        }
-
+#if XMLSERIALIZERGENERATOR
         // SxS: This method does not take any resource name and does not expose any resources to the caller.
         // It's OK to suppress the SxS warning.
         internal void AddImport(Type type, Hashtable types)
@@ -60,10 +56,10 @@ namespace System.Xml.Serialization
                 AddImport(intf, types);
 
             ConstructorInfo[] ctors = type.GetConstructors();
-            for (int i = 0; i < ctors.Length; i++)
+            for (int i = 0; i<ctors.Length; i++)
             {
                 ParameterInfo[] parms = ctors[i].GetParameters();
-                for (int j = 0; j < parms.Length; j++)
+                for (int j = 0; j<parms.Length; j++)
                 {
                     AddImport(parms[j].ParameterType, types);
                 }
@@ -72,7 +68,7 @@ namespace System.Xml.Serialization
             if (type.IsGenericType)
             {
                 Type[] arguments = type.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
+                for (int i = 0; i<arguments.Length; i++)
                 {
                     AddImport(arguments[i], types);
                 }
@@ -103,50 +99,13 @@ namespace System.Xml.Serialization
             //_imports[assembly] = assembly.Location;
         }
 
+        internal void Close() { }
+
         internal TextWriter Source
         {
             get { return _writer; }
         }
-
-        internal void Close() { }
-
-        internal static string GetTempAssemblyPath(string baseDir, Assembly assembly, string defaultNamespace)
-        {
-            if (assembly.IsDynamic)
-            {
-                throw new InvalidOperationException(SR.XmlPregenAssemblyDynamic);
-            }
-
-            try
-            {
-                if (baseDir != null && baseDir.Length > 0)
-                {
-                    // check that the dirsctory exists
-                    if (!Directory.Exists(baseDir))
-                    {
-                        throw new UnauthorizedAccessException(SR.Format(SR.XmlPregenMissingDirectory, baseDir));
-                    }
-                }
-                else
-                {
-                    baseDir = Path.GetTempPath();
-                    // check that the dirsctory exists
-                    if (!Directory.Exists(baseDir))
-                    {
-                        throw new UnauthorizedAccessException(SR.XmlPregenMissingTempDirectory);
-                    }
-                }
-                if (baseDir.EndsWith("\\", StringComparison.Ordinal))
-                    baseDir += GetTempAssemblyName(assembly.GetName(), defaultNamespace);
-                else
-                    baseDir += "\\" + GetTempAssemblyName(assembly.GetName(), defaultNamespace);
-            }
-            finally
-            {
-            }
-
-            return baseDir + ".dll";
-        }
+#endif
 
         internal static string GetTempAssemblyName(AssemblyName parent, string ns)
         {

@@ -29,8 +29,6 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             _length = array.Length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -54,8 +52,6 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             int arrayLength = array.Length;
             if ((uint)start > (uint)arrayLength)
@@ -84,8 +80,6 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -123,26 +117,16 @@ namespace System
 
         /// <summary>
         /// Create a new read-only span over a portion of a regular managed object. This can be useful
-        /// if part of a managed object represents a "fixed array." This is dangerous because
-        /// "length" is not checked, nor is the fact that "rawPointer" actually lies within the object.
+        /// if part of a managed object represents a "fixed array." This is dangerous because neither the
+        /// <paramref name="length"/> is checked, nor <paramref name="obj"/> being null, nor the fact that
+        /// "rawPointer" actually lies within <paramref name="obj"/>.
         /// </summary>
         /// <param name="obj">The managed object that contains the data to span over.</param>
         /// <param name="objectData">A reference to data within that object.</param>
         /// <param name="length">The number of <typeparamref name="T"/> elements the memory contains.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when the specified object is null.
-        /// </exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="length"/> is negative.
-        /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> DangerousCreate(object obj, ref T objectData, int length)
         {
-            if (obj == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
-            if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
-
             Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
             IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
             return new ReadOnlySpan<T>(pinnable, byteOffset, length);
@@ -220,37 +204,19 @@ namespace System
         /// <param name="destination">The span to copy items into.</param>
         public bool TryCopyTo(Span<T> destination)
         {
-            if ((uint)_length > (uint)destination.Length)
+            int length = _length;
+            int destLength = destination.Length;
+
+            if ((uint)length == 0)
+                return true;
+
+            if ((uint)length > (uint)destLength)
                 return false;
 
-            // TODO: This is a tide-over implementation as we plan to add a overlap-safe cpblk-based api to Unsafe. (https://github.com/dotnet/corefx/issues/13427)
-            unsafe
-            {
-                ref T src = ref DangerousGetPinnableReference();
-                ref T dst = ref destination.DangerousGetPinnableReference();
-                IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-                int length = _length;
-
-                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-                if (srcGreaterThanDst)
-                {
-                    // Source address greater than or equal to destination address. Can do normal copy.
-                    for (int i = 0; i < length; i++)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
-                }
-                else
-                {
-                    // Source address less than destination address. Must do backward copy.
-                    int i = length;
-                    while (i-- != 0)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
-                }
-                return true;
-            }
+            ref T src = ref DangerousGetPinnableReference();
+            ref T dst = ref destination.DangerousGetPinnableReference();
+            SpanHelpers.CopyTo<T>(ref dst, destLength, ref src, length);
+            return true;
         }
 
         /// <summary>

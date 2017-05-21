@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_NegativeCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1)); // Capacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1)); // Capacity < 0
         }
 
         [Theory]
@@ -67,9 +68,9 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1, 1)); // Capacity < 0
-            Assert.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)0.99)); // Grow factor < 1
-            Assert.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)10.01)); // Grow factor > 10
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1, 1)); // Capacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)0.99)); // Grow factor < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)10.01)); // Grow factor > 10
         }
 
         [Fact]
@@ -88,10 +89,11 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_ICollection_NullCollection_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("col", () => new Queue(null)); // Collection is null
+            AssertExtensions.Throws<ArgumentNullException>("col", () => new Queue(null)); // Collection is null
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Queue());
@@ -101,8 +103,18 @@ namespace System.Collections.Tests
             testQueue.Enqueue(1);
             testQueue.Enqueue("b");
             testQueue.Enqueue(2);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(testQueue);
 
+            DebuggerAttributeInfo debuggerAttribute = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(testQueue);
+            PropertyInfo infoProperty = debuggerAttribute.Properties.Single(property => property.Name == "Items");
+            object[] items = (object[])infoProperty.GetValue(debuggerAttribute.Instance);
+
+            Assert.Equal(testQueue.ToArray(), items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void DebuggerAttribute_NullQueue_ThrowsArgumentNullException()
+        {
             bool threwNull = false;
             try
             {
@@ -366,10 +378,10 @@ namespace System.Collections.Tests
             Queue queue1 = Helpers.CreateIntQueue(100);
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
-                Assert.Throws<ArgumentNullException>("array", () => queue2.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentNullException>("array", () => queue2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => queue2.CopyTo(new object[150, 150], 0)); // Array is multidimensional
 
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => queue2.CopyTo(new object[150], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => queue2.CopyTo(new object[150], -1)); // Index < 0
 
                 Assert.Throws<ArgumentException>(null, () => queue2.CopyTo(new object[150], 51)); // Index + queue.Count > array.Length
             });
@@ -476,6 +488,67 @@ namespace System.Collections.Tests
                     enumerator.Reset();
                 }
             });
+        }
+
+        [Fact]
+        public static void GetEnumerator_StartOfEnumeration_Clone()
+        {
+            Queue queue = Helpers.CreateIntQueue(10);
+
+            IEnumerator enumerator = queue.GetEnumerator();
+            ICloneable cloneableEnumerator = (ICloneable)enumerator;
+
+            IEnumerator clonedEnumerator = (IEnumerator)cloneableEnumerator.Clone();
+            Assert.NotSame(enumerator, clonedEnumerator);
+
+            // Cloned and original enumerators should enumerate separately.
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(0, enumerator.Current);
+            Assert.Throws<InvalidOperationException>(() => clonedEnumerator.Current);
+
+            Assert.True(clonedEnumerator.MoveNext());
+            Assert.Equal(0, enumerator.Current);
+            Assert.Equal(0, clonedEnumerator.Current);
+
+            // Cloned and original enumerators should enumerate in the same sequence.
+            for (int i = 1; i < queue.Count; i++)
+            {
+                Assert.True(enumerator.MoveNext());
+                Assert.NotEqual(enumerator.Current, clonedEnumerator.Current);
+
+                Assert.True(clonedEnumerator.MoveNext());
+                Assert.Equal(enumerator.Current, clonedEnumerator.Current);
+            }
+
+            Assert.False(enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            Assert.Equal(queue.Count - 1, clonedEnumerator.Current);
+
+            Assert.False(clonedEnumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            Assert.Throws<InvalidOperationException>(() => clonedEnumerator.Current);
+        }
+
+        [Fact]
+        public static void GetEnumerator_InMiddleOfEnumeration_Clone()
+        {
+            Queue queue = Helpers.CreateIntQueue(10);
+
+            IEnumerator enumerator = queue.GetEnumerator();
+            enumerator.MoveNext();
+            ICloneable cloneableEnumerator = (ICloneable)enumerator;
+
+            // Cloned and original enumerators should start at the same spot, even
+            // if the original is in the middle of enumeration.
+            IEnumerator clonedEnumerator = (IEnumerator)cloneableEnumerator.Clone();
+            Assert.Equal(enumerator.Current, clonedEnumerator.Current);
+
+            for (int i = 0; i < queue.Count - 1; i++)
+            {
+                Assert.True(clonedEnumerator.MoveNext());
+            }
+
+            Assert.False(clonedEnumerator.MoveNext());
         }
 
         [Fact]
@@ -882,7 +955,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_NullQueue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("queue", () => Queue.Synchronized(null)); // Queue is null
+            AssertExtensions.Throws<ArgumentNullException>("queue", () => Queue.Synchronized(null)); // Queue is null
         }
 
         public void StartEnqueueThread()

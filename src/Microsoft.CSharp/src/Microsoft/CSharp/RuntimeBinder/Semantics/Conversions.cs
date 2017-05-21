@@ -120,15 +120,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //     o    An explicit reference conversion exists from SE to TE.
                 if (typeSrc.IsArrayType() && typeDst.IsArrayType())
                 {
-                    return typeSrc.AsArrayType().rank == typeDst.AsArrayType().rank && FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsArrayType().GetElementType());
+                    return typeSrc.AsArrayType().rank == typeDst.AsArrayType().rank 
+                        && typeSrc.AsArrayType().IsSZArray == typeDst.AsArrayType().IsSZArray
+                        && FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsArrayType().GetElementType());
                 }
 
                 // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
                 //      and their base interfaces, provided there is an explicit reference conversion from S to T.
                 if (typeSrc.IsArrayType())
                 {
-                    if (typeSrc.AsArrayType().rank != 1 ||
-                        !typeDst.isInterfaceType() || typeDst.AsAggregateType().GetTypeArgsAll().Size != 1)
+                    if (!typeSrc.AsArrayType().IsSZArray ||
+                        !typeDst.isInterfaceType() || typeDst.AsAggregateType().GetTypeArgsAll().Count != 1)
                     {
                         return false;
                     }
@@ -144,7 +146,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    return FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsAggregateType().GetTypeArgsAll().Item(0));
+                    return FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsAggregateType().GetTypeArgsAll()[0]);
                 }
 
                 if (typeDst.IsArrayType() && typeSrc.IsAggregateType())
@@ -161,8 +163,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //      are the same type or there is an implicit or explicit reference conversion from S to T.
                     ArrayType arrayDest = typeDst.AsArrayType();
                     AggregateType aggtypeSrc = typeSrc.AsAggregateType();
-                    if (arrayDest.rank != 1 || !typeSrc.isInterfaceType() ||
-                        aggtypeSrc.GetTypeArgsAll().Size != 1)
+                    if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() ||
+                        aggtypeSrc.GetTypeArgsAll().Count != 1)
                     {
                         return false;
                     }
@@ -179,7 +181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     CType typeArr = arrayDest.GetElementType();
-                    CType typeLst = aggtypeSrc.GetTypeArgsAll().Item(0);
+                    CType typeLst = aggtypeSrc.GetTypeArgsAll()[0];
 
                     Debug.Assert(!typeArr.IsNeverSameType());
                     return typeArr == typeLst || FExpRefConv(loader, typeArr, typeLst);
@@ -230,13 +232,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray pSourceArgs = pSource.AsAggregateType().GetTypeArgsAll();
             TypeArray pTargetArgs = pTarget.AsAggregateType().GetTypeArgsAll();
 
-            Debug.Assert(pTypeParams.size == pSourceArgs.size);
-            Debug.Assert(pTypeParams.size == pTargetArgs.size);
+            Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
+            Debug.Assert(pTypeParams.Count == pTargetArgs.Count);
 
-            for (int iParam = 0; iParam < pTypeParams.size; ++iParam)
+            for (int iParam = 0; iParam < pTypeParams.Count; ++iParam)
             {
-                CType pSourceArg = pSourceArgs.Item(iParam);
-                CType pTargetArg = pTargetArgs.Item(iParam);
+                CType pSourceArg = pSourceArgs[iParam];
+                CType pTargetArg = pTargetArgs[iParam];
 
                 // If they're identical then this one is automatically good, so skip it.
                 // If we have an error type, then we're in some fault tolerance. Let it through.
@@ -244,7 +246,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     continue;
                 }
-                TypeParameterType pParam = pTypeParams.Item(iParam).AsTypeParameterType();
+                TypeParameterType pParam = pTypeParams[iParam].AsTypeParameterType();
                 if (pParam.Invariant)
                 {
                     return false;

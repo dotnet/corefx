@@ -251,11 +251,17 @@ namespace System.Net.Http
                 int maxConnections = _associatedHandler.MaxConnectionsPerServer;
                 if (maxConnections < int.MaxValue) // int.MaxValue considered infinite, mapping to libcurl default of 0
                 {
-                    // This should always succeed, as we already verified we can set this option with this value.  Treat 
-                    // any failure then as non-fatal in release; worst case is we employ more connections than desired.
                     CURLMcode code = Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, maxConnections);
-                    Debug.Assert(code == CURLMcode.CURLM_OK, $"Expected OK, got {code}");
-                    EventSourceTrace("Set max connections per server to {0}", maxConnections);
+                    switch (code)
+                    {
+                        case CURLMcode.CURLM_OK:
+                            EventSourceTrace("Set max host connections to {0}", maxConnections);
+                            break;
+                        default:
+                            // Treat failures as non-fatal in release; worst case is we employ more connections than desired.
+                            EventSourceTrace("Setting CURLMOPT_MAX_HOST_CONNECTIONS failed: {0}. Ignoring option.", code);
+                            break;
+                    }
                 }
 
                 return multiHandle;
@@ -602,7 +608,7 @@ namespace System.Net.Http
                     // Now propagate any failure that may have occurred while cleaning up
                     if (lastError != null)
                     {
-                        ExceptionDispatchInfo.Capture(lastError).Throw();
+                        ExceptionDispatchInfo.Throw(lastError);
                     }
                 }
                 finally
@@ -622,7 +628,7 @@ namespace System.Net.Http
             private void ActivateNewRequest(EasyRequest easy)
             {
                 Debug.Assert(easy != null, "We should never get a null request");
-                Debug.Assert(easy._associatedMultiAgent == null, "New requests should not be associated with an agent yet");
+                Debug.Assert(easy._associatedMultiAgent == this, "Request should be associated with this agent");
 
                 // If cancellation has been requested, complete the request proactively
                 if (easy._cancellationToken.IsCancellationRequested)
@@ -654,7 +660,6 @@ namespace System.Net.Http
                 {
                     easy.InitializeCurl();
 
-                    easy._associatedMultiAgent = this;
                     easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_PRIVATE, gcHandlePtr);
                     easy.SetCurlCallbacks(gcHandlePtr, s_receiveHeadersCallback, s_sendCallback, s_seekCallback, s_receiveBodyCallback, s_debugCallback);
 
@@ -921,12 +926,24 @@ namespace System.Net.Http
                             return 0;
                         }
 
+                        // Make sure we've not yet published the response. This could happen with trailer headers,
+                        // in which case we just ignore them (we don't want to add them to the response headers at
+                        // this point, as it'd contribute to a race condition, both in terms of headers appearing
+                        // "randomly" and in terms of accessing a non-thread-safe data structure from this thread
+                        // while the consumer might be accessing / mutating it elsewhere.)
+                        if (easy.Task.IsCompleted)
+                        {
+                            CurlHandler.EventSourceTrace("Response already published. Ignoring headers.", easy: easy);
+                            return size;
+                        }
+
                         CurlResponseMessage response = easy._responseMessage;
                         CurlResponseHeaderReader reader = new CurlResponseHeaderReader(buffer, size);
 
                         // Validate that we haven't received too much header data.
+                        // MaxResponseHeadersLength property is in units in K (1024) bytes.
                         ulong headerBytesReceived = response._headerBytesReceived + size;
-                        if (headerBytesReceived > (ulong)easy._handler.MaxResponseHeadersLength)
+                        if (headerBytesReceived > (ulong)(easy._handler.MaxResponseHeadersLength * 1024))
                         {
                             throw new HttpRequestException(
                                 SR.Format(SR.net_http_response_headers_exceeded_length, easy._handler.MaxResponseHeadersLength));

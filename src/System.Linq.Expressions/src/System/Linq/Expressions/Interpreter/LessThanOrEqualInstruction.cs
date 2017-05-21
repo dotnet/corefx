@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -295,7 +294,7 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_liftedToNullSingle ?? (s_liftedToNullSingle = new LessThanOrEqualSingle(null));
                     case TypeCode.Double: return s_liftedToNullDouble ?? (s_liftedToNullDouble = new LessThanOrEqualDouble(null));
                     default:
-                        throw Error.ExpressionNotSupportedForType("LessThanOrEqual", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
             else
@@ -314,7 +313,7 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_Single ?? (s_Single = new LessThanOrEqualSingle(Utils.BoxedFalse));
                     case TypeCode.Double: return s_Double ?? (s_Double = new LessThanOrEqualDouble(Utils.BoxedFalse));
                     default:
-                        throw Error.ExpressionNotSupportedForType("LessThanOrEqual", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
         }

@@ -9,10 +9,12 @@
     <ProjectReference Include="..\src\System.Reflection.Metadata.csproj">
       <SupportedFramework>net45;netcore45;netcoreapp1.0;wpa81;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <Dependency Include="System.Collections.Immutable">
+    <FilePackageDependency Include="System.Collections.Immutable">
       <TargetFramework>portable-net45+win8</TargetFramework>
       <Version>1.1.37</Version>
-    </Dependency>
+    </FilePackageDependency>
+    <InboxOnTargetFramework Include="netcoreapp2.0" />
+    <InboxOnTargetFramework Include="uap10.1" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

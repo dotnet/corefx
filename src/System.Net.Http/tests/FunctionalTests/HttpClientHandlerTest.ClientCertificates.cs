@@ -14,6 +14,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "dotnet/corefx #20010")]
     public class HttpClientHandler_ClientCertificates_Test
     {
         [Fact]
@@ -32,7 +33,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var handler = new HttpClientHandler())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => handler.ClientCertificateOptions = option);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.ClientCertificateOptions = option);
             }
         }
 
@@ -45,6 +46,16 @@ namespace System.Net.Http.Functional.Tests
             {
                 handler.ClientCertificateOptions = option;
                 Assert.Equal(option, handler.ClientCertificateOptions);
+            }
+        }
+
+        [Fact]
+        public void ClientCertificates_ClientCertificateOptionsAutomatic_ThrowsException()
+        {
+            using (var handler = new HttpClientHandler())
+            {
+                handler.ClientCertificateOptions = ClientCertificateOption.Automatic;
+                Assert.Throws<InvalidOperationException>(() => handler.ClientCertificates);
             }
         }
 
@@ -139,12 +150,8 @@ namespace System.Net.Http.Functional.Tests
         }
 
         private static bool BackendSupportsCustomCertificateHandling =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
+            HttpClientHandler_ServerCertificates_Test.BackendSupportsCustomCertificateHandling;
 
         private static bool BackendDoesNotSupportCustomCertificateHandling => !BackendSupportsCustomCertificateHandling;
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
     }
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 
 namespace System.Diagnostics
@@ -18,6 +19,11 @@ namespace System.Diagnostics
     /// relationships for the activities and sets Activity.Current.
     /// 
     /// When activity is finished, it should be stopped with static Activity.Stop method.
+    /// 
+    /// No methods on Activity allow exceptions to escape as a response to bad inputs.
+    /// They are thrown and caught (that allows Debuggers and Monitors to see the error)
+    /// but the exception is supressed, and the operation does something reasonable (typically
+    /// doing nothing).  
     /// </summary>
     public partial class Activity
     {
@@ -32,11 +38,19 @@ namespace System.Diagnostics
         /// <summary>
         /// This is an ID that is specific to a particular request.   Filtering
         /// to a particular ID insures that you get only one request that matches.  
-        /// Id has a hierarchical structure: /root-id.id1.id2.id3.  Id is generated when 
-        /// <see cref="Start"/> is called by appending suffix (preceeded with '.') to Parent.Id
+        /// Id has a hierarchical structure: '|root-id.id1_id2.id3_' Id is generated when 
+        /// <see cref="Start"/> is called by appending suffix to Parent.Id
         /// or ParentId; Activity has no Id until it started
-        /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#activity-id"/> for nore details
+        /// <para/>
+        /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
+        /// <example>
+        /// Id looks like '|a000b421-5d183ab6-Server1.1.8e2d4c28_1.':<para />
+        ///  - '|a000b421-5d183ab6-Server1.' - Id of the first, top-most, Activity created<para />
+        ///  - '|a000b421-5d183ab6-Server1.1.' - Id of a child activity. It was started in the same process as the first activity and ends with '.'<para />
+        ///  - '|a000b421-5d183ab6-Server1.1.8e2d4c28_' - Id of the grand child activity. It was started in another process and ends with '_'<para />
+        /// 'a000b421-5d183ab6-Server1' is a <see cref="RootId"/> for the first Activity and all its children
+        /// </example>
         public string Id { get; private set; }
 
         /// <summary>
@@ -46,7 +60,7 @@ namespace System.Diagnostics
         public DateTime StartTimeUtc { get; private set; }
 
         /// <summary>
-        /// If the Activity that created this activity is  from the same process you can get 
+        /// If the Activity that created this activity is from the same process you can get 
         /// that Activity with Parent.  However, this can be null if the Activity has no
         /// parent (a root activity) or if the Parent is from outside the process.
         /// </summary>
@@ -56,17 +70,18 @@ namespace System.Diagnostics
         /// <summary>
         /// If the parent for this activity comes from outside the process, the activity
         /// does not have a Parent Activity but MAY have a ParentId (which was deserialized from
-        /// from the parent) .   This accessor fetches the parent ID if it exists at all.  
+        /// from the parent).   This accessor fetches the parent ID if it exists at all.  
         /// Note this can be null if this is a root Activity (it has no parent)
+        /// <para/>
+        /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
         public string ParentId { get; private set; }
 
-
         /// <summary>
-        /// Root Id is substring from Activity.Id (or ParentId) between '/' (or beginning) and first '.'.
+        /// Root Id is substring from Activity.Id (or ParentId) between '|' (or beginning) and first '.'.
         /// Filtering by root Id allows to find all Activities involved in operation processing.
         /// RootId may be null if Activity has neither ParentId nor Id.
-        /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#activity-id"/> for more details
+        /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
         public string RootId
         {
@@ -79,11 +94,11 @@ namespace System.Diagnostics
                 {
                     if (Id != null)
                     {
-                        _rootId = getRootId(Id);
+                        _rootId = GetRootId(Id);
                     }
                     else if (ParentId != null)
                     {
-                        _rootId = getRootId(ParentId);
+                        _rootId = GetRootId(ParentId);
                     }
                 }
                 return _rootId;
@@ -109,7 +124,7 @@ namespace System.Diagnostics
         /// Baggage is string-string key-value pairs that represent information that will
         /// be passed along to children of this activity.   Baggage is serialized 
         /// when requests leave the process (along with the ID).   Typically Baggage is
-        /// used to do fine-grained control over logging of the activty and any children.  
+        /// used to do fine-grained control over logging of the activity and any children.  
         /// In general, if you are not using the data at runtime, you should be using Tags 
         /// instead. 
         /// </summary> 
@@ -138,20 +153,24 @@ namespace System.Diagnostics
         /* Constructors  Builder methods */
 
         /// <summary>
-        /// Note that Activity has a 'builder' pattern, where you call the constructor, a number of 'With*' APIs and then
+        /// Note that Activity has a 'builder' pattern, where you call the constructor, a number of 'Set*' and 'Add*' APIs and then
         /// call <see cref="Start"/> to build the activity.  You MUST call <see cref="Start"/> before using it.
         /// </summary>
         /// <param name="operationName">Operation's name <see cref="OperationName"/></param>
         public Activity(string operationName)
         {
             if (string.IsNullOrEmpty(operationName))
-                throw new ArgumentException($"{nameof(operationName)} must not be null or empty");
+            {
+                NotifyError(new ArgumentException($"{nameof(operationName)} must not be null or empty"));
+                return;
+            }
+
             OperationName = operationName;
         }
 
         /// <summary>
         /// Update the Activity to have a tag with an additional 'key' and value 'value'.
-        /// This shows up in the <see cref="Tags"/>  eumeration.   It is meant for information that
+        /// This shows up in the <see cref="Tags"/>  enumeration.   It is meant for information that
         /// is useful to log but not needed for runtime control (for the latter, <see cref="Baggage"/>)
         /// </summary>
         /// <returns>'this' for convenient chaining</returns>
@@ -163,8 +182,8 @@ namespace System.Diagnostics
 
         /// <summary>
         /// Update the Activity to have baggage with an additional 'key' and value 'value'.
-        /// This shows up in the <see cref="Baggage"/> eumeration as well as the <see cref="GetBaggageItem(string)"/>
-        /// mathod.
+        /// This shows up in the <see cref="Baggage"/> enumeration as well as the <see cref="GetBaggageItem(string)"/>
+        /// method.
         /// Baggage is meant for information that is needed for runtime control.   For information 
         /// that is simply useful to show up in the log with the activity use <see cref="Tags"/>.
         /// Returns 'this' for convenient chaining.
@@ -188,17 +207,21 @@ namespace System.Diagnostics
         public Activity SetParentId(string parentId)
         {
             if (Parent != null)
-                throw new InvalidOperationException(
-                    $"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}");
-
-            if (ParentId != null)
-                throw new InvalidOperationException(
-                    $"{nameof(ParentId)} is already set");
-
-            if (string.IsNullOrEmpty(parentId))
-                throw new ArgumentException($"{nameof(parentId)} must not be null or empty");
-
-            ParentId = parentId;
+            {
+                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+            }
+            else if (ParentId != null)
+            {
+                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+            }
+            else if (string.IsNullOrEmpty(parentId))
+            {
+                NotifyError(new ArgumentException($"{nameof(parentId)} must not be null or empty"));
+            }
+            else
+            {
+                ParentId = parentId;
+            }
             return this;
         }
 
@@ -210,10 +233,16 @@ namespace System.Diagnostics
         public Activity SetStartTime(DateTime startTimeUtc)
         {
             if (startTimeUtc.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC");
-            StartTimeUtc = startTimeUtc;
+            {
+                NotifyError(new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC"));
+            }
+            else
+            {
+                StartTimeUtc = startTimeUtc;
+            }
             return this;
         }
+
         /// <summary>
         /// Update the Activity to set <see cref="Duration"/>
         /// as a difference between <see cref="StartTimeUtc"/>
@@ -224,21 +253,27 @@ namespace System.Diagnostics
         public Activity SetEndTime(DateTime endTimeUtc)
         {
             if (endTimeUtc.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC");
-
-            Duration = endTimeUtc - StartTimeUtc;
+            {
+                NotifyError(new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC"));
+            }
+            else
+            {
+                Duration = endTimeUtc - StartTimeUtc;
+                if (Duration.Ticks <= 0)
+                    Duration = new TimeSpan(1); // We want Duration of 0 to mean  'EndTime not set)
+            }
             return this;
         }
 
         /// <summary>
-        /// If the Activity has ended (<see cref="Stop"/> was called) then this is the delta
-        /// between start and end.   If the activity is not ended then this is 
+        /// If the Activity has ended (<see cref="Stop"/> or <see cref="SetEndTime"/> was called) then this is the delta
+        /// between <see cref="StartTimeUtc"/> and end.   If Activity is not ended and <see cref="SetEndTime"/> was not called then this is 
         /// <see cref="TimeSpan.Zero"/>.
         /// </summary>
         public TimeSpan Duration { get; private set; }
 
         /// <summary>
-        /// Starts activity:
+        /// Starts activity
         /// <list type="bullet">
         /// <item>Sets <see cref="Parent"/> to hold <see cref="Current"/>.</item>
         /// <item>Sets <see cref="Current"/> to this activity.</item>
@@ -252,24 +287,29 @@ namespace System.Diagnostics
         public Activity Start()
         {
             if (Id != null)
-                throw new InvalidOperationException("Trying to start an Activity that was already started");
-
-            if (ParentId == null)
             {
-                var parent = Current;
-                if (parent != null)
-                {
-                    ParentId = parent.Id;
-                    Parent = parent;
-                }
+                NotifyError(new InvalidOperationException("Trying to start an Activity that was already started"));
             }
+            else
+            {
+                if (ParentId == null)
+                {
+                    var parent = Current;
+                    if (parent != null)
+                    {
+                        ParentId = parent.Id;
+                        Parent = parent;
+                    }
+                }
 
-            if (StartTimeUtc == default(DateTime))
-                StartTimeUtc = DateTime.UtcNow;
+                if (StartTimeUtc == default(DateTime))
+                {
+                    StartTimeUtc = GetUtcNow();
+                }
 
-            Id = GenerateId();
-
-            Current = this;
+                Id = GenerateId();
+                Current = this;
+            }
             return this;
         }
 
@@ -283,19 +323,37 @@ namespace System.Diagnostics
         public void Stop()
         {
             if (Id == null)
-                throw new InvalidOperationException("Trying to stop an Activity that was not started");
+            {
+                NotifyError(new InvalidOperationException("Trying to stop an Activity that was not started"));
+                return;
+            }
 
             if (!isFinished)
             {
                 isFinished = true;
 
                 if (Duration == TimeSpan.Zero)
-                    SetEndTime(DateTime.UtcNow);
+                {
+                    SetEndTime(GetUtcNow());
+                }
 
                 Current = Parent;
             }
         }
+
         #region private 
+        private static void NotifyError(Exception exception)
+        {
+            // Throw and catch the exception.  This lets it be seen by the debugger
+            // ETW, and other monitoring tools.   However we immediately swallow the
+            // exception.   We may wish in the future to allow users to hook this 
+            // in other useful ways but for now we simply swallow the exceptions.  
+            try
+            {
+                throw exception;
+            }
+            catch { }
+        }
 
         private string GenerateId()
         {
@@ -304,7 +362,7 @@ namespace System.Diagnostics
             {
                 // Normal start within the process
                 Debug.Assert(!string.IsNullOrEmpty(Parent.Id));
-                ret = appendSuffix(Parent.Id, Interlocked.Increment(ref Parent._currentChildId).ToString());
+                ret = AppendSuffix(Parent.Id, Interlocked.Increment(ref Parent._currentChildId).ToString(), '.');
             }
             else if (ParentId != null)
             {
@@ -313,95 +371,98 @@ namespace System.Diagnostics
 
                 //sanitize external RequestId as it may not be hierarchical. 
                 //we cannot update ParentId, we must let it be logged exactly as it was passed.
-                string parentId = ParentId[0] == s_rootIdPrefix ? ParentId : s_rootIdPrefix + ParentId;
-                ret = appendSuffix(parentId, "I-" + Interlocked.Increment(ref s_currentRootId));
+                string parentId = ParentId[0] == '|' ? ParentId : '|' + ParentId;
+
+                char lastChar = parentId[parentId.Length - 1];
+                if (lastChar != '.' && lastChar != '_')
+                {
+                    parentId += '.';
+                }
+
+                ret = AppendSuffix(parentId, Interlocked.Increment(ref s_currentRootId).ToString("x"), '_');
             }
             else
             {
                 // A Root Activity (no parent).  
-                ret = generateRootId();
+                ret = GenerateRootId();
             }
             // Useful place to place a conditional breakpoint.  
             return ret;
         }
 
-        private string getRootId(string id)
+        private string GetRootId(string id)
         {
-            //id MAY start with '/' and contain '.'. We return substring between them
-            //ParentId MAY NOT have hierarchical structure and we don't know if initially rootId was started with '/',
-            //so we must NOT include first '/' to allow mixed hierarchical and non-hierarchical request id scenarios
-            int rootEnd = id.IndexOf(s_idDelimiter);
+            //id MAY start with '|' and contain '.'. We return substring between them
+            //ParentId MAY NOT have hierarchical structure and we don't know if initially rootId was started with '|',
+            //so we must NOT include first '|' to allow mixed hierarchical and non-hierarchical request id scenarios
+            int rootEnd = id.IndexOf('.');
             if (rootEnd < 0)
                 rootEnd = id.Length;
-            int rootStart = id[0] == s_rootIdPrefix ? 1 : 0;
+            int rootStart = id[0] == '|' ? 1 : 0;
             return id.Substring(rootStart, rootEnd - rootStart);
         }
 
-        private string appendSuffix(string parentId, string suffix)
+        private string AppendSuffix(string parentId, string suffix, char delimiter)
         {
 #if DEBUG
-            suffix = OperationName + "-" + suffix;
+            suffix = OperationName.Replace('.', '-') + "-" + suffix;
 #endif
-            if (parentId.Length + suffix.Length <= 127)
-                return parentId + s_idDelimiter + suffix;
+            if (parentId.Length + suffix.Length < RequestIdMaxLength)
+                return parentId + suffix + delimiter;
 
             //Id overflow:
             //find position in RequestId to trim
-            int trimPosition = parentId.Length - 1;
-            while (trimPosition > 0)
+            int trimPosition = RequestIdMaxLength - 9; // overflow suffix + delimiter length is 9
+            while (trimPosition > 1)
             {
-                if ((parentId[trimPosition] == s_idDelimiter || parentId[trimPosition] == s_overflowDelimiter)
-                    && trimPosition <= 119) //overflow suffix length is 8 + 1 for #.
+                if (parentId[trimPosition - 1] == '.' || parentId[trimPosition - 1] == '_')
                     break;
                 trimPosition--;
             }
 
             //ParentId is not valid Request-Id, let's generate proper one.
             if (trimPosition == 0)
-                return generateRootId();
+                return GenerateRootId();
 
             //generate overflow suffix
-            byte[] bytes = new byte[4];
-            s_random.Value.NextBytes(bytes);
-
-            return parentId.Substring(0, trimPosition) + 
-                s_overflowDelimiter +
-                BitConverter.ToUInt32(bytes, 0).ToString("x8");
+            string overflowSuffix = ((int)GetRandomNumber()).ToString("x8");
+            return parentId.Substring(0, trimPosition) + overflowSuffix + '#';
         }
 
-        private string generateRootId()
+        private string GenerateRootId()
         {
-            if (s_uniqPrefix == null)
-            {
-                // Here we make an ID to represent the Process/AppDomain.   Ideally we use process ID but 
-                // it is unclear if we have that ID handy.   Currently we use low bits of high freq tick 
-                // as a unique random number (which is not bad, but loses randomness for startup scenarios).  
-                Interlocked.CompareExchange(ref s_uniqPrefix, generateUniquePrefix(), null);
-            }
-
-#if DEBUG
-            string ret = s_uniqPrefix + OperationName + s_idDelimiter + Interlocked.Increment(ref s_currentRootId);
-#else           // To keep things short, we drop the operation name 
-            string ret = s_uniqPrefix + s_idDelimiter + Interlocked.Increment(ref s_currentRootId);
-#endif
-            return ret;
+            // It is important that the part that changes frequently be first, because
+            // many hash functions don't 'randomize' the tail of a string.   This makes
+            // sampling based on the hash produce poor samples.   Thus the 'machine part'
+            // of the ID is last.  
+            return  '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
         }
-
-        // Used to generate an ID 
-        private int _currentChildId;            // A unique number for all children of this activity.  
-        private static int s_currentRootId;      // A unique number inside the appdomain.
-        private static string s_uniqPrefix;
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
+        private static unsafe long GetRandomNumber()
+        {
+            // Use the first 8 bytes of the GUID as a random number.  
+            Guid g = Guid.NewGuid();
+            return *((long*)&g);
+        }
 
         private string _rootId;
-        private static char s_idDelimiter = '.';
-        private static char s_overflowDelimiter = '#';
-        private static char s_rootIdPrefix = '/';
+        private int _currentChildId;  // A unique number for all children of this activity.  
 
-        private static readonly Lazy<Random> s_random = new Lazy<Random>();
+        // Used to generate an ID it represents the machine and process we are in.  
+        private static readonly string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
+
+        //A unique number inside the appdomain, randomized between appdomains. 
+        //Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
+        private static long s_currentRootId = (uint)GetRandomNumber();
+
+        private const int RequestIdMaxLength = 1024;
+
         /// <summary>
         /// Having our own key-value linked list allows us to be more efficient  
         /// </summary>
-        private class KeyValueListNode
+        private partial class KeyValueListNode
         {
             public KeyValuePair<string, string> keyValue;
             public KeyValueListNode Next;
@@ -410,6 +471,6 @@ namespace System.Diagnostics
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private bool isFinished;
-#endregion // private
+        #endregion // private
     }
 }

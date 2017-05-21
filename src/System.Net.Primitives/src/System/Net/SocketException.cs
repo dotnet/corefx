@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace System.Net.Sockets
 {
@@ -38,5 +39,13 @@ namespace System.Net.Sockets
         public override string Message => base.Message;
 
         public SocketError SocketErrorCode => _errorCode;
+
+        protected SocketException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"{NativeErrorCode}:{Message}");
+        }
+
+        public override int ErrorCode => base.NativeErrorCode;
     }
 }

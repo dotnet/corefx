@@ -4,6 +4,7 @@
 
 namespace System.Xml.Serialization
 {
+    using System.Xml;
     using System.Xml.Schema;
 
     ///<internalonly/>

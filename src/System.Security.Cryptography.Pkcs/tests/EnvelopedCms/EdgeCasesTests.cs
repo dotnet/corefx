@@ -21,7 +21,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class EdgeCasesTests
     {
-        [Fact]
+        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer());
+
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCase()
         {
@@ -54,7 +56,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCaseSki()
         {
@@ -92,6 +94,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop rejects zero length content: corefx#18724")]
         public static void ZeroLengthContent_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(Array.Empty<byte>());
@@ -99,20 +102,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
             {
                 CmsRecipient cmsRecipient = new CmsRecipient(cert);
-                try
-                {
-                    ecms.Encrypt(cmsRecipient);
-                }
-                catch (CryptographicException e)
-                {
-                    throw new Exception("ecms.Encrypt() threw " + e.Message + ".\nIf you're running on the desktop CLR, this is actually an expected result.");
-                }
+                ecms.Encrypt(cmsRecipient);
             }
             byte[] encodedMessage = ecms.Encode();
             ValidateZeroLengthContent(encodedMessage);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ZeroLengthContent_FixedValue()
         {
@@ -175,10 +171,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 ecms.Decrypt(extraStore);
                 ContentInfo contentInfo = ecms.ContentInfo;
                 byte[] content = contentInfo.Content;
-                if (content.Length == 6)
-                    throw new Exception("ContentInfo expected to be 0 but was actually 6. If you're running on the desktop CLR, this is actually a known bug.");
 
-                Assert.Equal(0, content.Length);
+                int expected = PlatformDetection.IsFullFramework ? 6 : 0; // Desktop bug gives 6
+                Assert.Equal(expected, content.Length);
             }
         }
 

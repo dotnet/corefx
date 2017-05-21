@@ -636,10 +636,7 @@ namespace System.Linq.Expressions.Compiler
                 return;
             }
 
-            if (typeFrom == typeof(void) || typeTo == typeof(void))
-            {
-                throw ContractUtils.Unreachable;
-            }
+            Debug.Assert(typeFrom != typeof(void) && typeTo != typeof(void));
 
             bool isTypeFromNullable = typeFrom.IsNullableType();
             bool isTypeToNullable = typeTo.IsNullableType();
@@ -682,25 +679,18 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitCastToType(this ILGenerator il, Type typeFrom, Type typeTo)
         {
-            if (!typeFrom.IsValueType && typeTo.IsValueType)
+            if (typeFrom.IsValueType)
             {
-                il.Emit(OpCodes.Unbox_Any, typeTo);
-            }
-            else if (typeFrom.IsValueType && !typeTo.IsValueType)
-            {
+                Debug.Assert(!typeTo.IsValueType);
                 il.Emit(OpCodes.Box, typeFrom);
                 if (typeTo != typeof(object))
                 {
                     il.Emit(OpCodes.Castclass, typeTo);
                 }
             }
-            else if (!typeFrom.IsValueType && !typeTo.IsValueType)
-            {
-                il.Emit(OpCodes.Castclass, typeTo);
-            }
             else
             {
-                throw Error.InvalidCast(typeFrom, typeTo);
+                il.Emit(typeTo.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, typeTo);
             }
         }
 
@@ -757,7 +747,7 @@ namespace System.Linq.Expressions.Compiler
                         case TypeCode.UInt64: method = Decimal_op_Implicit_UInt64; break;
                         case TypeCode.Char:   method = Decimal_op_Implicit_Char;   break;
                         default:
-                            throw Error.UnhandledConvert(typeTo);
+                            throw ContractUtils.Unreachable;
                     }
 
                     il.Emit(OpCodes.Call, method);
@@ -1076,7 +1066,7 @@ namespace System.Linq.Expressions.Compiler
             Debug.Assert(arrayType != null);
             Debug.Assert(arrayType.IsArray);
 
-            if (arrayType.IsVector())
+            if (arrayType.IsSZArray)
             {
                 il.Emit(OpCodes.Newarr, arrayType.GetElementType());
             }

@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -184,7 +183,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Single: return s_Single ?? (s_Single = new ModuloSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new ModuloDouble());
                 default:
-                    throw Error.ExpressionNotSupportedForType("Modulo", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

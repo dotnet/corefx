@@ -3,7 +3,7 @@
     "TargetGroup": {
       "description": "Sets the target framework for the BuildConfiguration you want to build.",
       "valueType": "property",
-      "values": ["netcoreapp", "netstandard", "netfx", "uap"],
+      "values": ["netcoreapp", "netstandard", "netfx", "uap", "mono"],
       "defaultValue": "netcoreapp"
     },
     "OSGroup": {
@@ -35,6 +35,12 @@
       "valueType": "property",
       "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
       "defaultValue": ""
+    },
+    "PortableBuild": {
+      "description": "Indicates if this is a portable build.",
+      "valueType": "property",
+      "values": [ "True", "False"],
+      "defaultValue": "false"
     },
     "SkipTests": {
       "description": "Enables/Disables running tests.",
@@ -240,10 +246,10 @@
             "MsBuildLogging":"/flp:v=normal;LogFile=build-packages.log"
           }
         },
-        "portableLinux":{
-          "description": "Make the build-native script generate binaries that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
           "settings": {
-            "RuntimeOS":"linux"
+            "PortableBuild":"true"
           }
         },
         "stripSymbols": {
@@ -380,10 +386,10 @@
             "RuntimeOs": "default"
           }
         },
-        "portableLinux":{
-          "description": "Make the build-native script generate binaries that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
           "settings": {
-            "AdditionalArgs": "portableLinux"
+            "AdditionalArgs": "-portable"
           }
         },
         "stripSymbols": {
@@ -533,10 +539,10 @@
             "BuildNumberMinor": "default"
           }
         },
-        "portableLinux":{
-          "description": "Download packages that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Download packages that are portable for the platform.",
           "settings": {
-            "RuntimeOS":"linux"
+            "PortableBuild":"true"
           }
         },
         "verbose": {

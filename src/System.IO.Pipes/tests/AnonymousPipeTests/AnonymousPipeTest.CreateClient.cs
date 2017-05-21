@@ -15,9 +15,9 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public static void NullParameters_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("pipeHandleAsString", () => new AnonymousPipeClientStream((string)null));
-            Assert.Throws<ArgumentNullException>("pipeHandleAsString", () => new AnonymousPipeClientStream(PipeDirection.Out, (string)null));
-            Assert.Throws<ArgumentNullException>("safePipeHandle", () => new AnonymousPipeClientStream(PipeDirection.In, (SafePipeHandle)null));
+            AssertExtensions.Throws<ArgumentNullException>("pipeHandleAsString", () => new AnonymousPipeClientStream((string)null));
+            AssertExtensions.Throws<ArgumentNullException>("pipeHandleAsString", () => new AnonymousPipeClientStream(PipeDirection.Out, (string)null));
+            AssertExtensions.Throws<ArgumentNullException>("safePipeHandle", () => new AnonymousPipeClientStream(PipeDirection.In, (SafePipeHandle)null));
         }
 
         [Fact]
@@ -25,7 +25,9 @@ namespace System.IO.Pipes.Tests
         {
             using (var server = new AnonymousPipeServerStream(PipeDirection.Out))
             using (var client = new AnonymousPipeClientStream(server.GetClientHandleAsString()))
-            { }
+            {
+                SuppressClientHandleFinalizationIfNetFramework(server);
+            }
         }
 
         [Theory]
@@ -34,15 +36,15 @@ namespace System.IO.Pipes.Tests
         public static void InvalidStringParameters_Throws_ArgumentException(string handle)
         {
             // Parameters must be nonnegative numeric characters
-            Assert.Throws<ArgumentException>("pipeHandleAsString", () => new AnonymousPipeClientStream(handle));
-            Assert.Throws<ArgumentException>("pipeHandleAsString", () => new AnonymousPipeClientStream(PipeDirection.Out, handle));
+            AssertExtensions.Throws<ArgumentException>("pipeHandleAsString", () => new AnonymousPipeClientStream(handle));
+            AssertExtensions.Throws<ArgumentException>("pipeHandleAsString", () => new AnonymousPipeClientStream(PipeDirection.Out, handle));
         }
 
         [Fact]
         public static void InvalidPipeHandle_Throws_ArgumentException()
         {
             SafePipeHandle pipeHandle = new SafePipeHandle(new IntPtr(-1), true);
-            Assert.Throws<ArgumentException>("safePipeHandle", () => new AnonymousPipeClientStream(PipeDirection.In, pipeHandle));
+            AssertExtensions.Throws<ArgumentException>("safePipeHandle", () => new AnonymousPipeClientStream(PipeDirection.In, pipeHandle));
         }
 
         [Fact]

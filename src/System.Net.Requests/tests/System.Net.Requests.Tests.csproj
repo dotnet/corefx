@@ -13,6 +13,12 @@
     <Compile Include="HttpWebResponseTest.cs" />
     <Compile Include="RequestStreamTest.cs" />
     <Compile Include="WebRequestTest.cs" />
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
     </Compile>
@@ -44,8 +50,6 @@
     <Compile Include="FtpWebRequestTest.cs" />
     <Compile Include="LoggingTest.cs" />
     <Compile Include="HttpRequestCachePolicyTest.cs" />
-    <Compile Include="HttpWebRequestHeaderTest.cs" />
-    <Compile Include="HttpWebRequestTest.netstandard.cs" />
     <Compile Include="HttpWebResponseHeaderTest.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

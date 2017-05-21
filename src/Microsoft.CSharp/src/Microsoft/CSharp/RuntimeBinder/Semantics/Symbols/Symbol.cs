@@ -18,7 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         kaidNil = -1,
 
         kaidGlobal = 0,
-        kaidErrorAssem,  // NOTE: !CSEE only
         kaidThisAssembly,
         kaidUnresolved,
         kaidStartAssigning,
@@ -53,19 +52,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         Lim
     }
-
-    // The pseudo-methods uses for accessing arrays (except in
-    // the optimized 1-d case.
-    internal enum ARRAYMETHOD
-    {
-        ARRAYMETH_LOAD,
-        ARRAYMETH_LOADADDR,
-        ARRAYMETH_STORE,
-        ARRAYMETH_CTOR,
-        ARRAYMETH_GETAT,   // Keep these in this order!!!
-
-        ARRAYMETH_COUNT
-    };
 
     /////////////////////////////////////////////////////////////////////////////////
 
@@ -176,9 +162,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         if (meth.Params != null)
                         {
-                            for (int i = 0; !fBogus && i < meth.Params.Size; i++)
+                            for (int i = 0; !fBogus && i < meth.Params.Count; i++)
                             {
-                                fBogus |= meth.Params.Item(i).computeCurrentBogusState();
+                                fBogus |= meth.Params[i].computeCurrentBogusState();
                             }
                         }
                     }
@@ -221,7 +207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     fBogus = this.AsAggregateType().getAggregate().computeCurrentBogusState();
                     for (int i = 0; !fBogus && i < this.AsAggregateType().GetTypeArgsAll().size; i++)
                     {
-                        fBogus |= this.AsAggregateType().GetTypeArgsAll().Item(i).computeCurrentBogusState();
+                        fBogus |= this.AsAggregateType().GetTypeArgsAll()[i].computeCurrentBogusState();
                     }
                     break;
                  */
@@ -246,7 +232,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_Scope:
                 case SYMKIND.SK_LambdaScope:
                 case SYMKIND.SK_NamespaceSymbol:
-                case SYMKIND.SK_NamespaceDeclaration:
                 default:
                     Debug.Assert(false, "CheckBogus with invalid Symbol kind");
                     setBogus(false);
@@ -263,7 +248,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public bool IsNamespaceSymbol() { return _kind == SYMKIND.SK_NamespaceSymbol; }
-        public bool IsNamespaceDeclaration() { return _kind == SYMKIND.SK_NamespaceDeclaration; }
+
         public bool IsAggregateSymbol() { return _kind == SYMKIND.SK_AggregateSymbol; }
         public bool IsAggregateDeclaration() { return _kind == SYMKIND.SK_AggregateDeclaration; }
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
@@ -341,7 +326,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return this.AsAggregateDeclaration().GetAssembly();
                 case SYMKIND.SK_AggregateSymbol:
                     return this.AsAggregateSymbol().AssociatedAssembly;
-                case SYMKIND.SK_NamespaceDeclaration:
                 case SYMKIND.SK_NamespaceSymbol:
                 case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
                 default:
@@ -369,7 +353,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return this.AsAggregateDeclaration().Agg().InternalsVisibleTo(assembly);
                 case SYMKIND.SK_AggregateSymbol:
                     return this.AsAggregateSymbol().InternalsVisibleTo(assembly);
-                case SYMKIND.SK_NamespaceDeclaration:
                 case SYMKIND.SK_ExternalAliasDefinitionSymbol:
                 case SYMKIND.SK_NamespaceSymbol:
                 case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
@@ -385,111 +368,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Assembly assem = GetAssembly();
             return assem == sym.GetAssembly() || sym.InternalsVisibleTo(assem);
         }
-
-        /*
-         * returns the inputfile where a symbol was declared.
-         *
-         * returns null for namespaces because they can be declared
-         * in multiple files.
-         */
-        public InputFile getInputFile()
-        {
-            switch (_kind)
-            {
-                case SYMKIND.SK_NamespaceSymbol:
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
-                    // namespaces don't have input files
-                    // call with a NamespaceDeclaration instead
-                    Debug.Assert(false);
-                    return null;
-
-                case SYMKIND.SK_NamespaceDeclaration:
-                    return null;
-
-                case SYMKIND.SK_AggregateSymbol:
-                    {
-#if !CSEE
-                        AggregateSymbol AggregateSymbol = this.AsAggregateSymbol();
-                        if (!AggregateSymbol.IsSource())
-                            return AggregateSymbol.DeclOnly().getInputFile();
-
-                        // Because an AggregateSymbol that isn't metadata can be defined across multiple
-                        // files, getInputFile isn't a reasonable operation.
-                        Debug.Assert(false);
-                        return null;
-#endif
-                    }
-
-                /*
-                case SK_AggregateType:
-                    return ((Symbol)this.AsAggregateType().getAggregate()).getInputFile();
-                 */
-
-                case SYMKIND.SK_AggregateDeclaration:
-                    return this.AsAggregateDeclaration().getInputFile();
-
-                /*
-                case SK_TypeParameterType:
-                    if (this.AsTypeParameterType().GetOwningSymbol().IsAggregateSymbol())
-                    {
-                        ASSERT(0);
-                        return null;
-                    }
-                    else
-                    {
-                        ASSERT(this.AsTypeParameterType().GetOwningSymbol().IsMethodSymbol());
-                        return AsTypeParameterType().GetOwningSymbol().AsMethodSymbol().getInputFile();
-                    }
-                 */
-                case SYMKIND.SK_TypeParameterSymbol:
-                    if (parent.IsAggregateSymbol())
-                    {
-                        // Because an AggregateSymbol that isn't metadata can be defined across multiple
-                        // files, getInputFile isn't a reasonable operation.
-                        Debug.Assert(false);
-                        return null;
-                    }
-                    else if (parent.IsMethodSymbol())
-                        return parent.AsMethodSymbol().getInputFile();
-                    Debug.Assert(false);
-                    break;
-
-                case SYMKIND.SK_FieldSymbol:
-                    return this.AsFieldSymbol().containingDeclaration().getInputFile();
-                case SYMKIND.SK_MethodSymbol:
-                    return this.AsMethodSymbol().containingDeclaration().getInputFile();
-                case SYMKIND.SK_PropertySymbol:
-                    return this.AsPropertySymbol().containingDeclaration().getInputFile();
-                case SYMKIND.SK_EventSymbol:
-                    return this.AsEventSymbol().containingDeclaration().getInputFile();
-
-                /*
-                case SK_PointerType:
-                case SK_NullableType:
-                case SK_ArrayType:
-                case SK_PinnedType:
-                case SK_ParameterModifierType:
-                case SK_OptionalModifierType:
-                    return AsType().GetBaseOrParameterOrElementType().getInputFile();
-                 */
-
-                case SYMKIND.SK_GlobalAttributeDeclaration:
-                    return parent.getInputFile();
-
-                /*
-                case SK_NullType:
-                case SK_VoidType:
-                    return null;
-                 */
-
-                default:
-                    Debug.Assert(false);
-                    break;
-            }
-
-            return null;
-        }
-
 
         /* Returns if the symbol is virtual. */
         public bool IsVirtual()
@@ -593,7 +471,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static NamespaceOrAggregateSymbol AsNamespaceOrAggregateSymbol(this Symbol symbol) { return symbol as NamespaceOrAggregateSymbol; }
         internal static NamespaceSymbol AsNamespaceSymbol(this Symbol symbol) { return symbol as NamespaceSymbol; }
         internal static AssemblyQualifiedNamespaceSymbol AsAssemblyQualifiedNamespaceSymbol(this Symbol symbol) { return symbol as AssemblyQualifiedNamespaceSymbol; }
-        internal static NamespaceDeclaration AsNamespaceDeclaration(this Symbol symbol) { return symbol as NamespaceDeclaration; }
+
         internal static AggregateSymbol AsAggregateSymbol(this Symbol symbol) { return symbol as AggregateSymbol; }
         internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
@@ -121,7 +122,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             };
             yield return new object[] { new int[,] { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } };
             yield return new object[] { new int[,,] { { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } } };
-            yield return new object[] { new int[,,,,] { { { { { 1 } } } } } };
+            yield return new object[] { new int[,,,] { { { { 1 } } } } };
             yield return new ArraySegment<int>(new int[] { 1, 2, 3, 4, 5 }, 1, 2);
             yield return Enumerable.Range(0, 10000).Select(i => (object)i).ToArray();
             yield return new object[200]; // fewer than 256 nulls
@@ -586,8 +587,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void SerializeDeserialize_InvalidArguments_ThrowsException()
         {
             var f = new BinaryFormatter();
-            Assert.Throws<ArgumentNullException>("serializationStream", () => f.Serialize(null, new object()));
-            Assert.Throws<ArgumentNullException>("serializationStream", () => f.Deserialize(null));
+            AssertExtensions.Throws<ArgumentNullException>("serializationStream", () => f.Serialize(null, new object()));
+            AssertExtensions.Throws<ArgumentNullException>("serializationStream", () => f.Deserialize(null));
             Assert.Throws<SerializationException>(() => f.Deserialize(new MemoryStream())); // seekable, 0-length
         }
 
@@ -747,8 +748,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        [ActiveIssue("Fails on desktop and core: 'Unable to cast object of type 'System.UInt32[][*]' to type 'System.Object[]'")]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails when serializing arrays with non-zero lower bounds")]
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
             FormatterClone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));

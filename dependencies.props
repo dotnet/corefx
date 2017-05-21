@@ -1,14 +1,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
 
-  <!-- There are situations where the live .Net Native targeting pack wouldn't be suitable to pick up.
-       These are usually temporary, but requires 'freezing' the .net native targeting pack on CoreFX.
-       Use the property below to control this behavior
-  -->
-  <PropertyGroup>
-    <DisableProjectNTfsAutoUpgrade Condition="'$(DisableProjectNTfsAutoUpgrade)'==''">false</DisableProjectNTfsAutoUpgrade>
-  </PropertyGroup>
-
   <!-- For detailed explanation of the reference versions see:
 
         https://github.com/dotnet/buildtools/blob/master/Documentation/project-nuget-dependencies.md
@@ -17,31 +9,37 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>0f63ef5a159c7cd37724ae17b05bf956dfb79b52</CoreFxCurrentRef>
-    <CoreClrCurrentRef>1c4a59f686ba747727efcddb87b0322b9c48261b</CoreClrCurrentRef>
-    <ExternalCurrentRef>3b8a99621d89ad9877f053ba8af25e0f25dcd9d8</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>d9076a006edfd716b4b54d702703fcb1f5575619</ProjectNTfsCurrentRef>
-    <SniCurrentRef>05650e53f2aa4497f74cd6e9b053d3f69f64b0bd</SniCurrentRef>
-    <StandardCurrentRef>1fcc52093fa372901c516f23293e8b8350c54027</StandardCurrentRef>
+    <CoreFxCurrentRef>3974bbe4abba2327b3b4f063331bc1b760870211</CoreFxCurrentRef>
+    <CoreClrCurrentRef>fcd99ed86a703a16698fcd0027707739c8ef3501</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>88ad93f43fcab8e6fcf4ef5713b515ff634c1a5c</CoreSetupCurrentRef>
+    <ExternalCurrentRef>9be29f5804c4798d8b51bd3fed99ea076041aeb2</ExternalCurrentRef>
+    <ProjectNTfsCurrentRef>3974bbe4abba2327b3b4f063331bc1b760870211</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>3974bbe4abba2327b3b4f063331bc1b760870211</ProjectNTfsTestILCCurrentRef>
+    <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
+    <StandardCurrentRef>a10b32352e820a22d976e9df11b0e737443045e2</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>stable</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>beta-25103-01</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>beta-25016-01</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25028-00</ProjectNTfsExpectedPrerelease>
-    <NETStandardPackageVersion>2.0.0-beta-25102-01</NETStandardPackageVersion>
+    <CoreFxExpectedPrerelease>preview2-25319-04</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview2-25316-03</CoreClrExpectedPrerelease>
+    <ExternalExpectedPrerelease>beta-25307-00</ExternalExpectedPrerelease>
+    <ProjectNTfsExpectedPrerelease>beta-25319-01</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25319-01</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25319-01</ProjectNTfsTestILCPackageVersion>
+    <NETStandardPackageVersion>2.1.0-preview1-25319-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
+    <MicrosoftNETCoreAppPackageVersion>2.0.0-preview2-25319-02</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0-beta-25007-02</SniPackageVersion>
+    <SniPackageVersion>4.4.0-preview2-25312-01</SniPackageVersion>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
   <PropertyGroup>
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
-    <XunitPerfAnalysisPackageVersion>1.0.0-alpha-build0047</XunitPerfAnalysisPackageVersion>
-    <TraceEventPackageVersion>1.0.0-alpha-experimental</TraceEventPackageVersion>
+    <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0003</XunitPerfAnalysisPackageVersion>
+    <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
+    <XunitNetcoreExtensionsVersion>1.0.1-prerelease-01616-05</XunitNetcoreExtensionsVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -60,6 +58,10 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)coreclr/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="CoreSetup">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="External">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ExternalCurrentRef)</CurrentRef>
@@ -72,9 +74,13 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)standard/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs">
+    <RemoteDependencyBuildInfo Include="ProjectNTfs">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="ProjectNTfsTestILC">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
@@ -101,21 +107,35 @@
       <ElementName>NETStandardPackageVersion</ElementName>
       <PackageId>$(NETStandardPackageId)</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs">
+    <XmlUpdateStep Include="ProjectNTfs">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsExpectedPrerelease</ElementName>
       <BuildInfoName>ProjectNTfs</BuildInfoName>
     </XmlUpdateStep>
+    <XmlUpdateStep Include="ProjectNTfsTestILC">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>ProjectNTfsTestILCExpectedPrerelease</ElementName>
+      <BuildInfoName>ProjectNTfsTestILC</BuildInfoName>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="ProjectNTfsTestILC">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>ProjectNTfsTestILCPackageVersion</ElementName>
+      <PackageId>TestILC.amd64ret</PackageId>
+    </XmlUpdateStep>
     <XmlUpdateStep Include="Sni">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>SniPackageVersion</ElementName>
-      <!-- Pick any of the SNI runtime packages. All the runtime packages of sni will have the same version -->
-      <PackageId>runtime.win7-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
+      <PackageId>runtime.win-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreSetup">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>MicrosoftNETCoreAppPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.App</PackageId>
     </XmlUpdateStep>
   </ItemGroup>
 
   <PropertyGroup>
-    <XUnitPackageVersion>2.2.0-beta4-build3444</XUnitPackageVersion>
+    <XUnitPackageVersion>2.3.0-beta1-build3642</XUnitPackageVersion>
   </PropertyGroup>
 
   <!-- Set up dependencies on packages that aren't found in a BuildInfo. -->
@@ -142,7 +162,7 @@
     </StaticDependency>
 
     <StaticDependency Include="Microsoft.xunit.netcore.extensions;Microsoft.DotNet.BuildTools.TestSuite">
-      <Version>1.0.1-prerelease-01401-04</Version>
+      <Version>$(XunitNetcoreExtensionsVersion)</Version>
     </StaticDependency>
 
     <PerformancePackDependency Include="xunit.performance.core" />
@@ -164,8 +184,6 @@
     </DependencyBuildInfo>
 
     <!-- project.json files to update -->
-    <ProjectJsonFiles Include="external\**\project.json" />
-    <ProjectJsonFiles Include="external\**\project.json.template" />
-
+    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)external\**\optional.json" />
   </ItemGroup>
 </Project>

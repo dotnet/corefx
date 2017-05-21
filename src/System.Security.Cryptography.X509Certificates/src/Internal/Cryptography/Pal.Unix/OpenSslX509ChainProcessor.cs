@@ -23,71 +23,7 @@ namespace Internal.Cryptography.Pal
         public bool? Verify(X509VerificationFlags flags, out Exception exception)
         {
             exception = null;
-            bool isEndEntity = true;
-
-            foreach (X509ChainElement element in ChainElements)
-            {
-                if (HasUnsuppressedError(flags, element, isEndEntity))
-                {
-                    return false;
-                }
-
-                isEndEntity = false;
-            }
-
-            return true;
-        }
-
-        private static bool HasUnsuppressedError(X509VerificationFlags flags, X509ChainElement element, bool isEndEntity)
-        {
-            foreach (X509ChainStatus status in element.ChainElementStatus)
-            {
-                if (status.Status == X509ChainStatusFlags.NoError)
-                {
-                    return false;
-                }
-
-                Debug.Assert(
-                    (status.Status & (status.Status - 1)) == 0,
-                    "Only one bit is set in status.Status");
-
-                // The Windows certificate store API only checks the time error for a "peer trust" certificate,
-                // but we don't have a concept for that in Unix.  If we did, we'd need to do that logic that here.
-                // Note also that that logic is skipped if CERT_CHAIN_POLICY_IGNORE_PEER_TRUST_FLAG is set.
-
-                X509VerificationFlags? suppressionFlag;
-
-                if (status.Status == X509ChainStatusFlags.RevocationStatusUnknown)
-                {
-                    if (isEndEntity)
-                    {
-                        suppressionFlag = X509VerificationFlags.IgnoreEndRevocationUnknown;
-                    }
-                    else if (IsSelfSigned(element.Certificate))
-                    {
-                        suppressionFlag = X509VerificationFlags.IgnoreRootRevocationUnknown;
-                    }
-                    else
-                    {
-                        suppressionFlag = X509VerificationFlags.IgnoreCertificateAuthorityRevocationUnknown;
-                    }
-                }
-                else
-                {
-                    suppressionFlag = GetSuppressionFlag(status.Status);
-                }
-
-                // If an error was found, and we do NOT have the suppression flag for it enabled,
-                // we have an unsuppressed error, so return true. (If there's no suppression for a given code,
-                // we (by definition) don't have that flag set.
-                if (!suppressionFlag.HasValue ||
-                    (flags & suppressionFlag) == 0)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return ChainVerifier.Verify(ChainElements, flags);
         }
 
         public X509ChainElement[] ChainElements { get; private set; }
@@ -101,7 +37,6 @@ namespace Internal.Cryptography.Pal
         public static IChainPal BuildChain(
             X509Certificate2 leaf,
             HashSet<X509Certificate2> candidates,
-            HashSet<X509Certificate2> downloaded,
             HashSet<X509Certificate2> systemTrusted,
             OidCollection applicationPolicy,
             OidCollection certificatePolicy,
@@ -121,9 +56,11 @@ namespace Internal.Cryptography.Pal
             // (If you need to think of it as an X509Store, it's a volatile memory store)
             using (SafeX509StoreHandle store = Interop.Crypto.X509StoreCreate())
             using (SafeX509StoreCtxHandle storeCtx = Interop.Crypto.X509StoreCtxCreate())
+            using (SafeX509StackHandle extraCerts = Interop.Crypto.NewX509Stack())
             {
                 Interop.Crypto.CheckValidOpenSslHandle(store);
                 Interop.Crypto.CheckValidOpenSslHandle(storeCtx);
+                Interop.Crypto.CheckValidOpenSslHandle(extraCerts);
 
                 bool lookupCrl = revocationMode != X509RevocationMode.NoCheck;
 
@@ -131,9 +68,15 @@ namespace Internal.Cryptography.Pal
                 {
                     OpenSslX509CertificateReader pal = (OpenSslX509CertificateReader)cert.Pal;
 
-                    if (!Interop.Crypto.X509StoreAddCert(store, pal.SafeHandle))
+                    using (SafeX509Handle handle = Interop.Crypto.X509UpRef(pal.SafeHandle))
                     {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        if (!Interop.Crypto.PushX509StackField(extraCerts, handle))
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
+
+                        // Ownership was transferred to the cert stack.
+                        handle.SetHandleAsInvalid();
                     }
 
                     if (lookupCrl)
@@ -159,9 +102,19 @@ namespace Internal.Cryptography.Pal
                     }
                 }
 
+                foreach (X509Certificate2 trustedCert in systemTrusted)
+                {
+                    OpenSslX509CertificateReader pal = (OpenSslX509CertificateReader)trustedCert.Pal;
+
+                    if (!Interop.Crypto.X509StoreAddCert(store, pal.SafeHandle))
+                    {
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    }
+                }
+
                 SafeX509Handle leafHandle = ((OpenSslX509CertificateReader)leaf.Pal).SafeHandle;
 
-                if (!Interop.Crypto.X509StoreCtxInit(storeCtx, store, leafHandle))
+                if (!Interop.Crypto.X509StoreCtxInit(storeCtx, store, leafHandle, extraCerts))
                 {
                     throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
@@ -208,22 +161,6 @@ namespace Internal.Cryptography.Pal
 
                         // Duplicate the certificate handle
                         X509Certificate2 elementCert = new X509Certificate2(elementCertPtr);
-
-                        // If the last cert is self signed then it's the root cert, do any extra checks.
-                        if (i == maybeRootDepth && IsSelfSigned(elementCert))
-                        {
-                            // If the root certificate was downloaded or the system
-                            // doesn't trust it, it's untrusted.
-                            if (downloaded.Contains(elementCert) ||
-                                !systemTrusted.Contains(elementCert))
-                            {
-                                AddElementStatus(
-                                    Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_UNTRUSTED,
-                                    status,
-                                    overallStatus);
-                            }
-                        }
-
                         elements[i] = new X509ChainElement(elementCert, status.ToArray(), "");
                     }
                 }
@@ -347,50 +284,6 @@ namespace Internal.Cryptography.Pal
             }
 
             list.Add(status);
-        }
-
-
-        private static X509VerificationFlags? GetSuppressionFlag(X509ChainStatusFlags status)
-        {
-            switch (status)
-            {
-                case X509ChainStatusFlags.UntrustedRoot:
-                case X509ChainStatusFlags.PartialChain:
-                    return X509VerificationFlags.AllowUnknownCertificateAuthority;
-
-                case X509ChainStatusFlags.NotValidForUsage:
-                case X509ChainStatusFlags.CtlNotValidForUsage:
-                    return X509VerificationFlags.IgnoreWrongUsage;
-
-                case X509ChainStatusFlags.NotTimeValid:
-                    return X509VerificationFlags.IgnoreNotTimeValid;
-
-                case X509ChainStatusFlags.CtlNotTimeValid:
-                    return X509VerificationFlags.IgnoreCtlNotTimeValid;
-
-                case X509ChainStatusFlags.InvalidNameConstraints:
-                case X509ChainStatusFlags.HasNotSupportedNameConstraint:
-                case X509ChainStatusFlags.HasNotDefinedNameConstraint:
-                case X509ChainStatusFlags.HasNotPermittedNameConstraint:
-                case X509ChainStatusFlags.HasExcludedNameConstraint:
-                    return X509VerificationFlags.IgnoreInvalidName;
-
-                case X509ChainStatusFlags.InvalidPolicyConstraints:
-                case X509ChainStatusFlags.NoIssuanceChainPolicy:
-                    return X509VerificationFlags.IgnoreInvalidPolicy;
-
-                case X509ChainStatusFlags.InvalidBasicConstraints:
-                    return X509VerificationFlags.IgnoreInvalidBasicConstraints;
-
-                case X509ChainStatusFlags.HasNotSupportedCriticalExtension:
-                    // This field would be mapped in by AllFlags, but we don't have a name for it currently.
-                    return (X509VerificationFlags)0x00002000;
-
-                case X509ChainStatusFlags.NotTimeNested:
-                    return X509VerificationFlags.IgnoreNotTimeNested;
-            }
-
-            return null;
         }
 
         private static X509ChainStatusFlags MapVerifyErrorToChainStatus(Interop.Crypto.X509VerifyStatusCode code)
@@ -524,8 +417,6 @@ namespace Internal.Cryptography.Pal
                     extraStore,
                     userIntermediateCerts,
                     systemIntermediateCerts,
-                    userRootCerts,
-                    systemRootCerts,
                 };
 
                 while (toProcess.Count > 0)
@@ -737,7 +628,7 @@ namespace Internal.Cryptography.Pal
 
             internal int VerifyCallback(int ok, IntPtr ctx)
             {
-                if (ok < 0)
+                if (ok != 0)
                 {
                     return ok;
                 }

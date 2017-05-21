@@ -5,7 +5,6 @@
     <ProjectGuid>{70FAC855-CAC6-4523-8477-880548D58A1B}</ProjectGuid>
     <UnsupportedPlatforms>Linux;NetBSD;OSX</UnsupportedPlatforms>
     <!-- Skipping the tests for project in all platforms due to issue: https://github.com/dotnet/corefx/issues/15041 -->
-    <RunTestsForProject>false</RunTestsForProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
@@ -73,6 +72,9 @@
     <Compile Include="SystemAcl\SystemAcl_RemoveInheritedAces.cs" />
     <Compile Include="SystemAcl\SystemAcl_SetAudit.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -8,14 +8,20 @@ namespace System.Globalization.Tests
     {
         public static int[] UrINNumberGroupSizes()
         {
-            if ((PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10)
+            if (
+                (PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10)
+#if !uap
                 ||
-                (PlatformDetection.IsOSX && PlatformDetection.OSXKernelVersion >= new Version(15, 0)))
+                (PlatformDetection.IsOSX && PlatformDetection.OSXKernelVersion >= new Version(15, 0))
+#endif
+                || (PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404) || PlatformDetection.IsFedora
+               )
             {
                 return new int[] { 3 };
             }
             else
             {
+                // Fedora, Ubuntu 14.04, <= Windows 8
                 return new int[] { 3, 2 };
             }
         }

@@ -16,8 +16,7 @@ namespace System.Globalization.Tests
             yield return new object[] { new CultureInfo("en-US").DateTimeFormat, englishAbbreviatedDayNames };
             yield return new object[] { new DateTimeFormatInfo(), englishAbbreviatedDayNames };
 
-            // ActiveIssue(2103)
-            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610 && !PlatformDetection.IsFedora23)
+            if (!PlatformDetection.IsUbuntu || PlatformDetection.IsUbuntu1404)
             {
                 yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, DateTimeFormatInfoData.FrFRAbbreviatedDayNames() };
             }
@@ -49,7 +48,7 @@ namespace System.Globalization.Tests
         [InlineData(DayOfWeek.Saturday + 1)]
         public void GetAbbreviatedDayName_Invalid_ThrowsArgumentOutOfRangeException(DayOfWeek dayofweek)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("dayofweek", () => new DateTimeFormatInfo().GetAbbreviatedDayName(dayofweek));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("dayofweek", () => new DateTimeFormatInfo().GetAbbreviatedDayName(dayofweek));
         }
     }
 }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -104,25 +103,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             if (null == @params)
                 return;
 
-            for (int i = 0; i < @params.size; i++)
+            for (int i = 0; i < @params.Count; i++)
             {
                 if (i > 0)
                 {
                     ErrAppendString(", ");
                 }
 
-                if (isParamArray && i == @params.size - 1)
+                if (isParamArray && i == @params.Count - 1)
                 {
                     ErrAppendString("params ");
                 }
 
                 // parameter type name
-                ErrAppendType(@params.Item(i), null);
+                ErrAppendType(@params[i], null);
             }
 
             if (isVarargs)
             {
-                if (@params.size != 0)
+                if (@params.Count != 0)
                 {
                     ErrAppendString(", ");
                 }
@@ -143,13 +142,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendPrintf(string format, params object[] args)
         {
-            ErrAppendString(String.Format(CultureInfo.InvariantCulture, format, args));
+            ErrAppendString(string.Format(CultureInfo.InvariantCulture, format, args));
         }
         private void ErrAppendName(Name name)
         {
             CheckDisplayableName(name);
 
-            if (name == GetNameManager().GetPredefName(PredefinedName.PN_INDEXERINTERNAL))
+            if (name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
             {
                 ErrAppendString("this");
             }
@@ -203,7 +202,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             if (parent == getBSymmgr().GetRootNS())
                 return;
 
-            if (pctx != null && !pctx.FNop() && parent.IsAggregateSymbol() && 0 != parent.AsAggregateSymbol().GetTypeVarsAll().size)
+            if (pctx != null && !pctx.FNop() && parent.IsAggregateSymbol() && 0 != parent.AsAggregateSymbol().GetTypeVarsAll().Count)
             {
                 CType pType = GetTypeManager().SubstType(parent.AsAggregateSymbol().getThisType(), pctx);
                 ErrAppendType(pType, null);
@@ -217,14 +216,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendTypeParameters(TypeArray @params, SubstContext pctx, bool forClass)
         {
-            if (@params != null && @params.size != 0)
+            if (@params != null && @params.Count != 0)
             {
                 ErrAppendChar('<');
-                ErrAppendType(@params.Item(0), pctx);
-                for (int i = 1; i < @params.size; i++)
+                ErrAppendType(@params[0], pctx);
+                for (int i = 1; i < @params.Count; i++)
                 {
                     ErrAppendString(",");
-                    ErrAppendType(@params.Item(i), pctx);
+                    ErrAppendType(@params[i], pctx);
                 }
                 ErrAppendChar('>');
             }
@@ -320,7 +319,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // This is kinda slow, but the alternative is to add bits to methsym.
                 //
                 string operatorName;
-                OperatorKind op = Operators.OperatorOfMethodName(GetNameManager(), meth.name);
+                OperatorKind op = Operators.OperatorOfMethodName(meth.name);
                 if (Operators.HasDisplayName(op))
                 {
                     operatorName = Operators.GetDisplayName(op);
@@ -330,13 +329,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     //
                     // either equals or compare
                     //
-                    if (meth.name == GetNameManager().GetPredefName(PredefinedName.PN_OPEQUALS))
+                    if (meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS))
                     {
                         operatorName = "equals";
                     }
                     else
                     {
-                        Debug.Assert(meth.name == GetNameManager().GetPredefName(PredefinedName.PN_OPCOMPARE));
+                        Debug.Assert(meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE));
                         operatorName = "compare";
                     }
                 }
@@ -428,15 +427,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             switch (sym.getKind())
             {
-                case SYMKIND.SK_NamespaceDeclaration:
-                    // for namespace declarations just convert the namespace
-                    ErrAppendSym(sym.AsNamespaceDeclaration().NameSpace(), null);
-                    break;
-
-                case SYMKIND.SK_GlobalAttributeDeclaration:
-                    ErrAppendName(sym.name);
-                    break;
-
                 case SYMKIND.SK_AggregateDeclaration:
                     ErrAppendSym(sym.AsAggregateDeclaration().Agg(), pctx);
                     break;
@@ -509,8 +499,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case SYMKIND.SK_LocalVariableSymbol:
-                case SYMKIND.SK_LabelSymbol:
-                case SYMKIND.SK_TransparentIdentifierMemberSymbol:
                     // Generate symbol name.
                     ErrAppendName(sym.name);
                     break;
@@ -519,7 +507,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case SYMKIND.SK_LambdaScope:
                 default:
                     // Shouldn't happen.
-                    Debug.Assert(false, "Bad symbol kind");
+                    Debug.Assert(false, $"Bad symbol kind: {sym.getKind()}");
                     break;
             }
         }
@@ -657,21 +645,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                             // Add [] with (rank-1) commas inside
                             ErrAppendChar('[');
 
-#if ! CSEE
                             // known rank.
-                            if (rank > 1)
+                            if (rank == 1)
                             {
-                                ErrAppendChar('*');
+                                if (!elementType.AsArrayType().IsSZArray)
+                                {
+                                    ErrAppendChar('*');
+                                }
                             }
-#endif
-
-                            for (int i = rank; i > 1; --i)
+                            else
                             {
-                                ErrAppendChar(',');
-#if ! CSEE
-
-                                ErrAppendChar('*');
-#endif
+                                for (int i = rank; i > 1; --i)
+                                {
+                                    ErrAppendChar(',');
+                                }
                             }
 
                             ErrAppendChar(']');
@@ -741,7 +728,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     fUserStrings = true;
                     break;
                 case ErrArgKind.Name:
-                    if (parg.name == GetNameManager().GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
+                    if (parg.name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
                     {
                         psz = "this";
                     }
@@ -753,11 +740,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case ErrArgKind.Str:
                     psz = parg.psz;
-                    break;
-                case ErrArgKind.PredefName:
-                    BeginString();
-                    ErrAppendName(GetNameManager().GetPredefName(parg.pdn));
-                    EndString(out psz);
                     break;
                 case ErrArgKind.SymWithType:
                     {
@@ -788,7 +770,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private bool IsDisplayableName(Name name)
         {
-            return name != GetNameManager().GetPredefName(PredefinedName.PN_MISSING);
+            return name != NameManager.GetPredefinedName(PredefinedName.PN_MISSING);
         }
 
         private void CheckDisplayableName(Name name)

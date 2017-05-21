@@ -3,14 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace System.Net.Sockets
@@ -149,18 +141,21 @@ namespace System.Net.Sockets
                         // Copy the user-provided list into our internal buffer list,
                         // so that we are not affected by subsequent changes to the list.
                         // We reuse the existing list so that we can avoid reallocation when possible.
+                        int bufferCount = value.Count;
                         if (_bufferListInternal == null)
                         {
-                            _bufferListInternal = new List<ArraySegment<byte>>(value.Count);
+                            _bufferListInternal = new List<ArraySegment<byte>>(bufferCount);
                         }
                         else
                         {
                             _bufferListInternal.Clear();
                         }
 
-                        for (int i = 0; i < value.Count; i++)
+                        for (int i = 0; i < bufferCount; i++)
                         {
-                            _bufferListInternal.Add(value[i]);
+                            ArraySegment<byte> buffer = value[i];
+                            RangeValidationHelpers.ValidateSegment(buffer);
+                            _bufferListInternal.Add(buffer);
                         }
                     }
                     else
@@ -382,8 +377,6 @@ namespace System.Net.Sockets
             // Mark as not in-use.
             _operating = Free;
 
-            InnerComplete();
-
             // Check for deferred Dispose().
             // The deferred Dispose is not guaranteed if Dispose is called while an operation is in progress. 
             // The _disposeCalled variable is not managed in a thread-safe manner on purpose for performance.
@@ -407,7 +400,7 @@ namespace System.Net.Sockets
             }
 
             // OK to dispose now.
-            FreeInternals(false);
+            FreeInternals();
 
             // Don't bother finalizing later.
             GC.SuppressFinalize(this);
@@ -415,7 +408,10 @@ namespace System.Net.Sockets
 
         ~SocketAsyncEventArgs()
         {
-            FreeInternals(true);
+            if (!Environment.HasShutdownStarted)
+            {
+                FreeInternals();
+            }
         }
 
         // NOTE: Use a try/finally to make sure Complete is called when you're done
@@ -474,14 +470,10 @@ namespace System.Net.Sockets
             // Remember the operation type.
             _completedOperation = SocketAsyncOperation.Accept;
 
-            // AcceptEx needs a single buffer with room for two special sockaddr data structures.
-            // It can also take additional buffer space in front of those special sockaddr 
-            // structures that can be filled in with initial data coming in on a connection.
-
-            // First calculate the special AcceptEx address buffer size.
-            // It is the size of two native sockaddr buffers with 16 extra bytes each.
-            // The native sockaddr buffers vary by address family so must reference the current socket.
-            _acceptAddressBufferCount = 2 * (_currentSocket._rightEndPoint.Serialize().Size + 16);
+            // AcceptEx needs a single buffer that's the size of two native sockaddr buffers with 16
+            // extra bytes each. It can also take additional buffer space in front of those special
+            // sockaddr structures that can be filled in with initial data coming in on a connection.
+            _acceptAddressBufferCount = 2 * (Socket.GetAddressSize(_currentSocket._rightEndPoint) + 16);
 
             // If our caller specified a buffer (willing to get received data with the Accept) then
             // it needs to be large enough for the two special sockaddr buffers that AcceptEx requires.
@@ -618,30 +610,13 @@ namespace System.Net.Sockets
             }
         }
 
-        internal void FinishOperationSync(SocketError socketError, int bytesTransferred, SocketFlags flags)
-        {
-            Debug.Assert(socketError != SocketError.IOPending);
-
-            if (socketError == SocketError.Success)
-            {
-                FinishOperationSyncSuccess(bytesTransferred, flags);
-            }
-            else
-            {
-                FinishOperationSyncFailure(socketError, bytesTransferred, flags);
-            }
-        }
-
         internal void FinishOperationSyncFailure(SocketError socketError, int bytesTransferred, SocketFlags flags)
         {
             SetResults(socketError, bytesTransferred, flags);
 
             // This will be null if we're doing a static ConnectAsync to a DnsEndPoint with AddressFamily.Unspecified;
             // the attempt socket will be closed anyways, so not updating the state is OK.
-            if (_currentSocket != null)
-            {
-                _currentSocket.UpdateStatusAfterSocketError(socketError);
-            }
+            _currentSocket?.UpdateStatusAfterSocketError(socketError);
 
             Complete();
         }
@@ -650,10 +625,7 @@ namespace System.Net.Sockets
         {
             SetResults(exception, bytesTransferred, flags);
 
-            if (_currentSocket != null)
-            {
-                _currentSocket.UpdateStatusAfterSocketError(_socketError);
-            }
+            _currentSocket?.UpdateStatusAfterSocketError(_socketError);
 
             Complete();
         }
@@ -664,10 +636,7 @@ namespace System.Net.Sockets
 
             // This will be null if we're doing a static ConnectAsync to a DnsEndPoint with AddressFamily.Unspecified;
             // the attempt socket will be closed anyways, so not updating the state is OK.
-            if (_currentSocket != null)
-            {
-                _currentSocket.UpdateStatusAfterSocketError(socketError);
-            }
+            _currentSocket?.UpdateStatusAfterSocketError(socketError);
 
             Complete();
             if (_context == null)
@@ -684,10 +653,7 @@ namespace System.Net.Sockets
         {
             SetResults(exception, bytesTransferred, flags);
 
-            if (_currentSocket != null)
-            {
-                _currentSocket.UpdateStatusAfterSocketError(_socketError);
-            }
+            _currentSocket?.UpdateStatusAfterSocketError(_socketError);
 
             Complete();
             if (_context == null)

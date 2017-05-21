@@ -10,6 +10,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1'">NETSTANDARD11</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8</PackageTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
@@ -21,6 +22,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\Reflection\Internal\Utilities\PinnedObject.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\CriticalDisposableObject.cs" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
+    <Compile Include="System\Reflection\Internal\Utilities\CriticalDisposableObject.netstandard1.1.cs" Condition="'$(TargetGroup)' == 'netstandard1.1'" />
     <Compile Include="System\Reflection\Internal\Utilities\ExceptionUtilities.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\PathUtilities.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\FunctionPointerAttributes.cs" />
@@ -96,14 +100,17 @@
     <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\StringUtils.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EmptyArray.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
+    <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.cs" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
+    <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.netstandard1.1.cs" Condition="'$(TargetGroup)' == 'netstandard1.1'" />
     <Compile Include="System\Reflection\Internal\Utilities\Hash.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ImmutableByteArrayInterop.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ImmutableMemoryStream.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\LightUpHelper.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\LightUpHelper.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="System\Reflection\Internal\Utilities\MemoryBlock.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\MemoryMapLightUp.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\MemoryMapLightUp.cs" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
+    <Compile Include="System\Reflection\Internal\Utilities\MemoryMapLightUp.netstandard1.1.cs" Condition="'$(TargetGroup)' == 'netstandard1.1'" />
     <Compile Include="System\Reflection\Internal\Utilities\PooledStringBuilder.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ObjectPool`1.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ReadOnlyUnmanagedMemoryStream.cs" />
@@ -257,6 +264,8 @@
     <Reference Include="System.Text.Encoding" />
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.IO.MemoryMappedFiles" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
+    <Reference Include="System.Buffers" Condition="'$(TargetGroup)' == 'netcoreapp'" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

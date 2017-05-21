@@ -33,7 +33,7 @@ namespace System.Security.Claims
         public void Ctor_AuthenticationType_Blank()
         {
             var id = new ClaimsIdentity("");
-            Assert.Null(id.AuthenticationType);
+            Assert.Equal(string.Empty, id.AuthenticationType);
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
@@ -190,7 +190,7 @@ namespace System.Security.Claims
         public void Ctor_EnumerableClaimAuthNameRoleType_AllEmpty()
         {
             var id = new ClaimsIdentity(new Claim[0], "", "", "");
-            Assert.Null(id.AuthenticationType);
+            Assert.Equal(string.Empty, id.AuthenticationType);
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
@@ -211,7 +211,7 @@ namespace System.Security.Claims
                     new Claim (ClaimsIdentity.DefaultNameClaimType, "claim_name_value"),
                 },
                        "", "", "");
-            Assert.Null(id.AuthenticationType);
+            Assert.Equal(string.Empty, id.AuthenticationType);
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
@@ -264,7 +264,7 @@ namespace System.Security.Claims
         public void Ctor_IdentityEnumerableClaimAuthNameRoleType_IdentityNullRestEmpty()
         {
             var id = new ClaimsIdentity(null, new Claim[0], "", "", "");
-            Assert.Null(id.AuthenticationType);
+            Assert.Equal(string.Empty, id.AuthenticationType);
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
@@ -287,7 +287,7 @@ namespace System.Security.Claims
                 },
                        "", "", "");
 
-            Assert.Null(id.AuthenticationType);
+            Assert.Equal(string.Empty, id.AuthenticationType);
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
@@ -506,22 +506,6 @@ namespace System.Security.Claims
             Assert.False(id.HasClaim("claim_type", "cLaIm_VaLuE"));
             Assert.False(id.HasClaim("Xclaim_type", "claim_value"));
             Assert.False(id.HasClaim("claim_type", "Xclaim_value"));
-        }
-
-        [Fact]
-        public void CustomClaimIdentity_SerializeDeserialize_Roundtrip()
-        {
-            var id1 = new CustomClaimsIdentity("someAuthType", "someNameType", "someRoleType");
-            ClaimsIdentity id2 = BinaryFormatterHelpers.Clone(id1);
-
-            Assert.Equal(id1.Actor, id2.Actor);
-            Assert.Equal(id1.AuthenticationType, id2.AuthenticationType);
-            Assert.Equal(id1.BootstrapContext, id2.BootstrapContext);
-            Assert.Equal(id1.IsAuthenticated, id2.IsAuthenticated);
-            Assert.Equal(id1.Label, id2.Label);
-            Assert.Equal(id1.Name, id2.Name);
-            Assert.Equal(id1.NameClaimType, id2.NameClaimType);
-            Assert.Equal(id1.RoleClaimType, id2.RoleClaimType);
         }
 
         [Serializable]

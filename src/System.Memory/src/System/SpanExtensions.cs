@@ -10,7 +10,7 @@ namespace System
     /// <summary>
     /// Extension methods for Span&lt;T&gt;.
     /// </summary>
-    public static class SpanExtensions
+    public static partial class SpanExtensions
     {
         /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
@@ -31,17 +31,6 @@ namespace System
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this Span<byte> span, byte value)
-        {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
-        }
-
-        /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. 
-        /// </summary>
-        /// <param name="span">The span to search.</param>
-        /// <param name="value">The value to search for.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this Span<char> span, char value)
         {
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
@@ -70,17 +59,6 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1.
-        /// </summary>
-        /// <param name="span">The span to search.</param>
-        /// <param name="value">The sequence to search for.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this Span<char> span, ReadOnlySpan<char> value)
-        {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
-        }
-
-        /// <summary>
         /// Determines whether two sequences are equal by comparing the elements using IEquatable&lt;T&gt;.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,16 +74,6 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual(this Span<byte> first, ReadOnlySpan<byte> second)
-        {
-            int length = first.Length;
-            return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
-        }
-
-        /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool SequenceEqual(this Span<char> first, ReadOnlySpan<char> second)
         {
             int length = first.Length;
             return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
@@ -135,17 +103,6 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. 
-        /// </summary>
-        /// <param name="span">The span to search.</param>
-        /// <param name="value">The value to search for.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this ReadOnlySpan<char> span, char value)
-        {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
-        }
-
-        /// <summary>
         /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
@@ -168,15 +125,77 @@ namespace System
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
+
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1.
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
-        /// <param name="value">The sequence to search for.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value)
+        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1)
         {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2)
+        {
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="values">The set of values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values)
+        {
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+        }
+
+        /// <summary>
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1)
+        {
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
+        {
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="values">The set of values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values)
+        {
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
         }
 
         /// <summary>
@@ -201,13 +220,80 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements.
+        /// Determines whether the specified sequence appears at the start of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool SequenceEqual(this ReadOnlySpan<char> first, ReadOnlySpan<char> second)
+        public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value)
         {
-            int length = first.Length;
-            return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
+            int valueLength = value.Length;
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+        }
+
+        /// <summary>
+        /// Determines whether the specified sequence appears at the start of the span.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+            where T : struct, IEquatable<T>
+        {
+            int valueLength = value.Length;
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+        }
+
+        /// <summary>
+        /// Determines whether the specified sequence appears at the start of the span.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
+        {
+            int valueLength = value.Length;
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+        }
+
+        /// <summary>
+        /// Determines whether the specified sequence appears at the start of the span.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+            where T : struct, IEquatable<T>
+        {
+            int valueLength = value.Length;
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+        }
+
+        /// <summary>
+        /// Creates a new  span over the portion of the target array.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this T[] array)
+        {
+            return new Span<T>(array);
+        }
+
+        /// <summary>
+        /// Creates a new  span over the portion of the target array segment.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment)
+        {
+            return new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        }
+
+        /// <summary>
+        /// Copies the contents of the array into the span. If the source
+        /// and destinations overlap, this method behaves as if the original values in
+        /// a temporary location before the destination is overwritten.
+        /// 
+        ///<param name="array">The array to copy items from.</param>
+        /// <param name="destination">The span to copy items into.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination Span is shorter than the source array.
+        /// </exception>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyTo<T>(this T[] array, Span<T> destination)
+        {
+            new ReadOnlySpan<T>(array).CopyTo(destination);
         }
     }
 }

@@ -4,8 +4,13 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRPropertyInfo : EXPR
+    internal sealed class ExprPropertyInfo : ExprWithType
     {
-        public PropWithType Property;
+        public ExprPropertyInfo(CType type)
+            : base(ExpressionKind.PropertyInfo, type)
+        {
+        }
+
+        public PropWithType Property { get; set; }
     }
 }

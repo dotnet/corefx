@@ -32,6 +32,17 @@ namespace System.Net.NameResolution.PalTests
             Assert.NotNull(hostEntry.Aliases);
         }
 
+        public static object[][] InvalidHostNames = new object[][] {
+            new object[] { ":" },
+            new object[] { "..." }
+        };
+
+        [Theory, MemberData(nameof(InvalidHostNames))]
+        public void GetHostByName_InvalidHostName_Throws(string hostName)
+        {
+            Assert.ThrowsAny<SocketException>(() => NameResolutionPal.GetHostByName(hostName));
+        }
+
         [Fact]
         public void GetHostByName_HostName()
         {
@@ -164,6 +175,14 @@ namespace System.Net.NameResolution.PalTests
             IPHostEntry hostEntry;
             int nativeErrorCode;
             SocketError error = NameResolutionPal.TryGetAddrInfo(hostName, out hostEntry, out nativeErrorCode);
+            if (error == SocketError.HostNotFound)
+            {
+                // On Unix, getaddrinfo returns host not found, if all the machine discovery settings on the local network
+                // is turned off. Hence dns lookup for it's own hostname fails.
+                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+                return;
+            }
+
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(hostEntry);
 
@@ -171,13 +190,25 @@ namespace System.Net.NameResolution.PalTests
             if (error == SocketError.HostNotFound)
             {
                 // On Unix, getaddrinfo returns private ipv4 address for hostname. If the OS doesn't have the
-                // dns lookup entry for this address, getnameinfo returns host not found.
+                // reverse dns lookup entry for this address, getnameinfo returns host not found.
                 Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
                 return;
             }
 
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(name);
+        }
+
+        [Fact]
+        public void TryGetAddrInfo_ExternalHost()
+        {
+            string hostName = "microsoft.com";
+
+            IPHostEntry hostEntry;
+            int nativeErrorCode;
+            SocketError error = NameResolutionPal.TryGetAddrInfo(hostName, out hostEntry, out nativeErrorCode);
+            Assert.Equal(SocketError.Success, error);
+            Assert.NotNull(hostEntry);
         }
 
         [Fact]

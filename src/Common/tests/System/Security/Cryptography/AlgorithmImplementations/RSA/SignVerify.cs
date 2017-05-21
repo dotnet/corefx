@@ -10,6 +10,9 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public class SignVerify
     {
+        public static bool BadKeyFormatDoesntThrow => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer();
+        public static bool InvalidKeySizeDoesntThrow => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer();
+
         [Fact]
         public static void InvalidKeySize_DoesNotInvalidateKey()
         {
@@ -25,6 +28,39 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [Fact]
+        public static void PublicKey_CannotSign()
+        {
+            using (RSA rsa = RSAFactory.Create())
+            using (RSA rsaPub = RSAFactory.Create())
+            {
+                rsaPub.ImportParameters(rsa.ExportParameters(false));
+
+                Assert.ThrowsAny<CryptographicException>(
+                    () => rsaPub.SignData(TestData.HelloBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            }
+        }
+
+        [Fact]
+        public static void SignEmptyHash()
+        {
+            using (RSA rsa = RSAFactory.Create())
+            {
+                Assert.ThrowsAny<CryptographicException>(
+                    () => rsa.SignHash(Array.Empty<byte>(), HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1));
+            }
+        }
+
+        [Fact]
+        public static void SignNullHash()
+        {
+            using (RSA rsa = RSAFactory.Create())
+            {
+                Assert.ThrowsAny<ArgumentNullException>(
+                    () => rsa.SignHash(null, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1));
+            }
+        }
+
+        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
         public static void ExpectedSignature_SHA1_384()
         {
             byte[] expectedSignature =
@@ -55,7 +91,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
         public static void ExpectedSignature_SHA1_1032()
         {
             byte[] expectedSignature =
@@ -227,7 +263,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Equal(expectedSignature, signature);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
         public static void VerifySignature_SHA1_384()
         {
             byte[] signature =
@@ -243,7 +279,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             VerifySignature(signature, TestData.HelloBytes, "SHA1", TestData.RSA384Parameters);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
         public static void VerifySignature_SHA1_1032()
         {
             byte[] signature =
@@ -439,7 +475,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(BadKeyFormatDoesntThrow))]
         public static void NegativeVerify_BadKeysize()
         {
             byte[] signature;

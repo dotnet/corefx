@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic.Utils;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
@@ -19,7 +20,7 @@ namespace System.Linq.Expressions
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
     [DebuggerTypeProxy(typeof(LambdaExpressionProxy))]
-    public abstract partial class LambdaExpression : Expression, IParameterProvider
+    public abstract class LambdaExpression : Expression, IParameterProvider
     {
         private readonly Expression _body;
 
@@ -65,7 +66,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Gets the return type of the lambda expression.
         /// </summary>
-        public Type ReturnType => Type.GetMethod("Invoke").ReturnType;
+        public Type ReturnType => Type.GetInvokeMethod().ReturnType;
 
         /// <summary>
         /// Gets the value that indicates if the lambda expression will be compiled with
@@ -151,6 +152,16 @@ namespace System.Linq.Expressions
 #if FEATURE_COMPILE
         internal abstract LambdaExpression Accept(Compiler.StackSpiller spiller);
 #endif
+
+        /// <summary>
+        /// Produces a delegate that represents the lambda expression.
+        /// </summary>
+        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
+        /// <returns>A delegate containing the compiled version of the lambda.</returns>
+        public Delegate Compile(DebugInfoGenerator debugInfoGenerator)
+        {
+            return Compile();
+        }
     }
 
     /// <summary>
@@ -161,7 +172,7 @@ namespace System.Linq.Expressions
     /// <remarks>
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
-    public partial class Expression<TDelegate> : LambdaExpression
+    public class Expression<TDelegate> : LambdaExpression
     {
         internal Expression(Expression body)
             : base(body)
@@ -281,6 +292,16 @@ namespace System.Linq.Expressions
             return new FullExpression<TDelegate>(body, name, tailCall, parameters);
         }
 #endif
+
+        /// <summary>
+        /// Produces a delegate that represents the lambda expression.
+        /// </summary>
+        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
+        /// <returns>A delegate containing the compiled version of the lambda.</returns>
+        public new TDelegate Compile(DebugInfoGenerator debugInfoGenerator)
+        {
+            return Compile();
+        }
     }
 
 #if !FEATURE_COMPILE
@@ -350,7 +371,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<ParameterExpression>(_par0);
+                case 0: return ExpressionUtils.ReturnObject<ParameterExpression>(_par0);
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
@@ -362,14 +383,14 @@ namespace System.Linq.Expressions
                 using (IEnumerator<ParameterExpression> en = parameters.GetEnumerator())
                 {
                     en.MoveNext();
-                    return en.Current == ReturnObject<ParameterExpression>(_par0);
+                    return en.Current == ExpressionUtils.ReturnObject<ParameterExpression>(_par0);
                 }
             }
 
             return false;
         }
 
-        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(this, ref _par0);
+        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ExpressionUtils.ReturnReadOnly(this, ref _par0);
 
         internal override Expression<TDelegate> Rewrite(Expression body, ParameterExpression[] parameters)
         {
@@ -381,7 +402,7 @@ namespace System.Linq.Expressions
                 return Expression.Lambda<TDelegate>(body, parameters);
             }
 
-            return Expression.Lambda<TDelegate>(body, ReturnObject<ParameterExpression>(_par0));
+            return Expression.Lambda<TDelegate>(body, ExpressionUtils.ReturnObject<ParameterExpression>(_par0));
         }
     }
 
@@ -403,7 +424,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<ParameterExpression>(_par0);
+                case 0: return ExpressionUtils.ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
@@ -434,7 +455,7 @@ namespace System.Linq.Expressions
         }
 
 
-        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(this, ref _par0);
+        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ExpressionUtils.ReturnReadOnly(this, ref _par0);
 
         internal override Expression<TDelegate> Rewrite(Expression body, ParameterExpression[] parameters)
         {
@@ -446,7 +467,7 @@ namespace System.Linq.Expressions
                 return Expression.Lambda<TDelegate>(body, parameters);
             }
 
-            return Expression.Lambda<TDelegate>(body, ReturnObject<ParameterExpression>(_par0), _par1);
+            return Expression.Lambda<TDelegate>(body, ExpressionUtils.ReturnObject<ParameterExpression>(_par0), _par1);
         }
     }
 
@@ -470,7 +491,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<ParameterExpression>(_par0);
+                case 0: return ExpressionUtils.ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
                 case 2: return _par2;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
@@ -505,7 +526,7 @@ namespace System.Linq.Expressions
             return false;
         }
 
-        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(this, ref _par0);
+        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ExpressionUtils.ReturnReadOnly(this, ref _par0);
 
         internal override Expression<TDelegate> Rewrite(Expression body, ParameterExpression[] parameters)
         {
@@ -517,7 +538,7 @@ namespace System.Linq.Expressions
                 return Expression.Lambda<TDelegate>(body, parameters);
             }
 
-            return Expression.Lambda<TDelegate>(body, ReturnObject<ParameterExpression>(_par0), _par1, _par2);
+            return Expression.Lambda<TDelegate>(body, ExpressionUtils.ReturnObject<ParameterExpression>(_par0), _par1, _par2);
         }
     }
 
@@ -538,7 +559,7 @@ namespace System.Linq.Expressions
         internal override bool SameParameters(ICollection<ParameterExpression> parameters) =>
             ExpressionUtils.SameElements(parameters, _parameters);
 
-        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(ref _parameters);
+        internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ExpressionUtils.ReturnReadOnly(ref _parameters);
 
         internal override Expression<TDelegate> Rewrite(Expression body, ParameterExpression[] parameters)
         {
@@ -863,7 +884,7 @@ namespace System.Linq.Expressions
         private static void ValidateLambdaArgs(Type delegateType, ref Expression body, ReadOnlyCollection<ParameterExpression> parameters, string paramName)
         {
             ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
-            RequiresCanRead(body, nameof(body));
+            ExpressionUtils.RequiresCanRead(body, nameof(body));
 
             if (!typeof(MulticastDelegate).IsAssignableFrom(delegateType) || delegateType == typeof(MulticastDelegate))
             {
@@ -876,7 +897,7 @@ namespace System.Linq.Expressions
             CacheDict<Type, MethodInfo> ldc = s_lambdaDelegateCache;
             if (!ldc.TryGetValue(delegateType, out mi))
             {
-                mi = delegateType.GetMethod("Invoke");
+                mi = delegateType.GetInvokeMethod();
                 if (delegateType.CanCache())
                 {
                     ldc[delegateType] = mi;
@@ -896,7 +917,7 @@ namespace System.Linq.Expressions
                 {
                     ParameterExpression pex = parameters[i];
                     ParameterInfo pi = pis[i];
-                    RequiresCanRead(pex, nameof(parameters), i);
+                    ExpressionUtils.RequiresCanRead(pex, nameof(parameters), i);
                     Type pType = pi.ParameterType;
                     if (pex.IsByRef)
                     {

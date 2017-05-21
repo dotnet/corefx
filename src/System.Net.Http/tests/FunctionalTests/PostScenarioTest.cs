@@ -19,6 +19,7 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "dotnet/corefx #20010")]
     public class PostScenarioTest
     {
         private const string ExpectedContent = "Test contest";
@@ -111,6 +112,7 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx behaves differently and will buffer content and use 'Content-Length' semantics")]
         public async Task PostUsingNoSpecifiedSemantics_UsesChunkedSemantics(Uri serverUri)
         {
             await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
@@ -146,11 +148,11 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsInvalidOperationException(Uri serverUri)
+        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsHttpRequestException(Uri serverUri)
         {
             HttpContent content = CustomContent.Create(ExpectedContent, false);
             var credential = new NetworkCredential(UserName, Password);
-            await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            await Assert.ThrowsAsync<HttpRequestException>(() => 
                 PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: false));
         }
 
@@ -229,7 +231,7 @@ namespace System.Net.Http.Functional.Tests
                 requestContent.Headers.ContentLength = null;
                 request.Headers.TransferEncodingChunked = true;
 
-                using (HttpResponseMessage response = await client.PostAsync(serverUri, requestContent))
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     string responseContent = await response.Content.ReadAsStringAsync();

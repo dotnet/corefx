@@ -19,7 +19,7 @@ namespace System.IO.Tests
         [Fact]
         public void InvalidHandleThrows()
         {
-            Assert.Throws<ArgumentException>("handle", () => CreateFileStream(new SafeFileHandle(new IntPtr(-1), true), FileAccess.Read));
+            AssertExtensions.Throws<ArgumentException>("handle", () => CreateFileStream(new SafeFileHandle(new IntPtr(-1), true), FileAccess.Read));
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("access", () => CreateFileStream(fs.SafeFileHandle, ~FileAccess.Read));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => CreateFileStream(fs.SafeFileHandle, ~FileAccess.Read));
             }
         }
 
@@ -134,6 +134,7 @@ namespace System.IO.Tests
     public class DerivedFileStream_ctor_sfh_fa : FileSystemTest
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The NetFX FileStream Handle constructor calls the virtual Can*. This has been fixed in netcoreapp to instead directly check for write/read FileAccess.")]
         public void VirtualCanReadWrite_ShouldNotBeCalledDuringCtor()
         {
             using (var fs = File.Create(GetTestFilePath()))

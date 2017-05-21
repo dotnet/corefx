@@ -6,9 +6,14 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Xml.Serialization;
 
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     [Flags]
     public enum XmlMappingAccess
@@ -59,7 +64,11 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public string ElementName
         {
+#if XMLSERIALIZERGENERATOR
+            get { return Microsoft.XmlSerializer.Generator.Accessor.UnescapeName(Accessor.Name); }
+#else
             get { return System.Xml.Serialization.Accessor.UnescapeName(Accessor.Name); }
+#endif
         }
 
         /// <devdoc>
@@ -118,7 +127,7 @@ namespace System.Xml.Serialization
             {
                 root = (XmlRootAttribute)XmlAttributes.GetAttr(type, typeof(XmlRootAttribute));
             }
-            return type.FullName + ":" + (root == null ? String.Empty : root.Key) + ":" + (ns == null ? String.Empty : ns);
+            return type.FullName + ":" + (root == null ? String.Empty : root.GetKey()) + ":" + (ns == null ? String.Empty : ns);
         }
 
         internal string Key { get { return _key; } }

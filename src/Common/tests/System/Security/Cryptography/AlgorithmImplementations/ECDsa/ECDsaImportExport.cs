@@ -8,9 +8,34 @@ namespace System.Security.Cryptography.EcDsa.Tests
 {
     public class ECDsaImportExportTests : ECDsaTestsBase
     {
-        [Theory, MemberData(nameof(TestCurvesFull))]
+#if netcoreapp
+        [Fact]
+        public static void DiminishedCoordsRoundtrip()
+        {
+            ECParameters toImport = ECDsaTestData.GetNistP521DiminishedCoordsParameters();
+            ECParameters privateParams;
+            ECParameters publicParams;
+
+            using (ECDsa ecdsa = ECDsaFactory.Create())
+            {
+                ecdsa.ImportParameters(toImport);
+                privateParams = ecdsa.ExportParameters(true);
+                publicParams = ecdsa.ExportParameters(false);
+            }
+            
+            ComparePublicKey(toImport.Q, privateParams.Q);
+            ComparePrivateKey(toImport, privateParams);
+            ComparePublicKey(toImport.Q, publicParams.Q);
+            Assert.Null(publicParams.D);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestCurvesFull))]
         public static void TestNamedCurves(CurveDef curveDef)
         {
+            if (!curveDef.Curve.IsNamed)
+                return;
+
             using (ECDsa ec1 = ECDsaFactory.Create(curveDef.Curve))
             {
                 ECParameters param1 = ec1.ExportParameters(curveDef.IncludePrivate);
@@ -30,6 +55,9 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(TestInvalidCurves))]
         public static void TestNamedCurvesNegative(CurveDef curveDef)
         {
+            if (!curveDef.Curve.IsNamed)
+                return;
+
             // An exception may be thrown during Create() if the Oid is bad, or later during native calls
             Assert.Throws<PlatformNotSupportedException>(() => ECDsaFactory.Create(curveDef.Curve).ExportParameters(false));
         }
@@ -240,11 +268,12 @@ namespace System.Security.Cryptography.EcDsa.Tests
         private static void VerifyNamedCurve(ECParameters parameters, ECDsa ec, int keySize, bool includePrivate)
         {
             parameters.Validate();
-            Assert.True(parameters.Curve.IsNamed);
+            Assert.True(parameters.Curve.IsNamed, "parameters.Curve.IsNamed");
             Assert.Equal(keySize, ec.KeySize);
             Assert.True(
                 includePrivate && parameters.D.Length > 0 ||
-                !includePrivate && parameters.D == null);
+                !includePrivate && parameters.D == null,
+                "Private key is " + (includePrivate ? "present" : "absent"));
 
             if (includePrivate)
                 ec.Exercise();
@@ -259,7 +288,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
         {
             Assert.True(parameters.Curve.IsExplicit);
             ECCurve curve = parameters.Curve;
-
 
             Assert.True(curveDef.IsCurveTypeEqual(curve.CurveType));
             Assert.True(
@@ -286,5 +314,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
             ECParameters paramSecondExport = ec.ExportExplicitParameters(curveDef.IncludePrivate);
             AssertEqual(parameters, paramSecondExport);
         }
+#endif
     }
 }

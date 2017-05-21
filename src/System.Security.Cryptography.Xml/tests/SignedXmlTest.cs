@@ -15,6 +15,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
+using System.Xml.XPath;
 using Xunit;
 
 namespace System.Security.Cryptography.Xml.Tests
@@ -164,7 +165,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Throws<CryptographicException>(() => signedXml.ComputeSignature());
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
         public void AsymmetricRSASignature()
         {
             SignedXml signedXml = MSDNSample();
@@ -187,8 +188,13 @@ namespace System.Security.Cryptography.Xml.Tests
             signedXml.ComputeSignature();
 
             Assert.Null(signedXml.SigningKeyName);
-            Assert.Equal(SignedXml.XmlDsigRSASHA1Url, signedXml.SignatureMethod);
-            Assert.Equal(128, signedXml.SignatureValue.Length);
+
+            if (PlatformDetection.IsFullFramework)
+                Assert.Equal("http://www.w3.org/2000/09/xmldsig#rsa-sha1", signedXml.SignatureMethod);
+            else
+                Assert.Equal("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", signedXml.SignatureMethod);
+
+            Assert.Equal(key.KeySize / 8, signedXml.SignatureValue.Length);
             Assert.Null(signedXml.SigningKeyName);
 
             // Get the XML representation of the signature.
@@ -284,7 +290,8 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.True(v1.CheckSignature());
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
+        [ActiveIssue(17001, TestPlatforms.OSX)]
         public void AsymmetricDSASignature()
         {
             SignedXml signedXml = MSDNSample();
@@ -308,7 +315,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
             Assert.Null(signedXml.SignatureLength);
             Assert.Equal(SignedXml.XmlDsigDSAUrl, signedXml.SignatureMethod);
-            Assert.Equal(40, signedXml.SignatureValue.Length);
+            Assert.InRange(signedXml.SignatureValue.Length, low: 40, high: Int32.MaxValue);
             Assert.Null(signedXml.SigningKeyName);
 
             // Get the XML representation of the signature.
@@ -357,19 +364,6 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.True(vrfy.CheckSignature(hmac), "HMACSHA1-Compute/Verify");
         }
 
-        [Fact(Skip = "TODO: fix me")]
-        public void SymmetricMACTripleDESSignature()
-        {
-            SignedXml signedXml = MSDNSample();
-            // Compute the signature.
-            byte[] secretkey = Encoding.Default.GetBytes("password");
-            using (HMAC hmac = HMACSHA256.Create())
-            {
-                hmac.Key = secretkey;
-                Assert.Throws<CryptographicException>(() => signedXml.ComputeSignature(hmac));
-            }
-        }
-
         // Using empty constructor
         // LAMESPEC: The two other constructors don't seems to apply in verifying signatures
         [Fact]
@@ -396,7 +390,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
         // Using empty constructor
         // LAMESPEC: The two other constructors don't seems to apply in verifying signatures
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
         public void AsymmetricDSAVerify()
         {
             string value = "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\" /><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#dsa-sha1\" /><Reference URI=\"#MyObjectId\"><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\" /><DigestValue>/Vvq6sXEVbtZC8GwNtLQnGOy/VI=</DigestValue></Reference></SignedInfo><SignatureValue>BYz/qRGjGsN1yMFPxWa3awUZm1y4I/IxOQroMxkOteRGgk1HIwhRYw==</SignatureValue><KeyInfo><KeyValue xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><DSAKeyValue><P>iglVaZ+LsSL8Y0aDXmFMBwva3xHqIypr3l/LtqBH9ziV2Sh1M4JVasAiKqytWIWt/s/Uk8Ckf2tO2Ww1vsNi1NL+Kg9T7FE52sn380/rF0miwGkZeidzm74OWhykb3J+wCTXaIwOzAWI1yN7FoeoN7wzF12jjlSXAXeqPMlViqk=</P><Q>u4sowiJMHilNRojtdmIuQY2YnB8=</Q><G>SdnN7d+wn1n+HH4Hr8MIryIRYgcXdbZ5TH7jAnuWc1koqRc1AZfcYAZ6RDf+orx6Lzn055FTFiN+1NHQfGUtXJCWW0zz0FVV1NJux7WRj8vGTldjJ5ef0oCenkpwDjcIxWsZgVobve4GPoyN1sAc1scnkJB59oupibklmF4y72A=</G><Y>XejzS8Z51yfl0zbYnxSYYbHqreSLjNCoGPB/KjM1TOyV5sMjz0StKtGrFWryTWc7EgvFY7kUth4e04VKf9HbK8z/FifHTXj8+Tszbjzw8GfInnBwLN+vJgbpnjtypmiI5Bm2nLiRbfkdAHP+OrKtr/EauM9GQfYuaxm3/Vj8B84=</Y><J>vGwGg9wqwwWP9xsoPoXu6kHArJtadiNKe9azBiUx5Ob883gd5wlKfEcGuKkBmBySGbgwxyOsIBovd9Kk48hF01ymfQzAAuHR0EdJECSsTsTTKVTLQNBU32O+PRbLYpv4E8kt6rNL83JLJCBY</J><Seed>sqzn8J6fd2gtEyq6YOqiUSHgPE8=</Seed><PgenCounter>sQ==</PgenCounter></DSAKeyValue></KeyValue></KeyInfo><Object Id=\"MyObjectId\"><MyElement xmlns=\"samples\">This is some text</MyElement></Object></Signature>";
@@ -565,7 +559,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Throws<CryptographicException>(() => signedXml.ComputeSignature());
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void DataReferenceToNonDataObject()
         {
             XmlDocument doc = new XmlDocument();
@@ -638,7 +632,7 @@ namespace System.Security.Cryptography.Xml.Tests
             return sw.ToString();
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void GetIdElement_Null()
         {
             SignedXml sign = new SignedXml();
@@ -646,7 +640,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(sign.GetIdElement(new XmlDocument(), null));
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
         public void DigestValue_CRLF()
         {
             XmlDocument doc = CreateSomeXml("\r\n");
@@ -658,16 +652,22 @@ namespace System.Security.Cryptography.Xml.Tests
 
             s.Position = 0;
 
-            HashAlgorithm hash = HashAlgorithm.Create("System.Security.Cryptography.SHA1CryptoServiceProvider");
-            byte[] digest = hash.ComputeHash(s);
+            byte[] digest;
+            using (HashAlgorithm hash = SHA1.Create())
+            {
+                digest = hash.ComputeHash(s);
+            }
+            
             Assert.Equal("IKbfdK2/DMfXyezCf5QggVCXfk8=", Convert.ToBase64String(digest));
 
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
             SignedXml signedXml = new SignedXml(doc);
             signedXml.SigningKey = cert.PrivateKey;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
+            signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
 
             Reference reference = new Reference();
+            reference.DigestMethod = SignedXml.XmlDsigSHA1Url;
             reference.Uri = "";
 
             XmlDsigEnvelopedSignatureTransform env = new XmlDsigEnvelopedSignatureTransform();
@@ -699,7 +699,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 + "</SignedInfo>", signedXml.SignedInfo.GetXml().OuterXml);
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact]
         public void DigestValue_LF()
         {
             XmlDocument doc = CreateSomeXml("\n");
@@ -711,16 +711,22 @@ namespace System.Security.Cryptography.Xml.Tests
 
             s.Position = 0;
 
-            HashAlgorithm hash = HashAlgorithm.Create("System.Security.Cryptography.SHA1CryptoServiceProvider");
-            byte[] digest = hash.ComputeHash(s);
+            byte[] digest;
+            using (HashAlgorithm hash = SHA1.Create())
+            {
+                digest = hash.ComputeHash(s);
+            }
+
             Assert.Equal("e3dsi1xK8FAx1vsug7J203JbEAU=", Convert.ToBase64String(digest));
 
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
             SignedXml signedXml = new SignedXml(doc);
             signedXml.SigningKey = cert.PrivateKey;
+            signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
             Reference reference = new Reference();
+            reference.DigestMethod = SignedXml.XmlDsigSHA1Url;
             reference.Uri = "";
 
             XmlDsigEnvelopedSignatureTransform env = new XmlDsigEnvelopedSignatureTransform();
@@ -958,8 +964,10 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml signedXml = new SignedXml(doc);
             signedXml.SigningKey = cert.PrivateKey;
             signedXml.SignedInfo.CanonicalizationMethod = canonicalizationMethod;
+            signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
 
             Reference reference = new Reference();
+            reference.DigestMethod = SignedXml.XmlDsigSHA1Url;
             reference.Uri = "";
 
             XmlDsigEnvelopedSignatureTransform env = new XmlDsigEnvelopedSignatureTransform();
@@ -1190,7 +1198,7 @@ namespace System.Security.Cryptography.Xml.Tests
             0xfa, 0x75, 0x89, 0x67, 0x33, 0x01, 0xd0, 0xb0, 0x13, 0xfa, 0x11,
             0x94, 0xac, 0x02, 0x02, 0x07, 0xd0 };
 
-        public SignedXml SignHMAC(string uri, KeyedHashAlgorithm mac, bool ok)
+        public SignedXml SignHMAC(string uri, KeyedHashAlgorithm mac, bool expectedToVerify)
         {
             string input = "<foo/>";
 
@@ -1205,28 +1213,39 @@ namespace System.Security.Cryptography.Xml.Tests
 
             sig.ComputeSignature(mac);
             doc.DocumentElement.AppendChild(doc.ImportNode(sig.GetXml(), true));
-            // doc.Save (System.Console.Out);
+            // doc.Save(System.Console.Out);
 
             sig.LoadXml(doc.DocumentElement["Signature"]);
-            Assert.Equal(ok, sig.CheckSignature(mac));
+            Assert.Equal(expectedToVerify, sig.CheckSignature(mac));
             return sig;
         }
 
-        static byte[] hmackey = new byte[0];
+        private static byte[] emptyHmacKey = new byte[0];
+        private static byte[] badKey = new byte[3] { 1, 2, 3 };
+
+        public static object[][] HmacKeys = new object[][] {
+            new object[] { new byte[0] },
+            new object[] { new byte[5] { 1, 2, 3, 4, 10 } }
+        };
+
+        private const string moreHmacMD5 = "http://www.w3.org/2001/04/xmldsig-more#hmac-md5";
         private const string more256 = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
         private const string more384 = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
         private const string more512 = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
         private const string moreripe = "http://www.w3.org/2001/04/xmldsig-more#hmac-ripemd160";
 
-        [Fact]
-        public void SignHMAC_SHA256()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA256(byte[] hmackey)
         {
-            SignedXml sign = SignHMAC(EncryptedXml.XmlEncSHA256Url, new HMACSHA256(hmackey), true);
+            var hmac = new HMACSHA256(hmackey);
+            Assert.Equal(hmackey, hmac.Key);
+
+            SignedXml sign = SignHMAC(EncryptedXml.XmlEncSHA256Url, hmac, true);
             Assert.Equal(more256, sign.SignatureMethod);
         }
 
-        [Fact]
-        public void SignHMAC_SHA256_Bad()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA256_Bad(byte[] hmackey)
         {
             SignedXml sign = SignHMAC(more256, new HMACSHA256(hmackey), false);
             Assert.Equal(more256, sign.SignatureMethod);
@@ -1242,19 +1261,27 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.True(sign.CheckSignature(new HMACSHA256(hmackey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA256(badKey)));
+            }
+
+            Assert.True(sign.CheckSignature(new HMACSHA256(emptyHmacKey)));
         }
 
-        [Fact]
-        public void SignHMAC_SHA512()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA512(byte[] hmackey)
         {
-            SignedXml sign = SignHMAC(EncryptedXml.XmlEncSHA512Url, new HMACSHA512(hmackey), true);
+            var hmac = new HMACSHA512(hmackey);
+            Assert.Equal(hmackey, hmac.Key);
+
+            SignedXml sign = SignHMAC(EncryptedXml.XmlEncSHA512Url, hmac, true);
             Assert.Equal(more512, sign.SignatureMethod);
         }
 
-        [Fact]
-        public void SignHMAC_SHA512_Bad()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA512_Bad(byte[] hmackey)
         {
             SignedXml sign = SignHMAC(more512, new HMACSHA512(hmackey), false);
             Assert.Equal(more512, sign.SignatureMethod);
@@ -1270,21 +1297,29 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.True(sign.CheckSignature(new HMACSHA512(hmackey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA512(badKey)));
+            }
+
+            Assert.True(sign.CheckSignature(new HMACSHA512(emptyHmacKey)));
         }
 
-        [Fact]
-        public void SignHMAC_SHA384()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA384(byte[] hmackey)
         {
+            var hmac = new HMACSHA384(hmackey);
+            Assert.Equal(hmackey, hmac.Key);
+
             // works as long as the string can be used by CryptoConfig to create 
             // an instance of the required hash algorithm
-            SignedXml sign = SignHMAC("SHA384", new HMACSHA384(hmackey), true);
+            SignedXml sign = SignHMAC("SHA384", hmac, true);
             Assert.Equal(more384, sign.SignatureMethod);
         }
 
-        [Fact]
-        public void SignHMAC_SHA384_Bad()
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_SHA384_Bad(byte[] hmackey)
         {
             // we can't verity the signature if the URI is used
             SignedXml sign = SignHMAC(more384, new HMACSHA384(hmackey), false);
@@ -1301,8 +1336,52 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.True(sign.CheckSignature(new HMACSHA384(hmackey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA384(badKey)));
+            }
+
+            Assert.True(sign.CheckSignature(new HMACSHA384(emptyHmacKey)));
+        }
+
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_MD5(byte[] hmackey)
+        {
+            var hmac = new HMACMD5(hmackey);
+            Assert.Equal(hmackey, hmac.Key);
+
+            // works as long as the string can be used by CryptoConfig to create 
+            // an instance of the required hash algorithm
+            SignedXml sign = SignHMAC("MD5", hmac, true);
+            Assert.Equal(moreHmacMD5, sign.SignatureMethod);
+        }
+
+        [Theory, MemberData(nameof(HmacKeys))]
+        public void SignHMAC_MD5_Bad(byte[] hmackey)
+        {
+            // we can't verity the signature if the URI is used
+            SignedXml sign = SignHMAC(moreHmacMD5, new HMACMD5(hmackey), false);
+            Assert.Equal(moreHmacMD5, sign.SignatureMethod);
+        }
+
+        [Fact]
+        public void VerifyHMAC_MD5()
+        {
+            string xml = @"<?xml version=""1.0"" encoding=""Windows-1252""?><foo><Signature xmlns=""http://www.w3.org/2000/09/xmldsig#""><SignedInfo><CanonicalizationMethod Algorithm=""http://www.w3.org/TR/2001/REC-xml-c14n-20010315"" /><SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#hmac-md5"" /><Reference URI=""""><Transforms><Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" /></Transforms><DigestMethod Algorithm=""MD5"" /><DigestValue>TH7ysbozJWVIWh/1K5bP1w==</DigestValue></Reference></SignedInfo><SignatureValue>tJ6m5YVu1jN1WgKWv3AXFQ==</SignatureValue></Signature></foo>";
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+
+            SignedXml sign = new SignedXml(doc);
+            sign.LoadXml(doc.DocumentElement["Signature"]);
+
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACMD5(badKey)));
+            }
+
+            Assert.True(sign.CheckSignature(new HMACMD5(emptyHmacKey)));
         }
 
         // CVE-2009-0217
@@ -1360,7 +1439,7 @@ namespace System.Security.Cryptography.Xml.Tests
             sign.CheckSignature(new HMACSHA1(Encoding.ASCII.GetBytes("secret")));
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void HmacMustBeMultipleOfEightBits()
         {
             for (int i = 1; i < 160; i++)
@@ -1373,7 +1452,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_ZeroLength()
         {
             string xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
@@ -1401,7 +1480,7 @@ namespace System.Security.Cryptography.Xml.Tests
             CheckErratum(sign, new HMACSHA1(Encoding.ASCII.GetBytes("secret")), "4");
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_SmallerThanMinimumLength()
         {
             // 72 is a multiple of 8 but smaller than the minimum of 80 bits
@@ -1410,7 +1489,7 @@ namespace System.Security.Cryptography.Xml.Tests
             CheckErratum(sign, new HMACSHA1(Encoding.ASCII.GetBytes("secret")), "72");
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_MinimumLength()
         {
             // 80 bits is the minimum (and the half-size of HMACSHA1)
@@ -1419,7 +1498,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.True(sign.CheckSignature(new HMACSHA1(Encoding.ASCII.GetBytes("secret"))));
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_SmallerHalfLength()
         {
             // 80bits is smaller than the half-size of HMACSHA256
@@ -1428,7 +1507,7 @@ namespace System.Security.Cryptography.Xml.Tests
             CheckErratum(sign, new HMACSHA256(Encoding.ASCII.GetBytes("secret")), "80");
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_HalfLength()
         {
             // 128 is the half-size of HMACSHA256
@@ -1445,7 +1524,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.True(sign.CheckSignature(new HMACSHA1(Encoding.ASCII.GetBytes("secret"))));
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_HMACOutputLength_Signature_Mismatch()
         {
             string xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
@@ -1469,7 +1548,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Throws<CryptographicException>(() => sign.CheckSignature(new HMACSHA1(Encoding.ASCII.GetBytes("no clue"))));
         }
 
-        [Fact(Skip = "TODO: fix me")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/16685")]
         public void VerifyHMAC_HMACOutputLength_Invalid()
         {
             string xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
@@ -1491,6 +1570,66 @@ namespace System.Security.Cryptography.Xml.Tests
 ";
             SignedXml sign = GetSignedXml(xml);
             Assert.Throws<FormatException>(() => sign.CheckSignature(new HMACSHA1(Encoding.ASCII.GetBytes("no clue"))));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
+        public void CoreFxSignedXmlUsesSha256ByDefault()
+        {
+            const string expectedSignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+            const string expectedDigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256";
+            ValidateSignedXmlDefaultHashAlgorithms(expectedSignatureMethod, expectedDigestMethod);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
+        public void NetFxSignedXmlUsesSha1ByDefault()
+        {
+            const string expectedSignatureMethod = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+            const string expectedDigestMethod = "http://www.w3.org/2000/09/xmldsig#sha1";
+            ValidateSignedXmlDefaultHashAlgorithms(expectedSignatureMethod, expectedDigestMethod);
+        }
+
+        private void ValidateSignedXmlDefaultHashAlgorithms(string expectedSignatureMethod, string expectedDigestMethod)
+        {
+            const string xml = @"<?xml version=""1.0""?>
+<example>
+<test>some text node</test>
+</example>";
+
+            var doc = new XmlDocument();
+            doc.PreserveWhitespace = true;
+            doc.LoadXml(xml);
+
+            using (RSA key = RSA.Create())
+            {
+                var sxml = new SignedXml(doc)
+                {
+                    SigningKey = key
+                };
+
+                Assert.Null(sxml.SignedInfo.SignatureMethod);
+
+                var reference = new Reference();
+                Assert.Equal(expectedDigestMethod, reference.DigestMethod);
+
+                reference.Uri = "";
+                reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+                sxml.AddReference(reference);
+                sxml.ComputeSignature();
+
+                XmlElement dsig = sxml.GetXml();
+                XPathNavigator xp = dsig.CreateNavigator();
+
+                XmlNamespaceManager nsMgr = new XmlNamespaceManager(xp.NameTable);
+                nsMgr.AddNamespace("ds", "http://www.w3.org/2000/09/xmldsig#");
+
+                Assert.Equal(expectedSignatureMethod,
+                    xp.SelectSingleNode("/ds:SignedInfo/ds:SignatureMethod/@Algorithm", nsMgr)?.Value);
+
+                Assert.Equal(expectedDigestMethod,
+                    xp.SelectSingleNode("/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm", nsMgr)?.Value);
+            }
         }
     }
 }

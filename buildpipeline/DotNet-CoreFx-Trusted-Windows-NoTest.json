@@ -141,32 +141,9 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\build.cmd",
-        "arguments": "$(PB_BuildArguments)",
+        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "enabled": true,
-      "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Index symbol file sources",
-      "timeoutInMinutes": 0,
-      "task": {
-        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SymbolsPath": "",
-        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
-        "SymbolsFolder": "",
-        "SkipIndexing": "false",
-        "TreatNotIndexedAsWarning": "false",
-        "SymbolsMaximumWaitTime": "",
-        "SymbolsProduct": "",
-        "SymbolsVersion": "",
-        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -182,7 +159,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\publish-packages.cmd",
-        "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=true",
+        "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -204,6 +181,29 @@
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Index symbol sources",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SymbolsPath": "",
+        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
+        "SymbolsFolder": "",
+        "SkipIndexing": "false",
+        "TreatNotIndexedAsWarning": "false",
+        "SymbolsMaximumWaitTime": "",
+        "SymbolsProduct": "",
+        "SymbolsVersion": "",
+        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -363,9 +363,6 @@
     },
     "PB_CleanAgent": {
       "value": "true"
-    },
-    "PB_SymbolsBuildIdRoot": {
-      "value": "DotNet-CoreFx-"
     },
     "PB_SyncArguments": {
       "value": "-p -- /p:ArchGroup=x64  /p:RuntimeOS=win10",

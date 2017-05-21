@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.ExceptionServices;
 using System.Security;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
@@ -46,6 +47,9 @@ namespace System.Net.Security
         private bool _checkCertName;
 
         private bool _refreshCredentialNeeded;
+
+        private readonly Oid _serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1");
+        private readonly Oid _clientAuthOid = new Oid("1.3.6.1.5.5.7.3.2");
 
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
                                                   bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
@@ -869,6 +873,8 @@ namespace System.Net.Security
                     _headerSize = streamSizes.Header;
                     _trailerSize = streamSizes.Trailer;
                     _maxDataSize = checked(streamSizes.MaximumMessage - (_headerSize + _trailerSize));
+
+                    Debug.Assert(_maxDataSize > 0, "_maxDataSize > 0");
                 }
                 catch (Exception e) when (!ExceptionCheck.IsFatal(e))
                 {
@@ -1006,12 +1012,17 @@ namespace System.Net.Security
                     chain = new X509Chain();
                     chain.ChainPolicy.RevocationMode = _checkCertRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck;
                     chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+
+                    // Authenticate the remote party: (e.g. when operating in server mode, authenticate the client).
+                    chain.ChainPolicy.ApplicationPolicy.Add(_serverMode ? _clientAuthOid : _serverAuthOid);
+
                     if (remoteCertificateStore != null)
                     {
                         chain.ChainPolicy.ExtraStore.AddRange(remoteCertificateStore);
                     }
 
                     sslPolicyErrors |= CertificateValidationPal.VerifyCertificateProperties(
+                        _securityContext,
                         chain,
                         remoteCertificateEx,
                         _checkCertName,
@@ -1097,7 +1108,7 @@ namespace System.Net.Security
 
                 if (status.Exception != null)
                 {
-                    throw status.Exception;
+                    ExceptionDispatchInfo.Throw(status.Exception);
                 }
 
                 return null;
@@ -1121,7 +1132,7 @@ namespace System.Net.Security
 
                 if (status.Exception != null)
                 {
-                    throw status.Exception;
+                    ExceptionDispatchInfo.Throw(status.Exception);
                 }
 
                 return null;

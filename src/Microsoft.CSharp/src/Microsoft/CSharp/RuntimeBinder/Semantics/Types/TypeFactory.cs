@@ -34,15 +34,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetTypeParameterSymbol(pSymbol);
             type.SetUnresolved(pSymbol.parent != null && pSymbol.parent.IsAggregateSymbol() && pSymbol.parent.AsAggregateSymbol().IsUnresolved());
             type.SetName(pSymbol.name);
-
-#if CSEE
-            type.typeRes = type;
-            if (!type.IsUnresolved())
-            {
-                type.tsRes = ktsImportMax;
-            }
-#endif // CSEE
-
             Debug.Assert(pSymbol.GetTypeParameterType() == null);
             pSymbol.SetTypeParameterType(type);
 
@@ -112,12 +103,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Derived types - parent is base type
-        public ArrayType CreateArray(Name name, CType pElementType, int rank)
+        public ArrayType CreateArray(Name name, CType pElementType, int rank, bool isSZArray)
         {
             ArrayType type = new ArrayType();
 
             type.SetName(name);
             type.rank = rank;
+            type.IsSZArray = isSZArray;
             type.SetElementType(pElementType);
 
             type.SetTypeKind(TypeKind.TK_ArrayType);

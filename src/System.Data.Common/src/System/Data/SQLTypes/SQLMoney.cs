@@ -19,7 +19,6 @@ namespace System.Data.SqlTypes
     /// a ten-thousandth of currency unit to be stored in or retrieved from a
     /// database.
     /// </summary>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
     public struct SqlMoney : INullable, IComparable, IXmlSerializable
@@ -68,7 +67,7 @@ namespace System.Data.SqlTypes
         public SqlMoney(long value)
         {
             if (value < s_minLong || value > s_maxLong)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             _value = value * s_lTickBase;
             _fNotNull = true;
         }
@@ -84,13 +83,13 @@ namespace System.Data.SqlTypes
             Debug.Assert(snum.Scale == s_iMoneyScale);
 
             if (snum._data3 != 0 || snum._data4 != 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             bool fPositive = snum.IsPositive;
             ulong ulValue = snum._data1 + (((ulong)snum._data2) << 32);
             if (fPositive && ulValue > long.MaxValue ||
                 !fPositive && ulValue > unchecked((ulong)(long.MinValue)))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             _value = fPositive ? (long)ulValue : unchecked(-(long)ulValue);
             _fNotNull = true;
@@ -210,7 +209,7 @@ namespace System.Data.SqlTypes
         {
             if (IsNull)
             {
-                return SQLResource.s_nullString;
+                return SQLResource.NullString;
             }
             decimal money = ToDecimal();
             // Formatting of SqlMoney: At least two digits after decimal point
@@ -234,7 +233,7 @@ namespace System.Data.SqlTypes
                      NumberStyles.AllowTrailingWhite |
                      NumberStyles.AllowLeadingWhite;
 
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
             {
                 money = SqlMoney.Null;
             }
@@ -256,7 +255,7 @@ namespace System.Data.SqlTypes
             if (x.IsNull)
                 return Null;
             if (x._value == s_minLong)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             return new SqlMoney(-x._value, 0);
         }
 
@@ -272,7 +271,7 @@ namespace System.Data.SqlTypes
             }
             catch (OverflowException)
             {
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             }
         }
 
@@ -284,7 +283,7 @@ namespace System.Data.SqlTypes
             }
             catch (OverflowException)
             {
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             }
         }
 

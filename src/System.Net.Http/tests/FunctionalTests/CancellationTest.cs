@@ -22,13 +22,13 @@ namespace System.Net.Http.Functional.Tests
             _output = output;
         }
 
-        [ActiveIssue(10504)]
         [OuterLoop] // includes seconds of delay
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
         [InlineData(true, true)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "uap: dotnet/corefx #20010, netfx: dotnet/corefx #19038")]
         public async Task GetAsync_ResponseContentRead_CancelUsingTimeoutOrToken_TaskCanceledQuickly(
             bool useTimeout, bool startResponseBody)
         {
@@ -61,22 +61,37 @@ namespace System.Net.Http.Functional.Tests
                     });
 
                     var stopwatch = Stopwatch.StartNew();
-                    await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+                    if (PlatformDetection.IsFullFramework)
                     {
-                        Task<HttpResponseMessage> getResponse = client.GetAsync(url, HttpCompletionOption.ResponseContentRead, cancellationToken);
-                        await triggerRequestCancel.Task;
-                        cts.Cancel();
-                        await getResponse;
-                    });
+                        // .NET Framework throws WebException instead of OperationCanceledException.
+                        await Assert.ThrowsAnyAsync<WebException>(async () =>
+                        {
+                            Task<HttpResponseMessage> getResponse = client.GetAsync(url, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                            await triggerRequestCancel.Task;
+                            cts.Cancel();
+                            await getResponse;
+                        });
+                    }
+                    else
+                    {
+                        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+                        {
+                            Task<HttpResponseMessage> getResponse = client.GetAsync(url, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                            await triggerRequestCancel.Task;
+                            cts.Cancel();
+                            await getResponse;
+                        });
+                    }
                     stopwatch.Stop();
                     _output.WriteLine("GetAsync() completed at: {0}", stopwatch.Elapsed.ToString());
 
                     triggerResponseWrite.SetResult(true);
-                    Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), "Elapsed time should be short");
+                    Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 30), $"Elapsed time {stopwatch.Elapsed} should be less than 30 seconds, was {stopwatch.Elapsed.TotalSeconds}");
                 });
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18864")] // Hangs on NETFX
         [ActiveIssue(9075, TestPlatforms.AnyUnix)] // recombine this test into the subsequent one when issue is fixed
         [OuterLoop] // includes seconds of delay
         [Fact]
@@ -85,6 +100,7 @@ namespace System.Net.Http.Functional.Tests
             return ReadAsStreamAsync_ReadAsync_Cancel_TaskCanceledQuickly(false);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18864")] // Hangs on NETFX
         [OuterLoop] // includes seconds of delay
         [Theory]
         [InlineData(true)]
@@ -134,7 +150,7 @@ namespace System.Net.Http.Functional.Tests
 
                         triggerResponseWrite.SetResult(true);
                         _output.WriteLine("ReadAsync() completed at: {0}", stopwatch.Elapsed.ToString());
-                        Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), "Elapsed time should be short");
+                        Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 30), $"Elapsed time {stopwatch.Elapsed} should be less than 30 seconds, was {stopwatch.Elapsed.TotalSeconds}");
                     }
                 });
             }

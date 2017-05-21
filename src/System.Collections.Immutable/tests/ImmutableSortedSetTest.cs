@@ -199,8 +199,8 @@ namespace System.Collections.Immutable.Tests
                 AssertAreSame(item, set[i++]);
             }
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => set[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => set[set.Count]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => set[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => set[set.Count]);
         }
 
         [Fact]
@@ -358,6 +358,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedSet.Create<int>());

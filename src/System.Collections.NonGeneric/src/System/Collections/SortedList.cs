@@ -60,9 +60,6 @@ namespace System.Collections
     // 
     [DebuggerTypeProxy(typeof(System.Collections.SortedList.SortedListDebugView))]
     [DebuggerDisplay("Count = {Count}")]
-#if FEATURE_CORECLR
-    [Obsolete("Non-generic collections have been deprecated. Please use collections in System.Collections.Generic.")]
-#endif
     [Serializable]
     public class SortedList : IDictionary, ICloneable
     {
@@ -613,7 +610,6 @@ namespace System.Collections
             Capacity = _size;
         }
 
-        [Serializable]
         private class SyncSortedList : SortedList
         {
             private SortedList _list;
@@ -834,7 +830,6 @@ namespace System.Collections
             }
         }
 
-        [Serializable]
         private class SortedListEnumerator : IDictionaryEnumerator, ICloneable
         {
             private SortedList _sortedList;
@@ -937,7 +932,6 @@ namespace System.Collections
             }
         }
 
-        [Serializable]
         private class KeyList : IList
         {
             private SortedList _sortedList;
@@ -1043,7 +1037,6 @@ namespace System.Collections
             }
         }
 
-        [Serializable]
         private class ValueList : IList
         {
             private SortedList _sortedList;

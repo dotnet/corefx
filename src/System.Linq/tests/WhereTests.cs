@@ -20,8 +20,8 @@ namespace System.Linq.Tests
             Func<int, bool> simplePredicate = (value) => true;
             Func<int, int, bool> complexPredicate = (value, index) => true;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.Where(simplePredicate));
-            Assert.Throws<ArgumentNullException>("source", () => source.Where(complexPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Where(simplePredicate));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Where(complexPredicate));
         }
 
         [Fact]
@@ -31,8 +31,8 @@ namespace System.Linq.Tests
             Func<int, bool> simplePredicate = null;
             Func<int, int, bool> complexPredicate = null;
 
-            Assert.Throws<ArgumentNullException>("predicate", () => source.Where(simplePredicate));
-            Assert.Throws<ArgumentNullException>("predicate", () => source.Where(complexPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.Where(simplePredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.Where(complexPredicate));
         }
 
         #endregion
@@ -814,13 +814,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_SourceThrowsOnReset()
+        public void Select_ResetEnumerator_ThrowsException()
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
+            IEnumerator<int> enumerator = source.Where(value => true).GetEnumerator();
 
-            var enumerator = source.Where(value => true).GetEnumerator();
-
-            Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+            // The full .NET Framework throws a NotImplementedException.
+            // See https://github.com/dotnet/corefx/pull/2959.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<NotImplementedException>(() => enumerator.Reset());
+            }
+            else
+            {
+                Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+            }
         }
 
         [Fact]
@@ -997,8 +1005,7 @@ namespace System.Linq.Tests
             Assert.Equal(source.Skip(source.Length - 1), source.Where((e, i) => i == source.Length - 1));
         }
 
-        [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void IndexOverflows()
         {
             var infiniteWhere = new FastInfiniteEnumerator<int>().Where((e, i) => true);

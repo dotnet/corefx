@@ -3,31 +3,33 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
 {
-    public class GetEnvironmentVariable
+    public partial class GetEnvironmentVariable
     {
         [Fact]
         public void InvalidArguments_ThrowsExceptions()
         {
-            Assert.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null));
-            Assert.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test"));
-            Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test"));
-            Assert.Throws<ArgumentException>("value", () => Environment.SetEnvironmentVariable("test", new string('s', 65 * 1024)));
+            AssertExtensions.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null));
+            AssertExtensions.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test"));
+            AssertExtensions.Throws<ArgumentException>("value", null, () => Environment.SetEnvironmentVariable("test", new string('s', 65 * 1024)));
 
-            Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test", EnvironmentVariableTarget.Machine));
-            Assert.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test", EnvironmentVariableTarget.User));
-            Assert.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null, EnvironmentVariableTarget.Process));
-            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.GetEnvironmentVariable("test", (EnvironmentVariableTarget)42));
-            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.SetEnvironmentVariable("test", "test", (EnvironmentVariableTarget)(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.GetEnvironmentVariables((EnvironmentVariableTarget)(3)));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test", EnvironmentVariableTarget.Machine));
+            AssertExtensions.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test", EnvironmentVariableTarget.User));
+            AssertExtensions.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null, EnvironmentVariableTarget.Process));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.GetEnvironmentVariable("test", (EnvironmentVariableTarget)42));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.SetEnvironmentVariable("test", "test", (EnvironmentVariableTarget)(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.GetEnvironmentVariables((EnvironmentVariableTarget)(3)));
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(new string('s', 256), "value", EnvironmentVariableTarget.User));
+                AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable(new string('s', 256), "value", EnvironmentVariableTarget.User));
             }
         }
 
@@ -133,6 +135,7 @@ namespace System.Tests
             }
         }
 
+        [Fact]
         public void EnumerateYieldsDictionaryEntryFromIEnumerable()
         {
             // GetEnvironmentVariables has always yielded DictionaryEntry from IEnumerable
@@ -145,6 +148,41 @@ namespace System.Tests
             else
             {
                 Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            }
+        }
+
+        [Fact]
+        public void GetEnumerator_IDictionaryEnumerator_YieldsDictionaryEntries()
+        {
+            // GetEnvironmentVariables has always yielded DictionaryEntry from IDictionaryEnumerator
+            IDictionary vars = Environment.GetEnvironmentVariables();
+            IDictionaryEnumerator enumerator = vars.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                Assert.IsType<DictionaryEntry>(enumerator.Current);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            }
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(EnvironmentVariableTarget.User)]
+        [InlineData(EnvironmentVariableTarget.Process)]
+        [InlineData(EnvironmentVariableTarget.Machine)]
+        public void GetEnumerator_LinqOverDictionaryEntries_Success(EnvironmentVariableTarget? target)
+        {
+            IDictionary envVars = target != null ?
+                Environment.GetEnvironmentVariables(target.Value) :
+                Environment.GetEnvironmentVariables();
+
+            Assert.IsType<Hashtable>(envVars);
+
+            foreach (KeyValuePair<string, string> envVar in envVars.Cast<DictionaryEntry>().Select(de => new KeyValuePair<string, string>((string)de.Key, (string)de.Value)))
+            {
+                Assert.NotNull(envVar.Key);
             }
         }
 
@@ -191,7 +229,7 @@ namespace System.Tests
         {
             bool lookForSetValue = (target == EnvironmentVariableTarget.Process) || PlatformDetection.IsWindowsAndElevated;
 
-            const string key = "EnumerateEnvironmentVariables";
+            string key = $"EnumerateEnvironmentVariables ({target})";
             string value = Path.GetRandomFileName();
 
             try
@@ -230,19 +268,23 @@ namespace System.Tests
         private static void SetEnvironmentVariableWithPInvoke(string name, string value)
         {
             bool success =
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                    SetEnvironmentVariable(name, value) :
+#if !Unix
+                    SetEnvironmentVariable(name, value);
+#else
                     (value != null ? setenv(name, value, 1) : unsetenv(name)) == 0;
+#endif
             Assert.True(success);
         }
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariableW" , CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern bool SetEnvironmentVariable(string lpName, string lpValue);
 
+#if Unix
         [DllImport("libc")]
         private static extern int setenv(string name, string value, int overwrite);
 
         [DllImport("libc")]
         private static extern int unsetenv(string name);
+#endif
     }
 }

@@ -38,13 +38,27 @@ shift
 goto :Arg_Loop
 
 :ToolsVersion
-:: Determine the tools version to pass to cmake/msbuild
+:: Default to highest Visual Studio version available
+::
+:: For VS2015 (and prior), only a single instance is allowed to be installed on a box
+:: and VS140COMNTOOLS is set as a global environment variable by the installer. This
+:: allows users to locate where the instance of VS2015 is installed.
+::
+:: For VS2017, multiple instances can be installed on the same box SxS and VS150COMNTOOLS
+:: is no longer set as a global environment variable and is instead only set if the user
+:: has launched the VS2017 Developer Command Prompt.
+::
+:: Following this logic, we will default to the VS2017 toolset if VS150COMNTOOLS tools is
+:: set, as this indicates the user is running from the VS2017 Developer Command Prompt and
+:: is already configured to use that toolset. Otherwise, we will fallback to using the VS2015
+:: toolset if it is installed. Finally, we will fail the script if no supported VS instance
+:: can be found.
 if not defined VisualStudioVersion (
     if defined VS150COMNTOOLS (
-        call "%VS150COMNTOOLS%\VsDevCmd.bat"
+        call "%VS150COMNTOOLS%VsDevCmd.bat"
         goto :VS2017
     ) else if defined VS140COMNTOOLS (
-        call "%VS140COMNTOOLS%\VsDevCmd.bat"
+        call "%VS140COMNTOOLS%VsDevCmd.bat"
         goto :VS2015
     )
     goto :MissingVersion
@@ -68,7 +82,7 @@ set __VSVersion=vs2017
 set __PlatformToolset=v141
 if NOT "%__BuildArch%" == "arm64" (
     :: Set the environment for the native build
-    call "%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsall.bat" %__VCBuildArch%
+    call "%VS150COMNTOOLS%..\..\VC\Auxiliary\Build\vcvarsall.bat" %__VCBuildArch%
 )
 goto :SetupDirs
 
@@ -78,7 +92,7 @@ set __VSVersion=vs2015
 set __PlatformToolset=v140
 if NOT "%__BuildArch%" == "arm64" (
     :: Set the environment for the native build
-    call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %__VCBuildArch%
+    call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" %__VCBuildArch%
 )
 goto :SetupDirs
 
@@ -95,8 +109,6 @@ if %__IntermediatesDir% == "" (
 )
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
-set "__RuntimePath=%__binDir%\runtime\%__TargetGroup%-Windows_NT-%CMAKE_BUILD_TYPE%-%__BuildArch%\"
-set "__TestSharedFrameworkPath=%__binDir%\testhost\%__TargetGroup%-Windows_NT-%CMAKE_BUILD_TYPE%-%__BuildArch%\shared\Microsoft.NETCore.App\9.9.9\"
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
@@ -143,10 +155,6 @@ call %__rootDir%/run.cmd build-managed -project="%__IntermediatesDir%\install.vc
 IF ERRORLEVEL 1 (
     goto :Failure
 )
-
-:: Copy to vertical runtime directory
-xcopy /yqs "%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native\*" "%__RuntimePath%"
-xcopy /yqs "%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native\*" "%__TestSharedFrameworkPath%"
 
 echo Done building Native components
 

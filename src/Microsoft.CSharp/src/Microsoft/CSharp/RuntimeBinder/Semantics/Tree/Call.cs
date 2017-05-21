@@ -4,22 +4,39 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRCALL : EXPR
+    internal sealed class ExprCall : ExprWithType, IExprWithArgs
     {
-        private EXPR _OptionalArguments;
-        public EXPR GetOptionalArguments() { return _OptionalArguments; }
-        public void SetOptionalArguments(EXPR value) { _OptionalArguments = value; }
+        public ExprCall(CType type)
+            : base(ExpressionKind.Call, type)
+        {
+        }
 
-        private EXPRMEMGRP _MemberGroup;
-        public EXPRMEMGRP GetMemberGroup() { return _MemberGroup; }
-        public void SetMemberGroup(EXPRMEMGRP value) { _MemberGroup = value; }
+        public Expr OptionalArguments { get; set; }
 
-        public MethWithInst mwi;
+        public ExprMemberGroup MemberGroup { get; set; }
 
-        public PREDEFMETH PredefinedMethod;
+        public Expr OptionalObject
+        {
+            get { return MemberGroup.OptionalObject; }
+            set { MemberGroup.OptionalObject = value; }
+        }
 
-        public NullableCallLiftKind nubLiftKind;
-        public EXPR pConversions;
-        public EXPR castOfNonLiftedResultToLiftedType;
+        public MethWithInst MethWithInst { get; set; }
+
+        public PREDEFMETH PredefinedMethod { get; set; }
+
+        public NullableCallLiftKind NullableCallLiftKind { get; set; }
+
+        public Expr PConversions { get; set; }
+
+        public Expr CastOfNonLiftedResultToLiftedType { get; set; }
+
+        SymWithType IExprWithArgs.GetSymWithType() => MethWithInst;
+
+        public override void SetMismatchedStaticBit()
+        {
+            MemberGroup?.SetMismatchedStaticBit();
+            base.SetMismatchedStaticBit();
+        }
     }
 }

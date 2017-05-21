@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
@@ -308,7 +309,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.False(reader.TryOpenAssociatedPortablePdb(@"b.dll", _ => null, out pdbProvider, out pdbPath));
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(@"b.dll", null, out pdbProvider, out pdbPath));
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(null, _ => null, out pdbProvider, out pdbPath));
-                Assert.Throws<ArgumentException>("peImagePath", () => reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
+                AssertExtensions.Throws<ArgumentException>("peImagePath", () => reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
             }
         }
 
@@ -504,7 +505,7 @@ namespace System.Reflection.PortableExecutable.Tests
             var ddBuilder = new DebugDirectoryBuilder();
             ddBuilder.AddCodeViewEntry(@"/a/b/a.pdb", id, portablePdbVersion: 0);
             ddBuilder.AddReproducibleEntry();
-            ddBuilder.AddCodeViewEntry(@"/a/b/c.pdb", id, portablePdbVersion: 0x0100);
+            ddBuilder.AddCodeViewEntry(@"/a/b/c.pdb", id, portablePdbVersion: 0x0100, age: 0x1234);
             ddBuilder.AddCodeViewEntry(@"/a/b/d.pdb", id, portablePdbVersion: 0x0100);
 
             var peStream = new MemoryStream(TestBuilders.BuildPEWithDebugDirectory(ddBuilder));

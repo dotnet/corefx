@@ -6,12 +6,14 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
     public class LoggingTest : RemoteExecutorTestBase
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
         public static void EventSource_ExistsWithCorrectId()
         {
             Type esType = typeof(Socket).Assembly.GetType("System.Net.NetEventSource", throwOnError: true, ignoreCase: false);
@@ -25,6 +27,7 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
         public void EventSource_EventsRaisedAsExpected()
         {
             RemoteInvoke(() =>
@@ -34,14 +37,34 @@ namespace System.Net.Sockets.Tests
                     var events = new ConcurrentQueue<EventWrittenEventArgs>();
                     listener.RunWithCallback(events.Enqueue, () =>
                     {
-                        // Invoke a test that'll cause some events to be generated
+                        // Invoke several tests to execute code paths while tracing is enabled
+
+                        new SendReceiveSync(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveSync(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+
+                        new SendReceiveTask(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveTask(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+
+                        new SendReceiveEap(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveEap(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+
+                        new SendReceiveApm(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveApm(new NullTestOutputHelper()).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+
                         new NetworkStreamTest().CopyToAsync_AllDataCopied(4096).GetAwaiter().GetResult();
+                        new NetworkStreamTest().Timeout_ValidData_Roundtrips().GetAwaiter().GetResult();
                     });
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
                 return SuccessExitCode;
             }).Dispose();
+        }
+
+        private sealed class NullTestOutputHelper : ITestOutputHelper
+        {
+            public void WriteLine(string message) { }
+            public void WriteLine(string format, params object[] args) { }
         }
     }
 }

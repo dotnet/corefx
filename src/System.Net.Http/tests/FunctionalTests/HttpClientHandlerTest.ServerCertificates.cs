@@ -15,7 +15,8 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientHandler_ServerCertificates_Test
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "uap: dotnet/corefx #20010, netfx: dotnet/corefx #16805")]
+    public partial class HttpClientHandler_ServerCertificates_Test
     {
         [OuterLoop] // TODO: Issue #11345
         [Fact]
@@ -174,10 +175,21 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task NoCallback_RevokedCertificate_NoRevocationChecking_Succeeds()
         {
-            using (var client = new HttpClient())
-            using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RevokedCertRemoteServer))
+            // On macOS (libcurl+darwinssl) we cannot turn revocation off.
+            // But we also can't realistically say that the default value for
+            // CheckCertificateRevocationList throws in the general case.
+            try
             {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                using (var client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RevokedCertRemoteServer))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            }
+            catch (HttpRequestException)
+            {
+                if (!ShouldSuppressRevocationException)
+                    throw;
             }
         }
 
@@ -199,8 +211,8 @@ namespace System.Net.Http.Functional.Tests
             new object[] { Configuration.Http.WrongHostNameCertRemoteServer , SslPolicyErrors.RemoteCertificateNameMismatch},
         };
 
-        [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(7812, TestPlatforms.Windows)]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(BackendSupportsCustomCertificateHandling))]
         [MemberData(nameof(CertificateValidationServersAndExpectedPolicies))]
         public async Task UseCallback_BadCertificate_ExpectedPolicyErrors(string url, SslPolicyErrors expectedErrors)
@@ -241,6 +253,8 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
+        // For macOS the "custom handling" means that revocation can't be *disabled*. So this test does not apply.
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public async Task SSLBackendNotSupported_Revocation_ThrowsPlatformNotSupportedException()
         {
             using (var client = new HttpClient(new HttpClientHandler() { CheckCertificateRevocationList = true }))
@@ -298,15 +312,5 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
-
-        private static bool BackendSupportsCustomCertificateHandling =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
-
-        private static bool BackendDoesNotSupportCustomCertificateHandling => !BackendSupportsCustomCertificateHandling;
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
-
     }
 }

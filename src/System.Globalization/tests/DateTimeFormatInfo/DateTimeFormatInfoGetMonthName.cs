@@ -19,8 +19,7 @@ namespace System.Globalization.Tests
             yield return new object[] { new DateTimeFormatInfo(), englishMonthNames };
             yield return new object[] { new CultureInfo("en-US").DateTimeFormat, englishMonthNames };
 
-            // ActiveIssue(2103)
-            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610 && !PlatformDetection.IsFedora23)
+            if (!PlatformDetection.IsUbuntu || PlatformDetection.IsUbuntu1404)
             {
                 yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, new string[] { "", "janvier", "f\u00E9vrier", "mars", "avril", "mai", "juin", "juillet", "ao\u00FBt", "septembre", "octobre", "novembre", "d\u00E9cembre", "" } };
             }
@@ -39,8 +38,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetMonthName_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("month", () => new DateTimeFormatInfo().GetMonthName(MinMonth - 1));
-            Assert.Throws<ArgumentOutOfRangeException>("month", () => new DateTimeFormatInfo().GetMonthName(MaxMonth + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("month", () => new DateTimeFormatInfo().GetMonthName(MinMonth - 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("month", () => new DateTimeFormatInfo().GetMonthName(MaxMonth + 1));
         }
     }
 }

@@ -134,12 +134,16 @@ static_assert(PAL_IN_Q_OVERFLOW == IN_Q_OVERFLOW, "");
 static_assert(PAL_IN_IGNORED == IN_IGNORED, "");
 static_assert(PAL_IN_ONLYDIR == IN_ONLYDIR, "");
 static_assert(PAL_IN_DONT_FOLLOW == IN_DONT_FOLLOW, "");
+#if HAVE_IN_EXCL_UNLINK
 static_assert(PAL_IN_EXCL_UNLINK == IN_EXCL_UNLINK, "");
+#endif // HAVE_IN_EXCL_UNLINK
 static_assert(PAL_IN_ISDIR == IN_ISDIR, "");
-#endif
+#endif // HAVE_INOTIFY
 
 static void ConvertFileStatus(const struct stat_& src, FileStatus* dst)
 {
+    dst->Dev = static_cast<int64_t>(src.st_dev);
+    dst->Ino = static_cast<int64_t>(src.st_ino);
     dst->Flags = FILESTATUS_FLAGS_NONE;
     dst->Mode = static_cast<int32_t>(src.st_mode);
     dst->Uid = src.st_uid;
@@ -213,13 +217,13 @@ static int32_t ConvertOpenFlags(int32_t flags)
             ret = O_WRONLY;
             break;
         default:
-            assert(false && "Unknown Open access mode.");
+            assert_msg(false, "Unknown Open access mode", static_cast<int>(flags));
             return -1;
     }
 
     if (flags & ~(PAL_O_ACCESS_MODE_MASK | PAL_O_CLOEXEC | PAL_O_CREAT | PAL_O_EXCL | PAL_O_TRUNC | PAL_O_SYNC))
     {
-        assert(false && "Unknown Open flag.");
+        assert_msg(false, "Unknown Open flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -384,7 +388,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         //  kernel set errno -> failure
         if (errno != 0)
         {
-            assert(errno == EBADF); // Invalid directory stream descriptor dir.
+            assert_err(errno == EBADF, "Invalid directory stream descriptor dir", errno);
             return errno;
         }
         return -1;
@@ -417,7 +421,7 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
             flags = O_CLOEXEC;
             break;
         default:
-            assert(false && "Unknown flag.");
+            assert_msg(false, "Unknown pipe flag", static_cast<int>(flags));
             errno = EINVAL;
             return -1;
     }
@@ -570,7 +574,16 @@ extern "C" int32_t SystemNative_FnMatch(const char* pattern, const char* path, F
 extern "C" int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, SeekWhence whence)
 {
     int64_t result;
-    while (CheckInterrupted(result = lseek(ToFileDescriptor(fd), offset, whence)));
+    while (CheckInterrupted(
+        result =
+#if HAVE_LSEEK64
+            lseek64(
+#else
+            lseek(
+#endif
+                 ToFileDescriptor(fd),
+                 offset,
+                 whence)));
     return result;
 }
 
@@ -633,7 +646,7 @@ static int32_t ConvertMMapProtection(int32_t protection)
 
     if (protection & ~(PAL_PROT_READ | PAL_PROT_WRITE | PAL_PROT_EXEC))
     {
-        assert(false && "Unknown protection.");
+        assert_msg(false, "Unknown protection", static_cast<int>(protection));
         return -1;
     }
 
@@ -653,7 +666,7 @@ static int32_t ConvertMMapFlags(int32_t flags)
 {
     if (flags & ~(PAL_MAP_SHARED | PAL_MAP_PRIVATE | PAL_MAP_ANONYMOUS))
     {
-        assert(false && "Unknown MMap flag.");
+        assert_msg(false, "Unknown MMap flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -673,7 +686,7 @@ static int32_t ConvertMSyncFlags(int32_t flags)
 {
     if (flags & ~(PAL_MS_SYNC | PAL_MS_ASYNC | PAL_MS_INVALIDATE))
     {
-        assert(false && "Unknown MSync flag.");
+        assert_msg(false, "Unknown MSync flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -712,7 +725,19 @@ extern "C" void* SystemNative_MMap(void* address,
     }
 
     // Use ToFileDescriptorUnchecked to allow -1 to be passed for the file descriptor, since managed code explicitly uses -1
-    void* ret = mmap(address, static_cast<size_t>(length), protection, flags, ToFileDescriptorUnchecked(fd), offset);
+    void* ret =
+#if HAVE_MMAP64
+        mmap64(
+#else
+        mmap(
+#endif
+            address,
+            static_cast<size_t>(length),
+            protection,
+            flags,
+            ToFileDescriptorUnchecked(fd),
+            offset);
+
     if (ret == MAP_FAILED)
     {
         return nullptr;
@@ -753,7 +778,7 @@ extern "C" int32_t SystemNative_MAdvise(void* address, uint64_t length, MemoryAd
 #endif
     }
 
-    assert(false && "Unknown MemoryAdvice");
+    assert_msg(false, "Unknown MemoryAdvice", static_cast<int>(advice));
     errno = EINVAL;
     return -1;
 }
@@ -828,7 +853,7 @@ extern "C" int64_t SystemNative_SysConf(SysConfName name)
             return sysconf(_SC_NPROCESSORS_ONLN);
     }
 
-    assert(false && "Unknown SysConfName");
+    assert_msg(false, "Unknown SysConf name", static_cast<int>(name));
     errno = EINVAL;
     return -1;
 }
@@ -836,7 +861,15 @@ extern "C" int64_t SystemNative_SysConf(SysConfName name)
 extern "C" int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
 {
     int32_t result;
-    while (CheckInterrupted(result = ftruncate(ToFileDescriptor(fd), length)));
+    while (CheckInterrupted(
+        result =
+#if HAVE_FTRUNCATE64
+        ftruncate64(
+#else
+        ftruncate(
+#endif
+            ToFileDescriptor(fd),
+            length)));
     return result;
 }
 
@@ -908,7 +941,17 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
 {
 #if HAVE_POSIX_ADVISE
     int32_t result;
-    while (CheckInterrupted(result = posix_fadvise(ToFileDescriptor(fd), offset, length, advice)));
+    while (CheckInterrupted(
+        result =
+#if HAVE_POSIX_FADVISE64
+            posix_fadvise64(
+#else
+            posix_fadvise(
+#endif
+                ToFileDescriptor(fd),
+                offset,
+                length,
+                advice)));
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
@@ -1140,9 +1183,9 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
         // futimes is not a POSIX function, and not available on Android,
         // but futimens is
         struct timespec origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[0].tv_sec = static_cast<time_t>(sourceStat.st_atime);
         origTimes[0].tv_nsec = 0;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
+        origTimes[1].tv_sec = static_cast<time_t>(sourceStat.st_mtime);
         origTimes[1].tv_nsec = 0;
         while (CheckInterrupted(ret = futimens(outFd, origTimes)));
 #endif
@@ -1179,6 +1222,9 @@ extern "C" int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathNam
     assert(pathName != nullptr);
 
 #if HAVE_INOTIFY
+#if !HAVE_IN_EXCL_UNLINK
+    mask &= ~static_cast<uint32_t>(PAL_IN_EXCL_UNLINK);
+#endif
     return inotify_add_watch(ToFileDescriptor(fd), pathName, mask);
 #else
     (void)fd, (void)pathName, (void)mask;
@@ -1243,13 +1289,18 @@ extern "C" int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int6
         errno = EINVAL;
         return -1;
     }
-    
+
+#if HAVE_FLOCK64
+    struct flock64 lockArgs;
+#else
     struct flock lockArgs;
+#endif
+
     lockArgs.l_type = lockType;
     lockArgs.l_whence = SEEK_SET;
     lockArgs.l_start = offset;
     lockArgs.l_len = length;
-    
+
     int32_t ret;
     while (CheckInterrupted(ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)));
     return ret;

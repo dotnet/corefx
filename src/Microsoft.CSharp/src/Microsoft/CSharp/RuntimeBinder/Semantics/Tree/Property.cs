@@ -4,7 +4,7 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRPROP : EXPR
+    internal sealed class ExprProperty : ExprWithType, IExprWithArgs
     {
         // If we have this.prop = 123, but the implementation of the property is in the
         // base class, then the object is of the base class type. Note that to get
@@ -14,18 +14,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // of the type we are actually calling through.  (We need to know the
         // "through" type to ensure that protected semantics are correctly enforced.)
 
-        private EXPR OptionalArguments;
-        public EXPR GetOptionalArguments() { return OptionalArguments; }
-        public void SetOptionalArguments(EXPR value) { OptionalArguments = value; }
-        private EXPRMEMGRP MemberGroup;
-        public EXPRMEMGRP GetMemberGroup() { return MemberGroup; }
-        public void SetMemberGroup(EXPRMEMGRP value) { MemberGroup = value; }
-        private EXPR OptionalObjectThrough;
-        public EXPR GetOptionalObjectThrough() { return OptionalObjectThrough; }
-        public void SetOptionalObjectThrough(EXPR value) { OptionalObjectThrough = value; }
+        public ExprProperty(CType type)
+            : base(ExpressionKind.Property, type)
+        {
+        }
 
-        public PropWithType pwtSlot;
-        public MethWithType mwtSet;
-        public bool isBaseCall() { return 0 != (flags & EXPRFLAG.EXF_BASECALL); }
+        public Expr OptionalArguments { get; set; }
+
+        public ExprMemberGroup MemberGroup { get; set; }
+
+        public Expr OptionalObject
+        {
+            get { return MemberGroup.OptionalObject; }
+            set { MemberGroup.OptionalObject = value; }
+        }
+
+        public Expr OptionalObjectThrough { get; set; }
+
+        public PropWithType PropWithTypeSlot { get; set; }
+
+        public MethWithType MethWithTypeSet { get; set; }
+
+        public bool IsBaseCall => 0 != (Flags & EXPRFLAG.EXF_BASECALL);
+
+        SymWithType IExprWithArgs.GetSymWithType() => PropWithTypeSlot;
     }
 }

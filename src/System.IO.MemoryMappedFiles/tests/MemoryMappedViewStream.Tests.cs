@@ -26,16 +26,16 @@ namespace System.IO.MemoryMappedFiles.Tests
                 using (mmf)
                 {
                     // Offset
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength));
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
 
                     // Size
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1));
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1, MemoryMappedFileAccess.ReadWrite));
                     if (IntPtr.Size == 4)
                     {
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue));
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
                     }
                     else
                     {
@@ -50,8 +50,8 @@ namespace System.IO.MemoryMappedFiles.Tests
                     Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(mapLength, 1, MemoryMappedFileAccess.ReadWrite));
 
                     // Access
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(-1)));
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(42)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(-1)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(42)));
                 }
             }
         }
@@ -77,11 +77,18 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
-            using (MemoryMappedViewStream s = mmf.CreateViewStream(0, Capacity, viewAccess))
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && 
+                (mapAccess == MemoryMappedFileAccess.ReadExecute ||
+                mapAccess == MemoryMappedFileAccess.ReadWriteExecute ||
+                viewAccess == MemoryMappedFileAccess.ReadExecute ||
+                viewAccess == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
-                ValidateMemoryMappedViewStream(s, Capacity, viewAccess);
-            }
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+                using (MemoryMappedViewStream s = mmf.CreateViewStream(0, Capacity, viewAccess))
+                {
+                    ValidateMemoryMappedViewStream(s, Capacity, viewAccess);
+                }
+            });
         }
 
         [Theory]
@@ -101,10 +108,15 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT &&
+                (mapAccess == MemoryMappedFileAccess.ReadExecute ||
+                mapAccess == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
-                Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
-            }
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+                {
+                    Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
+                }
+            });
         }
 
         /// <summary>

@@ -4,20 +4,25 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRMULTIGET : EXPR
+    internal sealed class ExprMultiGet : ExprWithType
     {
-        private EXPRMULTI OptionalMulti;
-        public EXPRMULTI GetOptionalMulti() { return OptionalMulti; }
-        public void SetOptionalMulti(EXPRMULTI value) { OptionalMulti = value; }
+        public ExprMultiGet(CType type)
+            : base(ExpressionKind.MultiGet, type)
+        {
+        }
+
+        public ExprMulti OptionalMulti { get; set; }
     }
 
-    internal sealed class EXPRMULTI : EXPR
+    internal sealed class ExprMulti : ExprWithType
     {
-        public EXPR Left;
-        public EXPR GetLeft() { return Left; }
-        public void SetLeft(EXPR value) { Left = value; }
-        public EXPR Operator;
-        public EXPR GetOperator() { return Operator; }
-        public void SetOperator(EXPR value) { Operator = value; }
+        public ExprMulti(CType type)
+            : base(ExpressionKind.Multi, type)
+        {
+        }
+
+        public Expr Left { get; set; }
+
+        public Expr Operator { get; set; }
     }
 }

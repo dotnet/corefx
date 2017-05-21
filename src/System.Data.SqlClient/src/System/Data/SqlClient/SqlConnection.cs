@@ -9,12 +9,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
-
-
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
-    public sealed partial class SqlConnection : DbConnection
+    public sealed partial class SqlConnection : DbConnection, ICloneable
     {
         private bool _AsyncCommandInProgress;
 
@@ -51,6 +50,15 @@ namespace System.Data.SqlClient
         public SqlConnection(string connectionString) : this()
         {
             ConnectionString = connectionString;    // setting connection string first so that ConnectionOption is available
+            CacheConnectionStringProperties();
+        }
+
+        private SqlConnection(SqlConnection connection)
+        {
+            GC.SuppressFinalize(this);
+            CopyFrom(connection);
+            _connectionString = connection._connectionString;
+
             CacheConnectionStringProperties();
         }
 
@@ -463,8 +471,8 @@ namespace System.Data.SqlClient
         override public void Close()
         {
             ConnectionState previousState = State;
-            Guid operationId;
-            Guid clientConnectionId;
+            Guid operationId = default(Guid);
+            Guid clientConnectionId = default(Guid);
 
             // during the call to Dispose() there is a redundant call to 
             // Close(). because of this, the second time Close() is invoked the 
@@ -597,6 +605,11 @@ namespace System.Data.SqlClient
                     s_diagnosticListener.WriteConnectionOpenAfter(operationId, this);
                 }
             }
+        }
+
+        public override void EnlistTransaction(Transaction transaction)
+        {
+            throw ADP.AmbientTransactionIsNotSupported();
         }
 
         internal void RegisterWaitingForReconnect(Task waitingTask)
@@ -885,6 +898,21 @@ namespace System.Data.SqlClient
             }
         }
 
+        public override DataTable GetSchema()
+        {
+            return GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
+        }
+
+        public override DataTable GetSchema(string collectionName)
+        {
+            return GetSchema(collectionName, null);
+        }
+
+        public override DataTable GetSchema(string collectionName, string[] restrictionValues)
+        {
+            return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
+        }
+
         private class OpenAsyncRetry
         {
             private SqlConnection _parent;
@@ -978,6 +1006,13 @@ namespace System.Data.SqlClient
         private bool TryOpen(TaskCompletionSource<DbConnectionInternal> retry)
         {
             SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
+
+            // Fail Fast in case an application is trying to enlist the SqlConnection in a Transaction Scope.
+            if (connectionOptions.Enlist && ADP.GetCurrentTransaction() != null)
+            {
+                throw ADP.AmbientTransactionIsNotSupported();
+            }
+
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
 
             if (ForceNewConnection)
@@ -1005,8 +1040,10 @@ namespace System.Data.SqlClient
                 GC.ReRegisterForFinalize(this);
             }
 
+            // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
+            SqlStatistics statistics = _statistics;
             if (StatisticsEnabled ||
-                s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand))
+                ( s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
             {
                 ADP.TimerCurrent(out _statistics._openTimestamp);
                 tdsInnerConnection.Parser.Statistics = _statistics;
@@ -1264,6 +1301,24 @@ namespace System.Data.SqlClient
             }
             // delegate the rest of the work to the SqlStatistics class
             Statistics.UpdateStatistics();
+        }
+
+        object ICloneable.Clone() => new SqlConnection(this);
+
+        private void CopyFrom(SqlConnection connection)
+        {
+            ADP.CheckArgumentNull(connection, nameof(connection));
+            _userConnectionOptions = connection.UserConnectionOptions;
+            _poolGroup = connection.PoolGroup;
+            
+            if (DbConnectionClosedNeverOpened.SingletonInstance == connection._innerConnection)
+            {
+                _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
+            }
+            else
+            {
+                _innerConnection = DbConnectionClosedPreviouslyOpened.SingletonInstance;
+            }
         }
     } // SqlConnection
 } // System.Data.SqlClient namespace

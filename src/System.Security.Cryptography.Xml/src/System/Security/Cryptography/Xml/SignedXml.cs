@@ -68,15 +68,15 @@ namespace System.Security.Cryptography.Xml
         public const string XmlDsigRSASHA1Url = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         public const string XmlDsigHMACSHA1Url = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
 
-        public const string XmlDsigSHA256Url = "http://www.w3.org/2001/04/xmlenc#sha256";
-        public const string XmlDsigRSASHA256Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+        internal const string XmlDsigSHA256Url = "http://www.w3.org/2001/04/xmlenc#sha256";
+        internal const string XmlDsigRSASHA256Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
         // Yes, SHA384 is in the xmldsig-more namespace even though all the other SHA variants are in xmlenc. That's the standard.
-        public const string XmlDsigSHA384Url = "http://www.w3.org/2001/04/xmldsig-more#sha384";
-        public const string XmlDsigRSASHA384Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
+        internal const string XmlDsigSHA384Url = "http://www.w3.org/2001/04/xmldsig-more#sha384";
+        internal const string XmlDsigRSASHA384Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
 
-        public const string XmlDsigSHA512Url = "http://www.w3.org/2001/04/xmlenc#sha512";
-        public const string XmlDsigRSASHA512Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
+        internal const string XmlDsigSHA512Url = "http://www.w3.org/2001/04/xmlenc#sha512";
+        internal const string XmlDsigRSASHA512Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
         public const string XmlDsigC14NTransformUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
         public const string XmlDsigC14NWithCommentsTransformUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
@@ -401,7 +401,7 @@ namespace System.Security.Cryptography.Xml
                 {
                     // Default to RSA-SHA1
                     if (SignedInfo.SignatureMethod == null)
-                        SignedInfo.SignatureMethod = XmlDsigRSASHA1Url;
+                        SignedInfo.SignatureMethod = XmlDsigRSASHA256Url;
                 }
                 else
                 {
@@ -790,7 +790,8 @@ namespace System.Security.Cryptography.Xml
 
         private byte[] GetC14NDigest(HashAlgorithm hash)
         {
-            if (!_bCacheValid || !SignedInfo.CacheValid)
+            bool isKeyedHashAlgorithm = hash is KeyedHashAlgorithm;
+            if (isKeyedHashAlgorithm || !_bCacheValid || !SignedInfo.CacheValid)
             {
                 string baseUri = (_containingDocument == null ? null : _containingDocument.BaseURI);
                 XmlResolver resolver = (_bResolverSet ? _xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));
@@ -810,7 +811,7 @@ namespace System.Security.Cryptography.Xml
                 SignedXmlDebugLog.LogCanonicalizedOutput(this, c14nMethodTransform);
                 _digestedSignedInfo = c14nMethodTransform.GetDigestedOutput(hash);
 
-                _bCacheValid = true;
+                _bCacheValid = !isKeyedHashAlgorithm;
             }
             return _digestedSignedInfo;
         }
@@ -910,7 +911,7 @@ namespace System.Security.Cryptography.Xml
             {
                 // If no DigestMethod has yet been set, default it to sha1
                 if (reference.DigestMethod == null)
-                    reference.DigestMethod = XmlDsigSHA1Url;
+                    reference.DigestMethod = Reference.DefaultDigestMethod;
 
                 SignedXmlDebugLog.LogSigningReference(this, reference);
 

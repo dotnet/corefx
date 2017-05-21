@@ -41,7 +41,7 @@ namespace System.Net.Http
             Activity activity = null;
             Guid loggingRequestId = Guid.Empty;
 
-            // If System.Net.Http.Activity is on see if we should log the start (or just log the activity)
+            // If System.Net.Http.HttpRequestOut is on see if we should log the start (or just log the activity)
             if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityName, request))
             {
                 activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
@@ -55,8 +55,8 @@ namespace System.Net.Http
                     activity.Start();
                 }
             }
-            //if Activity events are disabled, try to write System.Net.Http.Request event (deprecated)
-            else if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteNameDeprecated))
+            //try to write System.Net.Http.Request event (deprecated)
+            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteNameDeprecated))
             {
                 long timestamp = Stopwatch.GetTimestamp();
                 loggingRequestId = Guid.NewGuid();
@@ -99,7 +99,7 @@ namespace System.Net.Http
             }
             catch (TaskCanceledException)
             {
-                //we'll report task status in Activity.Stop
+                //we'll report task status in HttpRequestOut.Stop
                 throw;
             }
             catch (Exception ex)
@@ -118,15 +118,18 @@ namespace System.Net.Http
                 //always stop activity if it was started
                 if (activity != null)
                 {
-                    activity.SetEndTime(DateTime.UtcNow);
                     s_diagnosticListener.StopActivity(activity, new
                     {
                         Response = responseTask.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
+                        //If request is failed or cancelled, there is no reponse, therefore no information about request;
+                        //pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
+                        //and not retain all requests in Start 
+                        Request = request,
                         RequestTaskStatus = responseTask.Status
                     });
                 }
-                //if Activity events are disabled, try to write System.Net.Http.Response event (deprecated)
-                else if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteNameDeprecated))
+                // Try to write System.Net.Http.Response event (deprecated)
+                if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteNameDeprecated))
                 {
                     long timestamp = Stopwatch.GetTimestamp();
                     s_diagnosticListener.Write(DiagnosticsHandlerLoggingStrings.ResponseWriteNameDeprecated,

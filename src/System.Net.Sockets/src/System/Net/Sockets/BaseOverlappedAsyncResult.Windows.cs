@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
@@ -106,7 +102,7 @@ namespace System.Net.Sockets
                             SocketFlags ignore;
                             bool success = Interop.Winsock.WSAGetOverlappedResult(
                                 socket.SafeHandle,
-                                asyncResult._nativeOverlapped,
+                                nativeOverlapped,
                                 out numBytes,
                                 false,
                                 out ignore);
@@ -137,24 +133,13 @@ namespace System.Net.Sockets
         // Called either synchronously from SocketPal async routines or asynchronously via CompletionPortCallback above. 
         private void CompletionCallback(int numBytes, SocketError socketError)
         {
-            ReleaseUnmanagedStructures();
-
             ErrorCode = (int)socketError;
-            InvokeCallback(PostCompletion(numBytes));
+            object result = PostCompletion(numBytes);
+            ReleaseUnmanagedStructures(); // must come after PostCompletion, as overrides may use these resources
+            InvokeCallback(result);
         }
 
-        // The following property returns the Win32 unsafe pointer to
-        // whichever Overlapped structure we're using for IO.
-        internal SafeNativeOverlapped OverlappedHandle
-        {
-            get
-            {
-                // On WinNT we need to use (due to the current implementation)
-                // an Overlapped object in order to bind the socket to the
-                // ThreadPool's completion port, so return the native handle
-                return _nativeOverlapped == null ? SafeNativeOverlapped.Zero : _nativeOverlapped;
-            }
-        }
+        internal unsafe NativeOverlapped* DangerousOverlappedPointer => (NativeOverlapped*)_nativeOverlapped.DangerousGetHandle();
 
         // Check the result of the overlapped operation.
         // Handle synchronous success by completing the asyncResult here.
