@@ -230,20 +230,6 @@ namespace Internal.NativeCrypto
 
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
             public static extern unsafe NTSTATUS BCryptDecrypt(SafeKeyHandle hKey, byte* pbInput, int cbInput, IntPtr paddingInfo, [In, Out] byte[] pbIV, int cbIV, byte* pbOutput, int cbOutput, out int cbResult, int dwFlags);
-
-            [DllImport(Libraries.Crypt32, CharSet = CharSet.Ansi, SetLastError = true, BestFitMapping = false)]
-            public static extern bool CryptFormatObject(
-                [In]      int dwCertEncodingType,   // only valid value is X509_ASN_ENCODING
-                [In]      int dwFormatType,         // unused - pass 0.
-                [In]      int dwFormatStrType,      // select multiline
-                [In]      IntPtr pFormatStruct,     // unused - pass IntPtr.Zero
-                [MarshalAs(UnmanagedType.LPStr)]
-                [In]      String lpszStructType,    // OID value
-                [In]      byte[] pbEncoded,         // Data to be formatted
-                [In]      int cbEncoded,            // Length of data to be formatted
-                [MarshalAs(UnmanagedType.LPWStr)]
-                [Out]     StringBuilder pbFormat,   // Receives formatted string.
-                [In, Out] ref int pcbFormat);       // Sends/receives length of formatted String.
         }
     }
 
@@ -273,18 +259,6 @@ namespace Internal.NativeCrypto
 
         [DllImport(Libraries.BCrypt)]
         private static extern uint BCryptCloseAlgorithmProvider(IntPtr hAlgorithm, int dwFlags);
-    }
-
-    internal sealed class SafeHashHandle : SafeBCryptHandle
-    {
-        protected sealed override bool ReleaseHandle()
-        {
-            uint ntStatus = BCryptDestroyHash(handle);
-            return ntStatus == 0;
-        }
-
-        [DllImport(Libraries.BCrypt)]
-        private static extern uint BCryptDestroyHash(IntPtr hHash);
     }
 
     internal sealed class SafeKeyHandle : SafeBCryptHandle

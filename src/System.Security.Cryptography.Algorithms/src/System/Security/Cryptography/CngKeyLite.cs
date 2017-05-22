@@ -400,13 +400,6 @@ namespace System.Security.Cryptography
         None = 0x00000000,
     }
 
-    // Limited version of CngKeyOpenOptions from the Cng contract.
-    [Flags]
-    internal enum CngKeyOpenOptions : int
-    {
-        None = 0x00000000,
-    }
-
     // Limited version of CngExportPolicies from the Cng contract.
     [Flags]
     internal enum CngExportPolicies : int
