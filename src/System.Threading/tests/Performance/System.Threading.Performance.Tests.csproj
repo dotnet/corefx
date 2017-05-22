@@ -16,7 +16,7 @@
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
     <Compile Include="Perf.Monitor.cs" />
-    <Compile Include="Perf.Volalite.cs" />
+    <Compile Include="Perf.Volatile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

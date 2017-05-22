@@ -8,15 +8,25 @@ namespace System.Threading.Tests
 {
     public class Perf_Volatile
     {
-        [Benchmark(InnerIterationCount = 500)]
-        public void ReadWrite_double()
+        [Benchmark(InnerIterationCount = 2000)]
+        public void Read_double()
+        {
+            double location = 0;
+
+            Benchmark.Iterate(() =>
+            {
+                Volatile.Read(ref location);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        public void Write_double()
         {
             double location = 0;
             double newValue = 1;
 
             Benchmark.Iterate(() =>
             {
-                Volatile.Read(ref location);
                 Volatile.Write(ref location, newValue);
             });
         }
