@@ -18,7 +18,7 @@ def linuxPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'bui
 	['Debug', 'Release'].each { configurationGroup ->
 		['Linux x64'].each { osName ->
             def parameters = ['Config':configurationGroup, 'OuterLoop':false]
-            linuxPipeline.triggerPipelineOnGithubPRComment("${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*", parameters)
+            linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*", parameters)
 		}
 	}
 }
@@ -29,9 +29,14 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 	['Debug', 'Release'].each { configurationGroup ->
 		['Windows x64'].each { osName ->
             def parameters = ['Config':configurationGroup, 'OuterLoop':false]
-            windowsPipeline.triggerPipelineOnGithubPRComment("${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*", parameters)
+            windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*", parameters)
 		}
 	}
 }
 
 JobReport.Report.generateJobReport(out)
+
+// Make the call to generate the help job
+Utilities.createHelperJob(this, project, branch,
+    "Welcome to the ${project} Repository",  // This is prepended to the help message
+    "Have a nice day!")  // This is appended to the help message.  You might put known issues here.
