@@ -16,6 +16,7 @@
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
     <Compile Include="Perf.Monitor.cs" />
+    <Compile Include="Perf.SpinLock.cs" />
     <Compile Include="Perf.Volatile.cs" />
   </ItemGroup>
   <ItemGroup>
