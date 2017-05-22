@@ -259,7 +259,7 @@ namespace System.Xml.Serialization
             return sb.ToString();
         }
 
-        internal static bool GenerateSerializerStream(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, Assembly assembly, Hashtable assemblies, Stream stream)
+        internal static bool GenerateSerializerToStream(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, Assembly assembly, Hashtable assemblies, Stream stream)
         {
             var compiler = new Compiler();
             try

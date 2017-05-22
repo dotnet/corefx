@@ -854,7 +854,7 @@ namespace System.Xml.Serialization
                 }
             }
 
-            return TempAssembly.GenerateSerializerStream(mappings, types, null, assembly, new Hashtable(), stream);
+            return TempAssembly.GenerateSerializerToStream(mappings, types, null, assembly, new Hashtable(), stream);
         }
 #endif
 
