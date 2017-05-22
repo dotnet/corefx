@@ -5,8 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Tests
@@ -18,6 +16,10 @@ namespace System.Net.Tests
         {
             var listener = new HttpListener();
             Assert.Empty(listener.Prefixes);
+            Assert.Same(listener.Prefixes, listener.Prefixes);
+
+            Assert.Empty(listener.DefaultServiceNames);
+            Assert.Same(listener.DefaultServiceNames, listener.DefaultServiceNames);
         }
 
         [Theory]
@@ -166,20 +168,24 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [InlineData("http://*/")]
-        [InlineData("http://+/")]
-        [InlineData("http://localhost/")]
-        [InlineData("https://localhost/")]
-        [InlineData("http://0.0.0.0/")]
-        [InlineData("http://localhost:9200/")]
-        [InlineData("https://localhost:9200/")]
-        [InlineData("http://[fe80::70af:5aca:252a:3ca9]/")]
-        public void Add_NotStarted_ReturnsExpected(string uriPrefix)
+        [InlineData("http://*/", 1)]
+        [InlineData("http://+/", 1)]
+        [InlineData("http://localhost/", 2)]
+        [InlineData("https://localhost/", 2)]
+        [InlineData("http://0.0.0.0/", 1)]
+        [InlineData("http://localhost:9200/", 2)]
+        [InlineData("https://localhost:9200/", 2)]
+        [InlineData("http://[fe80::70af:5aca:252a:3ca9]/", 1)]
+        public void Add_NotStarted_ReturnsExpected(string uriPrefix, int expectedServiceNameLength)
         {
             var listener = new HttpListener();
             listener.Prefixes.Add(uriPrefix);
+
             Assert.Equal(1, listener.Prefixes.Count);
             Assert.True(listener.Prefixes.Contains(uriPrefix));
+
+            string[] serviceNames = listener.DefaultServiceNames.Cast<string>().ToArray();
+            Assert.Equal(expectedServiceNameLength, serviceNames.Length);
         }
 
         [Fact]
@@ -231,7 +237,7 @@ namespace System.Net.Tests
         {
             using (var factory = new HttpListenerFactory(hostname))
             {
-                var listener = factory.GetListener();
+                HttpListener listener = factory.GetListener();
                 string uriPrefix = Assert.Single(listener.Prefixes);
 
                 listener.Prefixes.Add(uriPrefix + "sub_path/");
@@ -353,6 +359,7 @@ namespace System.Net.Tests
             yield return new object[] { "http://localhost:-1/" };
             yield return new object[] { "http://localhost:0/" };
             yield return new object[] { "http://localhost:65536/" };
+            yield return new object[] { "http://localhost:/" };
             yield return new object[] { "http://localhost:trash/" };
             yield return new object[] { "http://localhost/invalid%path/" };
             yield return new object[] { "http://./" };
@@ -406,6 +413,7 @@ namespace System.Net.Tests
 
             // If the prefix was invalid, it shouldn't be added to the list.
             Assert.Empty(listener.Prefixes);
+            Assert.Empty(listener.DefaultServiceNames);
         }
 
         [Fact]
@@ -425,6 +433,7 @@ namespace System.Net.Tests
             // Ouch: even though adding the prefix threw an exception, the prefix was still added.
             Assert.Equal(1, listener.Prefixes.Count);
             Assert.True(listener.Prefixes.Contains(longPrefix));
+            Assert.Empty(listener.DefaultServiceNames);
 
             Assert.Throws<HttpListenerException>(() => listener.Start());
         }
