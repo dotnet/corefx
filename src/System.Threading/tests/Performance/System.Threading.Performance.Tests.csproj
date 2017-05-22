@@ -15,6 +15,7 @@
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+    <Compile Include="Perf.Monitor.cs" />
     <Compile Include="Perf.Volalite.cs" />
   </ItemGroup>
   <ItemGroup>
