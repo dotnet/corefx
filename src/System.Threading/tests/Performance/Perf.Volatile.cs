@@ -13,22 +13,34 @@ namespace System.Threading.Tests
         {
             double location = 0;
 
-            Benchmark.Iterate(() =>
+            foreach (var iteration in Benchmark.Iterations)
             {
-                Volatile.Read(ref location);
-            });
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Volatile.Read(ref location);
+                    }
+                }
+            }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = 2000)]
         public void Write_double()
         {
             double location = 0;
             double newValue = 1;
 
-            Benchmark.Iterate(() =>
+            foreach (var iteration in Benchmark.Iterations)
             {
-                Volatile.Write(ref location, newValue);
-            });
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Volatile.Write(ref location, newValue);
+                    }
+                }
+            }
         }
     }
 }
