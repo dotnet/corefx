@@ -1,6 +1,7 @@
 // Import the utility functionality.
 
 import jobs.generation.JobReport;
+import jobs.generation.Utilities;
 import org.dotnet.ci.pipelines.Pipeline
 
 // The input project name (e.g. dotnet/corefx)
