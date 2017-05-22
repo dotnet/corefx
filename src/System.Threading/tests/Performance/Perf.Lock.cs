@@ -13,7 +13,6 @@ namespace System.Threading.Tests
         public static void ReaderWriterLockSlimPerf()
         {
             ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
-
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
