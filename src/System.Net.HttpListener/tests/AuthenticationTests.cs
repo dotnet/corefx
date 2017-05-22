@@ -30,7 +30,7 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // Managed implementation connects successfully.
         [InlineData("Basic")]
         [InlineData("NTLM")]
         [InlineData("Negotiate")]
@@ -56,7 +56,7 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20099, TestPlatforms.Unix)]
         [MemberData(nameof(BasicAuthenticationHeader_TestData))]
         public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
         {
@@ -87,7 +87,7 @@ namespace System.Net.Tests
             yield return new object[] { "abc", HttpStatusCode.InternalServerError };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
         [InlineData("ExampleRealm")]
         [InlineData("  ExampleRealm  ")]
         [InlineData("")]
@@ -132,7 +132,7 @@ namespace System.Net.Tests
             await ValidateNullUser();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20101, TestPlatforms.AnyUnix)]
         [ActiveIssue(20096)]
         public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
         {
@@ -155,7 +155,7 @@ namespace System.Net.Tests
             yield return new object[] { "abcd", HttpStatusCode.BadRequest };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20101, TestPlatforms.AnyUnix)]
         [ActiveIssue(20096)]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
@@ -178,7 +178,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20101, TestPlatforms.AnyUnix)]
         [ActiveIssue(20096)]
         public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
         {
@@ -193,7 +193,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20101, TestPlatforms.AnyUnix)]
         [ActiveIssue(20096)]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
@@ -227,7 +227,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20100, TestPlatforms.AnyUnix)]
         public async Task AuthenticationSchemeSelectorDelegate_ThrowsException_SendsInternalServerErrorToClient()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
@@ -239,7 +239,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20100, TestPlatforms.AnyUnix)]
         public void AuthenticationSchemeSelectorDelegate_ThrowsOutOfMemoryException_RethrowsException()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
@@ -309,8 +309,7 @@ namespace System.Net.Tests
             }
         }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         public void UnsafeConnectionNtlmAuthentication_SetGet_ReturnsExpected()
         {
             using (var listener = new HttpListener())
@@ -328,8 +327,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         public void UnsafeConnectionNtlmAuthentication_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
