@@ -35,18 +35,6 @@ namespace Internal.NativeCrypto
             public const string Sha512 = "SHA512";              // BCRYPT_SHA512_ALGORITHM
         }
 
-        /// <summary>
-        ///     Magic numbers identifying blob types
-        /// </summary>
-        internal enum KeyBlobMagicNumber {
-            ECDHPublicP256 = 0x314B4345,                        // BCRYPT_ECDH_PUBLIC_P256_MAGIC
-            ECDHPublicP384 = 0x334B4345,                        // BCRYPT_ECDH_PUBLIC_P384_MAGIC
-            ECDHPublicP521 = 0x354B4345,                        // BCRYPT_ECDH_PUBLIC_P521_MAGIC
-            ECDsaPublicP256 = 0x31534345,                       // BCRYPT_ECDSA_PUBLIC_P256_MAGIC
-            ECDsaPublicP384 = 0x33534345,                       // BCRYPT_ECDSA_PUBLIC_P384_MAGIC
-            ECDsaPublicP521 = 0x35534345                        // BCRYPT_ECDSA_PUBLIC_P521_MAGIC
-        }
-
         internal static class KeyDerivationFunction
         {
             public const string Hash = "HASH";                  // BCRYPT_KDF_HASH
@@ -198,22 +186,6 @@ namespace Internal.NativeCrypto
         private static class BCryptGetPropertyStrings
         {
             public const String BCRYPT_HASH_LENGTH = "HashDigestLength";
-        }
-
-        public static String CryptFormatObject(String oidValue, byte[] rawData, bool multiLine)
-        {
-            const int X509_ASN_ENCODING = 0x00000001;
-            const int CRYPT_FORMAT_STR_MULTI_LINE = 0x00000001;
-
-            int dwFormatStrType = multiLine ? CRYPT_FORMAT_STR_MULTI_LINE : 0;
-
-            int cbFormat = 0;
-            if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, null, ref cbFormat))
-                return null;
-            StringBuilder sb = new StringBuilder((cbFormat + 1) / 2);
-            if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, sb, ref cbFormat))
-                return null;
-            return sb.ToString();
         }
 
         private enum NTSTATUS : uint
