@@ -76,7 +76,7 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
 stage ('Execute Tests') {
     def contextBase
     if (OuterLoop) {
-                      "Linux x64 Tests w/outer - ${Config}"
+        contextBase = "Linux x64 Tests w/outer - ${Config}"
     }
     else {
         contextBase = "Linux x64 Tests - ${Config}"
