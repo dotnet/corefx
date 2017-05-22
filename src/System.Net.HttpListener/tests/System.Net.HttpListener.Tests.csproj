@@ -14,6 +14,7 @@
     <Compile Include="GetContextHelper.cs" />
     <Compile Include="HttpListenerContextTests.cs" />
     <Compile Include="HttpListenerPrefixCollectionTests.cs" />
+    <Compile Include="HttpListenerResponseTests.Headers.cs" />
     <Compile Include="HttpListenerResponseTests.cs" />
     <Compile Include="HttpListenerRequestTests.cs" />
     <Compile Include="HttpListenerTests.cs" />
@@ -22,6 +23,7 @@
     <Compile Include="SimpleHttpTests.cs" />
     <Compile Include="HttpListenerFactory.cs" />
     <Compile Include="WebSocketTests.cs" />
+    <Compile Include="XUnitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>
