@@ -848,7 +848,7 @@ namespace System.Net.Security
             }
 
             output = outgoingSecurity.token;
-            
+            // maybe something goes wrong with InitializeSecurityContext
             return status;
         }
 

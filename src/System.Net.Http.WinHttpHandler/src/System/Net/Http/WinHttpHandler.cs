@@ -1306,6 +1306,10 @@ namespace System.Net.Http
             if (oldCallback == new IntPtr(Interop.WinHttp.WINHTTP_INVALID_STATUS_CALLBACK))
             {
                 int lastError = Marshal.GetLastWin32Error();
+                
+                Debug.Assert(lastError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "1");
+                Debug.Assert(lastError != unchecked((int)0x80090321), "2");
+                
                 if (lastError != Interop.WinHttp.ERROR_INVALID_HANDLE) // Ignore error if handle was already closed.
                 {
                     throw WinHttpException.CreateExceptionUsingError(lastError);
@@ -1341,6 +1345,11 @@ namespace System.Net.Http
                     // our context value (state object) to the request handle. And thus we won't get HANDLE_CLOSING
                     // notifications which would normally cause the state object to be unpinned and disposed.
                     state.Dispose();
+                    
+                    int lastError = Marshal.GetLastWin32Error();
+                    Debug.Assert(lastError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER, "3");
+                    Debug.Assert(lastError != unchecked((int)0x80090321), "4");
+                    
                     WinHttpException.ThrowExceptionUsingLastError();
                 }
             }
