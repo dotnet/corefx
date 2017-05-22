@@ -8,47 +8,63 @@ namespace System.Threading.Tests
 {
     public class Perf_Interlocked
     {
-        [Benchmark(InnerIterationCount = 500)]
-        public static void IncrementDecrement_int()
+        [Benchmark(InnerIterationCount = 1000)]
+        public static void Increment_int()
         {
             int location = 0;
             Benchmark.Iterate(() =>
             {
                 Interlocked.Increment(ref location);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        public static void Decrement_int()
+        {
+            int location = 0;
+            Benchmark.Iterate(() =>
+            {
                 Interlocked.Decrement(ref location);
             });
         }
 
-        [Benchmark(InnerIterationCount = 500)]
-        public void IncrementDecrement_long()
+        [Benchmark(InnerIterationCount = 1000)]
+        public void Increment_long()
         {
             long location = 0;
             Benchmark.Iterate(() =>
             {
                 Interlocked.Increment(ref location);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        public void Decrement_long()
+        {
+            long location = 0;
+            Benchmark.Iterate(() =>
+            {
                 Interlocked.Decrement(ref location);
             });
         }
 
-        [Benchmark(InnerIterationCount = 500)]
+        [Benchmark(InnerIterationCount = 1000)]
         public void Add_int()
         {
             int location = 0;
             Benchmark.Iterate(() =>
             {
                 Interlocked.Add(ref location, 2);
-                Interlocked.Add(ref location, -2);
             });
         }
 
-        [Benchmark(InnerIterationCount = 500)]
+        [Benchmark(InnerIterationCount = 1000)]
         public void Add_long()
         {
             long location = 0;
             Benchmark.Iterate(() =>
             {
                 Interlocked.Add(ref location, 2);
-                Interlocked.Add(ref location, -2);
             });
         }
 
