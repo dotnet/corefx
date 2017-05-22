@@ -8,120 +8,98 @@ namespace System.Threading.Tests
 {
     public class Perf_Interlocked
     {
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 500)]
         public static void IncrementDecrement_int()
         {
-            int integer32 = 0;
-            foreach (var iteration in Benchmark.Iterations)
+            int location = 0;
+            Benchmark.Iterate(() =>
             {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Increment(ref integer32);
-                    Interlocked.Decrement(ref integer32);
-                }
-            }
+                Interlocked.Increment(ref location);
+                Interlocked.Decrement(ref location);
+            });
         }
 
-        [Benchmark]
-        public static void IncrementDecrement_long()
-        {
-            long integer64 = 0;
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Increment(ref integer64);
-                    Interlocked.Decrement(ref integer64);
-                }
-            }
-        }
-
-        [Benchmark]
-        public static void Add_int()
-        {
-            int integer32 = 0;
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Add(ref integer32, 2);
-                    Interlocked.Add(ref integer32, -2);
-                }
-            }
-        }
-
-        [Benchmark]
-        public static void Add_long()
-        {
-            long integer64 = 0;
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Add(ref integer64, 2);
-                    Interlocked.Add(ref integer64, -2);
-                }
-            }
-        }
-
-        [Benchmark]
-        public static void Read()
+        [Benchmark(InnerIterationCount = 500)]
+        public void IncrementDecrement_long()
         {
             long location = 0;
-            foreach (var iteration in Benchmark.Iterations)
+            Benchmark.Iterate(() =>
             {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Read(ref location);
-                }
-            }
+                Interlocked.Increment(ref location);
+                Interlocked.Decrement(ref location);
+            });
         }
 
-        [Benchmark]
-        public static void Exchange()
+        [Benchmark(InnerIterationCount = 500)]
+        public void Add_int()
+        {
+            int location = 0;
+            Benchmark.Iterate(() =>
+            {
+                Interlocked.Add(ref location, 2);
+                Interlocked.Add(ref location, -2);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 500)]
+        public void Add_long()
+        {
+            long location = 0;
+            Benchmark.Iterate(() =>
+            {
+                Interlocked.Add(ref location, 2);
+                Interlocked.Add(ref location, -2);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        public static void Exchange_int()
+        {
+            int location = 0;
+            int newValue = 1;
+
+            Benchmark.Iterate(() =>
+            {
+                Interlocked.Exchange(ref location, newValue);
+            });
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        public static void Exchange_long()
         {
             long location = 0;
             long newValue = 1;
 
-            foreach (var iteration in Benchmark.Iterations)
+            Benchmark.Iterate(() =>
             {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.Exchange(ref location, newValue);
-                }
-            }
+                Interlocked.Exchange(ref location, newValue);
+            });
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 500)]
         public static void CompareExchange_int()
         {
             int location = 0;
             int newValue = 1;
             int comparand = 0;
 
-            foreach (var iteration in Benchmark.Iterations)
+            Benchmark.Iterate(() =>
             {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.CompareExchange(ref location, newValue, comparand);
-                }
-            }
+                Interlocked.CompareExchange(ref location, newValue, comparand);
+            });
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = 500)]
         public static void CompareExchange_long()
         {
             long location = 0;
             long newValue = 1;
             long comparand = 0;
 
-            foreach (var iteration in Benchmark.Iterations)
+            Benchmark.Iterate(() =>
             {
-                using (iteration.StartMeasurement())
-                {
-                    Interlocked.CompareExchange(ref location, newValue, comparand);
-                }
-            }
+                Interlocked.CompareExchange(ref location, newValue, comparand);
+            });
         }
     }
 }
