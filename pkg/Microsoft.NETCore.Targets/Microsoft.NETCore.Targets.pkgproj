@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
-    <PackageVersion>1.1.0</PackageVersion>
+    <PackageVersion>1.1.1</PackageVersion>
     <IsLineupPackage>true</IsLineupPackage>
     <RuntimeFileSource>runtime.json</RuntimeFileSource>
     <SkipValidatePackage>true</SkipValidatePackage>
