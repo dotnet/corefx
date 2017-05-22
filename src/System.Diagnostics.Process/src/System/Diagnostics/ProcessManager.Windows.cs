@@ -1086,12 +1086,13 @@ namespace System.Diagnostics
         {
             internal uint NextEntryOffset;
             internal uint NumberOfThreads;
-            private long _SpareLi1;
-            private long _SpareLi2;
-            private long _SpareLi3;
-            private long _CreateTime;
-            private long _UserTime;
-            private long _KernelTime;
+
+            private long reserved1;
+            private long reserved2;
+            private long reserved3;
+            private long reserved4;
+            private long reserved5;
+            private long reserved6;
 
             internal ushort NameLength;   // UNICODE_STRING   
             internal ushort MaximumNameLength;
@@ -1099,46 +1100,45 @@ namespace System.Diagnostics
 
             internal int BasePriority;
             internal IntPtr UniqueProcessId;
-            internal IntPtr InheritedFromUniqueProcessId;
+            internal IntPtr reserved7;
             internal uint HandleCount;
             internal uint SessionId;
-            internal UIntPtr PageDirectoryBase;
+            internal UIntPtr reserved8;
             internal UIntPtr PeakVirtualSize;  // SIZE_T
             internal UIntPtr VirtualSize;
-            internal uint PageFaultCount;
+            internal uint reserved9;
 
             internal UIntPtr PeakWorkingSetSize;
             internal UIntPtr WorkingSetSize;
-            internal UIntPtr QuotaPeakPagedPoolUsage;
+            internal UIntPtr reserved10;
             internal UIntPtr QuotaPagedPoolUsage;
-            internal UIntPtr QuotaPeakNonPagedPoolUsage;
+            internal UIntPtr reserved11;
             internal UIntPtr QuotaNonPagedPoolUsage;
             internal UIntPtr PagefileUsage;
             internal UIntPtr PeakPagefileUsage;
             internal UIntPtr PrivatePageCount;
 
-            private long _ReadOperationCount;
-            private long _WriteOperationCount;
-            private long _OtherOperationCount;
-            private long _ReadTransferCount;
-            private long _WriteTransferCount;
-            private long _OtherTransferCount;
+            private long reserved12;
+            private long reserved13;
+            private long reserved14;
+            private long reserved15;
+            private long reserved16;
+            private long reserved17;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         internal class SystemThreadInformation
         {
-            private long _KernelTime;
-            private long _UserTime;
-            private long _CreateTime;
-
-            private uint _WaitTime;
+            private long reserved1;
+            private long reserved2;
+            private long reserved3;
+            private uint reserved4;
             internal IntPtr StartAddress;
             internal IntPtr UniqueProcess;
             internal IntPtr UniqueThread;
             internal int Priority;
             internal int BasePriority;
-            internal uint ContextSwitches;
+            internal uint reserved5;
             internal uint ThreadState;
             internal uint WaitReason;
         }
