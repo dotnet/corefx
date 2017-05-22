@@ -22,7 +22,7 @@ def linuxPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'bui
             linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
             // Add one for outerloop
-            linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
+            linuxPipeline.triggerPipelineOnGithubPRComment("Portable Outerloop ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':true])
 		}
 	}
@@ -37,7 +37,7 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
             windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
             // Add one for outerloop
-            windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
+            windowsPipeline.triggerPipelineOnGithubPRComment("Portable Outerloop ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':true])
 		}
 	}
