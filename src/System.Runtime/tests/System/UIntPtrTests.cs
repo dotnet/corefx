@@ -138,6 +138,7 @@ namespace System.Tests
             Assert.Throws<OverflowException>(() => (uint)ptr);
         }
 
+        [ActiveIssue(20154, TargetFrameworkMonikers.NetFramework)]
         [ConditionalFact(nameof(Is64Bit))]
         public static void GetHashCodeRespectAllBits()
         {
