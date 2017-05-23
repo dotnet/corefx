@@ -400,6 +400,13 @@ namespace System.Security.Cryptography
         None = 0x00000000,
     }
 
+    // Limited version of CngKeyOpenOptions from the Cng contract.
+    [Flags]
+    internal enum CngKeyOpenOptions : int
+    {
+        None = 0x00000000,
+    }
+
     // Limited version of CngExportPolicies from the Cng contract.
     [Flags]
     internal enum CngExportPolicies : int
@@ -407,6 +414,8 @@ namespace System.Security.Cryptography
         None = 0x00000000,
         AllowPlaintextExport = 0x00000002,      // NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG
     }
+
+
 }
 
 // Internal, lightweight versions of the SafeNCryptHandle types which are public in CNG.

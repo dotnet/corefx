@@ -22,6 +22,13 @@ internal static partial class Interop
             public int cbData;
             public IntPtr pbData;
 
+            public string OID
+            {
+                get
+                {
+                   return Marshal.PtrToStringAnsi(pszOID);
+                }
+            }
 
             public string Name
             {
