@@ -11,6 +11,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="ReadOnlySpan\AsReadOnlySpan.cs" />
     <Compile Include="TInt.cs" />
   </ItemGroup>
   <ItemGroup>
