@@ -157,6 +157,9 @@
   <data name="Cryptography_InvalidRsaParameters" xml:space="preserve">
     <value>The specified RSA parameters are not valid; both Exponent and Modulus are required fields.</value>
   </data>
+  <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
+    <value>The string contains a character not in the 7 bit ASCII character set.</value>
+  </data>
   <data name="Cryptography_MissingIV" xml:space="preserve">
     <value>The cipher mode specified requires that an initialization vector (IV) be used.</value>
   </data>
@@ -174,6 +177,9 @@
   </data>
   <data name="Cryptography_NotValidPublicOrPrivateKey" xml:space="preserve">
     <value>Key is not a valid public or private key.</value>
+  </data>
+  <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
+    <value>Cannot open an invalid handle.</value>
   </data>
   <data name="Cryptography_PartialBlock" xml:space="preserve">
     <value>The input data is not a complete block.</value>
@@ -195,6 +201,9 @@
   </data>
   <data name="Cryptography_TransformBeyondEndOfBuffer" xml:space="preserve">
     <value>Attempt to transform beyond end of buffer.</value>
+  </data>
+  <data name="Cryptography_CipherModeNotSupported" xml:space="preserve">
+    <value>The specified CipherMode '{0}' is not supported.</value>
   </data>
   <data name="Cryptography_UnknownHashAlgorithm" xml:space="preserve">
     <value>'{0}' is not a known hash algorithm.</value>
