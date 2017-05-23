@@ -86,6 +86,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
+        [ActiveIssue(20148, ~TestPlatforms.Windows)]
         //[Variation(Desc = "TFS_470021 Unexpected local particle qualified name when chameleon schema is added to set")]
         public void TFS_470021()
         {

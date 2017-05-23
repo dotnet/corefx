@@ -894,6 +894,7 @@ namespace System.Xml.Tests
 
         //TFS_538324
         [Fact]
+        [ActiveIssue(20148, ~TestPlatforms.Windows)]
         public void XSDValidationGeneratesInvalidError_1()
         {
             using (var tempDirectory = new TempDirectory())
@@ -920,6 +921,7 @@ namespace System.Xml.Tests
 
         //TFS_538324
         [Fact]
+        [ActiveIssue(20148, ~TestPlatforms.Windows)]
         public void XSDValidationGeneratesInvalidError_2()
         {
             using (var tempDirectory = new TempDirectory())
