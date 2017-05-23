@@ -77,7 +77,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && 
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsInAppContainer && 
                 (mapAccess == MemoryMappedFileAccess.ReadExecute ||
                 mapAccess == MemoryMappedFileAccess.ReadWriteExecute ||
                 viewAccess == MemoryMappedFileAccess.ReadExecute ||
@@ -108,7 +108,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT &&
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsInAppContainer &&
                 (mapAccess == MemoryMappedFileAccess.ReadExecute ||
                 mapAccess == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
