@@ -141,7 +141,7 @@ namespace System.Tests
             Assert.Throws<OverflowException>(() => (int)ptr);
         }
 
-        [ActiveIssue(20154, TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This was a bug fix in .NET Core where the hash code should be different")]
         [ConditionalFact(nameof(Is64Bit))]
         public static void GetHashCodeRespectAllBits()
         {
