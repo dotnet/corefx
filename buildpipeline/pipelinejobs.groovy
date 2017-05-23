@@ -1,6 +1,7 @@
 // Import the utility functionality.
 
 import jobs.generation.JobReport;
+import jobs.generation.Utilities;
 import org.dotnet.ci.pipelines.Pipeline
 
 // The input project name (e.g. dotnet/corefx)
@@ -21,7 +22,7 @@ def linuxPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'bui
             linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
             // Add one for outerloop
-            linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
+            linuxPipeline.triggerPipelineOnGithubPRComment("Portable Outerloop ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':true])
 		}
 	}
@@ -33,10 +34,10 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 	['Debug', 'Release'].each { configurationGroup ->
 		['Windows x64'].each { osName ->
             // One for just innerloop
-            windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
+            windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
             // Add one for outerloop
-            windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
+            windowsPipeline.triggerPipelineOnGithubPRComment("Portable Outerloop ${osName} ${configurationGroup} Build", "(?i).*test\\W+outerloop\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':true])
 		}
 	}
