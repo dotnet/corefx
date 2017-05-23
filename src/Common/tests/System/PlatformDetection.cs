@@ -18,6 +18,7 @@ namespace System
         // do it in a way that failures don't cascade.
         //
 
+        public static bool IsUap => IsWinRT || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
         public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
 
@@ -387,6 +388,9 @@ namespace System
         private static volatile Tuple<bool> s_lazyNonZeroLowerBoundArraySupported;
 
         public static bool IsReflectionEmitSupported = !PlatformDetection.IsNetNative;
+
+        // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
+        public static bool IsInvokingStaticConstructorsSupported => !PlatformDetection.IsNetNative;
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit

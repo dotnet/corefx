@@ -30,15 +30,18 @@ namespace System.Reflection.Tests
         private string LoadFromTestPath { get; }
 
         public AssemblyTests() 
-            : base()
         {
-            DestTestAssemblyPath = Path.Combine(base.TestDirectory, "TestAssembly.dll");
-            File.Copy(SourceTestAssemblyPath, DestTestAssemblyPath);
-
             // Assembly.Location not supported (properly) on uapaot.
-            string currAssemblyPath = Path.Combine(Environment.CurrentDirectory, "System.Runtime.Tests.dll");
+            DestTestAssemblyPath = Path.Combine(base.TestDirectory, "TestAssembly.dll");
             LoadFromTestPath = Path.Combine(base.TestDirectory, "System.Runtime.Tests.dll");
-            File.Copy(currAssemblyPath, LoadFromTestPath, true);
+
+            // There is no dll to copy in ILC runs
+            if (!PlatformDetection.IsNetNative)
+            {
+                File.Copy(SourceTestAssemblyPath, DestTestAssemblyPath);
+                string currAssemblyPath = Path.Combine(Environment.CurrentDirectory, "System.Runtime.Tests.dll");
+                File.Copy(currAssemblyPath, LoadFromTestPath, true);
+            }
         }
 
         public static IEnumerable<object[]> Equality_TestData()
@@ -132,7 +135,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.Load(byte[]) not supported on UapAot")]
         public void AssemblyLoadFromBytes()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -144,7 +147,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.Load(byte[]) not supported on UapAot")]
         public void AssemblyLoadFromBytesNeg()
         {
             Assert.Throws<ArgumentNullException>(() => Assembly.Load((byte[])null));
@@ -152,7 +155,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.Load(byte[]) not supported on UapAot")]
         public void AssemblyLoadFromBytesWithSymbols()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -164,14 +167,14 @@ namespace System.Reflection.Tests
             Assert.Equal(assembly.FullName, loadedAssembly.FullName);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public void AssemblyReflectionOnlyLoadFromString()
         {
             AssemblyName an = typeof(AssemblyTests).Assembly.GetName();
             Assert.Throws<NotSupportedException>(() => Assembly.ReflectionOnlyLoad(an.FullName));
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public void AssemblyReflectionOnlyLoadFromBytes()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -179,7 +182,7 @@ namespace System.Reflection.Tests
             Assert.Throws<NotSupportedException>(() => Assembly.ReflectionOnlyLoad(aBytes));
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public void AssemblyReflectionOnlyLoadFromNeg()
         {
             Assert.Throws<ArgumentNullException>(() => Assembly.ReflectionOnlyLoad((string)null));
@@ -291,7 +294,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.LoadFile() not supported on UapAot")]
         public void Test_LoadFile()
         {
             Assembly currentAssembly = typeof(AssemblyTests).Assembly;
@@ -323,14 +326,14 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "The full .NET Framework has a bug and throws a NullReferenceException")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap, "The full .NET Framework has a bug and throws a NullReferenceException")]
         public void LoadFile_NullPath_Netcore_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.LoadFile() not supported on UapAot")]
         public void LoadFile_NoSuchPath_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => Assembly.LoadFile("System.Runtime.Tests.dll"));
@@ -485,7 +488,7 @@ namespace System.Reflection.Tests
 
         private static Assembly LoadSystemCollectionsAssembly()
         {
-            // Force System.collections to be linkedally
+            // Force System.collections to be linked statically
             List<int> li = new List<int>();
             li.Add(1);
             return Assembly.Load(new AssemblyName(typeof(List<int>).GetTypeInfo().Assembly.FullName));
