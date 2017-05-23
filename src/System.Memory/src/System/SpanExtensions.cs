@@ -282,6 +282,7 @@ namespace System
         /// <summary>
         /// Creates a new readonly span over the entire target array.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array)
         {
             return new ReadOnlySpan<T>(array);
