@@ -16,11 +16,9 @@
   <Target Name="BuildPackagesProject">
     <PropertyGroup>
       <_RestorePackagesCommand>"$(DotnetToolCommand)" restore $(MSBuildThisFileDirectory)/RestoreSDKProject/RestoreSDKProject.csproj /p:_PublishRID=$(_PublishRID) /p:_RuntimeFrameworkVersion=$(MicrosoftNETCoreAppPackageVersion) /p:CoreFxExpectedPrerelease=$(CoreFxExpectedPrerelease)</_RestorePackagesCommand>
-      <_BuildPackagesProjectCommand>"$(DotnetToolCommand)" build $(MSBuildThisFileDirectory)/RestoreSDKProject/RestoreSDKProject.csproj /p:_PublishRID=$(_PublishRID) /p:_MetaPackageDestinationFolder=$(SharedFrameworkValidationRefPath)</_BuildPackagesProjectCommand>
       <_PublishPackagesProjectCommand>"$(DotnetToolCommand)" publish $(MSBuildThisFileDirectory)/RestoreSDKProject/RestoreSDKProject.csproj /p:_PublishRID=$(_PublishRID) /p:_MetaPackageDestinationFolder=$(SharedFrameworkValidationRefPath) -f netcoreapp2.0 -r $(_PublishRID) -o $(SharedFrameworkValidationRuntimePath)</_PublishPackagesProjectCommand>
     </PropertyGroup>
     <Exec Command="$(_RestorePackagesCommand)" StandardOutputImportance="Low" />
-    <Exec Command="$(_BuildPackagesProjectCommand)" StandardOutputImportance="Low" />
     <Exec Command="$(_PublishPackagesProjectCommand)" StandardOutputImportance="Low" />
   </Target>
 
