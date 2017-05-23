@@ -168,15 +168,15 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [InlineData("http://*/", 1)]
-        [InlineData("http://+/", 1)]
-        [InlineData("http://localhost/", 2)]
-        [InlineData("https://localhost/", 2)]
-        [InlineData("http://0.0.0.0/", 1)]
-        [InlineData("http://localhost:9200/", 2)]
-        [InlineData("https://localhost:9200/", 2)]
-        [InlineData("http://[fe80::70af:5aca:252a:3ca9]/", 1)]
-        public void Add_NotStarted_ReturnsExpected(string uriPrefix, int expectedServiceNameLength)
+        [InlineData("http://*/")]
+        [InlineData("http://+/")]
+        [InlineData("http://localhost/")]
+        [InlineData("https://localhost/")]
+        [InlineData("http://0.0.0.0/")]
+        [InlineData("http://localhost:9200/")]
+        [InlineData("https://localhost:9200/")]
+        [InlineData("http://[fe80::70af:5aca:252a:3ca9]/")]
+        public void Add_NotStarted_ReturnsExpected(string uriPrefix)
         {
             var listener = new HttpListener();
             listener.Prefixes.Add(uriPrefix);
@@ -184,8 +184,7 @@ namespace System.Net.Tests
             Assert.Equal(1, listener.Prefixes.Count);
             Assert.True(listener.Prefixes.Contains(uriPrefix));
 
-            string[] serviceNames = listener.DefaultServiceNames.Cast<string>().ToArray();
-            Assert.Equal(expectedServiceNameLength, serviceNames.Length);
+            Assert.All(listener.DefaultServiceNames.Cast<string>(), serviceNames => Assert.StartsWith("HTTP/", serviceNames));
         }
 
         [Fact]
