@@ -14,6 +14,7 @@ public class WellKnownSidTypeTests
             return identity.Owner.AccountDomainSid != null;
     }
 
+    [ActiveIssue(20152, TargetFrameworkMonikers.NetFramework)]
     [ConditionalTheory(nameof(AccountIsDomainJoined))]
     [InlineData(WellKnownSidType.NullSid)]
     [InlineData(WellKnownSidType.WorldSid)]
