@@ -18,7 +18,10 @@ def linuxPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'bui
 ['netcoreapp'].each { targetGroup ->
 	['Debug', 'Release'].each { configurationGroup ->
 		['Linux x64'].each { osName ->
-            // One for just innerloop
+            // Runs the portable-linux.groovy pipeline on the target Helix queues mentioned in the pipeline.  Currently:
+            // CentOS 7.3, RedHat 7.3, Debian 8.7, Ubuntu 14.04, Ubuntu 16.04, Ubuntu 16.10, openSuSE 42.2 and Fedora 25
+
+            // One for just innerloop.
             linuxPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+linux\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
             // Add one for outerloop
@@ -33,6 +36,9 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 ['netcoreapp'].each { targetGroup ->
 	['Debug', 'Release'].each { configurationGroup ->
 		['Windows x64'].each { osName ->
+            // Runs the portable-windows.groovy pipeline on the target Helix queues mentioned in the pipeline.  Currently:
+            // Windows 10, Windows 7, Windows 8.1 and Windows Nano
+
             // One for just innerloop
             windowsPipeline.triggerPipelineOnGithubPRComment("Portable ${osName} ${configurationGroup} Build", "(?i).*test\\W+portable\\W+windows\\W+${configurationGroup}\\W+pipeline.*",
                 ['Config':configurationGroup, 'OuterLoop':false])
