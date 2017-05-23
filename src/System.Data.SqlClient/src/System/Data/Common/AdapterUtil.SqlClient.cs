@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Transactions;
 
 namespace System.Data.Common
 {
@@ -89,6 +90,11 @@ namespace System.Data.Common
             return e;
         }
 
+        internal static Exception DataTableDoesNotExist(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_DataTableDoesNotExist, collectionName));
+        }
+
         internal static InvalidOperationException MethodCalledTwice(string method)
         {
             InvalidOperationException e = new InvalidOperationException(SR.GetString(SR.ADP_CalledTwice, method));
@@ -150,6 +156,11 @@ namespace System.Data.Common
             return InvalidEnumerationValue(typeof(ParameterDirection), (int)value);
         }
 
+        internal static Exception TooManyRestrictions(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_TooManyRestrictions, collectionName));
+        }
+
 
         // IDbCommand.UpdateRowSource
         internal static ArgumentOutOfRangeException InvalidUpdateRowSource(UpdateRowSource value)
@@ -188,6 +199,11 @@ namespace System.Data.Common
         internal static Exception MethodNotImplemented([CallerMemberName] string methodName = "")
         {
             return NotImplemented.ByDesignWithMessage(methodName);
+        }
+
+        internal static Exception QueryFailed(string collectionName, Exception e)
+        {
+            return InvalidOperation(SR.GetString(SR.MDF_QueryFailed, collectionName), e);
         }
 
 
@@ -235,6 +251,11 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_CommandTextRequired, method));
         }
 
+        internal static Exception NoColumns()
+        {
+            return Argument(SR.GetString(SR.MDF_NoColumns));
+        }
+
         internal static InvalidOperationException ConnectionRequired(string method)
         {
             return InvalidOperation(SR.GetString(SR.ADP_ConnectionRequired, method));
@@ -263,9 +284,19 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSeqByteAccess, badIndex.ToString(CultureInfo.InvariantCulture), currIndex.ToString(CultureInfo.InvariantCulture), method));
         }
 
+        internal static Exception InvalidXml()
+        {
+            return Argument(SR.GetString(SR.MDF_InvalidXml));
+        }
+
         internal static Exception NegativeParameter(string parameterName)
         {
             return InvalidOperation(SR.GetString(SR.ADP_NegativeParameter, parameterName));
+        }
+
+        internal static Exception InvalidXmlMissingColumn(string collectionName, string columnName)
+        {
+            return Argument(SR.GetString(SR.MDF_InvalidXmlMissingColumn, collectionName, columnName));
         }
 
         //
@@ -281,6 +312,21 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSequentialColumnAccess, badCol.ToString(CultureInfo.InvariantCulture), currCol.ToString(CultureInfo.InvariantCulture)));
         }
 
+        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst)
+        {
+            return (0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase));
+        }
+
+        static internal Exception InvalidXmlInvalidValue(string collectionName, string columnName)
+        {
+            return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
+        }
+        
+        internal static Exception CollectionNameIsNotUnique(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_CollectionNameISNotUnique, collectionName));
+        }
+
 
         //
         // : IDbCommand
@@ -293,10 +339,32 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_UninitializedParameterSize, index.ToString(CultureInfo.InvariantCulture), dataType.Name));
         }
+
+        internal static Exception UnableToBuildCollection(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_UnableToBuildCollection, collectionName));
+        }
+
         internal static Exception PrepareParameterType(DbCommand cmd)
         {
             return InvalidOperation(SR.GetString(SR.ADP_PrepareParameterType, cmd.GetType().Name));
         }
+
+        internal static Exception UndefinedCollection(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_UndefinedCollection, collectionName));
+        }
+
+        internal static Exception UnsupportedVersion(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_UnsupportedVersion, collectionName));
+        }
+
+        internal static Exception AmbigousCollectionName(string collectionName)
+        {
+            return Argument(SR.GetString(SR.MDF_AmbigousCollectionName, collectionName));
+        }
+
         internal static Exception PrepareParameterSize(DbCommand cmd)
         {
             return InvalidOperation(SR.GetString(SR.ADP_PrepareParameterSize, cmd.GetType().Name));
@@ -305,6 +373,17 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_PrepareParameterScale, cmd.GetType().Name, type));
         }
+
+        internal static Exception MissingDataSourceInformationColumn()
+        {
+            return Argument(SR.GetString(SR.MDF_MissingDataSourceInformationColumn));
+        }
+
+        internal static Exception IncorrectNumberOfDataSourceInformationRows()
+        {
+            return Argument(SR.GetString(SR.MDF_IncorrectNumberOfDataSourceInformationRows));
+        }
+
         internal static Exception MismatchedAsyncResult(string expectedMethod, string gotMethod)
         {
             return InvalidOperation(SR.GetString(SR.ADP_MismatchedAsyncResult, expectedMethod, gotMethod));
@@ -337,6 +416,12 @@ namespace System.Data.Common
             ConnectionOptionsMissing,
             CouldNotSwitchToClosedPreviouslyOpenedState,
         }
+
+        internal static Exception MissingRestrictionColumn()
+        {
+            return Argument(SR.GetString(SR.MDF_MissingRestrictionColumn));
+        }
+
         internal static Exception InternalConnectionError(ConnectionError internalError)
         {
             return InvalidOperation(SR.GetString(SR.ADP_InternalConnectionError, (int)internalError));
@@ -345,6 +430,11 @@ namespace System.Data.Common
         internal static Exception InvalidConnectRetryCountValue()
         {
             return Argument(SR.GetString(SR.SQLCR_InvalidConnectRetryCountValue));
+        }
+
+        internal static Exception MissingRestrictionRow()
+        {
+            return Argument(SR.GetString(SR.MDF_MissingRestrictionRow));
         }
 
         internal static Exception InvalidConnectRetryIntervalValue()
@@ -376,6 +466,12 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.ADP_UnknownDataType, dataType.FullName));
         }
+
+        internal static bool IsEmptyArray(string[] array)
+        {
+            return (array == null || array.Length == 0);
+        }
+
         internal static ArgumentException DbTypeNotSupported(DbType type, Type enumtype)
         {
             return Argument(SR.GetString(SR.ADP_DbTypeNotSupported, type.ToString(), enumtype.Name));
@@ -446,6 +542,12 @@ namespace System.Data.Common
         {
             return CollectionNullValue(parameter, collection.GetType(), parameterType);
         }
+
+        internal static Exception UndefinedPopulationMechanism(string populationMechanism)
+        {
+            throw new NotImplementedException();
+        }
+
         internal static Exception InvalidParameterType(DbParameterCollection collection, Type parameterType, object invalidValue)
         {
             return CollectionInvalidType(collection.GetType(), parameterType, invalidValue);
@@ -554,6 +656,11 @@ namespace System.Data.Common
             return Environment.MachineName;
         }
 
+        internal static Transaction GetCurrentTransaction()
+        {
+            return Transaction.Current;
+        }
+
         internal static bool IsDirection(DbParameter value, ParameterDirection condition)
         {
 #if DEBUG
@@ -616,6 +723,10 @@ namespace System.Data.Common
             }
         }
 
+        internal static Exception AmbientTransactionIsNotSupported()
+        {
+            return new NotSupportedException(SR.AmbientTransactionsNotSupported);
+        }
 
         private static Version s_systemDataVersion;
 

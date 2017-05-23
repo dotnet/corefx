@@ -37,20 +37,12 @@ namespace System.Net
 {
     public sealed partial class HttpListenerResponse : IDisposable
     {
-        private bool _disposed;
-        private Encoding _contentEncoding;
         private long _contentLength;
         private bool _clSet;
-        private string _contentType;
-        private bool _keepAlive = true;
-        private HttpResponseStream _outputStream;
         private Version _version = HttpVersion.Version11;
-        private string _location;
         private int _statusCode = 200;
-        private string _statusDescription = "OK";
         private bool _chunked;
         private HttpListenerContext _context;
-        internal bool _headersSent;
         internal object _headersLock = new object();
         private bool _forceCloseChunked;
 
@@ -59,44 +51,15 @@ namespace System.Net
             _context = context;
         }
 
-        internal bool ForceCloseChunked
-        {
-            get { return _forceCloseChunked; }
-        }
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                if (_contentEncoding == null)
-                {
-                    _contentEncoding = Encoding.Default;
-                }
-
-                return _contentEncoding;
-            }
-            set
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _contentEncoding = value;
-            }
-        }
+        internal bool ForceCloseChunked => _forceCloseChunked;
 
         public long ContentLength64
         {
-            get { return _contentLength; }
+            get => _contentLength;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(nameof(value), SR.net_clsmall);
@@ -106,56 +69,21 @@ namespace System.Net
             }
         }
 
-        public string ContentType
+        private void EnsureResponseStream()
         {
-            get { return _contentType; }
-            set
+            if (_responseStream == null)
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _contentType = value;
-            }
-        }
-
-        public bool KeepAlive
-        {
-            get { return _keepAlive; }
-            set
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _keepAlive = value;
-            }
-        }
-
-        public Stream OutputStream
-        {
-            get
-            {
-                if (_outputStream == null)
-                    _outputStream = _context.Connection.GetResponseStream();
-                return _outputStream;
+                _responseStream = _context.Connection.GetResponseStream();
             }
         }
 
         public Version ProtocolVersion
         {
-            get { return _version; }
+            get => _version;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 if (value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -167,31 +95,13 @@ namespace System.Net
             }
         }
 
-        public string RedirectLocation
-        {
-            get { return _location; }
-            set
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
-
-                _location = value;
-            }
-        }
-
         public bool SendChunked
         {
-            get { return _chunked; }
+            get => _chunked;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
+                CheckSentHeaders();
 
                 _chunked = value;
             }
@@ -199,14 +109,10 @@ namespace System.Net
 
         public int StatusCode
         {
-            get { return _statusCode; }
+            get => _statusCode;
             set
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(GetType().ToString());
-
-                if (_headersSent)
-                    throw new InvalidOperationException(SR.net_cannot_change_after_headers);
+                CheckDisposed();
 
                 if (value < 100 || value > 999)
                     throw new ProtocolViolationException(SR.net_invalidstatus);
@@ -215,23 +121,11 @@ namespace System.Net
             }
         }
 
-        public string StatusDescription
-        {
-            get { return _statusDescription; }
-            set
-            {
-                _statusDescription = value;
-            }
-        }
-
-        private void Dispose()
-        {
-            Close(true);
-        }
+        private void Dispose() => Close(true);
 
         public void Close()
         {
-            if (_disposed)
+            if (Disposed)
                 return;
 
             Close(false);
@@ -239,7 +133,7 @@ namespace System.Net
 
         public void Abort()
         {
-            if (_disposed)
+            if (Disposed)
                 return;
 
             Close(true);
@@ -247,14 +141,13 @@ namespace System.Net
 
         private void Close(bool force)
         {
-            _disposed = true;
+            Disposed = true;
             _context.Connection.Close(force);
         }
 
         public void Close(byte[] responseEntity, bool willBlock)
         {
-            if (_disposed)
-                return;
+            CheckDisposed();
 
             if (responseEntity == null)
                 throw new ArgumentNullException(nameof(responseEntity));
@@ -273,12 +166,6 @@ namespace System.Net
             _statusDescription = templateResponse._statusDescription;
             _keepAlive = templateResponse._keepAlive;
             _version = templateResponse._version;
-        }
-
-        public void Redirect(string url)
-        {
-            StatusCode = 302; // Found
-            _location = url;
         }
 
         private bool FindCookie(Cookie cookie)
@@ -301,25 +188,8 @@ namespace System.Net
 
         internal void SendHeaders(bool closing, MemoryStream ms, bool isWebSocketHandshake = false)
         {
-            Encoding encoding = _contentEncoding;
-            if (encoding == null)
-                encoding = Encoding.Default;
-
             if (!isWebSocketHandshake)
             {
-                if (_contentType != null)
-                {
-                    if (_contentEncoding != null && _contentType.IndexOf(HttpHeaderStrings.Charset, StringComparison.Ordinal) == -1)
-                    {
-                        string enc_name = _contentEncoding.WebName;
-                        _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType + "; " + HttpHeaderStrings.Charset + enc_name);
-                    }
-                    else
-                    {
-                        _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType);
-                    }
-                }
-
                 if (_webHeaders[HttpKnownHeaderNames.Server] == null)
                     _webHeaders.Set(HttpKnownHeaderNames.Server, HttpHeaderStrings.NetCoreServerName);
                 CultureInfo inv = CultureInfo.InvariantCulture;
@@ -387,9 +257,6 @@ namespace System.Net
                         _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.KeepAlive);
                 }
 
-                if (_location != null)
-                    _webHeaders.Set(HttpKnownHeaderNames.Location, _location);
-
                 if (_cookies != null)
                 {
                     foreach (Cookie cookie in _cookies)
@@ -397,18 +264,22 @@ namespace System.Net
                 }
             }
 
+            Encoding encoding = Encoding.Default;
             StreamWriter writer = new StreamWriter(ms, encoding, 256);
-            writer.Write("HTTP/{0} {1} {2}\r\n", _version, _statusCode, _statusDescription);
-            string headers_str = FormatHeaders(_webHeaders);
-            writer.Write(headers_str);
+            writer.Write("HTTP/{0} {1} ", _version, _statusCode);
+            writer.Flush();
+            byte[] statusDescriptionBytes = WebHeaderEncoding.GetBytes(StatusDescription);
+            ms.Write(statusDescriptionBytes, 0, statusDescriptionBytes.Length);
+            writer.Write("\r\n");
+
+            writer.Write(FormatHeaders(_webHeaders));
             writer.Flush();
             int preamble = encoding.GetPreamble().Length;
-            if (_outputStream == null)
-                _outputStream = _context.Connection.GetResponseStream();
+            EnsureResponseStream();
 
             /* Assumes that the ms was at position 0 */
             ms.Position = preamble;
-            _headersSent = !isWebSocketHandshake;
+            SentHeaders = !isWebSocketHandshake;
         }
 
         private static string FormatHeaders(WebHeaderCollection headers)
@@ -473,6 +344,9 @@ namespace System.Net
             }
             return true;
         }
+
+        private bool Disposed { get; set; }
+        internal bool SentHeaders { get; set; }
     }
 }
 

@@ -9,7 +9,7 @@ using System.Runtime.Serialization.Formatters.Tests;
 
 using Xunit;
 
-namespace System.Net.WebHeaderCollectionTests
+namespace System.Net.Tests
 {
     public partial class WebHeaderCollectionTest
     {
@@ -402,13 +402,6 @@ namespace System.Net.WebHeaderCollectionTests
                 }
                 yield return new object[] { wc };
             }
-        }
-
-        [Theory]
-        [MemberData(nameof(SerializeDeserialize_Roundtrip_MemberData))]
-        public void SerializeDeserialize_Roundtrip(WebHeaderCollection c)
-        {
-            Assert.Equal(c, BinaryFormatterHelpers.Clone(c));
         }
 
         [Fact]
