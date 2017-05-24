@@ -128,8 +128,26 @@ namespace System.Net
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 }
 
+                switch (context.AuthenticationSchemes)
+                {
+                    case AuthenticationSchemes.Anonymous:
+                    case AuthenticationSchemes.None:
+                        // no auth needed
+                        break;
+
+                    case AuthenticationSchemes.Basic:
+                        // basic will be handled by other logic
+                        break;
+
+                    default:
+                        // currently everything else is unsupported
+                        selectionFailure = true;
+                        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        break;
+                }
+
                 if (selectionFailure || 
-                    ((context.AuthenticationSchemes == AuthenticationSchemes.Basic || context._listener.AuthenticationSchemes == AuthenticationSchemes.Negotiate) && context.Request.Headers["Authorization"] == null))
+                    (context.AuthenticationSchemes == AuthenticationSchemes.Basic && context.Request.Headers["Authorization"] == null))
                 {
                     if (!selectionFailure)
                     {
