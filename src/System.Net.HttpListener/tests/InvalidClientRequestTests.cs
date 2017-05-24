@@ -139,6 +139,8 @@ namespace System.Net.Tests
                     Assert.Same(clientTask, completedTask);
                     string errorMessage = Encoding.Default.GetString(errorMessageBytes, 0, clientTask.Result);
                     Assert.Contains(expectedMessage, errorMessage);
+
+                    Assert.False(serverTask.IsCompleted, $"Server task was completed: {serverTask.Status}");
                 }
             }
         }

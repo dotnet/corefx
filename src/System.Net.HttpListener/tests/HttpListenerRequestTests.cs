@@ -93,7 +93,7 @@ namespace System.Net.Tests
             }, content: null);
         }
 
-        [Theory]//[ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData("POST", "Content-Length: 9223372036854775807", 9223372036854775807)]
         // [ActiveIssue(20232, TestPlatforms.AnyUnix)] [InlineData("POST", "Content-Length: 9223372036854775808", 0)]
         [InlineData("POST", "Content-Length: 0", 0)]
@@ -180,7 +180,7 @@ namespace System.Net.Tests
             });
         }
         
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20237, TestPlatforms.AnyUnix)]
         public async Task RequestTraceIdentifier_GetWindows_ReturnsExpected()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -189,8 +189,7 @@ namespace System.Net.Tests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotWindowsImplementation))] // [ActiveIssue(20237, TestPlatforms.AnyUnix)]
         public async Task RequestTraceIdentifier_GetUnix_ReturnsExpected()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -250,8 +249,7 @@ namespace System.Net.Tests
             });
         }
 
-        // We get the ClientCertificate during connection on Unix.
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20238, TestPlatforms.AnyUnix)]
         public async Task ClientCertificateError_GetWhileGettingCertificate_ThrowsInvalidOperationException()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -318,8 +316,7 @@ namespace System.Net.Tests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
         public async Task TransportContext_GetUnix_ThrowsNotImplementedException()
         {
             await GetRequest("POST", null, null, (_, request) =>
@@ -328,7 +325,7 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
         public async Task TransportContext_GetChannelBinding_ReturnsExpected()
         {
             // This might not work on other devices:
@@ -340,7 +337,7 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
         [InlineData(ChannelBindingKind.Unique)]
         [InlineData(ChannelBindingKind.Unique)]
         public async Task TransportContext_GetChannelBindingInvalid_ThrowsNotSupportedException(ChannelBindingKind kind)
