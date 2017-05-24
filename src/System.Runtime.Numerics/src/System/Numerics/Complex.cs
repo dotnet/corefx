@@ -93,9 +93,9 @@ namespace System.Numerics
         public static Complex operator *(Complex left, Complex right)
         {
             // Multiplication:  (a + bi)(c + di) = (ac -bd) + (bc + ad)i
-            double resultm_realpart = (left.m_real * right.m_real) - (left.m_imaginary * right.m_imaginary);
-            double resultm_imaginarypart = (left.m_imaginary * right.m_real) + (left.m_real * right.m_imaginary);
-            return new Complex(resultm_realpart, resultm_imaginarypart);
+            double result_realpart = (left.m_real * right.m_real) - (left.m_imaginary * right.m_imaginary);
+            double result_imaginarypart = (left.m_imaginary * right.m_real) + (left.m_real * right.m_imaginary);
+            return new Complex(result_realpart, result_imaginarypart);
         }
 
         public static Complex operator /(Complex left, Complex right)
