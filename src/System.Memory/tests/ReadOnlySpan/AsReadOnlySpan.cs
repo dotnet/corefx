@@ -45,5 +45,44 @@ namespace System.SpanTests
             ReadOnlySpan<int> span = empty.AsReadOnlySpan();
             span.Validate<int>();
         }
+
+        [Fact]
+        [Trait("AsReadOnlySpan", "True")]
+        public static void ArraySegmentAsSpan()
+        {
+            int[] a = { 19, -17 };
+            ArraySegment<int> segmentInt = new ArraySegment<int>(a, 1, 1);
+            ReadOnlySpan<int> spanInt = segmentInt.AsReadOnlySpan();
+            spanInt.Validate<int>(-17);
+
+            long[] b = { 1, -3, 7, -15, 31 };
+            ArraySegment<long> segmentLong = new ArraySegment<long>(b, 1, 3);
+            ReadOnlySpan<long> spanLong = segmentLong.AsReadOnlySpan();
+            spanLong.Validate<long>(-3, 7, -15);
+
+            object o1 = new object();
+            object o2 = new object();
+            object o3 = new object();
+            object o4 = new object();
+            object[] c = { o1, o2, o3, o4 };
+            ArraySegment<object> segmentObject = new ArraySegment<object>(c, 0, 2);
+            ReadOnlySpan<object> spanObject = segmentObject.AsReadOnlySpan();
+            spanObject.Validate<object>(o1, o2);
+        }
+
+        [Fact]
+        [Trait("AsReadOnlySpan", "True")]
+        public static void ZeroLengthArraySegmentAsReadOnlySpan()
+        {
+            int[] empty = Array.Empty<int>();
+            ArraySegment<int> emptySegment = new ArraySegment<int>(empty);
+            ReadOnlySpan<int> span = emptySegment.AsReadOnlySpan();
+            span.Validate<int>();
+
+            int[] a = { 19, -17 };
+            ArraySegment<int> segmentInt = new ArraySegment<int>(a, 1, 0);
+            ReadOnlySpan<int> spanInt = segmentInt.AsReadOnlySpan();
+            spanInt.Validate<int>();
+        }
     }
 }
