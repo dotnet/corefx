@@ -65,6 +65,12 @@ namespace System.Transactions.Distributed
 
         protected DistributedTransaction(SerializationInfo serializationInfo, StreamingContext context)
         {
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
+
+            //throw NotSupported();
             throw new PlatformNotSupportedException();
         }
 
@@ -126,6 +132,13 @@ namespace System.Transactions.Distributed
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext context)
         {
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
+
+            //throw NotSupported();
+
             throw new PlatformNotSupportedException();
         }
 

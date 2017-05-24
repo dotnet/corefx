@@ -263,7 +263,7 @@ namespace System.Transactions
 
         internal virtual void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionException.CreateTransactionStateException(tx._innerException, tx.DistributedTxId);
         }
 
         internal virtual bool EnlistPromotableSinglePhase(
@@ -625,7 +625,14 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            // This is not allowed if the transaction's PromoterType is not MSDTC.
+            tx.ThrowIfPromoterTypeIsNotMSDTC();
+
+            // Promote the transaction.
+            tx._promoteState.EnterState(tx);
+
+            // Forward this call
+            tx.State.GetObjectData(tx, serializationInfo, context);
         }
 
         internal override void CompleteBlockingClone(InternalTransaction tx)
@@ -1186,7 +1193,17 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            // This is not allowed if the transaction's PromoterType is not MSDTC.
+            tx.ThrowIfPromoterTypeIsNotMSDTC();
+
+            // Promote the transaction.
+            tx._promoteState.EnterState(tx);
+
+            // Forward this call
+            tx.State.GetObjectData(tx, serializationInfo, context);
+
+            // Restart the commit process.
+            tx.State.RestartCommitIfNeeded(tx);
         }
     }
 
@@ -1516,7 +1533,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw CreateTransactionAbortedException(tx);
         }
 
         internal override void CheckForFinishedTransaction(InternalTransaction tx)
@@ -1666,7 +1683,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionInDoubtException.Create(TraceSourceType.TraceSourceBase, SR.TransactionIndoubt, tx._innerException, tx.DistributedTxId);
         }
     }
 
@@ -2039,7 +2056,26 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            Debug.Assert(tx.PromotedTransaction != null, "Promoted state not valid for transaction.");
+
+            // This is not allowed if the transaction's PromoterType is not MSDTC.
+            tx.ThrowIfPromoterTypeIsNotMSDTC();
+
+            // Simply get call get object data for the promoted transaction.
+            ISerializable serializableTx = tx.PromotedTransaction as ISerializable;
+            if (serializableTx == null)
+            {
+                // The LTM can only support this if the Distributed TM Supports it.
+                throw new NotSupportedException();
+            }
+
+            // Before forwarding this call to the promoted tx make sure to change
+            // the full type info so that only if the promoted tx does not set this
+            // then it should be set correctly.
+            serializationInfo.FullTypeName = tx.PromotedTransaction.GetType().FullName;
+
+            // Now forward the call.
+            serializableTx.GetObjectData(serializationInfo, context);
         }
 
         internal override void ChangeStatePromotedAborted(InternalTransaction tx)
@@ -3058,7 +3094,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionAbortedException.Create(SR.TransactionAborted, tx._innerException, tx.DistributedTxId);
         }
 
 
@@ -3241,7 +3277,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionInDoubtException.Create(TraceSourceType.TraceSourceBase, SR.TransactionIndoubt, tx._innerException, tx.DistributedTxId);
         }
 
 
@@ -3597,7 +3633,8 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw new TransactionPromotionException(SR.Format(SR.PromoterTypeUnrecognized, tx._promoterType.ToString()),
+                tx._innerException);
         }
 
         internal override void ChangeStateTransactionAborted(InternalTransaction tx, Exception e)
@@ -4140,7 +4177,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionAbortedException.Create(SR.TransactionAborted, tx._innerException, tx.DistributedTxId);
         }
     }
 
@@ -4252,7 +4289,7 @@ namespace System.Transactions
 
         internal override void GetObjectData(InternalTransaction tx, SerializationInfo serializationInfo, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            throw TransactionInDoubtException.Create(TraceSourceType.TraceSourceBase, SR.TransactionIndoubt, tx._innerException, tx.DistributedTxId);
         }
 
         internal override void CreateBlockingClone(InternalTransaction tx)
