@@ -10,7 +10,6 @@ namespace System.SpanTests
     public static partial class ReadOnlySpanTests
     {
         [Fact]
-        [Trait("AsReadOnlySpan", "True")]
         public static void ArrayAsReadOnlySpan()
         {
             int[] a = { 19, -17 };
@@ -29,7 +28,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        [Trait("AsReadOnlySpan", "True")]
         public static void NullArrayAsReadOnlySpan()
         {
             int[] a = null;
@@ -38,7 +36,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        [Trait("AsReadOnlySpan", "True")]
         public static void EmptyArrayAsReadOnlySpan()
         {
             int[] empty = Array.Empty<int>();
@@ -47,7 +44,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        [Trait("AsReadOnlySpan", "True")]
         public static void ArraySegmentAsSpan()
         {
             int[] a = { 19, -17 };
@@ -71,7 +67,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        [Trait("AsReadOnlySpan", "True")]
         public static void ZeroLengthArraySegmentAsReadOnlySpan()
         {
             int[] empty = Array.Empty<int>();
