@@ -10,11 +10,6 @@ namespace System.Linq.Expressions
 {
     internal static partial class CachedReflectionInfo
     {
-        private static Type[] s_ArrayOfType_Bool;
-        public  static Type[]   ArrayOfType_Bool =>
-                              s_ArrayOfType_Bool ??
-                             (s_ArrayOfType_Bool = new[] { typeof(bool) });
-
         private static ConstructorInfo s_Nullable_Boolean_Ctor;
 
         public static ConstructorInfo Nullable_Boolean_Ctor
@@ -88,6 +83,11 @@ namespace System.Linq.Expressions
         public  static MethodInfo   String_op_Equality_String_String =>
                                   s_String_op_Equality_String_String ??
                                  (s_String_op_Equality_String_String = typeof(string).GetMethod("op_Equality", new[] { typeof(string), typeof(string) }));
+
+        private static MethodInfo s_String_Equals_String_String;
+        public  static MethodInfo   String_Equals_String_String =>
+                                  s_String_Equals_String_String ??
+                                 (s_String_Equals_String_String = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(string) }));
 
         private static MethodInfo s_DictionaryOfStringInt32_Add_String_Int32;
         public  static MethodInfo   DictionaryOfStringInt32_Add_String_Int32 =>

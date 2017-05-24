@@ -45,11 +45,11 @@ namespace System.Diagnostics
         /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
         /// <example>
-        /// Id looks like '|Server1-5d183ab6-a000b421.1.8e2d4c28_1.':<para />
-        ///  - '|Server1-5d183ab6-a000b421.' - Id of the first, top-most, Activity created<para />
-        ///  - '|Server1-5d183ab6-a000b421.1.' - Id of a child activity. It was started in the same process as the first activity and ends with '.'<para />
-        ///  - '|Server1-5d183ab6-a000b421.1.8e2d4c28_' - Id of the grand child activity. It was started in another process and ends with '_'<para />
-        /// 'Server1-5d183ab6-a000b421' is a <see cref="RootId"/> for the first Activity and all its children
+        /// Id looks like '|a000b421-5d183ab6-Server1.1.8e2d4c28_1.':<para />
+        ///  - '|a000b421-5d183ab6-Server1.' - Id of the first, top-most, Activity created<para />
+        ///  - '|a000b421-5d183ab6-Server1.1.' - Id of a child activity. It was started in the same process as the first activity and ends with '.'<para />
+        ///  - '|a000b421-5d183ab6-Server1.1.8e2d4c28_' - Id of the grand child activity. It was started in another process and ends with '_'<para />
+        /// 'a000b421-5d183ab6-Server1' is a <see cref="RootId"/> for the first Activity and all its children
         /// </example>
         public string Id { get; private set; }
 
@@ -303,7 +303,9 @@ namespace System.Diagnostics
                 }
 
                 if (StartTimeUtc == default(DateTime))
-                    StartTimeUtc = DateTime.UtcNow;
+                {
+                    StartTimeUtc = GetUtcNow();
+                }
 
                 Id = GenerateId();
                 Current = this;
@@ -331,7 +333,9 @@ namespace System.Diagnostics
                 isFinished = true;
 
                 if (Duration == TimeSpan.Zero)
-                    SetEndTime(DateTime.UtcNow);
+                {
+                    SetEndTime(GetUtcNow());
+                }
 
                 Current = Parent;
             }
@@ -367,7 +371,7 @@ namespace System.Diagnostics
 
                 //sanitize external RequestId as it may not be hierarchical. 
                 //we cannot update ParentId, we must let it be logged exactly as it was passed.
-                string parentId = ParentId[0] == RootIdPrefix ? ParentId : RootIdPrefix + ParentId;
+                string parentId = ParentId[0] == '|' ? ParentId : '|' + ParentId;
 
                 char lastChar = parentId[parentId.Length - 1];
                 if (lastChar != '.' && lastChar != '_')
@@ -394,7 +398,7 @@ namespace System.Diagnostics
             int rootEnd = id.IndexOf('.');
             if (rootEnd < 0)
                 rootEnd = id.Length;
-            int rootStart = id[0] == RootIdPrefix ? 1 : 0;
+            int rootStart = id[0] == '|' ? 1 : 0;
             return id.Substring(rootStart, rootEnd - rootStart);
         }
 
@@ -427,19 +431,11 @@ namespace System.Diagnostics
 
         private string GenerateRootId()
         {
-            if (s_uniqPrefix == null)
-            {
-                // Here we make an ID to represent the Process/AppDomain.   Ideally we use process ID but 
-                // it is unclear if we have that ID handy.   Currently we use low bits of high freq tick 
-                // as a unique random number (which is not bad, but loses randomness for startup scenarios).  
-                Interlocked.CompareExchange(ref s_uniqPrefix, GenerateInstancePrefix(), null);
-            }
-#if DEBUG
-            string ret = s_uniqPrefix + "-" + OperationName.Replace('.', '-') + "-" + Interlocked.Increment(ref s_currentRootId).ToString("x") + '.';
-#else       // To keep things short, we drop the operation name 
-            string ret = s_uniqPrefix + "-" + Interlocked.Increment(ref s_currentRootId).ToString("x") + '.';
-#endif
-            return ret;
+            // It is important that the part that changes frequently be first, because
+            // many hash functions don't 'randomize' the tail of a string.   This makes
+            // sampling based on the hash produce poor samples.   Thus the 'machine part'
+            // of the ID is last.  
+            return  '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
         }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [SecuritySafeCritical]
@@ -452,17 +448,16 @@ namespace System.Diagnostics
         }
 
         private string _rootId;
-
-        // Used to generate an ID 
-        private static string s_uniqPrefix;  //instance unique prefix
         private int _currentChildId;  // A unique number for all children of this activity.  
+
+        // Used to generate an ID it represents the machine and process we are in.  
+        private static readonly string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
 
         //A unique number inside the appdomain, randomized between appdomains. 
         //Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
         private static long s_currentRootId = (uint)GetRandomNumber();
 
         private const int RequestIdMaxLength = 1024;
-        private const char RootIdPrefix = '|';
 
         /// <summary>
         /// Having our own key-value linked list allows us to be more efficient  

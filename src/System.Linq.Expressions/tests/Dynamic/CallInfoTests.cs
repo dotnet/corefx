@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,8 +14,8 @@ namespace System.Dynamic.Tests
         [Fact]
         public void Ctor_NullNames_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("argNames", () => new CallInfo(0, default(IEnumerable<string>)));
-            Assert.Throws<ArgumentNullException>("argNames", () => new CallInfo(0, default(string[])));
+            AssertExtensions.Throws<ArgumentNullException>("argNames", () => new CallInfo(0, default(IEnumerable<string>)));
+            AssertExtensions.Throws<ArgumentNullException>("argNames", () => new CallInfo(0, default(string[])));
         }
 
         [Theory]
@@ -23,14 +23,14 @@ namespace System.Dynamic.Tests
         [InlineData(2, new string[] { "foo", "bar", "baz", "quux", "quuux" })]
         public void Ctor_CountLessThanArgNamesCount_ThrowsArgumentException(int argCount, string[] argNames)
         {
-            Assert.Throws<ArgumentException>(null, () => new CallInfo(argCount, argNames));
+            AssertExtensions.Throws<ArgumentException>(null, () => new CallInfo(argCount, argNames));
         }
 
         [Fact]
         public void Ctor_NullItemInArgNames_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("argNames[1]", () => new CallInfo(3, "foo", null, "bar"));
-            Assert.Throws<ArgumentNullException>(
+            AssertExtensions.Throws<ArgumentNullException>("argNames[1]", () => new CallInfo(3, "foo", null, "bar"));
+            AssertExtensions.Throws<ArgumentNullException>(
                 "argNames[0]", () => new CallInfo(3, Enumerable.Repeat(default(string), 2)));
         }
 

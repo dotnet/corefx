@@ -224,6 +224,14 @@ namespace System.Net.Http
 
             set
             {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        value,
+                        SR.Format(SR.net_http_value_must_be_greater_than, 0));
+                }
+
                 CheckDisposedOrStarted();
                 _maxConnectionsPerServer = value;
             }
@@ -322,6 +330,8 @@ namespace System.Net.Http
                 _proxy = value;
             }
         }
+
+        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {

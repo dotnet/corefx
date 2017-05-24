@@ -21,6 +21,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class StateTests
     {
+        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer());
+
         //
         // Exercises various edge cases when EnvelopedCms methods and properties are called out of the "expected" order.
         //
@@ -203,7 +205,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void PostDecode_Encode_net46()
         {
             PostDecode_Encode(isRunningOnDesktop: true);
@@ -238,7 +240,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void PostDecode_ContentInfo_net46()
         {
             PostDecode_ContentInfo(isRunningOnDesktop: true);
@@ -254,12 +256,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
         // State 4: Called Decode() + Decrypt()
         //
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_Encode()
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
-
             EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(expectedContent));
             ecms.Encrypt(new CmsRecipient(Certificates.RSAKeyTransfer1.GetCertificate()));
             byte[] encodedMessage =
@@ -287,7 +288,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_RecipientInfos()
         {
@@ -326,7 +327,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_Decrypt()
         {

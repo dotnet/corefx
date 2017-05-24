@@ -111,14 +111,17 @@ namespace System.Text.RegularExpressions.Tests
             ICollection collection = regex.Match("aaabbccccccccccaaaabc").Groups;
 
             // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
 
             // Array is multidimensional
-            Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new object[10, 10], 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new object[10, 10], 0));
 
-            // Array has a non-zero lower bound
-            Array o = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
-            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(o, 0));
+            if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
+            {
+                // Array has a non-zero lower bound
+                Array o = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+                Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(o, 0));
+            }
 
             // Index < 0
             Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new object[collection.Count], -1));

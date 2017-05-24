@@ -56,11 +56,22 @@ namespace System.Net.Tests
         public bool IsCompleted => throw new NotImplementedException();
     }
 
-    public class Helpers
+    public static class Helpers
     {
+        public static bool IsWindowsImplementation { get; } = PlatformDetection.IsWindows && PlatformDetection.IsNotOneCoreUAP;
+        public static bool IsNotWindowsImplementation => !IsWindowsImplementation;
+
         public static void WaitForSocketShutdown(Socket socket)
         {
-            while (SocketConnected(socket));
+            if (PlatformDetection.IsWindows || PlatformDetection.IsOSX)
+            {
+                socket.Shutdown(SocketShutdown.Both);
+                while (SocketConnected(socket));
+            }
+            else
+            {
+                socket.Close();
+            }
         }
 
         public static bool SocketConnected(Socket socket)

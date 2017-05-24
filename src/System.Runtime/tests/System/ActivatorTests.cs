@@ -67,8 +67,8 @@ namespace System.Tests
         public static void CreateInstance_Invalid()
         {
             Type nullType = null;
-            Assert.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(nullType)); // Type is null
-            Assert.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(null, new object[0])); // Type is null
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(nullType)); // Type is null
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(null, new object[0])); // Type is null
 
             Assert.Throws<AmbiguousMatchException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { null }));
 
@@ -92,10 +92,13 @@ namespace System.Tests
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(AbstractTypeWithDefaultCtor))); // Type is abstract
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(IInterfaceType))); // Type is an interface
 
-#if netcoreapp
-            // Type is not a valid RuntimeType
-            Assert.Throws<ArgumentException>("type", () => Activator.CreateInstance(Helpers.NonRuntimeType()));
-#endif // netcoreapp
+#if netcoreapp || uapaot
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                // Type is not a valid RuntimeType
+                AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType));
+            }
+#endif // netcoreapp || uapaot
         }
 
         [Fact]
@@ -268,6 +271,19 @@ namespace System.Tests
             public ClassWithPrivateCtor3(int i) { Flag.Increase(300); }
         }
 
+        class HasPublicCtor
+        {
+            public int Value = 0;
+
+            public HasPublicCtor(int value) => Value = value;
+        }
+
+        class HasPrivateCtor
+        {
+            public int Value = 0;
+
+            private HasPrivateCtor(int value) => Value = value;
+        }
 
         public class IsTestedAttribute : Attribute
         {
@@ -292,7 +308,7 @@ namespace System.Tests
             public static bool Equal(int i) { return cnt == i; }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsInvokingStaticConstructorsSupported))]
         static void TestingBindingFlags()
         {
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.CurrentCulture));
@@ -321,6 +337,28 @@ namespace System.Tests
 
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Static, null, null, CultureInfo.CurrentCulture));
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Static, null, new object[] { 122 }, CultureInfo.CurrentCulture));
+        }
+
+        [Fact]
+        static void TestingBindingFlagsInstanceOnly()
+        {
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPublicCtor), default(BindingFlags), null, null, null));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPublicCtor), BindingFlags.NonPublic | BindingFlags.Instance, null, null, null));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPublicCtor), BindingFlags.Public | BindingFlags.Static, null, null, null));
+
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPrivateCtor), default(BindingFlags), null, null, null));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, null, null));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPrivateCtor), BindingFlags.NonPublic | BindingFlags.Static, null, null, null));
+
+            {
+                HasPublicCtor a = (HasPublicCtor)Activator.CreateInstance(typeof(HasPublicCtor), BindingFlags.Public | BindingFlags.Instance, null, new object[] { 100 }, null);
+                Assert.Equal(100, a.Value);
+            }
+
+            {
+                HasPrivateCtor a = (HasPrivateCtor)Activator.CreateInstance(typeof(HasPrivateCtor), BindingFlags.NonPublic | BindingFlags.Instance, null, new object[] { 100 }, null);
+                Assert.Equal(100, a.Value);
+            }
         }
 
         [Fact]

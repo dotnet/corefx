@@ -105,7 +105,7 @@ namespace System.IO
             using (var directory = new TempDirectory())
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory.Path);
-                Assert.Throws<ArgumentNullException>("directorySecurity", () => directoryInfo.SetAccessControl((DirectorySecurity) null));
+                AssertExtensions.Throws<ArgumentNullException>("directorySecurity", () => directoryInfo.SetAccessControl((DirectorySecurity) null));
             }
         }
 
@@ -128,7 +128,7 @@ namespace System.IO
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
             {
                 FileInfo fileInfo = new FileInfo(file.Path);
-                Assert.Throws<ArgumentNullException>("fileSecurity", () => fileInfo.SetAccessControl((FileSecurity) null));
+                AssertExtensions.Throws<ArgumentNullException>("fileSecurity", () => fileInfo.SetAccessControl((FileSecurity) null));
             }
         }
 

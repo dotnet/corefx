@@ -224,8 +224,8 @@ namespace System.Collections.Immutable.Tests
             Assert.False(queue.IsEmpty);
             Assert.Equal(new[] { 1, 2 }, queue);
 
-            Assert.Throws<ArgumentNullException>("items", () => ImmutableQueue.CreateRange((IEnumerable<int>)null));
-            Assert.Throws<ArgumentNullException>("items", () => ImmutableQueue.Create((int[])null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => ImmutableQueue.CreateRange((IEnumerable<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => ImmutableQueue.Create((int[])null));
         }
 
         [Fact]
@@ -236,6 +236,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableQueue.Create<int>());

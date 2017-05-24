@@ -10,8 +10,8 @@ this experience. Make sure to consult this document often.
 
 1. Acquire the latest nightly .NET Core SDK 2.0
 
-- [Win 64-bit Latest Zip](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.zip) [Installer](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.exe)
-- [macOS 64-bit Latest Tar](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.tar.gz) [Installer](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg)
+- [Win 64-bit Latest Zip](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.zip) [Installer](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.exe)
+- [macOS 64-bit Latest Tar](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.tar.gz) [Installer](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg)
 - [Others](https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries)
 
 To setup the SDK download the zip and extract it somewhere and add the root folder to your path or always fully
@@ -237,3 +237,19 @@ need to modify your .csproj to target netcoreapp2.0 and reference the nightly bu
 ```
 
 In a future update to Visual Studio, it will no longer be necessary to make this edit.
+
+## Finding specific builds
+
+The URL scheme for the runtime is as follows:
+
+```
+https://dotnetcli.azureedge.net/dotnet/master/Installers/$version$/dotnet-$os$-$arch$.$version$.exe
+https://dotnetcli.azureedge.net/dotnet/master/Installers/2.0.0-preview1-001915-00/dotnet-win-x64.2.0.0-preview1-001915-00.exe
+```
+
+The URL scheme for the SDK & CLI is as follows:
+
+```
+https://dotnetcli.azureedge.net/dotnet/Sdk/$version$/dotnet-dev-$os$-$arch.$version$.exe
+https://dotnetcli.azureedge.net/dotnet/Sdk/2.0.0-preview1-005791/dotnet-dev-win-x86.2.0.0-preview1-005791.exe
+```

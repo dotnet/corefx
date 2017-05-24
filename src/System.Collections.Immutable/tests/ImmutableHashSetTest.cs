@@ -64,6 +64,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/19044 - HashBucket.Equals() always returning true", TargetFrameworkMonikers.UapAot)]
         public void EnumeratorWithHashCollisionsTest()
         {
             var emptySet = this.EmptyTyped<int>().WithComparer(new BadHasher<int>());
@@ -141,6 +142,7 @@ namespace System.Collections.Immutable.Tests
         /// that *is* in the set.
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/19044 - HashBucket.Equals() always returning true", TargetFrameworkMonikers.UapAot)]
         public void RemoveValuesFromCollidedHashCode()
         {
             var set = ImmutableHashSet.Create<int>(new BadHasher<int>(), 5, 6);
@@ -157,6 +159,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableHashSet.Create<string>());

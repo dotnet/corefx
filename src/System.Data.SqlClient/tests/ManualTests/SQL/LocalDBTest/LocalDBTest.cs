@@ -13,10 +13,34 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void LocalDBConnectionTest()
         {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder("server=(localdb)\\MSSQLLocalDB");
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB");
             builder.IntegratedSecurity = true;
             builder.ConnectTimeout = 2;
-            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            OpenConnection(builder.ConnectionString);
+        }
+
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
+        public static void LocalDBMarsTest()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB;");
+            builder.IntegratedSecurity = true;
+            builder.MultipleActiveResultSets = true;
+            builder.ConnectTimeout = 2;
+            OpenConnection(builder.ConnectionString);
+        }
+
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
+        public static void InvalidDBTest()
+        {
+            using (var connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLOCALDB;Database=DOES_NOT_EXIST;Pooling=false;"))
+            {
+                DataTestUtility.AssertThrowsWrapper<SqlException>(() => connection.Open());
+            }
+        }
+
+        private static void OpenConnection(string connString)
+        {
+            using (SqlConnection connection = new SqlConnection(connString))
             {
                 connection.Open();
                 using (SqlCommand command = new SqlCommand("SELECT @@SERVERNAME", connection))

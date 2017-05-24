@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "#18940")]
     public class GetStoreTests : IsoStorageTest
     {
         private static MethodInfo s_verifyScopeMethod;
@@ -49,15 +50,22 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18268")]
         public void GetUserStoreForApplication()
         {
             var isf = IsolatedStorageFile.GetUserStoreForApplication();
+            VerifyApplicationStore(isf);
+        }
+
+        private void VerifyApplicationStore(IsolatedStorageFile isf)
+        {
             string root = isf.GetUserRootDirectory();
             Assert.EndsWith(@"AppFiles" + Path.DirectorySeparatorChar, root);
             Assert.True(Directory.Exists(root), "store root folder should exist");
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void GetUserStoreForAssembly()
         {
             var isf = IsolatedStorageFile.GetUserStoreForAssembly();
@@ -67,6 +75,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void GetUserStoreForDomain()
         {
             var isf = IsolatedStorageFile.GetUserStoreForDomain();
@@ -86,6 +95,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18268")]
+        public void GetStore_NullParamsAllowed()
+        {
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (Type)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (Type)null, (Type)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (object)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (object)null, (object)null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18269")]
         public void GetEnumerator_NoOp()
         {
             IEnumerator e = IsolatedStorageFile.GetEnumerator(IsolatedStorageScope.Assembly);
@@ -96,6 +116,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18269")]
         public void GetEnumerator_ThrowsForCurrent()
         {
             IEnumerator e = IsolatedStorageFile.GetEnumerator(IsolatedStorageScope.Assembly);

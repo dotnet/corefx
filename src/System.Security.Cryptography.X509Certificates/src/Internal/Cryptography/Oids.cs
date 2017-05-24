@@ -2,12 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
-using System.Security.Cryptography;
-
 namespace Internal.Cryptography
 {
     //
@@ -31,8 +25,23 @@ namespace Internal.Cryptography
         public const string CertPolicyConstraints       = "2.5.29.36";
         public const string EnhancedKeyUsage            = "2.5.29.37";
         public const string InhibitAnyPolicyExtension   = "2.5.29.54";
+        public const string Sha256                      = "2.16.840.1.101.3.4.2.1";
+        public const string Sha384                      = "2.16.840.1.101.3.4.2.2";
+        public const string Sha512                      = "2.16.840.1.101.3.4.2.3";
+        public const string EccCurveSecp384r1           = "1.3.132.0.34";
+        public const string EccCurveSecp521r1           = "1.3.132.0.35";
         public const string Ecc                         = "1.2.840.10045.2.1";
+        public const string EccCurveSecp256r1           = "1.2.840.10045.3.1.7";
+        public const string ECDsaSha256                 = "1.2.840.10045.4.3.2";
+        public const string ECDsaSha384                 = "1.2.840.10045.4.3.3";
+        public const string ECDsaSha512                 = "1.2.840.10045.4.3.4";
         public const string RsaRsa                      = "1.2.840.113549.1.1.1";
+        public const string Mgf1                        = "1.2.840.113549.1.1.8";
+        public const string RsaSsaPss                   = "1.2.840.113549.1.1.10";
+        public const string RsaPkcs1Sha256              = "1.2.840.113549.1.1.11";
+        public const string RsaPkcs1Sha384              = "1.2.840.113549.1.1.12";
+        public const string RsaPkcs1Sha512              = "1.2.840.113549.1.1.13";
+        public const string Pkcs9ExtensionRequest       = "1.2.840.113549.1.9.14";
         public const string DsaDsa                      = "1.2.840.10040.4.1";
         public const string EmailAddress                = "1.2.840.113549.1.9.1";
         public const string EnrollCertTypeExtension     = "1.3.6.1.4.1.311.20.2";

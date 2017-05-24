@@ -251,11 +251,17 @@ namespace System.Net.Http
                 int maxConnections = _associatedHandler.MaxConnectionsPerServer;
                 if (maxConnections < int.MaxValue) // int.MaxValue considered infinite, mapping to libcurl default of 0
                 {
-                    // This should always succeed, as we already verified we can set this option with this value.  Treat 
-                    // any failure then as non-fatal in release; worst case is we employ more connections than desired.
                     CURLMcode code = Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, maxConnections);
-                    Debug.Assert(code == CURLMcode.CURLM_OK, $"Expected OK, got {code}");
-                    EventSourceTrace("Set max connections per server to {0}", maxConnections);
+                    switch (code)
+                    {
+                        case CURLMcode.CURLM_OK:
+                            EventSourceTrace("Set max host connections to {0}", maxConnections);
+                            break;
+                        default:
+                            // Treat failures as non-fatal in release; worst case is we employ more connections than desired.
+                            EventSourceTrace("Setting CURLMOPT_MAX_HOST_CONNECTIONS failed: {0}. Ignoring option.", code);
+                            break;
+                    }
                 }
 
                 return multiHandle;
@@ -425,6 +431,7 @@ namespace System.Net.Http
             private void HandleIncomingRequests()
             {
                 Debug.Assert(!Monitor.IsEntered(_incomingRequests), "Incoming requests lock should only be held while accessing the queue");
+                EventSourceTrace(null);
 
                 while (true)
                 {
@@ -493,7 +500,9 @@ namespace System.Net.Http
             private void PerformCurlWork()
             {
                 CURLMcode performResult;
+                EventSourceTrace("Ask libcurl to perform any available work...");
                 while ((performResult = Interop.Http.MultiPerform(_multiHandle)) == CURLMcode.CURLM_CALL_MULTI_PERFORM) ;
+                EventSourceTrace("...done performing work: {0}", performResult);
                 ThrowIfCURLMError(performResult);
             }
 
@@ -536,9 +545,12 @@ namespace System.Net.Http
             /// <summary>Handle a libcurl message received as part of processing work.  This should signal a completed operation.</summary>
             private void HandleCurlMessage(Interop.Http.CURLMSG message, IntPtr easyHandle, CURLcode result)
             {
-                Debug.Assert(message == Interop.Http.CURLMSG.CURLMSG_DONE, $"CURLMSG_DONE is supposed to be the only message type, but got {message}");
                 if (message != Interop.Http.CURLMSG.CURLMSG_DONE)
+                {
+                    Debug.Fail($"CURLMSG_DONE is supposed to be the only message type, but got {message}");
+                    EventSourceTrace("Unexpected CURLMSG: {0}", message);
                     return;
+                }
 
                 // Get the GCHandle pointer from the easy handle's state
                 IntPtr gcHandlePtr;

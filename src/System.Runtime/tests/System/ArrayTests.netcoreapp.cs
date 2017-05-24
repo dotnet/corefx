@@ -53,6 +53,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Fill_Generic_TestData))]
+        [ActiveIssue("TFS 437849 - Universal Shared Generics issue", TargetFrameworkMonikers.UapAot)]
         public static void Fill_Generic<T>(IEnumerable<T> source, T value, int startIndex, int count)
         {
             if (startIndex == 0 && count == source.Count())
@@ -112,20 +113,20 @@ namespace System.Tests
         [Fact]
         public static void Reverse_Generic_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null, 0, 0));
         }
 
         [Fact]
         public static void Reverse_Generic_NegativeIndex_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
         }
 
         [Fact]
         public static void Reverse_Generic_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
         }
 
         [Theory]
@@ -141,11 +142,15 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3650 - Wrong exception thrown", TargetFrameworkMonikers.UapAot)]
         public static void CreateInstance_TypeNotRuntimeType_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1], new int[1]));
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, 0));
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, new int[1]));
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, new int[1], new int[1]));
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
@@ -22,6 +23,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
       <Link>Common\System\EnumTypes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\MockType.cs">
+      <Link>Common\System\MockType.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\CollectionAsserts.cs">
       <Link>Common\System\Collections\CollectionAsserts.cs</Link>
@@ -40,6 +44,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\TestBase.NonGeneric.cs">
       <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
     <Compile Include="Helpers.cs" />
     <Compile Include="System\ActivatorTests.cs" />
@@ -119,11 +126,14 @@
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uapaot'">
+    <Compile Include="System\TypeTests.netcoreapp.cs" />
+    <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
     <Compile Include="ArrayTests.netcoreapp.cs" />
     <Compile Include="Helpers.netcoreapp.cs" />
     <Compile Include="System\ActivatorTests.netcoreapp.cs" />
     <Compile Include="System\ArrayTests.netcoreapp.cs" />
+    <Compile Include="System\ArraySegmentTests.netcoreapp.cs" />
     <Compile Include="System\EnumTests.netcoreapp.cs" />
     <Compile Include="System\GCTests.netcoreapp.cs" />
     <Compile Include="System\IntPtrTests.netcoreapp.cs" />
@@ -136,10 +146,10 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\ExceptionServices\ExceptionDispatchInfoTests.netcoreapp.cs" />
+    <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
     <Compile Include="System\UIntPtrTests.netcoreapp.cs" />
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
     <Compile Include="System\TypedReferenceTests.cs" />
-    <Compile Include="System\TypeTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="System\StringSplitExtensions.cs" />
@@ -207,6 +217,7 @@
       <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
     <Compile Include="System\Runtime\NgenServicingAttributesTests.cs" />
+    <Compile Include="System\Runtime\ExceptionServices\HandleProcessCorruptedStateExceptions.cs" />
     <Compile Include="System\Attributes.cs" />
     <Compile Include="System\HandleTests.cs" />
     <Compile Include="System\AppContext\AppContext.Switch.cs" />

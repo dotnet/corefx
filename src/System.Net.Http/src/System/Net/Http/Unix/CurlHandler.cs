@@ -123,7 +123,6 @@ namespace System.Net.Http
         private static readonly bool s_supportsAutomaticDecompression;
         private static readonly bool s_supportsSSL;
         private static readonly bool s_supportsHttp2Multiplexing;
-        private static volatile StrongBox<CURLMcode> s_supportsMaxConnectionsPerServer;
         private static string s_curlVersionDescription;
         private static string s_curlSslVersionDescription;
 
@@ -138,6 +137,7 @@ namespace System.Net.Http
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
         private bool _preAuthenticate = HttpHandlerDefaults.DefaultPreAuthenticate;
         private CredentialCache _credentialCache = null; // protected by LockObject
+        private bool _useDefaultCredentials = HttpHandlerDefaults.DefaultUseDefaultCredentials;
         private CookieContainer _cookieContainer = new CookieContainer();
         private bool _useCookie = HttpHandlerDefaults.DefaultUseCookies;
         private TimeSpan _connectTimeout = Timeout.InfiniteTimeSpan;
@@ -367,22 +367,6 @@ namespace System.Net.Http
                     throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
 
-                // Make sure the libcurl version we're using supports the option, by setting the value on a temporary multi handle.
-                // We do this once and cache the result.
-                StrongBox<CURLMcode> supported = s_supportsMaxConnectionsPerServer; // benign race condition to read and set this
-                if (supported == null)
-                {
-                    using (Interop.Http.SafeCurlMultiHandle multiHandle = Interop.Http.MultiCreate())
-                    {
-                        s_supportsMaxConnectionsPerServer = supported = new StrongBox<CURLMcode>(
-                            Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, value));
-                    }
-                }
-                if (supported.Value != CURLMcode.CURLM_OK)
-                {
-                    throw new PlatformNotSupportedException(CurlException.GetCurlErrorString((int)supported.Value, isMulti: true));
-                }
-
                 CheckDisposedOrStarted();
                 _maxConnectionsPerServer = value;
             }
@@ -405,8 +389,12 @@ namespace System.Net.Http
 
         internal bool UseDefaultCredentials
         {
-            get { return false; }
-            set { }
+            get { return _useDefaultCredentials; }
+            set
+            {
+                CheckDisposedOrStarted();
+                _useDefaultCredentials = value;
+            }
         }
 
         public IDictionary<string, object> Properties
@@ -732,6 +720,7 @@ namespace System.Net.Http
             }
 
             NetEventSource.Log.HandlerMessage(
+                agent?.GetHashCode() ?? 0,
                 (agent?.RunningWorkerId).GetValueOrDefault(),
                 easy?.Task.Id ?? 0,
                 memberName,

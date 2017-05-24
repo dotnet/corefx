@@ -4,6 +4,8 @@
   <PropertyGroup>
     <!-- Always restore the x64 assets. These are build-only assets, so they should match the environment of the build. -->
     <NugetRuntimeIdentifier>$(RuntimeOS)-x64</NugetRuntimeIdentifier>
+    <!-- Tizen does not provide the x64 runtime so replaces it with the ubuntu.14.04-x64 -->
+    <NugetRuntimeIdentifier Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04-x64</NugetRuntimeIdentifier>
     <OutputPath>$(ToolsDir)ilasm</OutputPath>
     <EnableBinPlacing>false</EnableBinPlacing>
     <RidSpecificAssets>true</RidSpecificAssets>
@@ -20,7 +22,7 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <!-- When zipped/unzipped in a package, ilasm loses its executable flag. Reset it. -->
+  <!-- Executables restored with .NET Core 2.0 do not have executable permission flags. https://github.com/NuGet/Home/issues/4424 -->
   <Target Name="MakeIlasmExecutable" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(RunningOnUnix)' == 'true'">
     <Exec Command="chmod +x $(OutputPath)ilasm" />
   </Target>
