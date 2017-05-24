@@ -24,7 +24,7 @@
     </Otherwise>
   </Choose>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'">
     <!-- Ensure this runs before conflict resolution since the added files may cause conflicts -->
     <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
   </PropertyGroup>
