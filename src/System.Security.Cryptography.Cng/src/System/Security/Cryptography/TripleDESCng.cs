@@ -94,15 +94,6 @@ namespace System.Security.Cryptography
             _core.GenerateIV();
         }
 
-        public override KeySizes[] LegalKeySizes
-        {
-            get
-            {
-                // CNG does not support 128-bit keys.
-                return new KeySizes[] { new KeySizes(minSize: 3 * 64, maxSize: 3 * 64, skipSize: 0) };
-            }
-        }
-
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

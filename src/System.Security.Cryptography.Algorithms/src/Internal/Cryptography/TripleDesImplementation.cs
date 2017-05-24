@@ -13,16 +13,6 @@ namespace Internal.Cryptography
         private const int BitsPerByte = 8;
         private static readonly RandomNumberGenerator s_rng = RandomNumberGenerator.Create();
 
-        public override KeySizes[] LegalKeySizes
-        {
-            get
-            {
-                // CNG does not support 128-bit keys.
-                // Only support 192-bit keys on all platforms for simplicity.
-                return new KeySizes[] { new KeySizes(minSize: 3 * 64, maxSize: 3 * 64, skipSize: 0) };
-            }
-        }
-
         public override ICryptoTransform CreateDecryptor()
         {
             return CreateTransform(Key, IV, encrypting: false);
