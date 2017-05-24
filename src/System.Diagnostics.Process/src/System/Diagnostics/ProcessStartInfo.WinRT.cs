@@ -13,7 +13,7 @@ namespace System.Diagnostics
         public bool UseShellExecute
         {
             get { return false; }
-            set { if (value == true) throw new PlatformNotSupportedException(SR.UseShellExecuteNotSupported); }
+            set { if (value) throw new PlatformNotSupportedException(SR.UseShellExecuteNotSupported); }
         }
     }
 }
