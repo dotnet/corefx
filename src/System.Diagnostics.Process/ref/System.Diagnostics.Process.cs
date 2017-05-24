@@ -159,6 +159,7 @@ namespace System.Diagnostics
         public ProcessStartInfo(string fileName, string arguments) { }
         public string Arguments { get { throw null; } set { } }
         public bool CreateNoWindow { get { throw null; } set { } }
+        public bool CreateNewProcessGroup { get { throw null; } set { } }
         public string Domain { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute(null)]
         public System.Collections.Generic.IDictionary<string, string> Environment { get { throw null; } }
