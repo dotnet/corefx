@@ -350,7 +350,7 @@ namespace System.Diagnostics.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Group Ids are only available on Unix platforms
-        [Theory]
+        [Fact]
         public void TestCreateNewProcessGroup()
         {
             // Verify that StartInfo.CreateNewProcessGroup creates a process having its own process group
@@ -376,7 +376,7 @@ namespace System.Diagnostics.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Group Ids are only available on Unix platforms
-        [Theory]
+        [Fact]
         public void TestCreateNoNewProcessGroup()
         {
             // Verify that StartInfo.CreateNewProcessGroup == false does not create a process having its own process group

@@ -51,7 +51,7 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ForkAndExecProcess", SetLastError = true)]
         private static extern unsafe int ForkAndExecProcess(
             string filename, byte** argv, byte** envp, string cwd,
-            int redirectStdin, int redirectStdout, int redirectStderr,
+            int redirectStdin, int redirectStdout, int redirectStderr, int createNewProcessGroup,
             out int lpChildPid, out int stdinFd, out int stdoutFd, out int stderrFd);
 
         private static unsafe void AllocNullTerminatedArray(string[] arr, ref byte** arrPtr)
