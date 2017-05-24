@@ -9,8 +9,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
-
-
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -317,6 +316,11 @@ namespace System.Data.SqlClient
             }
         }
 
+        protected override DbProviderFactory DbProviderFactory
+        {
+            get { return SqlClientFactory.Instance; }
+        }
+
         // SqlCredential: Pair User Id and password in SecureString which are to be used for SQL authentication
 
         //
@@ -606,6 +610,11 @@ namespace System.Data.SqlClient
                     s_diagnosticListener.WriteConnectionOpenAfter(operationId, this);
                 }
             }
+        }
+
+        public override void EnlistTransaction(Transaction transaction)
+        {
+            throw ADP.AmbientTransactionIsNotSupported();
         }
 
         internal void RegisterWaitingForReconnect(Task waitingTask)
@@ -1002,6 +1011,13 @@ namespace System.Data.SqlClient
         private bool TryOpen(TaskCompletionSource<DbConnectionInternal> retry)
         {
             SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
+
+            // Fail Fast in case an application is trying to enlist the SqlConnection in a Transaction Scope.
+            if (connectionOptions.Enlist && ADP.GetCurrentTransaction() != null)
+            {
+                throw ADP.AmbientTransactionIsNotSupported();
+            }
+
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
 
             if (ForceNewConnection)
