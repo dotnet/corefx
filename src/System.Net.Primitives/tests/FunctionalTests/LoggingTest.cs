@@ -25,7 +25,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(19909, TargetFrameworkMonikers.Uap)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFramework: NetEventSource is only part of .NET Core;")]
         public void EventSource_EventsRaisedAsExpected()
         {
