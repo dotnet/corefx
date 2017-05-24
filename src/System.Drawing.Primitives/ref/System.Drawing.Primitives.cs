@@ -330,12 +330,12 @@ namespace System.Drawing
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.Drawing.Size operator +(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
-        public static System.Drawing.Size operator *(int multiplier, System.Drawing.Size size) { throw null; }
-        public static System.Drawing.Size operator *(System.Drawing.Size size, int multiplier) { throw null; }
-        public static System.Drawing.SizeF operator *(float multiplier, System.Drawing.Size size) { throw null; }
-        public static System.Drawing.SizeF operator *(System.Drawing.Size size, float multiplier) { throw null; }
-        public static System.Drawing.Size operator /(System.Drawing.Size size, int divisor) { throw null; }
-        public static System.Drawing.SizeF operator /(System.Drawing.Size size, float divisor) { throw null; }
+        public static System.Drawing.Size operator *(int left, System.Drawing.Size right) { throw null; }
+        public static System.Drawing.Size operator *(System.Drawing.Size left, int right) { throw null; }
+        public static System.Drawing.SizeF operator *(float left, System.Drawing.Size right) { throw null; }
+        public static System.Drawing.SizeF operator *(System.Drawing.Size left, float right) { throw null; }
+        public static System.Drawing.Size operator /(System.Drawing.Size left, int right) { throw null; }
+        public static System.Drawing.SizeF operator /(System.Drawing.Size left, float right) { throw null; }
         public static bool operator ==(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
         public static explicit operator System.Drawing.Point (System.Drawing.Size size) { throw null; }
         public static implicit operator System.Drawing.SizeF (System.Drawing.Size p) { throw null; }
@@ -366,9 +366,9 @@ namespace System.Drawing
         public static bool operator !=(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
         public static System.Drawing.SizeF operator -(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
         public static System.Drawing.SizeF Subtract(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
-        public static System.Drawing.SizeF operator *(float multiplier, System.Drawing.SizeF size) { throw null; }
-        public static System.Drawing.SizeF operator *(System.Drawing.SizeF size, float multiplier) { throw null; }
-        public static System.Drawing.SizeF operator /(System.Drawing.SizeF size, float divisor) { throw null; }
+        public static System.Drawing.SizeF operator *(float left, System.Drawing.SizeF right) { throw null; }
+        public static System.Drawing.SizeF operator *(System.Drawing.SizeF left, float right) { throw null; }
+        public static System.Drawing.SizeF operator /(System.Drawing.SizeF left, float right) { throw null; }
         public System.Drawing.PointF ToPointF() { throw null; }
         public System.Drawing.Size ToSize() { throw null; }
         public override string ToString() { throw null; }

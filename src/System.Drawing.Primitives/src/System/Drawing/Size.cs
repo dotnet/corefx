@@ -76,52 +76,58 @@ namespace System.Drawing
         /// <summary>
         /// Multiplication operator that multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
-        /// <param name="multiplier">Multiplier of type <see cref="int"/>.</param>
-        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="left">Multiplier of type <see cref="int"/>.</param>
+        /// <param name="right">Multiplicand of type <see cref="Size"/>.</param>
         /// <returns>Product of type <see cref="Size"/>.</returns>
-        public static Size operator *(int multiplier, Size size) => Multiply(size, multiplier);
+        public static Size operator *(int left, Size right) => Multiply(right, left);
 
         /// <summary>
         /// Multiplication operator that multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
-        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
-        /// <param name="multiplier">Multiplier of type <see cref="int"/>.</param>
+        /// <param name="left">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="right">Multiplier of type <see cref="int"/>.</param>
         /// <returns>Product of type <see cref="Size"/>.</returns>
-        public static Size operator *(Size size, int multiplier) => Multiply(size, multiplier);
+        public static Size operator *(Size left, int right) => Multiply(left, right);
 
         /// <summary>
         /// Division operator that divides <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
-        /// <param name="size">Dividend of type <see cref="Size"/>.</param>
-        /// <param name="divisor">Divisor of type <see cref="int"/>.</param>
+        /// <param name="left">Dividend of type <see cref="Size"/>.</param>
+        /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="Size"/>.</returns>
-        public static Size operator /(Size size, int divisor) =>
-            new Size(unchecked(size._width / divisor), unchecked(size._height / divisor));
+        public static Size operator /(Size left, int right)
+        {
+            int invDiv = 1 / right;
+            return new Size(unchecked(left._width * invDiv), unchecked(left._height * invDiv));
+        }
 
         /// <summary>
         /// Multiplication operator that multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
-        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
-        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="left">Multiplier of type <see cref="float"/>.</param>
+        /// <param name="right">Multiplicand of type <see cref="Size"/>.</param>
         /// <returns>Product of type <see cref="SizeF"/>.</returns>
-        public static SizeF operator *(float multiplier, Size size) => Multiply(size, multiplier);
+        public static SizeF operator *(float left, Size right) => Multiply(right, left);
 
         /// <summary>
         /// Multiplication operator that multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
-        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
-        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
+        /// <param name="left">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="right">Multiplier of type <see cref="float"/>.</param>
         /// <returns>Product of type <see cref="SizeF"/>.</returns>
-        public static SizeF operator *(Size size, float multiplier) => Multiply(size, multiplier);
+        public static SizeF operator *(Size left, float right) => Multiply(left, right);
 
         /// <summary>
         /// Division operator that divides <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
-        /// <param name="size">Dividend of type <see cref="Size"/>.</param>
-        /// <param name="divisor">Divisor of type <see cref="int"/>.</param>
+        /// <param name="left">Dividend of type <see cref="Size"/>.</param>
+        /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="SizeF"/>.</returns>
-        public static SizeF operator /(Size size, float divisor) =>
-            new SizeF(size._width / divisor, size._height / divisor);
+        public static SizeF operator /(Size left, float right)
+        {
+            float invDiv = 1.0f / right;
+            return new SizeF(left._width / invDiv, left._height / invDiv);
+        }
 
         /// <summary>
         ///    Tests whether two <see cref='System.Drawing.Size'/> objects

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Drawing.PrimitivesTests
 {
-    public class SizeTests
+    public partial class SizeTests
     {
         [Fact]
         public void DefaultConstructorTest()
@@ -106,125 +106,6 @@ namespace System.Drawing.PrimitivesTests
             Assert.Equal(subExpected, sz1 - sz2);
             Assert.Equal(addExpected, Size.Add(sz1, sz2));
             Assert.Equal(subExpected, Size.Subtract(sz1, sz2));
-        }
-
-        [Theory]
-        [InlineData(1000, 2400)]
-        [InlineData(int.MaxValue, 0)]
-        [InlineData(int.MaxValue, 1)]
-        [InlineData(int.MaxValue, 2)]
-        [InlineData(int.MaxValue, -1)]
-        [InlineData(int.MaxValue, -2)]
-        [InlineData(int.MaxValue, int.MaxValue)]
-        [InlineData(int.MinValue, 0)]
-        [InlineData(int.MinValue, 1)]
-        [InlineData(int.MinValue, 2)]
-        [InlineData(int.MinValue, -1)]
-        [InlineData(int.MinValue, -2)]
-        [InlineData(int.MinValue, int.MinValue)]
-        [InlineData(int.MaxValue, int.MinValue)]
-        public void MultiplicationTestSizeInt(int value1, int value2)
-        {
-            Size sz1 = new Size(value1, value1);
-            Size sz2 = new Size(value2, value2);
-            Size mulExpected;
-
-            unchecked
-            {
-                mulExpected = new Size(value1 * value2, value1 * value2);
-            }
-
-            Assert.Equal(mulExpected, sz1 * value2);
-            Assert.Equal(mulExpected, value2 * sz1);
-            Assert.Equal(mulExpected, sz2 * value1);
-            Assert.Equal(mulExpected, value1 * sz2);
-        }
-
-
-        [Theory]
-        [InlineData(1000, 2400.933)]
-        [InlineData(int.MaxValue, 0.0)]
-        [InlineData(int.MaxValue, 1.0)]
-        [InlineData(int.MaxValue, -1.0)]
-        [InlineData(int.MaxValue, float.MaxValue)]
-        [InlineData(int.MinValue, 0.0)]
-        [InlineData(int.MinValue, 1.0)]
-        [InlineData(int.MinValue, -1.0)]
-        [InlineData(int.MinValue, float.MinValue)]
-        [InlineData(int.MaxValue, float.MinValue)]
-        [InlineData(int.MinValue, float.MaxValue)]
-        public void MultiplicationTestSizeFloat(int value1, float value2)
-        {
-            if (value2 == 2400.993)
-            {
-                Console.WriteLine("This is it {0}", value1);
-            }
-            Size sz1 = new Size(value1, value1);
-            SizeF mulExpected;
-
-            unchecked
-            {
-                mulExpected = new SizeF(value1 * value2, value1 * value2);
-            }
-
-            Assert.Equal(mulExpected, sz1 * value2);
-            Assert.Equal(mulExpected, value2 * sz1);
-        }
-
-        [Fact]
-        public void DivideByIntZeroChecks()
-        {
-            Size size = new Size(100, 100);
-            Assert.Throws<DivideByZeroException>(() => size / 0);
-
-            SizeF expectedSizeF = new SizeF(100 / (float)0.0, 100 / (float)0.0);
-            Assert.Equal(expectedSizeF, size / (float)0.0);
-        }
-
-        [Theory]
-        [InlineData(0, 1)]
-        [InlineData(1, 1)]
-        [InlineData(-1, 1)]
-        [InlineData(1, -1)]
-        [InlineData(-1, -1)]
-        [InlineData(int.MaxValue, int.MaxValue)]
-        [InlineData(int.MaxValue, int.MinValue)]
-        [InlineData(int.MinValue, int.MaxValue)]
-        [InlineData(int.MinValue, int.MinValue)]
-        [InlineData(int.MaxValue, 1)]
-        [InlineData(int.MinValue, 1)]
-        [InlineData(int.MaxValue, -1)]
-        public void DivideTestSizeInt(int value1, int value2)
-        {
-            Size size = new Size(value1, value1);
-            Size expected;
-            
-            unchecked
-            {
-                expected = new Size(value1 / value2, value1 / value2);
-            }
-            Assert.Equal(expected, size / value2);
-        }
-
-        [Theory]
-        [InlineData(0, 1)]
-        [InlineData(1, 1.0)]
-        [InlineData(-1, 1.0)]
-        [InlineData(1, -1.0)]
-        [InlineData(-1, -1.0)]
-        [InlineData(int.MaxValue, float.MaxValue)]
-        [InlineData(int.MaxValue, float.MinValue)]
-        [InlineData(int.MinValue, float.MaxValue)]
-        [InlineData(int.MinValue, float.MinValue)]
-        [InlineData(int.MaxValue, 1.0)]
-        [InlineData(int.MinValue, 1.0)]
-        [InlineData(int.MaxValue, -1.0)]
-        [InlineData(int.MinValue, -1.0)]
-        public void DivideTestSizeFloat(int value1, float value2)
-        {
-            Size size = new Size(value1, value1);
-            SizeF expected = new SizeF(value1 / value2, value1 / value2);
-            Assert.Equal(expected, size / value2);
         }
 
         [Theory]
