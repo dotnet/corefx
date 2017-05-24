@@ -238,4 +238,10 @@
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
   </data>
+  <data name="CantStartAsUser" xml:space="preserve">
+    <value>The Process object must have the UseShellExecute property set to false in order to start a process as a user.</value>
+  </data>
+  <data name="CantUseEnvVars" xml:space="preserve">
+    <value>The Process object must have the UseShellExecute property set to false in order to use environment variables.</value>
+  </data>
 </root>

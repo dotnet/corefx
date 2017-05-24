@@ -434,18 +434,34 @@ namespace System.Diagnostics
         private string GetMainWindowTitle()
         {
             IntPtr handle = MainWindowHandle;
-            if (handle == (IntPtr)0)
+            if (handle == IntPtr.Zero)
+                return string.Empty;
+
+            int length = Interop.User32.GetWindowTextLengthW(handle);
+
+            if (length == 0)
             {
+#if DEBUG
+                // We never used to throw here, want to surface possible mistakes on our part
+                int error = Marshal.GetLastWin32Error();
+                Debug.Assert(error == 0, $"Failed GetWindowTextLengthW(): { new Win32Exception(error).Message }");
+#endif
                 return string.Empty;
             }
 
-            int length = Interop.User32.GetWindowTextLength(handle) * 2;
+            StringBuilder builder = new StringBuilder(length);
+            length = Interop.User32.GetWindowTextW(handle, builder, builder.Capacity + 1);
 
             if (length == 0)
-                return string.Empty;
+            {
+#if DEBUG
+                // We never used to throw here, want to surface possible mistakes on our part
+                int error = Marshal.GetLastWin32Error();
+                Debug.Assert(error == 0, $"Failed GetWindowTextW(): { new Win32Exception(error).Message }");
+#endif
+            }
 
-            StringBuilder builder = new StringBuilder(length);
-            Interop.User32.GetWindowText(handle, builder, builder.Capacity);
+            builder.Length = length;
             return builder.ToString();
         }
 
@@ -470,7 +486,6 @@ namespace System.Diagnostics
             const int WAIT_FAILED = unchecked((int)0xFFFFFFFF);
             const int WAIT_TIMEOUT = 0x00000102;
 
-            
             bool idle;
             using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.SYNCHRONIZE | Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
             {
@@ -578,9 +593,12 @@ namespace System.Diagnostics
 
         private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
+
+
+
         /// <summary>Starts the process using the supplied start info.</summary>
         /// <param name="startInfo">The start info with which to start the process.</param>
-        private bool StartCore(ProcessStartInfo startInfo)
+        private bool StartWithCreateProcess(ProcessStartInfo startInfo)
         {
             // See knowledge base article Q190351 for an explanation of the following code.  Noteworthy tricky points:
             //    * The handles are duplicated as non-inheritable before they are passed to CreateProcess so
@@ -955,7 +973,11 @@ namespace System.Diagnostics
                         }
                     }
                 }
-                return _processHandle;
+
+                // If we dispose of our contained handle we'll be in a bad state. NetFX dealt with this
+                // by doing a try..finally around every usage of GetProcessHandle and only disposed if
+                // it wasn't our handle.
+                return new SafeProcessHandle(_processHandle.DangerousGetHandle(), ownsHandle: false);
             }
             else
             {
