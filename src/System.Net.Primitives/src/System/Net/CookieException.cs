@@ -23,16 +23,17 @@ namespace System.Net
         protected CookieException(SerializationInfo serializationInfo, StreamingContext streamingContext)
             : base(serializationInfo, streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            base.GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
     }
 }

@@ -25,10 +25,12 @@ namespace System
 
         protected UriFormatException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
-        void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext) {
-            base.GetObjectData(serializationInfo, streamingContext);
+        void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+            throw new PlatformNotSupportedException();
         }
     }; // class UriFormatException
 } // namespace System

@@ -32,23 +32,9 @@ namespace System.Data.SqlClient
             _clientConnectionId = conId;
         }
 
-        private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc)
-        {
-            HResult = SqlExceptionHResult;
-            _errors = (SqlErrorCollection)si.GetValue("Errors", typeof(SqlErrorCollection));
-            _clientConnectionId = (Guid)si.GetValue("ClientConnectionId", typeof(Guid));
-        }
-
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            if (null == si)
-            {
-                throw new ArgumentNullException(nameof(si));
-            }
-
-            si.AddValue("Errors", _errors, typeof(SqlErrorCollection));
-            si.AddValue("ClientConnectionId", _clientConnectionId, typeof(Guid));
-            base.GetObjectData(si, context);
+            throw new PlatformNotSupportedException();
         }
 
         // runtime will call even if private...

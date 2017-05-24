@@ -90,56 +90,12 @@ namespace System.Collections.Specialized
 
         protected NameObjectCollectionBase(SerializationInfo info, StreamingContext context)
         {
-            _serializationInfo = info;
+            throw new PlatformNotSupportedException();
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            info.AddValue(ReadOnlyName, _readOnly);
-
-            // Maintain backward serialization compatibility if new APIs are not used.
-            if (_keyComparer == s_defaultComparer)
-            {
-                info.AddValue(HashCodeProviderName, CaseInsensitiveHashCodeProvider.DefaultInvariant, typeof(IHashCodeProvider));
-                info.AddValue(ComparerName, CaseInsensitiveComparer.DefaultInvariant, typeof(IComparer));
-            }
-            else if (_keyComparer == null)
-            {
-                info.AddValue(HashCodeProviderName, null, typeof(IHashCodeProvider));
-                info.AddValue(ComparerName, null, typeof(IComparer));
-            }
-            else if (_keyComparer is CompatibleComparer)
-            {
-                CompatibleComparer c = (CompatibleComparer)_keyComparer;
-                info.AddValue(HashCodeProviderName, c.HashCodeProvider, typeof(IHashCodeProvider));
-                info.AddValue(ComparerName, c.Comparer, typeof(IComparer));
-            }
-            else
-            {
-                info.AddValue(KeyComparerName, _keyComparer, typeof(IEqualityComparer));
-            }
-
-            int count = _entriesArray.Count;
-            info.AddValue(CountName, count);
-
-            string[] keys = new string[count];
-            object[] values = new object[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                NameObjectEntry entry = (NameObjectEntry)_entriesArray[i];
-                keys[i] = entry.Key;
-                values[i] = entry.Value;
-            }
-
-            info.AddValue(KeysName, keys, typeof(String[]));
-            info.AddValue(ValuesName, values, typeof(Object[]));
-            info.AddValue(VersionName, _version);
+            throw new PlatformNotSupportedException();
         }
 
         public virtual void OnDeserialization(object sender)

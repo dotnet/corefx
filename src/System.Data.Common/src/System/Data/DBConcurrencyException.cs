@@ -29,18 +29,9 @@ namespace System.Data
             _dataRows = dataRows;
         }
 
-        // runtime will call even if private...
-        private DBConcurrencyException(SerializationInfo si, StreamingContext sc) : base(si, sc)
-        {
-        }
-
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            if (null == si)
-            {
-                throw new ArgumentNullException(nameof(si));
-            }
-            base.GetObjectData(si, context);
+            throw new PlatformNotSupportedException();
         }
 
         public DataRow Row

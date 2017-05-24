@@ -31,13 +31,9 @@ namespace System.Security.Principal
             _unmappedIdentities = unmappedIdentities;
         }
 
-        private IdentityNotMappedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            base.GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         public IdentityReferenceCollection UnmappedIdentities
