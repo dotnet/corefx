@@ -30,6 +30,7 @@ namespace System.Numerics
         // This value is used inside Asin and Acos.
         private static readonly double s_log2 = Math.Log(2.0);
 
+        // Do not rename, these fields are needed for binary serialization
         private double m_real;
         private double m_imaginary;
         
