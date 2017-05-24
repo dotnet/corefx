@@ -112,49 +112,29 @@ namespace System.Diagnostics
         /// </summary>
         private bool WaitForExitCore(int milliseconds)
         {
-            bool exited;
-
+            SafeProcessHandle handle = null;
             try
             {
-                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.SYNCHRONIZE, false))
+                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.SYNCHRONIZE, false);
+                if (handle.IsInvalid)
+                    return true;
+
+                using (ProcessWaitHandle processWaitHandle = new ProcessWaitHandle(handle))
                 {
-                    if (handle.IsInvalid)
-                    {
-                        exited = true;
-                    }
-                    else
-                    {
-                        using (ProcessWaitHandle processWaitHandle = new ProcessWaitHandle(handle))
-                        {
-                            if (processWaitHandle.WaitOne(milliseconds))
-                            {
-                                exited = true;
-                                _signaled = true;
-                            }
-                            else
-                            {
-                                exited = false;
-                                _signaled = false;
-                            }
-                        }
-                    }
+                    return _signaled = processWaitHandle.WaitOne(milliseconds);
                 }
             }
             finally
             {
                 // If we have a hard timeout, we cannot wait for the streams
                 if (_output != null && milliseconds == Timeout.Infinite)
-                {
                     _output.WaitUtilEOF();
-                }
 
                 if (_error != null && milliseconds == Timeout.Infinite)
-                {
                     _error.WaitUtilEOF();
-                }
-            }
 
-            return exited;
+                handle?.Dispose();
+            }
         }
 
         /// <summary>Gets the main module for the associated process.</summary>
@@ -387,14 +367,14 @@ namespace System.Diagnostics
             StringBuilder builder = new StringBuilder(length);
             length = Interop.User32.GetWindowTextW(handle, builder, builder.Capacity + 1);
 
+#if DEBUG
             if (length == 0)
             {
-#if DEBUG
                 // We never used to throw here, want to surface possible mistakes on our part
                 int error = Marshal.GetLastWin32Error();
                 Debug.Assert(error == 0, $"Failed GetWindowTextW(): { new Win32Exception(error).Message }");
-#endif
             }
+#endif
 
             builder.Length = length;
             return builder.ToString();

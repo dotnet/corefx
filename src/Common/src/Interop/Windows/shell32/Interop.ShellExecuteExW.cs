@@ -25,7 +25,8 @@ internal partial class Interop
             public IntPtr lpClass;
             public IntPtr hkeyClass;
             public uint dwHotKey;
-            public IntPtr hIcon;
+            // This is a union of hIcon and hMonitor
+            public IntPtr hIconMonitor;
             public IntPtr hProcess;
         }
 

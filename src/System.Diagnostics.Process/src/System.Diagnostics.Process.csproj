@@ -88,7 +88,7 @@
       <Link>Common\Interop\Windows\user32\Interop.GetWindowThreadProcessId.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
-      <Link>Common\Interop\Windows\Interop.CloseHandle.cs</Link>
+      <Link>Common\Interop\Windows\kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.PERF_INFO.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.PERF_INFO.cs</Link>
@@ -214,7 +214,7 @@
       <Link>Common\Interop\Windows\kernel32\Interop.GetConsoleOutputCP.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CreateProcessWithLogon.cs">
-      <Link>Common\Interop\Windows\Interop.CreateProcessWithLogon.cs</Link>
+      <Link>Common\Interop\Windows\advapi32\Interop.CreateProcessWithLogon.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
