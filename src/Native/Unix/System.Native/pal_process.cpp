@@ -197,7 +197,7 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         if (createNewProcessGroup)
         {
             int result;
-            while (CheckInterrupted(result = setpgid(0)));
+            while (CheckInterrupted(result = setpgid(0, 0)));
             if (result == -1)
             {
                 _exit(errno != 0 ? errno : EXIT_FAILURE);
