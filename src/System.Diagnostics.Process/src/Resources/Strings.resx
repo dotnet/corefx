@@ -244,4 +244,7 @@
   <data name="CantUseEnvVars" xml:space="preserve">
     <value>The Process object must have the UseShellExecute property set to false in order to use environment variables.</value>
   </data>
+  <data name="UseShellExecuteNotSupported" xml:space="preserve">
+    <value>UseShellExecute is not supported on this platform.</value>
+  </data>
 </root>

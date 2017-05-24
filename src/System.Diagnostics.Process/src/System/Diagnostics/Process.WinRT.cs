@@ -9,7 +9,7 @@ namespace System.Diagnostics
         private bool StartCore(ProcessStartInfo startInfo)
         {
             return startInfo.UseShellExecute
-                ? throw new PlatformNotSupportedException(SR.UseShellExecute)
+                ? throw new PlatformNotSupportedException(SR.UseShellExecuteNotSupported)
                 : StartWithCreateProcess(startInfo);
         }
     }

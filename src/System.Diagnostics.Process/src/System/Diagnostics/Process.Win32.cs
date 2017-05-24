@@ -131,16 +131,24 @@ namespace System.Diagnostics
         {
             private Interop.Shell32.SHELLEXECUTEINFO* _executeInfo;
             private bool _succeeded;
+            private bool _notpresent;
 
             public ShellExecuteHelper(Interop.Shell32.SHELLEXECUTEINFO* executeInfo)
             {
                 _executeInfo = executeInfo;
             }
 
-            public void ShellExecuteFunction()
+            private void ShellExecuteFunction()
             {
-                if (!(_succeeded = Interop.Shell32.ShellExecuteExW(_executeInfo)))
-                    ErrorCode = Marshal.GetLastWin32Error();
+                try
+                {
+                    if (!(_succeeded = Interop.Shell32.ShellExecuteExW(_executeInfo)))
+                        ErrorCode = Marshal.GetLastWin32Error();
+                }
+                catch (EntryPointNotFoundException)
+                {
+                    _notpresent = true;
+                }
             }
 
             public bool ShellExecuteOnSTAThread()
@@ -159,6 +167,10 @@ namespace System.Diagnostics
                 {
                     ShellExecuteFunction();
                 }
+
+                if (_notpresent)
+                    throw new PlatformNotSupportedException(SR.UseShellExecuteNotSupported);
+
                 return _succeeded;
             }
 

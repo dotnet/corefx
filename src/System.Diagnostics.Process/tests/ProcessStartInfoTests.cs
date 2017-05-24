@@ -964,11 +964,13 @@ namespace System.Diagnostics.Tests
                 WindowStyle = ProcessWindowStyle.Minimized
             };
 
-            var process = Process.Start(info);
-            process.WaitForInputIdle(); // Give the file a chance to load
-            Assert.Equal("notepad", process.ProcessName);
-            Assert.StartsWith(Path.GetFileName(tempFile), process.MainWindowTitle);
-            process.Kill();
+            using (var process = Process.Start(info))
+            {
+                process.WaitForInputIdle(); // Give the file a chance to load
+                Assert.Equal("notepad", process.ProcessName);
+                Assert.StartsWith(Path.GetFileName(tempFile), process.MainWindowTitle);
+                process.Kill();
+            }
         }
 
         [Fact]
@@ -987,11 +989,13 @@ namespace System.Diagnostics.Tests
                 WindowStyle = ProcessWindowStyle.Minimized
             };
 
-            var process = Process.Start(info);
-            process.WaitForInputIdle(); // Give the file a chance to load
-            Assert.Equal("notepad", process.ProcessName);
-            Assert.StartsWith(Path.GetFileName(tempFile), process.MainWindowTitle);
-            process.Kill();
+            using (var process = Process.Start(info))
+            {
+                process.WaitForInputIdle(); // Give the file a chance to load
+                Assert.Equal("notepad", process.ProcessName);
+                Assert.StartsWith(Path.GetFileName(tempFile), process.MainWindowTitle);
+                process.Kill();
+            }
         }
 
         public static TheoryData<bool> UseShellExecute
