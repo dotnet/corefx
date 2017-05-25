@@ -43,6 +43,7 @@ namespace System.Net.Tests
             yield return new object[] { new string[] { "MyProtocol1", "MyProtocol2" }, "MyProtocol2" };
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [MemberData(nameof(SubProtocol_TestData))]
         public async Task AcceptWebSocketAsync_ValidSubProtocol_Success(string[] clientProtocols, string serverProtocol)
@@ -87,6 +88,7 @@ namespace System.Net.Tests
             });
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("")]
         [InlineData(" ")]
@@ -112,9 +114,10 @@ namespace System.Net.Tests
         public async Task AcceptWebSocketAsync_InvalidSubProtocol_ThrowsArgumentException(string subProtocol)
         {
             HttpListenerContext context = await GetWebSocketContext();
-            await Assert.ThrowsAsync<ArgumentException>("subProtocol", () => context.AcceptWebSocketAsync(subProtocol));
+            await AssertExtensions.ThrowsAsync<ArgumentException>("subProtocol", () => context.AcceptWebSocketAsync(subProtocol));
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("!")]
         [InlineData("#")]
@@ -125,6 +128,7 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(subProtocol));
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_InvalidKeepAlive_ThrowsWebSocketException()
         {
@@ -134,6 +138,7 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keepAliveInterval", () => context.AcceptWebSocketAsync(null, keepAlive));
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(-1)]
         [InlineData(0)]
@@ -151,9 +156,10 @@ namespace System.Net.Tests
             HttpListenerContext context = await GetWebSocketContext();
 
             ArraySegment<byte> internalBuffer = new FakeArraySegment() { Array = null }.ToActual();
-            await Assert.ThrowsAsync<ArgumentNullException>("internalBuffer.Array", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("internalBuffer.Array", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(-1)]
         [InlineData(11)]
@@ -162,9 +168,10 @@ namespace System.Net.Tests
             HttpListenerContext context = await GetWebSocketContext();
 
             ArraySegment<byte> internalBuffer = new FakeArraySegment() { Array = new byte[10], Offset = offset }.ToActual();
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("internalBuffer.Offset", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("internalBuffer.Offset", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(0, -1)]
         [InlineData(0, 11)]
@@ -175,7 +182,7 @@ namespace System.Net.Tests
             HttpListenerContext context = await GetWebSocketContext();
 
             ArraySegment<byte> internalBuffer = new FakeArraySegment() { Array = new byte[10], Offset = offset, Count = count }.ToActual();
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("internalBuffer.Count", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("internalBuffer.Count", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
         }
 
         private async Task GetSocketContext(string[] headers, Func<HttpListenerContext, Task> contextAction)

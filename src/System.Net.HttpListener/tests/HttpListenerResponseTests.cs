@@ -387,7 +387,7 @@ namespace System.Net.Tests
         {
             using (HttpListenerResponse response = await GetResponse())
             {
-                Assert.Throws<ArgumentNullException>("responseEntity", () => response.Close(null, true));
+                AssertExtensions.Throws<ArgumentNullException>("responseEntity", () => response.Close(null, true));
             }
         }
 
@@ -436,6 +436,7 @@ namespace System.Net.Tests
             }
         }
         
+        [ActiveIssue(20246)] // CI hanging frequently
         [InlineData(true)]
         [InlineData(false)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
