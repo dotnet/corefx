@@ -500,17 +500,9 @@ namespace System.Net
             }
         }
 
-        public override string ConnectionGroupName
-        {
-            get
-            {
-                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
-            }
-            set
-            {
-                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
-            }
-        }
+        // .Net Framework behavior difference: ConnectionGroupName cannot be changed.
+        // For app-compat reasons we allow apps to change it.
+        public override string ConnectionGroupName { get; set; }
 
         public override bool PreAuthenticate
         {
@@ -795,18 +787,9 @@ namespace System.Net
             }
         }
 
-
-        public int ReadWriteTimeout
-        {
-            get
-            {
-                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
-            }
-            set
-            {
-                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
-            }
-        }
+        // .Net Framework behavior difference: ReadWriteTimeout cannot be changed.
+        // For app-compat reasons we allow apps to change it and return the .Net Framework default.
+        public int ReadWriteTimeout { get; set; } = 300000;
 
         public virtual CookieContainer CookieContainer
         {
