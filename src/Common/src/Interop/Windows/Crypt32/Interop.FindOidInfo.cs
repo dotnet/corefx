@@ -26,7 +26,7 @@ internal static partial class Interop
             {
                 get
                 {
-                   return Marshal.PtrToStringAnsi(pszOID);
+                    return Marshal.PtrToStringAnsi(pszOID);
                 }
             }
 

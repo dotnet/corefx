@@ -9,6 +9,7 @@ internal static partial class Interop
 {
     internal static partial class NCrypt
     {
+
         [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
         internal static extern unsafe ErrorCode NCryptEncrypt(SafeNCryptKeyHandle hKey, [In] byte[] pbInput, int cbInput, void* pPaddingInfo, [Out] byte[] pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags);
 
