@@ -20,7 +20,7 @@ namespace System.IO.Compression
 
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(si, context);
         }
     }
 }

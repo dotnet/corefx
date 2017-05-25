@@ -33,7 +33,7 @@ namespace System.Security.Principal
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
 
         public IdentityReferenceCollection UnmappedIdentities

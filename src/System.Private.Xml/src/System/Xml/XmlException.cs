@@ -36,7 +36,7 @@ namespace System.Xml
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         //provided to meet the ECMA standards

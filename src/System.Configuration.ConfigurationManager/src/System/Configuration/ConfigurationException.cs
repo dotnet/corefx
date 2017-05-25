@@ -91,7 +91,7 @@ namespace System.Configuration
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         [Obsolete("This class is obsolete, use System.Configuration!System.Configuration.ConfigurationErrorsException.GetFilename instead")]

@@ -28,7 +28,7 @@ namespace System.Xml.XPath
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         public XPathException() : this(string.Empty, (Exception)null) { }

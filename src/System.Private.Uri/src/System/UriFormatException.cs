@@ -30,7 +30,7 @@ namespace System
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }; // class UriFormatException
 } // namespace System

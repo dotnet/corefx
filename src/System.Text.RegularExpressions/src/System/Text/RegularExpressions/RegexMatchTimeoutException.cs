@@ -57,7 +57,7 @@ namespace System.Text.RegularExpressions
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         public string Input { get; } = string.Empty;

@@ -136,7 +136,7 @@ namespace System.DirectoryServices.Protocols
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 

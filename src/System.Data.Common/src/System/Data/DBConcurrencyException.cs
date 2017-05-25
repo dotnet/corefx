@@ -31,7 +31,7 @@ namespace System.Data
 
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(si, context);
         }
 
         public DataRow Row

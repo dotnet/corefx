@@ -34,7 +34,7 @@ namespace System.Data.SqlClient
 
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(si, context);
         }
 
         // runtime will call even if private...

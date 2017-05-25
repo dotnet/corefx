@@ -132,7 +132,7 @@ namespace System.DirectoryServices.AccountManagement
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
     }
 
@@ -165,7 +165,7 @@ namespace System.DirectoryServices.AccountManagement
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         public int ErrorCode

@@ -166,7 +166,7 @@ namespace System.Configuration
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(info, context);
         }
 
         // Get file and linenumber from an XML Node in a DOM

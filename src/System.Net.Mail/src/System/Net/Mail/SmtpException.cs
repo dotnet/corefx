@@ -109,12 +109,12 @@ namespace System.Net.Mail
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
 
         public SmtpStatusCode StatusCode

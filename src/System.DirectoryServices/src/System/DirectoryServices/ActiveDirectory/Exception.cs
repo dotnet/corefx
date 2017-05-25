@@ -116,7 +116,7 @@ namespace System.DirectoryServices.ActiveDirectory
         [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
@@ -155,7 +155,7 @@ namespace System.DirectoryServices.ActiveDirectory
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
@@ -218,7 +218,7 @@ namespace System.DirectoryServices.ActiveDirectory
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
@@ -273,7 +273,7 @@ namespace System.DirectoryServices.ActiveDirectory
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
@@ -307,7 +307,7 @@ namespace System.DirectoryServices.ActiveDirectory
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 

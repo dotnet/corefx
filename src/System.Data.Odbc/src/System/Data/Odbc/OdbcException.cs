@@ -44,7 +44,7 @@ namespace System.Data.Odbc
 
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            throw new PlatformNotSupportedException();
+            base.GetObjectData(si, context);
         }
 
         // mdac bug 62559 - if we don't have it return nothing (empty string)
