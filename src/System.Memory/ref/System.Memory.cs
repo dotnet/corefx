@@ -118,7 +118,7 @@ namespace System
         public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
 
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> segment) { throw null; }
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> arraySegment) { throw null; }
     }
 }
 
