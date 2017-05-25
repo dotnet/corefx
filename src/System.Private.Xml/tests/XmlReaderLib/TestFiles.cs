@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -46,13 +46,8 @@ namespace System.Xml.Tests
         private const string _BigEndianXml = "BigEndian.xml";
         private const string _ConstructorXml = "Constructor.xml";
         private const string _LineNumberXml = "LineNumber.xml";
-        private const string _LineNumberEnt = "LineNumber.ent";
         private const string _LbNormalization = "LbNormalization.xml";
-        private const string _LbNormEnt1 = "se3_1.ent";
-        private const string _LbNormEnt2 = "se3_2.ent";
 
-        private const string _SchemaTypeXml = "SchemaType.xml";
-        private const string _SchemaTypeXsd = "SchemaType.xsd";
         private const string _BinaryXml = "Binary.bin";
 
         private const string strBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

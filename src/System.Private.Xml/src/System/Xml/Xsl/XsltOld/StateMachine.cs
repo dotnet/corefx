@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -45,7 +45,6 @@ namespace System.Xml.Xsl.XsltOld
         private const int M = 0x001000;       // EmptyTag
 
         internal const int BeginChild = C;
-        internal const int HadChild = H;
         internal const int EmptyTag = M;
 
         private const int B = 0x002000;       // Begin Record
@@ -57,7 +56,6 @@ namespace System.Xml.Xsl.XsltOld
         private const int S = 0x008000;       // Push namespace scope
         private const int P = 0x010000;       // Pop current namepsace scope
 
-        internal const int PushScope = S;
         internal const int PopScope = P;              // Next event must pop scope
 
         //

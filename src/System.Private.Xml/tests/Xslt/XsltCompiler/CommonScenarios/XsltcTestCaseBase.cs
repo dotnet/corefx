@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -32,8 +32,6 @@ namespace System.Xml.Tests
         // Other global variables
         protected bool _createFromInputFile = false; // This is intiialized from a parameter passed from LTM as a dimension, that dictates whether the variation is to be created using an input file.
 
-        protected bool _isInProc; // Is the current test run in proc or /Host None?
-
         private static ITestOutputHelper s_output;
         public XsltcTestCaseBase(ITestOutputHelper output)
         {
@@ -63,14 +61,6 @@ namespace System.Xml.Tests
             _createFromInputFile = executionMode.Equals("File");
 
             return 1;
-        }
-
-        protected static void CompareOutput(string expected, Stream actualStream)
-        {
-            using (var expectedStream = new MemoryStream(Encoding.UTF8.GetBytes(expected)))
-            {
-                CompareOutput(expectedStream, actualStream);
-            }
         }
 
         protected static void CompareOutput(Stream expectedStream, Stream actualStream, int count = 0)
@@ -338,16 +328,6 @@ namespace System.Xml.Tests
                 {
                     s_output.WriteLine(e.Message);
                     return false;
-                }
-            }
-
-            private static byte[] loadFile(string filename)
-            {
-                using (var fs = new FileStream(filename, FileMode.Open))
-                {
-                    var buffer = new byte[(int)fs.Length];
-                    fs.Read(buffer, 0, buffer.Length);
-                    return buffer;
                 }
             }
         }

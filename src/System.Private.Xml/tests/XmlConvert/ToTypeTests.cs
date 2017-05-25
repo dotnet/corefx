@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1122,15 +1122,6 @@ namespace System.Xml.Tests
             return TestValid(array0, array1, "decimal");
         }
 
-        #endregion
-
-        #region Methods
-
-        private TimeSpan GetOffsetFromUtc(DateTime dt)
-        {
-            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(dt);
-            return offset;
-        }
         #endregion
     }
 }

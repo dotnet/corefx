@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,8 +16,6 @@ namespace System.Xml.Tests
         private long _defaultCharsDoc = 0;
         private long _maxVal = Int64.MaxValue;
         private long _bigVal = 100000;
-        private string _path = Path.Combine(FilePathUtil.GetStandardPath(), @"xml10\entityexpansion\");
-        private string _path2 = Path.Combine(FilePathUtil.GetStandardPath(), @"XML10\ms_xml\");
 
         private string[] _skipFiles =
         {
@@ -25,20 +23,6 @@ namespace System.Xml.Tests
             "extent_4.xml",
             "surrogate_parameterentities_2.xml"
         };
-
-        private bool IsSkipped(string uri)
-        {
-            if (!uri.EndsWith(".xml"))
-            {
-                return true;
-            }
-            for (int i = 0; i < _skipFiles.Length; i++)
-            {
-                if (uri.Contains(_skipFiles[i]))
-                    return true;
-            }
-            return false;
-        }
 
         [Variation(Pri = 0, Desc = "MaxSettings: get default values")]
         public int v1()
@@ -396,8 +380,6 @@ namespace System.Xml.Tests
             }
             return TEST_FAIL;
         }
-
-        private string _xml = @"<!DOCTYPE r [<!ENTITY e SYSTEM '" + Path.Combine(FilePathUtil.GetTestDataPath(), "XmlReader", "ent.ent") + @"'>]><r>&e;</r>";
     }
 }
 

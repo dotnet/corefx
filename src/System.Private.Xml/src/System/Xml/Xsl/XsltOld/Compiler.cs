@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -768,17 +768,6 @@ namespace System.Xml.Xsl.XsltOld
         // Script support
         //
         private Hashtable[] _typeDeclsByLang = new Hashtable[] { new Hashtable(), new Hashtable(), new Hashtable() };
-        private ArrayList _scriptFiles = new ArrayList();
-        // Namespaces we always import when compiling
-        private static string[] s_defaultNamespaces = new string[] {
-            "System",
-            "System.Collections",
-            "System.Text",
-            "System.Text.RegularExpressions",
-            "System.Xml",
-            "System.Xml.Xsl",
-            "System.Xml.XPath",
-        };
 
         internal void AddScript(string source, ScriptingLanguage lang, string ns, string fileName, int lineNumber)
         {

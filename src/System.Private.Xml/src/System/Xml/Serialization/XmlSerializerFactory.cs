@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -27,8 +27,6 @@ namespace System.Xml.Serialization
     /// </devdoc>
     public class XmlSerializerFactory
     {
-        private static TempAssemblyCache s_cache = new TempAssemblyCache();
-
         /// <include file='doc\XmlSerializerFactory.uex' path='docs/doc[@for="XmlSerializerFactory.CreateSerializer"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>

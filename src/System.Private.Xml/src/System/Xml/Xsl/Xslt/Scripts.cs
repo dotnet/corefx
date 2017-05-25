@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -23,8 +23,6 @@ namespace System.Xml.Xsl.Xslt
 {
     internal class Scripts
     {
-        private const string ScriptClassesNamespace = "System.Xml.Xsl.CompiledQuery";
-
         private Compiler _compiler;
         private Dictionary<string, Type> _nsToType = new Dictionary<string, Type>();
         private XmlExtensionFunctionTable _extFuncs = new XmlExtensionFunctionTable();

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,7 +40,6 @@ namespace System.Xml.Schema
         internal static XmlQualifiedName ST_date = new XmlQualifiedName("date", XmlSchema.Namespace);
         internal static XmlQualifiedName ST_gYearMonth = new XmlQualifiedName("gYearMonth", XmlSchema.Namespace);
         internal static XmlQualifiedName ST_string = new XmlQualifiedName("string", XmlSchema.Namespace);
-        internal static XmlQualifiedName ST_anySimpleType = new XmlQualifiedName("anySimpleType", XmlSchema.Namespace);
 
         internal static XmlQualifiedName[] SimpleTypes =
         {
@@ -84,7 +83,6 @@ namespace System.Xml.Schema
         internal const short HC_ST_date = 16;
         internal const short HC_ST_gYearMonth = 17;
         internal const short HC_ST_string = 18;
-        internal const short HC_ST_Count = HC_ST_string + 1;
 
 
         internal const int TF_boolean = 1 << HC_ST_boolean;

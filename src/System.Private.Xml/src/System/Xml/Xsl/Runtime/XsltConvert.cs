@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -27,14 +27,10 @@ namespace System.Xml.Xsl.Runtime
     public static class XsltConvert
     {
         internal static readonly Type BooleanType = typeof(bool);
-        internal static readonly Type ByteArrayType = typeof(byte[]);
         internal static readonly Type ByteType = typeof(byte);
         internal static readonly Type DateTimeType = typeof(DateTime);
         internal static readonly Type DecimalType = typeof(decimal);
         internal static readonly Type DoubleType = typeof(double);
-        internal static readonly Type ICollectionType = typeof(ICollection);
-        internal static readonly Type IEnumerableType = typeof(IEnumerable);
-        internal static readonly Type IListType = typeof(IList);
         internal static readonly Type Int16Type = typeof(short);
         internal static readonly Type Int32Type = typeof(int);
         internal static readonly Type Int64Type = typeof(long);
@@ -43,15 +39,10 @@ namespace System.Xml.Xsl.Runtime
         internal static readonly Type SByteType = typeof(sbyte);
         internal static readonly Type SingleType = typeof(float);
         internal static readonly Type StringType = typeof(string);
-        internal static readonly Type TimeSpanType = typeof(TimeSpan);
         internal static readonly Type UInt16Type = typeof(ushort);
         internal static readonly Type UInt32Type = typeof(uint);
         internal static readonly Type UInt64Type = typeof(ulong);
-        internal static readonly Type UriType = typeof(Uri);
         internal static readonly Type VoidType = typeof(void);
-        internal static readonly Type XmlAtomicValueType = typeof(XmlAtomicValue);
-        internal static readonly Type XmlQualifiedNameType = typeof(XmlQualifiedName);
-        internal static readonly Type XPathItemType = typeof(XPathItem);
         internal static readonly Type XPathNavigatorArrayType = typeof(XPathNavigator[]);
         internal static readonly Type XPathNavigatorType = typeof(XPathNavigator);
         internal static readonly Type XPathNodeIteratorType = typeof(XPathNodeIterator);

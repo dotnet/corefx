@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,24 +40,6 @@ namespace System.Xml.Tests
         }
 
         protected String scriptTestPath = null;
-
-        protected String ScriptTestPath
-        {
-            get
-            {
-                if (scriptTestPath == null) //not thread safe
-                {
-                    scriptTestPath = _standardTests;
-
-                    if (!scriptTestPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                        scriptTestPath += Path.DirectorySeparatorChar;
-
-                    scriptTestPath += "Scripting" + Path.DirectorySeparatorChar;
-                }
-
-                return scriptTestPath;
-            }
-        }
 
         protected MethodInfo AMethodInfo
         {

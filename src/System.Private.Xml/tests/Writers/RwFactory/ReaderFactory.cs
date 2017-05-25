@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,7 +40,6 @@ namespace System.Xml.Tests
         private ReaderOverload _overload;
         private XmlReader _factoryReader = null;
         private XmlReader _underlyingReader = null;
-        protected short numEventHandlers = 0;
 
         // Parse Optional data specific to reader tests.
         protected override void PreTest()
@@ -187,21 +186,6 @@ namespace System.Xml.Tests
             //If you are not in PASS state at this point you are in Error.
             if (pstate != TestState.Pass)
                 pstate = TestState.Error;
-        }
-
-        protected void CompareSettings()
-        {
-            Log("Comparing ErrorSettings");
-            XmlReaderSettings actual = _factoryReader.Settings;
-            if (actual == null)
-                throw new CTestFailedException("Factory Reader Settings returned null");
-
-            CError.Compare(actual.CheckCharacters, _settings.CheckCharacters, "CheckCharacters");
-            CError.Compare(actual.IgnoreComments, _settings.IgnoreComments, "IgnoreComments");
-            CError.Compare(actual.IgnoreProcessingInstructions, _settings.IgnoreProcessingInstructions, "IgnorePI");
-            CError.Compare(actual.IgnoreWhitespace, _settings.IgnoreWhitespace, "IgnoreWhitespace");
-            CError.Compare(actual.LineNumberOffset, _settings.LineNumberOffset, "LinenumberOffset");
-            CError.Compare(actual.LinePositionOffset, _settings.LinePositionOffset, "LinePositionOffset");
         }
 
         protected void ConsumeReader(XmlReader reader)

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -64,28 +64,6 @@ namespace System.Xml.Tests
                 bPassed = (e.GetType().ToString() == exceptionType.ToString());
             }
             return bPassed;
-        }
-
-        protected void TestInvalidNodeType(XmlNodeType nt)
-        {
-            ReloadSource();
-
-            PositionOnNodeType(nt);
-            string name = DataReader.Name;
-            string value = DataReader.Value;
-
-            byte[] buffer = new byte[1];
-            if (CheckCanReadBinaryContent()) return;
-
-            try
-            {
-                int nBytes = DataReader.ReadContentAsBinHex(buffer, 0, 1);
-            }
-            catch (InvalidOperationException)
-            {
-                return;
-            }
-            CError.Compare(false, "Invalid OP exception not thrown on wrong nodetype");
         }
 
         [Variation("ReadBinHex Element with all valid value")]
