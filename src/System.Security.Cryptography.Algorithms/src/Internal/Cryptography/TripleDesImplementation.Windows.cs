@@ -20,16 +20,6 @@ namespace Internal.Cryptography
         {
             SafeAlgorithmHandle algorithm = TripleDesBCryptModes.GetSharedHandle(cipherMode);
 
-            if (key.Length == 16)
-            {
-                // Cng does not support Two-Key Triple DES, so manually support it here.
-                // Two-Key Triple DES contains two 8-byte keys {K1}{K2} with {K1} appended to make {K1}{K2}{K1}.
-                byte[] newkey = new byte[24];
-                Array.Copy(key, 0, newkey, 0, 16);
-                Array.Copy(key, 0, newkey, 16, 8);
-                key = newkey;
-            }
-
             BasicSymmetricCipher cipher = new BasicSymmetricCipherBCrypt(algorithm, cipherMode, blockSize, key, false, iv, encrypting);
             return UniversalCryptoTransform.Create(paddingMode, cipher, encrypting);
         }

@@ -65,6 +65,16 @@ namespace Internal.Cryptography
                     throw new ArgumentException(SR.Cryptography_InvalidIVSize, nameof(rgbIV));
             }
 
+            if (rgbKey.Length == 16)
+            {
+                // Some platforms do not support Two-Key Triple DES, so manually support it here.
+                // Two-Key Triple DES contains two 8-byte keys {K1}{K2} with {K1} appended to make {K1}{K2}{K1}.
+                byte[] newkey = new byte[24];
+                Array.Copy(rgbKey, 0, newkey, 0, 16);
+                Array.Copy(rgbKey, 0, newkey, 16, 8);
+                rgbKey = newkey;
+            }
+
             return CreateTransformCore(Mode, Padding, rgbKey, rgbIV, BlockSize / BitsPerByte, encrypting);
         }
     }

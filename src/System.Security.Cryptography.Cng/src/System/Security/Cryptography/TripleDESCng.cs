@@ -117,6 +117,21 @@ namespace System.Security.Cryptography
             return Interop.NCrypt.NCRYPT_3DES_ALGORITHM;
         }
 
+        byte[] ICngSymmetricAlgorithm.PreprocessKey(byte[] key)
+        {
+            if (key.Length == 16)
+            {
+                // Cng does not support Two-Key Triple DES, so manually support it here for consistency with System.Security.Cryptography.Algorithms.
+                // Two-Key Triple DES contains two 8-byte keys {K1}{K2} with {K1} appended to make {K1}{K2}{K1}.
+                byte[] newkey = new byte[24];
+                Array.Copy(key, 0, newkey, 0, 16);
+                Array.Copy(key, 0, newkey, 16, 8);
+                return newkey;
+            }
+
+            return key;
+        }
+
         private CngSymmetricAlgorithmCore _core;
     }
 }
