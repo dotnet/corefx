@@ -197,10 +197,10 @@ namespace Internal.NativeCrypto
 
            int cbFormat = 0;
            if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, null, ref cbFormat))
-                 return null;
+                return null;
             StringBuilder sb = new StringBuilder((cbFormat + 1) / 2);
             if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, sb, ref cbFormat))
-                 return null;
+                return null;
             return sb.ToString();
         }
 

@@ -74,7 +74,7 @@
     <value>Buffer cannot be null.</value>
   </data>
   <data name="Arg_CryptographyException" xml:space="preserve">
-     <value>Error occurred during a cryptographic operation.</value>
+    <value>Error occurred during a cryptographic operation.</value>
   </data>
   <data name="Cryptography_BadHashSize_ForAlgorithm" xml:space="preserve">
     <value>The provided value of {0} bytes does not match the expected size of {1} bytes for the algorithm ({2}).</value>
@@ -83,10 +83,10 @@
     <value>Encoded OID length is too large (greater than 0x7f bytes).</value>
   </data>
   <data name="Cryptography_CSP_NoPrivateKey" xml:space="preserve">
-     <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
+    <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
   </data>
   <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
-     <value>ASN1 corrupted data.</value>
+    <value>ASN1 corrupted data.</value>
    </data>
   <data name="Cryptography_ECXmlSerializationFormatRequired" xml:space="preserve">
     <value>XML serialization of an elliptic curve key requires using an overload which specifies the XML format to be used.</value>
