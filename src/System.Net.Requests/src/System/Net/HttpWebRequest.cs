@@ -22,6 +22,7 @@ namespace System.Net
     public class HttpWebRequest : WebRequest, ISerializable
     {
         private const int DefaultContinueTimeout = 350; // Current default value from .NET Desktop.
+        private const int DefaultReadWriteTimeout = 5 * 60 * 1000; // 5 minutes
 
         private WebHeaderCollection _webHeaderCollection = new WebHeaderCollection();
 
@@ -500,8 +501,6 @@ namespace System.Net
             }
         }
 
-        // .Net Framework behavior difference: ConnectionGroupName cannot be changed.
-        // For app-compat reasons we allow apps to change it.
         public override string ConnectionGroupName { get; set; }
 
         public override bool PreAuthenticate
@@ -787,9 +786,7 @@ namespace System.Net
             }
         }
 
-        // .Net Framework behavior difference: ReadWriteTimeout cannot be changed.
-        // For app-compat reasons we allow apps to change it and return the .Net Framework default.
-        public int ReadWriteTimeout { get; set; } = 300000;
+        public int ReadWriteTimeout { get; set; } = DefaultReadWriteTimeout;
 
         public virtual CookieContainer CookieContainer
         {
