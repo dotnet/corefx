@@ -1059,7 +1059,7 @@ namespace System.Diagnostics.Tests
 
             int expected = ERROR_BAD_EXE_FORMAT;
 
-            // Windows Nano bug tracked privately
+            // Windows Nano bug see #10290
             if (PlatformDetection.IsWindowsNanoServer)
                 expected = ERROR_SUCCESS;
 
