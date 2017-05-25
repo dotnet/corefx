@@ -70,6 +70,9 @@
   <data name="Argument_InvalidOidValue" xml:space="preserve">
     <value>The OID value was invalid.</value>
   </data>
+  <data name="Argument_InvalidValue" xml:space="preserve">
+    <value>Value was invalid.</value>
+  </data>
   <data name="ArgumentNull_Buffer" xml:space="preserve">
     <value>Buffer cannot be null.</value>
   </data>
@@ -88,8 +91,14 @@
   <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
     <value>ASN1 corrupted data.</value>
   </data>
+  <data name="Cryptography_DSA_KeyGenNotSupported" xml:space="preserve">
+    <value>DSA keys can be imported, but new key generation is not supported on this platform.</value>
+  </data>
   <data name="Cryptography_ECXmlSerializationFormatRequired" xml:space="preserve">
     <value>XML serialization of an elliptic curve key requires using an overload which specifies the XML format to be used.</value>
+  </data>
+  <data name="Cryptography_ECC_NamedCurvesOnly" xml:space="preserve">
+    <value>Only named curves are supported on this platform.</value>
   </data>
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
@@ -156,6 +165,9 @@
   </data>
   <data name="Cryptography_InvalidRsaParameters" xml:space="preserve">
     <value>The specified RSA parameters are not valid; both Exponent and Modulus are required fields.</value>
+  </data>
+  <data name="Cryptography_InvalidPaddingMode" xml:space="preserve">
+    <value>Specified padding mode is not valid for this algorithm.</value>
   </data>
   <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
     <value>The string contains a character not in the 7 bit ASCII character set.</value>
