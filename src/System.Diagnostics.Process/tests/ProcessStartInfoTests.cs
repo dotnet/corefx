@@ -979,7 +979,8 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
         public void StartInfo_TextFile_ShellExecute()
         {
-            string tempFile = GetTestFilePath() + ".txt";
+            string tempFilePath = GetTestFilePath();
+            string tempFile = tempFilePath + ".txt";
             File.WriteAllText(tempFile, $"StartInfo_TextFile_ShellExecute");
 
             ProcessStartInfo info = new ProcessStartInfo
@@ -993,7 +994,8 @@ namespace System.Diagnostics.Tests
             {
                 process.WaitForInputIdle(); // Give the file a chance to load
                 Assert.Equal("notepad", process.ProcessName);
-                Assert.StartsWith(Path.GetFileName(tempFile), process.MainWindowTitle);
+                // On some Windows versions, the file extension is not included in the title
+                Assert.StartsWith(Path.GetFileName(tempFilePath), process.MainWindowTitle);
                 process.Kill();
             }
         }
