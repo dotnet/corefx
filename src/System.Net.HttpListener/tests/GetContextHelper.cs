@@ -59,11 +59,13 @@ namespace System.Net.Tests
     public static class Helpers
     {
         public static bool IsWindowsImplementation { get; } =
-            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) != null &&
-            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
+            (typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) != null ||                  // CoreFX + HttpApi
+            typeof(HttpListener).Assembly.GetType("System.Net.UnsafeNclNativeMethods", throwOnError: false, ignoreCase: false) != null)   // NetFX
+            && PlatformDetection.IsNotOneCoreUAP; // never run for UAP
         public static bool IsNotWindowsImplementation =>
-            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) == null &&
-            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
+            !(typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) != null ||                  // CoreFX + HttpApi
+             typeof(HttpListener).Assembly.GetType("System.Net.UnsafeNclNativeMethods", throwOnError: false, ignoreCase: false) != null)   // NetFX
+            && PlatformDetection.IsNotOneCoreUAP; // never run for UAP
 
         public static void WaitForSocketShutdown(Socket socket)
         {
