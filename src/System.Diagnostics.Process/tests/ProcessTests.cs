@@ -1016,19 +1016,6 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]  // Needs permissions on Unix
-        // NativeErrorCode not 193 on Windows Nano for ERROR_BAD_EXE_FORMAT, issue #10290
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void TestStartOnWindowsWithBadFileFormat()
-        {
-            string path = GetTestFilePath();
-            File.Create(path).Dispose();
-
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
-            Assert.NotEqual(0, e.NativeErrorCode);
-        }
-
-
         [Fact]
         public void Start_NullStartInfo_ThrowsArgumentNullExceptionException()
         {
