@@ -190,13 +190,13 @@ namespace Internal.NativeCrypto
 
         public static String CryptFormatObject(String oidValue, byte[] rawData, bool multiLine)
         {
-           const int X509_ASN_ENCODING = 0x00000001;
-           const int CRYPT_FORMAT_STR_MULTI_LINE = 0x00000001;
+            const int X509_ASN_ENCODING = 0x00000001;
+            const int CRYPT_FORMAT_STR_MULTI_LINE = 0x00000001;
 
-           int dwFormatStrType = multiLine ? CRYPT_FORMAT_STR_MULTI_LINE : 0;
+            int dwFormatStrType = multiLine ? CRYPT_FORMAT_STR_MULTI_LINE : 0;
 
-           int cbFormat = 0;
-           if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, null, ref cbFormat))
+            int cbFormat = 0;
+            if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, null, ref cbFormat))
                 return null;
             StringBuilder sb = new StringBuilder((cbFormat + 1) / 2);
             if (!Interop.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, oidValue, rawData, rawData.Length, sb, ref cbFormat))
