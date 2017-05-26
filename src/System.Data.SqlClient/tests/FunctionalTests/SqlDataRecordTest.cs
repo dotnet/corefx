@@ -35,7 +35,7 @@ namespace System.Data.SqlClient.Tests
 
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            for(int i = 0; i < record.FieldCount; i++)
+            for (int i = 0; i < record.FieldCount; i++)
             {
                 Assert.Equal($"col{i + 1}", record.GetName(i));
             }
@@ -51,7 +51,7 @@ namespace System.Data.SqlClient.Tests
             record.SetSqlBinary(2, new SqlBinary(new byte[0]));
             record.SetBytes(2, 0, bb1, 0, 3);
             record.SetBytes(2, 2, bb1, 6, 3);
-            
+
             // Verify the length of the byte array
             Assert.Equal(5, record.GetBytes(2, 0, bb2, 0, 5));
 
@@ -78,10 +78,11 @@ namespace System.Data.SqlClient.Tests
 
             record.SetChars(3, 2, cb1, 4, 3);
             Assert.Equal(5, record.GetChars(3, 0, cb2, 0, 5));
+
             string interleavedResult = "xyefg";
             Assert.Equal(interleavedResult, new string(cb2, 0, (int)record.GetChars(3, 0, null, 0, 0)));
             Assert.Equal(interleavedResult, record.GetString(3));
-            
+
             record.SetSqlDateTime(4, SqlDateTime.MaxValue);
             Assert.Equal(SqlDateTime.MaxValue, record.GetSqlDateTime(4));
 
