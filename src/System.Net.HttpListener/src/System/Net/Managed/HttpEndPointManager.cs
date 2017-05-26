@@ -30,6 +30,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace System.Net
 {
@@ -91,6 +92,9 @@ namespace System.Net
             }
 
             ListenerPrefix lp = new ListenerPrefix(p);
+            if (lp.Host != "*" && lp.Host != "+" && Uri.CheckHostName(lp.Host) == UriHostNameType.Unknown)
+                throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_listener_host);
+
             if (lp.Path.IndexOf('%') != -1)
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
@@ -105,23 +109,30 @@ namespace System.Net
         private static HttpEndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure)
         {
             IPAddress addr;
-            if (host == "*")
-                addr = IPAddress.Any;
-            else if (IPAddress.TryParse(host, out addr) == false)
+            if (host == "*" || host == "+")
             {
+                addr = IPAddress.Any;
+            }
+            else
+            {
+                const int NotSupportedErrorCode = 50;
                 try
                 {
-                    IPHostEntry iphost = Dns.GetHostEntry(host);
-                    if (iphost != null)
-                        addr = iphost.AddressList[0];
-                    else
-                        addr = IPAddress.Any;
+                    addr = Dns.GetHostAddresses(host)[0];
                 }
                 catch
                 {
-                    addr = IPAddress.Any;
+                    // Throw same error code as windows, request is not supported.
+                    throw new HttpListenerException(NotSupportedErrorCode, SR.net_listener_not_supported);
+                }
+
+                if (IPAddress.Any.Equals(addr))
+                {
+                    // Don't support listening to 0.0.0.0, match windows behavior.
+                    throw new HttpListenerException(NotSupportedErrorCode, SR.net_listener_not_supported);
                 }
             }
+
             Dictionary<int, HttpEndPointListener> p = null;
             if (s_ipEndPoints.ContainsKey(addr))
             {
@@ -140,7 +151,14 @@ namespace System.Net
             }
             else
             {
-                epl = new HttpEndPointListener(listener, addr, port, secure);
+                try
+                {
+                    epl = new HttpEndPointListener(listener, addr, port, secure);
+                }
+                catch (SocketException ex)
+                {
+                    throw new HttpListenerException(ex.ErrorCode, ex.Message);
+                }
                 p[port] = epl;
             }
 

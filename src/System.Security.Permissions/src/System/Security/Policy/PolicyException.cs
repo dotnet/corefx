@@ -6,11 +6,14 @@ using System.Runtime.Serialization;
 
 namespace System.Security.Policy
 {
-    [Serializable]
     public partial class PolicyException : System.SystemException
     {
         public PolicyException() { }
-        protected PolicyException(SerializationInfo info, StreamingContext context) { }
+        protected PolicyException(SerializationInfo info, StreamingContext context)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
         public PolicyException(string message) { }
         public PolicyException(string message, Exception exception) { }
     }

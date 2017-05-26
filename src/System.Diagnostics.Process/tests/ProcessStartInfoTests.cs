@@ -15,6 +15,7 @@ using Xunit;
 using System.Text;
 using System.ComponentModel;
 using System.Security;
+using System.Threading;
 
 namespace System.Diagnostics.Tests
 {
@@ -242,10 +243,10 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // UseShellExecute currently not supported on Windows on .NET Core
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
-        public void UseShellExecute_GetSetWindows_Success_Netcore()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap, "Only UAP blocks setting ShellExecute to true")]
+        public void UseShellExecute_GetSetWindows_Success_Uap()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
             Assert.False(psi.UseShellExecute);
@@ -260,7 +261,7 @@ namespace System.Diagnostics.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default")]
         public void UseShellExecute_GetSetWindows_Success_Netfx()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -273,9 +274,9 @@ namespace System.Diagnostics.Tests
             Assert.True(psi.UseShellExecute);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // UseShellExecute currently not supported on Windows
         [Fact]
-        public void TestUseShellExecuteProperty_SetAndGet_Unix()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.NetFramework)]
+        public void TestUseShellExecuteProperty_SetAndGet_NotUapOrNetFX()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
             Assert.False(psi.UseShellExecute);
@@ -287,11 +288,11 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.UseShellExecute);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // UseShellExecute currently not supported on Windows
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestUseShellExecuteProperty_Redirects_NotSupported(int std)
         {
             Process p = CreateProcessLong();
@@ -496,7 +497,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("NewValue", kvpaOrdered[2].Value);
 
             psi.EnvironmentVariables.Remove("NewKey3");
-            Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));            
+            Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
@@ -930,6 +931,156 @@ namespace System.Diagnostics.Tests
         {
             var info = new ProcessStartInfo { WorkingDirectory = workingDirectory };
             Assert.Equal(workingDirectory ?? string.Empty, info.WorkingDirectory);
+        }
+
+        [Fact(Skip = "Manual test")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void StartInfo_WebPage()
+        {
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = @"http://www.microsoft.com"
+            };
+
+            Process.Start(info);
+        }
+
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
+        [MemberData(nameof(UseShellExecute))]
+        [OuterLoop("Launches notepad")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        public void StartInfo_NotepadWithContent(bool useShellExecute)
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.WriteAllText(tempFile, $"StartInfo_NotepadWithContent({useShellExecute})");
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = @"notepad.exe",
+                Arguments = tempFile,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            using (var process = Process.Start(info))
+            {
+                try
+                {
+                    process.WaitForInputIdle(); // Give the file a chance to load
+                    Assert.Equal("notepad", process.ProcessName);
+
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                }
+                finally
+                {
+                    process.Kill();
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Does not support UseShellExecute
+        [OuterLoop("Launches notepad")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        public void StartInfo_TextFile_ShellExecute()
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.WriteAllText(tempFile, $"StartInfo_TextFile_ShellExecute");
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = tempFile,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            using (var process = Process.Start(info))
+            {
+                try
+                {
+                    process.WaitForInputIdle(); // Give the file a chance to load
+                    Assert.Equal("notepad", process.ProcessName);
+
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                }
+                finally
+                {
+                    process.Kill();
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
+        public void ShellExecute_Nano_Fails_Start()
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.Create(tempFile).Dispose();
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = tempFile
+            };
+
+            Assert.Throws<PlatformNotSupportedException>(() => Process.Start(info));
+        }
+
+        public static TheoryData<bool> UseShellExecute
+        {
+            get
+            {
+                TheoryData<bool> data = new TheoryData<bool> { false };
+
+                if (   !PlatformDetection.IsUap // https://github.com/dotnet/corefx/issues/20204
+                    && !PlatformDetection.IsWindowsNanoServer) // By design
+                    data.Add(true);
+                return data;
+            }
+        }
+
+        private const int ERROR_SUCCESS = 0x0;
+        private const int ERROR_FILE_NOT_FOUND = 0x2;
+        private const int ERROR_BAD_EXE_FORMAT = 0xC1;
+
+        [MemberData(nameof(UseShellExecute))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartInfo_BadVerb(bool useShellExecute)
+        {
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = @"foo.txt",
+                Verb = "Zlorp"
+            };
+
+            Assert.Equal(ERROR_FILE_NOT_FOUND, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
+        }
+
+        [MemberData(nameof(UseShellExecute))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartInfo_BadExe(bool useShellExecute)
+        {
+            string tempFile = GetTestFilePath() + ".exe";
+            File.Create(tempFile).Dispose();
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = tempFile
+            };
+
+            int expected = ERROR_BAD_EXE_FORMAT;
+
+            // Windows Nano bug see #10290
+            if (PlatformDetection.IsWindowsNanoServer)
+                expected = ERROR_SUCCESS;
+
+            Assert.Equal(expected, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
         }
     }
 }

@@ -1718,7 +1718,6 @@ namespace System.Collections.Generic
 
         #region Helper classes
 
-        [Serializable]
         internal sealed class Node
         {
             public Node(T item, bool isRed)
@@ -1851,7 +1850,6 @@ namespace System.Collections.Generic
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
             private static readonly Node s_dummyNode = new Node(default(T), isRed: true);
@@ -1898,33 +1896,9 @@ namespace System.Collections.Generic
                 Initialize();
             }
 
-            private Enumerator(SerializationInfo info, StreamingContext context)
-            {
-                _tree = null;
-                _version = -1;
-                _current = null;
-                _reverse = false;
-                _stack = null;
-                _siInfo = info;
-            }
-
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                GetObjectData(info, context);
-            }
-
-            private void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(TreeName, _tree, typeof(SortedSet<T>));
-                info.AddValue(EnumVersionName, _version);
-                info.AddValue(ReverseName, _reverse);
-                info.AddValue(EnumStartName, !NotStartedOrEnded);
-                info.AddValue(NodeValueName, (_current == null ? s_dummyNode.Item : _current.Item), typeof(T));
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)

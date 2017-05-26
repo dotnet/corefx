@@ -327,7 +327,8 @@ namespace System.Net.Tests
             uint[] timeouts = new uint[6];
 
             // We need url group id which is private so we get it using reflection.
-            FieldInfo info = typeof(HttpListener).GetField("_urlGroupId", BindingFlags.Instance | BindingFlags.NonPublic);
+            string urlGroupIdName = PlatformDetection.IsFullFramework ? "m_UrlGroupId" : "_urlGroupId";
+            FieldInfo info = typeof(HttpListener).GetField(urlGroupIdName, BindingFlags.Instance | BindingFlags.NonPublic);
             ulong urlGroupId = (ulong)info.GetValue(_listener);
 
             HTTP_TIMEOUT_LIMIT_INFO timeoutinfo = new HTTP_TIMEOUT_LIMIT_INFO();

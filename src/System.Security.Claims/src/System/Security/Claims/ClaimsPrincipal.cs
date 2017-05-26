@@ -13,7 +13,6 @@ namespace System.Security.Claims
     /// <summary>
     /// Concrete IPrincipal supporting multiple claims-based identities
     /// </summary>
-    [Serializable]
     public class ClaimsPrincipal : IPrincipal
     {
         private enum SerializationMask
@@ -34,10 +33,7 @@ namespace System.Security.Claims
 
         protected ClaimsPrincipal(SerializationInfo info, StreamingContext context)
         {
-            if (null == info)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -621,15 +617,7 @@ namespace System.Security.Claims
 
         protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (null == info)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            if (_identities.Count > 0)
-            {
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_Serialization); // BinaryFormatter and WindowsIdentity would be needed
-            }
+            throw new PlatformNotSupportedException();
         }
     }
 }

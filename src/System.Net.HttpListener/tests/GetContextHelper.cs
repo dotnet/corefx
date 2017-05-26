@@ -56,11 +56,26 @@ namespace System.Net.Tests
         public bool IsCompleted => throw new NotImplementedException();
     }
 
-    public class Helpers
+    public static class Helpers
     {
+        public static bool IsWindowsImplementation { get; } =
+            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) != null &&
+            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
+        public static bool IsNotWindowsImplementation =>
+            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) == null &&
+            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
+
         public static void WaitForSocketShutdown(Socket socket)
         {
-            while (SocketConnected(socket));
+            if (PlatformDetection.IsWindows || PlatformDetection.IsOSX)
+            {
+                socket.Shutdown(SocketShutdown.Both);
+                while (SocketConnected(socket));
+            }
+            else
+            {
+                socket.Close();
+            }
         }
 
         public static bool SocketConnected(Socket socket)

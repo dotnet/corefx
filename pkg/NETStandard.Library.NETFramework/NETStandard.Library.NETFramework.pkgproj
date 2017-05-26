@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.1.0</PackageVersion>
     <TargetFrameworkName>net</TargetFrameworkName>
     <TargetFrameworkVersion>461</TargetFrameworkVersion>
     <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
@@ -25,6 +25,9 @@
     </StampFile>
     <File Include="targets\**\*.*" Exclude="@(StampFile)">
       <TargetPath>build/%(RecursiveDir)</TargetPath>
+    </File>
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>build/net471</TargetPath>
     </File>
   </ItemGroup>
 
@@ -132,6 +135,10 @@
   <!-- runs as initial target, overrides IncludeFiles in frameworkPackage.targets to define TFM-specific TargetPath 
        under the build folder  -->
   <Target Name="IncludeFiles" DependsOnTargets="IncludeNETStandardShims">
+    <PropertyGroup>
+      <_projectDirLength>$(ProjectDir.Length)</_projectDirLength>
+    </PropertyGroup>
+
     <ItemGroup>
       <!-- Include refs -->
       <File Include="@(RefFile)">
@@ -141,6 +148,14 @@
       <!-- Include lib -->
       <File Include="@(LibFile)">
         <TargetPath Condition="'%(LibFile.TargetPath)' == '' ">build/%(LibFile.TargetFramework)/lib%(LibFile.SubFolder)</TargetPath>
+      </File>
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- Set targetpath for sources to be under src so that it is excluded from the lib package -->
+      <File Condition="'%(File.IsSourceCodeFile)' == 'true'">
+        <TargetPath>src</TargetPath>
+        <TargetPath Condition="$([System.String]::Copy('%(FullPath)').StartsWith('$(ProjectDir)'))">src/$([System.String]::Copy('%(FullPath)').Substring($(_projectDirLength)).Replace('\', '/'))</TargetPath>
       </File>
     </ItemGroup>
   </Target>

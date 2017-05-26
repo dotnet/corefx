@@ -13,7 +13,6 @@ namespace System.Net
     ///       response from a Uniform Resource Identifier (Uri). This is an abstract class.
     ///    </para>
     /// </devdoc>
-    [Serializable]
     public abstract class WebResponse : MarshalByRefObject, ISerializable, IDisposable
     {
         /// <devdoc>
@@ -27,15 +26,17 @@ namespace System.Net
 
         protected WebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         protected virtual void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
         public virtual void Close()

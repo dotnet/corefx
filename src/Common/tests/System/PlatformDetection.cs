@@ -18,6 +18,7 @@ namespace System
         // do it in a way that failures don't cascade.
         //
 
+        public static bool IsUap => IsWinRT || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
         public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
 
@@ -28,18 +29,16 @@ namespace System
         public static bool IsNetBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD"));
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
         public static bool IsUbuntu => IsDistroAndVersion("ubuntu");
-        public static bool IsNotWindowsNanoServer => (!IsWindows ||
-            File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
+        public static bool IsWindowsNanoServer => (IsWindows && !File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")));
+        public static bool IsNotWindowsNanoServer => !IsWindowsNanoServer;
         public static bool IsWindows10Version1607OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
-        // Windows OneCoreUAP SKU doesn't have httpapi.dll
-        public static bool HasHttpApi => (IsWindows &&
-            File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "System32", "httpapi.dll")));
 
+        // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
-            File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "System32", "httpapi.dll")));
+            File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "httpapi.dll")));
 
         public static int WindowsVersion => GetWindowsVersion();
 
@@ -53,6 +52,18 @@ namespace System
             Version net462 = new Version(4, 6, 2);
             Version runningVersion = GetFrameworkVersion();
             return runningVersion != null && runningVersion >= net462;
+        }
+
+        public static bool IsNetfx470OrNewer()
+        {
+            if (!IsFullFramework)
+            {
+                return false;
+            }
+
+            Version net470 = new Version(4, 7, 0);
+            Version runningVersion = GetFrameworkVersion();
+            return runningVersion != null && runningVersion >= net470;
         }
 
         public static Version GetFrameworkVersion()
@@ -162,14 +173,9 @@ namespace System
             return false;
         }
 
+        public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
-        public static bool IsUbuntu1510 => IsDistroAndVersion("ubuntu", "15.10");
-        public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", "16.04");
-        public static bool IsUbuntu1610 => IsDistroAndVersion("ubuntu", "16.10");
-        public static bool IsFedora24 => IsDistroAndVersion("fedora", "24");
-        public static bool IsFedora25 => IsDistroAndVersion("fedora", "25");
-        public static bool IsFedora26 => IsDistroAndVersion("fedora", "26");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
 
         /// <summary>
@@ -381,5 +387,14 @@ namespace System
         }
 
         private static volatile Tuple<bool> s_lazyNonZeroLowerBoundArraySupported;
+
+        public static bool IsReflectionEmitSupported = !PlatformDetection.IsNetNative;
+
+        // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
+        public static bool IsInvokingStaticConstructorsSupported => !PlatformDetection.IsNetNative;
+
+        // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
+        // heavily on Reflection.Emit
+        public static bool IsXmlDsigXsltTransformSupported => PlatformDetection.IsReflectionEmitSupported;
     }
 }

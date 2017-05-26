@@ -14,7 +14,6 @@ namespace System.ComponentModel
     /// <summary>
     ///    <para>The exception that is thrown when using invalid arguments that are enumerators.</para>
     /// </summary>
-    [Serializable]
     public class InvalidEnumArgumentException : ArgumentException
     {
         /// <summary>
@@ -62,6 +61,7 @@ namespace System.ComponentModel
         /// </summary>
         protected InvalidEnumArgumentException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
     }
 }

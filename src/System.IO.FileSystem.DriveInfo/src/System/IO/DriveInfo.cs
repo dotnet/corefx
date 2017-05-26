@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.IO
 {
-    [Serializable]
     public sealed partial class DriveInfo : ISerializable
     {
         private readonly string _name;
@@ -24,11 +23,12 @@ namespace System.IO
         private DriveInfo(SerializationInfo info, StreamingContext context) :
             this((string)info.GetValue("_name", typeof(string)))
         {
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("_name", _name, typeof(String));
+            throw new PlatformNotSupportedException();
         }
 
         public string Name => _name;

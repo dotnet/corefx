@@ -43,6 +43,7 @@ namespace MonoTests.System.Configuration
     public class ConfigurationManagerTest
     {
         [Fact] // OpenExeConfiguration (ConfigurationUserLevel)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19384")]
         public void OpenExeConfiguration1_UserLevel_None()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -66,6 +67,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(15065, TestPlatforms.AnyUnix)]
         public void OpenExeConfiguration1_UserLevel_PerUserRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
@@ -130,6 +132,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18831")]
         public void exePath_UserLevelNone()
         {
             string name = TestUtil.ThisApplicationPath;
@@ -155,6 +158,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(15066, TestPlatforms.AnyUnix)]
         public void exePath_UserLevelPerRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
@@ -259,6 +263,7 @@ namespace MonoTests.System.Configuration
         [Fact]
         // Doesn't pass on Mono
         // [Category("NotWorking")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19384")]
         public void mapped_ExeConfiguration_null()
         {
             SysConfig config = ConfigurationManager.OpenMappedExeConfiguration(null, ConfigurationUserLevel.None);

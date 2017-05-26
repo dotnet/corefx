@@ -13,7 +13,6 @@ namespace System.Collections.Generic
         /// This class represents a subset view into the tree. Any changes to this view
         /// are reflected in the actual tree. It uses the comparer of the underlying tree.
         /// </summary>
-        [Serializable]
         internal sealed class TreeSubSet : SortedSet<T>, ISerializable, IDeserializationCallback
         {
             private SortedSet<T> _underlying;
@@ -44,12 +43,6 @@ namespace System.Collections.Generic
                 _count = 0;
                 _version = -1;
                 VersionCheckImpl();
-            }
-
-            private TreeSubSet(SerializationInfo info, StreamingContext context)
-            {
-                _siInfo = info;
-                OnDeserializationImpl(info);
             }
 
             internal override bool AddIfNotPresent(T item)
@@ -350,17 +343,7 @@ namespace System.Collections.Generic
 
             protected override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(MaxName, _max, typeof(T));
-                info.AddValue(MinName, _min, typeof(T));
-                info.AddValue(LowerBoundActiveName, _lBoundActive);
-                info.AddValue(UpperBoundActiveName, _uBoundActive);
-
-                base.GetObjectData(info, context);
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)

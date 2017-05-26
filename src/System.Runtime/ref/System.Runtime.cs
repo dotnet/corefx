@@ -2030,6 +2030,7 @@ namespace System
         public static string Format(string format, params object[] args) { throw null; }
         public System.CharEnumerator GetEnumerator() { throw null; }
         public override int GetHashCode() { throw null; }
+        public int GetHashCode(System.StringComparison comparisonType) { throw null; }
         public int IndexOf(char value) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
         public int IndexOf(char value, int startIndex, int count) { throw null; }
@@ -2633,7 +2634,9 @@ namespace System
         public virtual bool IsSecurityTransparent { get { throw null; } }
         public virtual bool IsSerializable { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
+        public virtual bool IsTypeDefinition { get { throw null; } }
         public virtual bool IsSZArray { get { throw null; } }
+        public virtual bool IsVariableBoundArray { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public bool IsVisible { get { throw null; } }
@@ -5721,6 +5724,7 @@ namespace System.Reflection
         public bool IsFinal { get { throw null; } }
         public virtual bool IsGenericMethod { get { throw null; } }
         public virtual bool IsGenericMethodDefinition { get { throw null; } }
+        public virtual bool IsConstructedGenericMethod { get { throw null; } }
         public bool IsHideBySig { get { throw null; } }
         public bool IsPrivate { get { throw null; } }
         public bool IsPublic { get { throw null; } }
@@ -6135,7 +6139,9 @@ namespace System.Reflection
         protected override bool IsValueTypeImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsConstructedGenericType { get { throw null; } }
+        public override bool IsTypeDefinition { get { throw null; } }
         public override bool IsSZArray { get { throw null; } }
+        public override bool IsVariableBoundArray { get { throw null; } }
         public override System.Type GetElementType() { throw null; }
         protected override bool HasElementTypeImpl() { throw null; }
         public override System.Type UnderlyingSystemType { get { throw null; } }
@@ -6499,6 +6505,12 @@ namespace System.Runtime.CompilerServices
     public sealed class IsReadOnlyAttribute : Attribute
     {
         public IsReadOnlyAttribute() { }
+    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [AttributeUsage(AttributeTargets.Struct)]
+    public sealed class IsByRefLikeAttribute : Attribute
+    {
+        public IsByRefLikeAttribute() { }
     }
     public sealed partial class RuntimeWrappedException : System.Exception
     {

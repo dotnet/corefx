@@ -25,6 +25,7 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
     public class HttpClientHandlerTest
     {
         readonly ITestOutputHelper _output;
@@ -98,6 +99,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void Ctor_ExpectedDefaultPropertyValues()
         {
@@ -130,6 +132,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
         [Fact]
         public void MaxRequestContentBufferSize_Get_ReturnsZero()
@@ -140,6 +143,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
         [Fact]
         public void MaxRequestContentBufferSize_Set_ThrowsPlatformNotSupportedException()
@@ -214,7 +218,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [Theory]
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
         public async Task GetAsync_IPBasedUri_Success(IPAddress address)
         {
@@ -469,6 +473,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
@@ -515,6 +520,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(3, 2)]
@@ -744,6 +750,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("cookieName1", "cookieValue1")]
@@ -950,7 +957,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(18864)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx's ConnectStream.ReadAsync tries to read beyond data already buffered, causing hangs #18864")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_ReadFromSlowStreamingServer_PartialDataReturned()
@@ -1079,6 +1086,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(99)]
@@ -1583,6 +1591,7 @@ namespace System.Net.Http.Functional.Tests
         #endregion
 
         #region Version tests
+        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersion10_ServerReceivesVersion10Request()
@@ -1664,6 +1673,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20(Uri server)

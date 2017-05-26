@@ -171,6 +171,31 @@ namespace SerializationTestTypes
         }
     }
 
+    [DataContract]
+    public class DefaultCollections
+    {
+        [DataMember]
+        private ArrayList _arrayList = new ArrayList() { new Person() };
+        [DataMember]
+        private Dictionary<int, object> _dictionary = new Dictionary<int, object>() { { 001, new CharClass() } };
+        [DataMember]
+        private Hashtable _hashtable = new Hashtable() { { "one", new Version1() } };
+        [DataMember]
+        private object[] _singleDimArray = new object[] { new Employee() };
+    }
+
+    [DataContract(Name = "Car", Namespace = "TestingVersionTolerance")]
+    public class Version1
+    {
+        [DataMember]
+        public object make;
+
+        public Version1()
+        {
+            make = "Chevrolet";
+        }
+    }
+
     public class TypeNotFound { };
 
     public class TypeLibraryManager

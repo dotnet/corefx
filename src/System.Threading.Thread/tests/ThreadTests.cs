@@ -178,7 +178,17 @@ namespace System.Threading.Threads.Tests
             Assert.Equal(ApartmentState.STA, getApartmentState(t));
             t.Start();
             Assert.True(t.Join(UnexpectedTimeoutMilliseconds));
-            Assert.Equal(ApartmentState.STA, apartmentStateInThread);
+
+            if (PlatformDetection.IsWindowsNanoServer)
+            {
+                // Nano server threads are always MTA. If you set the thread to STA
+                // it will read back as STA but when the thread starts it will read back as MTA.
+                Assert.Equal(ApartmentState.MTA, apartmentStateInThread);
+            }
+            else
+            {
+                Assert.Equal(ApartmentState.STA, apartmentStateInThread);
+            }
         }
 
         [Theory]
@@ -757,9 +767,9 @@ namespace System.Threading.Threads.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Thread.Sleep(TimeSpan.FromMilliseconds((double)int.MaxValue + 1)));
 
             Thread.Sleep(0);
-            var startTime = DateTime.Now;
+            var startTime = DateTime.UtcNow;
             Thread.Sleep(500);
-            Assert.True((DateTime.Now - startTime).TotalMilliseconds >= 100);
+            Assert.InRange((DateTime.UtcNow - startTime).TotalMilliseconds, 100, int.MaxValue);
         }
 
         [Fact]

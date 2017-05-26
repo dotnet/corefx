@@ -23,28 +23,19 @@ namespace System.Net
             Closed,
         }
 
-        private Encoding _contentEncoding;
-
-        private string _statusDescription;
-        private bool _keepAlive;
         private ResponseState _responseState;
 
-        private HttpResponseStream _responseStream;
         private long _contentLength;
-        private BoundaryType _boundaryType;
         private Interop.HttpApi.HTTP_RESPONSE _nativeResponse;
 
-        private HttpListenerContext _httpContext;
 
         internal HttpListenerResponse()
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this);
             _nativeResponse = new Interop.HttpApi.HTTP_RESPONSE();
-            _boundaryType = BoundaryType.None;
             _nativeResponse.StatusCode = (ushort)HttpStatusCode.OK;
             _nativeResponse.Version.MajorVersion = 1;
             _nativeResponse.Version.MinorVersion = 1;
-            _keepAlive = true;
             _responseState = ResponseState.Created;
         }
 
@@ -54,91 +45,11 @@ namespace System.Net
             _httpContext = httpContext;
         }
 
-        private HttpListenerContext HttpListenerContext
-        {
-            get
-            {
-                return _httpContext;
-            }
-        }
 
-        private HttpListenerRequest HttpListenerRequest
-        {
-            get
-            {
-                return HttpListenerContext.Request;
-            }
-        }
-
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                return _contentEncoding;
-            }
-            set
-            {
-                _contentEncoding = value;
-            }
-        }
-
-        public string ContentType
-        {
-            get
-            {
-                return Headers[HttpKnownHeaderNames.ContentType];
-            }
-            set
-            {
-                CheckDisposed();
-                if (string.IsNullOrEmpty(value))
-                {
-                    Headers.Remove(HttpKnownHeaderNames.ContentType);
-                }
-                else
-                {
-                    Headers.Set(HttpKnownHeaderNames.ContentType, value);
-                }
-            }
-        }
-
-        public Stream OutputStream
-        {
-            get
-            {
-                CheckDisposed();
-                EnsureResponseStream();
-                return _responseStream;
-            }
-        }
-
-        public string RedirectLocation
-        {
-            get
-            {
-                return Headers[HttpResponseHeader.Location];
-            }
-            set
-            {
-                // note that this doesn't set the status code to a redirect one
-                CheckDisposed();
-                if (string.IsNullOrEmpty(value))
-                {
-                    Headers.Remove(HttpKnownHeaderNames.Location);
-                }
-                else
-                {
-                    Headers.Set(HttpKnownHeaderNames.Location, value);
-                }
-            }
-        }
 
         public int StatusCode
         {
-            get
-            {
-                return (int)_nativeResponse.StatusCode;
-            }
+            get => _nativeResponse.StatusCode;
             set
             {
                 CheckDisposed();
@@ -147,45 +58,6 @@ namespace System.Net
                     throw new ProtocolViolationException(SR.net_invalidstatus);
                 }
                 _nativeResponse.StatusCode = (ushort)value;
-            }
-        }
-
-        public string StatusDescription
-        {
-            get
-            {
-                if (_statusDescription == null)
-                {
-                    // if the user hasn't set this, generated on the fly, if possible.
-                    // We know this one is safe, no need to verify it as in the setter.
-                    _statusDescription = HttpStatusDescription.Get(StatusCode);
-                }
-                if (_statusDescription == null)
-                {
-                    _statusDescription = string.Empty;
-                }
-                return _statusDescription;
-            }
-            set
-            {
-                CheckDisposed();
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                // Need to verify the status description doesn't contain any control characters except HT.  We mask off the high
-                // byte since that's how it's encoded.
-                for (int i = 0; i < value.Length; i++)
-                {
-                    char c = (char)(0x000000ff & (uint)value[i]);
-                    if ((c <= 31 && c != (byte)'\t') || c == 127)
-                    {
-                        throw new ArgumentException(SR.net_WebHeaderInvalidControlChars, "name");
-                    }
-                }
-
-                _statusDescription = value;
             }
         }
 
@@ -204,117 +76,10 @@ namespace System.Net
             _keepAlive = templateResponse._keepAlive;
         }
 
-        public bool SendChunked
-        {
-            get
-            {
-                return (EntitySendFormat == EntitySendFormat.Chunked);
-            }
-            set
-            {
-                if (value)
-                {
-                    EntitySendFormat = EntitySendFormat.Chunked;
-                }
-                else
-                {
-                    EntitySendFormat = EntitySendFormat.ContentLength;
-                }
-            }
-        }
-
-        // We MUST NOT send message-body when we send responses with these Status codes
-        private static readonly int[] s_noResponseBody = { 100, 101, 204, 205, 304 };
-
-        private bool CanSendResponseBody(int responseCode)
-        {
-            for (int i = 0; i < s_noResponseBody.Length; i++)
-            {
-                if (responseCode == s_noResponseBody[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        internal EntitySendFormat EntitySendFormat
-        {
-            get
-            {
-                return (EntitySendFormat)_boundaryType;
-            }
-            set
-            {
-                CheckDisposed();
-                if (_responseState >= ResponseState.SentHeaders)
-                {
-                    throw new InvalidOperationException(SR.net_rspsubmitted);
-                }
-                if (value == EntitySendFormat.Chunked && HttpListenerRequest.ProtocolVersion.Minor == 0)
-                {
-                    throw new ProtocolViolationException(SR.net_nochunkuploadonhttp10);
-                }
-                _boundaryType = (BoundaryType)value;
-                if (value != EntitySendFormat.ContentLength)
-                {
-                    _contentLength = -1;
-                }
-            }
-        }
-
-        public bool KeepAlive
-        {
-            get
-            {
-                return _keepAlive;
-            }
-            set
-            {
-                CheckDisposed();
-                _keepAlive = value;
-            }
-        }
-
-        public void Redirect(string url)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"url={url}");
-            Headers[HttpResponseHeader.Location] = url;
-            StatusCode = (int)HttpStatusCode.Redirect;
-            StatusDescription = HttpStatusDescription.Get(StatusCode);
-        }
-
-        public long ContentLength64
-        {
-            get
-            {
-                return _contentLength;
-            }
-            set
-            {
-                CheckDisposed();
-                if (_responseState >= ResponseState.SentHeaders)
-                {
-                    throw new InvalidOperationException(SR.net_rspsubmitted);
-                }
-                if (value >= 0)
-                {
-                    _contentLength = value;
-                    _boundaryType = BoundaryType.ContentLength;
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_clsmall);
-                }
-            }
-        }
 
         public Version ProtocolVersion
         {
-            get
-            {
-                return new Version(_nativeResponse.Version.MajorVersion, _nativeResponse.Version.MinorVersion);
-            }
+            get => new Version(_nativeResponse.Version.MajorVersion, _nativeResponse.Version.MinorVersion);
             set
             {
                 CheckDisposed();
@@ -336,7 +101,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
             try
             {
-                if (_responseState >= ResponseState.Closed)
+                if (Disposed)
                 {
                     return;
                 }
@@ -375,7 +140,7 @@ namespace System.Net
                     throw new ArgumentNullException(nameof(responseEntity));
                 }
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"ResponseState:{_responseState}, BoundaryType:{_boundaryType}, ContentLength:{_contentLength}");
-                if (_responseState < ResponseState.SentHeaders && _boundaryType != BoundaryType.Chunked)
+                if (!SentHeaders && _boundaryType != BoundaryType.Chunked)
                 {
                     ContentLength64 = responseEntity.Length;
                 }
@@ -409,7 +174,7 @@ namespace System.Net
 
         private void Dispose()
         {
-            if (_responseState >= ResponseState.Closed)
+            if (Disposed)
             {
                 return;
             }
@@ -420,29 +185,7 @@ namespace System.Net
             HttpListenerContext.Close();
         }
 
-        internal BoundaryType BoundaryType
-        {
-            get
-            {
-                return _boundaryType;
-            }
-        }
-
-        internal bool SentHeaders
-        {
-            get
-            {
-                return _responseState >= ResponseState.SentHeaders;
-            }
-        }
-
-        internal bool ComputedHeaders
-        {
-            get
-            {
-                return _responseState >= ResponseState.ComputedHeaders;
-            }
-        }
+        internal BoundaryType BoundaryType => _boundaryType;
 
         private void EnsureResponseStream()
         {
@@ -612,56 +355,6 @@ namespace System.Net
                 FreePinnedHeaders(pinnedHeaders);
             }
             return statusCode;
-        }
-
-        internal void ComputeCookies()
-        {
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Info(this,
-$"Entering Set-Cookie: {Headers[HttpResponseHeader.SetCookie]}, Set-Cookie2: {Headers[HttpKnownHeaderNames.SetCookie2]}");
-            if (_cookies != null)
-            {
-                // now go through the collection, and concatenate all the cookies in per-variant strings
-                string setCookie2 = null;
-                string setCookie = null;
-                for (int index = 0; index < _cookies.Count; index++)
-                {
-                    Cookie cookie = _cookies[index];
-                    string cookieString = cookie.ToServerString();
-                    if (cookieString == null || cookieString.Length == 0)
-                    {
-                        continue;
-                    }
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Now looking at index:{index} cookie: {cookie}");
-                    if (cookie.IsRfc2965Variant())
-                    {
-                        setCookie2 = setCookie2 == null ? cookieString : setCookie2 + ", " + cookieString;
-                    }
-                    else
-                    {
-                        setCookie = setCookie == null ? cookieString : setCookie + ", " + cookieString;
-                    }
-                }
-                if (!string.IsNullOrEmpty(setCookie))
-                {
-                    Headers.Set(HttpKnownHeaderNames.SetCookie, setCookie);
-                    if (string.IsNullOrEmpty(setCookie2))
-                    {
-                        Headers.Remove(HttpKnownHeaderNames.SetCookie2);
-                    }
-                }
-                if (!string.IsNullOrEmpty(setCookie2))
-                {
-                    Headers.Set(HttpKnownHeaderNames.SetCookie2, setCookie2);
-                    if (string.IsNullOrEmpty(setCookie))
-                    {
-                        Headers.Remove(HttpKnownHeaderNames.SetCookie);
-                    }
-                }
-            }
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Info(this,
-$"Exiting Set-Cookie: {Headers[HttpResponseHeader.SetCookie]} Set-Cookie2: {Headers[HttpKnownHeaderNames.SetCookie2]}");
         }
 
         internal Interop.HttpApi.HTTP_FLAGS ComputeHeaders()
@@ -917,20 +610,13 @@ $"flags: {flags} _boundaryType: {_boundaryType} _contentLength: {_contentLength}
             }
         }
 
-        private void CheckDisposed()
-        {
-            if (_responseState >= ResponseState.Closed)
-            {
-                throw new ObjectDisposedException(this.GetType().FullName);
-            }
-        }
-
         internal void CancelLastWrite(SafeHandle requestQueueHandle)
         {
-            if (_responseStream != null)
-            {
-                _responseStream.CancelLastWrite(requestQueueHandle);
-            }
+            _responseStream?.CancelLastWrite(requestQueueHandle);
         }
+
+        internal bool ComputedHeaders => _responseState >= ResponseState.ComputedHeaders;
+        internal bool SentHeaders => _responseState >= ResponseState.SentHeaders;
+        private bool Disposed => _responseState >= ResponseState.Closed;
     }
 }

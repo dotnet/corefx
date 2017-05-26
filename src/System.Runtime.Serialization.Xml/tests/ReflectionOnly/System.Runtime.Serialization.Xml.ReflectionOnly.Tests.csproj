@@ -3,14 +3,12 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);ReflectionOnly</DefineConstants>
-    <ProjectGuid>{38889701-0AF4-48B3-999C-E99D639C61B6}</ProjectGuid>
+    <ProjectGuid>{38889701-0af4-48b3-999c-e99d639c61b6}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)..\DataContractSerializerStressTests.cs" />
     <Compile Include="$(TestSourceFolder)..\Utils.cs" />
@@ -69,12 +67,9 @@
       <Link>SerializationTestTypes\SelfRefAndCycles.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="$(TestSourceFolder)..\SerializationTypes.CoreCLR.cs" />
     <Compile Include="$(TestSourceFolder)..\DataContractSerializer.CoreCLR.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -24,7 +24,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security.Principal
 {
-    [Serializable]
     public class WindowsIdentity : ClaimsIdentity, IDisposable, ISerializable, IDeserializationCallback
     {
         private string _name = null;
@@ -240,20 +239,12 @@ namespace System.Security.Principal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Public API has already shipped.")]
         public WindowsIdentity(SerializationInfo info, StreamingContext context)
         {
-            _claimsInitialized = false;
-
-            IntPtr userToken = (IntPtr)info.GetValue("m_userToken", typeof(IntPtr));
-            if (userToken != IntPtr.Zero)
-            {
-                CreateFromToken(userToken);
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // TODO: Add back when ClaimsIdentity is serializable
-            // base.GetObjectData(info, context);
-            info.AddValue("m_userToken", _safeTokenHandle.DangerousGetHandle());
+            throw new PlatformNotSupportedException();
         }
 
         void IDeserializationCallback.OnDeserialization(object sender) { }
@@ -1067,14 +1058,12 @@ namespace System.Security.Principal
         Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
     }
 
-    [Serializable]
     internal enum TokenType : int
     {
         TokenPrimary = 1,
         TokenImpersonation
     }
 
-    [Serializable]
     internal enum TokenInformationClass : int
     {
         TokenUser = 1,

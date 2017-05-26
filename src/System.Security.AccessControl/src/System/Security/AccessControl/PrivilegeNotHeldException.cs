@@ -8,7 +8,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security.AccessControl
 {
-    [Serializable]
     public sealed class PrivilegeNotHeldException : UnauthorizedAccessException, ISerializable
     {
         private readonly string _privilegeName = null;
@@ -30,20 +29,9 @@ namespace System.Security.AccessControl
             _privilegeName = privilege;
         }
 
-        private PrivilegeNotHeldException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            _privilegeName = info.GetString(nameof(PrivilegeName));
-        }
-
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
             base.GetObjectData(info, context);
-            info.AddValue(nameof(PrivilegeName), _privilegeName, typeof(string));
         }
 
         public string PrivilegeName

@@ -31,6 +31,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,7 +80,7 @@ namespace System.Net
                         _trailer_sent = true;
                     }
                 }
-                catch (IOException)
+                catch (HttpListenerException)
                 {
                     // Ignore error due to connection reset by peer
                 }
@@ -115,7 +116,7 @@ namespace System.Net
             // SendHeaders works on shared headers
             lock (_response._headersLock)
             {
-                if (_response._headersSent)
+                if (_response.SentHeaders)
                 {
                     return null;
                 }
@@ -145,7 +146,14 @@ namespace System.Net
             }
             else
             {
-                _stream.Write(buffer, offset, count);
+                try
+                {
+                    _stream.Write(buffer, offset, count);
+                }
+                catch (IOException ex)
+                {
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
             }
         }
 
@@ -200,7 +208,7 @@ namespace System.Net
         {
             if (_closed)
             {
-                HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
                 ares._callback = cback;
                 ares._state = state;
                 ares.Complete();
@@ -230,7 +238,25 @@ namespace System.Net
                 InternalWrite(bytes, 0, bytes.Length);
             }
 
-            return _stream.BeginWrite(buffer, offset, size, cback, state);
+            try
+            {
+                return _stream.BeginWrite(buffer, offset, size, cback, state);
+            }
+            catch (IOException ex)
+            {
+                if (_ignore_errors)
+                {
+                    HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
+                    ares._callback = cback;
+                    ares._state = state;
+                    ares.Complete();
+                    return ares;
+                }
+                else
+                {
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
+            }
         }
 
         private void EndWriteCore(IAsyncResult asyncResult)
@@ -250,11 +276,25 @@ namespace System.Net
             }
             else
             {
-                _stream.EndWrite(asyncResult);
-                if (_response.SendChunked)
-                    _stream.Write(s_crlf, 0, 2);
+                try
+                {
+                    _stream.EndWrite(asyncResult);
+                    if (_response.SendChunked)
+                        _stream.Write(s_crlf, 0, 2);
+                }
+                catch (IOException ex)
+                {
+                    // NetworkStream wraps exceptions in IOExceptions; if the underlying socket operation
+                    // failed because of invalid arguments or usage, propagate that error.  Otherwise
+                    // wrap the whole thing in an HttpListenerException.  This is all to match Windows behavior.
+                    if (ex.InnerException is ArgumentException || ex.InnerException is InvalidOperationException)
+                    {
+                        ExceptionDispatchInfo.Throw(ex.InnerException);
+                    }
+
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
             }
         }
     }
 }
-

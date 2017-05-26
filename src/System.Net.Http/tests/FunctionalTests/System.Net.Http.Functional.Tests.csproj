@@ -3,11 +3,18 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
@@ -35,6 +42,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\HttpsTestServer.cs">
       <Link>Common\System\Net\HttpsTestServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
+      <Link>Common\System\Net\Capability.Security.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
@@ -70,13 +80,14 @@
     <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
     <Compile Include="HttpClientHandlerTest.MaxResponseHeadersLength.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.cs" />
-    <Compile Include="HttpClientHandlerTest.ServerCertificates.Unix.cs" Condition="'$(TargetsUnix)' == 'true'"/>
-    <Compile Include="HttpClientHandlerTest.ServerCertificates.Windows.cs" Condition="'$(TargetsWindows)' == 'true'"/>
+    <Compile Include="HttpClientHandlerTest.ServerCertificates.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="HttpClientHandlerTest.ServerCertificates.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="HttpClientHandlerTest.SslProtocols.cs" />
-    <Compile Include="HttpClientHandlerTest.SslProtocols.Unix.cs" Condition="'$(TargetsUnix)' == 'true'"/>
-    <Compile Include="HttpClientHandlerTest.SslProtocols.Windows.cs" Condition="'$(TargetsWindows)' == 'true'"/>
+    <Compile Include="HttpClientHandlerTest.SslProtocols.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="HttpClientHandlerTest.SslProtocols.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="DiagnosticsTests.cs" />
     <Compile Include="HttpClientTest.cs" />
+    <Compile Include="HttpClientEKUTest.cs" />
     <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpMessageInvokerTest.cs" />
@@ -98,6 +109,9 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="DefaultCredentialsTest.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="HttpClientHandlerTest.AcceptAllCerts.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

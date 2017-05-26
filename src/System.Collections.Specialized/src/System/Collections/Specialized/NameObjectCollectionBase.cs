@@ -636,7 +636,6 @@ namespace System.Collections.Specialized
         // Enumerator over keys of NameObjectCollection
         //
 
-        [Serializable]
         internal class NameObjectKeysEnumerator : IEnumerator
         {
             private int _pos;
@@ -697,7 +696,6 @@ namespace System.Collections.Specialized
         /// <devdoc>
         /// <para>Represents a collection of the <see cref='System.String' qualify='true'/> keys of a collection.</para>
         /// </devdoc>
-        [Serializable]
         public class KeysCollection : ICollection
         {
             private NameObjectCollectionBase _coll;

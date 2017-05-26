@@ -75,10 +75,18 @@ namespace System.IO.Tests
             Assert.False(testDir.Exists);
         }
 
-        [Fact]
-        public void ShouldThrowDirectoryNotFoundExceptionForNonexistentDirectory()
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsDirectoryNotFound(char trailingChar)
         {
-            Assert.Throws<DirectoryNotFoundException>(() => Delete(GetTestFilePath()));
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(path));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(path));
         }
 
         [Fact]
@@ -109,7 +117,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         public void ExtendedDirectoryWithSubdirectories()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + GetTestFilePath());
@@ -119,7 +127,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         public void LongPathExtendedDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500).FullPath);
@@ -143,7 +151,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Deleting extended readonly directory throws IOException
         public void WindowsDeleteExtendedReadOnlyDirectory()
         {
@@ -175,7 +183,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Deleting extended hidden directory succeeds
         public void WindowsShouldBeAbleToDeleteExtendedHiddenDirectory()
         {

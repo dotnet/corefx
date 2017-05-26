@@ -209,6 +209,17 @@ namespace System.Tests
         [Fact]
         public void GetSystemDirectory()
         {
+            if (PlatformDetection.IsWindowsNanoServer)
+            {
+                // https://github.com/dotnet/corefx/issues/19110
+                // On Windows Nano, ShGetKnownFolderPath currently doesn't give
+                // the correct result for SystemDirectory.
+                // Assert that it's wrong, so that if it's fixed, we don't forget to
+                // enable this test for Nano.
+                Assert.NotEqual(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
+                return;
+            }
+
             Assert.Equal(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
         }
 
@@ -255,7 +266,7 @@ namespace System.Tests
         }
 
         // The commented out folders aren't set on all systems.
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // https://github.com/dotnet/corefx/issues/19110
         [InlineData(Environment.SpecialFolder.ApplicationData)]
         [InlineData(Environment.SpecialFolder.CommonApplicationData)]
         [InlineData(Environment.SpecialFolder.LocalApplicationData)]
@@ -306,12 +317,14 @@ namespace System.Tests
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);
+
             Assert.NotEmpty(knownFolder);
 
             // Call the older folder API to compare our results.
             char* buffer = stackalloc char[260];
             SHGetFolderPathW(IntPtr.Zero, (int)folder, IntPtr.Zero, 0, buffer);
             string folderPath = new string(buffer);
+
             Assert.Equal(folderPath, knownFolder);
         }
 

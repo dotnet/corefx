@@ -12,7 +12,6 @@ using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    [Serializable]
     public class X509Certificate2 : X509Certificate
     {
         private volatile byte[] _lazyRawData;
@@ -116,6 +115,7 @@ namespace System.Security.Cryptography.X509Certificates
         protected X509Certificate2(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
 
         public bool Archived

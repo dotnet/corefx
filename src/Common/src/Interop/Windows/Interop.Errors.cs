@@ -26,6 +26,7 @@ internal partial class Interop
         internal const int ERROR_FILE_EXISTS = 0x50;
         internal const int ERROR_INVALID_PARAMETER = 0x57;
         internal const int ERROR_BROKEN_PIPE = 0x6D;
+        internal const int ERROR_CALL_NOT_IMPLEMENTED  = 0x78;
         internal const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
         internal const int ERROR_INVALID_NAME = 0x7B;
         internal const int ERROR_NEGATIVE_SEEK = 0x83;
@@ -53,6 +54,9 @@ internal partial class Interop
         internal const int ERROR_NO_TOKEN = 0x3f0;
         internal const int ERROR_DLL_INIT_FAILED = 0x45A;
         internal const int ERROR_COUNTER_TIMEOUT = 0x461;
+        internal const int ERROR_NO_ASSOCIATION = 0x483;
+        internal const int ERROR_DDE_FAIL = 0x484;
+        internal const int ERROR_DLL_NOT_FOUND = 0x485;
         internal const int ERROR_NOT_FOUND = 0x490;
         internal const int ERROR_NON_ACCOUNT_SID = 0x4E9;
         internal const int ERROR_NOT_ALL_ASSIGNED = 0x514;

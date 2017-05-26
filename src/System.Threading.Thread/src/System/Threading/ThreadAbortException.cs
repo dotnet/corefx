@@ -7,14 +7,9 @@ using System.Runtime.Serialization;
 namespace System.Threading 
 {
     // Thread.Abort() is not supported in .NET Core, so this is currently just a stub to make the type available at compile time
-    [Serializable]
     public sealed class ThreadAbortException : SystemException
     {
         private ThreadAbortException()
-        {
-        }
-
-        private ThreadAbortException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 

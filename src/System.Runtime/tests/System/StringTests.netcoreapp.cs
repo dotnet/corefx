@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Xunit;
 
 namespace System.Tests
@@ -190,12 +191,14 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Replace_StringComparison_TestData))]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_ReturnsExpected(string original, string oldValue, string newValue, StringComparison comparisonType, string expected)
         {
             Assert.Equal(expected, original.Replace(oldValue, newValue, comparisonType));
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_TurkishI()
         {
             string source = "\u0069\u0130";
@@ -245,6 +248,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Replace_StringComparisonCulture_TestData))]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparisonCulture_ReturnsExpected(string original, string oldValue, string newValue, bool ignoreCase, CultureInfo culture, string expected)
         {
             Assert.Equal(expected, original.Replace(oldValue, newValue, ignoreCase, culture));
@@ -255,25 +259,59 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_NullOldValue_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", true, CultureInfo.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", true, CultureInfo.CurrentCulture));
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_EmptyOldValue_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", true, CultureInfo.CurrentCulture));
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", true, CultureInfo.CurrentCulture));
         }
 
         [Theory]
         [InlineData(StringComparison.CurrentCulture - 1)]
         [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
         {
-            Assert.Throws<ArgumentException>("comparisonType", () => "abc".Replace("abc", "def", comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".Replace("abc", "def", comparisonType));
+        }
+
+
+        private static readonly StringComparison[] StringComparisons = (StringComparison[])Enum.GetValues(typeof(StringComparison));
+
+
+        public static IEnumerable<object[]> GetHashCode_StringComparison_Data => StringComparisons.Select(value => new object[] { value });
+
+        [Theory]
+        [MemberData(nameof(GetHashCode_StringComparison_Data))]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3645 - String.GetHashCode(StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
+        public static void GetHashCode_StringComparison(StringComparison comparisonType)
+        {
+            Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), "abc".GetHashCode(comparisonType));
+        }
+
+
+        public static IEnumerable<object[]> GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data => new[]
+        {
+            new object[] { StringComparisons.Min() - 1 },
+            new object[] { StringComparisons.Max() + 1 },
+        };
+
+        [Theory]
+        [MemberData(nameof(GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data))]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3645 - String.GetHashCode(StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
+        public static void GetHashCode_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
+        {
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".GetHashCode(comparisonType));
         }
     }
 }

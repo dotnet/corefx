@@ -8,13 +8,11 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-    [Serializable]
     public abstract class ContextBoundObject : System.MarshalByRefObject
     {
         protected ContextBoundObject() { }
     }
 
-    [Serializable]
     public class ContextMarshalException : SystemException
     {
         public ContextMarshalException() : this(SR.Arg_ContextMarshalException, null)
@@ -32,11 +30,10 @@ namespace System
 
         protected ContextMarshalException(SerializationInfo info, StreamingContext context): base(info, context)
         {
-            HResult = HResults.COR_E_CONTEXTMARSHAL;
+            throw new PlatformNotSupportedException();
         }
     }
 
-    [Serializable]
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public partial class ContextStaticAttribute : System.Attribute
     {

@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
@@ -60,6 +61,17 @@ namespace System
             return exception;
         }
 
+        public static async Task<T> ThrowsAsync<T>(string paramName, Func<Task> testCode)
+            where T : ArgumentException
+        {
+            T exception = await Assert.ThrowsAsync<T>(testCode);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
+        }
+
         public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, Action action) 
             where TNetCoreExceptionType : ArgumentException 
             where TNetFxExceptionType : ArgumentException
@@ -103,6 +115,19 @@ namespace System
             where TSecondExceptionType : Exception
         {
            ThrowsAny(typeof(TFirstExceptionType), typeof(TSecondExceptionType), action);
+        }
+
+        public static void ThrowsIf<T>(bool condition, Action action)
+            where T : Exception
+        {
+            if (condition)
+            {
+                Assert.Throws<T>(action);
+            }
+            else
+            {
+                action();
+            }
         }
     }
 }

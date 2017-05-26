@@ -17,11 +17,7 @@ namespace System.Net
         private List<HttpListenerContext> _contextQueue = new List<HttpListenerContext>();
         private List<ListenerAsyncResult> _asyncWaitQueue = new List<ListenerAsyncResult>();
         private Dictionary<HttpConnection, HttpConnection> _connections = new Dictionary<HttpConnection, HttpConnection>();
-
-        internal SslStream CreateSslStream(Stream innerStream, bool ownsStream, RemoteCertificateValidationCallback callback)
-        {
-            return new SslStream(innerStream, ownsStream, callback);
-        }
+        private bool _unsafeConnectionNtlmAuthentication;
 
         public HttpListenerTimeoutManager TimeoutManager
         {
@@ -32,14 +28,9 @@ namespace System.Net
             }
         }
 
-        public HttpListenerPrefixCollection Prefixes
-        {
-            get
-            {
-                CheckDisposed();
-                return _prefixes;
-            }
-        }
+        private void AddPrefixCore(string uriPrefix) => HttpEndPointManager.AddPrefix(uriPrefix, this);
+
+        private void RemovePrefixCore(string uriPrefix) => HttpEndPointManager.RemovePrefix(uriPrefix, this);
 
         public void Start()
         {
@@ -71,22 +62,22 @@ namespace System.Net
 
         public bool UnsafeConnectionNtlmAuthentication
         {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
+            // NTLM isn't currently supported, so this is a nop anyway and we can just roundtrip the value
+            get => _unsafeConnectionNtlmAuthentication;
             set
             {
-                throw new PlatformNotSupportedException();
+                CheckDisposed();
+                _unsafeConnectionNtlmAuthentication = value;
             }
         }
 
         public void Stop()
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            try
+
+            lock (_internalLock)
             {
-                lock (_internalLock)
+                try
                 {
                     CheckDisposed();
                     if (_state == State.Stopped)
@@ -95,18 +86,17 @@ namespace System.Net
                     }
 
                     Close(false);
-
-                    _state = State.Stopped;
                 }
-            }
-            catch (Exception exception)
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Stop {exception}");
-                throw;
-            }
-            finally
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
+                catch (Exception exception)
+                {
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Stop {exception}");
+                    throw;
+                }
+                finally
+                {
+                    _state = State.Stopped;
+                    if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
+                }
             }
         }
 
@@ -303,7 +293,7 @@ namespace System.Net
                 throw new InvalidOperationException(SR.Format(SR.net_listener_mustcall, "Start()"));
             }
 
-            ListenerAsyncResult ares = new ListenerAsyncResult(callback, state);
+            ListenerAsyncResult ares = new ListenerAsyncResult(this, callback, state);
 
             // lock wait_queue early to avoid race conditions
             lock ((_asyncWaitQueue as ICollection).SyncRoot)
@@ -333,7 +323,7 @@ namespace System.Net
             }
 
             ListenerAsyncResult ares = asyncResult as ListenerAsyncResult;
-            if (ares == null)
+            if (ares == null || !ReferenceEquals(this, ares._parent))
             {
                 throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
@@ -355,8 +345,7 @@ namespace System.Net
             }
 
             HttpListenerContext context = ares.GetContext();
-            context.ParseAuthentication(SelectAuthenticationScheme(context));
-
+            context.ParseAuthentication(context.AuthenticationSchemes);
             return context;
         }
 

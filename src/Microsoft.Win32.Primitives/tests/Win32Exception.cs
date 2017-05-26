@@ -101,29 +101,5 @@ namespace System.ComponentModel.Tests
                 Assert.Equal(expected: "Unknown error (0x23)", actual: ex.Message);
             }
         }
-
-        public static IEnumerable<object[]> SerializeDeserialize_MemberData()
-        {
-            yield return new object[] { new Win32Exception() };
-            yield return new object[] { new Win32Exception(42) };
-            yield return new object[] { new Win32Exception(-42) };
-            yield return new object[] { new Win32Exception("some message") };
-            yield return new object[] { new Win32Exception(42, "some message") };
-            yield return new object[] { new Win32Exception("some message", new InvalidOperationException()) };
-        }
-
-        [Theory]
-        [MemberData(nameof(SerializeDeserialize_MemberData))]
-        public static void SerializeDeserialize(Win32Exception exception)
-        {
-            BinaryFormatterHelpers.AssertRoundtrips(exception, e => e.NativeErrorCode, e => e.ErrorCode);
-        }
-
-        [Fact]
-        public static void GetObjectData_InvalidArgs_Throws()
-        {
-            var e = new Win32Exception();
-            AssertExtensions.Throws<ArgumentNullException>("info", () => e.GetObjectData(null, default(StreamingContext)));
-        }
     }
 }

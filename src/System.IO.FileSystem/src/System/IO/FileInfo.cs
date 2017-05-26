@@ -15,7 +15,6 @@ namespace System.IO
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
-    [Serializable]
     public sealed partial class FileInfo : FileSystemInfo
     {
         private String _name;
@@ -31,12 +30,6 @@ namespace System.IO
             Contract.EndContractBlock();
 
             Init(fileName);
-        }
-
-        private FileInfo(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            _name = Path.GetFileName(OriginalPath);
-            DisplayPath = GetDisplayPath(OriginalPath);
         }
 
         [System.Security.SecurityCritical]

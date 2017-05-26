@@ -22,6 +22,7 @@ namespace System.Net.NetworkInformation.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Not all APIs are supported on Linux and OSX
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_GetIPv4InterfaceStatistics_Success()
         {
             // This API is not actually IPv4 specific.
@@ -45,7 +46,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_GetIPv4InterfaceStatistics_Success_Linux()
         {

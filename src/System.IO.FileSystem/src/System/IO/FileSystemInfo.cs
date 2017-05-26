@@ -13,7 +13,6 @@ using System.Runtime.Versioning;
 
 namespace System.IO
 {
-    [Serializable]
     public abstract partial class FileSystemInfo : MarshalByRefObject, ISerializable
     {
         protected String FullPath;          // fully qualified path of the file or directory
@@ -27,19 +26,12 @@ namespace System.IO
 
         protected FileSystemInfo(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            FullPath = Path.GetFullPath(info.GetString(nameof(FullPath)));
-            OriginalPath = info.GetString(nameof(OriginalPath));
+            throw new PlatformNotSupportedException();
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(nameof(OriginalPath), OriginalPath, typeof(String));
-            info.AddValue(nameof(FullPath), FullPath, typeof(String));
+            throw new PlatformNotSupportedException();
         }
 
         // Full path of the directory/file

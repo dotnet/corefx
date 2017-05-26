@@ -14,7 +14,9 @@ namespace System.Globalization.Tests
                 ||
                 (PlatformDetection.IsOSX && PlatformDetection.OSXKernelVersion >= new Version(15, 0))
 #endif
-                || PlatformDetection.IsUbuntu1510 || PlatformDetection.IsUbuntu1604 || PlatformDetection.IsUbuntu1610 || PlatformDetection.IsFedora
+                || (PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404)
+                || PlatformDetection.IsFedora
+                || (PlatformDetection.IsDebian && !PlatformDetection.IsDebian8)
                )
             {
                 return new int[] { 3 };

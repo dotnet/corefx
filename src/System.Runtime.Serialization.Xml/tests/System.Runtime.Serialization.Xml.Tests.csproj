@@ -4,12 +4,10 @@
   <PropertyGroup>
     <ProjectGuid>{30CAB353-089E-4294-B23B-F2DD1D945654}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)DataContractSerializerStressTests.cs" />
     <Compile Include="$(TestSourceFolder)Utils.cs" />
@@ -40,7 +38,7 @@
     <Compile Include="SerializationTestTypes\SampleTypes.cs" />
     <Compile Include="SerializationTestTypes\SelfRefAndCycles.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
     <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
   </ItemGroup>

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using Xunit;
 
 namespace System.IO.Tests
@@ -37,6 +35,21 @@ namespace System.IO.Tests
         public void InvalidModeThrows()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsFileNotFound(char trailingChar)
+        {
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<FileNotFoundException>(() => CreateFileStream(path, FileMode.Open));
+        }
+
+        [ActiveIssue(19965, TestPlatforms.AnyUnix)]
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => CreateFileStream(path, FileMode.Open));
         }
 
         [Fact]

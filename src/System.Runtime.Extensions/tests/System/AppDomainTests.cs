@@ -13,7 +13,8 @@ using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
+    // No appdomain in UWP or CoreRT
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         public AppDomainTests()
@@ -259,6 +260,18 @@ namespace System.Tests
             Assert.Null(AppDomain.CurrentDomain.GetData(""));  
             AppDomain.CurrentDomain.SetData("randomkey", 4);
             Assert.Equal(4, AppDomain.CurrentDomain.GetData("randomkey"));
+        }
+
+        [Fact]
+        public void SetData_SameKeyMultipleTimes_ReplacesOldValue()
+        {
+            string key = Guid.NewGuid().ToString("N");
+            for (int i = 0; i < 3; i++)
+            {
+                AppDomain.CurrentDomain.SetData(key, i.ToString());
+                Assert.Equal(i.ToString(), AppDomain.CurrentDomain.GetData(key));
+            }
+            AppDomain.CurrentDomain.SetData(key, null);
         }
 
         [Fact]

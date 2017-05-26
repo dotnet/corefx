@@ -11,13 +11,15 @@ namespace System.Security.Authentication
     /// The authentication process can be retried with different parameters subject to
     /// remote party willingness of accepting that.
     /// </summary>
-    [Serializable]
     public class AuthenticationException : SystemException
     {
         public AuthenticationException() { }
         public AuthenticationException(string message) : base(message) { }
         public AuthenticationException(string message, Exception innerException) : base(message, innerException) { }
-        protected AuthenticationException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
+        protected AuthenticationException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 
     /// <summary>
@@ -27,12 +29,14 @@ namespace System.Security.Authentication
     /// underlined stream.
     /// </para>
     /// </summary>
-    [Serializable]
     public class InvalidCredentialException : AuthenticationException
     {
         public InvalidCredentialException() { }
         public InvalidCredentialException(string message) : base(message) { }
         public InvalidCredentialException(string message, Exception innerException) : base(message, innerException) { }
-        protected InvalidCredentialException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
+        protected InvalidCredentialException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 }

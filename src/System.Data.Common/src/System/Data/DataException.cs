@@ -9,10 +9,12 @@ using System.Runtime.Serialization;
 
 namespace System.Data
 {
-    [Serializable]
     public class DataException : SystemException
     {
-        protected DataException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DataException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public DataException() : base(SR.DataSet_DefaultDataException)
         {
@@ -27,10 +29,12 @@ namespace System.Data
         public DataException(string s, Exception innerException) : base(s, innerException) { }
     };
 
-    [Serializable]
     public class ConstraintException : DataException
     {
-        protected ConstraintException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ConstraintException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public ConstraintException() : base(SR.DataSet_DefaultConstraintException)
         {
@@ -48,10 +52,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class DeletedRowInaccessibleException : DataException
     {
-        protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class.
@@ -75,10 +81,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class DuplicateNameException : DataException
     {
-        protected DuplicateNameException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DuplicateNameException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public DuplicateNameException() : base(SR.DataSet_DefaultDuplicateNameException)
         {
@@ -96,10 +104,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class InRowChangingEventException : DataException
     {
-        protected InRowChangingEventException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected InRowChangingEventException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public InRowChangingEventException() : base(SR.DataSet_DefaultInRowChangingEventException)
         {
@@ -117,10 +127,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class InvalidConstraintException : DataException
     {
-        protected InvalidConstraintException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected InvalidConstraintException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public InvalidConstraintException() : base(SR.DataSet_DefaultInvalidConstraintException)
         {
@@ -138,10 +150,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class MissingPrimaryKeyException : DataException
     {
-        protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public MissingPrimaryKeyException() : base(SR.DataSet_DefaultMissingPrimaryKeyException)
         {
@@ -159,10 +173,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class NoNullAllowedException : DataException
     {
-        protected NoNullAllowedException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected NoNullAllowedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public NoNullAllowedException() : base(SR.DataSet_DefaultNoNullAllowedException)
         {
@@ -180,10 +196,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class ReadOnlyException : DataException
     {
-        protected ReadOnlyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ReadOnlyException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public ReadOnlyException() : base(SR.DataSet_DefaultReadOnlyException)
         {
@@ -201,10 +219,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class RowNotInTableException : DataException
     {
-        protected RowNotInTableException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected RowNotInTableException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public RowNotInTableException() : base(SR.DataSet_DefaultRowNotInTableException)
         {
@@ -222,10 +242,12 @@ namespace System.Data
         }
     }
 
-    [Serializable]
     public class VersionNotFoundException : DataException
     {
-        protected VersionNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected VersionNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public VersionNotFoundException() : base(SR.DataSet_DefaultVersionNotFoundException)
         {

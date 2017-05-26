@@ -537,7 +537,6 @@ namespace System.Collections.Generic
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
             private LinkedList<T> _list;
@@ -564,12 +563,7 @@ namespace System.Collections.Generic
 
             private Enumerator(SerializationInfo info, StreamingContext context)
             {
-                _siInfo = info;
-                _list = null;
-                _version = 0;
-                _node = null;
-                _current = default(T);
-                _index = 0;
+                throw new PlatformNotSupportedException();
             }
 
             public T Current
@@ -631,15 +625,7 @@ namespace System.Collections.Generic
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(LinkedListName, _list);
-                info.AddValue(VersionName, _version);
-                info.AddValue(CurrentValueName, _current);
-                info.AddValue(IndexName, _index);
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)

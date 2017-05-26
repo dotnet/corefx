@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security.Principal
 {
-    [Serializable]
     public sealed class IdentityNotMappedException : SystemException
     {
         private IdentityReferenceCollection _unmappedIdentities;
@@ -30,10 +29,6 @@ namespace System.Security.Principal
             : this(message)
         {
             _unmappedIdentities = unmappedIdentities;
-        }
-
-        private IdentityNotMappedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
         }
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
