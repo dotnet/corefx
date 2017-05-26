@@ -2460,8 +2460,9 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal("remove_Notification", reader.GetString(reader.GetMethodDefinition(eventAccessors.Remover).Name));
             Assert.True(eventAccessors.Raiser.IsNil);
 
-            // ilasm doesn't retain the order in which other accessors were specified in IL
-            AssertEx.SetEqual(otherAccessorNames, "suspend_Notification", "resume_Notification", "other_Notification");
+            // Note that ilasm doesn't retain the order in which other accessors were specified in IL,
+            // so if the DLL resource is rebuilt from IL this test may need to be adjusted.
+            Assert.Equal(new[] { "resume_Notification", "other_Notification", "suspend_Notification" }, otherAccessorNames);
         }
 
         [Fact]
