@@ -51,6 +51,8 @@ namespace System.Net
         private int _maximumResponseHeadersLen = _defaultMaxResponseHeadersLength;
         private ServicePoint _servicePoint;
         private int _timeout = WebRequest.DefaultTimeoutMilliseconds;
+        private int _readWriteTimeout = DefaultReadWriteTimeout;
+
         private HttpContinueDelegate _continueDelegate;
 
         // stores the user provided Host header as Uri. If the user specified a default port explicitly we'll lose
@@ -786,7 +788,26 @@ namespace System.Net
             }
         }
 
-        public int ReadWriteTimeout { get; set; } = DefaultReadWriteTimeout;
+        public int ReadWriteTimeout
+        {
+            get {
+                return _readWriteTimeout;
+            }
+            set {
+
+                if (RequestSubmitted)
+                {
+                    throw new InvalidOperationException(SR.net_reqsubmitted);
+                }
+
+                if (value<=0 && value!=System.Threading.Timeout.Infinite)
+                {
+                    throw new ArgumentOutOfRangeException("value", SR.net_io_timeout_use_gt_zero);
+                }
+
+                _readWriteTimeout = value;
+            }
+        }
 
         public virtual CookieContainer CookieContainer
         {
