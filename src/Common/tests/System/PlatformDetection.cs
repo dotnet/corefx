@@ -18,9 +18,10 @@ namespace System
         // do it in a way that failures don't cascade.
         //
 
-        public static bool IsUap => IsWinRT || IsNetNative;
+        public static bool IsUap => IsInAppContainer || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
-        public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
+        // CoreCLR uses a single type (RuntimeType) to represent all Types, CoreRT uses a type hierarchy. That's an implementation detail that isn't likely to change with any speed.
+        public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase) && typeof(int).GetType() != typeof(int[]).GetType();
 
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
@@ -87,18 +88,18 @@ namespace System
             return Version.TryParse(runningVersion, out result) ? result : null;
         }
 
-        private static int s_isWinRT = -1;
+        private static int s_isInAppContainer = -1;
 
-        public static bool IsWinRT
+        public static bool IsInAppContainer
         {
             get
             {
-                if (s_isWinRT != -1)
-                    return s_isWinRT == 1;
+                if (s_isInAppContainer != -1)
+                    return s_isInAppContainer == 1;
 
                 if (!IsWindows || IsWindows7)
                 {
-                    s_isWinRT = 0;
+                    s_isInAppContainer = 0;
                     return false;
                 }
 
@@ -110,7 +111,7 @@ namespace System
                     switch (result)
                     {
                         case 15703: // APPMODEL_ERROR_NO_APPLICATION
-                            s_isWinRT = 0;
+                            s_isInAppContainer = 0;
                             break;
                         case 0:     // ERROR_SUCCESS
                         case 122:   // ERROR_INSUFFICIENT_BUFFER
@@ -118,7 +119,7 @@ namespace System
                                     // not NO_APPLICATION and we're not actually giving a buffer here. The
                                     // API will always return NO_APPLICATION if we're not running under a
                                     // WinRT process, no matter what size the buffer is.
-                            s_isWinRT = 1;
+                            s_isInAppContainer = 1;
                             break;
                         default:
                             throw new InvalidOperationException($"Failed to get AppId, result was {result}.");
@@ -131,7 +132,7 @@ namespace System
                     if (e.GetType().FullName.Equals("System.EntryPointNotFoundException", StringComparison.Ordinal))
                     {
                         // API doesn't exist, likely pre Win8
-                        s_isWinRT = 0;
+                        s_isInAppContainer = 0;
                     }
                     else
                     {
@@ -139,7 +140,7 @@ namespace System
                     }
                 }
 
-                return s_isWinRT == 1;
+                return s_isInAppContainer == 1;
             }
         }
 
@@ -306,7 +307,7 @@ namespace System
                 if (s_isWindowsElevated != -1)
                     return s_isWindowsElevated == 1;
 
-                if (!IsWindows || IsWinRT)
+                if (!IsWindows || IsInAppContainer)
                 {
                     s_isWindowsElevated = 0;
                     return false;

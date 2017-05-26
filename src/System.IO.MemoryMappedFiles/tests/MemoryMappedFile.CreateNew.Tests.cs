@@ -153,7 +153,7 @@ namespace System.IO.MemoryMappedFiles.Tests
                 ValidateMemoryMappedFile(mmf, 4096, MemoryMappedFileAccess.Read);
             }
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT, () =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsInAppContainer, () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(name, 4096, MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileOptions.DelayAllocatePages, HandleInheritability.Inheritable))
                 {
@@ -200,7 +200,7 @@ namespace System.IO.MemoryMappedFiles.Tests
                 ValidateMemoryMappedFile(mmf, capacity);
             }
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsInAppContainer && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access))
                 {
@@ -208,7 +208,7 @@ namespace System.IO.MemoryMappedFiles.Tests
                 }
             });
 
-            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsWinRT && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
+            AssertExtensions.ThrowsIf<UnauthorizedAccessException>(PlatformDetection.IsInAppContainer && (access == MemoryMappedFileAccess.ReadExecute || access == MemoryMappedFileAccess.ReadWriteExecute), () =>
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(mapName, capacity, access, options, inheritability))
                 {
