@@ -158,15 +158,16 @@ Breaking Change Rules
 * Adding `virtual` to a member  
 > Make note, that marking a member virtual might cause previous consumers to still call the member non-virtually.
 
-* Introducing or removing an override
-> Make note, that introducing an override might cause previous consumers to skip over the override when calling `base`.
-
 &#10007; **Disallowed**
 * Adding an member to an interface
 
 * Adding an abstract member to a type when there _are accessible_ (`public` or `protected`) constructors and the type is not `sealed`
 
 * Adding a constructor to a class which previously had no constructor, without also adding the default constructor
+
+* Introducing or removing an override to non-sealed types
+> Introducing an override will cause previous consumers to skip over the override when calling `base` if not compiled against the new version.
+> Removing an override, although not breaking code compiled against a previous version, will fall into the previous case if re-added later.
 
 * Adding an overload that precludes an existing overload, and defines different behavior  
 > This will break existing clients that were bound to the previous overload. For example, if you have a class that has a single version of a method that accepts a `uint`, an existing consumer will 
