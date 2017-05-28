@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
-    public class AuthenticationTests : IDisposable
+    public class HttpListenerAuthenticationTest : IDisposable
     {
         private const string Basic = "Basic";
         private const string TestUser = "testuser";
@@ -22,7 +22,7 @@ namespace System.Net.Tests
         private HttpListenerFactory _factory;
         private HttpListener _listener;
 
-        public AuthenticationTests()
+        public HttpListenerAuthenticationTest()
         {
             _factory = new HttpListenerFactory();
             _listener = _factory.GetListener();
@@ -146,8 +146,8 @@ namespace System.Net.Tests
             await ValidateNullUser();
         }
 
+        [ActiveIssue(20096, TestPlatforms.Windows, TargetFrameworkMonikers.Netcoreapp)] // WinHTTP request times out on Core.
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20096)]
         public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
@@ -169,8 +169,8 @@ namespace System.Net.Tests
             yield return new object[] { "abcd", HttpStatusCode.BadRequest };
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20096)]
+        [ActiveIssue(20096, TestPlatforms.Windows, TargetFrameworkMonikers.Netcoreapp)] // WinHTTP request times out on Core.
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -192,8 +192,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20096)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
@@ -207,8 +206,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20096)]
+        [ActiveIssue(20096, TestPlatforms.Windows, TargetFrameworkMonikers.Netcoreapp)] // WinHTTP request times out on Core.
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -219,7 +218,14 @@ namespace System.Net.Tests
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", header);
 
                 HttpResponseMessage message = await AuthenticationFailure(client, statusCode);
-                Assert.Empty(message.Headers.WwwAuthenticate);
+                if (!string.IsNullOrEmpty(header))
+                {
+                    Assert.Empty(message.Headers.WwwAuthenticate);
+                }
+                else
+                {
+                    Assert.Equal("Negotiate", message.Headers.WwwAuthenticate.ToString());
+                }
             }
         }
 
@@ -384,21 +390,20 @@ namespace System.Net.Tests
 
         public async Task<HttpResponseMessage> AuthenticationFailure(HttpClient client, HttpStatusCode errorCode)
         {
+            client.Timeout = new TimeSpan(0, 0, 1);
             Task<HttpResponseMessage> clientTask = client.GetAsync(_factory.ListeningUrl);
 
             // The server task will hang forever if it is not cancelled.
             var tokenSource = new CancellationTokenSource();
             Task<HttpListenerContext> serverTask = Task.Run(() => _listener.GetContext(), tokenSource.Token);
-
+            
             // The client task should complete first - the server should send a 401 response.
             Task resultTask = await Task.WhenAny(clientTask, serverTask);
             tokenSource.Cancel();
             if (resultTask == serverTask)
             {
-                await serverTask;
+                await clientTask;
             }
-
-            Assert.Same(clientTask, resultTask);
 
             Assert.Equal(errorCode, clientTask.Result.StatusCode);
             return clientTask.Result;
