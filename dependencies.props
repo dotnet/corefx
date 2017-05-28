@@ -10,7 +10,7 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>159d043ab5edd2b42c6f4132c410797405a37e60</CoreFxCurrentRef>
-    <CoreClrCurrentRef>70d26b901117f5fb436b63b54a1fcfe244060704</CoreClrCurrentRef>
+    <CoreClrCurrentRef>d84cb6e991a5b7c39c9961441a9b392d62017ef6</CoreClrCurrentRef>
     <CoreSetupCurrentRef>aac2e06e201666201a5cfda06a296921a1c7f69d</CoreSetupCurrentRef>
     <ExternalCurrentRef>9be29f5804c4798d8b51bd3fed99ea076041aeb2</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>5002272371cd242387eb84c160da4e1449e0f483</ProjectNTfsCurrentRef>
