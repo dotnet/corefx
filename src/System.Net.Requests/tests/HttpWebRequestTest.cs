@@ -485,22 +485,15 @@ namespace System.Net.Tests
             Assert.False(request.AllowAutoRedirect);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "ConnectionGroupName isn't implemented in Core")]
-        public void ConnectionGroupName_SetAndGetGroup_ValuesMatch(Uri remoteServer)
+        [Fact]
+        public void ConnectionGroupName_SetAndGetGroup_ValuesMatch()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-
-            if (!PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName);
-            }
-            else
-            {
-                Assert.Null(request.ConnectionGroupName);
-                request.ConnectionGroupName = "Group";
-                Assert.Equal("Group", request.ConnectionGroupName);
-            }
+            // Note: In CoreFX changing this value will not have any effect on HTTP stack's behavior.
+            //       For app-compat reasons we allow applications to alter and read the property.
+            HttpWebRequest request = WebRequest.CreateHttp("http://test");
+            Assert.Null(request.ConnectionGroupName);
+            request.ConnectionGroupName = "Group";
+            Assert.Equal("Group", request.ConnectionGroupName);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -740,13 +733,14 @@ namespace System.Net.Tests
             Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Implemented in .NET Framework")]
-        public void ReadWriteTimeout_SetThenGet_ThrowsNotImplementedException(Uri remoteServer)
+        [Fact]
+        public void ReadWriteTimeout_SetThenGet_ValuesMatch()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            Assert.Throws<NotImplementedException>(() => request.ReadWriteTimeout = 5);
-            Assert.Throws<NotImplementedException>(() => request.ReadWriteTimeout);
+            // Note: In CoreFX changing this value will not have any effect on HTTP stack's behavior.
+            //       For app-compat reasons we allow applications to alter and read the property.
+            HttpWebRequest request = WebRequest.CreateHttp("http://test");
+            request.ReadWriteTimeout = 5;
+            Assert.Equal(5, request.ReadWriteTimeout);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
