@@ -10,24 +10,24 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>159d043ab5edd2b42c6f4132c410797405a37e60</CoreFxCurrentRef>
-    <CoreClrCurrentRef>4b3d197ba4ddfb47b2679db809c87af0e5a88d99</CoreClrCurrentRef>
+    <CoreClrCurrentRef>70d26b901117f5fb436b63b54a1fcfe244060704</CoreClrCurrentRef>
     <CoreSetupCurrentRef>aac2e06e201666201a5cfda06a296921a1c7f69d</CoreSetupCurrentRef>
     <ExternalCurrentRef>9be29f5804c4798d8b51bd3fed99ea076041aeb2</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>5002272371cd242387eb84c160da4e1449e0f483</ProjectNTfsCurrentRef>
     <ProjectNTfsTestILCCurrentRef>5002272371cd242387eb84c160da4e1449e0f483</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
-    <StandardCurrentRef>b8014fe2c5ac40eae1e0cdf7f6928d14429fedd8</StandardCurrentRef>
+    <StandardCurrentRef>70d26b901117f5fb436b63b54a1fcfe244060704</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <CoreFxExpectedPrerelease>preview2-25328-01</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview2-25327-02</CoreClrExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview2-25328-01</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-25307-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-25317-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25317-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25317-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.0-preview2-25327-01</NETStandardPackageVersion>
+    <NETStandardPackageVersion>2.0.0-preview2-25328-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.0.0-preview2-25317-03</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
