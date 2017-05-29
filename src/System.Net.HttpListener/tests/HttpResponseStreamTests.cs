@@ -296,8 +296,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooMuch_ThrowsProtocolViolationException()
         {
             using (HttpClient client = new HttpClient())
@@ -325,8 +324,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleAsynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())
@@ -352,8 +350,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleSynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())
@@ -379,6 +376,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ActiveIssue(19534, TestPlatforms.OSX)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
@@ -417,6 +415,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(20246)] // CI hanging frequently
         [ActiveIssue(19534, TestPlatforms.OSX)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
@@ -550,7 +549,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task EndWrite_InvalidAsyncResult_ThrowsArgumentException()
         {
             using (HttpListenerResponse response1 = await _helper.GetResponse())
@@ -566,7 +564,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task EndWrite_CalledTwice_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response1 = await _helper.GetResponse())

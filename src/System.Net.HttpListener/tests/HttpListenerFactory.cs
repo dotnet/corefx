@@ -6,31 +6,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using Xunit;
 
 namespace System.Net.Tests
 {
     // Utilities for generating URL prefixes for HttpListener
-    internal class HttpListenerFactory : IDisposable
+    public class HttpListenerFactory : IDisposable
     {
         private readonly HttpListener _processPrefixListener;
         private readonly Exception _processPrefixException;
         private readonly string _processPrefix;
-        public const string Hostname = "localhost";
+        private readonly string _hostname;
         private readonly string _path;
         private readonly int _port;
 
-        internal HttpListenerFactory()
+        internal HttpListenerFactory(string hostname = "localhost", string path = null)
         {
             // Find a URL prefix that is not in use on this machine *and* uses a port that's not in use.
             // Once we find this prefix, keep a listener on it for the duration of the process, so other processes
             // can't steal it.
+            _hostname = hostname;
+            _path = path ?? Guid.NewGuid().ToString("N");
+            string pathComponent = string.IsNullOrEmpty(_path) ? _path : $"{_path}/";
 
-            Guid processGuid = Guid.NewGuid();
-            _path = processGuid.ToString("N");
-
-            for (int port = 1024; port <= IPEndPoint.MaxPort; port++)
+            for (int port = 1025; port <= IPEndPoint.MaxPort; port++)
             {
-                string prefix = $"http://{Hostname}:{port}/{_path}/";
+                string prefix = $"http://{hostname}:{port}/{pathComponent}";
 
                 var listener = new HttpListener();
                 try
@@ -51,10 +52,22 @@ namespace System.Net.Tests
                     // Remember the exception for later
                     _processPrefixException = e;
 
-                    // If this is not an HttpListenerException or SocketException, something very wrong has happened, and there's no point
-                    // in trying again.
-                    if (!(e is HttpListenerException) && !(e is SocketException))
+                    if (e is HttpListenerException listenerException)
+                    {
+                        // If we can't access the host (e.g. if it is '+' or '*' and the current user is the administrator)
+                        // then throw.
+                        const int ERROR_ACCESS_DENIED = 5;
+                        if (listenerException.ErrorCode == ERROR_ACCESS_DENIED && (hostname == "*" || hostname == "+"))
+                        {
+                            throw new InvalidOperationException($"Access denied for host {hostname}");
+                        }
+                    }
+                    else if (!(e is SocketException))
+                    {
+                        // If this is not an HttpListenerException or SocketException, something very wrong has happened, and there's no point
+                        // in trying again.
                         break;
+                    }
                 }
             }
 
@@ -89,11 +102,36 @@ namespace System.Net.Tests
             }
         }
 
+        public string Hostname => _hostname;
         public string Path => _path;
 
-        public HttpListener GetListener() => _processPrefixListener;
+        private static bool? s_supportsWildcards;
+        public static bool SupportsWildcards
+        {
+            get
+            {
+                if (!s_supportsWildcards.HasValue)
+                {
+                    try
+                    {
+                        using (new HttpListenerFactory("*"))
+                        {
+                            s_supportsWildcards = true;
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        s_supportsWildcards = false;
+                    }
+                }
 
-        public void Dispose() => _processPrefixListener.Close();
+                return s_supportsWildcards.Value;
+            }
+        }
+
+        public HttpListener GetListener() => _processPrefixListener ?? throw new Exception("Could not reserve a port for HttpListener", _processPrefixException);
+
+        public void Dispose() => _processPrefixListener?.Close();
 
         public Socket GetConnectedSocket()
         {
@@ -115,6 +153,8 @@ namespace System.Net.Tests
 
         public byte[] GetContent(string httpVersion, string requestType, string query, string text, IEnumerable<string> headers, bool headerOnly)
         {
+            headers = headers ?? Enumerable.Empty<string>();
+
             Uri listeningUri = new Uri(ListeningUrl);
             string rawUrl = listeningUri.PathAndQuery;
             if (query != null)
@@ -122,12 +162,16 @@ namespace System.Net.Tests
                 rawUrl += query;
             }
 
-            string content = $"{requestType} {rawUrl} HTTP/{httpVersion}\r\nHost: {listeningUri.Host}\r\n";
-            if (text != null)
+            string content = $"{requestType} {rawUrl} HTTP/{httpVersion}\r\n";
+            if (!headers.Any(header => header.ToLower().StartsWith("host:")))
+            {
+                content += $"Host: { listeningUri.Host}\r\n";
+            }
+            if (text != null && !headers.Any(header => header.ToLower().StartsWith("content-length:")))
             {
                 content += $"Content-Length: {text.Length}\r\n";
             }
-            foreach (string header in headers ?? Enumerable.Empty<string>())
+            foreach (string header in headers)
             {
                 content += header + "\r\n";
             }

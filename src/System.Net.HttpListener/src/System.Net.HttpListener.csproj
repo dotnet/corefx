@@ -6,6 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Although we have a NS configuration, the actual UWP implementation will be fully managed, so just validate against OneCore -->
     <UWPCompatible>false</UWPCompatible>
+    <ForceManagedImplementation>false</ForceManagedImplementation>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -47,6 +48,8 @@
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\Net\BoundaryType.cs" />
+    <Compile Include="System\Net\EntitySendFormat.cs" />
     <Compile Include="System\Net\HttpListenerPrefixCollection.cs" />
     <Compile Include="System\Net\HttpRequestStream.cs" />
     <Compile Include="System\Net\AuthenticationTypes.cs" />
@@ -82,6 +85,9 @@
     <Compile Include="$(CommonPath)\System\Net\CaseInsensitiveAscii.cs">
       <Link>Common\System\Net\CaseInsensitiveAscii.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
+      <Link>Common\System\Net\ExceptionCheck.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpStatusDescription.cs">
       <Link>Common\System\Net\HttpStatusDescription.cs</Link>
     </Compile>
@@ -94,39 +100,34 @@
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>Common\System\Net\UriScheme.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\WebHeaderEncoding.cs">
+      <Link>Common\System\Net\WebHeaderEncoding.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
       <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
     </Compile>
+    <Compile Include="System\Net\Windows\CookieExtensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(ForceManagedImplementation)' != 'true'">
     <Compile Include="System\Net\Windows\HttpListener.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerContext.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerRequest.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerResponse.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerTimeoutManager.Windows.cs" />
-    <Compile Include="System\Net\Windows\BoundaryType.cs" />
     <Compile Include="System\Net\Windows\ContextFlags.cs" />
-    <Compile Include="System\Net\Windows\CookieExtensions.cs" />
     <Compile Include="System\Net\Windows\HttpRequestQueueV2Handle.cs" />
     <Compile Include="System\Net\Windows\HttpServerSessionHandle.cs" />
     <Compile Include="System\Net\Windows\HttpListenerRequestContext.cs" />
     <Compile Include="System\Net\Windows\ListenerClientCertAsyncResult.Windows.cs" />
     <Compile Include="System\Net\Windows\AsyncRequestContext.cs" />
-    <Compile Include="System\Net\Windows\EntitySendFormat.cs" />
     <Compile Include="System\Net\Windows\RequestContextBase.cs" />
     <Compile Include="System\Net\Windows\SyncRequestContext.cs" />
     <Compile Include="System\Net\Windows\ListenerAsyncResult.Windows.cs" />
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
-      <Link>Common\System\Net\ExceptionCheck.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\WebHeaderEncoding.cs">
-      <Link>Common\System\Net\WebHeaderEncoding.cs</Link>
     </Compile>
     <Compile Include="System\Net\Windows\HttpResponseStream.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpResponseStreamAsyncResult.cs" />
@@ -333,7 +334,7 @@
       <Link>Common\Interop\Windows\sspicli\SSPIWrapper.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' OR '$(ForceManagedImplementation)' == 'true'">
     <Compile Include="System\Net\Managed\HttpEndPointListener.cs" />
     <Compile Include="System\Net\Managed\HttpEndPointManager.cs" />
     <Compile Include="System\Net\Managed\HttpConnection.cs" />
