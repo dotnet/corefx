@@ -482,9 +482,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20246)] // CI hanging frequently
-        [Fact]
-        [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20246, TestPlatforms.AnyUnix)] // CI hanging frequently, [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Read_FromClosedConnectionAsynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -513,9 +511,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20246)] // CI hanging frequently
-        [Fact]
-        [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20246, TestPlatforms.AnyUnix)] // CI hanging frequently, [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Read_FromClosedConnectionSynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
