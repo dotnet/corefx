@@ -94,22 +94,75 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [InlineData("POST", "Content-Length: 9223372036854775807", 9223372036854775807)]
-        // [ActiveIssue(20232, TestPlatforms.AnyUnix)] [InlineData("POST", "Content-Length: 9223372036854775808", 0)]
-        [InlineData("POST", "Content-Length: 0", 0)]
-        [InlineData("PUT", "Content-Length: 0", 0)]
-        [InlineData("PUT", "Content-Length: 1", 1)]
-        [InlineData("PUT", "Content-Length: 1\nContent-Length: 1", 1)]
-        [InlineData("POST", "Transfer-Encoding: chunked", -1)]
-        [InlineData("PUT", "Transfer-Encoding: chunked", -1)]
-        [InlineData("PUT", "Transfer-Encoding: chunked", -1)]
-        [InlineData("PUT", "Content-Length: 10\nTransfer-Encoding: chunked", -1)]
-        [InlineData("PUT", "Transfer-Encoding: chunked\nContent-Length: 10", -1)]
-        public async Task ContentLength_GetProperty_ReturnsExpected(string method, string contentLengthString, long expected)
+        [InlineData("POST", "Content-Length: 9223372036854775807", 9223372036854775807, true)] // long.MaxValue
+        [InlineData("POST", "Content-Length: 9223372036854775808", 0, false)] // long.MaxValue + 1
+        [InlineData("POST", "Content-Length: 18446744073709551615 ", 0, false)] // ulong.MaxValue
+        [InlineData("POST", "Content-Length: 0", 0, false)]
+        [InlineData("PUT", "Content-Length: 0", 0, false)]
+        [InlineData("PUT", "Content-Length: 1", 1, true)]
+        [InlineData("PUT", "Content-Length: 1\nContent-Length: 1", 1, true)]
+        [InlineData("POST", "Transfer-Encoding: chunked", -1, true)]
+        [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
+        [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
+        [InlineData("PUT", "Content-Length: 10\nTransfer-Encoding: chunked", -1, true)]
+        [InlineData("PUT", "Transfer-Encoding: chunked\nContent-Length: 10", -1, true)]
+        public async Task ContentLength_GetProperty_ReturnsExpected(string method, string contentLengthString, long expected, bool hasEntityBody)
         {
             await GetRequest(method, "", contentLengthString.Split('\n'), (_, request) =>
             {
                 Assert.Equal(expected, request.ContentLength64);
+                Assert.Equal(hasEntityBody, request.HasEntityBody);
+            }, content: "\r\n");
+        }
+
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [InlineData(100)]
+        [InlineData("-100")]
+        [InlineData("")]
+        [InlineData("abc")]
+        [InlineData("9223372036854775808")]
+        [ActiveIssue(20294, TargetFrameworkMonikers.Netcoreapp)]
+        public async Task ContentLength_ManuallySetInHeaders_ReturnsExpected(string newValue)
+        {
+            await GetRequest("POST", null, new string[] { "Content-Length: 1" }, (_, request) =>
+            {
+                Assert.Equal("1", request.Headers["Content-Length"]);
+
+                request.Headers.Set("Content-Length", newValue);
+                Assert.Equal(newValue, request.Headers["Content-Length"]);
+                Assert.Equal(1, request.ContentLength64);
+
+                Assert.True(request.HasEntityBody);
+            }, content: "\r\n");
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ActiveIssue(20294, TargetFrameworkMonikers.Netcoreapp)]
+        public async Task ContentLength_ManuallyRemovedFromHeaders_DoesNotAffect()
+        {
+            await GetRequest("POST", null, new string[] { "Content-Length: 1" }, (_, request) =>
+            {
+                Assert.Equal("1", request.Headers["Content-Length"]);
+
+                request.Headers.Remove("Content-Length");
+                Assert.Equal(1, request.ContentLength64);
+
+                Assert.True(request.HasEntityBody);
+            }, content: "\r\n");
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        public async Task ContentLength_SetInHeadersAfterAccessingProperty_DoesNothing()
+        {
+            await GetRequest("POST", null, new string[] { "Content-Length: 1" }, (_, request) =>
+            {
+                Assert.Equal("1", request.Headers["Content-Length"]);
+                Assert.Equal(1, request.ContentLength64);
+
+                request.Headers.Set("Content-Length", "1000");
+                Assert.Equal(1, request.ContentLength64);
+
+                Assert.True(request.HasEntityBody);
             }, content: "\r\n");
         }
 
@@ -163,10 +216,16 @@ namespace System.Net.Tests
 
                 HttpListenerRequest request = context.Request;
                 Assert.Equal(client.RemoteEndPoint.ToString(), request.UserHostAddress);
+
                 Assert.Equal(client.RemoteEndPoint, request.LocalEndPoint);
+                Assert.Same(request.LocalEndPoint, request.LocalEndPoint);
+
                 Assert.Equal(client.LocalEndPoint, request.RemoteEndPoint);
+                Assert.Same(request.RemoteEndPoint, request.RemoteEndPoint);
 
                 Assert.Equal(factory.ListeningUrl, request.Url.ToString());
+                Assert.Same(request.Url, request.Url);
+
                 Assert.Equal($"/{factory.Path}/", request.RawUrl);
             }
         }
@@ -180,21 +239,12 @@ namespace System.Net.Tests
             });
         }
         
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20237, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task RequestTraceIdentifier_GetWindows_ReturnsExpected()
         {
             await GetRequest("POST", null, null, (_, request) =>
             {
                 Assert.NotEqual(Guid.Empty, request.RequestTraceIdentifier);
-            });
-        }
-
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotWindowsImplementation))] // [ActiveIssue(20237, TestPlatforms.AnyUnix)]
-        public async Task RequestTraceIdentifier_GetUnix_ReturnsExpected()
-        {
-            await GetRequest("POST", null, null, (_, request) =>
-            {
-                Assert.Equal(Guid.Empty, request.RequestTraceIdentifier);
             });
         }
 
@@ -249,18 +299,6 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20238, TestPlatforms.AnyUnix)]
-        public async Task ClientCertificateError_GetWhileGettingCertificate_ThrowsInvalidOperationException()
-        {
-            await GetRequest("POST", null, null, (_, request) =>
-            {
-                request.BeginGetClientCertificate(null, null);
-                Assert.Throws<InvalidOperationException>(() => request.ClientCertificateError);
-                Assert.Throws<InvalidOperationException>(() => request.BeginGetClientCertificate(null, null));
-                Assert.Throws<InvalidOperationException>(() => request.GetClientCertificate());
-            });
-        }
-
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task GetClientCertificate_NoCertificate_ReturnsNull()
         {
@@ -285,7 +323,7 @@ namespace System.Net.Tests
         {
             await GetRequest("POST", null, null, (_, request) =>
             {
-                Assert.Throws<ArgumentNullException>("asyncResult", () => request.EndGetClientCertificate(null));
+                AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => request.EndGetClientCertificate(null));
             });
         }
 
@@ -298,8 +336,8 @@ namespace System.Net.Tests
                 {
                     IAsyncResult beginGetClientCertificateResult1 = request1.BeginGetClientCertificate(null, null);
 
-                    Assert.Throws<ArgumentException>("asyncResult", () => request2.EndGetClientCertificate(new CustomAsyncResult()));
-                    Assert.Throws<ArgumentException>("asyncResult", () => request2.EndGetClientCertificate(beginGetClientCertificateResult1));
+                    AssertExtensions.Throws<ArgumentException>("asyncResult", () => request2.EndGetClientCertificate(new CustomAsyncResult()));
+                    AssertExtensions.Throws<ArgumentException>("asyncResult", () => request2.EndGetClientCertificate(beginGetClientCertificateResult1));
                 }).Wait();
             });
         }
@@ -316,16 +354,7 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
-        public async Task TransportContext_GetUnix_ThrowsNotImplementedException()
-        {
-            await GetRequest("POST", null, null, (_, request) =>
-            {
-                Assert.Throws<NotImplementedException>(() => request.TransportContext.GetChannelBinding(ChannelBindingKind.Endpoint));
-            });
-        }
-
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task TransportContext_GetChannelBinding_ReturnsExpected()
         {
             // This might not work on other devices:
@@ -337,8 +366,7 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20239, TestPlatforms.AnyUnix)]
-        [InlineData(ChannelBindingKind.Unique)]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(ChannelBindingKind.Unique)]
         public async Task TransportContext_GetChannelBindingInvalid_ThrowsNotSupportedException(ChannelBindingKind kind)
         {
@@ -496,6 +524,14 @@ namespace System.Net.Tests
         [Theory]
         [InlineData("1.0")]
         [InlineData("1.1")]
+        [InlineData("1.2")]
+        [InlineData("1.3")]
+        [InlineData("1.4")]
+        [InlineData("1.5")]
+        [InlineData("1.6")]
+        [InlineData("1.7")]
+        [InlineData("1.8")]
+        [InlineData("1.9")]
         public async Task ProtocolVersion_GetProperty_ReturnsExpected(string httpVersion)
         {
             var version = new Version(httpVersion);
