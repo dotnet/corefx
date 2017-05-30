@@ -977,7 +977,8 @@ namespace System.Diagnostics.Tests
                 }
                 finally
                 {
-                    process.Kill();
+                    if (process != null && !process.HasExited)
+                        process.Kill();
                 }
             }
         }
@@ -1011,7 +1012,8 @@ namespace System.Diagnostics.Tests
                 }
                 finally
                 {
-                    process.Kill();
+                    if (process != null && !process.HasExited)
+                        process.Kill();
                 }
             }
         }
