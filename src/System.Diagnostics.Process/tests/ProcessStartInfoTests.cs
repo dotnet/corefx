@@ -986,6 +986,7 @@ namespace System.Diagnostics.Tests
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
         public void StartInfo_TextFile_ShellExecute()
         {
             string tempFile = GetTestFilePath() + ".txt";
