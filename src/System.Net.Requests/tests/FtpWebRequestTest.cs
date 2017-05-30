@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using TestHelpers;
 using Xunit;
 
 namespace System.Net.Tests
@@ -69,8 +69,8 @@ namespace System.Net.Tests
         [Fact]
         public void GetResponse_ConnectFailure_ThrowsWebException()
         {
-            // This is an invalid IP address, so we should fail to connect.
-            string serverUrl = "ftp://127.0.0.1/";
+            PortScanner portScanner = new PortScanner();
+            string serverUrl = "ftp://127.0.0.1:" + portScanner.FirstClosedPort;
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
             WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
             Assert.Equal(WebExceptionStatus.ConnectFailure, ex.Status);
