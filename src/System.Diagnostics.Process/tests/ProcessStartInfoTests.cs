@@ -944,7 +944,7 @@ namespace System.Diagnostics.Tests
                 FileName = @"http://www.microsoft.com"
             };
 
-            Process.Start(info);
+            Process.Start(info); // Returns null after navigating browser
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
@@ -967,6 +967,8 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
+                Assert.True(process != null, $"Could not start {info.FileName} {info.Arguments} UseShellExecute={info.UseShellExecute}");
+
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
@@ -1002,6 +1004,8 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
+                Assert.True(process != null, $"Could not start {info.FileName} UseShellExecute={info.UseShellExecute}");
+
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
