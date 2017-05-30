@@ -24,7 +24,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(BlobBuilder.MinChunkSize, builder.ChunkCapacity);
 
             builder = new BlobBuilder(10001);
-            Assert.Equal(10001, builder.ChunkCapacity);
+            Assert.Equal(20001, builder.ChunkCapacity);
         }
 
         [Fact]
