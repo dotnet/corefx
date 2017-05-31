@@ -17,7 +17,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
         private static readonly string[] Names =
         {
-            "arg", "ARG", "Arg", "Argument name that isn’t a valid C♯ name 👿🤢",
+            "arg", "ARG", "Arg", 
+#if !uap
+            "Argument name that isn’t a valid C♯ name 👿🤢",
+#endif
             "horrid name with" + (char)0xD800 + "a half surrogate", "new", "break", null
         };
 
