@@ -16,10 +16,7 @@ namespace System.Drawing.PrimitivesTest
             SizeF sz = new SizeF(width, height);
             SizeF mulExpected;
 
-            unchecked
-            {
-                mulExpected = new SizeF(width * multiplier, height * multiplier);
-            }
+            mulExpected = new SizeF(width * multiplier, height * multiplier);
 
             Assert.Equal(mulExpected, sz * multiplier);
             Assert.Equal(mulExpected, multiplier * sz);
@@ -76,7 +73,7 @@ namespace System.Drawing.PrimitivesTest
         [InlineData(1.0f, float.MinValue)]
         [InlineData(-1.0f, float.MinValue)]
         [InlineData(-1.0f, float.MinValue)]
-        public void DivideTestSizeFloat(float value1, float value2)
+        public void DivideTestSizeFFloat(float value1, float value2)
         {
             DivideSizeFFloatTester(value1, 1.0f, value2);
             DivideSizeFFloatTester(1.0f, value1, value2);
