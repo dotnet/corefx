@@ -306,6 +306,72 @@ If it needs to be skipped in multiple frameworks and the reasons are different p
 
 **Currently this are the [Framework Monikers](https://github.com/dotnet/buildtools/blob/master/src/xunit.netcore.extensions/TargetFrameworkMonikers.cs#L23-L26) that we support through our test execution infrastructure**
 
+#### ConditionalFactAttribute
+Use this attribute to run the test only when a condition is `true`. This attribute is used when `ActiveIssueAttribute` or `SkipOnTargetFrameworkAttribute` are not flexible enough due to needing to run a custom logic at test time. This test behaves as a `[Fact]` test that has no test data passed in as a parameter.
+
+```cs
+[ConditionalFact(params string[] conditionMemberNames)]
+```
+
+The conditional method needs to be a static method or property on this or any ancestor type, of any visibility, accepting zero arguments, and having a return type of Boolean.
+
+**Example:**
+```cs
+public class TestClass
+{
+    public static bool ConditionProperty => true;
+
+    [ConditionalFact(nameof(ConditionProperty))]
+    public static void TestMethod()
+    {
+        Assert.True(true);
+    }
+}
+```
+
+#### ConditionalTheoryAttribute
+Use this attribute to run the test only when a condition is `true`. This attribute is used when `ActiveIssueAttribute` or `SkipOnTargetFrameworkAttribute` are not flexible enough due to needing to run a custom logic at test time. This test behaves as a `[Theory]` test that has no test data passed in as a parameter.
+
+```cs
+[ConditionalTheory(params string[] conditionMemberNames)]
+```
+
+This attribute must have `[MemberData(string member)]` or a `[ClassData(Type class)]` attribute, which represents an `IEnumerable<object>` containing the data that will be passed as a parameter to the test. Another option is to add multiple or one `[InlineData(object params[] parameters)]` attribute.
+
+The conditional method needs to be a static method or property on this or any ancestor type, of any visibility, accepting zero arguments, and having a return type of Boolean.
+
+**Example:**
+```cs
+public class TestClass
+{
+    public static bool ConditionProperty => true;
+
+    public static IEnumerable<object[]> Subtract_TestData()
+    {
+        yield return new object[] { new IntPtr(42), 6, (long)36 };
+        yield return new object[] { new IntPtr(40), 0, (long)40 };
+        yield return new object[] { new IntPtr(38), -2, (long)40 };
+    }
+
+    [ConditionalTheory(nameof(ConditionProperty))]
+    [MemberData(nameof(Equals_TestData))]
+    public static void Subtract(IntPtr ptr, int offset, long expected)
+    {
+        IntPtr p1 = IntPtr.Subtract(ptr, offset);
+        VerifyPointer(p1, expected);
+
+        IntPtr p2 = ptr - offset;
+        VerifyPointer(p2, expected);
+
+        IntPtr p3 = ptr;
+        p3 -= offset;
+        VerifyPointer(p3, expected);
+    }
+}
+```
+
+**Note that all of the attributes above must include an issue number/link and/or have a comment next to them briefly justifying the reason. ActiveIssueAttribute and SkipOnTargetFrameworkAttribute should use their constructor parameters to do this**
+
 _**A few common examples with the above attributes:**_
 
 - Run all tests acceptable on Windows that are not failing:
