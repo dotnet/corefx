@@ -84,14 +84,14 @@ Once you've build the source code for netfx from the root (`build.cmd -framework
 
 1. Build the test project through msbuild /p:targetgroup=netfx
 2. Open Visual Studio
-3. Open xunit runner for your test project `%corefxpath%\bin\\%OSGroup.Architecture.BuildConfiguration%\\%YOURPROJECT%\\%TARGETGROUP%\xunit.console.exe`
-    * Where %OSGroup.Architecture.BuildConfiguration% is something like AnyOS.AnyCPU.Debug
+3. Open xunit runner for your test project `<corefxpath>\bin\<OSGroup.Architecture.BuildConfiguration>\<YOURPROJECT>\<TARGETGROUP>\xunit.console.exe`
+    * Example: `D:\corefx\bin\AnyOS.AnyCPU.Debug\System.Runtime.Extensions.Tests\netstandard\xunit.console.exe`
 4. Open project properties and fill in the next information:
-    * Arguments -> ```%YOURPROJECT%.dll -noshadow -xml testResults.xml -notrait Benchmark=true -notrait category=nonnetfxtests  -notrait category=OuterLoop -notrait category=failing -notrait category=nonwindowstests```
+    * Arguments -> ```<YOURPROJECT>.dll -noshadow -xml testResults.xml -notrait Benchmark=true -notrait category=nonnetfxtests  -notrait category=OuterLoop -notrait category=failing -notrait category=nonwindowstests```
          * Note that this arguments change if you are running/debugging Outerloop tests (You would need to delete `-notrait category=Outerloop`. I usually build and copy xunit's arguments from RunTests.cmd inside the test project bin folder.
     * Debugger Type -> Managed (v4.6, v4.5, v4.0)
     * Environment -> you need to add an environment variable as follows:
-         * DEVPATH -> %corefxpath%\bin\testhost\netfx-Windows_NT-Debug-x64\
+         * DEVPATH -> `<corefxpath>\bin\testhost\netfx-Windows_NT-Debug-x64\`
 5. Set breakpoint appropriately
 6. F5 (Debug)
 
