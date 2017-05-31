@@ -9,6 +9,22 @@ namespace System.Drawing.PrimitivesTest
 {
     public partial class SizeFTests
     {
+        #region SizeF * float tests
+
+        private void MultSizeFFloatTester(float width, float height, float multiplier)
+        {
+            SizeF sz = new SizeF(width, height);
+            SizeF mulExpected;
+
+            unchecked
+            {
+                mulExpected = new SizeF(width * multiplier, height * multiplier);
+            }
+
+            Assert.Equal(mulExpected, sz * multiplier);
+            Assert.Equal(mulExpected, multiplier * sz);
+        }
+
         [Theory]
         [InlineData(1000.234f, 2400.933f)]
         [InlineData(float.MaxValue, 0.0f)]
@@ -23,19 +39,22 @@ namespace System.Drawing.PrimitivesTest
         [InlineData(float.MinValue, float.MaxValue)]
         public void MultiplicationTest(float value1, float value2)
         {
-            SizeF sz1 = new SizeF(value1, value1);
-            SizeF sz2 = new SizeF(value2, value2);
-            SizeF mulExpected;
+            MultSizeFFloatTester(value1, 1.0f, value2);
+            MultSizeFFloatTester(value2, 1.0f, value1);
 
-            unchecked
-            {
-                mulExpected = new SizeF(value1 * value2, value1 * value2);
-            }
+            MultSizeFFloatTester(1.0f, value1, value2);
+            MultSizeFFloatTester(1.0f, value2, value1);
+        }
 
-            Assert.Equal(mulExpected, sz1 * value2);
-            Assert.Equal(mulExpected, value2 * sz1);
-            Assert.Equal(mulExpected, sz2 * value1);
-            Assert.Equal(mulExpected, value1 * sz2);
+        #endregion
+
+        #region SizeF / float tests
+
+        private void DivideSizeFFloatTester(float width, float height, float divisor)
+        {
+            SizeF size = new SizeF(width, height);
+            SizeF expected = new SizeF(width / divisor, height / divisor);
+            Assert.Equal(expected, size / divisor);
         }
 
         [Theory]
@@ -59,11 +78,10 @@ namespace System.Drawing.PrimitivesTest
         [InlineData(-1.0f, float.MinValue)]
         public void DivideTestSizeFloat(float value1, float value2)
         {
-            SizeF size = new SizeF(value1, value1);
-            float invDiv = 1.0f / value2;
-            SizeF expected = new SizeF(value1 * invDiv, value1 * invDiv);
-            Assert.Equal(expected, size / value2);
+            DivideSizeFFloatTester(value1, 1.0f, value2);
+            DivideSizeFFloatTester(1.0f, value1, value2);
         }
 
+        #endregion
     }
 }

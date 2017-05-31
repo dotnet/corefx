@@ -74,7 +74,7 @@ namespace System.Drawing
         public static Size operator -(Size sz1, Size sz2) => Subtract(sz1, sz2);
 
         /// <summary>
-        /// Multiplication operator that multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
+        /// Multiplies a <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
         /// <param name="left">Multiplier of type <see cref="int"/>.</param>
         /// <param name="right">Multiplicand of type <see cref="Size"/>.</param>
@@ -82,7 +82,7 @@ namespace System.Drawing
         public static Size operator *(int left, Size right) => Multiply(right, left);
 
         /// <summary>
-        /// Multiplication operator that multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
+        /// Multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
         /// <param name="left">Multiplicand of type <see cref="Size"/>.</param>
         /// <param name="right">Multiplier of type <see cref="int"/>.</param>
@@ -90,19 +90,15 @@ namespace System.Drawing
         public static Size operator *(Size left, int right) => Multiply(left, right);
 
         /// <summary>
-        /// Division operator that divides <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
+        /// Divides <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
         /// <param name="left">Dividend of type <see cref="Size"/>.</param>
         /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="Size"/>.</returns>
-        public static Size operator /(Size left, int right)
-        {
-            int invDiv = 1 / right;
-            return new Size(unchecked(left._width * invDiv), unchecked(left._height * invDiv));
-        }
+        public static Size operator /(Size left, int right) => new Size(unchecked(left._width / right), unchecked(left._height / right));
 
         /// <summary>
-        /// Multiplication operator that multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
         /// <param name="left">Multiplier of type <see cref="float"/>.</param>
         /// <param name="right">Multiplicand of type <see cref="Size"/>.</param>
@@ -110,7 +106,7 @@ namespace System.Drawing
         public static SizeF operator *(float left, Size right) => Multiply(right, left);
 
         /// <summary>
-        /// Multiplication operator that multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
         /// <param name="left">Multiplicand of type <see cref="Size"/>.</param>
         /// <param name="right">Multiplier of type <see cref="float"/>.</param>
@@ -118,16 +114,13 @@ namespace System.Drawing
         public static SizeF operator *(Size left, float right) => Multiply(left, right);
 
         /// <summary>
-        /// Division operator that divides <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// Divides <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
         /// <param name="left">Dividend of type <see cref="Size"/>.</param>
         /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="SizeF"/>.</returns>
         public static SizeF operator /(Size left, float right)
-        {
-            float invDiv = 1.0f / right;
-            return new SizeF(left._width / invDiv, left._height / invDiv);
-        }
+            => new SizeF(left._width / right, left._height / right);
 
         /// <summary>
         ///    Tests whether two <see cref='System.Drawing.Size'/> objects
@@ -248,8 +241,7 @@ namespace System.Drawing
         public override string ToString() => "{Width=" + width.ToString() + ", Height=" + height.ToString() + "}";
 
         /// <summary>
-        /// Helper method for operator * (multiply) that accepts type <see cref="Size"/> and <see cref="int"/>,
-        /// returning a product of type <see cref="Size"/>.
+        /// Multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
         /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
         /// <param name="multiplier">Multiplier of type <see cref='int'>.</param>
@@ -258,8 +250,7 @@ namespace System.Drawing
             new Size(unchecked(size._width * multiplier), unchecked(size._height * multiplier));
 
         /// <summary>
-        /// Helper method for operator * (multiply) that accepts type <see cref="Size"/> and <see cref="float"/>, 
-        /// returning a product of type <see cref="SizeF"/>.
+        /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
         /// </summary>
         /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
         /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
