@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -540,7 +541,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // Attempt the online test a couple of times, in case there was just a CRL
                 // download failure.
-                const int RetryLimit = 3;
+                const int RetryLimit = 10;
                 bool valid = false;
 
                 for (int i = 0; i < RetryLimit; i++)
@@ -550,6 +551,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     if (valid)
                     {
                         break;
+                    }
+
+                    if (i > 3)
+                    {
+                        // Network congestion?
+                        Thread.Sleep(1000);
                     }
 
                     for (int j = 0; j < onlineChain.ChainElements.Count; j++)
