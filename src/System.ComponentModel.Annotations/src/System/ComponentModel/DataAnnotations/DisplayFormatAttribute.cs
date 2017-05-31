@@ -14,7 +14,6 @@ namespace System.ComponentModel.DataAnnotations
     public class DisplayFormatAttribute : Attribute
     {
         private readonly LocalizableString _nullDisplayText = new LocalizableString("NullDisplayText");
-        private Type _nullDisplayTextResourceType;
 
         /// <summary>
         ///     Default constructor
@@ -53,13 +52,7 @@ namespace System.ComponentModel.DataAnnotations
         public string NullDisplayText
         {
             get { return _nullDisplayText.Value; }
-            set
-            {
-                if (_nullDisplayText.Value != value)
-                {
-                    _nullDisplayText.Value = value;
-                }
-            }
+            set { _nullDisplayText.Value = value; }
         }
 
         /// <summary>
@@ -84,15 +77,8 @@ namespace System.ComponentModel.DataAnnotations
 		/// </summary>
 		public Type NullDisplayTextResourceType
         {
-            get { return _nullDisplayTextResourceType; }
-            set
-            {
-                if (_nullDisplayTextResourceType != value)
-                {
-                    _nullDisplayTextResourceType = value;
-                    _nullDisplayText.ResourceType = value;
-                }
-            }
+            get { return _nullDisplayText.ResourceType; }
+            set { _nullDisplayText.ResourceType = value; }
         }
 
         /// <summary>

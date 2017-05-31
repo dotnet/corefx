@@ -122,6 +122,21 @@ namespace System.ComponentModel.DataAnnotations.Tests
             // Changing target resource
             attribute.NullDisplayText = "Resource2";
             Assert.Equal(FakeResourceType.Resource2, attribute.GetNullDisplayText());
+
+            // Not existing resource in the resource type
+            attribute.NullDisplayText = "Resource3";
+            Assert.Throws<InvalidOperationException>(() => attribute.GetNullDisplayText());
+        }
+
+        [Fact]
+        public void NullDisplayText_NotAResourceType()
+        {
+			DisplayFormatAttribute attribute = new DisplayFormatAttribute();
+            // Setting a type that is not a resource type
+            attribute.NullDisplayTextResourceType = typeof(string);
+
+            attribute.NullDisplayText = "foo";
+			Assert.Throws<InvalidOperationException>(() => attribute.GetNullDisplayText());
         }
 
         [Theory]
