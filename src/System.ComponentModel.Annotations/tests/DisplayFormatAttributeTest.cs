@@ -131,12 +131,12 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public void NullDisplayText_NotAResourceType()
         {
-			DisplayFormatAttribute attribute = new DisplayFormatAttribute();
+            DisplayFormatAttribute attribute = new DisplayFormatAttribute();
             // Setting a type that is not a resource type
             attribute.NullDisplayTextResourceType = typeof(string);
 
             attribute.NullDisplayText = "foo";
-			Assert.Throws<InvalidOperationException>(() => attribute.GetNullDisplayText());
+            Assert.Throws<InvalidOperationException>(() => attribute.GetNullDisplayText());
         }
 
         [Theory]
