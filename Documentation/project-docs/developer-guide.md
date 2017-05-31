@@ -229,7 +229,7 @@ The tests can also be filtered based on xunit trait attributes defined in [`xuni
 #### OuterloopAttribute
 
 ```cs
-OuterLoop()
+[OuterLoop()]
 ```
 Tests marked as `Outerloop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through msbuild but can be enabled manually by adding the  `Outerloop` property e.g.
 
@@ -245,12 +245,14 @@ msbuild <csproj_file> /t:BuildAndTest /p:WithCategories=OuterLoop
 #### PlatformSpecificAttribute
 
 ```cs
-PlatformSpecific(TestPlatforms platforms)
+[PlatformSpecific(TestPlatforms platforms)]
 ```
 Use this attribute on test methods to specify that this test may only be run on the specified platforms. This attribute returns the following categories based on platform
 - `nonwindowstests` for tests that don't run on Windows
 - `nonlinuxtests` for tests that don't run on Linux
 - `nonosxtests` for tests that don't run on OS X
+
+**[Available Test Platforms](https://github.com/dotnet/buildtools/blob/master/src/xunit.netcore.extensions/TestPlatforms.cs#L10)**
 
 When running tests by building a test project, tests that don't apply to the `OSGroup` are not run. For example, to run Linux-specific tests on a Linux box, use the following command line:
 ```sh
@@ -262,7 +264,7 @@ To run all Linux-compatible tests that are failing:
 ```
 
 #### ActiveIssueAttribute
-This attribute is intended to be used when there is an active issue tracking the test failure and it is needed to be fixed. This is a temporary attribute to skip the test while the issue is fixed.
+This attribute is intended to be used when there is an active issue tracking the test failure and it is needed to be fixed. This is a temporary attribute to skip the test while the issue is fixed. It is important that you limit the scope of the attribute to just the platforms and target monikers where the issue applies.
 
 This attribute can be applied either to a test class (will disable all the tests in that class) or to a test method. It allows multiple usages on the same member.
 
@@ -270,24 +272,23 @@ This attribute returns the 'failing' category, which is disabled by default.
 
 **Disable for all platforms and all target frameworks:**
 ```cs
-ActiveIssue(int issue)
-ActiveIssue(string issue)
+[ActiveIssue(int issue)]
+[ActiveIssue(string issue)]
 ```
 **Disable for specific platform:**
 ```cs
-ActiveIssue(int issue, TestPlatforms platforms)
-ActiveIssue(string issue, TestPlatforms platforms)
+[ActiveIssue(int issue, TestPlatforms platforms)]
+[ActiveIssue(string issue, TestPlatforms platforms)]
 ```
 **Disable for specific target frameworks:**
 ```cs
-ActiveIssue(int issue, TargetFrameworkMonikers frameworks)
-ActiveIssue(string issue, TargetFrameworkMonikers frameworks)
+[ActiveIssue(int issue, TargetFrameworkMonikers frameworks)]
+[ActiveIssue(string issue, TargetFrameworkMonikers frameworks)]
 ```
-
 **Disable for specific test platforms and target frameworks:**
 ```cs
-ActiveIssue(int issue, TestPlatforms platforms, TargetFrameworkMonikers frameworks)
-ActiveIssue(string issue, TestPlatforms platforms, TargetFrameworkMonikers frameworks)
+[ActiveIssue(int issue, TestPlatforms platforms, TargetFrameworkMonikers frameworks)]
+[ActiveIssue(string issue, TestPlatforms platforms, TargetFrameworkMonikers frameworks)]
 ```
 Use this attribute over test methods to skip failing tests only on the specific platforms and the specific target frameworks.
 
@@ -296,21 +297,14 @@ This attribute is intended to disable a test permanently on a framework where an
 
 This attribute can be applied either to a test class (will disable all the tests in that class) or to a test method. It allows multiple usages on the same member.
 
-The available frameworks to disable are the following:
-
-| TargetFrameworkMonikers | Returns | Frameworks |
-| :-----------------------: |:-------:| :---------:|
-| NetFramework | `nonnetfxtests` | Netfx |
-| Netcoreapp | `nonnetcoreapptests` | Netcoreapp |
-| Uap | `nonuaptests`, `nonuapaottests` | Uap, UapAot |
-| UapAot | `nonuapaottests` | UapAot |
-
 ```cs
-SkipOnTargetFramework(TargetFrameworkMonikers frameworks, string reason)
+[SkipOnTargetFramework(TargetFrameworkMonikers frameworks, string reason)]
 ```
 Use this attribute over test methods to skip tests only on the specific target frameworks. The reason parameter doesn't affect the traits but we rather always use it so that when we see this attribute we know why it is being skipped on that framework. 
 
-If it needs to be skipped in multiple frameworks and the reasons are different please use two attributes on the same test so that you can specify different reasons for each framework. 
+If it needs to be skipped in multiple frameworks and the reasons are different please use two attributes on the same test so that you can specify different reasons for each framework.
+
+**Currently this are the [Framework Monikers](https://github.com/dotnet/buildtools/blob/master/src/xunit.netcore.extensions/TargetFrameworkMonikers.cs#L23-L26) that we support through our test execution infrastructure**
 
 _**A few common examples with the above attributes:**_
 
