@@ -17,6 +17,7 @@
     <!-- We redistribute the 4.0.1 binaries for netcore50 because they target the API sets 
          as kernel32 is unavailable on OneCore systems -->
     <ProjectReference Condition="'$(PackagePlatform)'!='arm64'" Include="redist\clrcompression.depproj">
+      <UndefineProperties>SkipCreatePackageOnMissingFiles</UndefineProperties>
       <AdditionalProperties>PackageTargetRuntime=$(PackageTargetRuntime)</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
