@@ -628,6 +628,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ListMembers()
     {
         TypeWithListMembers x = new TypeWithListMembers
@@ -812,6 +813,7 @@ public static partial class DataContractSerializerTests
 
     [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19516")]
+    [ActiveIssue("dotnet/corefx #20476", TargetFrameworkMonikers.UapAot)]
     public static void DCS_TypeWithPrivateFieldAndPrivateGetPublicSetProperty()
     {
         TypeWithPrivateFieldAndPrivateGetPublicSetProperty x = new TypeWithPrivateFieldAndPrivateGetPublicSetProperty
@@ -1482,6 +1484,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_InnerExceptionMessageWithSpecialChars()
     {
         var value = new Exception("", new Exception("Test Exception<>&'\""));
@@ -1600,6 +1603,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_GenericQueue()
     {
         Queue<int> value = new Queue<int>();
@@ -1613,6 +1617,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_GenericStack()
     {
         var value = new Stack<int>();
@@ -1628,6 +1633,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_Queue()
     {
         var value = new Queue();
@@ -1642,6 +1648,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_Stack()
     {
         var value = new Stack();
@@ -1657,6 +1664,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_SortedList()
     {
         var value = new SortedList();
@@ -1669,6 +1677,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_SystemVersion()
     {
         Version value = new Version(1, 2, 3, 4);
@@ -1688,7 +1697,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual<TypeWithCommonTypeProperties>(value, deserializedValue);
     }
 
-#if uapaot
+#if !uapaot
     [Fact]
     public static void DCS_TypeWithTypeProperty()
     {
@@ -1876,6 +1885,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ReadOnlyCollection()
     {
         List<string> list = new List<string>() { "Foo", "Bar" };
@@ -1887,14 +1897,14 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18312")]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ReadOnlyDictionary()
     {
         var dict = new Dictionary<string, int>();
         dict["Foo"] = 1;
         dict["Bar"] = 2;
         ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
-        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></_dictionary></ReadOnlyDictionaryOfstringint>");
+        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><m_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></m_dictionary></ReadOnlyDictionaryOfstringint>");
 
         Assert.StrictEqual(value.Count, deserializedValue.Count);
         Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
@@ -2831,7 +2841,8 @@ public static partial class DataContractSerializerTests
             PreserveObjectReferences = false
         };
 
-        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data><_data2 i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data2></ObjectContainer>";
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data><_data2 i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.79
+76931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data2></ObjectContainer>";
         var value = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.PrimitiveContainer());
 
         var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
@@ -3046,6 +3057,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_BasicRoundtripDCRDefaultCollections()
     {
         var defaultCollections = new SerializationTestTypes.DefaultCollections();
