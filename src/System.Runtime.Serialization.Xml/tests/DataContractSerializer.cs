@@ -3147,8 +3147,6 @@ public static partial class DataContractSerializerTests
         NativeDllWrapper.CallIntoNativeDll();
     }
 
-
-
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;
