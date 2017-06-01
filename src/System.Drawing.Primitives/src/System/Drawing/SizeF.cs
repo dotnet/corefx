@@ -106,7 +106,7 @@ namespace System.Drawing
         /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="SizeF"/>.</returns>
         public static SizeF operator /(SizeF left, float right)
-            => new SizeF(left._width / right, left._height / right);
+            => new SizeF(left.width / right, left.height / right);
 
         /// <summary>
         ///    Tests whether two <see cref='System.Drawing.SizeF'/> objects
@@ -217,7 +217,7 @@ namespace System.Drawing
         /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
         /// <returns>Product of type SizeF.</returns>
         private static SizeF Multiply(SizeF size, float multiplier) =>
-            new SizeF(size._width * multiplier, size._height * multiplier);
+            new SizeF(size.width * multiplier, size.height * multiplier);
     }
 }
 

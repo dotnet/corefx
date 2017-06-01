@@ -95,7 +95,7 @@ namespace System.Drawing
         /// <param name="left">Dividend of type <see cref="Size"/>.</param>
         /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="Size"/>.</returns>
-        public static Size operator /(Size left, int right) => new Size(unchecked(left._width / right), unchecked(left._height / right));
+        public static Size operator /(Size left, int right) => new Size(unchecked(left.width / right), unchecked(left.height / right));
 
         /// <summary>
         /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
@@ -120,7 +120,7 @@ namespace System.Drawing
         /// <param name="right">Divisor of type <see cref="int"/>.</param>
         /// <returns>Result of type <see cref="SizeF"/>.</returns>
         public static SizeF operator /(Size left, float right)
-            => new SizeF(left._width / right, left._height / right);
+            => new SizeF(left.width / right, left.height / right);
 
         /// <summary>
         ///    Tests whether two <see cref='System.Drawing.Size'/> objects
@@ -247,7 +247,7 @@ namespace System.Drawing
         /// <param name="multiplier">Multiplier of type <see cref='int'>.</param>
         /// <returns>Product of type <see cref="Size"/>.</returns>
         private static Size Multiply(Size size, int multiplier) =>
-            new Size(unchecked(size._width * multiplier), unchecked(size._height * multiplier));
+            new Size(unchecked(size.width * multiplier), unchecked(size.height * multiplier));
 
         /// <summary>
         /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
@@ -256,6 +256,6 @@ namespace System.Drawing
         /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
         /// <returns>Product of type SizeF.</returns>
         private static SizeF Multiply(Size size, float multiplier) =>
-            new SizeF(size._width * multiplier, size._height * multiplier);
+            new SizeF(size.width * multiplier, size.height * multiplier);
     }
 }
