@@ -3120,6 +3120,7 @@ public class LocalReadingPosition
     public string PlatformOffset { get; set; }
 }
 
+#if !uapaot
 public class NativeDllWrapper
 {
     internal struct MyStruct
@@ -3139,6 +3140,7 @@ public class NativeDllWrapper
         return myStruct.field1;
     }
 }
+#endif
 
 public class TypeWithXmlElementProperty
 {
