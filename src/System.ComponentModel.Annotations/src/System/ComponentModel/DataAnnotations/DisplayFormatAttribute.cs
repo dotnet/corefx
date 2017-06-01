@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
-
 namespace System.ComponentModel.DataAnnotations
 {
     /// <summary>
@@ -71,7 +69,7 @@ namespace System.ComponentModel.DataAnnotations
         public bool HtmlEncode { get; set; }
 
 		/// <summary>
-		///     Gets or sets the <see cref="System.Type" /> that contains the resources for <see cref="NullDisplayText" />.
+		///     Gets or sets the <see cref="Type" /> that contains the resources for <see cref="NullDisplayText" />.
 		///     Using <see cref="NullDisplayTextResourceType" /> along with <see cref="NullDisplayText" />, allows the <see cref="GetNullDisplayText" />
 		///     method to return localized values.
 		/// </summary>
@@ -100,7 +98,7 @@ namespace System.ComponentModel.DataAnnotations
         ///         When <see cref="NullDisplayText" /> and <see cref="NullDisplayTextResourceType" /> have not been set, returns <c>null</c>.
         ///     </para>
         /// </returns>
-        /// <exception cref="System.InvalidOperationException">
+        /// <exception cref="InvalidOperationException">
         ///     After setting both the <see cref="NullDisplayTextResourceType" /> property and the <see cref="NullDisplayText" /> property,
         ///     but a public static property with a name matching the <see cref="NullDisplayText" /> value couldn't be found
         ///     on the <see cref="NullDisplayTextResourceType" />.
