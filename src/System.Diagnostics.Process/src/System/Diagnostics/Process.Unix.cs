@@ -255,7 +255,7 @@ namespace System.Diagnostics
             int childPid, stdinFd, stdoutFd, stderrFd;
             Interop.Sys.ForkAndExecProcess(
                 filename, argv, envp, cwd,
-                startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
+                startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError, startInfo.CreateNewProcessGroup,
                 out childPid,
                 out stdinFd, out stdoutFd, out stderrFd);
 

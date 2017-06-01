@@ -144,5 +144,11 @@ namespace System.Diagnostics
                 _windowStyle = value;
             }
         }
+
+        /// <summary>
+        /// When set to true this will create the process in a new process group rather
+        /// than in the same group as the parent process.
+        /// </summary>
+        public bool CreateNewProcessGroup { get; set; }
     }
 }

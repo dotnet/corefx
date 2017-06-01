@@ -342,6 +342,67 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void TestCreateNewProcessGroupProperty()
+        {
+            // Verify that StartInfo.CreateNewProcessGroup property is available and settable
+            Process p = CreateProcess();
+            p.StartInfo.CreateNewProcessGroup = true;
+            Assert.Equal(true, p.StartInfo.CreateNewProcessGroup);
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Group Ids are only available on Unix platforms
+        [Fact]
+        public void TestCreateNewProcessGroup()
+        {
+            // Verify that StartInfo.CreateNewProcessGroup creates a process having its own process group
+            Process p = CreateProcess();
+            p.StartInfo.CreateNewProcessGroup = true;
+
+            try
+            {
+                p.Start();
+#if !TargetsWindows
+                // Group Id should be the same as the process Id instead of a parent process Id
+                int pgid = Interop.getpgid(p.Id);
+                Assert.Equal(pgid, p.Id);
+#endif
+            }
+            finally
+            {
+                if (!p.HasExited)
+                    p.Kill();
+
+                Assert.True(p.WaitForExit(WaitInMS));
+            }
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Group Ids are only available on Unix platforms
+        [Fact]
+        public void TestCreateNoNewProcessGroup()
+        {
+            // Verify that StartInfo.CreateNewProcessGroup == false does not create a process having its own process group
+            Process p = CreateProcess();
+            p.StartInfo.CreateNewProcessGroup = false;
+
+            try
+            {
+                p.Start();
+#if !TargetsWindows
+                // Group Id should not be the same as the process Id
+                int pgid = Interop.getpgid(p.Id);
+                Assert.NotEqual(pgid, p.Id);
+#endif
+            }
+            finally
+            {
+                if (!p.HasExited)
+                    p.Kill();
+
+                Assert.True(p.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact]
         public void TestWorkingDirectoryProperty()
         {
             CreateDefaultProcess();

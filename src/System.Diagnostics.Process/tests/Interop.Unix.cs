@@ -16,5 +16,8 @@ namespace System.Diagnostics.Tests
 
         [DllImport("libc")]
         internal static extern int getsid(int pid);
+
+        [DllImport("libc")]
+        internal static extern int getpgid(int pid);
     }
 }

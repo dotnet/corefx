@@ -99,6 +99,7 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t redirectStdin,
                                       int32_t redirectStdout,
                                       int32_t redirectStderr,
+                                      int32_t createNewProcessGroup,
                                       int32_t* childPid,
                                       int32_t* stdinFd,
                                       int32_t* stdoutFd,
@@ -118,9 +119,9 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0)
+    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0 || (createNewProcessGroup & ~1) != 0)
     {
-        assert(false && "Boolean redirect* inputs must be 0 or 1.");
+        assert(false && "Boolean redirect* and createNewProcessGroup inputs must be 0 or 1.");
         errno = EINVAL;
         success = false;
         goto done;
@@ -180,6 +181,18 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         {
             int result;
             while (CheckInterrupted(result = chdir(cwd)));
+            if (result == -1)
+            {
+                _exit(errno != 0 ? errno : EXIT_FAILURE);
+            }
+        }
+
+        // If CreateNewProcessGroup was chosen then set the child process group Id to its
+        // own process Id so that it is in its own process group.
+        if (createNewProcessGroup)
+        {
+            int result;
+            while (CheckInterrupted(result = setpgid(0, 0)));
             if (result == -1)
             {
                 _exit(errno != 0 ? errno : EXIT_FAILURE);
