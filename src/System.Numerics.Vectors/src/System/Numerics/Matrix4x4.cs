@@ -130,6 +130,23 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Gets or sets the scale component of this matrix.
+        /// </summary>
+        public Vector3 Scale
+        {
+            get
+            {
+                return new Vector3(M11, M22, M33);
+            }
+            set
+            {
+                M11 = value.X;
+                M22 = value.Y;
+                M33 = value.Z;
+            }
+        }
+
+        /// <summary>
         /// Constructs a Matrix4x4 from the given components.
         /// </summary>
         public Matrix4x4(float m11, float m12, float m13, float m14,
@@ -863,7 +880,7 @@ namespace System.Numerics
         }
 
         /// <summary>
-        /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances. 
+        /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances.
         /// </summary>
         /// <param name="fieldOfView">Field of view in the y direction, in radians.</param>
         /// <param name="aspectRatio">Aspect ratio, defined as view space width divided by height.</param>
@@ -1266,9 +1283,9 @@ namespace System.Numerics
             // a | j k l | = a ( f ( kp - lo ) - g ( jp - ln ) + h ( jo - kn ) )
             //   | n o p |
             //
-            //   | e g h |     
+            //   | e g h |
             // b | i k l | = b ( e ( kp - lo ) - g ( ip - lm ) + h ( io - km ) )
-            //   | m o p |     
+            //   | m o p |
             //
             //   | e f h |
             // c | i j l | = c ( e ( jp - ln ) - f ( ip - lm ) + h ( in - jm ) )
@@ -1313,7 +1330,7 @@ namespace System.Numerics
             //                                       -1
             // If you have matrix M, inverse Matrix M   can compute
             //
-            //     -1       1      
+            //     -1       1
             //    M   = --------- A
             //            det(M)
             //
