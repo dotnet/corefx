@@ -48,11 +48,27 @@ namespace System.Runtime.Serialization.Formatters.Tests
             CheckForAnyEquals(obj, clone);
         }
 
+        private string GetRepoRootPath()
+        {
+            var exeFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
+
+            DirectoryInfo root = exeFile.Directory;
+            while (!Directory.Exists(Path.Combine(root.FullName, ".git")))
+            {
+                if (root.Parent == null)
+                    return null;
+
+                root = root.Parent;
+            }
+
+            return root.FullName;
+        }
+
         // Used for generating BinaryFormatterTestData.cs
         //[Fact]
         public void Serialize()
         {
-            IEnumerable<object[]> objs = SerializableObjects().Concat(EqualityComparers());
+            IEnumerable<object[]> objs = EqualityComparers().Concat(SerializableObjects());
             List<string> serializedHashes = new List<string>();
             foreach (var obj in objs)
             {
@@ -65,7 +81,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 }
             }
 
-            string path = @"D:\corefx\src\System.Runtime.Serialization.Formatters\tests\BinaryFormatterTestData.cs";
+            string repoPath = GetRepoRootPath();
+            Assert.NotNull(repoPath);
+
+            string path = Path.Combine(repoPath, "src", "System.Runtime.Serialization.Formatters", "tests", "BinaryFormatterTestData.cs");
             string[] lines = File.ReadAllLines(path);
 
             List<string> newLines = new List<string>();
@@ -93,7 +112,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             Assert.Equal(numOfHashes, serializedHashes.Count);
-
             File.WriteAllLines(path, newLines);
         }
 
