@@ -36,7 +36,6 @@
     <Compile Include="System\Diagnostics\SymbolStore\SymLanguageVendor.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
-    <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
     <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.IO\src\System.IO.csproj" />
