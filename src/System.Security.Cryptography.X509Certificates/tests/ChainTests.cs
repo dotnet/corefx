@@ -553,12 +553,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         break;
                     }
 
-                    if (i > 3)
-                    {
-                        // Network congestion?
-                        Thread.Sleep(1000);
-                    }
-
                     for (int j = 0; j < onlineChain.ChainElements.Count; j++)
                     {
                         X509ChainElement chainElement = onlineChain.ChainElements[j];
@@ -572,6 +566,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                             Console.WriteLine(
                                 $"{nameof(VerifyWithRevocation)}: online attempt {i} - errors at depth {j}: {allFlags}");
+
+                            if (i > 3)
+                            {
+                                Console.WriteLine("Network congestion? Sleeping 1 second");
+                                Thread.Sleep(1000);
+                            }
                         }
 
                         chainElement.Certificate.Dispose();
