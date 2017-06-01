@@ -942,37 +942,33 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
             if (entry == null || entry.AssemblyName != assemblyName)
             {
-                Assembly assm = null;
-
                 // Check early to avoid throwing unnecessary exceptions
                 if (assemblyName == null)
                 {
                     return null;
                 }
 
+                Assembly assm = null;
+                AssemblyName assmName = null;
+
+                try
+                {
+                    assmName = new AssemblyName(assemblyName);
+                }
+                catch
+                {
+                    return null;
+                }
+
                 if (_isSimpleAssembly)
                 {
-                    try
-                    {
-                        assm = Assembly.Load(assemblyName);
-                    }
-                    catch { }
-
-                    if (assm == null)
-                    {
-                        try
-                        {
-                            AssemblyName asmName = new AssemblyName(assemblyName);
-                            assm = Assembly.Load(asmName.Name);
-                        }
-                        catch { }
-                    }
+                    assm = ResolveSimpleAssemblyName(assmName);
                 }
                 else
                 {
                     try
                     {
-                        assm = Assembly.Load(new AssemblyName(assemblyName));
+                        assm = Assembly.Load(assmName);
                     }
                     catch { }
                 }
@@ -1040,7 +1036,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             catch (FileLoadException) { }
             catch (BadImageFormatException) { }
 
-            if(type == null)
+            if (type == null)
             {
                 type = Type.GetType(typeName, ResolveSimpleAssemblyName, new TopLevelAssemblyTypeResolver(assm).ResolveType, throwOnError: false);
             }
