@@ -130,7 +130,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Take(1) - serialized netfx objects are not supported
-            foreach (string tfmBase64Hash in tfmBase64Hashes.Take(1))
+            foreach (string tfmBase64Hash in tfmBase64Hashes)
             {
                 // Currently for valuetuples
                 if (!string.IsNullOrWhiteSpace(tfmBase64Hash))
