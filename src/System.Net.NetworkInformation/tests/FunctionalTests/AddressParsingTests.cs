@@ -7,6 +7,7 @@ using Xunit;
 
 namespace System.Net.NetworkInformation.Tests
 {
+    [ActiveIssue(20014, TargetFrameworkMonikers.Uap)]
     public class AddressParsingTests
     {
         [Fact]

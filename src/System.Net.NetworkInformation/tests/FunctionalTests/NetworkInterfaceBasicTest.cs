@@ -257,6 +257,7 @@ namespace System.Net.NetworkInformation.Tests
             Assert.True(NetworkInterface.GetIsNetworkAvailable());
         }
 
+        [ActiveIssue(20014, TargetFrameworkMonikers.Uap)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(false)]
