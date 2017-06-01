@@ -277,7 +277,7 @@ namespace System.Security.Principal
         // the request is anonymous. It does not represent a real process or thread token so
         // it cannot impersonate or do anything useful. Note this identity does not represent the
         // usual concept of an anonymous token, and the name is simply misleading but we cannot change it now.
-        
+
         public static WindowsIdentity GetAnonymous()
         {
             return new WindowsIdentity();
@@ -367,12 +367,12 @@ namespace System.Security.Principal
             {
                 if (_isAuthenticated == -1)
                 {
-                        // This approach will not work correctly for domain guests (will return false
-                        // instead of true). This is a corner-case that is not very interesting.
-                        _isAuthenticated = CheckNtTokenForSid(new SecurityIdentifier(IdentifierAuthority.NTAuthority,
-                                                                        new int[] { Interop.SecurityIdentifier.SECURITY_AUTHENTICATED_USER_RID })) ? 1 : 0;
+                    // This approach will not work correctly for domain guests (will return false
+                    // instead of true). This is a corner-case that is not very interesting.
+                    _isAuthenticated = CheckNtTokenForSid(new SecurityIdentifier(IdentifierAuthority.NTAuthority,
+                                                                    new int[] { Interop.SecurityIdentifier.SECURITY_AUTHENTICATED_USER_RID })) ? 1 : 0;
                 }
-                return _isAuthenticated == 1;                
+                return _isAuthenticated == 1;
             }
         }
         private bool CheckNtTokenForSid(SecurityIdentifier sid)
@@ -631,9 +631,9 @@ namespace System.Security.Principal
         //
         // internal.
         //
-        
+
         private static AsyncLocal<SafeAccessTokenHandle> s_currentImpersonatedToken = new AsyncLocal<SafeAccessTokenHandle>(CurrentImpersonatedTokenChanged);
-        
+
         private static void RunImpersonatedInternal(SafeAccessTokenHandle token, Action action)
         {
             bool isImpersonating;
@@ -666,7 +666,7 @@ namespace System.Security.Principal
                 },
                 null);
         }
-        
+
         private static void CurrentImpersonatedTokenChanged(AsyncLocalValueChangedArgs<SafeAccessTokenHandle> args)
         {
             if (!args.ThreadContextChanged)
@@ -681,7 +681,7 @@ namespace System.Security.Principal
                     Environment.FailFast(new Win32Exception().Message);
             }
         }
-        
+
         internal static WindowsIdentity GetCurrentInternal(TokenAccessLevels desiredAccess, bool threadOnly)
         {
             int hr = 0;
@@ -711,7 +711,7 @@ namespace System.Security.Principal
             else
                 return (dwLastError & 0x0000FFFF) | unchecked((int)0x80070000);
         }
-        
+
         private static Exception GetExceptionFromNtStatus(int status)
         {
             if ((uint)status == Interop.StatusOptions.STATUS_ACCESS_DENIED)
@@ -723,7 +723,7 @@ namespace System.Security.Principal
             int win32ErrorCode = Interop.NtDll.RtlNtStatusToDosError(status);
             return new SecurityException(new Win32Exception(win32ErrorCode).Message);
         }
-        
+
         private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
         {
             isImpersonating = true;
