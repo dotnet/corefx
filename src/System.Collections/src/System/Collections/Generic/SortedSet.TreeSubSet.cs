@@ -45,12 +45,6 @@ namespace System.Collections.Generic
                 VersionCheckImpl();
             }
 
-            private TreeSubSet(SerializationInfo info, StreamingContext context)
-            {
-                _siInfo = info;
-                OnDeserializationImpl(info);
-            }
-
             internal override bool AddIfNotPresent(T item)
             {
                 if (!IsWithinRange(item))
@@ -349,68 +343,15 @@ namespace System.Collections.Generic
 
             protected override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(MaxName, _max, typeof(T));
-                info.AddValue(MinName, _min, typeof(T));
-                info.AddValue(LowerBoundActiveName, _lBoundActive);
-                info.AddValue(UpperBoundActiveName, _uBoundActive);
-
-                base.GetObjectData(info, context);
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)
             {
-                // Don't do anything here as the work has already been done by the constructor
+                throw new PlatformNotSupportedException();
             }
 
-            protected override void OnDeserialization(Object sender) => OnDeserializationImpl(sender);
-
-            private void OnDeserializationImpl(Object sender)
-            {
-                if (_siInfo == null)
-                {
-                    throw new SerializationException(SR.Serialization_InvalidOnDeser);
-                }
-
-                _comparer = (IComparer<T>)_siInfo.GetValue(ComparerName, typeof(IComparer<T>));
-                int savedCount = _siInfo.GetInt32(CountName);
-                _max = (T)_siInfo.GetValue(MaxName, typeof(T));
-                _min = (T)_siInfo.GetValue(MinName, typeof(T));
-                _lBoundActive = _siInfo.GetBoolean(LowerBoundActiveName);
-                _uBoundActive = _siInfo.GetBoolean(UpperBoundActiveName);
-                _underlying = new SortedSet<T>();
-
-                if (savedCount != 0)
-                {
-                    T[] items = (T[])_siInfo.GetValue(ItemsName, typeof(T[]));
-
-                    if (items == null)
-                    {
-                        throw new SerializationException(SR.Serialization_MissingValues);
-                    }
-
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        _underlying.Add(items[i]);
-                    }
-                }
-
-                _underlying._version = _siInfo.GetInt32(VersionName);
-                _count = _underlying._count;
-                _version = _underlying._version - 1;
-                VersionCheck(); // this should update the count to be right and update root to be right
-
-                if (_count != savedCount)
-                {
-                    throw new SerializationException(SR.Serialization_MismatchedCount);
-                }
-
-                _siInfo = null;
-            }
+            protected override void OnDeserialization(Object sender) => throw new PlatformNotSupportedException();
         }
     }
 }

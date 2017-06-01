@@ -1861,7 +1861,6 @@ namespace System.Collections.Generic
             private Node _current;
 
             private bool _reverse;
-            private SerializationInfo _siInfo;
 
             internal Enumerator(SortedSet<T> set)
             {
@@ -1874,8 +1873,6 @@ namespace System.Collections.Generic
                 _stack = new Stack<Node>(2 * (int)Log2(set.Count + 1));
                 _current = null;
                 _reverse = false;
-
-                _siInfo = null;
 
                 Initialize();
             }
@@ -1891,70 +1888,17 @@ namespace System.Collections.Generic
                 _current = null;
                 _reverse = reverse;
 
-                _siInfo = null;
-
                 Initialize();
-            }
-
-            private Enumerator(SerializationInfo info, StreamingContext context)
-            {
-                _tree = null;
-                _version = -1;
-                _current = null;
-                _reverse = false;
-                _stack = null;
-                _siInfo = info;
             }
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                GetObjectData(info, context);
-            }
-
-            private void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(TreeName, _tree, typeof(SortedSet<T>));
-                info.AddValue(EnumVersionName, _version);
-                info.AddValue(ReverseName, _reverse);
-                info.AddValue(EnumStartName, !NotStartedOrEnded);
-                info.AddValue(NodeValueName, (_current == null ? s_dummyNode.Item : _current.Item), typeof(T));
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)
             {
-                OnDeserialization(sender);
-            }
-
-            private void OnDeserialization(Object sender)
-            {
-                if (_siInfo == null)
-                {
-                    throw new SerializationException(SR.Serialization_InvalidOnDeser);
-                }
-
-                _tree = (SortedSet<T>)_siInfo.GetValue(TreeName, typeof(SortedSet<T>));
-                _version = _siInfo.GetInt32(EnumVersionName);
-                _reverse = _siInfo.GetBoolean(ReverseName);
-                bool EnumStarted = _siInfo.GetBoolean(EnumStartName);
-                _stack = new Stack<Node>(2 * (int)Log2(_tree.Count + 1));
-                _current = null;
-                if (EnumStarted)
-                {
-                    T item = (T)_siInfo.GetValue(NodeValueName, typeof(T));
-                    Initialize();
-
-                    // go until it reaches the value we want
-                    while (this.MoveNext())
-                    {
-                        if (_tree.Comparer.Compare(Current, item) == 0)
-                            break;
-                    }
-                }
+                throw new PlatformNotSupportedException();
             }
 
             private void Initialize()
