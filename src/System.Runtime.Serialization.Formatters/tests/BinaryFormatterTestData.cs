@@ -11,7 +11,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
 {
     public partial class BinaryFormatterTests
     {
-        public static IEnumerable<object[]> EqualityComparers()
+        // *** AUTO UPDATED BLOBS ***
+
+        /// <summary>
+        /// First: Serializable object
+        /// Second: String Array with blob serialized in [netcoreapp, netfx]
+        /// To update hashes execute UpdateBlobs test
+        /// </summary>
+        public static IEnumerable<object[]> SerializableEqualityComparers()
         {
             // Internal specialized equality comparers
             yield return new object[] { EqualityComparer<UInt32Enum>.Default, new string[] { "AAEAAAD/////AQAAAAAAAAAEAQAAAOEBU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuT2JqZWN0RXF1YWxpdHlDb21wYXJlcmAxW1tTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVUludDMyRW51bSwgU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLCBWZXJzaW9uPTQuMC4zLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49OWQ3N2NjN2FkMzliNjhlYl1dAAAAAAs=", "AAEAAAD/////AQAAAAAAAAAEAQAAAOEBU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuT2JqZWN0RXF1YWxpdHlDb21wYXJlcmAxW1tTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVUludDMyRW51bSwgU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLCBWZXJzaW9uPTQuMC4zLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49OWQ3N2NjN2FkMzliNjhlYl1dAAAAAAs=" } };
@@ -22,10 +29,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         /// <summary>
-        /// First: Object
-        /// Second: String Array with Base64 Object Hashes serialized in 1. netcoreapp and 2. netfx
-        /// If a new hash needs to be generated delete the string element in the array and you will get 
-        /// the new one in the exception message when running the ValidateTfmHashes test.
+        /// First: Serializable object
+        /// Second: String Array with blob serialized in [netcoreapp, netfx]
+        /// To update hashes execute UpdateBlobs test
         /// </summary>
         public static IEnumerable<object[]> SerializableObjects()
         {
@@ -391,12 +397,76 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
+        // *** NON AUTO UPDATED DATA ***
+
+        public static IEnumerable<object> SerializableExceptions()
+        {
+            var exception = new Exception("Exception message", new Exception("Inner exception message"));
+            yield return new object[] { new AggregateException("Aggregate exception message", exception) };
+            yield return new object[] { exception };
+        }
+
         public static IEnumerable<object> NonSerializableObjects()
         {
             yield return new NonSerializableStruct();
             yield return new NonSerializableClass();
             yield return new SerializableClassWithBadField();
             yield return new object[] { 1, 2, 3, new NonSerializableClass() };
+        }
+
+        public static IEnumerable<object[]> BasicObjectsRoundtrip()
+        {
+            foreach (object[] record in SerializableObjects())
+            {
+                foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
+                {
+                    foreach (TypeFilterLevel filterLevel in new[] { TypeFilterLevel.Full, TypeFilterLevel.Low })
+                    {
+                        foreach (FormatterTypeStyle typeFormat in new[] { FormatterTypeStyle.TypesAlways, FormatterTypeStyle.TypesWhenNeeded, FormatterTypeStyle.XsdString })
+                        {
+                            yield return new object[] { record[0], assemblyFormat, filterLevel, typeFormat };
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> NonSerializableTypes()
+        {
+            foreach (object obj in NonSerializableObjects())
+            {
+                foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
+                {
+                    foreach (TypeFilterLevel filterLevel in new[] { TypeFilterLevel.Full, TypeFilterLevel.Low })
+                    {
+                        foreach (FormatterTypeStyle typeFormat in new[] { FormatterTypeStyle.TypesAlways, FormatterTypeStyle.TypesWhenNeeded, FormatterTypeStyle.XsdString })
+                        {
+                            yield return new object[] { obj, assemblyFormat, filterLevel, typeFormat };
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> FuzzInputs()
+        {
+            var rand = new Random(42);
+            foreach (object[] record in SerializableObjects())
+            {
+                const int FuzzingsPerObject = 3;
+                for (int i = 0; i < FuzzingsPerObject; i++)
+                {
+                    yield return new object[] { record[0], rand };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> CrossProcessObjects()
+        {
+            // Just a few objects to verify we can roundtrip out of process memory
+            yield return new object[] { "test" };
+            yield return new object[] { new List<int> { 1, 2, 3, 4, 5 } };
+            yield return new object[] { new Tree<int>(1, new Tree<int>(2, new Tree<int>(3, null, null), new Tree<int>(4, null, null)), new Tree<int>(5, null, null)) };
         }
     }
 }
