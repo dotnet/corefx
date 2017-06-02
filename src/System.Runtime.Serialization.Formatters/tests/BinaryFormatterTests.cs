@@ -51,7 +51,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     $"Blob: " + SerializeObjectToBlob(obj));
             }
 
-            foreach (string blob in blobs.Where(blob => !string.IsNullOrWhiteSpace(blob)))
+            foreach (string blob in blobs)
             {
                 CheckForAnyEquals(obj, DeserializeBlobToObject(blob));
             }
