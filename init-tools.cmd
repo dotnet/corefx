@@ -1,4 +1,7 @@
 @if not defined _echo @echo off
+:: want this environment variable to persist for the other build steps so moving above setlocal.
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 setlocal
 
 set INIT_TOOLS_LOG=%~dp0init-tools.log
