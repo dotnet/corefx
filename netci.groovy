@@ -33,12 +33,10 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'OpenSUSE13.2' : 'opensuse.13.2-x64',
                              'RHEL7.2': 'rhel.7-x64']
 
-def osShortName = ['Windows 10': 'win10',
-                   'Windows 7' : 'win7',
+def osShortName = ['Windows 7' : 'win7',
                    'Windows_NT' : 'windows_nt',
                    'Ubuntu14.04' : 'ubuntu14.04',
                    'OSX' : 'osx',
-                   'Windows Nano 2016' : 'winnano16',
                    'Ubuntu16.04' : 'ubuntu16.04',
                    'CentOS7.1' : 'centos7.1',
                    'Debian8.4' : 'debian8.4',
@@ -116,104 +114,17 @@ def osShortName = ['Windows 10': 'win10',
 }
 
 // **************************
-// Define outerloop windows Nano testing.  Run locally on each machine.
-// **************************
-[true, false].each { isPR ->
-    ['Windows Nano 2016'].each { os ->
-        ['Debug', 'Release'].each { configurationGroup ->
-
-            def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
-            
-            def newBuildJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}_bld"
-
-            def newBuildJob = job(Utilities.getFullJobName(project, newBuildJobName, isPR)) {
-                steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:OSGroup=Windows_NT /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true /p:Outerloop=true /p:WithoutCategories=IgnoreForCI")
-                    // Package up the results.
-                    batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack . bin packages")
-                }
-            }
-
-            // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT', 'latest-or-auto')
-            // Set up standard options.
-            Utilities.standardJobSetup(newBuildJob, project, isPR, "*/${branch}")
-            // Archive the results
-            Utilities.addArchival(newBuildJob, "bin/build.pack,run-test.cmd,msbuild.log")
-            
-            def fullCoreFXBuildJobName = projectFolder + '/' + newBuildJob.name
-            def newTestJobName =  "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}_tst"
-            def newTestJob = job(Utilities.getFullJobName(project, newTestJobName, isPR)) {
-                steps {
-                    // The tests/corefx components
-                    copyArtifacts(fullCoreFXBuildJobName) {
-                        includePatterns('bin/build.pack')
-                        includePatterns('run-test.cmd')
-                        buildSelector {
-                            buildNumber('\${COREFX_BUILD}')
-                        }
-                    }
-
-                    // Unpack the build data
-                    batchFile("PowerShell -command \"\"C:\\Packer\\unpacker.ps1 .\\bin\\build.pack . > .\\bin\\unpacker.log\"\"")
-                    // Run the tests
-                    batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup} %WORKSPACE%\\packages")
-                    // Run the tests
-                    batchFile("run-test.cmd .\\bin\\tests\\AnyOS.AnyCPU.${configurationGroup} %WORKSPACE%\\packages")
-                }
-
-                parameters {
-                    stringParam('COREFX_BUILD', '', 'Build number to use for copying binaries for nano server bld.')
-                }
-            }
-
-            // Set the affinity.  All of these run on Windows Nano currently.
-            Utilities.setMachineAffinity(newTestJob, os)
-            // Set up standard options.
-            Utilities.addStandardOptions(newTestJob, isPR)
-            // Add the unit test results
-            Utilities.addXUnitDotNETResults(newTestJob, 'bin/tests/**/testResults.xml')
-
-            def fullCoreFXTestJobName = projectFolder + '/' + newTestJob.name
-            def newJob = buildFlowJob(Utilities.getFullJobName(project, newJobName, isPR)) {
-                buildFlow("""
-                    b = build(params, '${fullCoreFXBuildJobName}')
-                    build(params +
-                    [COREFX_BUILD: b.build.number], '${fullCoreFXTestJobName}')
-                    """)
-            }
-
-            // Set the machine affinity to windows_nt, since git fails on Nano.
-            Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
-            // Set up standard options.
-            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-
-            // Set up appropriate triggers.  PR on demand, otherwise nightly
-            if (isPR) {
-                // Set PR trigger.
-                // TODO: More elaborate regex trigger?
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop\\W+${os}\\W+${configurationGroup}.*")
-            }
-            else {
-                // Set a periodic trigger
-                Utilities.addPeriodicTrigger(newJob, '@daily')
-            }
-        }
-    }
-}
-
-// **************************
 // Define outerloop testing for OSes that can build and run.  Run locally on each machine.
 // **************************
 [true, false].each { isPR ->
-    ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1', 'OpenSUSE13.2', 'RHEL7.2', 'Fedora23', 'Debian8.4', 'OSX'].each { os ->
+    ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1', 'OpenSUSE13.2', 'RHEL7.2', 'Fedora23', 'Debian8.4', 'OSX'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
             def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                 steps {
-                    if (os == 'Windows 10' || os == 'Windows 7' || os == 'Windows_NT') {
+                    if (os == 'Windows 7' || os == 'Windows_NT') {
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:Outerloop=true /p:WithoutCategories=IgnoreForCI")
                     }
                     else if (os == 'OSX') {
@@ -267,7 +178,7 @@ def osShortName = ['Windows 10': 'win10',
             def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                 // On Windows we use the packer to put together everything. On *nix we use tar
                 steps {
-                    if (os == 'Windows 10' || os == 'Windows 7' || os == 'Windows_NT') {
+                    if (os == 'Windows 7' || os == 'Windows_NT') {
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:WithoutCategories=IgnoreForCI")
                         batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
                     }
