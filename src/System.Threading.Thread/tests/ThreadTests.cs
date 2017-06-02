@@ -769,8 +769,7 @@ namespace System.Threading.Threads.Tests
 
             Thread.Sleep(0);
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            var stopwatch = Stopwatch.StartNew();
             Thread.Sleep(500);
             stopwatch.Stop();
             Assert.InRange((int)stopwatch.ElapsedMilliseconds, 100, int.MaxValue);
