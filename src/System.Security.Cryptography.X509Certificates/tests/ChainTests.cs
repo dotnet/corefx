@@ -566,12 +566,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                             Console.WriteLine(
                                 $"{nameof(VerifyWithRevocation)}: online attempt {i} - errors at depth {j}: {allFlags}");
-
-                            Thread.Sleep(1000);
                         }
 
                         chainElement.Certificate.Dispose();
                     }
+
+                    Thread.Sleep(1000); // For network flakiness
                 }
 
                 Assert.True(valid, $"Online Chain Built Validly within {RetryLimit} tries");
