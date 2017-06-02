@@ -64,13 +64,8 @@ namespace System.Net.Sockets
                             CloseAsIs();
                             throw;
                         }
-
-                        // Try to disable completions for synchronous success, if requested
-                        if (trySkipCompletionPortOnSuccess &&
-                            CompletionPortHelper.SkipCompletionPortOnSuccess(boundHandle.Handle))
-                        {
-                            _skipCompletionPortOnSuccess = true;
-                        }
+                        
+                        _skipCompletionPortOnSuccess = false;
 
                         // Don't set this until after we've configured the handle above (if we did)
                         _iocpBoundHandle = boundHandle;
