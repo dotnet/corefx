@@ -541,7 +541,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // Attempt the online test a couple of times, in case there was just a CRL
                 // download failure.
-                const int RetryLimit = 10;
+                const int RetryLimit = 3;
                 bool valid = false;
 
                 for (int i = 0; i < RetryLimit; i++)
@@ -567,11 +567,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                             Console.WriteLine(
                                 $"{nameof(VerifyWithRevocation)}: online attempt {i} - errors at depth {j}: {allFlags}");
 
-                            if (i > 3)
-                            {
-                                Console.WriteLine("Network congestion? Sleeping 1 second");
-                                Thread.Sleep(1000);
-                            }
+                            Thread.Sleep(1000);
                         }
 
                         chainElement.Certificate.Dispose();
