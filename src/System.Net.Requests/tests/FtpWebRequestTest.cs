@@ -5,9 +5,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using TestHelpers;
 using Xunit;
 
 namespace System.Net.Tests
@@ -69,8 +69,7 @@ namespace System.Net.Tests
         [Fact]
         public void GetResponse_ConnectFailure_ThrowsWebException()
         {
-            PortScanner portScanner = new PortScanner();
-            string serverUrl = "ftp://127.0.0.1:" + portScanner.FirstClosedPort;
+            string serverUrl = "ftp://127.0.0.1:" + GetClosedLoopbackPort();
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
             WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
             Assert.Equal(WebExceptionStatus.ConnectFailure, ex.Status);
@@ -364,6 +363,17 @@ namespace System.Net.Tests
             catch (WebException) { }
 
             return false;
+        }
+
+        // It binds to a free port and close it. This port won't be available during the 'TIME-WAIT' state (typically 1 min).
+        private static int GetClosedLoopbackPort()
+        {
+            using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
+                return (listener.LocalEndPoint as IPEndPoint)?.Port ?? 0;
+            }
         }
     }
 }
