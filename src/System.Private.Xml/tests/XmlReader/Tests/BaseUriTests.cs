@@ -12,13 +12,13 @@ namespace System.Xml.Tests
 {
     public class BaseUriTests
     {
-        private const string _dummyXml = @"<?xml version=""1.0""?>";
+        private const string DummyXml = @"<?xml version=""1.0""?>";
 
         public static IEnumerable<object[]> GetXmlReaderUrlCreateMethods()
         {
             yield return new [] { new Func<string, XmlReader>(s => XmlReader.Create(s)) };
-            yield return new [] { new Func<string, XmlReader>(s => XmlReader.Create(File.OpenRead(s), null, s)) };
-            yield return new [] { new Func<string, XmlReader>(s => XmlReader.Create(new StreamReader(File.OpenRead(s)), null, s)) };
+            yield return new [] { new Func<string, XmlReader>(s => XmlReader.Create(File.OpenRead(s), new XmlReaderSettings { CloseInput = true }, s)) };
+            yield return new [] { new Func<string, XmlReader>(s => XmlReader.Create(new StreamReader(File.OpenRead(s)), new XmlReaderSettings { CloseInput = true }, s)) };
             yield return new [] { new Func<string, XmlReader>(s => new XmlTextReader(s)) };
             yield return new [] { new Func<string, XmlReader>(s => new XmlTextReader(s, File.OpenRead(s))) };
             yield return new [] { new Func<string, XmlReader>(s => new XmlTextReader(s, new StreamReader(File.OpenRead(s)))) };
@@ -28,10 +28,10 @@ namespace System.Xml.Tests
         [MemberData(nameof(GetXmlReaderUrlCreateMethods))]
         public void CreateWithAbsolutePathGivesAbsoluteBaseUri(Func<string, XmlReader> factory)
         {
-            var tempPath = Path.GetTempFileName();
+            string tempPath = Path.GetTempFileName();
             try
             {
-                File.WriteAllText(tempPath, _dummyXml);
+                File.WriteAllText(tempPath, DummyXml);
                 using (XmlReader reader = factory(tempPath))
                 {
                     Assert.True(new Uri(reader.BaseURI).IsAbsoluteUri);
