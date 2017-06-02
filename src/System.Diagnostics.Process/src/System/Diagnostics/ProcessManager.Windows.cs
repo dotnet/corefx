@@ -940,7 +940,7 @@ namespace System.Diagnostics
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
 
-        static ProcessInfo[] GetProcessInfos(IntPtr dataPtr)
+        private static ProcessInfo[] GetProcessInfos(IntPtr dataPtr)
         {
             // 60 is a reasonable number for processes on a normal machine.
             Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>(60);
@@ -950,9 +950,7 @@ namespace System.Diagnostics
             while (true)
             {
                 IntPtr currentPtr = (IntPtr)((long)dataPtr + totalOffset);
-                SystemProcessInformation pi = new SystemProcessInformation();
-
-                Marshal.PtrToStructure(currentPtr, pi);
+                SystemProcessInformation pi = Marshal.PtrToStructure<SystemProcessInformation>(currentPtr);
 
                 // get information for a process
                 ProcessInfo processInfo = new ProcessInfo();
@@ -1001,8 +999,7 @@ namespace System.Diagnostics
                 int i = 0;
                 while (i < pi.NumberOfThreads)
                 {
-                    SystemThreadInformation ti = new SystemThreadInformation();
-                    Marshal.PtrToStructure(currentPtr, ti);
+                    SystemThreadInformation ti = Marshal.PtrToStructure<SystemThreadInformation>(currentPtr);
                     ThreadInfo threadInfo = new ThreadInfo();
 
                     threadInfo._processId = (int)ti.UniqueProcess;
@@ -1082,16 +1079,11 @@ namespace System.Diagnostics
 
         // native struct defined in ntexapi.h
         [StructLayout(LayoutKind.Sequential)]
-        internal class SystemProcessInformation
+        internal unsafe struct SystemProcessInformation
         {
             internal uint NextEntryOffset;
             internal uint NumberOfThreads;
-            private long _SpareLi1;
-            private long _SpareLi2;
-            private long _SpareLi3;
-            private long _CreateTime;
-            private long _UserTime;
-            private long _KernelTime;
+            private fixed byte Reserved1[48];
 
             internal ushort NameLength;   // UNICODE_STRING   
             internal ushort MaximumNameLength;
@@ -1099,46 +1091,39 @@ namespace System.Diagnostics
 
             internal int BasePriority;
             internal IntPtr UniqueProcessId;
-            internal IntPtr InheritedFromUniqueProcessId;
+            internal IntPtr Reserved2;
             internal uint HandleCount;
             internal uint SessionId;
-            internal UIntPtr PageDirectoryBase;
+            internal UIntPtr Reserved3;
             internal UIntPtr PeakVirtualSize;  // SIZE_T
             internal UIntPtr VirtualSize;
-            internal uint PageFaultCount;
+            internal uint Reserved4;
 
-            internal UIntPtr PeakWorkingSetSize;
-            internal UIntPtr WorkingSetSize;
-            internal UIntPtr QuotaPeakPagedPoolUsage;
-            internal UIntPtr QuotaPagedPoolUsage;
-            internal UIntPtr QuotaPeakNonPagedPoolUsage;
-            internal UIntPtr QuotaNonPagedPoolUsage;
-            internal UIntPtr PagefileUsage;
-            internal UIntPtr PeakPagefileUsage;
-            internal UIntPtr PrivatePageCount;
+            internal UIntPtr PeakWorkingSetSize;  // SIZE_T
+            internal UIntPtr WorkingSetSize;  // SIZE_T
+            internal UIntPtr Reserved5;
+            internal UIntPtr QuotaPagedPoolUsage;  // SIZE_T
+            internal UIntPtr Reserved6;
+            internal UIntPtr QuotaNonPagedPoolUsage;  // SIZE_T
+            internal UIntPtr PagefileUsage;  // SIZE_T
+            internal UIntPtr PeakPagefileUsage;  // SIZE_T
+            internal UIntPtr PrivatePageCount;  // SIZE_T
 
-            private long _ReadOperationCount;
-            private long _WriteOperationCount;
-            private long _OtherOperationCount;
-            private long _ReadTransferCount;
-            private long _WriteTransferCount;
-            private long _OtherTransferCount;
+            private fixed byte Reserved7[48];
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal class SystemThreadInformation
+        internal unsafe struct SystemThreadInformation
         {
-            private long _KernelTime;
-            private long _UserTime;
-            private long _CreateTime;
+            private fixed byte Reserved1[24];
 
-            private uint _WaitTime;
+            private uint Reserved2;
             internal IntPtr StartAddress;
             internal IntPtr UniqueProcess;
             internal IntPtr UniqueThread;
             internal int Priority;
             internal int BasePriority;
-            internal uint ContextSwitches;
+            internal uint Reserved3;
             internal uint ThreadState;
             internal uint WaitReason;
         }
