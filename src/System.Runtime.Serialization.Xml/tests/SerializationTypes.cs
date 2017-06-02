@@ -16,6 +16,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Text;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SerializationTypes
 {
@@ -3074,6 +3075,50 @@ public class TestableDerivedException : System.Exception
     public string TestProperty { get; set; }
 }
 
+namespace DirectRef
+{
+    public class TypeWithIndirectRef
+    {
+        public static implicit operator Task<object>(TypeWithIndirectRef v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Name { get; set; }
+    }
+}
+
+public class NookAppLocalState
+{
+    public int ArticleViewCount { get; set; }
+    public string CurrentlyReadingProductEAN { get; set; }
+    public PaymentType CurrentPaymentType { get; set; }
+    public bool IsFirstRun { get; set; }
+    public List<LocalReadingPosition> LocalReadingPositionState { get; set; }
+    public List<string> PreviousSearchQueries { get; set; }
+    public System.Drawing.Color TextColor;
+
+    [XmlIgnore]
+    public int IgnoreProperty;
+
+    public bool IsFirstRunDuplicate { get; set; }
+    // Nested Types
+    public enum PaymentType
+    {
+        Unconfigured,
+        Nook,
+        Microsoft
+    }
+}
+
+public class LocalReadingPosition
+{
+    public string Ean { get; set; }
+    public DateTime LastReadTime { get; set; }
+    public int PageCount { get; set; }
+    public string PageNumber { get; set; }
+    public string PlatformOffset { get; set; }
+}
 
 public class TypeWithXmlElementProperty
 {
@@ -5184,4 +5229,48 @@ public class Manager : EmployeeC
 
     [DataMember]
     public EmployeeC[] emps;
+}
+
+[Serializable]
+public class MyArgumentException : Exception, ISerializable
+{
+    private string _paramName;
+
+    public MyArgumentException() : base() { }
+
+    public MyArgumentException(string message) : base(message)
+    {
+    }
+
+    public MyArgumentException(string message, string paramName) : base(message)
+    {
+        _paramName = paramName;
+    }
+
+    protected MyArgumentException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        _paramName = info.GetString("ParamName");
+    }
+
+    public string ParamName
+    {
+        get
+        {
+            return _paramName;
+        }
+        internal set
+        {
+            _paramName = value;
+        }
+    }
+
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException("info");
+        }
+
+        base.GetObjectData(info, context);
+        info.AddValue("ParamName", _paramName, typeof(string));
+    }
 }
