@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -172,9 +231,6 @@
   <data name="net_http_content_buffersize_limit" xml:space="preserve">
     <value>Buffering more than {0} bytes is not supported.</value>
   </data>
-  <data name="net_http_value_not_supported" xml:space="preserve">
-    <value>The value '{0}' is not supported for property '{1}'.</value>
-  </data>
   <data name="net_http_io_read" xml:space="preserve">
     <value>The read operation failed, see inner exception.</value>
   </data>
@@ -196,9 +252,6 @@
   <data name="net_http_invalid_proxy" xml:space="preserve">
     <value>When using WindowsProxyUsePolicy.UseCustomProxy, the Proxy property must not be null.</value>
   </data>
-  <data name="net_http_handler_nocontentlength" xml:space="preserve">
-    <value>The content length of the request content can't be determined. Either set TransferEncodingChunked to true, load content into buffer, or set MaxRequestContentBufferSize.</value>
-  </data>
   <data name="net_http_value_must_be_greater_than" xml:space="preserve">
     <value>The specified value must be greater than {0}.</value>
   </data>
@@ -208,74 +261,14 @@
   <data name="MailAddressInvalidFormat" xml:space="preserve">
     <value>The specified string is not in the form required for an e-mail address.</value>
   </data>
-  <data name="MailHeaderFieldMalformedHeader" xml:space="preserve">
-    <value>The mail header is malformed.</value>
-  </data>
-  <data name="InvalidHeaderName" xml:space="preserve">
-    <value>An invalid character was found in header name.</value>
-  </data>
-  <data name="net_cookie_attribute" xml:space="preserve">
-    <value>The '{0}'='{1}' part of the cookie is invalid.</value>
-  </data>
-  <data name="net_http_unix_invalid_credential" xml:space="preserve">
-    <value>The libcurl library in use ({0}) does not support different credentials for different authentication schemes.</value>
-  </data>
-  <data name="net_http_unix_https_support_unavailable_libcurl" xml:space="preserve">
-    <value>The libcurl library in use ({0}) does not support HTTPS.</value>
-  </data>
-  <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
-    <value>Specified file length was too large for the file system.</value>
-  </data>
-  <data name="IO_FileExists_Name" xml:space="preserve">
-    <value>The file '{0}' already exists.</value>
-  </data>
-  <data name="IO_FileNotFound" xml:space="preserve">
-    <value>Unable to find the specified file.</value>
-  </data>
-  <data name="IO_FileNotFound_FileName" xml:space="preserve">
-    <value>Could not find file '{0}'.</value>
-  </data>
-  <data name="IO_PathNotFound_NoPathName" xml:space="preserve">
-    <value>Could not find a part of the path.</value>
-  </data>
-  <data name="IO_PathNotFound_Path" xml:space="preserve">
-    <value>Could not find a part of the path '{0}'.</value>
-  </data>
-  <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
-  </data>
-  <data name="IO_SharingViolation_File" xml:space="preserve">
-    <value>The process cannot access the file '{0}' because it is being used by another process.</value>
-  </data>
-  <data name="IO_SharingViolation_NoFileName" xml:space="preserve">
-    <value>The process cannot access the file because it is being used by another process.</value>
-  </data>
-  <data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
-    <value>Access to the path is denied.</value>
-  </data>
-  <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
-    <value>Access to the path '{0}' is denied.</value>
-  </data>
-  <data name="net_http_content_no_concurrent_reads" xml:space="preserve">
-    <value>The stream does not support concurrent read operations.</value>
-  </data>
   <data name="net_http_username_empty_string" xml:space="preserve">
     <value>The username for a credential object cannot be null or empty.</value>
   </data>
   <data name="net_http_no_concurrent_io_allowed" xml:space="preserve">
     <value>The stream does not support concurrent I/O read or write operations.</value>
   </data>
-  <data name="net_http_unix_invalid_response" xml:space="preserve">
-    <value>The server returned an invalid or unrecognized response.</value>
-  </data>
-  <data name="net_http_unix_handler_disposed" xml:space="preserve">
-    <value>The handler was disposed of while active operations were in progress.</value>
-  </data>
   <data name="net_http_buffer_insufficient_length" xml:space="preserve">
     <value>The buffer was not long enough.</value>
-  </data>
-  <data name="net_http_response_headers_exceeded_length" xml:space="preserve">
-    <value>The HTTP response headers length exceeded the set limit of {0} bytes.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
     <value>Positive number required.</value>
@@ -289,13 +282,13 @@
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
     <value>Can not access a closed Stream.</value>
   </data>
-  <data name="net_http_libcurl_callback_notsupported" xml:space="preserve">
-    <value>The handler does not support custom handling of certificates with this combination of libcurl ({0}) and its SSL backend ("{1}").</value>
+  <data name="InvalidHeaderName" xml:space="preserve">
+    <value>An invalid character was found in header name.</value>
   </data>
-  <data name="net_http_libcurl_clientcerts_notsupported" xml:space="preserve">
-    <value>The handler does not support client authentication certificates with this combination of libcurl ({0}) and its SSL backend ("{1}").</value>
+  <data name="MailHeaderFieldMalformedHeader" xml:space="preserve">
+    <value>The mail header is malformed.</value>
   </data>
-  <data name="net_http_libcurl_revocation_notsupported" xml:space="preserve">
-    <value>The handler does not support changing revocation settings with this combination of libcurl ({0}) and its SSL backend ("{1}").</value>
+  <data name="net_http_unix_invalid_response" xml:space="preserve">
+    <value>The server returned an invalid or unrecognized response.</value>
   </data>
 </root>
