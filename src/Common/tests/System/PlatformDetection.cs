@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32;
 using Xunit;
 
 namespace System
@@ -44,11 +45,6 @@ namespace System
 
         public static bool IsNetfx462OrNewer()
         {
-            if (!IsFullFramework)
-            {
-                return false;
-            }
-
             Version net462 = new Version(4, 6, 2);
             Version runningVersion = GetFrameworkVersion();
             return runningVersion != null && runningVersion >= net462;
@@ -56,11 +52,6 @@ namespace System
 
         public static bool IsNetfx470OrNewer()
         {
-            if (!IsFullFramework)
-            {
-                return false;
-            }
-
             Version net470 = new Version(4, 7, 0);
             Version runningVersion = GetFrameworkVersion();
             return runningVersion != null && runningVersion >= net470;
@@ -80,23 +71,29 @@ namespace System
 
         public static Version GetFrameworkVersion()
         {
-            string[] descriptionArray = RuntimeInformation.FrameworkDescription.Split(' ');
-            if (descriptionArray.Length < 3)
-            {
+            if (!IsFullFramework)
                 return null;
-            }
-                
-            string runningVersion = descriptionArray[2];
 
-            // we could get a version with build number > 1 e.g 4.6.1375 but we only want to have 4.6.1
-            // so that we get the actual Framework Version
-            if (runningVersion.Length > 5)
+            using (RegistryKey ndpKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "").OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"))
             {
-                runningVersion = runningVersion.Substring(0, 5);
+                int value = (int)ndpKey.GetValue("Release");
+                if (value >= 460798)
+                    return new Version(4, 7, 0);
+                if (value >= 394802)
+                    return new Version(4, 6, 2);
+                if (value >= 394254)
+                    return new Version(4, 6, 1);
+                if (value >= 393295)
+                    return new Version(4, 6, 0);
+                if (value >= 379893)
+                    return new Version(4, 5, 2);
+                if (value >= 378675)
+                    return new Version(4, 5, 1);
+                if (value >= 378389)
+                    return new Version(4, 5, 0);
+                
+                throw new NotSupportedException("Couldn't get the Full Framework running in the current environment");
             }
-
-            Version result;
-            return Version.TryParse(runningVersion, out result) ? result : null;
         }
 
         private static int s_isWinRT = -1;
