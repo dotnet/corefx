@@ -452,7 +452,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, Stream input, XmlNameTable nt) : this(nt)
         {
-            url = ConvertAbsoluteUnixPathToAbsoluteUri(url);
+            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver : null);
             _namespaceManager = new XmlNamespaceManager(nt);
             if (url == null || url.Length == 0)
             {
@@ -479,7 +479,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, TextReader input, XmlNameTable nt) : this(nt)
         {
-            url = ConvertAbsoluteUnixPathToAbsoluteUri(url);
+            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             _reportedBaseUri = (url != null) ? url : string.Empty;
             InitTextReaderInput(_reportedBaseUri, input);
@@ -672,7 +672,7 @@ namespace System.Xml
                                     XmlParserContext context, bool closeInput)
             : this(settings.GetXmlResolver(), settings, context)
         {
-            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr);
+            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -738,7 +738,7 @@ namespace System.Xml
         internal XmlTextReaderImpl(TextReader input, XmlReaderSettings settings, string baseUriStr, XmlParserContext context)
             : this(settings.GetXmlResolver(), settings, context)
         {
-            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr);
+            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -9816,13 +9816,32 @@ namespace System.Xml
             Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
         }
 
-        private static string ConvertAbsoluteUnixPathToAbsoluteUri(string url)
+        private static string ConvertAbsoluteUnixPathToAbsoluteUri(string url, XmlResolver resolver)
         {
             // new Uri(uri, UriKind.RelativeOrAbsolute) returns a Relative Uri for absolute unix paths (e.g. /tmp).
             // We convert the native unix path to a 'file://' uri string to make it an Absolute Uri.
             if (IsUnixSystem && url != null && url.Length > 0 && url[0] == '/')
             {
-                return new Uri(url).ToString();
+                try
+                {
+                    if (resolver != null)
+                    {
+                        var uri = resolver.ResolveUri(null, url);
+                        if (uri.IsFile)
+                        {
+                            return uri.ToString();
+                        }
+                        return url;
+                    }
+                    else
+                    {
+                        return new Uri(url).ToString();
+                    }
+                }
+                catch
+                {
+                    return url;
+                }
             }
             return url;
         }
