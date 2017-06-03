@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
-    public class AuthenticationTests : IDisposable
+    public class HttpListenerAuthenticationTests : IDisposable
     {
         private const string Basic = "Basic";
         private const string TestUser = "testuser";
@@ -22,7 +22,7 @@ namespace System.Net.Tests
         private HttpListenerFactory _factory;
         private HttpListener _listener;
 
-        public AuthenticationTests()
+        public HttpListenerAuthenticationTests()
         {
             _factory = new HttpListenerFactory();
             _listener = _factory.GetListener();
@@ -44,6 +44,23 @@ namespace System.Net.Tests
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(headerType, "body");
                 await AuthenticationFailure(client, HttpStatusCode.Forbidden);
+            }
+        }
+
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // Managed implementation connects successfully.
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData("Basic")]
+        [InlineData("NTLM")]
+        [InlineData("Negotiate")]
+        [InlineData("Unknown")]
+        public async Task NoAuthenticationGetContextAsync_AuthenticationProvided_ReturnsForbiddenStatusCode(string headerType)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.None;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(headerType, "body");
+                await AuthenticationFailureAsyncContext(client, HttpStatusCode.Forbidden);
             }
         }
 
@@ -414,8 +431,9 @@ namespace System.Net.Tests
 
             // The server task will hang forever if it is not cancelled.
             var tokenSource = new CancellationTokenSource();
-            Task<HttpListenerContext> serverTask = Task.Run(() => _listener.GetContext(), tokenSource.Token);
 
+            Task<HttpListenerContext> serverTask = Task.Run(() => _listener.GetContext(), tokenSource.Token);
+            
             // The client task should complete first - the server should send a 401 response.
             Task resultTask = await Task.WhenAny(clientTask, serverTask);
             tokenSource.Cancel();
@@ -430,6 +448,24 @@ namespace System.Net.Tests
             return clientTask.Result;
         }
 
+        public async Task<HttpResponseMessage> AuthenticationFailureAsyncContext(HttpClient client, HttpStatusCode errorCode)
+        {
+            Task<HttpResponseMessage> clientTask = client.GetAsync(_factory.ListeningUrl);
+            Task<HttpListenerContext> serverTask = _listener.GetContextAsync();
+
+            // The client task should complete first - the server should send a 401 response.
+            Task resultTask = await Task.WhenAny(clientTask, serverTask);
+            if (resultTask == serverTask)
+            {
+                await serverTask;
+            }
+
+            Assert.Same(clientTask, resultTask);
+
+            Assert.Equal(errorCode, clientTask.Result.StatusCode);
+            return clientTask.Result;
+        }
+        
         private async Task ValidateNullUser()
         {
             Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();
