@@ -9822,25 +9822,18 @@ namespace System.Xml
             // We convert the native unix path to a 'file://' uri string to make it an Absolute Uri.
             if (IsUnixSystem && url != null && url.Length > 0 && url[0] == '/')
             {
-                try
+                if (resolver != null)
                 {
-                    if (resolver != null)
+                    var uri = resolver.ResolveUri(null, url);
+                    if (uri.IsFile)
                     {
-                        var uri = resolver.ResolveUri(null, url);
-                        if (uri.IsFile)
-                        {
-                            return uri.ToString();
-                        }
-                        return url;
+                        return uri.ToString();
                     }
-                    else
-                    {
-                        return new Uri(url).ToString();
-                    }
-                }
-                catch
-                {
                     return url;
+                }
+                else
+                {
+                    return new Uri(url).ToString();
                 }
             }
             return url;
