@@ -296,37 +296,80 @@ namespace System.Net
 
         #region UrlEncode implementation
         
-        private static void GetEncodedBytes(byte[] originalBytes, int offset, int count, byte[] expandedBytes)
+        // unencoded is the original string, buffer/bufferLength are used
+        // to hold the UTF-8 and URL-encoded bytes before calling
+        // GetString.
+        // byteIndex tells us where in the buffer to start encoding to UTF-8.
+        private unsafe static string EncodeAndGetString(string unencoded, byte* buffer, int byteIndex, int bufferLength)
         {
+            // Argument checks
+            // Even though this is an internal method, we do it
+            // for the sake of avoiding buffer overruns if something
+            // goes wrong
+            if (unencoded == null || buffer == null)
+                throw new ArgumentNullException(unencoded == null ? nameof(unencoded) : nameof(buffer));
+            // uint trick: second check is equal to byteIndex < 0 || byteIndex >= bufferLength
+            // We know that bufferLength won't wrap when cast because of the first check
+            if (bufferLength <= 0 || (uint)byteIndex >= (uint)bufferLength)
+                throw new ArgumentOutOfRangeException(bufferLength <= 0 ? nameof(bufferLength) : nameof(byteIndex));
+            
+            // should be equal to Encoding.UTF8.GetByteCount(unencoded)
+            int byteCount = bufferLength - byteIndex;
+            Debug.Assert(byteCount == Encoding.UTF8.GetByteCount(unencoded));
+            
+            byte* encodedOutput = buffer + byteIndex;
+            
+            // First, encode the string to UTF-8
+            fixed (char* pch = unencoded)
+                Encoding.UTF8.GetBytes(pch, unencoded.Length, encodedOutput, byteCount);
+            
+            // Then, URL encode within the same buffer
+            GetEncodedBytes(encodedOutput, byteCount, buffer, bufferLength, sameBuffer: true);
+            
+            // Decode back to UTF-16 and return
+            return Encoding.UTF8.GetString(buffer, bufferLength);
+        }
+        
+        private unsafe static void GetEncodedBytes(byte* original, int count, byte* expanded, int expandedCount, bool sameBuffer)
+        {
+            // Argument checks
+            // Even though this is an internal method, we do it
+            // for the sake of avoiding buffer overruns if something
+            // goes wrong
+            if (original == null || expanded == null)
+                throw new ArgumentNullException(original == null ? nameof(original) : nameof(expanded));
+            if (expandedCount < 0 || (uint)count > (uint)expandedCount)
+                throw new ArgumentOutOfRangeException(expandedCount < 0 ? nameof(expandedCount) : nameof(count));
+            
             int pos = 0;
-            int end = offset + count;
-            Debug.Assert(offset < end && end <= originalBytes.Length);
-            for (int i = offset; i < end; i++)
+            
+            for (int i = 0; i < count; i++)
             {
-#if DEBUG
                 // Make sure we never overwrite any bytes if originalBytes and
-                // expandedBytes refer to the same array
-                if (originalBytes == expandedBytes)
-                {
-                    Debug.Assert(i >= pos);
-                }
-#endif
+                // expandedBytes refer to the same buffer
+                // This check ensures that the memory location represented
+                // by i is ahead of the one represented by pos, using
+                // pointer arithmetic
+                Debug.Assert(!sameBuffer || original + i >= expanded + pos);
+                
+                // Also check that we haven't overrun the expanded buffer
+                Debug.Assert(pos < expandedCount);
 
-                byte b = originalBytes[i];
+                byte b = original[i];
                 char ch = (char)b;
                 if (IsUrlSafeChar(ch))
                 {
-                    expandedBytes[pos++] = b;
+                    expanded[pos++] = b;
                 }
                 else if (ch == ' ')
                 {
-                    expandedBytes[pos++] = (byte)'+';
+                    expanded[pos++] = (byte)'+';
                 }
                 else
                 {
-                    expandedBytes[pos++] = (byte)'%';
-                    expandedBytes[pos++] = (byte)IntToHex((b >> 4) & 0xf);
-                    expandedBytes[pos++] = (byte)IntToHex(b & 0x0f);
+                    expanded[pos++] = (byte)'%';
+                    expanded[pos++] = (byte)IntToHex((b >> 4) & 0xf);
+                    expanded[pos++] = (byte)IntToHex(b & 0x0f);
                 }
             }
         }
@@ -372,19 +415,34 @@ namespace System.Net
             int byteCount = Encoding.UTF8.GetByteCount(value);
             int unsafeByteCount = byteCount - unexpandedCount;
             int byteIndex = unsafeByteCount * 2;
-
-            // Instead of allocating one array of length `byteCount` to store
-            // the UTF-8 encoded bytes, and then a second array of length 
-            // `3 * byteCount - 2 * unexpandedCount`
-            // to store the URL-encoded UTF-8 bytes, we allocate a single array of
-            // the latter and encode the data in place, saving the first allocation.
-            // We store the UTF-8 bytes to the end of this array, and then URL encode to the
-            // beginning of the array.
-            byte[] newBytes = new byte[byteCount + byteIndex];
-            Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
             
-            GetEncodedBytes(newBytes, byteIndex, byteCount, newBytes);
-            return Encoding.UTF8.GetString(newBytes);
+            Debug.Assert(unsafeByteCount > 0); // there should be at least a few bytes expanded
+            
+            unsafe
+            {
+                // Instead of allocating one array of length `byteCount` to store
+                // the UTF-8 encoded bytes, and then a second array of length 
+                // `3 * byteCount - 2 * unexpandedCount`
+                // to store the URL-encoded UTF-8 bytes, we allocate a single array of
+                // the latter and encode the data in place, saving the first allocation.
+                // We store the UTF-8 bytes to the end of this array, and then URL encode to the
+                // beginning of the array.
+                const int StackAllocThreshold = 1024; // Arbitrary limit for how big the stackalloc can be
+                
+                int bufferCount = byteCount + byteIndex;
+                
+                if (bufferCount <= StackAllocThreshold)
+                {
+                    byte* pBuffer = stackalloc byte[bufferCount];
+                    return EncodeAndGetString(value, pBuffer, byteIndex, bufferCount);
+                }
+                
+                // The size of the intermediary buffer is
+                // too large, so allocate on the heap
+                var buffer = new byte[bufferCount];
+                fixed (byte* pBuffer = buffer)
+                    return EncodeAndGetString(value, pBuffer, byteIndex, bufferCount);
+            }
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
@@ -415,11 +473,17 @@ namespace System.Net
                 Buffer.BlockCopy(value, offset, subarray, 0, count);
                 return subarray;
             }
-
-            // expand not 'safe' characters into %XX, spaces to +s
-            byte[] expandedBytes = new byte[count + unsafeCount * 2];
-            GetEncodedBytes(value, offset, count, expandedBytes);
-            return expandedBytes;
+            
+            unsafe
+            {
+                // expand not 'safe' characters into %XX, spaces to +s
+                byte[] expandedBytes = new byte[count + unsafeCount * 2];
+                fixed (byte* src = &value[offset], dest = expandedBytes)
+                {
+                    GetEncodedBytes(src, count, dest, expandedBytes.Length, sameBuffer: false);
+                    return expandedBytes;
+                }
+            }
         }
 
 #endregion
