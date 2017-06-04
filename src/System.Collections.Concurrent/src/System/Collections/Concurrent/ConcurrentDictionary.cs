@@ -1980,13 +1980,14 @@ namespace System.Collections.Concurrent
                 int count = GetCountInternal();
                 if (count < 0) throw new OutOfMemoryException();
 
-                List<TKey> keys = new List<TKey>(count);
+                int keyIndex = 0;
+                TKey[] keys = new TKey[count];
                 for (int i = 0; i < _tables._buckets.Length; i++)
                 {
                     Node current = _tables._buckets[i];
                     while (current != null)
                     {
-                        keys.Add(current._key);
+                        keys[keyIndex++] = current._key;
                         current = current._next;
                     }
                 }
@@ -2012,13 +2013,14 @@ namespace System.Collections.Concurrent
                 int count = GetCountInternal();
                 if (count < 0) throw new OutOfMemoryException();
 
-                List<TValue> values = new List<TValue>(count);
+                int valueIndex = 0;
+                TValue[] values = new TValue[count];
                 for (int i = 0; i < _tables._buckets.Length; i++)
                 {
                     Node current = _tables._buckets[i];
                     while (current != null)
                     {
-                        values.Add(current._value);
+                        values[valueIndex++] = current._value;
                         current = current._next;
                     }
                 }
