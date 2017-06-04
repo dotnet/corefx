@@ -33,20 +33,11 @@ namespace System.Linq
                     return list[index];
                 }
 
-                if (index >= 0)
+                bool found;
+                TSource item = EnumerableHelpers.TryGetElementAt(index, out found, source: source);
+                if (found)
                 {
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (index == 0)
-                            {
-                                return e.Current;
-                            }
-
-                            index--;
-                        }
-                    }
+                    return item;
                 }
             }
 
@@ -79,18 +70,8 @@ namespace System.Linq
                 }
                 else
                 {
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (index == 0)
-                            {
-                                return e.Current;
-                            }
-
-                            index--;
-                        }
-                    }
+                    bool found;
+                    return EnumerableHelpers.TryGetElementAt(index, out found, source: source);
                 }
             }
 

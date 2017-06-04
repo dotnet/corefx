@@ -96,6 +96,8 @@ namespace System.Collections.Generic
         /// </returns>
         internal static T[] ToArray<T>(IEnumerable<T> source, out int length)
         {
+            Debug.Assert(source != null);
+
             ICollection<T> ic = source as ICollection<T>;
             if (ic != null)
             {

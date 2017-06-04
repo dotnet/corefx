@@ -102,17 +102,25 @@ namespace System.Linq
                 return ordered.TryGetFirst(predicate, out found);
             }
 
-            foreach (TSource element in source)
+            var ilist = source as IList<TSource>;
+            if (ilist != null)
             {
-                if (predicate(element))
+                var array = source as TSource[];
+                if (array != null)
                 {
-                    found = true;
-                    return element;
+                    return EnumerableHelpers.TryGetFirst(predicate, out found, array: array);
                 }
+
+                var list = source as List<TSource>;
+                if (list != null)
+                {
+                    return EnumerableHelpers.TryGetFirst(predicate, out found, list: list);
+                }
+
+                return EnumerableHelpers.TryGetFirst(predicate, out found, ilist: ilist);
             }
 
-            found = false;
-            return default(TSource);
+            return EnumerableHelpers.TryGetFirst(predicate, out found, source: source);
         }
     }
 }
