@@ -66,6 +66,8 @@ namespace System.Collections.Concurrent
         private KeyValuePair<TKey, TValue>[] _serializationArray; // Used for custom serialization
         private int _serializationConcurrencyLevel; // used to save the concurrency level in serialization
         private int _serializationCapacity; // used to save the capacity in serialization
+        [NonSerialized]
+        private long _count; // use to increment/decrement the total items count
 
         // The default capacity, i.e. the initial # of buckets. When choosing this value, we are making
         // a trade-off between the size of a very small dictionary, and the number of resizes when
@@ -445,6 +447,7 @@ namespace System.Collections.Concurrent
 
                             value = curr._value;
                             tables._countPerLock[lockNo]--;
+                            Interlocked.Decrement(ref _count);
                             return true;
                         }
                         prev = curr;
@@ -617,6 +620,7 @@ namespace System.Collections.Concurrent
                 Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
                 _tables = newTables;
                 _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
+                Interlocked.Exchange(ref _count, 0L);
             }
             finally
             {
@@ -866,6 +870,7 @@ namespace System.Collections.Concurrent
                     {
                         tables._countPerLock[lockNo]++;
                     }
+                    Interlocked.Increment(ref _count);
 
                     //
                     // If the number of elements guarded by this lock has exceeded the budget, resize the bucket table.
@@ -964,19 +969,8 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                int acquiredLocks = 0;
-                try
-                {
-                    // Acquire all locks
-                    AcquireAllLocks(ref acquiredLocks);
-
-                    return GetCountInternal();
-                }
-                finally
-                {
-                    // Release locks that have been acquired earlier
-                    ReleaseLocks(0, acquiredLocks);
-                }
+                // ToInt32 checks for overflow
+                return Convert.ToInt32(Volatile.Read(ref _count));
             }
         }
 
@@ -1251,30 +1245,7 @@ namespace System.Collections.Concurrent
         /// false.</value>
         public bool IsEmpty
         {
-            get
-            {
-                int acquiredLocks = 0;
-                try
-                {
-                    // Acquire all locks
-                    AcquireAllLocks(ref acquiredLocks);
-
-                    for (int i = 0; i < _tables._countPerLock.Length; i++)
-                    {
-                        if (_tables._countPerLock[i] != 0)
-                        {
-                            return false;
-                        }
-                    }
-                }
-                finally
-                {
-                    // Release locks that have been acquired earlier
-                    ReleaseLocks(0, acquiredLocks);
-                }
-
-                return true;
-            }
+            get { return Volatile.Read(ref _count) == 0L; }
         }
 
         #region IDictionary<TKey,TValue> members
