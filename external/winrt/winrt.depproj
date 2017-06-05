@@ -12,6 +12,11 @@
     <PackageReference Include="Microsoft.TargetingPack.Private.WinRT">
       <Version>1.0.3</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Portable.Compatibility">
+      <Version>1.0.2</Version>
+    </PackageReference>
+    <!-- Include only windows.winmd and mscorlib.dll shim -->
+    <FileToInclude Include="Windows;mscorlib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
