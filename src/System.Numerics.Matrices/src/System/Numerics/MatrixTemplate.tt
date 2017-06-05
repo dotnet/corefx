@@ -1,0 +1,642 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ output extension=".txt" #>
+<#
+    const int MinColCount = 1;
+    const int MaxColCount = 8;
+    const int MinRowCount = 1;
+    const int MaxRowCount = 8;
+
+    for (int rowCount = MinRowCount; rowCount <= MaxRowCount; rowCount ++)
+    {
+        for (int colCount = MinColCount; colCount <= MaxColCount; colCount++)
+        {
+            if (rowCount == MinRowCount && colCount == MinColCount)
+                continue;
+
+            string structName = String.Format("Matrix{0}x{1}", colCount, rowCount);
+            string outputFileName = structName + ".cs";
+#>
+using System.Runtime.InteropServices;
+
+namespace System.Numerics.Matrices
+{
+    /// <summary>
+    /// Represents a matrix of double precision floating-point values defined by its number of columns and rows
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct <#= structName #>: IEquatable<<#= structName #>>, IMatrix
+    {
+        public const int ColumnCount = <#= colCount #>;
+        public const int RowCount = <#= rowCount #>;
+
+        static <#= structName #>()
+        {
+            Zero = new <#= structName #>(0);
+<#
+            if (rowCount == colCount)
+            {
+#>			Identitiy = new <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    if (x == y)
+                    {
+                        #>1<#
+                    }
+                    else 
+                    {
+                        #>0<#
+                    }
+
+                    if (x + 1 < colCount || y + 1 < rowCount)
+                    {
+                        #>, <#
+                    }
+                }
+
+                if (y + 1 < rowCount)
+                {
+                    #><#= Environment.NewLine #><#
+                    #>                                      <#
+                }
+            }
+#>);
+<#
+            }
+#>
+        }
+
+        /// <summary>
+        /// Constant <#= structName #> with all values initialized to zero
+        /// </summary>
+        public static readonly <#= structName #> Zero;
+<#
+            if (rowCount == colCount)
+            {
+#>        
+        /// <summary>
+        /// Constant <#= structName #> with value intialized to the identity of a <#= colCount #> x <#= rowCount #> matrix
+        /// </summary>
+        public static readonly <#= structName #> Identitiy;
+<#
+            }
+#>
+
+        /// <summary>
+        /// Initializes a <#= structName #> with all of it values specifically set
+        /// </summary>
+<#
+        for (int y = 0; y < rowCount; y++)
+        {
+            for (int x = 0; x < colCount; x++)
+            {
+                #>        /// <param name="m<#= x + 1 #><#= y + 1 #>">The column <#= x + 1 #>, row <#= y + 1 #> value</param><#
+                #><#= Environment.NewLine #><#
+            }
+        }
+#>
+        public <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("double m{0}{1}", x + 1, y + 1) #><#
+
+                    if (x + 1 != colCount || y + 1 != rowCount)
+                    {
+                        #>, <#
+                    }
+                }
+
+                if (y + 1 < rowCount)
+                {
+                    #><#= Environment.NewLine #><#
+                    #>                         <#
+                }
+            }
+#>)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+#>			<#
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("M{0}{1} = m{0}{1}; ", x + 1, y + 1) #><#
+                }
+                #><#= Environment.NewLine #><#
+            }
+#>
+        }
+
+        /// <summary>
+        /// Initialized a <#= structName #> with all values set to the same value
+        /// </summary>
+        /// <param name="value">The value to set all values to</param>
+        public <#= structName #>(double value)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+#>			<#
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("M{0}{1} = ", x + 1, y + 1) #><#
+
+                    if (x + 1 == colCount && y + 1 == rowCount)
+                    {
+                        #>value;<#
+                    }
+                }
+                #><#= Environment.NewLine #><#
+            }
+#>
+        }
+
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>		<#
+                    #><#= String.Format("public double M{0}{1}", x + 1, y + 1) #>;<#
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+
+        public unsafe double this[int col, int row]
+        {
+            get
+            {
+                if (col < 0 || col >= ColumnCount)
+                    throw new ArgumentOutOfRangeException("col");
+                if (row < 0 || row >= RowCount)
+                    throw new ArgumentOutOfRangeException("col");
+
+                fixed (<#= structName #>* p = &this)
+                {
+                    double* d = (double*)p;
+                    return d[row * ColumnCount + col];
+                }
+            }
+            set
+            {
+                if (col < 0 || col >= ColumnCount)
+                    throw new ArgumentOutOfRangeException("col");
+                if (row < 0 || row >= RowCount)
+                    throw new ArgumentOutOfRangeException("col");
+
+                fixed (<#= structName #>* p = &this)
+                {
+                    double* d = (double*)p;
+                    d[row * ColumnCount + col] = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of columns in the matrix
+        /// </summary>
+        public int Columns { get { return <#= structName #>.ColumnCount; } }
+        /// <summary>
+        /// Get the number of rows in the matrix
+        /// </summary>
+        public int Rows { get { return <#= structName #>.RowCount; } }
+
+<#
+        if (rowCount > 1 && colCount > 1)
+        {
+            for (int x = 0; x < colCount; x++)
+            {
+                string retType = String.Format("Matrix1x{0}", rowCount);
+#>
+        /// <summary>
+        /// Gets a new <#= retType #> containing the values of column <#= x + 1 #>
+        /// </summary>
+        public <#= retType #> Column<#= x + 1 #> { get { return new <#= retType #>(<#
+                for (int y = 0; y < rowCount; y++)
+                {
+                    #><#= String.Format("M{0}{1}", x + 1, y + 1) #><#
+
+                    if (y + 1 < rowCount)
+                    {
+                        #>, <#
+                    }
+                }
+                #>); } }
+<#
+            }
+
+            for (int y = 0; y < rowCount; y++)
+            {
+                string retType = String.Format("Matrix{0}x1", colCount);
+#>
+        /// <summary>
+        /// Gets a new <#= retType #> containing the values of column <#= y + 1 #>
+        /// </summary>
+        public <#= retType #> Row<#= y + 1 #> { get { return new <#= retType #>(<#
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("M{0}{1}", x + 1, y + 1) #><#
+
+                    if (x + 1 < colCount)
+                    {
+                        #>, <#
+                    }
+                }
+                #>); } }
+<#
+            }
+        }
+#>
+
+        public override bool Equals(object obj)
+        {
+            if (obj is <#= structName #>)
+                return this == (<#= structName #>)obj;
+
+            return false;
+        }
+
+        public bool Equals(<#= structName #> other)
+        {
+            return this == other;
+        }
+
+        public unsafe override int GetHashCode()
+        {
+            fixed (<#= structName #>* p = &this)
+            {
+                int* x = (int*)p;
+                unchecked
+                {
+                    return <#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    if (x == 0 && y != 0)
+                    {
+                            #>                         + <#
+                    }
+            
+                    #><#= String.Format("(x[{0:00}] ^ x[{1:00}])", y * colCount + x * 2, y * colCount + x * 2 + 1) #><#
+            
+                    if (x + 1 == colCount)
+                    {
+                        if (y + 1 == rowCount)
+                        {
+                            #>;<#
+                        }
+                        #><#= Environment.NewLine #><#
+                    }
+                    else
+                    {
+                        #> + <#
+                    }
+                }
+            }
+#>
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return String.Format("<#= structName #>: "<#
+            #><#= Environment.NewLine #><#
+            for (int y = 0; y < rowCount; y++)
+            {
+                #>                               + "{{<#
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>|{<#= String.Format("{0:00}", y * colCount + x) #>}<#
+                }
+                #>|}}"<#
+                #><#= Environment.NewLine #><#
+            }
+            
+            for (int y = 0; y < rowCount; y++)
+            {				
+                #>                               <#					 
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format(", M{0}{1}", x + 1, y + 1) #><#
+                }
+                
+                if (y +1 < rowCount)
+                {
+                    #><#= Environment.NewLine #><#
+                }
+            }
+
+            #>); 
+        }
+
+        /// <summary>
+        /// Creates and returns a transposed matrix
+        /// </summary>
+        /// <returns>Matrix with transposed values</returns>
+        public <#= String.Format("Matrix{0}x{1}", rowCount, colCount) #> Transpose()
+        {
+            return new <#= String.Format("Matrix{0}x{1}", rowCount, colCount) #>(<#
+
+            for (int y = 0; y < colCount; y++)
+            {
+                for (int x = 0; x < rowCount; x++)
+                {
+                    #><#= String.Format("M{1}{0}", x + 1, y + 1) #><#
+
+                    if (x + 1 < rowCount || y + 1 < colCount)
+                    {
+                        #>, <#
+                    }
+                }
+
+                if (y + 1 < colCount)
+                {
+                    #><#= Environment.NewLine #><#
+                    #>                                 <#
+                }
+            }
+            
+            #>);
+        }
+
+        public static bool operator ==(<#= structName #> matrix1, <#= structName #> matrix2)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    if (x == 0 && y == 0)
+                    {
+                        #>            return <#
+                    }
+                    else
+                    {
+                        #>                && <#
+                    }
+
+                    #><#= String.Format("(matrix1 == matrix2 || Math.Abs(matrix1.M{0}{1} - matrix2.M{0}{1}) <= Double.Epsilon)", x + 1, y + 1) #><#
+
+                    if (x + 1 == colCount && y + 1 == rowCount)
+                    {
+                        #>;<#
+                    }
+            
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+        }
+
+        public static bool operator !=(<#= structName #> matrix1, <#= structName #> matrix2)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    if (x == 0 && y == 0)
+                    {
+                        #>            return <#
+                    }
+                    else
+                    {
+                        #>                || <#
+                    }
+
+                    #><#= String.Format("Math.Abs(matrix1.M{0}{1} - matrix2.M{0}{1}) > Double.Epsilon", x + 1, y + 1) #><#
+
+                    if (x + 1 == colCount && y + 1 == rowCount)
+                    {
+                        #>;<#
+                    }
+            
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+        }
+
+        public static <#= structName #> operator +(<#= structName #> matrix1, <#= structName #> matrix2)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>            <#= String.Format("double m{0}{1} = matrix1.M{0}{1} + matrix2.M{0}{1}", x + 1, y + 1) #>;<#
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+
+            return new <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("m{0}{1}", x + 1, y + 1) #><#
+        
+                    if (x + 1 != colCount || y + 1 != rowCount)
+                    {
+                        #>, <#
+                    }
+                    if (x + 1 == colCount && y + 1 != rowCount)
+                    {
+                        #>
+
+                                 <#
+                    }
+                }
+            }
+            #>);
+        }
+
+        public static <#= structName #> operator -(<#= structName #> matrix1, <#= structName #> matrix2)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>            <#= String.Format("double m{0}{1} = matrix1.M{0}{1} - matrix2.M{0}{1}", x + 1, y + 1) #>;<#
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+
+            return new <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("m{0}{1}", x + 1, y + 1) #><#
+        
+                    if (x + 1 != colCount || y + 1 != rowCount)
+                    {
+                        #>, <#
+                    }
+                    if (x + 1 == colCount && y + 1 != rowCount)
+                    {
+                        #>
+
+                                 <#
+                    }
+                }
+            }
+            #>);
+        }
+
+        public static <#= structName #> operator *(<#= structName #> matrix, double scalar)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>            <#= String.Format("double m{0}{1} = matrix.M{0}{1} * scalar", x + 1, y + 1) #>;<#
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+
+            return new <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("m{0}{1}", x + 1, y + 1) #><#
+        
+                    if (x + 1 != colCount || y + 1 != rowCount)
+                    {
+                        #>, <#
+                    }
+                    if (x + 1 == colCount && y + 1 != rowCount)
+                    {
+                        #>
+
+                                 <#
+                    }
+                }
+            }
+            #>);
+        }
+
+        public static <#= structName #> operator *(double scalar, <#= structName #> matrix)
+        {
+<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #>            <#= String.Format("double m{0}{1} = scalar * matrix.M{0}{1}", x + 1, y + 1) #>;<#
+                    #><#= Environment.NewLine #><#
+                }
+            }
+#>
+
+            return new <#= structName #>(<#
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    #><#= String.Format("m{0}{1}", x + 1, y + 1) #><#
+        
+                    if (x + 1 != colCount || y + 1 != rowCount)
+                    {
+                        #>, <#
+                    }
+                    if (x + 1 == colCount && y + 1 != rowCount)
+                    {
+                        #><#= Environment.NewLine #><#
+						#>                                 <#
+                    }
+                }
+            }
+            #>);
+        }
+
+<#
+                for (int j = MinColCount; j <= MaxColCount; j++)
+                {
+                    int srcCols = j;
+                    int srcRows = colCount;
+                    int dstCols = srcCols;
+                    int dstRows = rowCount;
+
+                    if ((srcCols == MinColCount && srcRows == MinRowCount) || (dstCols == MinColCount && dstRows == MinRowCount))
+                        continue;
+
+                    string mulName = String.Format("Matrix{0}x{1}", srcCols, srcRows);
+                    string prodName = String.Format("Matrix{0}x{1}", dstCols, dstRows);
+#>
+        public static <#= prodName #> operator *(<#= structName #> matrix1, <#= mulName #> matrix2)
+        {
+<#
+                    for (int y = 0; y < dstRows; y++)
+                    {
+                        for (int x = 0; x < dstCols; x++)
+                        {
+                            #>            <#= String.Format("double m{0}{1} = ", x + 1, y + 1) #><#
+
+                            for (int y1 = 0, x1 = 0; y1 < srcRows && x1 < colCount; y1++, x1++)
+                            {
+                                #><#= String.Format("matrix1.M{0}{1} * matrix2.M{2}{3}", x1 + 1, y + 1, x + 1, y1 + 1) #><#
+
+                                if (y1 + 1 < srcRows && x1 + 1 < colCount)
+                                {
+                                    #> + <#
+                                }
+                            }
+
+                            #>;<#= Environment.NewLine #><#
+                        
+                        }
+                    }
+#>
+
+            return new <#= prodName #>(<#			
+                    for (int y = 0; y < dstRows; y++)
+                    {
+                        for (int x = 0; x < dstCols; x++)
+                        {
+                            #><#= String.Format("m{0}{1}", x + 1, y + 1) #><#
+
+                            if (x + 1 < dstCols || y + 1 < dstRows)
+                            {
+                                #>, <#
+                            }
+							if (x + 1 == dstCols && y + 1 < dstRows)
+							{
+								#><#= Environment.NewLine #><#
+								#>                                 <#
+							}
+                        }
+                    }
+                    #>);
+        }
+<#
+                }
+#>
+    }
+}
+<#
+            string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+            string outputFilePath = Path.Combine(templateDirectory, outputFileName);
+            File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+
+            this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+        }
+    }
+#>

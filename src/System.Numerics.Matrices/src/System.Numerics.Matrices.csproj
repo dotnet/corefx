@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A7402731-F3B8-4DFE-8507-88623CA1B2BA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Numerics.Matrices</RootNamespace>
+    <AssemblyName>System.Numerics.Matrices</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Numerics\IMatrix.cs" />
+    <Compile Include="System\Numerics\Matrix1x2.cs" />
+    <Compile Include="System\Numerics\Matrix1x3.cs" />
+    <Compile Include="System\Numerics\Matrix1x4.cs" />
+    <Compile Include="System\Numerics\Matrix1x5.cs" />
+    <Compile Include="System\Numerics\Matrix1x6.cs" />
+    <Compile Include="System\Numerics\Matrix1x7.cs" />
+    <Compile Include="System\Numerics\Matrix1x8.cs" />
+    <Compile Include="System\Numerics\Matrix2x1.cs" />
+    <Compile Include="System\Numerics\Matrix2x2.cs" />
+    <Compile Include="System\Numerics\Matrix2x3.cs" />
+    <Compile Include="System\Numerics\Matrix2x4.cs" />
+    <Compile Include="System\Numerics\Matrix2x5.cs" />
+    <Compile Include="System\Numerics\Matrix2x6.cs" />
+    <Compile Include="System\Numerics\Matrix2x7.cs" />
+    <Compile Include="System\Numerics\Matrix2x8.cs" />
+    <Compile Include="System\Numerics\Matrix3x1.cs" />
+    <Compile Include="System\Numerics\Matrix3x2.cs" />
+    <Compile Include="System\Numerics\Matrix3x3.cs" />
+    <Compile Include="System\Numerics\Matrix3x4.cs" />
+    <Compile Include="System\Numerics\Matrix3x5.cs" />
+    <Compile Include="System\Numerics\Matrix3x6.cs" />
+    <Compile Include="System\Numerics\Matrix3x7.cs" />
+    <Compile Include="System\Numerics\Matrix3x8.cs" />
+    <Compile Include="System\Numerics\Matrix4x1.cs" />
+    <Compile Include="System\Numerics\Matrix4x2.cs" />
+    <Compile Include="System\Numerics\Matrix4x3.cs" />
+    <Compile Include="System\Numerics\Matrix4x4.cs" />
+    <Compile Include="System\Numerics\Matrix4x5.cs" />
+    <Compile Include="System\Numerics\Matrix4x6.cs" />
+    <Compile Include="System\Numerics\Matrix4x7.cs" />
+    <Compile Include="System\Numerics\Matrix4x8.cs" />
+    <Compile Include="System\Numerics\Matrix5x1.cs" />
+    <Compile Include="System\Numerics\Matrix5x2.cs" />
+    <Compile Include="System\Numerics\Matrix5x3.cs" />
+    <Compile Include="System\Numerics\Matrix5x4.cs" />
+    <Compile Include="System\Numerics\Matrix5x5.cs" />
+    <Compile Include="System\Numerics\Matrix5x6.cs" />
+    <Compile Include="System\Numerics\Matrix5x7.cs" />
+    <Compile Include="System\Numerics\Matrix5x8.cs" />
+    <Compile Include="System\Numerics\Matrix6x1.cs" />
+    <Compile Include="System\Numerics\Matrix6x2.cs" />
+    <Compile Include="System\Numerics\Matrix6x3.cs" />
+    <Compile Include="System\Numerics\Matrix6x4.cs" />
+    <Compile Include="System\Numerics\Matrix6x5.cs" />
+    <Compile Include="System\Numerics\Matrix6x6.cs" />
+    <Compile Include="System\Numerics\Matrix6x7.cs" />
+    <Compile Include="System\Numerics\Matrix6x8.cs" />
+    <Compile Include="System\Numerics\Matrix7x1.cs" />
+    <Compile Include="System\Numerics\Matrix7x2.cs" />
+    <Compile Include="System\Numerics\Matrix7x3.cs" />
+    <Compile Include="System\Numerics\Matrix7x4.cs" />
+    <Compile Include="System\Numerics\Matrix7x5.cs" />
+    <Compile Include="System\Numerics\Matrix7x6.cs" />
+    <Compile Include="System\Numerics\Matrix7x7.cs" />
+    <Compile Include="System\Numerics\Matrix7x8.cs" />
+    <Compile Include="System\Numerics\Matrix8x1.cs" />
+    <Compile Include="System\Numerics\Matrix8x2.cs" />
+    <Compile Include="System\Numerics\Matrix8x3.cs" />
+    <Compile Include="System\Numerics\Matrix8x4.cs" />
+    <Compile Include="System\Numerics\Matrix8x5.cs" />
+    <Compile Include="System\Numerics\Matrix8x6.cs" />
+    <Compile Include="System\Numerics\Matrix8x7.cs" />
+    <Compile Include="System\Numerics\Matrix8x8.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="System\Numerics\MatrixTemplate.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MatrixTemplate.txt</LastGenOutput>
+    </Content>
+    <Content Include="System\Numerics\MatrixTemplate.txt">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MatrixTemplate.tt</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
