@@ -107,6 +107,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.UapAot)]
         public void CopyTo_NonZeroLowerBoundArray_ThrowsIndexOutOfRangeException()
         {
             var listener = new HttpListener();
@@ -215,7 +216,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndNotStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -230,7 +232,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredWithDifferentPathAndNotStarted_Works(string hostname)
         {
@@ -247,7 +250,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -273,7 +277,8 @@ namespace System.Net.Tests
             }
         }
         
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerNotStarted_Works(string host)
         {
@@ -292,7 +297,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerStarted_Works(string host)
         {
@@ -320,7 +326,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathMultipleStarted_Success(string host)
         {

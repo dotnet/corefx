@@ -5,6 +5,7 @@
 using SerializationTypes;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -443,6 +444,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GetOonlyDictionary_UseSimpleDictionaryFormat()
     {
         var x = new TypeWithDictionaryGenericMembers();
@@ -1502,6 +1504,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GenericQueue()
     {
         Queue<int> value = new Queue<int>();
@@ -1515,6 +1518,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GenericStack()
     {
         var value = new Stack<int>();
@@ -1530,6 +1534,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_Queue()
     {
         var value = new Queue();
@@ -1544,6 +1549,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_Stack()
     {
         var value = new Stack();
@@ -1559,6 +1565,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_SortedList()
     {
         var value = new SortedList();
@@ -1571,6 +1578,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_SystemVersion()
     {
         Version value = new Version(1, 2, 3, 4);
@@ -1681,6 +1689,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_ReadOnlyCollection()
     {
         List<string> list = new List<string>() { "Foo", "Bar" };
@@ -1692,14 +1701,14 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18312")]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_ReadOnlyDictionary()
     {
         var dict = new Dictionary<string, int>();
         dict["Foo"] = 1;
         dict["Bar"] = 2;
         ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
-        var deserializedValue = SerializeAndDeserialize(value, @"{""_dictionary"":[{""Key"":""Foo"",""Value"":1},{""Key"":""Bar"",""Value"":2}]}");
+        var deserializedValue = SerializeAndDeserialize(value, @"{""m_dictionary"":[{""Key"":""Foo"",""Value"":1},{""Key"":""Bar"",""Value"":2}]}");
 
         Assert.StrictEqual(value.Count, deserializedValue.Count);
         Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
@@ -2695,6 +2704,8 @@ public static partial class DataContractJsonSerializerTests
 
 #if ReflectionOnly
     [ActiveIssue(18373)]
+#else
+    [ActiveIssue("dotnet/corefx #20481", TargetFrameworkMonikers.UapAot)]
 #endif
     [Fact]
     public static void DCJS_VerifyDictionaryFormat()
@@ -2753,6 +2764,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20483", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_VerifyIndentation()
     {
         var testClass = new TestClass()
@@ -2832,6 +2844,35 @@ public static partial class DataContractJsonSerializerTests
         var actual = VerifyIndentationOfSerializedXml(value, "", null, null, () => new DataContractJsonSerializer(typeof(BaseType)), true);
         Assert.Equal(value.StrBase, actual.StrBase);
         Assert.Equal(value.StrDerived, actual.StrDerived);
+    }
+
+    [Fact]
+    public static void DCJS_ConcurrentDictionary()
+    {
+        var value = new ConcurrentDictionary<string, int>();
+        value["one"] = 1;
+        value["two"] = 2;
+        var deserializedValue = SerializeAndDeserialize<ConcurrentDictionary<string, int>>(value, @"[{""Key"":""one"",""Value"":1},{""Key"":""two"",""Value"":2}]",
+            null, null, true);
+
+        Assert.NotNull(deserializedValue);
+        Assert.True(deserializedValue.Count == 2);
+        Assert.True(deserializedValue["one"] == 1);
+        Assert.True(deserializedValue["two"] == 2);
+    }
+
+    [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
+    public static void DCJS_ReadOnlyDictionaryCausingDuplicateInvalidDataContract()
+    {
+        var dict = new Dictionary<string, int>();
+        dict["Foo"] = 1;
+        dict["Bar"] = 2;
+        var value = new ReadOnlyDictionary<string, int>(dict);
+        var deserializedValue = SerializeAndDeserialize(value, "{\"m_dictionary\":[{\"Key\":\"Foo\",\"Value\":1},{\"Key\":\"Bar\",\"Value\":2}]}", null, () => new DataContractJsonSerializer(typeof(ReadOnlyDictionary<string, int>)));
+        Assert.StrictEqual(value.Count, deserializedValue.Count);
+        Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
+        Assert.StrictEqual(value["Bar"], deserializedValue["Bar"]);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)

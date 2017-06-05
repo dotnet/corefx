@@ -29,16 +29,16 @@ namespace System.IO.Tests
         /// the symbolic link may fail to create. Only run this test if it creates
         /// links successfully.
         /// </summary>
-        protected static bool CanCreateSymbolicLinks
-        {
-            get
-            {
-                bool success = true;
+        protected static bool CanCreateSymbolicLinks => s_canCreateSymbolicLinks.Value;
 
+        private static readonly Lazy<bool> s_canCreateSymbolicLinks = new Lazy<bool>(() =>
+        {
+            try
+            {
                 // Verify file symlink creation
                 string path = Path.GetTempFileName();
                 string linkPath = path + ".link";
-                success = MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false);
+                bool success = MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false);
                 try { File.Delete(path); } catch { }
                 try { File.Delete(linkPath); } catch { }
 
@@ -51,6 +51,12 @@ namespace System.IO.Tests
 
                 return success;
             }
-        }
+            catch
+            {
+                // Problems with Process.Start (used by CreateSymbolicLinks) on some platforms
+                // https://github.com/dotnet/corefx/issues/19909
+                return false;
+            }
+        });
     }
 }
