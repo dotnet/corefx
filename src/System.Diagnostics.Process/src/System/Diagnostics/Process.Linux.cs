@@ -219,5 +219,28 @@ namespace System.Diagnostics
             return stat;
         }
 
+        public IntPtr MainWindowHandle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        public string MainWindowTitle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        public bool Responding
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
     }
 }
