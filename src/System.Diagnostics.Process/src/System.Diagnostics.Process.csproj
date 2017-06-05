@@ -279,10 +279,10 @@
     <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\Process.Win32.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\Process.WinRT.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\Process.WinRT.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Windows.cs" />
+    <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\ProcessManager.Win32.cs" />
+    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\ProcessManager.WinRT.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.Windows.cs" />
     <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\ProcessStartInfo.Win32.cs" />
     <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\ProcessStartInfo.WinRT.cs" />

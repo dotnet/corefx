@@ -12,5 +12,49 @@ namespace System.Diagnostics
                 ? throw new PlatformNotSupportedException(SR.UseShellExecuteNotSupported)
                 : StartWithCreateProcess(startInfo);
         }
+
+        private string GetMainWindowTitle()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public IntPtr MainWindowHandle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        private bool CloseMainWindowCore()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public string MainWindowTitle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        private bool IsRespondingCore()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public bool Responding
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        private bool WaitForInputIdleCore(int milliseconds)
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 }
