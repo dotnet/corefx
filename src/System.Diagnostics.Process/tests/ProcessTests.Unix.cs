@@ -23,7 +23,7 @@ namespace System.Diagnostics.Tests
             using (Process p = Process.GetCurrentProcess())
             {
                 Assert.Throws<PlatformNotSupportedException>(() => p.Responding);
-                Assert.Equal(string.Empty, p.MainWindowTitle);
+                Assert.Throws<PlatformNotSupportedException>(() => p.MainWindowTitle);
                 Assert.False(p.CloseMainWindow());
                 Assert.Throws<InvalidOperationException>(()=>p.WaitForInputIdle());
             }
