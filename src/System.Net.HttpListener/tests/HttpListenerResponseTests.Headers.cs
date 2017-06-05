@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -13,7 +11,8 @@ namespace System.Net.Tests
 {
     public class HttpListenerResponseHeadersTests : HttpListenerResponseTestBase
     {
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AddHeader_ValidValue_ReplacesHeaderInCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -25,24 +24,27 @@ namespace System.Net.Tests
             Assert.Equal("value2", response.Headers["name"]);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AddHeader_NullOrEmptyName_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentNullException>("name", () => response.AddHeader(null, ""));
-            Assert.Throws<ArgumentNullException>("name", () => response.AddHeader("", ""));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => response.AddHeader(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => response.AddHeader("", ""));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AddHeader_InvalidNameOrValue_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentException>("name", () => response.AddHeader("\r \t \n", ""));
-            Assert.Throws<ArgumentException>("name", () => response.AddHeader("(", ""));
-            Assert.Throws<ArgumentException>("value", () => response.AddHeader("name", "value1\rvalue2\r"));
+            AssertExtensions.Throws<ArgumentException>("name", () => response.AddHeader("\r \t \n", ""));
+            AssertExtensions.Throws<ArgumentException>("name", () => response.AddHeader("(", ""));
+            AssertExtensions.Throws<ArgumentException>("value", () => response.AddHeader("name", "value1\rvalue2\r"));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AppendHeader_ValidValue_AddsHeaderToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -54,26 +56,28 @@ namespace System.Net.Tests
             Assert.Equal("value1,value2", response.Headers["name"]);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(20164)]
-        public async Task AppendHeader_NullName_ThrowsArgumentNullException()
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task AppendHeader_NullOrEmptyName_ThrowsArgumentNullException(string name)
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentNullException>("name", () => response.AppendHeader(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => response.AppendHeader(null, ""));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [ActiveIssue(20164)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AppendHeader_InvalidNameOrValue_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentException>("name", () => response.AppendHeader("", ""));
-            Assert.Throws<ArgumentException>("name", () => response.AppendHeader("\r \t \n", ""));
-            Assert.Throws<ArgumentException>("name", () => response.AppendHeader("(", ""));
-            Assert.Throws<ArgumentException>("value", () => response.AppendHeader("name", "value1\rvalue2\r"));
+            AssertExtensions.Throws<ArgumentException>("name", () => response.AppendHeader("\r \t \n", ""));
+            AssertExtensions.Throws<ArgumentException>("name", () => response.AppendHeader("(", ""));
+            AssertExtensions.Throws<ArgumentException>("value", () => response.AppendHeader("name", "value1\rvalue2\r"));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentEncoding_SetCustom_DoesNothing()
         {
             // Setting HttpListenerResponse.ContentEncoding does nothing - it is never used.
@@ -88,7 +92,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentEncoding_SetDisposed_DoesNothing()
         {
             HttpListenerResponse response = await GetResponse();
@@ -101,7 +106,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentEncoding_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -117,10 +123,11 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("application/json", 152)]
         [InlineData("  applICATion/jSOn   ", 152)]
         [InlineData("garbage", 143)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task ContentType_SetAndSend_Success(string contentType, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -133,11 +140,12 @@ namespace System.Net.Tests
             string clientResponse = GetClientResponse(expectedNumberOfBytes);
             Assert.Contains($"\r\nContent-Type: {contentType.Trim()}\r\n", clientResponse);
         }
-        
+
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(null, null)]
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task ContentType_SetNullEmptyOrWhitespace_ResetsContentType(string contentType, string expectedContentType)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -154,7 +162,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentType_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -164,7 +173,8 @@ namespace System.Net.Tests
             Assert.Null(response.ContentType);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentType_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -180,7 +190,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Type", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task OutputStream_GetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -189,11 +200,12 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => response.OutputStream);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("http://microsoft.com", 152)]
         [InlineData("  http://MICROSOFT.com   ", 152)]
         [InlineData("garbage", 139)]
         [InlineData("http://domain:-1", 148)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task RedirectLocation_SetAndSend_Success(string redirectLocation, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -207,11 +219,11 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nLocation: {redirectLocation.Trim()}\r\n", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(null, null)]
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
-        // The managed implementation should set Location directly in Headers rather than track it with its own variable.
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19972, TestPlatforms.AnyUnix)]
         public async Task RedirectLocation_SetNullOrEmpty_ResetsRedirectLocation(string redirectLocation, string expectedRedirectLocation)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -231,7 +243,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Location", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task RedirectLocation_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -241,8 +254,8 @@ namespace System.Net.Tests
             Assert.Null(response.RedirectLocation);
         }
 
-        // The managed implementation should not throw setting RedirectLocation after headers were sent.
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19971, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task RedirectLocation_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -258,11 +271,12 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Location", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(100, "HTTP/1.1 100 Continue", 112)]
         [InlineData(404, "HTTP/1.1 404 Not Found", 127)]
         [InlineData(401, "HTTP/1.1 401 Unauthorized", 130)]
         [InlineData(999, "HTTP/1.1 999 ", 118)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task StatusCode_SetAndSend_Success(int statusCode, string startLine, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -277,7 +291,8 @@ namespace System.Net.Tests
             Assert.StartsWith($"{startLine}\r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task StatusCode_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -287,8 +302,8 @@ namespace System.Net.Tests
             Assert.Equal(200, response.StatusCode);
         }
 
-        // The managed implementation should not throw setting StatusCode after headers were sent.
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task StatusCode_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -304,7 +319,8 @@ namespace System.Net.Tests
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(99)]
         [InlineData(1000)]
         public async Task StatusCode_SetInvalid_ThrowsProtocolViolationException(int statusCode)
@@ -316,6 +332,8 @@ namespace System.Net.Tests
             }
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(100, "Continue")]
         [InlineData(101, "Switching Protocols")]
         [InlineData(102, "Processing")]
@@ -364,7 +382,6 @@ namespace System.Net.Tests
         [InlineData(505, "Http Version Not Supported")]
         [InlineData(507, "Insufficient Storage")]
         [InlineData(999, "")]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task StatusDescription_GetWithCustomStatusCode_ReturnsExpected(int statusCode, string expectedDescription)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -381,11 +398,12 @@ namespace System.Net.Tests
             Assert.StartsWith($"HTTP/1.1 404 {expectedDescription}\r\n", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("", "", 118)]
         [InlineData("A !#\t1\u1234", "A !#\t14", 125)] // 
         [InlineData("StatusDescription", "StatusDescription", 135)]
         [InlineData("  StatusDescription  ", "  StatusDescription  ", 139)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task StatusDescription_SetCustom_Success(string statusDescription, string expectedStatusDescription, int expectedNumberOfBytes)
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -398,32 +416,34 @@ namespace System.Net.Tests
             Assert.StartsWith($"HTTP/1.1 200 {expectedStatusDescription}\r\n", clientResponse);
         }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task StatusDescription_SetNull_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await GetResponse())
             {
-                Assert.Throws<ArgumentNullException>("value", () => response.StatusDescription = null);
+                AssertExtensions.Throws<ArgumentNullException>("value", () => response.StatusDescription = null);
                 Assert.Equal("OK", response.StatusDescription);
             }
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("\0abc")]
         [InlineData("\u007F")]
         [InlineData("\r")]
         [InlineData("\n")]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task StatusDescription_SetInvalid_ThrowsArgumentException(string statusDescription)
         {
             using (HttpListenerResponse response = await GetResponse())
             {
-                Assert.Throws<ArgumentException>("name", () => response.StatusDescription = statusDescription);
+                AssertExtensions.Throws<ArgumentException>("name", () => response.StatusDescription = statusDescription);
                 Assert.Equal("OK", response.StatusDescription);
             }
         }
-        
-        // The managed implementation should throw setting StatusDescription when disposed.
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task StatusDescription_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -433,7 +453,8 @@ namespace System.Net.Tests
             Assert.Equal("OK", response.StatusDescription);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task StatusDescription_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -449,10 +470,10 @@ namespace System.Net.Tests
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true, 120)]
         [InlineData(false, 106)]
-        // The managed implementation should set ContentLength to -1 if sendChunked == true.
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19973, TestPlatforms.AnyUnix)]
         public async Task SendChunked_GetSet_ReturnsExpected(bool sendChunked, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
@@ -484,9 +505,9 @@ namespace System.Net.Tests
                 Assert.DoesNotContain("Transfer-Encoding", clientResponse);
             }
         }
-        
-        // The managed implementation should set SendChunked to true after sending headers.
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19973, TestPlatforms.AnyUnix)]
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SendChunked_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -499,7 +520,8 @@ namespace System.Net.Tests
             Assert.Contains("\r\nTransfer-Encoding: chunked\r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SendChunked_SetAfterHeadersSent_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -515,9 +537,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        // The managed implementation should throw a ProtocolViolationException setting SendChunked to
-        // true when the request is version 1.0
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19977, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SendChunked_SetTrueAndRequestHttpVersionMinorIsZero_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -533,9 +554,10 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true, 120)]
         [InlineData(false, 139)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task KeepAlive_GetSet_ReturnsExpected(bool keepAlive, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
@@ -570,7 +592,8 @@ namespace System.Net.Tests
             }
         }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task KeepAlive_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -586,7 +609,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Connection", clientResponse);
         }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task KeepAlive_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -602,7 +626,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task KeepAlive_NoBoundaryAndRequestHttpRequestVersionMinorIsZero_SetsToFalseWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -617,8 +642,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        // The managed implementation should KeepAlive directly in Headers rather than tracking it with its own field.
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19972, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task KeepAlive_ContentLengthBoundaryAndRequestHttpVersionMinorIsZero_DoesNotChangeWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -635,10 +660,11 @@ namespace System.Net.Tests
             string clientResponse = GetClientResponse(148);
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
-    
+
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(0, 106)]
         [InlineData(10, 117)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task ContentLength64_GetSet_ReturnsExpected(int contentLength64, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
@@ -666,13 +692,14 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nContent-Length: {contentLength64}\r\n", clientResponse);
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(100, 0, 112)]
         [InlineData(101, 0, 123)]
         [InlineData(204, 0, 114)]
         [InlineData(205, 0, 117)]
         [InlineData(304, 0, 116)]
         [InlineData(200, -1, 120)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task ContentLength64_NotSetAndGetAfterSendingHeaders_ReturnValueDependsOnStatusCode(int statusCode, int expectedContentLength64, int expectedNumberOfBytes)
         {
             HttpListenerResponse response = await GetResponse();
@@ -694,7 +721,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentLength64_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -708,7 +736,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Length", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentLength64_SetAfterHeadersSent_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -724,7 +753,8 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ContentLength64_SetNegative_ThrowsArgumentOutOfRangeException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -748,10 +778,9 @@ namespace System.Net.Tests
             yield return new object[] { new Version(1, 1, 2, 3) };
         }
 
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(ProtocolVersion_Set_TestData))]
-        // The managed implementation should turn ProtocolVersion into a nop to match Windows.
-        // The managed implementation should only set the major and minor components of ProtocolVersion.
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(19977, TestPlatforms.AnyUnix)]
         public async Task ProtocolVersion_SetValid_ReturnsExpected(Version version)
         {
             Version expectedVersion = new Version(version.Major, version.Minor);
@@ -762,22 +791,23 @@ namespace System.Net.Tests
                 Assert.Equal(expectedVersion, response.ProtocolVersion);
             }
 
-            // It looks like HttpListenerResponse actually ignores the ProtocolVersion when sending to the client.
             string clientResponse = GetClientResponse(120);
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ProtocolVersion_SetNull_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await GetResponse())
             {
-                Assert.Throws<ArgumentNullException>("value", () => response.ProtocolVersion = null);
+                AssertExtensions.Throws<ArgumentNullException>("value", () => response.ProtocolVersion = null);
                 Assert.Equal(new Version(1, 1), response.ProtocolVersion);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
         [InlineData(2, 0)]
@@ -785,12 +815,13 @@ namespace System.Net.Tests
         {
             using (HttpListenerResponse response = await GetResponse())
             {
-                Assert.Throws<ArgumentException>("value", () => response.ProtocolVersion = new Version(major, minor));
+                AssertExtensions.Throws<ArgumentException>("value", () => response.ProtocolVersion = new Version(major, minor));
                 Assert.Equal(new Version(1, 1), response.ProtocolVersion);
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Headers_GetSet_ReturnsExpected()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -812,7 +843,8 @@ namespace System.Net.Tests
             Assert.Contains("\r\nName1: Value1\r\nName2: Value2\r\nName3: \r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Headers_SetNull_ThrowsNullReferenceException()
         {
             using (HttpListenerResponse response = await GetResponse())

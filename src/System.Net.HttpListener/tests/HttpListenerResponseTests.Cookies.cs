@@ -11,7 +11,8 @@ namespace System.Net.Tests
 {
     public class HttpListenerResponseCookiesTests : HttpListenerResponseTestBase
     {
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Cookies_GetSet_ReturnsExpected()
         {
             HttpListenerResponse response = await GetResponse();
@@ -87,7 +88,8 @@ namespace System.Net.Tests
             };
         }
 
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20165, TestPlatforms.AnyUnix)]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(Cookies_TestData))]
         public async Task Cookies_SetAndSend_ClientReceivesExpectedHeaders(CookieCollection cookies, int expectedBytes, string expectedSetCookie, string expectedSetCookie2)
         {
@@ -102,7 +104,7 @@ namespace System.Net.Tests
             string clientResponse = GetClientResponse(expectedBytes);
             if (expectedSetCookie != null)
             {
-                Assert.Contains($"{Environment.NewLine}{expectedSetCookie}{Environment.NewLine}", clientResponse);
+                Assert.Contains($"\r\n{expectedSetCookie}\r\n", clientResponse);
             }
             else
             {
@@ -111,7 +113,7 @@ namespace System.Net.Tests
 
             if (expectedSetCookie2 != null)
             {
-                Assert.Contains($"{Environment.NewLine}{expectedSetCookie2}{Environment.NewLine}", clientResponse);
+                Assert.Contains($"\r\n{expectedSetCookie2}\r\n", clientResponse);
             }
             else
             {
@@ -119,7 +121,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20165, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Cookies_SetInHeader_ClientReceivesExpectedHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -129,11 +132,12 @@ namespace System.Net.Tests
             response.Close();
 
             string clientResponse = GetClientResponse(173);
-            Assert.Contains($"{Environment.NewLine}Set-Cookie: name1=value1{Environment.NewLine}", clientResponse);
-            Assert.Contains($"{Environment.NewLine}Set-Cookie2: name2=value2{Environment.NewLine}", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie: name1=value1\r\n", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie2: name2=value2\r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20165, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Cookies_SetCookie2InHeadersButNotInCookies_RemovesFromHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -149,10 +153,11 @@ namespace System.Net.Tests
 
             string clientResponse = GetClientResponse(170);
             Assert.DoesNotContain("Set-Cookie:", clientResponse);
-            Assert.Contains($"{Environment.NewLine}Set-Cookie2: name3=value3; Port=\"200\"; Version=1{Environment.NewLine}", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie2: name3=value3; Port=\"200\"; Version=1\r\n", clientResponse);
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20165, TestPlatforms.AnyUnix)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Cookies_SetCookieInHeadersButNotInCookies_RemovesFromHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -167,11 +172,12 @@ namespace System.Net.Tests
             Assert.Null(response.Headers["Set-Cookie2"]);
 
             string clientResponse = GetClientResponse(146);
-            Assert.Contains($"{Environment.NewLine}Set-Cookie: name3=value3{Environment.NewLine}", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie: name3=value3\r\n", clientResponse);
             Assert.DoesNotContain("Set-Cookie2", clientResponse);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AppendCookie_ValidCookie_AddsCookieToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -192,14 +198,16 @@ namespace System.Net.Tests
             Assert.Equal("value3", response.Cookies[0].Value);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task AppendCookie_NullCookie_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentNullException>("cookie", () => response.AppendCookie(null));
+            AssertExtensions.Throws<ArgumentNullException>("cookie", () => response.AppendCookie(null));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SetCookie_ValidCookie_AddsCookieToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -212,7 +220,8 @@ namespace System.Net.Tests
             Assert.Equal(new Cookie[] { cookie1, cookie2 }, response.Cookies.Cast<Cookie>());
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SetCookie_ValidCookie_ClonesCookie()
         {
             HttpListenerResponse response = await GetResponse();
@@ -224,24 +233,26 @@ namespace System.Net.Tests
             Assert.Equal("value", response.Cookies[0].Value);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SetCookie_NullCookie_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
-            Assert.Throws<ArgumentNullException>("cookie", () => response.SetCookie(null));
+            AssertExtensions.Throws<ArgumentNullException>("cookie", () => response.SetCookie(null));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SetCookie_CookieDoesntExist_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
             var cookie1 = new Cookie("name", "value");
 
             response.SetCookie(cookie1);
-            Assert.Throws<ArgumentException>("cookie", () => response.SetCookie(cookie1));
+            AssertExtensions.Throws<ArgumentException>("cookie", () => response.SetCookie(cookie1));
 
             var cookie2 = new Cookie("name", "value2");
-            Assert.Throws<ArgumentException>("cookie", () => response.SetCookie(cookie2));
+            AssertExtensions.Throws<ArgumentException>("cookie", () => response.SetCookie(cookie2));
             Assert.Equal(new Cookie[] { cookie2 }, response.Cookies.Cast<Cookie>());
         }
     }

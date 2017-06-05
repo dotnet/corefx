@@ -7,7 +7,8 @@ using Windows.Storage;
 using Xunit;
 
 namespace System.IO
-{
+{   
+    [ActiveIssue("https://github.com/dotnet/corefx/issues/18940", TargetFrameworkMonikers.UapAot)]
     public class CreateSafeFileHandleTests
     {
         [Fact]
