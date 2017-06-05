@@ -37,7 +37,7 @@ namespace System.Net.Tests
 
         [Fact]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
-        [ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Netcoreapp)]
         public async Task AddHeader_LongName_ThrowsArgumentOutOfRangeException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -79,7 +79,7 @@ namespace System.Net.Tests
 
         [Fact]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
-        [ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Netcoreapp)]
         public async Task AppendHeader_LongName_ThrowsArgumentOutOfRangeException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -857,7 +857,6 @@ namespace System.Net.Tests
                 };
                 response.Headers = headers;
                 Assert.Equal(headers, response.Headers);
-                //[ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
                 Assert.NotSame(headers, response.Headers);
             }
 
@@ -883,7 +882,7 @@ namespace System.Net.Tests
         [Theory]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("Transfer-Encoding")]
-        [ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetRestricted_ThrowsArgumentException(string name)
         {
             HttpListenerResponse response = await GetResponse();
@@ -906,7 +905,7 @@ namespace System.Net.Tests
 
         [Fact]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
-        [ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetLongName_ThrowsArgumentOutOfRangeException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -919,7 +918,7 @@ namespace System.Net.Tests
 
         [Fact]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
-        [ActiveIssue(20425, TargetFrameworkMonikers.Netcoreapp)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetRequestHeader_ThrowsInvalidOperationException()
         {
             HttpListenerResponse response = await GetResponse();
