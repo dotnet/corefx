@@ -922,7 +922,6 @@ namespace System.Collections.Generic
         }
 
         [Serializable]
-        [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         public sealed class KeyValuePairComparer : Comparer<KeyValuePair<TKey, TValue>>
         {
             internal IComparer<TKey> keyComparer;
