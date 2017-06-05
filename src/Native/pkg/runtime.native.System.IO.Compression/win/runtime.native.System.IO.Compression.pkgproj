@@ -6,11 +6,20 @@
     <WinVersion Condition="'$(PackagePlatform)'=='arm64'">win10</WinVersion>
     <WinVersion Condition="'$(PackagePlatform)'=='x86' OR '$(PackagePlatform)'=='x64'">win7</WinVersion>
     <PackageTargetRuntime>$(WinVersion)-$(PackagePlatform)</PackageTargetRuntime>
+    <PackageVersion>4.3.1</PackageVersion>
+    <!-- the native compression packages require nuget >3.5 for nativeassets support -->
+    <MinClientVersion3>3.5</MinClientVersion3>    
   </PropertyGroup>
   <ItemGroup>
     <NativeFile Include="$(WinNativePath)\clrcompression.dll">
       <TargetPath>runtimes/$(WinVersion)-$(PackagePlatform)/native</TargetPath>
     </NativeFile>
+    <!-- We redistribute the 4.0.1 binaries for netcore50 because they target the API sets 
+         as kernel32 is unavailable on OneCore systems -->
+    <ProjectReference Condition="'$(PackagePlatform)'!='arm64'" Include="redist\clrcompression.depproj">
+      <UndefineProperties>SkipCreatePackageOnMissingFiles</UndefineProperties>
+      <AdditionalProperties>PackageTargetRuntime=$(PackageTargetRuntime)</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

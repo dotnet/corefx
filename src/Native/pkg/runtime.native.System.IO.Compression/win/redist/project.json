@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "runtime.native.System.IO.Compression": "4.1.0"
+  },
+  "frameworks": {
+    "netcore50": {}
+  },
+  "runtimes": {
+    "win10-x86-aot": {},
+    "win10-x64-aot": {},
+    "win10-arm-aot": {}
+  }
+}
