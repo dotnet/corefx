@@ -950,7 +950,7 @@ namespace System.Diagnostics
             while (true)
             {
                 IntPtr currentPtr = (IntPtr)((long)dataPtr + totalOffset);
-                SystemProcessInformation pi = Marshal.PtrToStructure<SystemProcessInformation>(currentPtr);
+                ref SystemProcessInformation pi = ref *(SystemProcessInformation *)(currentPtr);
 
                 // get information for a process
                 ProcessInfo processInfo = new ProcessInfo();
