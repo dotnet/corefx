@@ -220,5 +220,29 @@ namespace System.Diagnostics
         {
             return Interop.libproc.proc_pid_rusage(Interop.Sys.GetPid());
         }
+
+        public IntPtr MainWindowHandle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        public string MainWindowTitle
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        public bool Responding
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
     }
 }
