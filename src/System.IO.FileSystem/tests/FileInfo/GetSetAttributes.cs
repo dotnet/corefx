@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -148,6 +149,37 @@ namespace System.IO.Tests
         public void SetAttributes_MissingDirectory(char trailingChar)
         {
             Assert.Throws<DirectoryNotFoundException>(() => Set(Path.Combine(GetTestFilePath(), "file" + trailingChar), FileAttributes.ReadOnly));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_CreateAfter(char trailingChar)
+        {
+            string filePath = GetTestFilePath() + trailingChar;
+            FileInfo info = new FileInfo(filePath);
+            File.Create(filePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).Dispose();
+            Assert.Equal(FileAttributes.Archive, info.Attributes);
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void GetAttributes_DeleteAfter(char trailingChar)
+        {
+            string filePath = GetTestFilePath() + trailingChar;
+            File.Create(filePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).Dispose();
+            FileInfo info = new FileInfo(filePath + trailingChar);
+            File.Delete(filePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
+        }
+
+        public void GetAttributes_DeleteAfterEnumerate()
+        {
+            // When enumerating we populate the state as we already have it.
+            string filePath = GetTestFilePath();
+            File.Create(filePath).Dispose();
+            FileInfo info = new DirectoryInfo(TestDirectory).EnumerateFiles().First();
+            File.Delete(filePath);
+            Assert.Equal(FileAttributes.Normal, info.Attributes);
+            info.Refresh();
+            Assert.Equal((FileAttributes)(-1), info.Attributes);
         }
     }
 }
