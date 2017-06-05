@@ -942,6 +942,7 @@ namespace System.Diagnostics
 
         private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr)
         {
+            // Use a dictionary to avoid duplicate entries if any
             // 60 is a reasonable number for processes on a normal machine.
             Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>(60);
 
