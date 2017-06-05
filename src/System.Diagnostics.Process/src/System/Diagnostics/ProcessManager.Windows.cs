@@ -942,8 +942,8 @@ namespace System.Diagnostics
 
         private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr)
         {
-            // 250 is a reasonable number for processes on a normal machine.
-            var processInfos = new List<ProcessInfo>(250);
+            // 60 is a reasonable number for processes on a normal machine.
+            Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>(60);
 
             long totalOffset = 0;
 
@@ -993,7 +993,7 @@ namespace System.Diagnostics
                 }
 
                 // get the threads for current process
-                processInfos.Add(processInfo);
+                processInfos[processInfo.ProcessId] = processInfo;
 
                 currentPtr = (IntPtr)((long)currentPtr + Marshal.SizeOf(pi));
                 int i = 0;
@@ -1022,7 +1022,9 @@ namespace System.Diagnostics
                 totalOffset += pi.NextEntryOffset;
             }
 
-            return processInfos.ToArray();
+            ProcessInfo[] temp = new ProcessInfo[processInfos.Values.Count];
+            processInfos.Values.CopyTo(temp, 0);
+            return temp;
         }
 
         // This function generates the short form of process name. 
