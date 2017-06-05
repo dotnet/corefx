@@ -42,7 +42,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableObjects))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ValidateTfmHashes(object obj, string[] blobs)
         {
             if (blobs == null || blobs.Length < 2)
@@ -51,7 +51,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     $"Blob: " + SerializeObjectToBlob(obj));
             }
 
-            foreach (string blob in blobs.Take(1).Where(blob => !string.IsNullOrWhiteSpace(blob)))
+            foreach (string blob in blobs.Where(blob => !string.IsNullOrWhiteSpace(blob)))
             {
                 CheckForAnyEquals(obj, DeserializeBlobToObject(blob));
             }

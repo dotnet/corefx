@@ -12,6 +12,7 @@ namespace System.Collections.Specialized
     ///  </para>
     /// </devdoc>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ListDictionary : IDictionary
     {
         private DictionaryNode head; // Do not rename (binary serialization)
@@ -492,6 +493,7 @@ namespace System.Collections.Specialized
         }
 
         [Serializable]
+        [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         public class DictionaryNode
         {
             public object key;
