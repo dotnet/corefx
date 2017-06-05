@@ -22,7 +22,7 @@ namespace System.Diagnostics.Tests
             // This tests the hardcoded implementations of these APIs on Unix.
             using (Process p = Process.GetCurrentProcess())
             {
-                Assert.True(p.Responding);
+                Assert.Throws<PlatformNotSupportedException>(() => p.Responding);
                 Assert.Equal(string.Empty, p.MainWindowTitle);
                 Assert.False(p.CloseMainWindow());
                 Assert.Throws<InvalidOperationException>(()=>p.WaitForInputIdle());

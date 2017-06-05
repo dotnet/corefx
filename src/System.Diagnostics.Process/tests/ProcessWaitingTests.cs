@@ -217,6 +217,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void WaitForInputIdle_NotDirected_ThrowsInvalidOperationException()
         {
