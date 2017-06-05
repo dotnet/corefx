@@ -22,7 +22,7 @@ namespace Legacy.Support
         private static SerialPortRequirements s_localMachineSerialPortRequirements;
 
         // Set this true to display port info to the console rather than Debug.WriteLine
-        private static bool s_displayPortInfoOnConsole = false;
+        private static bool s_displayPortInfoOnConsole = true;
 
         static TCSupport()
         {
