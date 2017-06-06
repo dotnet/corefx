@@ -971,7 +971,7 @@ namespace System.Diagnostics
                 processInfo.HandleCount = (int)pi.HandleCount;
 
 
-                if (pi.Name.Buffer == IntPtr.Zero)
+                if (pi.ImageName.Buffer == IntPtr.Zero)
                 {
                     if (processInfo.ProcessId == NtProcessManager.SystemProcessID)
                     {
@@ -989,7 +989,7 @@ namespace System.Diagnostics
                 }
                 else
                 {
-                    string processName = GetProcessShortName(Marshal.PtrToStringUni(pi.Name.Buffer, pi.Name.Length / sizeof(char)));
+                    string processName = GetProcessShortName(Marshal.PtrToStringUni(pi.ImageName.Buffer, pi.ImageName.Length / sizeof(char)));
                     processInfo.ProcessName = processName;
                 }
 
@@ -1085,10 +1085,10 @@ namespace System.Diagnostics
             internal uint NextEntryOffset;
             internal uint NumberOfThreads;
             private fixed byte Reserved1[48];
-            internal Interop.UNICODE_STRING Name;
+            internal Interop.UNICODE_STRING ImageName;
             internal int BasePriority;
             internal IntPtr UniqueProcessId;
-            private IntPtr Reserved2;
+            private UIntPtr Reserved2;
             internal uint HandleCount;
             internal uint SessionId;
             private UIntPtr Reserved3;
