@@ -226,11 +226,10 @@ namespace System.SpanTests
             Assert.Equal<TestValueTypeWithReference>(expected, actual);
         }
 
-        // NOTE: IndexOverflow test is constrained to run on Windows and MacOSX because it
-        //       causes problems on Linux due to the way deferred memory allocation works.
-        //       On Linux, the allocation can succeed even if there is not enough memory
-        //       but then the test may get killed by the OOM killer at the time the memory
-        //       is accessed which triggers the full memory allocation.
+        // NOTE: ClearLongerThanUintMaxValueBytes test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
         [Fact]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
