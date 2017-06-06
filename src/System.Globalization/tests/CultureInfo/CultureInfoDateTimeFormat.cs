@@ -33,9 +33,11 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void TestSettingThreadCultures()
         {
+            if (PlatformDetection.IsNetNative && !PlatformDetection.IsWinRT) // Tide us over until .Net Native ILC tests run are run inside an appcontainer.
+                return;
+
             RemoteInvoke(() =>
             {
                 CultureInfo culture = new CultureInfo("ja-JP");
