@@ -22,8 +22,8 @@ namespace System.Diagnostics.Tests
             // This tests the hardcoded implementations of these APIs on Unix.
             using (Process p = Process.GetCurrentProcess())
             {
-                Assert.Throws<PlatformNotSupportedException>(() => p.Responding);
-                Assert.Throws<PlatformNotSupportedException>(() => p.MainWindowTitle);
+                Assert.True(p.Responding);
+                Assert.Equal(string.Empty, p.MainWindowTitle);
                 Assert.False(p.CloseMainWindow());
                 Assert.Throws<InvalidOperationException>(()=>p.WaitForInputIdle());
             }
@@ -34,7 +34,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            Assert.Throws<PlatformNotSupportedException>(() => _process.MainWindowHandle);
+            Assert.Equal(IntPtr.Zero, _process.MainWindowHandle);
         }
 
         [Fact]
