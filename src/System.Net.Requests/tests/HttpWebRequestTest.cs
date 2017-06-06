@@ -17,6 +17,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19580")]
     public partial class HttpWebRequestTest : RemoteExecutorTestBase
     {
         private const string RequestBody = "This is data to POST.";
