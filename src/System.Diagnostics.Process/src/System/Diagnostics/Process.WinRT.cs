@@ -13,15 +13,11 @@ namespace System.Diagnostics
                 : StartWithCreateProcess(startInfo);
         }
 
-        private string GetMainWindowTitle() => string.Empty;
-
         public IntPtr MainWindowHandle => IntPtr.Zero;
 
         private bool CloseMainWindowCore() => false;
 
         public string MainWindowTitle => string.Empty;
-
-        private bool IsRespondingCore() => true;
 
         public bool Responding => true;
 
