@@ -13,9 +13,6 @@ namespace System.Diagnostics
 {
     internal static partial class ProcessManager
     {
-        public static IntPtr GetMainWindowHandle(int processId)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        public static IntPtr GetMainWindowHandle(int processId) => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
     }
 }

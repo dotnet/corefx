@@ -219,28 +219,10 @@ namespace System.Diagnostics
             return stat;
         }
 
-        public IntPtr MainWindowHandle
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
+        public IntPtr MainWindowHandle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
 
-        public string MainWindowTitle
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
+        public string MainWindowTitle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
 
-        public bool Responding
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
+        public bool Responding => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
     }
 }
