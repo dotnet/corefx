@@ -76,6 +76,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.CopyOnWrite)]
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
+            if (PlatformDetection.IsNetNative && viewAccess == MemoryMappedFileAccess.ReadWriteExecute) // ActiveIssue https://github.com/dotnet/corefx/issues/20751 throws IOException.
+                return;
+
             const int Capacity = 4096;
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
             using (MemoryMappedViewAccessor acc = mmf.CreateViewAccessor(0, Capacity, viewAccess))
@@ -100,6 +103,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
+            if (PlatformDetection.IsNetNative && viewAccess == MemoryMappedFileAccess.ReadWriteExecute) // ActiveIssue https://github.com/dotnet/corefx/issues/20751 throws IOException.
+                return;
+
             const int Capacity = 4096;
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
             {
