@@ -177,7 +177,10 @@ namespace System.IO.Tests
             File.Create(filePath).Dispose();
             FileInfo info = new DirectoryInfo(TestDirectory).EnumerateFiles().First();
             File.Delete(filePath);
-            Assert.Equal(FileAttributes.Normal, info.Attributes);
+
+            // The actual value will vary depending on the OS and what is running.
+            // Archive, NotContentIndexed, etc. might be set.
+            Assert.NotEqual((FileAttributes)(-1), info.Attributes);
             info.Refresh();
             Assert.Equal((FileAttributes)(-1), info.Attributes);
         }
