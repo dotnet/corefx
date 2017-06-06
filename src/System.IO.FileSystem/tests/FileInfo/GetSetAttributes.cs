@@ -157,7 +157,9 @@ namespace System.IO.Tests
             string filePath = GetTestFilePath() + trailingChar;
             FileInfo info = new FileInfo(filePath);
             File.Create(filePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).Dispose();
-            Assert.Equal(FileAttributes.Archive, info.Attributes);
+            // The actual value will vary depending on the OS and what is running.
+            // Archive, NotContentIndexed, etc. might be set.
+            Assert.NotEqual((FileAttributes)(-1), info.Attributes);
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
