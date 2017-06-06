@@ -13,18 +13,18 @@ namespace System.Diagnostics
                 : StartWithCreateProcess(startInfo);
         }
 
-        private string GetMainWindowTitle() => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        private string GetMainWindowTitle() => string.Empty;
 
-        public IntPtr MainWindowHandle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public IntPtr MainWindowHandle => IntPtr.Zero;
 
-        private bool CloseMainWindowCore() => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        private bool CloseMainWindowCore() => false;
 
-        public string MainWindowTitle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public string MainWindowTitle => string.Empty;
 
-        private bool IsRespondingCore() => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        private bool IsRespondingCore() => true;
 
-        public bool Responding => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public bool Responding => true;
 
-        private bool WaitForInputIdleCore(int milliseconds) => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        private bool WaitForInputIdleCore(int milliseconds) => false;
     }
 }

@@ -221,10 +221,10 @@ namespace System.Diagnostics
             return Interop.libproc.proc_pid_rusage(Interop.Sys.GetPid());
         }
 
-        public IntPtr MainWindowHandle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public IntPtr MainWindowHandle => IntPtr.Zero;
 
-        public string MainWindowTitle => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public string MainWindowTitle => string.Empty;
 
-        public bool Responding => throw new PlatformNotSupportedException(SR.Win32WindowsNotSupported);
+        public bool Responding => true;
     }
 }

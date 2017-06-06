@@ -303,7 +303,4 @@
   <data name="UseShellExecuteNotSupported" xml:space="preserve">
     <value>UseShellExecute is not supported on this platform.</value>
   </data>
-  <data name="Win32WindowsNotSupported" xml:space="preserve">
-    <value>Operations on HWND-based windows are not supported on this platform.</value>
-  </data>
 </root>
