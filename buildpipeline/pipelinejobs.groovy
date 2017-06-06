@@ -1,6 +1,7 @@
 // Import the utility functionality.
 
 import jobs.generation.JobReport;
+import jobs.generation.SummaryBuilder;
 import jobs.generation.Utilities;
 import org.dotnet.ci.pipelines.Pipeline
 
@@ -46,6 +47,8 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 }
 
 JobReport.Report.generateJobReport(out)
+def linkList = [ "www.bing.com" ]
+SummaryBuilder.addSummaryLinks('Test Execution Summary', linkList)
 
 // Make the call to generate the help job
 Utilities.createHelperJob(this, project, branch,
