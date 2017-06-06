@@ -19,6 +19,7 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(CurrentInfo_CustomCulture_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void CurrentInfo_CustomCulture(CultureInfo newCurrentCulture)
         {
             RemoteInvoke((cultureName) =>
@@ -33,6 +34,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void CurrentInfo_Subclass_OverridesGetFormat()
         {
             RemoteInvoke(() =>
@@ -44,6 +46,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void CurrentInfo_Subclass_OverridesNumberFormat()
         {
             RemoteInvoke(() =>
