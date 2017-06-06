@@ -61,7 +61,7 @@ namespace System.IO.Tests
         [Fact]
         public void CanGetAllTimesAfterCreation()
         {
-            DateTime beforeTime = DateTime.UtcNow.AddSeconds(-1);
+            DateTime beforeTime = DateTime.UtcNow.AddSeconds(-3);
             T item = GetExistingItem();
             DateTime afterTime = DateTime.UtcNow.AddSeconds(3);
             ValidateSetTimes(item, beforeTime, afterTime);
