@@ -5,21 +5,6 @@ import jobs.generation.SummaryBuilder;
 //          in the build scripts and this can cause problems.
 // OuterLoop - If true, runs outerloop, if false runs just innerloop
 
-def submittedHelixJson = null
-
-simpleNode('Windows_NT','latest') {
-    stage ('Checkout source') {
-        retry (10) {
-            checkout scm
-        }
-    }
-
-    def logFolder = getLogFolder()
-
-    stage ('Clean') {
-        bat '.\\clean.cmd -all'
-    }
-}
 
 stage ('Generate Link') {
     def SummaryBuilder builder = new SummaryBuilder()

@@ -5,16 +5,6 @@ import jobs.generation.SummaryBuilder;
 //          in the build scripts and this can cause problems.
 // OuterLoop - If true, runs outerloop, if false runs just innerloop
 
-def submittedHelixJson = null
-
-simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
-    stage ('Checkout source') {
-        checkout scm
-    }
-
-    def logFolder = getLogFolder()
-
-}
 
 stage ('Generate Link') {
     def SummaryBuilder builder = new SummaryBuilder()
