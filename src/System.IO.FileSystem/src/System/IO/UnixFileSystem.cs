@@ -504,6 +504,13 @@ namespace System.IO
                         }
                         searchPattern = searchPattern.Substring(lastSlash + 1);
                     }
+
+                    // We need to escape any escape characters in the search pattern
+                    searchPattern = searchPattern.Replace(@"\", @"\\");
+
+                    // And then escape '[' to prevent it being picked up as a wildcard
+                    searchPattern = searchPattern.Replace(@"[", @"\[");
+
                     string fullPath = Path.GetFullPath(userPath);
 
                     // Store everything for the enumerator
@@ -638,6 +645,7 @@ namespace System.IO
                 {
                     searchPattern += "*";
                 }
+
                 return searchPattern;
             }
 
