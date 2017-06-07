@@ -7,7 +7,10 @@ import jobs.generation.SummaryBuilder;
 
 
 stage ('Generate Link') {
-    def SummaryBuilder builder = new SummaryBuilder()
-    def linkList = [ "www.bing.com" ]
-    builder.addSummaryLinks('Test Execution Summary', linkList)
+    def newSummary = manager.createSummary("terminal.gif")
+    
+    // Append the header
+    newSummary.appendText("<b>Links to Read:</b><ul>", false)
+    newSummary.appendText("<li><a href=\\\"www.bing.com\\\">www.bing.com</a></li>", false)
+    newSummary.appendText("<li>None</li>", false)
 }
