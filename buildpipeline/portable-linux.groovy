@@ -1,5 +1,5 @@
 @Library('dotnet-ci') _
-
+import jobs.generation.SummaryBuilder;
 // Incoming parameters.  Access with "params.<param name>".
 // Config - Build configuration. Note that we don't using 'Configuration' since it's used
 //          in the build scripts and this can cause problems.
