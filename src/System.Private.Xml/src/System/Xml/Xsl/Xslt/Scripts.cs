@@ -15,7 +15,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
-#if !uapaot
+#if !uap
 using System.Xml.Xsl.IlGen;
 #endif
 using System.Xml.Xsl.Runtime;
