@@ -21,9 +21,11 @@
 
     <!-- by default all packages will use the same version which revs with respect to product version -->
     <PackageVersion Condition="'$(PackageVersion)' == ''">4.3.0</PackageVersion>
+
+    <PackageBaselineProps Condition="'$(PackageBaselineProps)' == ''">$(MSBuildThisFileDirectory)pkg\baseline\baseline.props</PackageBaselineProps>
   </PropertyGroup>
 
-  <Import Condition="Exists('pkg/baseline/baseline.props')" Project="pkg/baseline/baseline.props" />
+  <Import Condition="Exists('$(PackageBaselineProps)')" Project="$(PackageBaselineProps)" />
 
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.pkgproj'">
     <ValidatePackageSuppression Include="SuppressNETStandardInference">
