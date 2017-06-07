@@ -47,8 +47,9 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 }
 
 JobReport.Report.generateJobReport(out)
+def SummaryBuilder builder = new SummaryBuilder()
 def linkList = [ "www.bing.com" ]
-SummaryBuilder.addSummaryLinks('Test Execution Summary', linkList)
+builder.addSummaryLinks('Test Execution Summary', linkList)
 
 // Make the call to generate the help job
 Utilities.createHelperJob(this, project, branch,
