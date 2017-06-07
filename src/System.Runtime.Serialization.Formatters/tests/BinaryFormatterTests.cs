@@ -43,7 +43,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [Theory]
         [MemberData(nameof(SerializableObjects))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void ValidateTfmHashes(object obj, string[] blobs)
+        public void ValidateAgainstBlobs(object obj, string[] blobs)
         {
             if (blobs == null || blobs.Length < 2)
             {
