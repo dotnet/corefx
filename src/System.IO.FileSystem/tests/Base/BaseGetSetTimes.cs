@@ -41,7 +41,7 @@ namespace System.IO.Tests
             {
                 DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, function.Kind);
                 function.Setter(item, dt);
-                var result = function.Getter(item);
+                DateTime result = function.Getter(item);
                 Assert.Equal(dt, result);
                 Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
 

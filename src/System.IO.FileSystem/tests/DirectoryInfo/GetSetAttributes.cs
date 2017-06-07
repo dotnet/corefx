@@ -2,15 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.IO.Tests
 {
     public class DirectoryInfo_GetSetAttributes : InfoGetSetAttributes<DirectoryInfo>
     {
-        protected override FileAttributes Get(string path) => new DirectoryInfo(path).Attributes;
-        protected override void Set(string path, FileAttributes attributes) => new DirectoryInfo(path).Attributes = attributes;
-        protected override string CreateItem(string path = null) => Directory.CreateDirectory(path ?? GetTestFilePath()).FullName;
+        protected override FileAttributes GetAttributes(string path) => new DirectoryInfo(path).Attributes;
+        protected override void SetAttributes(string path, FileAttributes attributes) => new DirectoryInfo(path).Attributes = attributes;
+        protected override string CreateItem(string path = null, [CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
+            => Directory.CreateDirectory(path ?? GetTestFilePath()).FullName;
         protected override DirectoryInfo CreateInfo(string path) => new DirectoryInfo(path);
         protected override void DeleteItem(string path) => Directory.Delete(path);
         protected override bool IsDirectory => true;
@@ -21,9 +23,9 @@ namespace System.IO.Tests
         public void UnixAttributeSetting(FileAttributes attr)
         {
             string path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(attr | FileAttributes.Directory, Get(path));
-            Set(path, 0);
+            SetAttributes(path, attr);
+            Assert.Equal(attr | FileAttributes.Directory, GetAttributes(path));
+            SetAttributes(path, 0);
         }
 
         [Theory]
@@ -47,9 +49,9 @@ namespace System.IO.Tests
         public void WindowsAttributeSetting(FileAttributes attr)
         {
             string path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(attr | FileAttributes.Directory, Get(path));
-            Set(path, 0);
+            SetAttributes(path, attr);
+            Assert.Equal(attr | FileAttributes.Directory, GetAttributes(path));
+            SetAttributes(path, 0);
         }
 
         [Theory]
@@ -62,9 +64,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that don't get set
         public void UnixInvalidAttributes(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Directory, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Directory, GetAttributes(path));
         }
 
         [Theory]
@@ -76,9 +78,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that don't get set
         public void WindowsInvalidAttributes(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Directory, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Directory, GetAttributes(path));
         }
 
         [Theory]
@@ -87,8 +89,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that throw
         public void UnixInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
-            var path = CreateItem();
-            Assert.Throws<ArgumentException>(() => Set(path, attr));
+            string path = CreateItem();
+            Assert.Throws<ArgumentException>(() => SetAttributes(path, attr));
         }
 
         [Theory]
@@ -98,8 +100,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that throw
         public void WindowsInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
-            var path = CreateItem();
-            Assert.Throws<ArgumentException>(() => Set(path, attr));
+            string path = CreateItem();
+            Assert.Throws<ArgumentException>(() => SetAttributes(path, attr));
         }
     }
 }

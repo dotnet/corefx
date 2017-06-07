@@ -12,59 +12,59 @@ namespace System.IO.Tests
         [Fact]
         public void NullParameters()
         {
-            Assert.Throws<ArgumentNullException>(() => Get(null));
-            Assert.Throws<ArgumentNullException>(() => Set(null, FileAttributes.Normal));
+            Assert.Throws<ArgumentNullException>(() => GetAttributes(null));
+            Assert.Throws<ArgumentNullException>(() => SetAttributes(null, FileAttributes.Normal));
         }
 
         [Fact]
         public void InvalidParameters()
         {
-            Assert.Throws<ArgumentException>(() => Get(string.Empty));
-            Assert.Throws<ArgumentException>(() => Set(string.Empty, FileAttributes.Normal));
+            Assert.Throws<ArgumentException>(() => GetAttributes(string.Empty));
+            Assert.Throws<ArgumentException>(() => SetAttributes(string.Empty, FileAttributes.Normal));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void SetAttributes_MissingFile(char trailingChar)
         {
-            Assert.Throws<FileNotFoundException>(() => Set(GetTestFilePath() + trailingChar, FileAttributes.ReadOnly));
+            Assert.Throws<FileNotFoundException>(() => SetAttributes(GetTestFilePath() + trailingChar, FileAttributes.ReadOnly));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void SetAttributes_MissingDirectory(char trailingChar)
         {
-            Assert.Throws<DirectoryNotFoundException>(() => Set(Path.Combine(GetTestFilePath(), "file" + trailingChar), FileAttributes.ReadOnly));
+            Assert.Throws<DirectoryNotFoundException>(() => SetAttributes(Path.Combine(GetTestFilePath(), "file" + trailingChar), FileAttributes.ReadOnly));
         }
 
 
         [ConditionalFact(nameof(CanCreateSymbolicLinks))]
         public void SymLinksAreReparsePoints()
         {
-            var path = CreateItem();
-            var linkPath = GetTestFilePath();
+            string path = CreateItem();
+            string linkPath = GetTestFilePath();
 
             Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: IsDirectory));
 
-            Assert.NotEqual(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(path));
-            Assert.Equal(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(linkPath));
+            Assert.NotEqual(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & GetAttributes(path));
+            Assert.Equal(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & GetAttributes(linkPath));
         }
 
         [ConditionalFact(nameof(CanCreateSymbolicLinks))]
         public void SymLinksReflectSymLinkAttributes()
         {
-            var path = CreateItem();
-            var linkPath = GetTestFilePath();
+            string path = CreateItem();
+            string linkPath = GetTestFilePath();
 
             Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: IsDirectory));
 
-            Set(path, FileAttributes.ReadOnly);
+            SetAttributes(path, FileAttributes.ReadOnly);
             try
             {
-                Assert.Equal(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(path));
-                Assert.NotEqual(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(linkPath));
+                Assert.Equal(FileAttributes.ReadOnly, FileAttributes.ReadOnly & GetAttributes(path));
+                Assert.NotEqual(FileAttributes.ReadOnly, FileAttributes.ReadOnly & GetAttributes(linkPath));
             }
             finally
             {
-                Set(path, Get(path) & ~FileAttributes.ReadOnly);
+                SetAttributes(path, GetAttributes(path) & ~FileAttributes.ReadOnly);
             }
         }
     }

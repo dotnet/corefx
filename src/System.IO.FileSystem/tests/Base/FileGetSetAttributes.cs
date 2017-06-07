@@ -15,10 +15,10 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix valid file attributes
         public void UnixAttributeSetting(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(attr, Get(path));
-            Set(path, 0);
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(attr, GetAttributes(path));
+            SetAttributes(path, 0);
         }
 
         [Theory]
@@ -32,10 +32,10 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows file attribute
         public void WindowsAttributeSetting(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(attr, Get(path));
-            Set(path, 0);
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(attr, GetAttributes(path));
+            SetAttributes(path, 0);
         }
 
         [Theory]
@@ -47,9 +47,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix invalid file attributes
         public void UnixInvalidAttributes(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Normal, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Normal, GetAttributes(path));
         }
 
         [Theory]
@@ -61,9 +61,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Invalid Windows file attributes 
         public void WindowsInvalidAttributes(FileAttributes attr)
         {
-            var path = CreateItem();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Normal, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Normal, GetAttributes(path));
         }
     }
 }

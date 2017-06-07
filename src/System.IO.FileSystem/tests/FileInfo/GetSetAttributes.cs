@@ -8,14 +8,14 @@ namespace System.IO.Tests
 {
     public class FileInfo_GetSetAttributes : InfoGetSetAttributes<FileInfo>
     {
-        protected override FileAttributes Get(string path) => new FileInfo(path).Attributes;
-        protected override void Set(string path, FileAttributes attributes) => new FileInfo(path).Attributes = attributes;
+        protected override FileAttributes GetAttributes(string path) => new FileInfo(path).Attributes;
+        protected override void SetAttributes(string path, FileAttributes attributes) => new FileInfo(path).Attributes = attributes;
         protected override FileInfo CreateInfo(string path) => new FileInfo(path);
 
         [Fact]
-        public void IsReadOnly_Set_And_Get()
+        public void IsReadOnly_SetAndGet()
         {
-            var test = new FileInfo(GetTestFilePath());
+            FileInfo test = new FileInfo(GetTestFilePath());
             test.Create().Dispose();
 
             // Set to True

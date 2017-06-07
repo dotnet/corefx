@@ -18,20 +18,20 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void GetAttributes_MissingFile(char trailingChar)
         {
-            Assert.Equal((FileAttributes)(-1), Get(GetTestFilePath() + trailingChar));
+            Assert.Equal((FileAttributes)(-1), GetAttributes(GetTestFilePath() + trailingChar));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void GetAttributes_MissingDirectory(char trailingChar)
         {
-            Assert.Equal((FileAttributes)(-1), Get(Path.Combine(GetTestFilePath(), "file" + trailingChar)));
+            Assert.Equal((FileAttributes)(-1), GetAttributes(Path.Combine(GetTestFilePath(), "file" + trailingChar)));
         }
 
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void GetAttributes_CreateAfter(char trailingChar)
         {
             string path = GetTestFilePath();
-            var info = CreateInfo(trailingChar == 'a' ? path : path + trailingChar);
+            T info = CreateInfo(trailingChar == 'a' ? path : path + trailingChar);
             CreateItem(path);
 
             // The actual value will vary depending on the OS and what is running.
@@ -43,7 +43,7 @@ namespace System.IO.Tests
         public void GetAttributes_DeleteAfter(char trailingChar)
         {
             string path = CreateItem();
-            var info = CreateInfo(trailingChar == 'a' ? path : path + trailingChar);
+            T info = CreateInfo(trailingChar == 'a' ? path : path + trailingChar);
             DeleteItem(path);
             Assert.Equal((FileAttributes)(-1), info.Attributes);
         }
@@ -52,7 +52,7 @@ namespace System.IO.Tests
         {
             // When enumerating we populate the state as we already have it.
             string path = CreateItem();
-            var info = new DirectoryInfo(TestDirectory).EnumerateFileSystemInfos().First();
+            FileSystemInfo info = new DirectoryInfo(TestDirectory).EnumerateFileSystemInfos().First();
             DeleteItem(path);
 
             // The actual value will vary depending on the OS and what is running.
