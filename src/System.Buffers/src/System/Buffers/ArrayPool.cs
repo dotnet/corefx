@@ -22,6 +22,9 @@ namespace System.Buffers
     /// </remarks>
     public abstract class ArrayPool<T>
     {
+        // Default minimum array length for an ArrayPool
+        internal const int DefaultMinArrayLength = 16;
+
         /// <summary>The lazily-initialized shared pool instance.</summary>
         private static ArrayPool<T> s_sharedInstance = null;
 
@@ -74,7 +77,26 @@ namespace System.Buffers
         /// </remarks>
         public static ArrayPool<T> Create(int maxArrayLength, int maxArraysPerBucket)
         {
-            return new DefaultArrayPool<T>(maxArrayLength, maxArraysPerBucket);
+            return new DefaultArrayPool<T>(DefaultMinArrayLength, maxArrayLength, maxArraysPerBucket);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="ArrayPool{T}"/> instance using custom configuration options.
+        /// </summary>
+        /// <param name="minArrayLength">The minimum length of array instances that may be stored in the pool.</param>
+        /// <param name="maxArrayLength">The maximum length of array instances that may be stored in the pool.</param>
+        /// <param name="maxArraysPerBucket">
+        /// The maximum number of array instances that may be stored in each bucket in the pool.  The pool
+        /// groups arrays of similar lengths into buckets for faster access.
+        /// </param>
+        /// <returns>A new <see cref="ArrayPool{T}"/> instance with the specified configuration options.</returns>
+        /// <remarks>
+        /// The created pool will group arrays into buckets, with no more than <paramref name="maxArraysPerBucket"/>
+        /// in each bucket and with those arrays not exceeding <paramref name="maxArrayLength"/> in length.
+        /// </remarks>
+        public static ArrayPool<T> Create(int minArrayLength, int maxArrayLength, int maxArraysPerBucket)
+        {
+            return new DefaultArrayPool<T>(minArrayLength, maxArrayLength, maxArraysPerBucket);
         }
 
         /// <summary>
