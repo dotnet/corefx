@@ -220,13 +220,5 @@ namespace System.Diagnostics
         {
             return Interop.libproc.proc_pid_rusage(Interop.Sys.GetPid());
         }
-
-        public IntPtr MainWindowHandle => IntPtr.Zero;
-
-        public string MainWindowTitle => string.Empty;
-
-        public bool Responding => true;
-
-        private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
     }
 }
