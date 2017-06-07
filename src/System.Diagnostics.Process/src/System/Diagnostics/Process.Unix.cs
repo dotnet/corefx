@@ -534,6 +534,8 @@ namespace System.Diagnostics
 
         public IntPtr MainWindowHandle => IntPtr.Zero;
 
+        private bool CloseMainWindowCore() => false;
+
         public string MainWindowTitle => string.Empty;
 
         public bool Responding => true;
