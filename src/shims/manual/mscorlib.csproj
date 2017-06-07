@@ -17,7 +17,7 @@
     <HasMatchingContract>true</HasMatchingContract>
     <ContractAssemblyPath>$(NetFxRefPath)mscorlib.dll</ContractAssemblyPath>
     <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
-    <IsRuntimeAndReferenceAssembly>true</IsRuntimeAndReferenceAssembly>
+    <IsRuntimeAssembly>true</IsRuntimeAssembly>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
