@@ -506,7 +506,7 @@ namespace System.IO
                     }
 
                     // Typically we shouldn't see either of these cases, an upfront check is much faster
-                    for (int i = 0; i < name.Length; i++)
+                    for (int i = 0; i < searchPattern.Length; i++)
                         if (searchPattern[i] == '\\' || searchPattern[i] == '[')
                         {
                             // We need to escape any escape characters in the search pattern
