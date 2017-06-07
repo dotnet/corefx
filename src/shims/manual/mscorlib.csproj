@@ -18,6 +18,7 @@
     <ContractAssemblyPath>$(NetFxRefPath)mscorlib.dll</ContractAssemblyPath>
     <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
     <IsRuntimeAndReferenceAssembly>true</IsRuntimeAndReferenceAssembly>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
