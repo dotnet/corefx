@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Add any internal types that we need to forward from mscorlib.
+// Add any internal types that we need to forward from mscorlib. 
 
 // These types are required for Desktop to Core serialization as they are not covered by GenAPI because they are marked as internal.
 #if netcoreapp
@@ -25,4 +25,15 @@
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.SByteEnumEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.ShortEnumEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.LongEnumEqualityComparer<>))]
+
+// This is temporary as we are building the mscorlib shim against netfx461 which doesn't contain ValueTuples.
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,>))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,,>))]
 #endif
