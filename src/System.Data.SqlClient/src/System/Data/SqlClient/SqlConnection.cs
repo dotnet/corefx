@@ -47,6 +47,8 @@ namespace System.Data.SqlClient
         // using SqlConnection.Open() method. 
         internal bool _applyTransientFaultHandling = false;
 
+        internal SqlTransaction CurrentTransaction { get; set; }
+
         public SqlConnection(string connectionString) : this()
         {
             ConnectionString = connectionString;    // setting connection string first so that ConnectionOption is available
@@ -423,6 +425,7 @@ namespace System.Data.SqlClient
                 //  a transaction with a null connection property.  Use GC.KeepAlive to ensure this doesn't happen.
                 GC.KeepAlive(this);
 
+                this.CurrentTransaction = transaction;
                 return transaction;
             }
             finally
@@ -462,6 +465,17 @@ namespace System.Data.SqlClient
             }
         }
 
+        private void CleanOutTransactionJunk()
+        {
+            if (InnerConnection.Pool != null)
+            {
+                if (this.CurrentTransaction != null)
+                {
+                    this.CurrentTransaction.Dispose();
+                }
+                this.BeginTransaction(IsolationLevel.ReadCommitted).Dispose();
+            }
+        }
 
         private void CloseInnerConnection()
         {
@@ -475,6 +489,8 @@ namespace System.Data.SqlClient
 
         override public void Close()
         {
+            CleanOutTransactionJunk();
+
             ConnectionState previousState = State;
             Guid operationId = default(Guid);
             Guid clientConnectionId = default(Guid);

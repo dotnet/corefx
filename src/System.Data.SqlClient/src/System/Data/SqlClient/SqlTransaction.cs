@@ -160,6 +160,8 @@ namespace System.Data.SqlClient
 
         protected override void Dispose(bool disposing)
         {
+            this._connection.CurrentTransaction = null;
+
             if (disposing)
             {
                 if (!IsZombied && !IsYukonPartialZombie)
