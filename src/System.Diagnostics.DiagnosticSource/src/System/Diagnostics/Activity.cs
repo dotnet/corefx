@@ -191,7 +191,19 @@ namespace System.Diagnostics
         /// <returns>'this' for convenient chaining</returns>
         public Activity AddBaggage(string key, string value)
         {
-            _baggage = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value), Next = _baggage };
+            if (string.IsNullOrEmpty(key) || key.Length > 32)
+            {
+                NotifyError(new ArgumentException($"Trying to add baggage with invalid key '{key}'"));
+            }
+            else if (string.IsNullOrEmpty(value) || value.Length > 42)
+            {
+                NotifyError(new ArgumentException($"Trying to add baggage with invalid value '{value}'"));
+            }
+            else
+            {
+                _baggage = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value), Next = _baggage };
+            }
+
             return this;
         }
 

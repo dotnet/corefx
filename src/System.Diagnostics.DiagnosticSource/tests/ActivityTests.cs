@@ -530,6 +530,27 @@ namespace System.Diagnostics.Tests
             Assert.Same(originalActivity, Activity.Current);
         }
 
+        [Fact]
+        public void InvalidBaggage()
+        {
+            var activity = new Activity("test");
+
+            activity.AddBaggage(null, "value");
+            activity.AddBaggage("", "value");
+            activity.AddBaggage("_____33 characters long key______", "value");
+            activity.AddBaggage("key", null);
+            activity.AddBaggage("key", "");
+            activity.AddBaggage("key", "_________43 characters long value__________");
+            Assert.Empty(activity.Baggage);
+
+            var key32 = "_____32 characters long key_____";
+            var value42 = "_________42 characters long value_________";
+            activity.AddBaggage(key32, value42);
+            Assert.Equal(1, activity.Baggage.Count());
+            Assert.Equal(key32, activity.Baggage.First().Key);
+            Assert.Equal(value42, activity.Baggage.First().Value);
+        }
+
         private class TestObserver : IObserver<KeyValuePair<string, object>>
         {
             public string EventName { get; private set; }
