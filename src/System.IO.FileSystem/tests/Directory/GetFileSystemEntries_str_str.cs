@@ -393,7 +393,11 @@ namespace System.IO.Tests
             InlineData(
                 "foodies*.",
                 new string[] { @"foodies. ", @"foodies.  ", @"foodies.   ", @"foodies.    ", @"foodies.     " },
-                new string[] { })
+                new string[] { }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" },
+                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" }),
             ]
         public void PatternTests_DosStarSpace(string pattern, string[] sourceFiles, string[] expected)
         {
@@ -409,127 +413,152 @@ namespace System.IO.Tests
         [OuterLoop("These are pretty corner, don't need to run all the time.")]
         // Can't do these without extended path support on Windows, UsingNewNormalization filters appropriately
         [ConditionalTheory(nameof(UsingNewNormalization)),
-            // "foo*." actually becomes "foo<" when passed to NT.
+            // "foo*." actually becomes "foo<" when passed to NT. It matches all characters up to, and including, the final period.
             //
-            // This one is really awkward- it matches all characters up to, and including, the final period.
             // There is a "bug" somewhere in the Windows stack where *some* files with trailing spaces after the final period will be returned when
             // using "*." at the end of a string (which becomes "<"). According to the rules (and the actual pattern matcher used FsRtlIsNameInExpression)
             // *nothing* should match after the final period.
+            //
+            // The results as passed to RtlIsNameInExpression (after changing *. to <) are in comments.
             InlineData(
                 "foo*.",
                 new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo..", @"foo...", @"foo. ", @"foo.  ", @"foo .", @"foo. . .", @"foo. t" },
+                // Really should be: new string[] { @"foo", @"foo.", @"foo..", @"foo...", @"foo .", @"foo. . ." }), but is
                 new string[] { @"foo", @"foo .", @"foo.", @"foo..", @"foo...", @"foo. ", @"foo. . ." }),
             InlineData(
                 "*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                // Really should be: new string[] { @"foo.." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.." }),
             InlineData(
                 "f*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                // Really should be: new string[] { @"foo.." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.." }),
             InlineData(
                 "fo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                // Really should be: new string[] { @"foo.." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.." }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo." },
+                // Really should be: new string[] { @"foo." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo." }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                // Really should be: new string[] { @"foo." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo." }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.", @"foo", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                // Really should be: new string[] { @"foo.", @"foo" }), but is
                 new string[] { @"foo.", @"foo", @"foo.  ", @"foo.   ", @"foo. " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo" },
+                // Really should be: new string[] { @"foo.", @"foo" }), but is
                 new string[] { @"foo.", @"foo", @"foo.  ", @"foo.   ", @"foo. " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.    ", @"foo", @"foo.", @"foo. ", @"foo.  ", @"foo.   " },
+                // Really should be: new string[] { @"foo.", @"foo" }), but is
                 new string[] { @"foo.", @"foo", @"foo.  ", @"foo.    ", @"foo. " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.    ", @"foo", @"food", @"foo.", @"foo. ", @"foo.  ", @"foo.   " },
+                // Really should be: new string[] { @"foo.", @"foo", @"food" }), but is
                 new string[] { @"foo.", @"foo", @"foo.  ", @"foo.    ", @"foo. ", @"food" }),
             InlineData(
                 "fo*.",
                 new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                // Really should be: new string[] { @"foo." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.", @"foo.    " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . .", @"foo. . . " },
+                // Really should be: new string[] { @"foo. .", @"foo. . ." }), but is
                 new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . ." }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo. .", @"foo.. .", @"foo.... .", @"foo..... ." },
+                // Really should be: new string[] { @"foo. .", @"foo.. .", @"foo.... .", @"foo..... ." }), but is
                 new string[] { @"foo. ", @"foo. .", @"foo.. .", @"foo.... .", @"foo..... ." }),
-            InlineData(
-                "foo*.",
-                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" },
-                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" }),
             InlineData(
                 "fo*.",
                 new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . .", @"foo. . . " },
+                // Really should be: new string[] { @"foo. .", @"foo. . ."}), but is
                 new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . .", @"foo. . . " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                // Really should be: new string[] { @"foo." }), but is
                 new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   " }),
             InlineData(
                 "food*.",
                 new string[] { @"food.", @"food. ", @"food.  ", @"food.   ", @"food.    ", @"food.     " },
+                // Really should be: new string[] { @"food." }), but is
                 new string[] { @"food.", @"food. ", @"food.  ", @"food.   " }),
             InlineData(
                 "food*.",
                 new string[] { @"food.", @"food. ", @"food.  ", @"food.   ", @"food.    ", @"food.     ", @"foodi." },
+                // Really should be: new string[] { @"food.", @"foodi." }), but is
                 new string[] { @"food.", @"food. ", @"food.  ", @"food.   ", @"foodi." }),
             InlineData(
                 "foodi*.",
                 new string[] { @"foodi.", @"foodi. ", @"foodi.  ", @"foodi.   ", @"foodi.    ", @"foodi.     " },
+                // Really should be: new string[] { @"foodi." }), but is
                 new string[] { @"foodi.", @"foodi. ", @"foodi.  ", @"foodi.   " }),
             InlineData(
                 "foodie*.",
                 new string[] { @"foodie.", @"foodie. ", @"foodie.  ", @"foodie.   ", @"foodie.    ", @"foodie.     " },
+                // Really should be: new string[] { @"foodie." }), but is
                 new string[] { @"foodie.", @"foodie. ", @"foodie.  ", @"foodie.   " }),
             InlineData(
                 "fooooo*.",
                 new string[] { @"foooooo.", @"foooooo. ", @"foooooo.  " },
+                // Really should be: new string[] { @"foooooo." }), but is
                 new string[] { @"foooooo.", @"foooooo. ", @"foooooo.  " }),
             InlineData(
                 "fooooo*.",
                 new string[] { @"foooooo. ", @"foooooo.  ", @"foooooo.   " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"foooooo. ", @"foooooo.  ", @"foooooo.   " }),
             InlineData(
                 "fo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " }),
             InlineData(
                 "fo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " }),
             InlineData(
                 "fo*.",
                 new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " }),
             InlineData(
                 "fo*.",
                 new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"fo.     ", @"fo.      ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                // Really should be: new string[] { }), but is
                 new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"fo.     ", @"fo.      ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " }),
             InlineData(
                 "foo*.",
                 new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t", @"foo.   ", @"foo.    " },
+                // Really should be: new string[] { @"foo.." }), but is
                 new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.." }),
             ]
         public void PatternTests_DosStarOddSpace(string pattern, string[] sourceFiles, string[] expected)
