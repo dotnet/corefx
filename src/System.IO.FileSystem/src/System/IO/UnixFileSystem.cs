@@ -14,6 +14,7 @@ namespace System.IO
     internal sealed partial class UnixFileSystem : FileSystem
     {
         internal const int DefaultBufferSize = 4096;
+        private static char[] s_EscapeCharacters = new char[] { '\\', '[' };
 
         public override int MaxPath { get { return Interop.Sys.MaxPath; } }
 
@@ -505,11 +506,15 @@ namespace System.IO
                         searchPattern = searchPattern.Substring(lastSlash + 1);
                     }
 
-                    // We need to escape any escape characters in the search pattern
-                    searchPattern = searchPattern.Replace(@"\", @"\\");
+                    // Typically we shouldn't see either of these cases
+                    if (searchPattern.IndexOfAny(s_EscapeCharacters) != -1)
+                    {
+                        // We need to escape any escape characters in the search pattern
+                        searchPattern = searchPattern.Replace(@"\", @"\\");
 
-                    // And then escape '[' to prevent it being picked up as a wildcard
-                    searchPattern = searchPattern.Replace(@"[", @"\[");
+                        // And then escape '[' to prevent it being picked up as a wildcard
+                        searchPattern = searchPattern.Replace(@"[", @"\[");
+                    }
 
                     string fullPath = Path.GetFullPath(userPath);
 
