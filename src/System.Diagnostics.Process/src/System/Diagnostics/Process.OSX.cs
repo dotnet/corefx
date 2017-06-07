@@ -226,5 +226,7 @@ namespace System.Diagnostics
         public string MainWindowTitle => string.Empty;
 
         public bool Responding => true;
+
+        private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
     }
 }

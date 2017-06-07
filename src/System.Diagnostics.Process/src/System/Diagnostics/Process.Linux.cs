@@ -218,11 +218,5 @@ namespace System.Diagnostics
             }
             return stat;
         }
-
-        public IntPtr MainWindowHandle => IntPtr.Zero;
-
-        public string MainWindowTitle => string.Empty;
-
-        public bool Responding => true;
     }
 }

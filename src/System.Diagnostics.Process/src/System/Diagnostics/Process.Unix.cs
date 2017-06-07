@@ -532,21 +532,12 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private bool IsRespondingCore()
-        {
-            return true;
-        }
-        private string GetMainWindowTitle()
-        {
-            return string.Empty;
-        }
-        private bool CloseMainWindowCore()
-        {
-            return false;
-        }
-        private bool WaitForInputIdleCore(int milliseconds)
-        {
-            throw new InvalidOperationException(SR.InputIdleUnkownError);
-        }
+        public IntPtr MainWindowHandle => IntPtr.Zero;
+
+        public string MainWindowTitle => string.Empty;
+
+        public bool Responding => true;
+
+        private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
     }
 }
