@@ -8,6 +8,7 @@ namespace System.Net.NetworkInformation.Tests
 {
     public class MiscParsingTests
     {
+        [ActiveIssue(20014, TargetFrameworkMonikers.Uap)]
         [Fact]
         public static void NumRoutesParsing()
         {
@@ -16,6 +17,7 @@ namespace System.Net.NetworkInformation.Tests
             Assert.Equal(4, numRoutes);
         }
 
+        [ActiveIssue(20014, TargetFrameworkMonikers.Uap)]
         [Fact]
         public static void DefaultTtlParsing()
         {

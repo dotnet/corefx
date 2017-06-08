@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Net.NetworkInformation.Unit.Tests
 {
+    [ActiveIssue(20014, TargetFrameworkMonikers.Uap)]
     public class NetworkInterfaceTest
     {
         [Fact]
