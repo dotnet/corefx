@@ -439,7 +439,8 @@ namespace System.Diagnostics.Tests
 
                     var activity = new Activity("activity");
 
-                    var startTime = DateTime.UtcNow;
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
                     // Test Activity.Start
                     source.StartActivity(activity, arguments);
 
@@ -447,12 +448,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(arguments, observer.EventObject);
                     Assert.NotNull(observer.Activity);
 
-                    // We 'fix' DateTime on netfx to be precise; 
-                    // comparing Activity StartTime to potentially imprecise DateTime.UtcNow is not correct
-                    // this test does not intend fo check StartTime/Duration precision, so we allow anything within 20ms.
-                    Assert.InRange(observer.Activity.StartTimeUtc, startTime.AddMilliseconds(-1 * MaxClockErrorMSec), DateTime.MaxValue);
-                    Assert.InRange(observer.Activity.StartTimeUtc, DateTime.MinValue, DateTime.UtcNow.AddMilliseconds(MaxClockErrorMSec).AddTicks(-1));
-
+                    Assert.NotEqual(activity.StartTimeUtc, default(DateTime));
                     Assert.Equal(TimeSpan.Zero, observer.Activity.Duration);
 
                     observer.Reset();
@@ -461,6 +457,7 @@ namespace System.Diagnostics.Tests
 
                     // Test Activity.Stop
                     source.StopActivity(activity, arguments);
+                    stopWatch.Stop();
                     Assert.Equal(activity.OperationName + ".Stop", observer.EventName);
                     Assert.Equal(arguments, observer.EventObject);
 
@@ -469,7 +466,7 @@ namespace System.Diagnostics.Tests
                     Assert.InRange(observer.Activity.Duration, TimeSpan.FromTicks(1), TimeSpan.MaxValue);
 
                     // let's only check that Duration is set in StopActivity, we do not intend to check precision here
-                    Assert.InRange(observer.Activity.StartTimeUtc + observer.Activity.Duration, DateTime.MinValue, DateTime.UtcNow.AddMilliseconds(2 * MaxClockErrorMSec));
+                    Assert.InRange(observer.Activity.Duration, TimeSpan.MinValue, stopWatch.Elapsed.Add(TimeSpan.FromMilliseconds(2 * MaxClockErrorMSec)));
                 } 
             }
         }
