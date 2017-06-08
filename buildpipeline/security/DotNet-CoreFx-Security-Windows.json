@@ -34,7 +34,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "$(Build.SourcesDirectory) $(CloudDropAccountName) $(CloudDropAccessToken) $(CloudDropContainer)",
+        "arguments": "$(Build.SourcesDirectory) $(PB_CloudDropAccountName) $(PB_CloudDropAccessToken) $(PB_CloudDropContainer)",
         "workingFolder": "$(Build.SourcesDirectory)",
         "inlineScript": "param($SrcDir, $account, $token, $container)\n$syncCmd = Join-Path \"$SrcDir\" \"sync.cmd\"\n$p = Start-Process $syncCmd -ArgumentList \"-ab -- /p:CloudDropAccountName=$account /p:CloudDropAccessToken=$token /p:ContainerName=$container\" -PassThru -NoNewWindow -ErrorAction Stop -Wait -Verbose  \nWrite-Host \"Exit Code: $($p.ExitCode)\"\n\n\n",
         "failOnStandardError": "true"
@@ -313,7 +313,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "$(Build.SourcesDirectory) $(Git)",
+        "arguments": "$(Build.SourcesDirectory) $(PB_Git)",
         "workingFolder": "$(Build.SourcesDirectory)",
         "inlineScript": "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process $git -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process $git -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
         "failOnStandardError": "true"
@@ -666,7 +666,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(Git)",
+        "filename": "$(PB_Git)",
         "arguments": "clone $(CorefxGitUrl) corefx",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -685,7 +685,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(Git)",
+        "filename": "$(PB_Git)",
         "arguments": "checkout HEAD",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
