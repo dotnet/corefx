@@ -2209,7 +2209,7 @@ namespace System.Collections.Immutable
                 try
                 {
                     var startIndex = 0;
-                    while(enumerator.MoveNext())
+                    while (enumerator.MoveNext())
                     {
                         if (match(enumerator.Current))
                         {
