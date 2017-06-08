@@ -19,6 +19,8 @@ qualify the path to dotnet in the root of this folder for all the instructions i
 
 Note: Installer will put dotnet globally in your path which you might not want for dogfooding daily toolsets.
 
+If you use the installer while having a release version of .Net Core 1.x also installed, `dotnet` will prefer the 1.x version by default. To change this, create a [global.json file](https://docs.microsoft.com/dotnet/articles/core/tools/global-json) that sets the SDK version to the version of .Net Core SDK 2.0 you installed, e.g. `2.0.0-preview1-005797`.
+
 After setting up dotnet you can verify you are using the newer version by:
 
 `dotnet --info` -- the version should be greater than 2.0.0-*
