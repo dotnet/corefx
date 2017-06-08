@@ -2664,6 +2664,22 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    public static void DCJS_DeserializeDateTimeForDifferentFormats()
+    {
+        var jsonTypes = new JsonTypes();
+        var dcjsSettings = new DataContractJsonSerializerSettings()
+        {
+            DateTimeFormat = jsonTypes.DTF_hmsFt,
+            UseSimpleDictionaryFormat = true,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            KnownTypes = new List<Type>()
+        };
+        var value1 = DeserializeString<DateTime>("\"03:58:32.00 a.m.\"", true, dcjsSettings);
+        var value2 = DeserializeString<DateTime>("\"03:58:32.00 a. m.\"", true, dcjsSettings);
+        Assert.Equal(value1, value2);
+    }
+
+    [Fact]
     public static void DCJS_VerifyDictionaryTypes()
     {
         var dcjsSettings = new DataContractJsonSerializerSettings()
