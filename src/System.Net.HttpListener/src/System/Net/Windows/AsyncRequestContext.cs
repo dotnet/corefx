@@ -18,13 +18,13 @@ namespace System.Net
         private volatile int _nativeOverlappedCounter = 0;
         private volatile int _nativeOverlappedUsed = 0;
 
-        private void ReleaseNativeOverlapped()
+        private void DebugRefCountReleaseNativeOverlapped()
         {
             Debug.Assert(Interlocked.Decrement(ref _nativeOverlappedCounter) == 0, "NativeOverlapped released too many times.");
             Interlocked.Decrement(ref _nativeOverlappedUsed);
         }
 
-        private void AddRefNativeOverlapped()
+        private void DebugRefCountAllocNativeOverlapped()
         {
             Debug.Assert(Interlocked.Increment(ref _nativeOverlappedCounter) == 1, "NativeOverlapped allocated without release.");
         }
@@ -42,7 +42,7 @@ namespace System.Net
             if (_nativeOverlapped != null)
             {
 #if DEBUG
-                ReleaseNativeOverlapped();
+                DebugRefCountReleaseNativeOverlapped();
 #endif
 
                 NativeOverlapped* nativeOverlapped = _nativeOverlapped;
@@ -53,7 +53,7 @@ namespace System.Net
             if (_nativeOverlapped == null)
             {
 #if DEBUG
-                AddRefNativeOverlapped();
+                DebugRefCountAllocNativeOverlapped();
 #endif
                 SetBuffer(checked((int)newSize));
                 _boundHandle = boundHandle;
@@ -75,7 +75,7 @@ namespace System.Net
             if (_nativeOverlapped != null)
             {
 #if DEBUG
-                ReleaseNativeOverlapped();
+                DebugRefCountReleaseNativeOverlapped();
 #endif
 
                 NativeOverlapped* nativeOverlapped = _nativeOverlapped;
@@ -92,7 +92,7 @@ namespace System.Net
                 if (!Environment.HasShutdownStarted || disposing)
                 {
 #if DEBUG
-                    ReleaseNativeOverlapped();
+                    DebugRefCountReleaseNativeOverlapped();
 #endif
                     _boundHandle.FreeNativeOverlapped(_nativeOverlapped);
                 }

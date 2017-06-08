@@ -856,13 +856,13 @@ namespace System.Net.WebSockets
             private volatile int _nativeOverlappedCounter = 0;
             private volatile int _nativeOverlappedUsed = 0;
 
-            private void ReleaseNativeOverlapped()
+            private void DebugRefCountReleaseNativeOverlapped()
             {
                 Debug.Assert(Interlocked.Decrement(ref _nativeOverlappedCounter) == 0, "NativeOverlapped released too many times.");
                 Interlocked.Decrement(ref _nativeOverlappedUsed);
             }
 
-            private void AddRefNativeOverlapped()
+            private void DebugRefCountAllocNativeOverlapped()
             {
                 Debug.Assert(Interlocked.Increment(ref _nativeOverlappedCounter) == 1, "NativeOverlapped allocated without release.");
             }
@@ -1009,7 +1009,7 @@ namespace System.Net.WebSockets
             private unsafe void InitializeOverlapped(ThreadPoolBoundHandle boundHandle)
             {
 #if DEBUG
-                AddRefNativeOverlapped();
+                DebugRefCountAllocNativeOverlapped();
 #endif
                 _boundHandle = boundHandle;
                 _ptrNativeOverlapped = boundHandle.AllocateNativeOverlapped(CompletionPortCallback, null, null);
@@ -1024,7 +1024,7 @@ namespace System.Net.WebSockets
                     if (_ptrNativeOverlapped != null)
                     {
 #if DEBUG
-                        ReleaseNativeOverlapped();
+                        DebugRefCountReleaseNativeOverlapped();
 #endif
                         _boundHandle.FreeNativeOverlapped(_ptrNativeOverlapped);
                         _ptrNativeOverlapped = null;
