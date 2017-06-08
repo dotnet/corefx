@@ -14,9 +14,18 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(source));
             }
+            
+            if (source is TSource[] array)
+            {
+                return array;
+            }
+            
+            if (source is IIListProvider<TSource> arrayProvider)
+            {
+                return arrayProvider.ToArray();
+            }
 
-            IIListProvider<TSource> arrayProvider = source as IIListProvider<TSource>;
-            return arrayProvider != null ? arrayProvider.ToArray() : EnumerableHelpers.ToArray(source);
+            return EnumerableHelpers.ToArray(source);
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
