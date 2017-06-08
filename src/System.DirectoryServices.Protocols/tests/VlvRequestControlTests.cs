@@ -18,7 +18,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.True(control.ServerSide);
             Assert.Equal("2.16.840.1.113730.3.4.9", control.Type);
             
-            AssertExtensions.Equal(new byte[] { 48, 132, 0, 0, 0, 18, 2, 1, 0, 2, 1, 0, 160, 132, 0, 0, 0, 6, 2, 1, 0, 2, 1, 0 }, control.GetValue());
+            Assert.Equal(new byte[] { 48, 132, 0, 0, 0, 18, 2, 1, 0, 2, 1, 0, 160, 132, 0, 0, 0, 6, 2, 1, 0, 2, 1, 0 }, control.GetValue());
         }
 
         [Theory]
@@ -124,7 +124,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.NotSame(contextId, control.ContextId);
             Assert.Equal(contextId, control.ContextId);
 
-            AssertExtensions.Equal(new byte[] { 48, 132, 0, 0, 0, 23, 2, 1, 0, 2, 1, 0, 160, 132, 0, 0, 0, 6, 2, 1, 0, 2, 1, 0, 4, 3, 1, 2, 3 }, control.GetValue());
+            Assert.Equal(new byte[] { 48, 132, 0, 0, 0, 23, 2, 1, 0, 2, 1, 0, 160, 132, 0, 0, 0, 6, 2, 1, 0, 2, 1, 0, 4, 3, 1, 2, 3 }, control.GetValue());
         }
     }
 }

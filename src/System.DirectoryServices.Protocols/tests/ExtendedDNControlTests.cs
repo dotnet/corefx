@@ -14,7 +14,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.True(control.ServerSide);
             Assert.Equal("1.2.840.113556.1.4.529", control.Type);
 
-            AssertExtensions.Equal(new byte[] { 48, 132, 0, 0, 0, 3, 2, 1, 0 }, control.GetValue());
+            Assert.Equal(new byte[] { 48, 132, 0, 0, 0, 3, 2, 1, 0 }, control.GetValue());
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.True(control.ServerSide);
             Assert.Equal("1.2.840.113556.1.4.529", control.Type);
 
-            AssertExtensions.Equal(new byte[] { 48, 132, 0, 0, 0, 3, 2, 1, 1 }, control.GetValue());
+            Assert.Equal(new byte[] { 48, 132, 0, 0, 0, 3, 2, 1, 1 }, control.GetValue());
         }
 
         [Theory]

@@ -17,7 +17,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Equal(512, control.PageSize);
             Assert.Equal("1.2.840.113556.1.4.319", control.Type);
             
-            AssertExtensions.Equal(new byte[] { 48, 132, 0, 0, 0, 6, 2, 2, 2, 0, 4, 0 }, control.GetValue());
+            Assert.Equal(new byte[] { 48, 132, 0, 0, 0, 6, 2, 2, 2, 0, 4, 0 }, control.GetValue());
         }
 
         [Theory]
@@ -32,7 +32,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Equal(pageSize, control.PageSize);
             Assert.Equal("1.2.840.113556.1.4.319", control.Type);
 
-            AssertExtensions.Equal(expectedValue, control.GetValue());
+            Assert.Equal(expectedValue, control.GetValue());
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Equal(512, control.PageSize);
             Assert.Equal("1.2.840.113556.1.4.319", control.Type);
 
-            AssertExtensions.Equal(expectedValue, control.GetValue());
+            Assert.Equal(expectedValue, control.GetValue());
         }
 
         [Fact]

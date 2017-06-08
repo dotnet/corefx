@@ -34,7 +34,7 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.True(control.ServerSide);
             Assert.Equal("1.2.840.113556.1.4.841", control.Type);
 
-            AssertExtensions.Equal(expectedValue, control.GetValue());
+            Assert.Equal(expectedValue, control.GetValue());
         }
 
         [Theory]
