@@ -20,25 +20,5 @@ namespace System.IO.Tests
         {
             return new FileStream(handle, access, bufferSize);
         }
-
-        [Fact]
-        public void InvalidBufferSizeThrows()
-        {
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
-            {
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => CreateFileStream(fs.SafeFileHandle, FileAccess.Read, -1));
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => CreateFileStream(fs.SafeFileHandle, FileAccess.Read, 0));
-            }
-        }
-
-        [Fact]
-        public void ValidBufferSize()
-        {
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
-            {
-                using (FileStream fsw = CreateFileStream(fs.SafeFileHandle, FileAccess.Write, 64 * 1024))
-                { }
-            }
-        }
     }
 }
