@@ -1116,6 +1116,15 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
+        /// Returns an <see cref="IEqualityComparer{HashSet{T}}"/> object that can be used for equality testing of two <see cref="HashSet{T}"/> objects.
+        /// </summary>
+        /// <param name="comparer">The <see cref="IEqualityComparer{T}"/> to use in comparing the sets' elements, or <code>null</code>
+        /// to use the default comparer.</param>
+        /// <returns>An <see cref="IEqualityComparer{HashSet{T}}"/> for comparing sets</returns>
+        public static IEqualityComparer<HashSet<T>> CreateSetComparer(IEqualityComparer<T> comparer)
+            => new HashSetEqualityComparer<T>(comparer);
+
+        /// <summary>
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
         /// greater than or equal to capacity.
         /// </summary>
@@ -1651,19 +1660,13 @@ namespace System.Collections.Generic
             return result;
         }
 
-
         /// <summary>
-        /// Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
-        /// to specified comparer.
-        /// 
-        /// Because items are hashed according to a specific equality comparer, we have to resort
-        /// to n^2 search if they're using different equality comparers.
+        /// Legacy method matching previous inconsistent equality method used via nullary CreateSetComparer method.
         /// </summary>
         /// <param name="set1"></param>
         /// <param name="set2"></param>
-        /// <param name="comparer"></param>
         /// <returns></returns>
-        internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
+        internal static bool LegacyHashSetEquals(HashSet<T> set1, HashSet<T> set2)
         {
             // handle null cases first
             if (set1 == null)
@@ -1677,6 +1680,7 @@ namespace System.Collections.Generic
             }
 
             // all comparers are the same; this is faster
+            // This is also incorrect, but kept for compat.
             if (AreEqualityComparersEqual(set1, set2))
             {
                 if (set1.Count != set2.Count)
@@ -1694,7 +1698,8 @@ namespace System.Collections.Generic
                 return true;
             }
             else
-            {  // n^2 search because items are hashed according to their respective ECs
+            {
+                EqualityComparer<T> comparer = EqualityComparer<T>.Default;
                 foreach (T set2Item in set2)
                 {
                     bool found = false;
@@ -1713,6 +1718,93 @@ namespace System.Collections.Generic
                 }
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
+        /// to specified comparer.
+        /// Because items are hashed according to a specific equality comparer, we have to resort
+        /// to building a new set if neither use that equality comparer.
+        /// </summary>
+        /// <param name="set1">The first set to compare.</param>
+        /// <param name="set2">The second set to compare.</param>
+        /// <param name="comparer">The comparer for comparing elements.</param>
+        /// <returns><c>true</c> if the two sets are equivalent, <c>false</c> otherwise.</returns>
+        internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
+        {
+            if (set1 == set2)
+            {
+                return true;
+            }
+
+            if (set1 == null || set2 == null)
+            {
+                return false;
+            }
+
+            int count1 = set1.Count;
+            int count2 = set2.Count;
+            if (count1 == 0)
+            {
+                return count2 == 0;
+            }
+
+            if (count2 == 0)
+            {
+                return false;
+            }
+
+            if (comparer.Equals(set1._comparer))
+            {
+                if (comparer.Equals(set2._comparer))
+                {
+                    // Since both sets are using our comparer as their comparer, we can test for set-equality,
+                    // which is the fastest path, and the most-common use-case.
+                    return set1.Count == set2.Count && set1.ContainsAllElements(set2);
+                }
+
+                if (count1 > count2)
+                {
+                    // Filtering set2 according to comparer can result in fewer than set2.Count elements,
+                    // but never more, so short-circuit if set2.Count is less than set1.Count.
+                    return false;
+                }
+            }
+            else if (comparer.Equals(set2._comparer))
+            {
+                // We need a starting point of a set according to the comparer, and set1 doesn't meet
+                // that criteria. If set2 does, swap to use it.
+                if (count1 < count2)
+                {
+                    return false;
+                }
+
+                HashSet<T> swapTemp = set1;
+                set1 = set2;
+                set2 = swapTemp;
+                count1 = count2;
+            }
+            else
+            {
+                // Neither set use our comparer, so create a new one with the contents of set1.
+                set1 = new HashSet<T>(set1, comparer);
+                count1 = set1.Count;
+                if (count1 > count2)
+                {
+                    return false;
+                }
+            }
+
+            HashSet<T> seen = new HashSet<T>(comparer);
+            foreach (T item in set2)
+            {
+                if (seen.Add(item) && !set1.Contains(item))
+                {
+                    return false;
+                }
+            }
+
+            return seen.Count == count1;
         }
 
         /// <summary>

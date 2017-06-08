@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 namespace System.Collections.Generic
 {
-
     /// <summary>
     /// Equality comparer for hashsets of hashsets
     /// </summary>
@@ -19,26 +14,68 @@ namespace System.Collections.Generic
 
         public HashSetEqualityComparer()
         {
-            _comparer = EqualityComparer<T>.Default;
+            // null comparer signals legacy use.
         }
 
-        // using m_comparer to keep equals properties in tact; don't want to choose one of the comparers
-        public bool Equals(HashSet<T> x, HashSet<T> y)
+        public HashSetEqualityComparer(IEqualityComparer<T> comparer)
         {
-            return HashSet<T>.HashSetEquals(x, y, _comparer);
+            _comparer = comparer ?? EqualityComparer<T>.Default;
         }
+
+        public bool Equals(HashSet<T> x, HashSet<T> y)
+            => _comparer == null ? HashSet<T>.LegacyHashSetEquals(x, y) : HashSet<T>.HashSetEquals(x, y, _comparer);
 
         public int GetHashCode(HashSet<T> obj)
         {
-            int hashCode = 0;
-            if (obj != null)
+            if (obj == null)
             {
+                return 0;
+            }
+
+            if (_comparer == null)
+            {
+                IEqualityComparer<T> comparer = EqualityComparer<T>.Default;
+                // Legacy behaviour for compat.
+                int hashCode = 0;
                 foreach (T t in obj)
                 {
-                    hashCode = hashCode ^ (_comparer.GetHashCode(t) & 0x7FFFFFFF);
+                    hashCode = hashCode ^ (comparer.GetHashCode(t) & 0x7FFFFFFF);
                 }
-            } // else returns hashcode of 0 for null hashsets
-            return hashCode;
+
+                return hashCode;
+            }
+
+            unchecked
+            {
+                int hashCode = 0x5EED5EED; // Arbitrary seed with a mix of 1s and 0s throughout the value.
+                IEqualityComparer<T> comparer = _comparer;
+
+                // Already know the set is distinct as considered by comparer, so we don't need to track duplicates.
+                if (comparer.Equals(obj.Comparer))
+                {
+                    foreach (T item in obj)
+                    {
+                        hashCode ^= comparer.GetHashCode(item);
+                    }
+
+                    hashCode += obj.Count;
+                }
+                else
+                {
+                    HashSet<T> seen = new HashSet<T>(comparer);
+                    foreach (T item in obj)
+                    {
+                        if (seen.Add(item))
+                        {
+                            hashCode ^= comparer.GetHashCode(item);
+                        }
+                    }
+
+                    hashCode += seen.Count;
+                }
+
+                return hashCode;
+            }
         }
 
         // Equals method for the comparer itself. 
@@ -49,13 +86,23 @@ namespace System.Collections.Generic
             {
                 return false;
             }
-            return (_comparer == comparer._comparer);
+
+            if (_comparer == null)
+            {
+                return comparer._comparer == null;
+            }
+
+            return comparer._comparer != null && _comparer.Equals(comparer._comparer);
         }
 
         public override int GetHashCode()
         {
+            if (_comparer == null)
+            {
+                return 1; // Non-zero to differ from the HashSetEqualityComparer itself being null with most uses.
+            }
+
             return _comparer.GetHashCode();
         }
     }
 }
-

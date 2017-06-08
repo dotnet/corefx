@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Tests
 {
@@ -86,6 +87,30 @@ namespace System.Collections.Tests
         {
             return obj.GetHashCode();
         }
+    }
+
+    // It walks like EqualityComparer<T>.Default, it quacks like EqualityComparer<T>.Default
+    // but it quite definitely is not EqualityComparer<T>.Default.
+    public class DefaultCopyCatComparer<T> : IEqualityComparer<T>
+    {
+        public bool Equals(T x, T y) => EqualityComparer<T>.Default.Equals(x, y);
+
+        public int GetHashCode(T obj) => EqualityComparer<T>.Default.GetHashCode(obj);
+
+        public override bool Equals(object obj) => obj is DefaultCopyCatComparer<T>;
+
+        public override int GetHashCode() => ~EqualityComparer<T>.Default.GetHashCode();
+    }
+
+    public class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+    {
+        public bool Equals(T x, T y) => ReferenceEquals(x, y);
+
+        public int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
+
+        public override bool Equals(object obj) => obj is ReferenceEqualityComparer<T>;
+
+        public override int GetHashCode() => 0x4A54C0DE;
     }
 
     [Serializable]
