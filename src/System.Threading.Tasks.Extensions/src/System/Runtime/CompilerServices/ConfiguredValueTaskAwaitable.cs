@@ -39,7 +39,7 @@ namespace System.Runtime.CompilerServices
         public struct ConfiguredValueTaskAwaiter : ICriticalNotifyCompletion
         {
             /// <summary>The value being awaited.</summary>
-            private readonly ValueTask<TResult> _value;
+            private ValueTask<TResult> _value; // Perf: Not readonly, methods are called on this struct
             /// <summary>The value to pass to ConfigureAwait.</summary>
             private readonly bool _continueOnCapturedContext;
 
@@ -58,9 +58,13 @@ namespace System.Runtime.CompilerServices
             /// <summary>Gets the result of the ValueTask.</summary>
             public TResult GetResult()
             {
-                return _value._task == null ? 
-                    _value._result : 
-                    _value._task.GetAwaiter().GetResult();
+                return _value._task == null ? _value._result : GetResultFromTask();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            private TResult GetResultFromTask()
+            {
+                return _value._task.GetAwaiter().GetResult();
             }
 
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable{TResult}"/>.</summary>
