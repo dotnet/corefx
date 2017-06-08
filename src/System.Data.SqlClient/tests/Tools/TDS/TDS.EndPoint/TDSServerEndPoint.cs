@@ -110,7 +110,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
                 catch (Exception e)
                 {
                     Log($"{GetType().Name} {EndpointName} Error occured while testing server endpoint {e.Message}");
-                    throw e;
+                    throw;
                 }
             }
             Log($"{GetType().Name} {EndpointName} Endpoint test successful.");
