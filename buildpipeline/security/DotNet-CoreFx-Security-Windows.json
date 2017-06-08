@@ -701,7 +701,7 @@
     "name": "DotNet-CoreFx-Security-Windows",
     "url": "https://devdiv.visualstudio.com/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6389",
     "uri": "vstfs:///Build/Definition/6389",
-    "path": "\\DotNet\\raeda",
+    "path": "\\",
     "type": 2,
     "revision": 152,
     "createdDate": "2017-06-08T18:05:53.047Z",
