@@ -793,20 +793,6 @@
     "system.debug": {
       "value": "false"
     },
-    "CloudDropAccountName": {
-      "value": "dotnetbuilddrops"
-    },
-    "CloudDropAccessToken": {
-      "value": null,
-      "isSecret": true
-    },
-    "CloudDropContainer": {
-      "value": "corefx-beta-20170530-06",
-      "allowOverride": true
-    },
-    "Git": {
-      "value": "$(ProgramFiles)\\Git\\cmd\\git.exe"
-    },
     "CorefxGitUrl": {
       "value": "https://github.com/dotnet/corefx"
     }
