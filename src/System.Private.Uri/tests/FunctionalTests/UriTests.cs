@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using Xunit;
 
 namespace System.PrivateUri.Tests
@@ -87,6 +88,16 @@ namespace System.PrivateUri.Tests
 
             s = uri.UserInfo;
             Assert.Equal<String>(s, @"");
+        }
+
+        [Fact]
+        public static void TestCtor_String2()
+        {
+            string temp = Path.GetTempPath();
+            string path = Path.Combine(temp);
+            Uri uri = new Uri(path, UriKind.RelativeOrAbsolute);
+            Console.WriteLine($"### {uri.IsAbsoluteUri} temp path is '{temp}' path is '{path}'");
+            Assert.True(uri.IsAbsoluteUri, $"Not absolute, temp path is '{temp}' path is '{path}'");
         }
 
         [Fact]
