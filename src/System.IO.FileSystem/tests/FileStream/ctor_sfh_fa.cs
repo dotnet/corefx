@@ -15,6 +15,37 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void InvalidHandle_Throws()
+        {
+            using (var handle = new SafeFileHandle(new IntPtr(-1), ownsHandle: false))
+            {
+                AssertExtensions.Throws<ArgumentException>("handle", () => CreateFileStream(handle, FileAccess.Read));
+            }
+        }
+
+        [Fact]
+        public void InvalidAccess_Throws()
+        {
+            using (var handle = new SafeFileHandle(new IntPtr(1), ownsHandle: false))
+            {
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => CreateFileStream(handle, ~FileAccess.Read));
+            }
+        }
+
+        [ActiveIssue(20797, TargetFrameworkMonikers.NetFramework)] // This fails on desktop
+        [Fact]
+        public void InvalidAccess_DoesNotCloseHandle()
+        {
+            using (var handle = new SafeFileHandle(new IntPtr(1), ownsHandle: false))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => CreateFileStream(handle, ~FileAccess.Read));
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                Assert.False(handle.IsClosed);
+            }
+        }
+
+        [Fact]
         public void FileAccessRead()
         {
             string fileName = GetTestFilePath();
@@ -52,7 +83,6 @@ namespace System.IO.Tests
                 }
             }
         }
-
 
         [Fact]
         public void FileAccessReadWrite()
