@@ -30,7 +30,8 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // Managed implementation connects successfully.
+        // [ActiveIssue(20840, TestPlatforms.Unix)] // Managed implementation connects successfully.
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("Basic")]
         [InlineData("NTLM")]
@@ -47,7 +48,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // Managed implementation connects successfully.
+        // [ActiveIssue(20840, TestPlatforms.Unix)] Managed implementation connects successfully.
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData("Basic")]
         [InlineData("NTLM")]
