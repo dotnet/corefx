@@ -2205,22 +2205,29 @@ namespace System.Collections.Immutable
                 Contract.Ensures(Contract.Result<Node>() != null);
 
                 var result = this;
-                var index = 0;
-                var count = this.Count;
-                var removed = 0;
-                while(index + removed < count)
+                var enumerator = new Enumerator(result);
+                try
                 {
-                    var item = result[index];
-                    if (match(item))
+                    var startIndex = 0;
+                    while(enumerator.MoveNext())
                     {
-                        result = result.RemoveAt(index);
-                        removed++;
-                    }
-                    else
-                    {
-                        index++;
+                        if (match(enumerator.Current))
+                        {
+                            result = result.RemoveAt(startIndex);
+                            enumerator.Dispose();
+                            enumerator = new Enumerator(result, startIndex: startIndex);
+                        }
+                        else
+                        {
+                            startIndex++;
+                        }
                     }
                 }
+                finally
+                {
+                    enumerator.Dispose();
+                }
+
                 return result;
             }
 
