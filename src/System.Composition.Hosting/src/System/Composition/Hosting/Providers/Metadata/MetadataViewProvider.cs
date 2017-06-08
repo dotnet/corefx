@@ -11,7 +11,8 @@ using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Providers.Metadata
 {
-    internal static class MetadataViewProvider
+
+    public static class MetadataViewProvider
     {
         private static readonly MethodInfo s_getMetadataValueMethod = typeof(MetadataViewProvider).GetTypeInfo().GetDeclaredMethod("GetMetadataValue");
 
@@ -74,7 +75,7 @@ namespace System.Composition.Hosting.Providers.Metadata
             throw new CompositionFailedException(string.Format(Properties.Resources.MetadataViewProvider_InvalidViewImplementation, typeof(TMetadata).Name));
         }
 
-        private static TValue GetMetadataValue<TValue>(IDictionary<string, object> metadata, string name, DefaultValueAttribute defaultValue)
+        public static TValue GetMetadataValue<TValue>(IDictionary<string, object> metadata, string name, DefaultValueAttribute defaultValue)
         {
             object result;
             if (metadata.TryGetValue(name, out result))

@@ -11,7 +11,7 @@ using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Providers.ExportFactory
 {
-    internal class ExportFactoryExportDescriptorProvider : ExportDescriptorProvider
+    public class ExportFactoryExportDescriptorProvider : ExportDescriptorProvider
     {
         private static readonly MethodInfo s_getExportFactoryDefinitionsMethod = typeof(ExportFactoryExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetExportFactoryDescriptors");
 
@@ -25,7 +25,7 @@ namespace System.Composition.Hosting.Providers.ExportFactory
             return (ExportDescriptorPromise[])gldm(exportKey, definitionAccessor);
         }
 
-        private static ExportDescriptorPromise[] GetExportFactoryDescriptors<TProduct>(CompositionContract exportFactoryContract, DependencyAccessor definitionAccessor)
+        public static ExportDescriptorPromise[] GetExportFactoryDescriptors<TProduct>(CompositionContract exportFactoryContract, DependencyAccessor definitionAccessor)
         {
             var productContract = exportFactoryContract.ChangeType(typeof(TProduct));
             var boundaries = EmptyArray<string>.Value;

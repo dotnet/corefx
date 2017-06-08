@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace System.Composition.Hosting.Providers.ImportMany
 {
-    internal class ImportManyExportDescriptorProvider : ExportDescriptorProvider
+    public class ImportManyExportDescriptorProvider : ExportDescriptorProvider
     {
         private static readonly MethodInfo s_getImportManyDefinitionMethod = typeof(ImportManyExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetImportManyDescriptor");
         private static readonly Type[] s_supportedContractTypes = new[] { typeof(IList<>), typeof(ICollection<>), typeof(IEnumerable<>) };
@@ -37,7 +37,7 @@ namespace System.Composition.Hosting.Providers.ImportMany
             return new[] { (ExportDescriptorPromise)gimdm(contract, elementContract, definitionAccessor) };
         }
 
-        private static ExportDescriptorPromise GetImportManyDescriptor<TElement>(CompositionContract importManyContract, CompositionContract elementContract, DependencyAccessor definitionAccessor)
+        public static ExportDescriptorPromise GetImportManyDescriptor<TElement>(CompositionContract importManyContract, CompositionContract elementContract, DependencyAccessor definitionAccessor)
         {
             return new ExportDescriptorPromise(
                 importManyContract,

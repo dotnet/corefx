@@ -11,7 +11,8 @@ using System.Composition.Hosting.Providers.Metadata;
 
 namespace System.Composition.Hosting.Providers.Lazy
 {
-    internal class LazyWithMetadataExportDescriptorProvider : ExportDescriptorProvider
+
+    public class LazyWithMetadataExportDescriptorProvider : ExportDescriptorProvider
     {
         private static readonly MethodInfo s_getLazyDefinitionsMethod = typeof(LazyWithMetadataExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetLazyDefinitions");
 
@@ -26,7 +27,7 @@ namespace System.Composition.Hosting.Providers.Lazy
             return (ExportDescriptorPromise[])gldm(exportKey, definitionAccessor);
         }
 
-        private static ExportDescriptorPromise[] GetLazyDefinitions<TValue, TMetadata>(CompositionContract lazyContract, DependencyAccessor definitionAccessor)
+        public static ExportDescriptorPromise[] GetLazyDefinitions<TValue, TMetadata>(CompositionContract lazyContract, DependencyAccessor definitionAccessor)
         {
             var metadataProvider = MetadataViewProvider.GetMetadataViewProvider<TMetadata>();
 

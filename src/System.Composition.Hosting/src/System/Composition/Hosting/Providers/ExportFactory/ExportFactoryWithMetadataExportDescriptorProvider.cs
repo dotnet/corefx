@@ -12,7 +12,7 @@ using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Providers.ExportFactory
 {
-    internal class ExportFactoryWithMetadataExportDescriptorProvider : ExportDescriptorProvider
+    public class ExportFactoryWithMetadataExportDescriptorProvider : ExportDescriptorProvider
     {
         private static readonly MethodInfo s_getLazyDefinitionsMethod =
             typeof(ExportFactoryWithMetadataExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetExportFactoryDescriptors");
@@ -29,7 +29,7 @@ namespace System.Composition.Hosting.Providers.ExportFactory
             return (ExportDescriptorPromise[])gldm(contract, definitionAccessor);
         }
 
-        private static ExportDescriptorPromise[] GetExportFactoryDescriptors<TProduct, TMetadata>(CompositionContract exportFactoryContract, DependencyAccessor definitionAccessor)
+        public static ExportDescriptorPromise[] GetExportFactoryDescriptors<TProduct, TMetadata>(CompositionContract exportFactoryContract, DependencyAccessor definitionAccessor)
         {
             var productContract = exportFactoryContract.ChangeType(typeof(TProduct));
             var boundaries = EmptyArray<string>.Value;
