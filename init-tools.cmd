@@ -69,3 +69,4 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
 exit /b 0
+ 
