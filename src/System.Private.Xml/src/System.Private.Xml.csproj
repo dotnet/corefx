@@ -527,6 +527,7 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
     <Compile Include="System\Xml\Xsl\IlGen\GenerateHelper.cs" />

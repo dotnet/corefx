@@ -10,6 +10,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Versioning;
+using System.Threading;
 
 namespace System.Xml
 {
@@ -138,7 +139,8 @@ namespace System.Xml
         private Formatting _formatting;
         private bool _indented; // perf - faster to check a boolean.
         private int _indentation;
-        private char _indentChar;
+        private char[] _indentChars;
+        private static char[] s_defaultIndentChars = new string(DefaultIndentChar, IndentArrayLength).ToCharArray();
 
         // element stack
         private TagInfo[] _stack;
@@ -172,6 +174,8 @@ namespace System.Xml
         //
         // Constants and constant tables
         //
+        private const int IndentArrayLength = 64;
+        private const char DefaultIndentChar = ' ';
         private const int NamespaceStackInitialSize = 8;
 #if DEBUG
         private const int MaxNamespacesWalkCount = 3;
@@ -253,7 +257,8 @@ namespace System.Xml
             _namespaces = true;
             _formatting = Formatting.None;
             _indentation = 2;
-            _indentChar = ' ';
+            _indentChars = s_defaultIndentChars;
+
             // namespaces
             _nsStack = new Namespace[NamespaceStackInitialSize];
             _nsTop = -1;
@@ -338,15 +343,45 @@ namespace System.Xml
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Xml_InvalidIndentation);
-                _indentation = value;
+                if(_indentation != value)
+                {
+                    _indentation = value;
+                    int arraySize = _indentation * IndentArrayLength;
+                    if (arraySize > _indentChars.Length)
+                    {
+                        char indentChar = _indentChars[0];
+                        _indentChars = new char[arraySize];
+                        for (int i = 0; i < arraySize; i++)
+                        {
+                            _indentChars[i] = indentChar;
+                        }
+                    }
+                }
             }
         }
 
         // Gets or sets which character to use for indenting when Formatting is set to "Indented".
         public char IndentChar
         {
-            get { return _indentChar; }
-            set { _indentChar = value; }
+            get { return _indentChars[0]; }
+            set
+            {
+                if (value == DefaultIndentChar)
+                {
+                    _indentChars = s_defaultIndentChars;
+                    return;
+                }
+
+                if (ReferenceEquals(_indentChars, s_defaultIndentChars))
+                {
+                    _indentChars = new char[IndentArrayLength];
+                }
+
+                for (int i = 0; i < IndentArrayLength; i++)
+                {
+                    _indentChars[i] = value;
+                }
+            }
         }
 
         // Gets or sets which character to use to quote attribute values.
@@ -1310,8 +1345,7 @@ namespace System.Xml
                     {
                         Indent(true);
                     }
-                    _textWriter.Write('<');
-                    _textWriter.Write('/');
+                    _textWriter.Write("</");
                     if (_namespaces && _stack[_top].prefix != null)
                     {
                         _textWriter.Write(_stack[_top].prefix);
@@ -1393,10 +1427,18 @@ namespace System.Xml
             else if (!_stack[_top].mixed)
             {
                 _textWriter.WriteLine();
-                int i = beforeEndElement ? _top - 1 : _top;
-                for (i *= _indentation; i > 0; i--)
+                int i = (beforeEndElement ? _top - 1 : _top) * _indentation;
+                if(i <= _indentChars.Length)
                 {
-                    _textWriter.Write(_indentChar);
+                    _textWriter.Write(_indentChars, 0, i);
+                }
+                else
+                {
+                    while(i > 0)
+                    {
+                        _textWriter.Write(_indentChars, 0, Math.Min(i, _indentChars.Length));
+                        i -= _indentChars.Length;
+                    }
                 }
             }
         }
