@@ -1,0 +1,84 @@
+{
+  "frameworkDefinitions": {
+    ".NETPlatform": {
+      "folderName": "dotnet",
+      "displayName": ".NET Platform",
+      "versions": {
+        "v5.1": {
+          "name": ".NETPlatform,Version=v5.1",
+          "folderName": "dotnet5.1",
+          "displayName": ".NET Platform 5.1"
+        },
+        "v5.2": {
+          "name": ".NETPlatform,Version=v5.2",
+          "folderName": "dotnet5.2",
+          "displayName": ".NET Platform 5.2"
+        },
+        "v5.3": {
+          "name": ".NETPlatform,Version=v5.3",
+          "folderName": "dotnet5.3",
+          "displayName": ".NET Platform 5.3"
+        },
+        "v5.10": {
+          "name": ".NETPlatform,Version=v5.10",
+          "folderName": "dotnet5.10",
+          "displayName": ".NET Platform 5.10"
+        }
+    },
+
+    ".NETFramework": {
+      "folderName": "net",
+      "versions": {
+        "v4.0": {
+          "name": ".NETFramework,Version=v4.0",
+          "folderName": "net40",
+          "displayName": ".NET Framework 4",
+          "profiles": {
+            "Client": {
+              "name": ".NETFramework,Version=v4.0,Profile=Client",
+              "folderName": "net40-client",
+              "displayName": ".NET Framework 4 Client Profile"
+            }
+          }
+        },
+        "v4.5": {
+          "name": ".NETFramework,Version=v4.5",
+          "folderName": "net45",
+          "displayName": ".NET Framework 4.5",
+          "imports": [ ".NETPlatform,Version=v5.1" ]
+        },
+        "v4.5.1": {
+          "name": ".NETFramework,Version=v4.5.1",
+          "folderName": "net451",
+          "displayName": ".NET Framework 4.5.1",
+          "imports": [ ".NETPlatform,Version=v5.2" ]
+        },
+        "v4.6": {
+          "name": ".NETFramework,Version=v4.6",
+          "folderName": "net46",
+          "displayName": ".NET Framework 4.6",
+          "imports": [ ".NETPlatform,Version=v5.3" ]
+        }
+      }
+    },
+
+    "DNX": {
+      "shortName": "dnx",
+      "Version=v4.5.1": {
+        "shortName": "dnx451",
+        "imports": [ ".NETFramework,Version=v4.5.1" ]
+      },
+      "Version=v4.6": {
+        "shortName": "dnx46",
+        "imports": [ ".NETFramework,Version=v4.6" ]
+      }
+    },
+
+    "DNX Core": {
+      "shortName": "dnxcore",
+      "Version=v5.0": {
+        "shortName": "dnxcore5",
+        "imports": [ ".NETPlatform,Version=v5.0" ]
+      }
+    }
+}
