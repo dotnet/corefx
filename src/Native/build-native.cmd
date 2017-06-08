@@ -15,6 +15,8 @@ set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
 set "__LinkLibraries= "
+set __StrictToolVersionMatch=
+set __OverrideScriptsFolderPath=''
 
 call %__rootDir%/run.cmd build-managed -GenerateVersion -project=%__rootDir%/build.proj
 
@@ -33,6 +35,9 @@ if /i [%1] == [arm64]       ( set __BuildArch=arm64&&set __VCBuildArch=arm64&&sh
 
 if /i [%1] == [toolsetDir]  ( set "__ToolsetDir=%2"&&shift&&shift&goto Arg_Loop)
 if /i [%1] == [--TargetGroup]  ( set "__TargetGroup=%2"&&shift&&shift&goto Arg_Loop)
+
+if /i [%1] == [strictToolVersionMatch]      ( set "__StrictToolVersionMatch=-StrictToolVersionMatch"&&shift&goto Arg_Loop)
+if /i [%1] == [--OverrideScriptsFolderPath] ( set "__OverrideScriptsFolderPath=%2"&&shift&&shift&goto Arg_Loop)
 
 shift
 goto :Arg_Loop
@@ -135,7 +140,7 @@ if /i "%__BuildArch%" == "arm64" (
 )
 
 pushd "%__IntermediatesDir%"
-call "%__nativeWindowsDir%\gen-buildsys-win.bat" %__nativeWindowsDir% %__VSVersion% %__BuildArch%
+call "%__nativeWindowsDir%\gen-buildsys-win.bat" %__nativeWindowsDir% %__VSVersion% %__BuildArch% %__rootDir% %__OverrideScriptsFolderPath% %__StrictToolVersionMatch%
 popd
 
 :CheckForProj
@@ -169,7 +174,7 @@ set "__LinkArgs=%__LinkArgs% /APPCONTAINER"
 set "__appContainer=true"
 
 pushd "%__IntermediatesDir%"
-call "%__nativeWindowsDir%\gen-buildsys-win.bat" %__nativeWindowsDir% %__VSVersion% %__BuildArch%
+call "%__nativeWindowsDir%\gen-buildsys-win.bat" %__nativeWindowsDir% %__VSVersion% %__BuildArch% %__rootDir% %__OverrideScriptsFolderPath% %__StrictToolVersionMatch%
 popd
 
 if not exist "%__IntermediatesDir%\install.vcxproj" goto :Failure

@@ -16,6 +16,9 @@ if "%__VSVersion%" == "vs2017" (
   set __VSString=15 2017
 ) else (
   set __VSString=14 2015
+)
+
+set "__rootRepo=%4"
 set "__OverrideScriptsFolderPath=%5"
 set "__StrictToolVersionMatch=%6"
 
