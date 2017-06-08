@@ -439,8 +439,7 @@ namespace System.Diagnostics.Tests
 
                     var activity = new Activity("activity");
 
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
+                    var stopWatch = Stopwatch.StartNew();
                     // Test Activity.Start
                     source.StartActivity(activity, arguments);
 
@@ -466,7 +465,7 @@ namespace System.Diagnostics.Tests
                     Assert.InRange(observer.Activity.Duration, TimeSpan.FromTicks(1), TimeSpan.MaxValue);
 
                     // let's only check that Duration is set in StopActivity, we do not intend to check precision here
-                    Assert.InRange(observer.Activity.Duration, TimeSpan.MinValue, stopWatch.Elapsed.Add(TimeSpan.FromMilliseconds(2 * MaxClockErrorMSec)));
+                    Assert.InRange(observer.Activity.Duration, TimeSpan.FromTicks(1), stopWatch.Elapsed.Add(TimeSpan.FromMilliseconds(2 * MaxClockErrorMSec)));
                 } 
             }
         }
