@@ -652,8 +652,6 @@ namespace System.Drawing
                 byte* pbIconDirEntry = unchecked(pbIconData + 6);
                 int icondirEntrySize = Marshal.SizeOf(typeof(SafeNativeMethods.ICONDIRENTRY));
 
-                Debug.Assert((icondirEntrySize * (idCount - 1) + icondirSize) <= _iconData.Length, "Illegal number of ICONDIRENTRIES");
-
                 if ((icondirEntrySize * (idCount - 1) + icondirSize) > _iconData.Length)
                 {
                     throw new ArgumentException(SR.Format(SR.InvalidPictureType, "picture", "Icon"));
@@ -729,8 +727,6 @@ namespace System.Drawing
 
                     pbIconDirEntry += icondirEntrySize;
                 }
-
-                Debug.Assert(_bestImageOffset >= 0 && _bestBytesInRes >= 0 && (_bestImageOffset + _bestBytesInRes) <= _iconData.Length, "Illegal offset/length for the Icon data");
 
                 if (_bestImageOffset < 0)
                 {
