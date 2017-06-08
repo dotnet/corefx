@@ -2205,19 +2205,22 @@ namespace System.Collections.Immutable
                 Contract.Ensures(Contract.Result<Node>() != null);
 
                 var result = this;
-                int index = 0;
-                foreach (var item in this)
+                var index = 0;
+                var count = this.Count;
+                var removed = 0;
+                for(;;)
                 {
+                    if (index + removed >= count)
+                        break;
+                    var item = result[index];
                     if (match(item))
                     {
                         result = result.RemoveAt(index);
+                        removed++;
                     }
                     else
-                    {
                         index++;
-                    }
                 }
-
                 return result;
             }
 

@@ -178,6 +178,17 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void RemoveAllBugTest()
+        {
+            var builder = ImmutableList.CreateBuilder<int>();
+            var elemsToRemove = new[]{0, 1, 2, 3, 4, 5}.ToImmutableHashSet();
+            foreach(var elem in new[]{0, 1, 2, 3, 4, 5, 6})
+                builder.Add(elem);
+            builder.RemoveAll(elemsToRemove.Contains);
+            Assert.Equal(new int[]{ 6 }, builder);
+        }
+
+        [Fact]
         public void RemoveAt()
         {
             var mutable = ImmutableList<int>.Empty.ToBuilder();
