@@ -132,7 +132,8 @@ namespace System.IO.MemoryMappedFiles
             viewHandle.Initialize((ulong)nativeSize);
             return new MemoryMappedView(
                 viewHandle,
-                extraMemNeeded,       // the view points to offset - extraMemNeeded, so we need to shift back by extraMemNeeded
+                requestedOffset,       // the view points to offset - extraMemNeeded, so we need to shift back by extraMemNeeded
+                extraMemNeeded,
                 requestedSize,        // only allow access to the actual size requested
                 access);
         }

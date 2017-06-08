@@ -16,7 +16,7 @@ namespace System.IO.MemoryMappedFiles
         private readonly MemoryMappedFileAccess _access;
 
         [SecurityCritical]
-        private unsafe MemoryMappedView(SafeMemoryMappedViewHandle viewHandle, long pointerOffset,
+        private unsafe MemoryMappedView(SafeMemoryMappedViewHandle viewHandle, long pointerOffset, long nativeViewOffset,
                                         long size, MemoryMappedFileAccess access)
         {
             Debug.Assert(viewHandle != null);
@@ -25,6 +25,7 @@ namespace System.IO.MemoryMappedFiles
             _pointerOffset = pointerOffset;
             _size = size;
             _access = access;
+            NativeViewOffset = nativeViewOffset;
         }
 
         public SafeMemoryMappedViewHandle ViewHandle
@@ -37,6 +38,8 @@ namespace System.IO.MemoryMappedFiles
         {
             get { return _pointerOffset; }
         }
+
+        internal long NativeViewOffset { get; }
 
         public long Size
         {

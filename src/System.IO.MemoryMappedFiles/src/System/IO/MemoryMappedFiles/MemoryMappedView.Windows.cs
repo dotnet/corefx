@@ -89,7 +89,7 @@ namespace System.IO.MemoryMappedFiles
             }
 
             viewHandle.Initialize((ulong)size + (ulong)extraMemNeeded);
-            return new MemoryMappedView(viewHandle, extraMemNeeded, size, access);
+            return new MemoryMappedView(viewHandle, offset, extraMemNeeded, size, access);
         }
 
         // Flushes the changes such that they are in sync with the FileStream bits (ones obtained

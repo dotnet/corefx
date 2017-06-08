@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -191,6 +192,39 @@ namespace System.IO.MemoryMappedFiles.Tests
                             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MapLength : 0, 
                             s.PointerOffset);
                     }
+                }
+            }
+        }
+
+        [Fact]
+        public void LargePointerOffsetMatches()
+        {
+            var bytes = Enumerable.Range(1, 70000).Select(i => unchecked((byte)i)).ToArray();
+            var file = GetTestFilePath();
+            File.WriteAllBytes(file, bytes);
+            using (var mmf = MemoryMappedFile.CreateFromFile(file))
+            {
+                using (var stream = mmf.CreateViewStream(68000, 10))
+                {
+                    Assert.Equal(68000, stream.PointerOffset);
+                }
+            }
+        }
+
+        [Fact]
+        public void NonAlignedOffsets()
+        {
+            var bytes = Enumerable.Range(1, 70000).Select(i => unchecked((byte)i)).ToArray();
+            var file = GetTestFilePath();
+            File.WriteAllBytes(file, bytes);
+            using (var mmf = MemoryMappedFile.CreateFromFile(file))
+            {
+                using (var stream = mmf.CreateViewStream(68000, 10))
+                {
+                    Assert.Equal(unchecked((byte)68001), stream.ReadByte());
+                    Assert.Equal(unchecked((byte)68002), stream.ReadByte());
+                    Assert.Equal(unchecked((byte)68003), stream.ReadByte());
+                    Assert.Equal(unchecked((byte)68004), stream.ReadByte());
                 }
             }
         }
