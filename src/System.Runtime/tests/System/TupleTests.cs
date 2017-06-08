@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Tests
@@ -211,22 +211,40 @@ namespace System.Tests
                 Assert.False(Tuple.Equals(null));
                 Assert.False(((IStructuralEquatable)Tuple).Equals(null));
 
-                IStructuralEquatable_Equals_NullComparer_ThrowsNullReferenceException();
-                IStructuralEquatable_GetHashCode_NullComparer_ThrowsNullReferenceException();
-            }
-            
-            public void IStructuralEquatable_Equals_NullComparer_ThrowsNullReferenceException()
-            {
-                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13410
-                IStructuralEquatable equatable = (IStructuralEquatable)Tuple;
-                Assert.Throws<NullReferenceException>(() => equatable.Equals(Tuple, null));
+                IStructuralEquatable_Equals_NullComparer_UsesDefaultComparer();
+                IStructuralEquatable_GetHashCode_NullComparer_UsesDefaultComparer();
             }
 
-            public void IStructuralEquatable_GetHashCode_NullComparer_ThrowsNullReferenceException()
+            public void IStructuralEquatable_Equals_NullComparer_UsesDefaultComparer()
             {
-                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13410
                 IStructuralEquatable equatable = (IStructuralEquatable)Tuple;
-                Assert.Throws<NullReferenceException>(() => equatable.GetHashCode(null));
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    Assert.Equal(
+                        equatable.Equals(Tuple, EqualityComparer<object>.Default),
+                        equatable.Equals(Tuple, null));
+                }
+                else
+                {
+                    // .NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.
+                    Assert.Throws<NullReferenceException>(() => equatable.Equals(Tuple, null));
+                }
+            }
+
+            public void IStructuralEquatable_GetHashCode_NullComparer_UsesDefaultComparer()
+            {
+                IStructuralEquatable equatable = (IStructuralEquatable)Tuple;
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    Assert.Equal(
+                        equatable.GetHashCode(EqualityComparer<object>.Default),
+                        equatable.GetHashCode(null));
+                }
+                else
+                {
+                    // .NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.
+                    Assert.Throws<NullReferenceException>(() => equatable.GetHashCode(null));
+                }
             }
 
             public void CompareTo(TupleTestDriver<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> other, int expectedResult, int expectedStructuralResult)
@@ -235,14 +253,23 @@ namespace System.Tests
                 Assert.Equal(expectedStructuralResult, ((IStructuralComparable)Tuple).CompareTo(other.Tuple, TestComparer.Instance));
                 Assert.Equal(1, ((IComparable)Tuple).CompareTo(null));
 
-                IStructuralComparable_NullComparer_ThrowsNullReferenceException();  
+                IStructuralComparable_NullComparer_UsesDefaultComparer();
             }
 
-            public void IStructuralComparable_NullComparer_ThrowsNullReferenceException()
+            public void IStructuralComparable_NullComparer_UsesDefaultComparer()
             {
-                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13410
                 IStructuralComparable comparable = (IStructuralComparable)Tuple;
-                Assert.Throws<NullReferenceException>(() => comparable.CompareTo(Tuple, null));
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    Assert.Equal(
+                        comparable.CompareTo(Tuple, Comparer<object>.Default),
+                        comparable.CompareTo(Tuple, null));
+                }
+                else
+                {
+                    // .NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.
+                    Assert.Throws<NullReferenceException>(() => comparable.CompareTo(Tuple, null));
+                }
             }
 
             public void NotEqual()

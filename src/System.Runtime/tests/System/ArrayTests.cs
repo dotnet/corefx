@@ -2461,9 +2461,19 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void IStructuralComparable_NullComparer_ThrowsNullReferenceException()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralComparable_NullComparer_UsesDefaultComparer()
         {
-            // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13410
+            IStructuralComparable comparable = new int[] { 1, 2, 3 };
+            Assert.Equal(
+                comparable.CompareTo(new int[] { 1, 2, 3 }, Comparer<object>.Default),
+                comparable.CompareTo(new int[] { 1, 2, 3 }, null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralComparable_NullComparer_UsesDefaultComparer_netfx()
+        {
             IStructuralComparable comparable = new int[] { 1, 2, 3 };
             Assert.Throws<NullReferenceException>(() => comparable.CompareTo(new int[] { 1, 2, 3 }, null));
         }
@@ -2504,15 +2514,36 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void IStructuralEquatable_Equals_NullComparer_ThrowsNullReferenceException()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralEquatable_Equals_NullComparer_UsesDefaultComparer()
         {
-            // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13410
             IStructuralEquatable equatable = new int[] { 1, 2, 3 };
-            Assert.Throws<NullReferenceException>(() => equatable.Equals(new int[] { 1, 2, 3 }, null));
+            Assert.Equal(
+                equatable.Equals(new int[] { 1, 2, 3 }, EqualityComparer<object>.Default),
+                equatable.Equals(new int[] { 1, 2, 3 }, null));
         }
 
         [Fact]
-        public static void IStructuralEquatable_GetHashCode_NullComparer_ThrowsArgumentNullException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralEquatable_Equals_NullComparer_UsesDefaultComparer_netfx()
+        {
+            IStructuralEquatable equatable = new[] { 1, 2, 3 };
+            Assert.Throws<NullReferenceException>(() => equatable.Equals(new[] { 1, 2, 3 }, null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralEquatable_GetHashCode_NullComparer_UsesDefaultComparer()
+        {
+            IStructuralEquatable equatable = new int[] { 1, 2, 3 };
+            Assert.Equal(
+                equatable.GetHashCode(EqualityComparer<object>.Default),
+                equatable.GetHashCode(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public static void IStructuralEquatable_GetHashCode_NullComparer_UsesDefaultComparer_netfx()
         {
             IStructuralEquatable equatable = new int[] { 1, 2, 3 };
             AssertExtensions.Throws<ArgumentNullException>("comparer", () => equatable.GetHashCode(null));
