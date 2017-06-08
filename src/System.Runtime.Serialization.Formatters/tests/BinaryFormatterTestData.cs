@@ -23,7 +23,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         /// Second: String Array with blob serialized in [netcoreapp, netfx]
         /// To update hashes execute UpdateBlobs test
         /// </summary>
-        public static IEnumerable<object[]> SerializableEqualityComparers()
+        public static IEnumerable<object[]> SerializableEqualityComparers_MemberData()
         {
             // Internal specialized equality comparers
             yield return new object[] { EqualityComparer<UInt32Enum>.Default, new string[] { "AAEAAAD/////AQAAAAAAAAAEAQAAAOEBU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuT2JqZWN0RXF1YWxpdHlDb21wYXJlcmAxW1tTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVUludDMyRW51bSwgU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLCBWZXJzaW9uPTQuMC4zLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49OWQ3N2NjN2FkMzliNjhlYl1dAAAAAAs=", "AAEAAAD/////AQAAAAAAAAAEAQAAAOEBU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuT2JqZWN0RXF1YWxpdHlDb21wYXJlcmAxW1tTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVUludDMyRW51bSwgU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLCBWZXJzaW9uPTQuMC4zLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49OWQ3N2NjN2FkMzliNjhlYl1dAAAAAAs=" } };
@@ -38,7 +38,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         /// Second: String Array with blob serialized in [netcoreapp, netfx]
         /// To update hashes execute UpdateBlobs test
         /// </summary>
-        public static IEnumerable<object[]> SerializableObjects()
+        public static IEnumerable<object[]> SerializableObjects_MemberData()
         {
             // Primitive types
             yield return new object[] { byte.MinValue, new string[] { "AAEAAAD/////AQAAAAAAAAAEAQAAAAtTeXN0ZW0uQnl0ZQEAAAAHbV92YWx1ZQACAAs=", "AAEAAAD/////AQAAAAAAAAAEAQAAAAtTeXN0ZW0uQnl0ZQEAAAAHbV92YWx1ZQACAAs=" } };
@@ -510,14 +510,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         // *** NON AUTO UPDATED DATA ***
 
-        public static IEnumerable<object> SerializableExceptions()
+        public static IEnumerable<object> SerializableExceptions_MemberData()
         {
             var exception = new Exception("Exception message", new Exception("Inner exception message"));
             yield return new object[] { new AggregateException("Aggregate exception message", exception) };
             yield return new object[] { exception };
         }
 
-        public static IEnumerable<object> NonSerializableObjects()
+        public static IEnumerable<object> NonSerializableObjects_MemberData()
         {
             yield return new NonSerializableStruct();
             yield return new NonSerializableClass();
@@ -526,9 +526,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { 1, 2, 3, new NonSerializableClass() };
         }
 
-        public static IEnumerable<object[]> BasicObjectsRoundtrip()
+        public static IEnumerable<object[]> BasicObjectsRoundtrip_MemberData()
         {
-            foreach (object[] record in SerializableObjects())
+            foreach (object[] record in SerializableObjects_MemberData())
             {
                 foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
                 {
@@ -543,9 +543,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static IEnumerable<object[]> NonSerializableTypes()
+        public static IEnumerable<object[]> NonSerializableTypes_MemberData()
         {
-            foreach (object obj in NonSerializableObjects())
+            foreach (object obj in NonSerializableObjects_MemberData())
             {
                 foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
                 {
@@ -560,10 +560,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static IEnumerable<object[]> FuzzInputs()
+        public static IEnumerable<object[]> FuzzInputs_MemberData()
         {
             var rand = new Random(42);
-            foreach (object[] record in SerializableObjects())
+            foreach (object[] record in SerializableObjects_MemberData())
             {
                 const int FuzzingsPerObject = 3;
                 for (int i = 0; i < FuzzingsPerObject; i++)
@@ -573,7 +573,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static IEnumerable<object[]> CrossProcessObjects()
+        public static IEnumerable<object[]> CrossProcessObjects_MemberData()
         {
             // Just a few objects to verify we can roundtrip out of process memory
             yield return new object[] { "test" };

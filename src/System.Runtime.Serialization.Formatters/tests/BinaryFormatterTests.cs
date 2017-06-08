@@ -43,10 +43,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [MemberData(nameof(SerializableObjects_MemberData))]
         public void ValidateAgainstBlobs(object obj, string[] blobs)
         {
-            if (blobs == null || blobs.Length < 2)
+            if (blobs == null || blobs.Length == 0)
             {
-                throw new InvalidOperationException($"Type {obj} has no blobs to deserialize and test equality against. " +
-                    $"Blob: " + SerializeObjectToBlob(obj));
+                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
+                    SerializeObjectToBlob(obj));
             }
 
             foreach (string blob in blobs)
@@ -80,13 +80,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Theory]
-        [MemberData(nameof(SerializableEqualityComparers))]
+        [MemberData(nameof(SerializableEqualityComparers_MemberData))]
         public void ValidateDeserializationOfEqualityComparers(object obj, string[] blobs)
         {
-            if (blobs == null || blobs.Length < 2)
+            if (blobs == null || blobs.Length == 0)
             {
-                throw new InvalidOperationException($"Type {obj} has no blobs to deserialize and test equality against. " +
-                    $"Blob: " + SerializeObjectToBlob(obj));
+                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
+                    SerializeObjectToBlob(obj));
             }
 
             foreach (string base64Serialized in blobs)
@@ -102,7 +102,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [Fact]
         public void RoundtripManyObjectsInOneStream()
         {
-            object[][] objects = SerializableObjects().ToArray();
+            object[][] objects = SerializableObjects_MemberData().ToArray();
             var s = new MemoryStream();
             var f = new BinaryFormatter();
 
@@ -135,14 +135,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Theory]
-        [MemberData(nameof(SerializableExceptions))]
+        [MemberData(nameof(SerializableExceptions_MemberData))]
         public void Roundtrip_Exceptions(Exception expected)
         {
             BinaryFormatterHelpers.AssertRoundtrips(expected);
         }
 
         [Theory]
-        [MemberData(nameof(NonSerializableTypes))]
+        [MemberData(nameof(NonSerializableTypes_MemberData))]
         public void ValidateNonSerializableTypes(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
             var f = new BinaryFormatter()
@@ -353,7 +353,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [OuterLoop]
         [Theory]
-        [MemberData(nameof(FuzzInputs))]
+        [MemberData(nameof(FuzzInputs_MemberData))]
         public void Deserialize_FuzzInput(object obj, Random rand)
         {
             // Get the serialized data for the object
@@ -403,7 +403,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Theory]
-        [MemberData(nameof(CrossProcessObjects))]
+        [MemberData(nameof(CrossProcessObjects_MemberData))]
         public void Roundtrip_CrossProcess(object obj)
         {
             string outputPath = GetTestFilePath();
