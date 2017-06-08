@@ -20,7 +20,6 @@
     <IgnoredReference Include="System.Private.CoreLib" />
 
     <!-- Exclude shims from the closure verification -->
-    <ExcludeFromClosure Include="mscorlib" />
     <ExcludeFromClosure Include="System" />
     <ExcludeFromClosure Include="System.Configuration" />
     <ExcludeFromClosure Include="System.Core" />

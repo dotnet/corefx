@@ -108,7 +108,7 @@
 
   <Target Name="VerifyClosure" 
           DependsOnTargets="GetClosureFiles" 
-          AfterTargets="Build"
+          BeforeTargets="ValidatePackage"
           Inputs="%(ClosureFile.FileSet)"
           Outputs="batching-on-FileSet-metadata">
     <ItemGroup>
@@ -147,7 +147,7 @@
 
   <Target Name="VerifyNETStandard" 
           DependsOnTargets="GetClosureFiles" 
-          AfterTargets="Build"
+          BeforeTargets="ValidatePackage"
           Inputs="%(ClosureFile.FileSet)"
           Outputs="batching-on-FileSet-metadata">
 
