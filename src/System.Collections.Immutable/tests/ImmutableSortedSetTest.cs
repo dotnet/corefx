@@ -77,6 +77,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework sporadically fails as https://github.com/dotnet/coreclr/pull/4340 is not ported to it")]
         public void EmptyTest()
         {
             this.EmptyTestHelper(Empty<int>(), 5, null);
