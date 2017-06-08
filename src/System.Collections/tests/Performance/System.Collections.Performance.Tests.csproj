@@ -6,12 +6,16 @@
     <ProjectGuid>{16568C86-E97E-42C6-B683-65A1B5AF2EC8}</ProjectGuid>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
+    <Compile Include="Perf.BitArray.cs" />
+    <Compile Include="Perf.BitArray.netcoreapp.cs" Condition="'$(TargetGroup)'=='netcoreapp'" />
     <Compile Include="Perf.Dictionary.cs" />
     <Compile Include="Perf.HashSet.cs" />
     <Compile Include="Perf.List.cs" />
