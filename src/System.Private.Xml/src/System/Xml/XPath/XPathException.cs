@@ -77,6 +77,12 @@ namespace System.Xml.XPath
         {
             try
             {
+                if (res == null)
+                {
+                    string argsStr = args != null ? $"[{string.Join(", ", args)}]" : "<null>";
+                    return $"Resource message not available. Arguments passed: {argsStr}";
+                }
+
                 string message = args == null ? res : string.Format(res, args);
                 if (message == null)
                     message = "UNKNOWN(" + res + ")";
