@@ -2208,10 +2208,8 @@ namespace System.Collections.Immutable
                 var index = 0;
                 var count = this.Count;
                 var removed = 0;
-                for(;;)
+                while(index + removed < count)
                 {
-                    if (index + removed >= count)
-                        break;
                     var item = result[index];
                     if (match(item))
                     {
@@ -2219,7 +2217,9 @@ namespace System.Collections.Immutable
                         removed++;
                     }
                     else
+                    {
                         index++;
+                    }
                 }
                 return result;
             }
