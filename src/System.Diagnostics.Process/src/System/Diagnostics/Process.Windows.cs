@@ -88,16 +88,10 @@ namespace System.Diagnostics
         /// <summary>Stops the associated process immediately.</summary>
         public void Kill()
         {
-            SafeProcessHandle handle = null;
-            try
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE))
             {
-                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE);
                 if (!Interop.Kernel32.TerminateProcess(handle, -1))
                     throw new Win32Exception();
-            }
-            finally
-            {
-                ReleaseProcessHandle(handle);
             }
         }
 
@@ -119,52 +113,28 @@ namespace System.Diagnostics
         private bool WaitForExitCore(int milliseconds)
         {
             SafeProcessHandle handle = null;
-            bool exited;
-            ProcessWaitHandle processWaitHandle = null;
             try
             {
                 handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.SYNCHRONIZE, false);
                 if (handle.IsInvalid)
+                    return true;
+
+                using (ProcessWaitHandle processWaitHandle = new ProcessWaitHandle(handle))
                 {
-                    exited = true;
-                }
-                else
-                {
-                    processWaitHandle = new ProcessWaitHandle(handle);
-                    if (processWaitHandle.WaitOne(milliseconds))
-                    {
-                        exited = true;
-                        _signaled = true;
-                    }
-                    else
-                    {
-                        exited = false;
-                        _signaled = false;
-                    }
+                    return _signaled = processWaitHandle.WaitOne(milliseconds);
                 }
             }
             finally
             {
-                if (processWaitHandle != null)
-                {
-                    processWaitHandle.Dispose();
-                }
-
                 // If we have a hard timeout, we cannot wait for the streams
                 if (_output != null && milliseconds == Timeout.Infinite)
-                {
                     _output.WaitUtilEOF();
-                }
 
                 if (_error != null && milliseconds == Timeout.Infinite)
-                {
                     _error.WaitUtilEOF();
-                }
 
-                ReleaseProcessHandle(handle);
+                handle?.Dispose();
             }
-
-            return exited;
         }
 
         /// <summary>Gets the main module for the associated process.</summary>
@@ -183,10 +153,9 @@ namespace System.Diagnostics
         /// <summary>Checks whether the process has exited and updates state accordingly.</summary>
         private void UpdateHasExited()
         {
-            SafeProcessHandle handle = null;
-            try
+            using (SafeProcessHandle handle = GetProcessHandle(
+                Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION | Interop.Advapi32.ProcessOptions.SYNCHRONIZE, false))
             {
-                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION | Interop.Advapi32.ProcessOptions.SYNCHRONIZE, false);
                 if (handle.IsInvalid)
                 {
                     _exited = true;
@@ -230,10 +199,6 @@ namespace System.Diagnostics
                         }
                     }
                 }
-            }
-            finally
-            {
-                ReleaseProcessHandle(handle);
             }
         }
 
@@ -283,10 +248,8 @@ namespace System.Diagnostics
         {
             get
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     bool disabled;
                     if (!Interop.Kernel32.GetProcessPriorityBoost(handle, out disabled))
                     {
@@ -294,23 +257,13 @@ namespace System.Diagnostics
                     }
                     return !disabled;
                 }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
-                }
             }
             set
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.Kernel32.SetProcessPriorityBoost(handle, !value))
                         throw new Win32Exception();
-                }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
                 }
             }
         }
@@ -322,10 +275,8 @@ namespace System.Diagnostics
         {
             get
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     int value = Interop.Kernel32.GetPriorityClass(handle);
                     if (value == 0)
                     {
@@ -333,25 +284,13 @@ namespace System.Diagnostics
                     }
                     return (ProcessPriorityClass)value;
                 }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
-                }
             }
             set
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.Kernel32.SetPriorityClass(handle, (int)value))
-                    {
                         throw new Win32Exception();
-                    }
-                }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
                 }
             }
         }
@@ -363,32 +302,20 @@ namespace System.Diagnostics
         {
             get
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     IntPtr processAffinity, systemAffinity;
                     if (!Interop.Kernel32.GetProcessAffinityMask(handle, out processAffinity, out systemAffinity))
                         throw new Win32Exception();
                     return processAffinity;
                 }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
-                }
             }
             set
             {
-                SafeProcessHandle handle = null;
-                try
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION))
                 {
-                    handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.Kernel32.SetProcessAffinityMask(handle, value))
                         throw new Win32Exception();
-                }
-                finally
-                {
-                    ReleaseProcessHandle(handle);
                 }
             }
         }
@@ -411,108 +338,13 @@ namespace System.Diagnostics
         /// <summary>Get the minimum and maximum working set limits.</summary>
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
-            SafeProcessHandle handle = null;
-            try
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
             {
-                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION);
-
-                // GetProcessWorkingSetSize is not exposed in coresys.  We use 
-                // GetProcessWorkingSetSizeEx instead which also returns FLAGS which give some flexibility
-                // in terms of Min and Max values which we neglect.
                 int ignoredFlags;
                 if (!Interop.Kernel32.GetProcessWorkingSetSizeEx(handle, out minWorkingSet, out maxWorkingSet, out ignoredFlags))
-                {
                     throw new Win32Exception();
-                }
-            }
-            finally
-            {
-                ReleaseProcessHandle(handle);
             }
         }
-
-        private string GetMainWindowTitle()
-        {
-            IntPtr handle = MainWindowHandle;
-            if (handle == (IntPtr)0)
-            {
-                return string.Empty;
-            }
-
-            int length = Interop.User32.GetWindowTextLength(handle) * 2;
-
-            if (length == 0)
-                return string.Empty;
-
-            StringBuilder builder = new StringBuilder(length);
-            Interop.User32.GetWindowText(handle, builder, builder.Capacity);
-            return builder.ToString();
-        }
-
-        private bool IsRespondingCore()
-        {
-            const int WM_NULL = 0x0000;
-            const int SMTO_ABORTIFHUNG = 0x0002;
-
-            IntPtr mainWindow = MainWindowHandle;
-            if (mainWindow == (IntPtr)0)
-            {
-                return true;
-            }
-
-            IntPtr result;
-            return Interop.User32.SendMessageTimeout(mainWindow, WM_NULL, IntPtr.Zero, IntPtr.Zero, SMTO_ABORTIFHUNG, 5000, out result) != (IntPtr)0;
-        }
-
-        private bool WaitForInputIdleCore(int milliseconds)
-        {
-            const int WAIT_OBJECT_0 = 0x00000000;
-            const int WAIT_FAILED = unchecked((int)0xFFFFFFFF);
-            const int WAIT_TIMEOUT = 0x00000102;
-
-            
-            bool idle;
-            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.SYNCHRONIZE | Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
-            {
-                int ret = Interop.User32.WaitForInputIdle(handle, milliseconds);
-                switch (ret)
-                {
-                    case WAIT_OBJECT_0:
-                        idle = true;
-                        break;
-                    case WAIT_TIMEOUT:
-                        idle = false;
-                        break;
-                    case WAIT_FAILED:
-                    default:
-                        throw new InvalidOperationException(SR.InputIdleUnkownError);
-                }
-            }
-            return idle;
-        }
-
-        private bool CloseMainWindowCore()
-        {
-            const int GWL_STYLE = -16; // Retrieves the window styles.
-            const int WS_DISABLED = 0x08000000; // WindowStyle disabled. A disabled window cannot receive input from the user.
-            const int WM_CLOSE = 0x0010; // WindowMessage close.
-
-            IntPtr mainWindowHandle = MainWindowHandle;
-            if (mainWindowHandle == (IntPtr)0)
-            {
-                return false;
-            }
-
-            int style = Interop.User32.GetWindowLong(mainWindowHandle, GWL_STYLE);
-            if ((style & WS_DISABLED) != 0)
-            {
-                return false;
-            }
-
-            Interop.User32.PostMessage(mainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-            return true;
-        }
-
 
         /// <summary>Sets one or both of the minimum and maximum working set limits.</summary>
         /// <param name="newMin">The new minimum working set limit, or null not to change it.</param>
@@ -521,10 +353,8 @@ namespace System.Diagnostics
         /// <param name="resultingMax">The resulting maximum working set limit after any changes applied.</param>
         private void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
         {
-            SafeProcessHandle handle = null;
-            try
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION | Interop.Advapi32.ProcessOptions.PROCESS_SET_QUOTA))
             {
-                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION | Interop.Advapi32.ProcessOptions.PROCESS_SET_QUOTA);
                 IntPtr min, max;
                 int ignoredFlags;
                 if (!Interop.Kernel32.GetProcessWorkingSetSizeEx(handle, out min, out max, out ignoredFlags))
@@ -570,17 +400,13 @@ namespace System.Diagnostics
                 resultingMin = min;
                 resultingMax = max;
             }
-            finally
-            {
-                ReleaseProcessHandle(handle);
-            }
         }
 
         private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
         /// <summary>Starts the process using the supplied start info.</summary>
         /// <param name="startInfo">The start info with which to start the process.</param>
-        private bool StartCore(ProcessStartInfo startInfo)
+        private bool StartWithCreateProcess(ProcessStartInfo startInfo)
         {
             // See knowledge base article Q190351 for an explanation of the following code.  Noteworthy tricky points:
             //    * The handles are duplicated as non-inheritable before they are passed to CreateProcess so
@@ -849,10 +675,8 @@ namespace System.Diagnostics
         /// <summary>Gets timing information for the current process.</summary>
         private ProcessThreadTimes GetProcessTimes()
         {
-            SafeProcessHandle handle = null;
-            try
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, false))
             {
-                handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, false);
                 if (handle.IsInvalid)
                 {
                     throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
@@ -865,11 +689,8 @@ namespace System.Diagnostics
                 {
                     throw new Win32Exception();
                 }
+
                 return processTimes;
-            }
-            finally
-            {
-                ReleaseProcessHandle(handle);
             }
         }
 
@@ -955,7 +776,11 @@ namespace System.Diagnostics
                         }
                     }
                 }
-                return _processHandle;
+
+                // If we dispose of our contained handle we'll be in a bad state. NetFX dealt with this
+                // by doing a try..finally around every usage of GetProcessHandle and only disposed if
+                // it wasn't our handle.
+                return new SafeProcessHandle(_processHandle.DangerousGetHandle(), ownsHandle: false);
             }
             else
             {

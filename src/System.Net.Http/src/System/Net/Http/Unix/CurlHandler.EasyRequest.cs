@@ -87,6 +87,8 @@ namespace System.Net.Http
                 }
                 _easyHandle = easyHandle;
 
+                EventSourceTrace("Configuring request.");
+
                 // Before setting any other options, turn on curl's debug tracing
                 // if desired.  CURLOPT_VERBOSE may also be set subsequently if
                 // EventSource tracing is enabled.
@@ -95,6 +97,10 @@ namespace System.Net.Http
                     SetCurlOption(CURLoption.CURLOPT_VERBOSE, 1L);
                 }
 
+                // Before actually configuring the handle based on the state of the request,
+                // do any necessary cleanup of the request object.
+                SanitizeRequestMessage();
+                
                 // Configure the handle
                 SetUrl();
                 SetNetworkingOptions();
@@ -109,6 +115,8 @@ namespace System.Net.Http
                 SetCookieOption(_requestMessage.RequestUri);
                 SetRequestHeaders();
                 SetSslOptions();
+
+                EventSourceTrace("Done configuring request.");
             }
 
             public void EnsureResponseMessagePublished()
@@ -239,6 +247,15 @@ namespace System.Net.Http
 
                 // Release any send transfer state, which will return its buffer to the pool
                 _sendTransferState?.Dispose();
+            }
+
+            private void SanitizeRequestMessage()
+            {
+                // Make sure Transfer-Encoding and Content-Length make sense together.
+                if (_requestMessage.Content != null)
+                {
+                    SetChunkedModeForSend(_requestMessage);
+                }
             }
 
             private void SetUrl()
@@ -685,18 +702,22 @@ namespace System.Net.Http
             {
                 var slist = new SafeCurlSListHandle();
 
-                // Add content request headers
+                bool suppressContentType;
                 if (_requestMessage.Content != null)
                 {
-                    SetChunkedModeForSend(_requestMessage);
-
+                    // Add content request headers
                     AddRequestHeaders(_requestMessage.Content.Headers, slist);
+                    suppressContentType = _requestMessage.Content.Headers.ContentType == null;
+                }
+                else
+                {
+                    suppressContentType = true;
+                }
 
-                    if (_requestMessage.Content.Headers.ContentType == null)
-                    {
-                        // Remove the Content-Type header libcurl adds by default.
-                        ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoContentType));
-                    }
+                if (suppressContentType)
+                {
+                    // Remove the Content-Type header libcurl adds by default.
+                    ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoContentType));
                 }
 
                 // Add request headers
@@ -741,6 +762,10 @@ namespace System.Net.Http
                 // potentially more expensive than, just always setting the callback.
                 SslProvider.SetSslOptions(this, _handler.ClientCertificateOptions);
             }
+
+            internal bool ServerCertificateValidationCallbackAcceptsAll => ReferenceEquals(
+                _handler.ServerCertificateValidationCallback,
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator);
 
             internal void SetCurlCallbacks(
                 IntPtr easyGCHandle,

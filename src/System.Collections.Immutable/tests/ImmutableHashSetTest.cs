@@ -64,6 +64,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/19044 - HashBucket.Equals() always returning true", TargetFrameworkMonikers.UapAot)]
         public void EnumeratorWithHashCollisionsTest()
         {
             var emptySet = this.EmptyTyped<int>().WithComparer(new BadHasher<int>());
@@ -133,6 +134,12 @@ namespace System.Collections.Immutable.Tests
             set = ImmutableHashSet.CreateRange(comparer, (IEnumerable<string>)new[] { "a", "b" });
             Assert.Equal(2, set.Count);
             Assert.Same(comparer, set.KeyComparer);
+
+            set = ImmutableHashSet.Create(default(string));
+            Assert.Equal(1, set.Count);
+
+            set = ImmutableHashSet.CreateRange(new[] { null, "a", null, "b" });
+            Assert.Equal(3, set.Count);
         }
 
         /// <summary>
@@ -141,6 +148,7 @@ namespace System.Collections.Immutable.Tests
         /// that *is* in the set.
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/19044 - HashBucket.Equals() always returning true", TargetFrameworkMonikers.UapAot)]
         public void RemoveValuesFromCollidedHashCode()
         {
             var set = ImmutableHashSet.Create<int>(new BadHasher<int>(), 5, 6);

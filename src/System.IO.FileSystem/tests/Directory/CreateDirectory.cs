@@ -127,7 +127,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing slash
         public void ValidExtendedPathWithTrailingSlash()
         {
@@ -229,7 +229,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path succeeds
         public void DirectoryLongerThanMaxPath_Succeeds()
         {
@@ -253,7 +253,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax throws PathTooLongException
         public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
         {
@@ -265,7 +265,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax succeeds
         public void ExtendedDirectoryLongerThanLegacyMaxPath_Succeeds()
         {
@@ -277,7 +277,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path succeeds
         public void DirectoryLongerThanMaxDirectoryAsPath_Succeeds()
         {
@@ -354,19 +354,16 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // extended syntax with whitespace
         public void WindowsExtendedSyntaxWhiteSpace()
         {
             var paths = IOInputs.GetSimpleWhiteSpace();
-            using (TemporaryDirectory directory = new TemporaryDirectory())
+            foreach (var path in paths)
             {
-                foreach (var path in paths)
-                {
-                    string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + directory.Path, path);
-                    Directory.CreateDirectory(extendedPath);
-                    Assert.True(Directory.Exists(extendedPath), extendedPath);
-                }
+                string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + TestDirectory, path);
+                Directory.CreateDirectory(extendedPath);
+                Assert.True(Directory.Exists(extendedPath), extendedPath);
             }
         }
 
@@ -411,18 +408,15 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)] // device name prefixes
         public void PathWithReservedDeviceNameAsExtendedPath()
         {
             var paths = IOInputs.GetReservedDeviceNames();
-            using (TemporaryDirectory directory = new TemporaryDirectory())
+            Assert.All(paths, (path) =>
             {
-                Assert.All(paths, (path) =>
-                {
-                    Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(directory.Path, path)).Exists, path);
-                });
-            }
+                Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, path)).Exists, path);
+            });
         }
 
         [Fact]
@@ -445,7 +439,7 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         public void CDriveCase()
         {
             DirectoryInfo dir = Create("c:\\");

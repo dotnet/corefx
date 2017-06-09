@@ -77,7 +77,7 @@ namespace System.Net
 
         protected override IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+            HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
             ares._callback = cback;
             ares._state = state;
             if (_no_more_data || size == 0 || _closed)
@@ -118,11 +118,19 @@ namespace System.Net
             try
             {
                 int nread = base.EndRead(base_ares);
+                if (nread == 0)
+                {
+                    _no_more_data = true;
+                    ares._count = rb.InitialCount - rb.Count;
+                    ares.Complete();
+                    return;
+                }
+
                 _decoder.Write(ares._buffer, ares._offset, nread);
                 nread = _decoder.Read(rb.Buffer, rb.Offset, rb.Count);
                 rb.Offset += nread;
                 rb.Count -= nread;
-                if (rb.Count == 0 || !_decoder.WantMore || nread == 0)
+                if (rb.Count == 0 || !_decoder.WantMore)
                 {
                     _no_more_data = !_decoder.WantMore && nread == 0;
                     ares._count = rb.InitialCount - rb.Count;
@@ -146,8 +154,15 @@ namespace System.Net
                 throw new ArgumentNullException(nameof(asyncResult));
 
             HttpStreamAsyncResult ares = asyncResult as HttpStreamAsyncResult;
-            if (asyncResult == null)
+            if (ares == null || !ReferenceEquals(this, ares._parent))
+            {
                 throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (ares._endCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndRead)));
+            }
+            ares._endCalled = true;
 
             if (!asyncResult.IsCompleted)
                 asyncResult.AsyncWaitHandle.WaitOne();

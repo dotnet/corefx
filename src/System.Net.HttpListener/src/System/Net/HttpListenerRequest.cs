@@ -16,57 +16,15 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListenerRequest
     {
-        private string[] _acceptTypes;
-        private string[] _userLanguages;
         private CookieCollection _cookies;
         private bool? _keepAlive;
         private string _rawUrl;
         private Uri _requestUri;
         private Version _version;
 
-        public string[] AcceptTypes
-        {
-            get
-            {
-                if (_acceptTypes == null)
-                {
-                    _acceptTypes = Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.Accept]);
-                }
+        public string[] AcceptTypes => Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.Accept]);
 
-                return _acceptTypes;
-            }
-        }
-
-        public string[] UserLanguages
-        {
-            get
-            {
-                if (_userLanguages == null)
-                {
-                    _userLanguages = Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.AcceptLanguage]);
-                }
-
-                return _userLanguages;
-            }
-        }
-
-        private static Func<CookieCollection, Cookie, bool, int> s_internalAddMethod = null;
-        private static Func<CookieCollection, Cookie, bool, int> InternalAddMethod
-        {
-            get
-            {
-                if (s_internalAddMethod == null)
-                {
-                    // We need to use CookieCollection.InternalAdd, as this method performs no validation on the Cookies.
-                    // Unfortunately this API is internal so we use reflection to access it. The method is cached for performance reasons.
-                    MethodInfo method = typeof(CookieCollection).GetMethod("InternalAdd", BindingFlags.NonPublic | BindingFlags.Instance);
-                    Debug.Assert(method != null, "We need to use an internal method named InternalAdd that is declared on Cookie.");
-                    s_internalAddMethod = (Func<CookieCollection, Cookie, bool, int>)Delegate.CreateDelegate(typeof(Func<CookieCollection, Cookie, bool, int>), method);
-                }
-
-                return s_internalAddMethod;
-            }
-        }
+        public string[] UserLanguages => Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.AcceptLanguage]);
 
         private CookieCollection ParseCookies(Uri uri, string setCookieHeader)
         {
@@ -87,7 +45,7 @@ namespace System.Net
                     continue;
                 }
 
-                InternalAddMethod(cookies, cookie, true);
+                cookies.InternalAdd(cookie, true);
             }
             return cookies;
         }
@@ -223,8 +181,8 @@ namespace System.Net
                     {
                         header = header.ToLower(CultureInfo.InvariantCulture);
                         _keepAlive =
-                            header.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) < 0 ||
-                            header.IndexOf("keep-alive", StringComparison.InvariantCultureIgnoreCase) >= 0;
+                            header.IndexOf("close", StringComparison.OrdinalIgnoreCase) < 0 ||
+                            header.IndexOf("keep-alive", StringComparison.OrdinalIgnoreCase) >= 0;
                     }
                 }
 

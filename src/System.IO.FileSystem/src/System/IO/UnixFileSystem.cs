@@ -448,14 +448,27 @@ namespace System.IO
             {
                 case SearchTarget.Files:
                     return new FileSystemEnumerable<FileInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new FileInfo(path, null));
+                        {
+                            var info = new FileInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
                 case SearchTarget.Directories:
                     return new FileSystemEnumerable<DirectoryInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new DirectoryInfo(path, null));
+                        {
+                            var info = new DirectoryInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
                 default:
-                    return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) => isDir ?
-                        (FileSystemInfo)new DirectoryInfo(path, null) :
-                        (FileSystemInfo)new FileInfo(path, null));
+                    return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
+                        {
+                            var info = isDir ?
+                                (FileSystemInfo)new DirectoryInfo(path, null) :
+                                (FileSystemInfo)new FileInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
             }
         }
 
@@ -504,6 +517,21 @@ namespace System.IO
                         }
                         searchPattern = searchPattern.Substring(lastSlash + 1);
                     }
+
+                    // Typically we shouldn't see either of these cases, an upfront check is much faster
+                    foreach (char c in searchPattern)
+                    {
+                        if (c == '\\' || c == '[')
+                        {
+                            // We need to escape any escape characters in the search pattern
+                            searchPattern = searchPattern.Replace(@"\", @"\\");
+
+                            // And then escape '[' to prevent it being picked up as a wildcard
+                            searchPattern = searchPattern.Replace(@"[", @"\[");
+                            break;
+                        }
+                    }
+
                     string fullPath = Path.GetFullPath(userPath);
 
                     // Store everything for the enumerator
@@ -638,6 +666,7 @@ namespace System.IO
                 {
                     searchPattern += "*";
                 }
+
                 return searchPattern;
             }
 
@@ -672,7 +701,12 @@ namespace System.IO
 
         public override FileAttributes GetAttributes(string fullPath)
         {
-            return new FileInfo(fullPath, null).Attributes;
+            FileAttributes attributes = new FileInfo(fullPath, null).Attributes;
+
+            if (attributes == (FileAttributes)(-1))
+                FileSystemInfo.ThrowNotFound(fullPath);
+
+            return attributes;
         }
 
         public override void SetAttributes(string fullPath, FileAttributes attributes)

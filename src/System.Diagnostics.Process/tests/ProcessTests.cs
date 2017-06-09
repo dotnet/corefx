@@ -85,29 +85,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact] 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior varies on Windows and Unix
-        [OuterLoop]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
-        public void TestBasePriorityOnUnix()
-        {
-            CreateDefaultProcess();
-            
-            ProcessPriorityClass originalPriority = _process.PriorityClass;
-            Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
-
-            try
-            {
-                SetAndCheckBasePriority(ProcessPriorityClass.High, -11);
-                SetAndCheckBasePriority(ProcessPriorityClass.Idle, 19);
-                SetAndCheckBasePriority(ProcessPriorityClass.Normal, 0);
-            }
-            finally
-            {
-                _process.PriorityClass = originalPriority;
-            }
-        }
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -154,17 +131,6 @@ namespace System.Diagnostics.Tests
                 Process p = CreateProcessLong();
                 StartSleepKillWait(p);
                 Assert.NotEqual(0, p.ExitCode);
-            }
-        }
-
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests UseShellExecute with ProcessStartInfo
-        [Fact]
-        public void TestUseShellExecute_Unix_Succeeds()
-        {
-            using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = "exit", Arguments = "42" }))
-            {
-                Assert.True(p.WaitForExit(WaitInMS));
-                Assert.Equal(42, p.ExitCode);
             }
         }
 
@@ -659,29 +625,6 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.PriorityBoostEnabled = true);
         }
 
-        [Fact] 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior varies on Windows and Unix
-        [OuterLoop]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
-        public void TestPriorityClassUnix()
-        {
-            CreateDefaultProcess();
-
-            ProcessPriorityClass priorityClass = _process.PriorityClass;
-            try
-            {
-                _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
-
-                _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
-            }
-            finally
-            {
-                _process.PriorityClass = priorityClass;
-            }
-        }
-
         [Fact, PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestPriorityClassWindows()
         {
@@ -724,7 +667,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
             // Processes are not hosted by dotnet in the full .NET Framework.
-            string expected = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            string expected = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
             Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(expected), StringComparer.OrdinalIgnoreCase);
         }
 
@@ -796,14 +739,6 @@ namespace System.Diagnostics.Tests
             Process p = Process.GetProcessById(_process.Id);
             Assert.Equal(_process.Id, p.Id);
             Assert.Equal(_process.ProcessName, p.ProcessName);
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to get process Id
-        public void TestRootGetProcessById()
-        {
-            Process p = Process.GetProcessById(1);
-            Assert.Equal(1, p.Id);
         }
 
         [Fact]
@@ -888,15 +823,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(MachineName_Remote_TestData))]
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // Accessing processes on remote machines is not supported on Unix.
-        public void GetProcessesByName_RemoteMachineNameUnix_ThrowsPlatformNotSupportedException(string machineName)
-        {
-            Process currentProcess = Process.GetCurrentProcess();
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessesByName(currentProcess.ProcessName, machineName));
-        }
-
         [Fact]
         public void GetProcessesByName_NoSuchProcess_ReturnsEmpty()
         {
@@ -918,8 +844,9 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/18212", TargetFrameworkMonikers.UapAot)]
         public void TestProcessOnRemoteMachineWindows()
         {
             Process currentProccess = Process.GetCurrentProcess();
@@ -946,15 +873,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(TestPlatforms.AnyUnix)]  // Behavior differs on Windows and Unix
-        public void TestProcessOnRemoteMachineUnix()
-        {
-            Process currentProcess = Process.GetCurrentProcess();
-
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1"));
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessById(currentProcess.Id, "127.0.0.1"));
-        }
-
         [Fact]
         public void StartInfo_GetFileName_ReturnsExpected()
         {
@@ -962,7 +880,7 @@ namespace System.Diagnostics.Tests
             process.Start();
 
             // Processes are not hosted by dotnet in the full .NET Framework.
-            string expectedFileName = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            string expectedFileName = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
             Assert.Equal(expectedFileName, process.StartInfo.FileName);
 
             process.Kill();
@@ -1004,7 +922,7 @@ namespace System.Diagnostics.Tests
         public void StartInfo_SetNull_ThrowsArgumentNullException()
         {
             var process = new Process();
-            Assert.Throws<ArgumentNullException>("value", () => process.StartInfo = null);
+            Assert.Throws<ArgumentNullException>(() => process.StartInfo = null);
         }
 
         [Fact]
@@ -1098,19 +1016,6 @@ namespace System.Diagnostics.Tests
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
             Assert.NotEqual(0, e.NativeErrorCode);
         }
-
-        [PlatformSpecific(TestPlatforms.Windows)]  // Needs permissions on Unix
-        // NativeErrorCode not 193 on Windows Nano for ERROR_BAD_EXE_FORMAT, issue #10290
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void TestStartOnWindowsWithBadFileFormat()
-        {
-            string path = GetTestFilePath();
-            File.Create(path).Dispose();
-
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
-            Assert.NotEqual(0, e.NativeErrorCode);
-        }
-
 
         [Fact]
         public void Start_NullStartInfo_ThrowsArgumentNullExceptionException()
@@ -1230,15 +1135,8 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // MainWindowHandle is not supported on Unix.
-        public void MainWindowHandle_GetUnix_ThrowsPlatformNotSupportedException()
-        {
-            CreateDefaultProcess();
-
-            Assert.Throws<PlatformNotSupportedException>(() => _process.MainWindowHandle);
-        }
-
-        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowHandle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1256,6 +1154,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // MainWindowTitle is a no-op and always returns string.Empty on Unix.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowTitle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1290,24 +1189,11 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Responding always returns true on Unix.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void Responding_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.Responding);
-        }
-
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Needs to get the process Id from OS
-        [Fact]
-        private void TestWindowApisUnix()
-        {
-            // This tests the hardcoded implementations of these APIs on Unix.
-            using (Process p = Process.GetCurrentProcess())
-            {
-                Assert.True(p.Responding);
-                Assert.Equal(string.Empty, p.MainWindowTitle);
-                Assert.False(p.CloseMainWindow());
-                Assert.Throws<InvalidOperationException>(()=>p.WaitForInputIdle());
-            }
         }
 
         [Fact]

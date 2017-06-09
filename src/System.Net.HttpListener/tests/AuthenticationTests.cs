@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication.ExtendedProtection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,24 +30,97 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // Managed implementation connects successfully.
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData("Basic")]
+        [InlineData("NTLM")]
+        [InlineData("Negotiate")]
+        [InlineData("Unknown")]
+        public async Task NoAuthentication_AuthenticationProvided_ReturnsForbiddenStatusCode(string headerType)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.None;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(headerType, "body");
+                await AuthenticationFailure(client, HttpStatusCode.Forbidden);
+            }
+        }
+
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(AuthenticationSchemes.Basic)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
-        public async Task TestBasicAuthentication(AuthenticationSchemes authScheme)
+        public async Task BasicAuthentication_ValidUsernameAndPassword_Success(AuthenticationSchemes authScheme)
         {
             _listener.AuthenticationSchemes = authScheme;
             await ValidateValidUser();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [MemberData(nameof(BasicAuthenticationHeader_TestData))]
+        public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Basic, header);
+
+                HttpResponseMessage response = await AuthenticationFailure(client, statusCode);
+
+                if (statusCode == HttpStatusCode.Unauthorized)
+                {
+                    Assert.Equal("Basic realm=\"\"", response.Headers.WwwAuthenticate.ToString());
+                }
+                else
+                {
+                    Assert.Empty(response.Headers.WwwAuthenticate);
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> BasicAuthenticationHeader_TestData()
+        {
+            yield return new object[] { string.Empty, HttpStatusCode.Unauthorized };
+            yield return new object[] { null, HttpStatusCode.Unauthorized };
+            yield return new object[] { Convert.ToBase64String(Encoding.ASCII.GetBytes("username")), HttpStatusCode.BadRequest };
+            yield return new object[] { "abc", HttpStatusCode.InternalServerError };
+        }
+
+        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData("ExampleRealm")]
+        [InlineData("  ExampleRealm  ")]
+        [InlineData("")]
+        [InlineData(null)]
+        public async Task BasicAuthentication_RealmSet_SendsChallengeToClient(string realm)
+        {
+            _listener.Realm = realm;
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+            Assert.Equal(realm, _listener.Realm);
+
+            using (var client = new HttpClient())
+            {
+                HttpResponseMessage response = await AuthenticationFailure(client, HttpStatusCode.Unauthorized);
+                Assert.Equal($"Basic realm=\"{realm}\"", response.Headers.WwwAuthenticate.ToString());
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task TestAnonymousAuthentication()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             await ValidateNullUser();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task TestBasicAuthenticationWithDelegate()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.None;
@@ -54,7 +130,21 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData("somename:somepassword", "somename", "somepassword")]
+        [InlineData("somename:", "somename", "")]
+        [InlineData(":somepassword", "", "somepassword")]
+        [InlineData("somedomain\\somename:somepassword", "somedomain\\somename", "somepassword")]
+        [InlineData("\\somename:somepassword", "\\somename", "somepassword")]
+        public async Task TestBasicAuthenticationWithValidAuthStrings(string authString, string expectedName, string expectedPassword)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+            await ValidateValidUser(authString, expectedName, expectedPassword);
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task TestAnonymousAuthenticationWithDelegate()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.None;
@@ -64,7 +154,135 @@ namespace System.Net.Tests
             await ValidateNullUser();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(20604)]
+        public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("NTLM", "TlRMTVNTUAABAAAABzIAAAYABgArAAAACwALACAAAABXT1JLU1RBVElPTkRPTUFJTg==");
+
+                HttpResponseMessage message = await AuthenticationFailure(client, HttpStatusCode.Unauthorized);
+                Assert.StartsWith("NTLM", message.Headers.WwwAuthenticate.ToString());
+            }
+        }
+
+        public static IEnumerable<object[]> InvalidNtlmNegotiateAuthentication_TestData()
+        {
+            yield return new object[] { null, HttpStatusCode.Unauthorized };
+            yield return new object[] { string.Empty, HttpStatusCode.Unauthorized };
+            yield return new object[] { "abc", HttpStatusCode.BadRequest };
+            yield return new object[] { "abcd", HttpStatusCode.BadRequest };
+        }
+
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(20604)]
+        [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
+        public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("NTLM", header);
+
+                HttpResponseMessage message = await AuthenticationFailure(client, statusCode);
+                if (statusCode == HttpStatusCode.Unauthorized)
+                {
+                    Assert.Equal("NTLM", message.Headers.WwwAuthenticate.ToString());
+                }
+                else
+                {
+                    Assert.Empty(message.Headers.WwwAuthenticate);
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(20604)]
+        public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", "TlRMTVNTUAABAAAABzIAAAYABgArAAAACwALACAAAABXT1JLU1RBVElPTkRPTUFJTg==");
+
+                HttpResponseMessage message = await AuthenticationFailure(client, HttpStatusCode.Unauthorized);
+                Assert.StartsWith("Negotiate", message.Headers.WwwAuthenticate.ToString());
+            }
+        }
+
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(20604)]
+        [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
+        public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", header);
+
+                HttpResponseMessage message = await AuthenticationFailure(client, statusCode);
+                Assert.Empty(message.Headers.WwwAuthenticate);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public async Task AuthenticationSchemeSelectorDelegate_ReturnsInvalidAuthenticationScheme_PerformsNoAuthentication()
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+            _listener.AuthenticationSchemeSelectorDelegate = (request) => (AuthenticationSchemes)(-1);
+
+            using (var client = new HttpClient())
+            {
+                Task<HttpResponseMessage> clientTask = client.GetAsync(_factory.ListeningUrl);
+                HttpListenerContext context = await _listener.GetContextAsync();
+
+                Assert.False(context.Request.IsAuthenticated);
+                context.Response.Close();
+
+                await clientTask;
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public async Task AuthenticationSchemeSelectorDelegate_ThrowsException_SendsInternalServerErrorToClient()
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+            _listener.AuthenticationSchemeSelectorDelegate = (request) => { throw new InvalidOperationException(); };
+
+            using (var client = new HttpClient())
+            {
+                HttpResponseMessage response = await AuthenticationFailure(client, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void AuthenticationSchemeSelectorDelegate_ThrowsOutOfMemoryException_RethrowsException()
+        {
+            _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+            _listener.AuthenticationSchemeSelectorDelegate = (request) => { throw new OutOfMemoryException(); };
+
+            using (var client = new HttpClient())
+            {
+                Task<string> clientTask = client.GetStringAsync(_factory.ListeningUrl);
+                Assert.Throws<OutOfMemoryException>(() => _listener.GetContext());
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void AuthenticationSchemeSelectorDelegate_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -73,7 +291,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.AuthenticationSchemeSelectorDelegate = null);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void AuthenticationSchemes_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -82,16 +301,18 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.AuthenticationSchemes = AuthenticationSchemes.Basic);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void ExtendedProtectionPolicy_SetNull_ThrowsArgumentNullException()
         {
             using (var listener = new HttpListener())
             {
-                Assert.Throws<ArgumentNullException>("value", () => listener.ExtendedProtectionPolicy = null);
+                AssertExtensions.Throws<ArgumentNullException>("value", () => listener.ExtendedProtectionPolicy = null);
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void ExtendedProtectionPolicy_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -100,7 +321,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.ExtendedProtectionPolicy = null);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void ExtendedProtectionPolicy_SetCustomChannelBinding_ThrowsObjectDisposedException()
         {
             using (var listener = new HttpListener())
@@ -109,20 +331,9 @@ namespace System.Net.Tests
                 AssertExtensions.Throws<ArgumentException>("value", "CustomChannelBinding", () => listener.ExtendedProtectionPolicy = protectionPolicy);
             }
         }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnsafeConnectionNtlmAuthentication_Unix_ThrowsPlatformNotSupportedException()
-        {
-            using (var listener = new HttpListener())
-            {
-                Assert.Throws<PlatformNotSupportedException>(() => listener.UnsafeConnectionNtlmAuthentication);
-                Assert.Throws<PlatformNotSupportedException>(() => listener.UnsafeConnectionNtlmAuthentication = false);
-            }
-        }
         
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void UnsafeConnectionNtlmAuthentication_SetGet_ReturnsExpected()
         {
             using (var listener = new HttpListener())
@@ -140,8 +351,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void UnsafeConnectionNtlmAuthentication_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -150,7 +361,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.UnsafeConnectionNtlmAuthentication = false);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void ExtendedProtectionSelectorDelegate_SetNull_ThrowsArgumentNullException()
         {
             using (var listener = new HttpListener())
@@ -159,7 +371,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void ExtendedProtectionSelectorDelegate_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -168,7 +381,25 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.ExtendedProtectionSelectorDelegate = null);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public async Task Realm_SetWithoutBasicAuthenticationScheme_SendsNoChallengeToClient()
+        {
+            _listener.Realm = "ExampleRealm";
+
+            using (HttpClient client = new HttpClient())
+            {
+                Task<HttpResponseMessage> clientTask = client.GetAsync(_factory.ListeningUrl);
+                HttpListenerContext context = await _listener.GetContextAsync();
+                context.Response.Close();
+
+                HttpResponseMessage response = await clientTask;
+                Assert.Empty(response.Headers.WwwAuthenticate);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void Realm_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -177,9 +408,31 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.Realm = null);
         }
 
+        public async Task<HttpResponseMessage> AuthenticationFailure(HttpClient client, HttpStatusCode errorCode)
+        {
+            Task<HttpResponseMessage> clientTask = client.GetAsync(_factory.ListeningUrl);
+
+            // The server task will hang forever if it is not cancelled.
+            var tokenSource = new CancellationTokenSource();
+            Task<HttpListenerContext> serverTask = Task.Run(() => _listener.GetContext(), tokenSource.Token);
+
+            // The client task should complete first - the server should send a 401 response.
+            Task resultTask = await Task.WhenAny(clientTask, serverTask);
+            tokenSource.Cancel();
+            if (resultTask == serverTask)
+            {
+                await serverTask;
+            }
+
+            Assert.Same(clientTask, resultTask);
+
+            Assert.Equal(errorCode, clientTask.Result.StatusCode);
+            return clientTask.Result;
+        }
+
         private async Task ValidateNullUser()
         {
-            var serverContextTask = _listener.GetContextAsync();
+            Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();
 
             using (HttpClient client = new HttpClient())
             {
@@ -187,40 +440,40 @@ namespace System.Net.Tests
                     Basic,
                     Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", TestUser, TestPassword))));
 
-                var clientTask = client.GetStringAsync(_factory.ListeningUrl);
+                Task<string> clientTask = client.GetStringAsync(_factory.ListeningUrl);
                 HttpListenerContext listenerContext = await serverContextTask;
 
                 Assert.Null(listenerContext.User);
             }
         }
 
-        private async Task ValidateValidUser()
+        private Task ValidateValidUser() =>
+            ValidateValidUser(string.Format("{0}:{1}", TestUser, TestPassword), TestUser, TestPassword);
+
+        private async Task ValidateValidUser(string authHeader, string expectedUsername, string expectedPassword)
         {
-            var serverContextTask = _listener.GetContextAsync();
+            Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new Http.Headers.AuthenticationHeaderValue(
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     Basic,
-                    Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", TestUser, TestPassword))));
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes(authHeader)));
 
-                var clientTask = client.GetStringAsync(_factory.ListeningUrl);
+                Task <string> clientTask = client.GetStringAsync(_factory.ListeningUrl);
                 HttpListenerContext listenerContext = await serverContextTask;
 
-                Assert.Equal(TestUser, listenerContext.User.Identity.Name);
-                Assert.True(listenerContext.User.Identity.IsAuthenticated);
+                Assert.Equal(expectedUsername, listenerContext.User.Identity.Name);
+                Assert.Equal(!string.IsNullOrEmpty(expectedUsername), listenerContext.User.Identity.IsAuthenticated);
                 Assert.Equal(Basic, listenerContext.User.Identity.AuthenticationType);
+
+                HttpListenerBasicIdentity id = Assert.IsType<HttpListenerBasicIdentity>(listenerContext.User.Identity);
+                Assert.Equal(expectedPassword, id.Password);
             }
         }
 
-        private AuthenticationSchemes SelectAnonymousAndBasicSchemes(HttpListenerRequest request)
-        {
-            return AuthenticationSchemes.Anonymous | AuthenticationSchemes.Basic;
-        }
+        private AuthenticationSchemes SelectAnonymousAndBasicSchemes(HttpListenerRequest request) => AuthenticationSchemes.Anonymous | AuthenticationSchemes.Basic;
 
-        private AuthenticationSchemes SelectAnonymousScheme(HttpListenerRequest request)
-        {
-            return AuthenticationSchemes.Anonymous;
-        }
+        private AuthenticationSchemes SelectAnonymousScheme(HttpListenerRequest request) => AuthenticationSchemes.Anonymous;
 
         private class CustomChannelBinding : ChannelBinding
         {

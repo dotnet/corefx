@@ -57,6 +57,7 @@ namespace System.Collections
     [DebuggerTypeProxy(typeof(System.Collections.Hashtable.HashtableDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
     public class Hashtable : IDictionary, ISerializable, IDeserializationCallback, ICloneable
     {
         /*
@@ -1403,27 +1404,12 @@ namespace System.Collections
 
             internal SyncHashtable(SerializationInfo info, StreamingContext context) : base(info, context)
             {
-                _table = (Hashtable)info.GetValue("ParentTable", typeof(Hashtable));
-                if (_table == null)
-                {
-                    throw new SerializationException(SR.Serialization_InsufficientState);
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-                Contract.EndContractBlock();
-
-                // Our serialization code hasn't been fully tweaked to be safe 
-                // for a concurrent writer.
-                lock (_table.SyncRoot)
-                {
-                    info.AddValue("ParentTable", _table, typeof(Hashtable));
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override int Count

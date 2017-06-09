@@ -49,26 +49,26 @@ namespace System.Tests
             Environment.ExitCode = 0; // in case the test host has a void returning Main
         }
 
-        [ActiveIssue("https://github.com/dotnet/coreclr/issues/6206")]
         [Theory]
         [InlineData(1)] // setting ExitCode and exiting Main
         [InlineData(2)] // setting ExitCode both from Main and from an Unloading event handler.
         [InlineData(3)] // using Exit(exitCode)
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20387 - ILC test pipeline does not accomodate tests in child processes built into custom assemblies.", TargetFrameworkMonikers.UapAot)]
         public static void ExitCode_VoidMainAppReturnsSetValue(int mode)
         {
             int expectedExitCode = 123;
 
             const string AppName = "VoidMainWithExitCodeApp.exe";
             var psi = new ProcessStartInfo();
-            if (File.Exists(HostRunner))
-            {
-                psi.FileName = HostRunner;
-                psi.Arguments = $"{AppName} {expectedExitCode} {mode}";
-            }
-            else
+            if (IsFullFramework || IsNetNative)
             {
                 psi.FileName = AppName;
                 psi.Arguments = $"{expectedExitCode} {mode}";
+            }
+            else
+            {
+                psi.FileName = HostRunner;
+                psi.Arguments = $"{AppName} {expectedExitCode} {mode}";
             }
 
             using (Process p = Process.Start(psi))

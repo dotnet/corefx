@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -141,6 +142,7 @@ namespace System.Threading.Threads.Tests
         [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows
+        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void GetSetApartmentStateTest_ChangeAfterThreadStarted_Windows(
             Func<Thread, ApartmentState> getApartmentState,
             Func<Thread, ApartmentState, int> setApartmentState,
@@ -163,6 +165,7 @@ namespace System.Threading.Threads.Tests
         [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows
+        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void ApartmentStateTest_ChangeBeforeThreadStarted_Windows(
             Func<Thread, ApartmentState> getApartmentState,
             Func<Thread, ApartmentState, int> setApartmentState,
@@ -423,6 +426,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [ActiveIssue(20766, TargetFrameworkMonikers.UapAot)]
         public static void ThreadStateTest()
         {
             var e0 = new ManualResetEvent(false);
@@ -651,6 +655,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [ActiveIssue(20766, TargetFrameworkMonikers.UapAot)]
         public static void InterruptTest()
         {
             // Interrupting a thread that is not blocked does not do anything, but once the thread starts blocking, it gets
@@ -701,6 +706,7 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void InterruptInFinallyBlockTest_SkipOnDesktopFramework()
         {
             // A wait in a finally block can be interrupted. The desktop framework applies the same rules as thread abort, and
@@ -767,9 +773,11 @@ namespace System.Threading.Threads.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Thread.Sleep(TimeSpan.FromMilliseconds((double)int.MaxValue + 1)));
 
             Thread.Sleep(0);
-            var startTime = DateTime.Now;
+
+            var stopwatch = Stopwatch.StartNew();
             Thread.Sleep(500);
-            Assert.True((DateTime.Now - startTime).TotalMilliseconds >= 100);
+            stopwatch.Stop();
+            Assert.InRange((int)stopwatch.ElapsedMilliseconds, 100, int.MaxValue);
         }
 
         [Fact]
@@ -816,6 +824,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void MiscellaneousTest()
         {
             Thread.BeginCriticalRegion();

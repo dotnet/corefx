@@ -10,6 +10,7 @@ namespace System.Drawing
 {
     [DebuggerDisplay("{NameAndARGBValue}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct Color : IEquatable<Color>
     {
         public static readonly Color Empty = new Color();
@@ -363,11 +364,13 @@ namespace System.Drawing
 
         public byte A => (byte)((Value >> ARGBAlphaShift) & 0xFF);
 
-        private bool IsKnownColor => ((state & StateKnownColorValid) != 0);
+        public bool IsKnownColor => ((state & StateKnownColorValid) != 0);
 
         public bool IsEmpty => state == 0;
 
         public bool IsNamedColor => ((state & StateNameValid) != 0) || IsKnownColor;
+
+        public bool IsSystemColor => IsKnownColor && ((((KnownColor) knownColor) <= KnownColor.WindowText) || (((KnownColor) knownColor) > KnownColor.YellowGreen));
 
         // Not localized because it's only used for the DebuggerDisplayAttribute, and the values are
         // programmatic items.
@@ -449,7 +452,7 @@ namespace System.Drawing
 
         public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
 
-        private static Color FromKnownColor(KnownColor color)
+        public static Color FromKnownColor(KnownColor color)
         {
             var value = (int)color;
             if (value < (int)KnownColor.FirstColor || value > (int)KnownColor.LastColor)
@@ -574,7 +577,7 @@ namespace System.Drawing
 
         public int ToArgb() => unchecked((int)Value);
 
-        private KnownColor ToKnownColor() => (KnownColor)knownColor;
+        public KnownColor ToKnownColor() => (KnownColor)knownColor;
 
         public override string ToString()
         {

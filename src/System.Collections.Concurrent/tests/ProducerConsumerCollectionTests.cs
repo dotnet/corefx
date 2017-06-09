@@ -415,7 +415,6 @@ namespace System.Collections.Concurrent.Tests
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(100)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Multidim rank 1 arrays not supported: https://github.com/dotnet/corert/issues/3331")]
         public void CopyTo_ArrayZeroLowerBound_ZeroIndex_ExpectedElementsCopied(int size)
         {
             IEnumerable<int> initialItems = Enumerable.Range(1, size);
@@ -880,6 +879,7 @@ namespace System.Collections.Concurrent.Tests
 
         [Theory]
         [InlineData(ConcurrencyTestSeconds)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20474", TargetFrameworkMonikers.UapAot)]
         public void ManyConcurrentAddsTakes_ForceContentionWithToArray(double seconds)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();

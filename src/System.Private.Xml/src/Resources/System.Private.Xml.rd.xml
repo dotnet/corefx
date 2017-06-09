@@ -10,10 +10,16 @@
         <Type Name="XmlSerializer">
           <Method Name=".ctor">
             <TypeParameter Name="type" XmlSerializer="Public"/>
-            <TypeEnumerableParameter Name="extraTypes" XmlSerializer="Public"/>
+            <TypeEnumerableParameter Name="extraTypes" Dynamic="Public"/>
           </Method>
+          <Property Name="Mode" Dynamic="Required" />
         </Type>
       </Namespace>
+      <Namespace Name="System.Xml.Schema" Dynamic="Public" />
     </Assembly>
+    <Namespace Name="System.Collections">
+      <Type Name="IEnumerable" Dynamic="Required All" />
+      <Type Name="IEnumerator" Dynamic="Required All" />
+    </Namespace>
   </Library>
 </Directives>

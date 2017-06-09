@@ -141,11 +141,15 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/3650 - Wrong exception thrown", TargetFrameworkMonikers.UapAot)]
         public static void CreateInstance_TypeNotRuntimeType_ThrowsArgumentException()
         {
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1], new int[1]));
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, 0));
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, new int[1]));
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, new int[1], new int[1]));
+            }
         }
     }
 }

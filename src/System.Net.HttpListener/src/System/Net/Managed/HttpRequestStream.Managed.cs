@@ -28,8 +28,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -102,9 +104,24 @@ namespace System.Net
                 return nread;
             }
 
+            if (_remainingBody > 0)
+            {
+                size = (int)Math.Min(_remainingBody, (long)size);
+            }
+
             nread = _stream.Read(buffer, offset, size);
-            if (nread > 0 && _remainingBody > 0)
+
+            if (_remainingBody > 0)
+            {
+                if (nread == 0)
+                {
+                    throw new HttpListenerException((int)HttpStatusCode.BadRequest);
+                }
+
+                Debug.Assert(nread <= _remainingBody);
                 _remainingBody -= nread;
+            }
+
             return nread;
         }
 
@@ -112,7 +129,7 @@ namespace System.Net
         {
             if (size == 0 || _closed)
             {
-                HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
                 ares._callback = cback;
                 ares._state = state;
                 ares.Complete();
@@ -122,7 +139,7 @@ namespace System.Net
             int nread = FillFromBuffer(buffer, offset, size);
             if (nread > 0 || nread == -1)
             {
-                HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
                 ares._buffer = buffer;
                 ares._offset = offset;
                 ares._count = size;
@@ -137,7 +154,7 @@ namespace System.Net
             // for HTTP pipelining
             if (_remainingBody >= 0 && size > _remainingBody)
             {
-                size = (int)Math.Min(int.MaxValue, _remainingBody);
+                size = (int)Math.Min(_remainingBody, (long)size);
             }
 
             return _stream.BeginRead(buffer, offset, size, cback, state);
@@ -148,20 +165,47 @@ namespace System.Net
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            if (asyncResult is HttpStreamAsyncResult)
+            if (asyncResult is HttpStreamAsyncResult r)
             {
-                HttpStreamAsyncResult r = (HttpStreamAsyncResult)asyncResult;
+                if (!ReferenceEquals(this, r._parent))
+                {
+                    throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+                }
+                if (r._endCalled)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndRead)));
+                }
+                r._endCalled = true;
+
                 if (!asyncResult.IsCompleted)
+                {
                     asyncResult.AsyncWaitHandle.WaitOne();
+                }
+
                 return r._synchRead;
             }
 
             if (_closed)
                 return 0;
 
-            int nread = _stream.EndRead(asyncResult);
-            if (_remainingBody > 0 && nread > 0)
+            int nread = 0;
+            try
             {
+                nread = _stream.EndRead(asyncResult);
+            }
+            catch (IOException e) when (e.InnerException is ArgumentException || e.InnerException is InvalidOperationException)
+            {
+                ExceptionDispatchInfo.Throw(e.InnerException);
+            }
+
+            if (_remainingBody > 0)
+            {
+                if (nread == 0)
+                {
+                    throw new HttpListenerException((int)HttpStatusCode.BadRequest);
+                }
+
+                Debug.Assert(nread <= _remainingBody);
                 _remainingBody -= nread;
             }
 
