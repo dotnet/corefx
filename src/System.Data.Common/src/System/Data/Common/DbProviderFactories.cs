@@ -108,7 +108,7 @@ namespace System.Data.Common
             ADP.CheckArgumentNull(providerFactoryClass, nameof(providerFactoryClass));
             ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
 
-            if (!typeof(DbProviderFactory).IsAssignableFrom(providerFactoryClass))
+            if (!providerFactoryClass.IsSubclassOf(typeof(DbProviderFactory)))
             {
                 throw ADP.Argument($"The type '{providerFactoryClass.FullName}' doesn't inherit from DbProviderFactory");
             }

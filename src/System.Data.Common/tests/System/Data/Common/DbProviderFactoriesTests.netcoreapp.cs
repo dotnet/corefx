@@ -7,10 +7,16 @@ using Xunit;
 
 namespace System.Data.Common
 {
+    public sealed class TestProviderFactory : DbProviderFactory
+    {
+        public static readonly TestProviderFactory Instance = new TestProviderFactory();
+        private TestProviderFactory() { }
+    }
+
     public class DbProviderFactoriesTests
     {
+
         [Fact]
-        [Trait("Issue", "I19826")]
         public void InitializationTest()
         {
             DataTable initializedTable = DbProviderFactories.GetFactoryClasses();
@@ -22,18 +28,14 @@ namespace System.Data.Common
             Assert.Equal("AssemblyQualifiedName", initializedTable.Columns[3].ColumnName);
         }
 
-
         [Fact]
-        [Trait("Issue", "I19826")]
         public void GetFactoryEmptyTableTest()
         {
             ClearDbProviderFactoriesTable();
             Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
         }
 
-
         [Fact]
-        [Trait("Issue", "I19826")]
         public void ConfigureFactoryWithTypeTest()
         {
             ClearDbProviderFactoriesTable();
@@ -46,9 +48,7 @@ namespace System.Data.Common
             Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
         }
         
-
         [Fact]
-        [Trait("Issue", "I19826")]
         public void ConfigureFactoryWithDbConnectionTest()
         {
             ClearDbProviderFactoriesTable();
@@ -60,8 +60,27 @@ namespace System.Data.Common
             Assert.NotNull(factory);
             Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
         }
+        
+        [Fact]
+        public void ReplaceFactoryWithConfigureFactoryWithTypeTest()
+        {
+            ClearDbProviderFactoriesTable();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            DbProviderFactories.ConfigureFactory(typeof(System.Data.SqlClient.SqlClientFactory), "System.Data.SqlClient");
+            DataTable providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
+            Assert.NotNull(factory);
+            Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
 
-
+            DbProviderFactories.ConfigureFactory(typeof(TestProviderFactory), "System.Data.SqlClient");
+            providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
+            Assert.NotNull(factory);
+            Assert.Equal(typeof(TestProviderFactory), factory.GetType());
+        }
+        
         private void ClearDbProviderFactoriesTable()
         {
             // as the DbProviderFactories table is shared, for tests we need a clean one before a test starts to make sure the tests always succeed. 
