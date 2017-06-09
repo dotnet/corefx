@@ -427,6 +427,9 @@
     <EmbeddedResource Include="Resources\System\Drawing\DefaultComponent.bmp" />
     <EmbeddedResource Include="Resources\System\Drawing\Printing\PrintDocument.bmp" />
     <EmbeddedResource Include="Resources\System\Drawing\ShieldIcon.ico" />
+    <EmbeddedResource Condition="'$(TargetsUnix)' == 'true'" Include="Resources\System\Drawing\Error.ico">
+      <LogicalName>placeholder.ico</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

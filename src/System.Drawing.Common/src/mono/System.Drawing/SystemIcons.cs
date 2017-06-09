@@ -52,12 +52,22 @@ namespace System.Drawing
             // we minimize the # of icons to load since most of them are duplicates
             icons = new Icon[6];
             // we use an internal .ctor to ensure the SystemIcons can't de disposed
+#if NETCORE
+            // TODO: Decide which icons to use for this.
+            icons[Application_Winlogo] = new Icon("placeholder.ico", true);
+            icons[Asterisk_Information] = new Icon("placeholder.ico", true);
+            icons[Error_Hand] = new Icon("placeholder.ico", true);
+            icons[Exclamation_Warning] = new Icon("placeholder.ico", true);
+            icons[Question_] = new Icon("placeholder.ico", true);
+            icons[Shield_] = new Icon("placeholder.ico", true);
+#else
             icons[Application_Winlogo] = new Icon("Mono.ico", true);
             icons[Asterisk_Information] = new Icon("Information.ico", true);
             icons[Error_Hand] = new Icon("Error.ico", true);
             icons[Exclamation_Warning] = new Icon("Warning.ico", true);
             icons[Question_] = new Icon("Question.ico", true);
             icons[Shield_] = new Icon("Shield.ico", true);
+#endif
         }
 
         private SystemIcons()
