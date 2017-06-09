@@ -359,6 +359,10 @@ namespace System.Drawing.Tests
             yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 48, 48) };
             yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 256, 256) };
             yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 0, 0) };
+
+            // Handle rerring to icon without any colour.
+            var icon_48x48_one_entry_1bit = new Icon(Helpers.GetEmbeddedResourcePath("48x48_one_entry_1bit.ico"));
+            yield return new object[] { Icon.FromHandle(icon_48x48_one_entry_1bit.Handle) };
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
