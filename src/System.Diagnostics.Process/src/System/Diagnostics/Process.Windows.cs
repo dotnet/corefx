@@ -631,7 +631,6 @@ namespace System.Diagnostics
 
         private static Encoding GetConsoleEncodingOrThrow(ConsoleStreamDirection encodingType)
         {
-            const int INVALID_HANDLE = 6;
             int codePage;
             try
             {
@@ -640,13 +639,18 @@ namespace System.Diagnostics
                     (int)Interop.Kernel32.GetConsoleOutputCP();
 
                 int error = Marshal.GetLastWin32Error();
-                if (error == INVALID_HANDLE)
+                if (error == Interop.Errors.ERROR_INVALID_HANDLE)
                 {
                     throw new PlatformNotSupportedException(SR.ConsoleEncodingNotSupported);
                 }
                 else if (error != 0)
                 {
-                    throw new InvalidOperationException(SR.ConsoleEncodingNotDetected);
+                    string api = encodingType == ConsoleStreamDirection.Input ? 
+                        "Kernel32!GetConsoleCP" : 
+                        "Kernel32!GetConsoleOutputCP";
+                    Debug.Fail(
+                        "Console encoding could not be detected.",
+                        $"{api} has set last error to {error} ({new Win32Exception(error).Message}).");
                 }
             }
             catch (EntryPointNotFoundException)
