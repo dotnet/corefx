@@ -631,31 +631,23 @@ namespace System.Diagnostics
 
         private static Encoding GetConsoleEncodingOrThrow(ConsoleStreamDirection encodingType)
         {
-            int codePage;
-            try
-            {
-                codePage = (encodingType == ConsoleStreamDirection.Input) ?
+            int codePage = (encodingType == ConsoleStreamDirection.Input) ?
                     (int)Interop.Kernel32.GetConsoleCP() :
                     (int)Interop.Kernel32.GetConsoleOutputCP();
 
-                int error = Marshal.GetLastWin32Error();
-                if (error == Interop.Errors.ERROR_INVALID_HANDLE)
-                {
-                    throw new PlatformNotSupportedException(SR.ConsoleEncodingNotSupported);
-                }
-                else if (error != 0)
-                {
-                    string api = encodingType == ConsoleStreamDirection.Input ? 
-                        "Kernel32!GetConsoleCP" : 
-                        "Kernel32!GetConsoleOutputCP";
-                    Debug.Fail(
-                        "Console encoding could not be detected.",
-                        $"{api} has set last error to {error} ({new Win32Exception(error).Message}).");
-                }
-            }
-            catch (EntryPointNotFoundException)
+            int error = Marshal.GetLastWin32Error();
+            if (error == Interop.Errors.ERROR_INVALID_HANDLE)
             {
                 throw new PlatformNotSupportedException(SR.ConsoleEncodingNotSupported);
+            }
+            else if (error != 0)
+            {
+                string api = encodingType == ConsoleStreamDirection.Input ?
+                    "Kernel32!GetConsoleCP" :
+                    "Kernel32!GetConsoleOutputCP";
+                Debug.Fail(
+                    "Console encoding could not be detected.",
+                    $"{api} has set last error to {error} ({new Win32Exception(error).Message}).");
             }
 
             Encoding enc = EncodingHelper.GetSupportedConsoleEncoding(codePage);
