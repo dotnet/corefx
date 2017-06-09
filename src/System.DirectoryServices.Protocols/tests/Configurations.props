@@ -3,7 +3,6 @@
   <PropertyGroup>
     <BuildConfigurations>
         netstandard-Windows_NT;
-        netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
