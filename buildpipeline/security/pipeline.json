@@ -17,6 +17,17 @@
                     "Name": "DotNet-CoreFx-Security-Windows"
                 }
             ]
+        },
+        {
+            "Name": "Security Build for OSX",
+            "Parameters": {
+                "TreatWarningsAsErrors": "false"
+            },
+            "Definitions": [
+                {
+                    "Name": "DotNet-CoreFx-Security-OSX"
+                }
+            ]
         }
     ]
 }
