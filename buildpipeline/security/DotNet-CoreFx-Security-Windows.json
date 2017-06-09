@@ -139,30 +139,6 @@
             "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
-            "displayName": "Run CodeMetrics ",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "d72a577f-47a3-4634-86be-d7d8a535dd1a",
-                "versionSpec": "1.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "Files": "security\\*\\lib\\*\\*.dll",
-                "SearchGac": "true",
-                "IgnoreInvalidTargets": "true",
-                "IgnoreGeneratedCode": "true",
-                "Directory": "$(Build.SourcesDirectory)\\security",
-                "Reference": "security\\**\\*.dll",
-                "Platform": "",
-                "Quiet": "false",
-                "toolVersion": "Latest"
-            }
-        },
-        {
-            "enabled": true,
-            "continueOnError": true,
-            "alwaysRun": false,
             "displayName": "Run APIScan",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
