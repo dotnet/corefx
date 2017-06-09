@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Linq;
 using Legacy.Support;
 using Xunit;
 
@@ -17,26 +18,10 @@ namespace System.IO.Ports.Tests
         [ActiveIssue("https://github.com/dotnet/corefx/issues/20588 - GetPortNames() has registry dependency.", TargetFrameworkMonikers.UapAot)]
         private void OpenEveryPortName()
         {
-            string[] portNames = SerialPort.GetPortNames();
-
-            for (int i = 0; i < portNames.Length; ++i)
+            foreach (string portName in SerialPort.GetPortNames())
             {
-                Debug.WriteLine("Opening port " + portNames[i]);
-                bool portExists = false;
-                foreach (string str in PortHelper.GetPorts())
-                {
-                    if (str == portNames[i])
-                    {
-                        portExists = true;
-                        break;
-                    }
-                }
-                if (!portExists)
-                {
-                    Debug.WriteLine("Real Port does not exist. Ignore the output from SerialPort.GetPortNames()");
-                    continue;
-                }
-                using (SerialPort serialPort = new SerialPort(portNames[i]))
+                Debug.WriteLine("Opening port " + portName);
+                using (SerialPort serialPort = new SerialPort(portName))
                 {
                     try
                     {
@@ -46,7 +31,33 @@ namespace System.IO.Ports.Tests
                 }
             }
         }
+
+        [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20588 - GetPortNames() has registry dependency.", TargetFrameworkMonikers.UapAot)]
+        private void AllHelperPortsAreInGetPortNames()
+        {
+            string[] serialPortNames = SerialPort.GetPortNames();
+            foreach (string helperPortName in PortHelper.GetPorts())
+            {
+                Assert.True(serialPortNames.Contains(helperPortName),
+                    $"{helperPortName} is not present in SerialPort.GetPortNames result");
+            }
+        }
+
+        [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20588 - GetPortNames() has registry dependency.", TargetFrameworkMonikers.UapAot)]
+        private void AllGetPortNamesAreInHelperPorts()
+        {
+            string[] helperPortNames = PortHelper.GetPorts();
+            foreach (string serialPortName in SerialPort.GetPortNames())
+            {
+                Assert.True(helperPortNames.Contains(serialPortName),
+                    $"{serialPortName} is not present in PortHelper.GetPorts result");
+            }
+        }
+
         #endregion
+
     }
 }
 
