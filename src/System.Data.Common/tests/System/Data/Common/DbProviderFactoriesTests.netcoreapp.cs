@@ -60,6 +60,19 @@ namespace System.Data.Common
             Assert.NotNull(factory);
             Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
         }
+
+        [Fact]
+        public void GetFactoryWithDbConnectionTest()
+        {
+            ClearDbProviderFactoriesTable();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            DbProviderFactories.ConfigureFactory(new System.Data.SqlClient.SqlConnection(), "System.Data.SqlClient");
+            DataTable providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            DbProviderFactory factory = DbProviderFactories.GetFactory(new System.Data.SqlClient.SqlConnection());
+            Assert.NotNull(factory);
+            Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
+        }
         
         [Fact]
         public void ReplaceFactoryWithConfigureFactoryWithTypeTest()

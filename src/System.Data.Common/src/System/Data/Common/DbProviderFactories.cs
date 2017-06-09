@@ -35,7 +35,7 @@ namespace System.Data.Common
                         return DbProviderFactories.GetFactory(providerRow);
                     }
                 }
-                throw ADP.Argument($"The specified invariant name '{providerInvariantName}' wasn't found in the list of registered .Net Framework Data Providers.",  providerInvariantName);
+                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_InvariantNameNotFound, providerInvariantName));
             }
             finally
             {
@@ -71,12 +71,12 @@ namespace System.Data.Common
                             }
                             // else throw DataProviderInvalid
                         }
-                        throw ADP.InvalidOperation("The requested .Net Framework Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.");
+                        throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
                     }
-                    throw ADP.Argument($"The registered .Net Framework Data Provider's DbProviderFactory implementation type '{assemblyQualifiedName}' couldn't be loaded.");
+                    throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, assemblyQualifiedName));
                 }
             }
-            throw ADP.Argument("The missing .Net Framework Data Provider's assembly qualified name is required.");
+            throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
         }
 
         public static DataTable GetFactoryClasses()
@@ -110,7 +110,7 @@ namespace System.Data.Common
 
             if (!providerFactoryClass.IsSubclassOf(typeof(DbProviderFactory)))
             {
-                throw ADP.Argument($"The type '{providerFactoryClass.FullName}' doesn't inherit from DbProviderFactory");
+                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_NotAFactoryType, providerFactoryClass.FullName));
             }
             RegisterFactoryInTable(providerFactoryClass, providerInvariantName, name, description);
         }
@@ -128,7 +128,7 @@ namespace System.Data.Common
             DbProviderFactory factoryInstance = GetFactory(connection);
             if (factoryInstance == null)
             {
-                throw ADP.Argument("The .Net Framework Data Provider doesn't supply a DbProviderFactory implementation via DbConnection.");
+                throw ADP.Argument(SR.ADP_DbProviderFactories_NoFactorySuppliedThroughDbConnection);
             }
             RegisterFactoryInTable(factoryInstance.GetType(), providerInvariantName, name, description);
         }
