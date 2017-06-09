@@ -1,4 +1,28 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// See the LICENSE file in the project root for more information.
+//
+// Copyright (C) 2004,2006-2008 Novell, Inc (http://www.novell.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.IO;
@@ -10,11 +34,11 @@ namespace System.Drawing.Tests
     public class IconTests
     {
         [Theory]
-        [InlineData("smiley.ico")]
-        [InlineData("323511.ico")]
+        [InlineData("48x48_multiple_entries_4bit.ico")]
+        [InlineData("256x256_seven_entries_multiple_bits.ico")]
         public void Ctor_FilePath(string name)
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Assert.Equal(32, icon.Width);
             Assert.Equal(32, icon.Height);
             Assert.Equal(new Size(32, 32), icon.Size);
@@ -23,19 +47,19 @@ namespace System.Drawing.Tests
         public static IEnumerable<object[]> Size_TestData()
         {
             // Normal size
-            yield return new object[] { "smiley.ico", new Size(16, 16), new Size(16, 16) };
-            yield return new object[] { "smiley.ico", new Size(-32, -32), new Size(16, 16) };
-            yield return new object[] { "smiley.ico", new Size(32, 16), new Size(32, 32) };
-            yield return new object[] { "323511.ico", new Size(48, 48), new Size(48, 48) };
-            yield return new object[] { "323511.ico", new Size(0, 0), new Size(32, 32) };
-            yield return new object[] { "323511.ico", new Size(1, 1), new Size(256, 256) };
+            yield return new object[] { "48x48_multiple_entries_4bit.ico", new Size(16, 16), new Size(16, 16) };
+            yield return new object[] { "48x48_multiple_entries_4bit.ico", new Size(-32, -32), new Size(16, 16) };
+            yield return new object[] { "48x48_multiple_entries_4bit.ico", new Size(32, 16), new Size(32, 32) };
+            yield return new object[] { "256x256_seven_entries_multiple_bits.ico", new Size(48, 48), new Size(48, 48) };
+            yield return new object[] { "256x256_seven_entries_multiple_bits.ico", new Size(0, 0), new Size(32, 32) };
+            yield return new object[] { "256x256_seven_entries_multiple_bits.ico", new Size(1, 1), new Size(256, 256) };
 
             // Unusual size
-            yield return new object[] { "80509.ico", new Size(16, 16), new Size(10, 16) };
-            yield return new object[] { "80509.ico", new Size(32, 32), new Size(11, 22) };
+            yield return new object[] { "10x16_one_entry_32bit.ico", new Size(16, 16), new Size(10, 16) };
+            yield return new object[] { "10x16_one_entry_32bit.ico", new Size(32, 32), new Size(11, 22) };
 
             // Only 256
-            yield return new object[] { "only256.ico", new Size(0, 0), new Size(256, 256) };
+            yield return new object[] { "256x256_one_entry_32bit.ico", new Size(0, 0), new Size(256, 256) };
         }
 
         [Theory]
@@ -69,7 +93,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Ctor_Stream()
         {
-            using (var stream = new FileStream(Helpers.GetEmbeddedResourcePath("smiley.ico"), FileMode.Open))
+            using (var stream = new FileStream(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"), FileMode.Open))
             {
                 var icon = new Icon(stream);
                 Assert.Equal(32, icon.Width);
@@ -203,7 +227,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Ctor_Type_Resource()
         {
-            var icon = new Icon(typeof(IconTests), "Smiley.ico");
+            var icon = new Icon(typeof(IconTests), "48x48_multiple_entries_4bit.ico");
             Assert.Equal(32, icon.Height);
             Assert.Equal(32, icon.Width);
         }
@@ -211,14 +235,14 @@ namespace System.Drawing.Tests
         [Fact]
         public void Ctor_NullType_ThrowsNullReferenceException()
         {
-            Assert.Throws<NullReferenceException>(() => new Icon(null, "smiley.ico"));
+            Assert.Throws<NullReferenceException>(() => new Icon(null, "48x48_multiple_entries_4bit.ico"));
         }
 
         [Theory]
         [InlineData(typeof(Icon), null)]
         [InlineData(typeof(Icon), "")]
-        [InlineData(typeof(Icon), "smiley.ico")]
-        [InlineData(typeof(IconTests), "smiley.ico")]
+        [InlineData(typeof(Icon), "48x48_multiple_entries_4bit.ico")]
+        [InlineData(typeof(IconTests), "48x48_MULTIPLE_entries_4bit.ico")]
         public void Ctor_InvalidResource_ThrowsArgumentNullException(Type type, string resource)
         {
             Assert.Throws<ArgumentException>(null, () => new Icon(type, resource));
@@ -227,7 +251,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Clone_ConstructedIcon_Success()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Icon clone = (Icon)icon.Clone();
             Assert.NotSame(icon, clone);
             Assert.NotSame(icon.Handle, clone.Handle);
@@ -254,7 +278,7 @@ namespace System.Drawing.Tests
         [InlineData(48)]
         public void XpIcon_ToBitmap_Success(int size)
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("32bpp.ico"), size, size);
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_32bit.ico"), size, size);
             Assert.Equal(size, icon.Width);
             Assert.Equal(size, icon.Height);
             Assert.Equal(new Size(size, size), icon.Size);
@@ -268,14 +292,14 @@ namespace System.Drawing.Tests
         [Fact]
         public void Save_NullOutputStream_ThrowsNullReferenceException()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Assert.Throws<NullReferenceException>(() => icon.Save(null));
         }
 
         [Fact]
         public void ExtractAssociatedIcon_FilePath_Success()
         {
-            Icon icon = Icon.ExtractAssociatedIcon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            Icon icon = Icon.ExtractAssociatedIcon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Assert.Equal(32, icon.Width);
             Assert.Equal(32, icon.Height);
         }
@@ -302,12 +326,12 @@ namespace System.Drawing.Tests
         }
 
         [Theory]
-        [InlineData("16x16x16.ico")]
-        [InlineData("32x32x16.ico")]
-        [InlineData("48x48x1.ico")]
-        [InlineData("64x64x256.ico")]
-        [InlineData("96x96x256.ico")]
-        [InlineData("323511.ico")]
+        [InlineData("16x16_one_entry_4bit.ico")]
+        [InlineData("32x32_one_entry_4bit.ico")]
+        [InlineData("48x48_one_entry_1bit.ico")]
+        [InlineData("64x64_one_entry_8bit.ico")]
+        [InlineData("96x96_one_entry_8bit.ico")]
+        [InlineData("256x256_seven_entries_multiple_bits.ico")]
         public void Save_OutputStream_Success(string fileName)
         {
             SaveAndCompare(new Icon(Helpers.GetEmbeddedResourcePath(fileName)), true);
@@ -316,7 +340,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Save_OutputStream_ProducesIdenticalBytes()
         {
-            string filePath = Helpers.GetEmbeddedResourcePath("323511.ico");
+            string filePath = Helpers.GetEmbeddedResourcePath("256x256_seven_entries_multiple_bits.ico");
             var icon = new Icon(filePath);
             using (var outputStream = new MemoryStream())
             {
@@ -327,14 +351,14 @@ namespace System.Drawing.Tests
 
         public static IEnumerable<object[]> ToBitmap_TestData()
         {
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("16x16x16.ico")) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("32x32x16.ico")) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("48x48x1.ico")) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("64x64x256.ico")) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("96x96x256.ico")) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("415581.ico"), 48, 48) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("415581.ico"), 256, 256) };
-            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("415581.ico"), 0, 0) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("16x16_one_entry_4bit.ico")) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("32x32_one_entry_4bit.ico")) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("48x48_one_entry_1bit.ico")) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("64x64_one_entry_8bit.ico")) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("96x96_one_entry_8bit.ico")) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 48, 48) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 256, 256) };
+            yield return new object[] { new Icon(Helpers.GetEmbeddedResourcePath("256x256_two_entries_multiple_bits.ico"), 0, 0) };
         }
 
         [Theory]
@@ -394,7 +418,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void FromHandle_IconHandleOneTime_Success()
         {
-            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16x16.ico")))
+            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16_one_entry_4bit.ico")))
             {
                 using (Icon icon2 = Icon.FromHandle(icon1.Handle))
                 {
@@ -408,7 +432,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void FromHandle_IconHandleMultipleTime_Success()
         {
-            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16x16.ico")))
+            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16_one_entry_4bit.ico")))
             {
                 using (Icon icon2 = Icon.FromHandle(icon1.Handle))
                 {
@@ -429,7 +453,7 @@ namespace System.Drawing.Tests
         public void FromHandle_BitmapHandleOneTime_Success()
         {
             IntPtr handle;
-            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16x16.ico")))
+            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16_one_entry_4bit.ico")))
             {
                 handle = icon1.ToBitmap().GetHicon();
             }
@@ -445,7 +469,7 @@ namespace System.Drawing.Tests
         public void FromHandle_BitmapHandleMultipleTime_Success()
         {
             IntPtr handle;
-            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16x16.ico")))
+            using (var icon1 = new Icon(Helpers.GetEmbeddedResourcePath("16x16_one_entry_4bit.ico")))
             {
                 handle = icon1.ToBitmap().GetHicon();
             }
@@ -472,7 +496,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Handle_GetWhenDisposed_ThrowsObjectDisposedException()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             icon.Dispose();
 
             Assert.Throws<ObjectDisposedException>(() => icon.Handle);
@@ -481,7 +505,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Size_GetWhenDisposed_ThrowsObjectDisposedException()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             icon.Dispose();
 
             Assert.Throws<ObjectDisposedException>(() => icon.Width);
@@ -492,14 +516,14 @@ namespace System.Drawing.Tests
         [Fact]
         public void Serialize_RoundtripFromData_Success()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Roundtrip(icon);
         }
 
         [Fact]
         public void Serialize_RoundtripWithSize_Success()
         {
-            var icon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico"));
+            var icon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico"));
             Assert.Equal(new Size(32, 32), icon.Size);
             Roundtrip(icon);
         }
@@ -523,7 +547,7 @@ namespace System.Drawing.Tests
         [Fact]
         public void Serialize_RoundtripFromHandle_Success()
         {
-            using (var sourceIcon = new Icon(Helpers.GetEmbeddedResourcePath("smiley.ico")))
+            using (var sourceIcon = new Icon(Helpers.GetEmbeddedResourcePath("48x48_multiple_entries_4bit.ico")))
             {
                 var icon = Icon.FromHandle(sourceIcon.Handle);
                 Roundtrip(icon);
