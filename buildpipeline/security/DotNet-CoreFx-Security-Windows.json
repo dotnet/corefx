@@ -194,27 +194,6 @@
             }
         },
         {
-            "enabled": false,
-            "continueOnError": true,
-            "alwaysRun": false,
-            "displayName": "Count Files",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-                "versionSpec": "1.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "scriptType": "inlineScript",
-                "scriptName": "",
-                "arguments": "$(Build.SourcesDirectory)",
-                "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
-                "failOnStandardError": "true"
-            }
-        },
-        {
             "enabled": true,
             "continueOnError": false,
             "alwaysRun": false,
@@ -232,27 +211,6 @@
                 "arguments": "$(Build.SourcesDirectory) $(PB_Git)",
                 "workingFolder": "$(Build.SourcesDirectory)",
                 "inlineScript": "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process $git -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process $git -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
-                "failOnStandardError": "true"
-            }
-        },
-        {
-            "enabled": false,
-            "continueOnError": true,
-            "alwaysRun": false,
-            "displayName": "Count Files",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-                "versionSpec": "1.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "scriptType": "inlineScript",
-                "scriptName": "",
-                "arguments": "$(Build.SourcesDirectory)",
-                "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
                 "failOnStandardError": "true"
             }
         },
@@ -456,96 +414,6 @@
                 "arguments": "-all",
                 "workingFolder": "$(Build.SourcesDirectory)",
                 "failOnStandardError": "false"
-            }
-        },
-        {
-            "enabled": false,
-            "continueOnError": true,
-            "alwaysRun": false,
-            "displayName": "Run AutoApplicability",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "7f579cc9-a33b-4061-a506-9702d139f221",
-                "versionSpec": "1.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "ApplyRules": "Microsoft.Security",
-                "ExternalRelease": "true",
-                "InternalRelease": "true",
-                "IsService": "false",
-                "IsSoftware": "true",
-                "DataSensitivity": "none",
-                "IsCertAuthority": "false",
-                "IsCodeSigner": "true",
-                "UsesHSM": "false",
-                "toolVersion": "Latest"
-            }
-        },
-        {
-            "enabled": false,
-            "continueOnError": true,
-            "alwaysRun": false,
-            "displayName": "Generate .rsp files",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-                "versionSpec": "1.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "scriptType": "inlineScript",
-                "scriptName": "",
-                "arguments": "$(Build.SourcesDirectory)",
-                "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$secDir = Join-Path $SrcDir \"security\"\necho \"/v\" | Out-File fxcop.rsp\ngci $secDir  -Recurse | % {\nif ($_.Name.ToLower().EndsWith(\".exe\") -or $_.Name.ToLower().EndsWith(\".dll\")) \n{\necho \"/f:$($_.FullName)\" | out-file -append fxcop.rsp\n}\n}\nGet-Content .\\fxcop.rsp\n",
-                "failOnStandardError": "true"
-            }
-        },
-        {
-            "enabled": false,
-            "continueOnError": true,
-            "alwaysRun": false,
-            "displayName": "Run FxCop",
-            "timeoutInMinutes": 0,
-            "condition": "succeeded()",
-            "task": {
-                "id": "0f6c0e13-d60d-4668-b829-0c875e47a5bb",
-                "versionSpec": "2.*",
-                "definitionType": "task"
-            },
-            "inputs": {
-                "inputType": "CommandLine",
-                "arguments": "@fxcop.rsp",
-                "targets": "",
-                "recursive": "true",
-                "ruleset": "Recommended",
-                "customRulesets": "",
-                "directory": "",
-                "reference": "",
-                "platform": "",
-                "types": "",
-                "timeout": "",
-                "customRuleAssemblies": "",
-                "enableRules": "",
-                "disableRules": "",
-                "searchGAC": "true",
-                "ignoreInvalidTargets": "true",
-                "ignoreGeneratedCode": "false",
-                "aspNetOnly": "false",
-                "failOnMissingRules": "false",
-                "overrideRuleVisibilities": "false",
-                "doNotSearchPlatformDirectories": "false",
-                "reportMissingIndirectAssemblies": "false",
-                "update": "false",
-                "console": "true",
-                "consoleXsl": "",
-                "verbose": "false",
-                "quiet": "false",
-                "summary": "true",
-                "toolVersion": "Latest"
             }
         }
     ],
