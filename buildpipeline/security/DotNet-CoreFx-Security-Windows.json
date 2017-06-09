@@ -34,9 +34,9 @@
             "inputs": {
                 "scriptType": "inlineScript",
                 "scriptName": "",
-                "arguments": "$(Build.SourcesDirectory) $(PB_CloudDropAccountName) $(PB_CloudDropAccessToken) $(PB_CloudDropContainer)",
+                "arguments": "$(PB_CloudDropAccountName) $(PB_CloudDropAccessToken) $(PB_CloudDropContainer)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir, $account, $token, $container)\n$syncCmd = Join-Path \"$SrcDir\" \"sync.cmd\"\n$p = Start-Process $syncCmd -ArgumentList \"-ab -- /p:CloudDropAccountName=$account /p:CloudDropAccessToken=$token /p:ContainerName=$container\" -PassThru -NoNewWindow -ErrorAction Stop -Wait -Verbose  \nWrite-Host \"Exit Code: $($p.ExitCode)\"\n\n\n",
+                "inlineScript": "param($account, $token, $container)\n.\\sync.cmd -ab -- /p:CloudDropAccountName=$account /p:CloudDropAccessToken=$token /p:ContainerName=$container",
                 "failOnStandardError": "true"
             }
         },
