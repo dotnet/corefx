@@ -79,29 +79,6 @@ namespace System.Data.Common
             throw ADP.Argument("The missing .Net Framework Data Provider's assembly qualified name is required.");
         }
 
-        public static DbProviderFactory GetFactory(DbConnection connection)
-        {
-            ADP.CheckArgumentNull(connection, nameof(connection));
-            return connection.ProviderFactory;
-        }
-
-        public static void SetFactory<TFactory>(string name="", string providerInvariantName="", string description = "")
-            where TFactory : DbProviderFactory
-        {
-            RegisterFactoryInTable(name, providerInvariantName, typeof(TFactory), description);
-        }
-        
-        public static void SetFactory(DbConnection connection, string name="", string providerInvariantName = "", string description = "")
-        {
-            ADP.CheckArgumentNull(connection, nameof(connection));
-            DbProviderFactory factoryInstance = GetFactory(connection);
-            if (factoryInstance == null)
-            {
-                throw ADP.Argument("The .Net Framework Data Provider doesn't supply a DbProviderFactory implementation via DbConnection");
-            }
-            RegisterFactoryInTable(name, providerInvariantName, factoryInstance.GetType(), description);
-        }
-
         public static DataTable GetFactoryClasses()
         {
             try
@@ -114,8 +91,49 @@ namespace System.Data.Common
                 _providerTableLock.ExitReadLock();
             }
         }
+
+        public static DbProviderFactory GetFactory(DbConnection connection)
+        {
+            ADP.CheckArgumentNull(connection, nameof(connection));
+            return connection.ProviderFactory;
+        }
+
+        public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName)
+        {
+            ConfigureFactory(providerFactoryClass, providerInvariantName, string.Empty, string.Empty);
+        }
         
-        private static void RegisterFactoryInTable(string name, string providerInvariantName, Type factoryType, string description)
+        public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName, string name, string description)
+        {
+            ADP.CheckArgumentNull(providerFactoryClass, nameof(providerFactoryClass));
+            ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
+
+            if (!typeof(DbProviderFactory).IsAssignableFrom(providerFactoryClass))
+            {
+                throw ADP.Argument($"The type '{providerFactoryClass.FullName}' doesn't inherit from DbProviderFactory");
+            }
+            RegisterFactoryInTable(providerFactoryClass, providerInvariantName, name, description);
+        }
+        
+        public static void ConfigureFactory(DbConnection connection, string providerInvariantName)
+        {
+            ConfigureFactory(connection, providerInvariantName, string.Empty, string.Empty);
+        }
+        
+        public static void ConfigureFactory(DbConnection connection, string providerInvariantName, string name, string description)
+        {
+            ADP.CheckArgumentNull(connection, nameof(connection));
+            ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
+
+            DbProviderFactory factoryInstance = GetFactory(connection);
+            if (factoryInstance == null)
+            {
+                throw ADP.Argument("The .Net Framework Data Provider doesn't supply a DbProviderFactory implementation via DbConnection.");
+            }
+            RegisterFactoryInTable(factoryInstance.GetType(), providerInvariantName, name, description);
+        }
+        
+        private static void RegisterFactoryInTable(Type factoryType, string providerInvariantName, string name, string description)
         {
             ADP.CheckArgumentNull(factoryType, nameof(factoryType));
             string invariantNameToUse = string.IsNullOrWhiteSpace(providerInvariantName) ? factoryType.Namespace : providerInvariantName;

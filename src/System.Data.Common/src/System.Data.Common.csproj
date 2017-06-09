@@ -16,7 +16,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Data\Common\DbColumn.cs" />
-    <Compile Include="System\Data\Common\DbProviderFactories.cs" />
     <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
@@ -213,6 +212,7 @@
     <Compile Include="System\Data\Common\DbParameter.cs" />
     <Compile Include="System\Data\Common\DbParameterCollection.cs" />
     <Compile Include="System\Data\Common\DbProviderFactory.cs" />
+    <Compile Include="System\Data\Common\DbProviderFactories.cs" />
     <Compile Include="System\Data\Common\DbProviderSpecificTypePropertyAttribute.cs" />
     <Compile Include="System\Data\Common\DBSchemaRow.cs" />
     <Compile Include="System\Data\Common\DBSchemaTable.cs" />
