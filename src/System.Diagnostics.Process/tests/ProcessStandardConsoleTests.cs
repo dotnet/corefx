@@ -14,6 +14,7 @@ namespace System.Diagnostics.Tests
         private const int s_ConsoleEncoding = 437;
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Console encoding not supported")]
         public void TestChangesInConsoleEncoding()
         {
             Action<int> run = expectedCodePage =>
@@ -57,6 +58,21 @@ namespace System.Diagnostics.Tests
                 Interop.SetConsoleCP(inputEncoding);
                 Interop.SetConsoleOutputCP(outputEncoding);
             }
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ConsoleEncodingOnUap(int whichStream)
+        {
+            Process p = CreateProcessLong();
+            p.StartInfo.RedirectStandardInput = whichStream == 1;
+            p.StartInfo.RedirectStandardOutput = whichStream == 2;
+            p.StartInfo.RedirectStandardError = whichStream == 3;
+
+            Assert.Throws<PlatformNotSupportedException>(() => p.Start());
         }
     }
 }
