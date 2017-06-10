@@ -8,9 +8,6 @@ namespace System.Drawing.Tests
 {
     public static class Helpers
     {
-        public static string GetEmbeddedResourcePath(string name)
-        {
-            return Path.Combine(Assembly.GetExecutingAssembly().Location, "..", "bitmaps", name);
-        }
+        public static string GetTestBitmapPath(string name) => Path.Combine(AppContext.BaseDirectory, "bitmaps", name);
     }
 }
