@@ -463,7 +463,7 @@ namespace System.Runtime.CompilerServices
         {
             int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
 
-            fixed( void* ptr = a )
+            fixed (void* ptr = a)
             {
                 void* r1 = Unsafe.Add<int>(ptr, 1);
                 Assert.Equal(0x234, *(int*)r1);
@@ -526,7 +526,7 @@ namespace System.Runtime.CompilerServices
         {
             int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
 
-            fixed( void* ptr = a )
+            fixed (void* ptr = a)
             {
                 void* r1 = Unsafe.Subtract<int>(ptr, -2);
                 Assert.Equal(0x345, *(int*)r1);
