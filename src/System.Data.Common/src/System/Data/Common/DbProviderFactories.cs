@@ -172,7 +172,7 @@ namespace System.Data.Common
             descriptionColumn.ReadOnly = true;
             DataColumn invariantNameColumn = new DataColumn(InvariantName, typeof(string));
             invariantNameColumn.ReadOnly = true;
-            // This column isn't readonly in CoreFx, while it is readonly in NetFx, as this class allow overwriting registered providers at runtime.
+            // This column is writable in CoreFx, while it is readonly in NetFx, as this class allows overwriting registered providers at runtime.
             DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedName, typeof(string));
 
             DataColumn[] primaryKey = new DataColumn[] { invariantNameColumn };
