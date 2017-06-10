@@ -722,7 +722,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (!(@this != null &&
                 other != null &&
-                @this.Comparer.Equals(other.Comparer) &&
+                //@this.Comparer.Equals(other.Comparer) &&
                 @this.Count == other.Count))
                 return false;
 

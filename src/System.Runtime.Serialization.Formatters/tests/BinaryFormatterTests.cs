@@ -51,7 +51,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     SerializeObjectToBlob(obj));
             }
 
-            foreach (string blob in blobs.Take(1))
+            foreach (string blob in blobs)
             {
                 CheckForAnyEquals(obj, DeserializeBlobToObject(blob));
             }

@@ -63,9 +63,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 }
             }
 
-            if (objA is IEnumerable)
+            if (objA is IEnumerable objAEnumerable && objB is IEnumerable objBEnumerable)
             {
-                return CheckSequenceEquals(objA as IEnumerable, objB as IEnumerable);
+                return CheckSequenceEquals(objAEnumerable, objBEnumerable);
             }
 
             return objA.Equals(objB);
