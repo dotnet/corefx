@@ -15,7 +15,6 @@ namespace System.Data.Common
 
     public class DbProviderFactoriesTests
     {
-
         [Fact]
         public void InitializationTest()
         {
@@ -47,13 +46,47 @@ namespace System.Data.Common
             Assert.NotNull(factory);
             Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
         }
-        
+
+        [Fact]
+        public void ConfigureFactoryWithTypeNoNameSpecifiedTest()
+        {
+            ClearDbProviderFactoriesTable();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            DbProviderFactories.ConfigureFactory(typeof(System.Data.SqlClient.SqlClientFactory));
+            DataTable providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
+            Assert.NotNull(factory);
+            Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
+        }
+
+        [Fact]
+        public void ConfigureFactoryWithWrongTypeTest()
+        {
+            ClearDbProviderFactoriesTable();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.ConfigureFactory(typeof(System.Data.SqlClient.SqlConnection)));
+        }
+
         [Fact]
         public void ConfigureFactoryWithDbConnectionTest()
         {
             ClearDbProviderFactoriesTable();
             Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
             DbProviderFactories.ConfigureFactory(new System.Data.SqlClient.SqlConnection(), "System.Data.SqlClient");
+            DataTable providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
+            Assert.NotNull(factory);
+            Assert.Equal(typeof(System.Data.SqlClient.SqlClientFactory), factory.GetType());
+        }
+
+        [Fact]
+        public void ConfigureFactoryWithDbConnectionNoNameSpecifiedTest()
+        {
+            ClearDbProviderFactoriesTable();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            DbProviderFactories.ConfigureFactory(new System.Data.SqlClient.SqlConnection());
             DataTable providerTable = DbProviderFactories.GetFactoryClasses();
             Assert.Equal(1, providerTable.Rows.Count);
             DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
