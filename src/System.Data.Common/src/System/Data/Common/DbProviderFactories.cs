@@ -97,6 +97,11 @@ namespace System.Data.Common
             ADP.CheckArgumentNull(connection, nameof(connection));
             return connection.ProviderFactory;
         }
+        
+        public static void ConfigureFactory(Type providerFactoryClass)
+        {
+            ConfigureFactory(providerFactoryClass, string.Empty, string.Empty, string.Empty);
+        }
 
         public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName)
         {
@@ -106,7 +111,6 @@ namespace System.Data.Common
         public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName, string name, string description)
         {
             ADP.CheckArgumentNull(providerFactoryClass, nameof(providerFactoryClass));
-            ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
 
             if (!providerFactoryClass.IsSubclassOf(typeof(DbProviderFactory)))
             {
@@ -114,7 +118,12 @@ namespace System.Data.Common
             }
             RegisterFactoryInTable(providerFactoryClass, providerInvariantName, name, description);
         }
-        
+
+        public static void ConfigureFactory(DbConnection connection)
+        {
+            ConfigureFactory(connection, string.Empty, string.Empty, string.Empty);
+        }
+
         public static void ConfigureFactory(DbConnection connection, string providerInvariantName)
         {
             ConfigureFactory(connection, providerInvariantName, string.Empty, string.Empty);
@@ -123,7 +132,6 @@ namespace System.Data.Common
         public static void ConfigureFactory(DbConnection connection, string providerInvariantName, string name, string description)
         {
             ADP.CheckArgumentNull(connection, nameof(connection));
-            ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
 
             DbProviderFactory factoryInstance = GetFactory(connection);
             if (factoryInstance == null)
@@ -136,8 +144,8 @@ namespace System.Data.Common
         private static void RegisterFactoryInTable(Type factoryType, string providerInvariantName, string name, string description)
         {
             ADP.CheckArgumentNull(factoryType, nameof(factoryType));
-            string invariantNameToUse = string.IsNullOrWhiteSpace(providerInvariantName) ? factoryType.Namespace : providerInvariantName;
 
+            string invariantNameToUse = string.IsNullOrWhiteSpace(providerInvariantName) ? factoryType.Namespace : providerInvariantName;
             try
             {
                 _providerTableLock.EnterWriteLock();

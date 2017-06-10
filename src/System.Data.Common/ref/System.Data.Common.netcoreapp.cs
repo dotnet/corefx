@@ -10,8 +10,10 @@ namespace System.Data.Common
 {
     public static partial class DbProviderFactories
     {
+        public static void ConfigureFactory(Type providerFactoryClass) { throw null; }
         public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName) { throw null; }
         public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName, string name, string description) { throw null; }
+        public static void ConfigureFactory(DbConnection connection) { throw null; }
         public static void ConfigureFactory(DbConnection connection, string providerInvariantName) { throw null; }
         public static void ConfigureFactory(DbConnection connection, string providerInvariantName, string name, string description) { throw null; }
     }
