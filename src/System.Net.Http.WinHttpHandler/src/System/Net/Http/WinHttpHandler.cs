@@ -452,28 +452,6 @@ namespace System.Net.Http
             }
         }
 
-        public int MaxResponseDrainSize
-        {
-            get
-            {
-                return _maxResponseDrainSize;
-            }
-
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        value,
-                        SR.Format(SR.net_http_value_must_be_greater_than, 0));
-                }
-
-                CheckDisposedOrStarted();
-                _maxResponseDrainSize = value;
-            }
-        }
-
         public IDictionary<string, object> Properties
         {
             get
@@ -1203,19 +1181,6 @@ namespace System.Net.Http
                 handle,
                 option,
                 ref optionData))
-            {
-                WinHttpException.ThrowExceptionUsingLastError();
-            }
-        }
-
-        private void SetWinHttpOption(SafeWinHttpHandle handle, uint option, string optionData)
-        {
-            Debug.Assert(handle != null);
-            if (!Interop.WinHttp.WinHttpSetOption(
-                handle,
-                option,
-                optionData,
-                (uint)optionData.Length))
             {
                 WinHttpException.ThrowExceptionUsingLastError();
             }
