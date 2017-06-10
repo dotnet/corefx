@@ -398,7 +398,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { new TypeWithoutNamespace(), new string[] { "AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAAUVHlwZVdpdGhvdXROYW1lc3BhY2UAAAAAAgAAAAs=", "AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAAUVHlwZVdpdGhvdXROYW1lc3BhY2UAAAAAAgAAAAs=" } };
 
             // Extension of core serializable types
-            if (!PlatformDetection.IsNetfxBelow471())
+            if (PlatformDetection.IsNetfx471OrNewer())
             {
                 // ValueType isn't serializable before ntfx471.
                 yield return new object[] { new ValueTuple(), new string[] { "AAEAAAD/////AQAAAAAAAAAEAQAAABFTeXN0ZW0uVmFsdWVUdXBsZQAAAAAL", "AAEAAAD/////AQAAAAAAAAAEAQAAABFTeXN0ZW0uVmFsdWVUdXBsZQAAAAAL" } };
