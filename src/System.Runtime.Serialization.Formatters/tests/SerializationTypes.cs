@@ -199,7 +199,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal sealed class ObjectWithArrays
+    public sealed class ObjectWithArrays
     {
         public int[] IntArray;
         public string[] StringArray;
@@ -464,7 +464,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal class SimpleKeyedCollection : System.Collections.ObjectModel.KeyedCollection<int, Point>
+    public class SimpleKeyedCollection : System.Collections.ObjectModel.KeyedCollection<int, Point>
     {
         protected override int GetKeyForItem(Point item)
         {

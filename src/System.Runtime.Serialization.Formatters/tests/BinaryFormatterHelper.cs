@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,16 +17,29 @@ namespace System.Runtime.Serialization.Formatters.Tests
     {
         private static void CheckForAnyEquals(object obj, object deserializedObj)
         {
-            if (obj != null && deserializedObj != null)
+            try
+            {
+                Assert.True(CheckEquals(obj, deserializedObj));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error during equality check of type " + obj?.GetType()?.FullName);
+                throw;
+            }
+        }
+
+        public static bool CheckEquals(object objA, object objB)
+        {
+            if (objA != null && objB != null)
             {
                 object equalityResult = null;
-                Type objType = obj.GetType();
+                Type objType = objA.GetType();
 
                 // Check if custom equality extension method is available
                 MethodInfo customEqualityCheck = GetExtensionMethod(typeof(EqualityExtensions).Assembly, objType);
                 if (customEqualityCheck != null)
                 {
-                    equalityResult = customEqualityCheck.Invoke(obj, new object[] { obj, deserializedObj });
+                    equalityResult = customEqualityCheck.Invoke(objA, new object[] { objA, objB });
                 }
                 else
                 {
@@ -38,26 +52,57 @@ namespace System.Runtime.Serialization.Formatters.Tests
                         MethodInfo equalsMethod = objType.GetMethod("Equals", new Type[] { objType });
                         if (equalsMethod.DeclaringType != typeof(object))
                         {
-                            equalityResult = equalsMethod.Invoke(obj, new object[] { deserializedObj });
+                            equalityResult = equalsMethod.Invoke(objA, new object[] { objB });
                         }
                     }
                 }
 
                 if (equalityResult != null)
                 {
-                    Assert.True((bool)equalityResult, "Error during equality check of type " + objType.FullName);
-                    return;
+                    return (bool)equalityResult;
                 }
             }
 
+            if (objA is IEnumerable)
+            {
+                return CheckSequenceEquals(objA as IEnumerable, objB as IEnumerable);
+            }
+
+            return objA.Equals(objB);
+        }
+
+        private static bool CheckSequenceEquals(IEnumerable a, IEnumerable b)
+        {
+            if (a == null || b == null)
+                return a == b;
+
+            if (a.GetType() != b.GetType())
+                return false;
+
+            IEnumerator eA = null;
+            IEnumerator eB = null;
+
             try
             {
-                Assert.Equal(obj, deserializedObj);
+                eA = (a as IEnumerable).GetEnumerator();
+                eB = (a as IEnumerable).GetEnumerator();
+                while (true)
+                {
+                    bool moved = eA.MoveNext();
+                    if (moved != eB.MoveNext())
+                        return false;
+                    if (!moved)
+                        return true;
+                    if (eA.Current == null && eB.Current == null)
+                        return true;
+                    if (!CheckEquals(eA.Current, eB.Current))
+                        return true;
+                }
             }
-            catch (Exception)
+            finally
             {
-                Console.WriteLine("Error during equality check of type " + obj?.GetType()?.FullName);
-                throw;
+                (eA as IDisposable)?.Dispose();
+                (eB as IDisposable)?.Dispose();
             }
         }
 
@@ -65,14 +110,19 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (extendedType.IsGenericType)
             {
-                return typeof(EqualityExtensions).GetMethods()
-                    ?.SingleOrDefault(m => m.Name == "IsEqual" && m.GetParameters().Length == 2 && m.GetParameters()[0].ParameterType.Name == extendedType.Name)
-                    ?.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
+                MethodInfo method = typeof(EqualityExtensions).GetMethods()
+                        ?.SingleOrDefault(m =>
+                            m.Name == "IsEqual" &&
+                            m.GetParameters().Length == 2 &&
+                            m.GetParameters()[0].ParameterType.Name == extendedType.Name);
+                if (method == null)
+                    return null;
+
+                if (method.IsGenericMethodDefinition)
+                    return method.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
             }
-            else
-            {
-                return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
-            }
+
+            return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
         }
 
         public static string GetTestDataFilePath()
