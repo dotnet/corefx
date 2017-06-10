@@ -227,53 +227,53 @@ namespace System.Drawing
                 case Status.Ok:
                     return;
                 case Status.GenericError:
-                    msg = Locale.GetText("Generic Error [GDI+ status: {0}]", status);
+                    msg = string.Format("Generic Error [GDI+ status: {0}]", status);
                     throw new Exception(msg);
                 case Status.InvalidParameter:
-                    msg = Locale.GetText("A null reference or invalid value was found [GDI+ status: {0}]", status);
+                    msg = string.Format("A null reference or invalid value was found [GDI+ status: {0}]", status);
                     throw new ArgumentException(msg);
                 case Status.OutOfMemory:
-                    msg = Locale.GetText("Not enough memory to complete operation [GDI+ status: {0}]", status);
+                    msg = string.Format("Not enough memory to complete operation [GDI+ status: {0}]", status);
                     throw new OutOfMemoryException(msg);
                 case Status.ObjectBusy:
-                    msg = Locale.GetText("Object is busy and cannot state allow this operation [GDI+ status: {0}]", status);
+                    msg = string.Format("Object is busy and cannot state allow this operation [GDI+ status: {0}]", status);
                     throw new MemberAccessException(msg);
                 case Status.InsufficientBuffer:
-                    msg = Locale.GetText("Insufficient buffer provided to complete operation [GDI+ status: {0}]", status);
+                    msg = string.Format("Insufficient buffer provided to complete operation [GDI+ status: {0}]", status);
 #if NETCORE
                     throw new Exception(msg);
 #else
 				throw new InternalBufferOverflowException (msg);
 #endif
                 case Status.PropertyNotSupported:
-                    msg = Locale.GetText("Property not supported [GDI+ status: {0}]", status);
+                    msg = string.Format("Property not supported [GDI+ status: {0}]", status);
                     throw new NotSupportedException(msg);
                 case Status.FileNotFound:
-                    msg = Locale.GetText("Requested file was not found [GDI+ status: {0}]", status);
+                    msg = string.Format("Requested file was not found [GDI+ status: {0}]", status);
                     throw new FileNotFoundException(msg);
                 case Status.AccessDenied:
-                    msg = Locale.GetText("Access to resource was denied [GDI+ status: {0}]", status);
+                    msg = string.Format("Access to resource was denied [GDI+ status: {0}]", status);
                     throw new UnauthorizedAccessException(msg);
                 case Status.UnknownImageFormat:
-                    msg = Locale.GetText("Either the image format is unknown or you don't have the required libraries to decode this format [GDI+ status: {0}]", status);
+                    msg = string.Format("Either the image format is unknown or you don't have the required libraries to decode this format [GDI+ status: {0}]", status);
                     throw new NotSupportedException(msg);
                 case Status.NotImplemented:
-                    msg = Locale.GetText("The requested feature is not implemented [GDI+ status: {0}]", status);
+                    msg = string.Format("The requested feature is not implemented [GDI+ status: {0}]", status);
                     throw new NotImplementedException(msg);
                 case Status.WrongState:
-                    msg = Locale.GetText("Object is not in a state that can allow this operation [GDI+ status: {0}]", status);
+                    msg = string.Format("Object is not in a state that can allow this operation [GDI+ status: {0}]", status);
                     throw new ArgumentException(msg);
                 case Status.FontFamilyNotFound:
-                    msg = Locale.GetText("The requested FontFamily could not be found [GDI+ status: {0}]", status);
+                    msg = string.Format("The requested FontFamily could not be found [GDI+ status: {0}]", status);
                     throw new ArgumentException(msg);
                 case Status.ValueOverflow:
-                    msg = Locale.GetText("Argument is out of range [GDI+ status: {0}]", status);
+                    msg = string.Format("Argument is out of range [GDI+ status: {0}]", status);
                     throw new OverflowException(msg);
                 case Status.Win32Error:
-                    msg = Locale.GetText("The operation is invalid [GDI+ status: {0}]", status);
+                    msg = string.Format("The operation is invalid [GDI+ status: {0}]", status);
                     throw new InvalidOperationException(msg);
                 default:
-                    msg = Locale.GetText("Unknown Error [GDI+ status: {0}]", status);
+                    msg = string.Format("Unknown Error [GDI+ status: {0}]", status);
                     throw new Exception(msg);
             }
         }

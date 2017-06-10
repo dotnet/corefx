@@ -73,7 +73,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This SolidBrush object can't be modified."));
+                    throw new ArgumentException("This SolidBrush object can't be modified.");
             }
         }
 
@@ -89,7 +89,7 @@ namespace System.Drawing
         protected override void Dispose(bool disposing)
         {
             if (disposing && !isModifiable)
-                throw new ArgumentException(Locale.GetText("This SolidBrush object can't be modified."));
+                throw new ArgumentException("This SolidBrush object can't be modified.");
 
             base.Dispose(disposing);
         }

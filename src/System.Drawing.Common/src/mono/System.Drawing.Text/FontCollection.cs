@@ -70,7 +70,7 @@ namespace System.Drawing.Text
 
                 // MS doesn't throw ObjectDisposedException in this case
                 if (nativeFontCollection == IntPtr.Zero)
-                    throw new ArgumentException(Locale.GetText("Collection was disposed."));
+                    throw new ArgumentException("Collection was disposed.");
 
                 status = GDIPlus.GdipGetFontCollectionFamilyCount(nativeFontCollection, out found);
                 GDIPlus.CheckStatus(status);

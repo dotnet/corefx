@@ -397,7 +397,6 @@
     <Compile Include="mono\System.Drawing.Text\HotkeyPrefix.cs" />
     <Compile Include="mono\System.Drawing.Text\InstalledFontCollection.cs" />
     <Compile Include="mono\System.Drawing.Text\TextRenderingHint.cs" />
-    <Compile Include="mono\Locale.cs" />
     <Compile Include="mono\MonoTODOAttribute.cs" />
     <!-- Shared with Windows -->
     <Compile Include="System/Drawing/BitmapSuffixInSameAssemblyAttribute.cs" />

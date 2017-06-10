@@ -144,7 +144,7 @@ namespace System.Drawing
             Stream s = type.GetTypeInfo().Assembly.GetManifestResourceStream(type, resource);
             if (s == null)
             {
-                string msg = Locale.GetText("Resource '{0}' was not found.", resource);
+                string msg = string.Format("Resource '{0}' was not found.", resource);
                 throw new FileNotFoundException(msg);
             }
 
@@ -197,7 +197,7 @@ namespace System.Drawing
                 // unmanaged call for normal (successful) calls
                 if ((this.PixelFormat & PixelFormat.Indexed) != 0)
                 {
-                    string msg = Locale.GetText("SetPixel cannot be called on indexed bitmaps.");
+                    string msg = "SetPixel cannot be called on indexed bitmaps.";
                     throw new InvalidOperationException(msg);
                 }
             }

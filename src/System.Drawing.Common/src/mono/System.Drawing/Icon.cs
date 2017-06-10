@@ -142,7 +142,7 @@ namespace System.Drawing
                 IconInfo ii;
                 GDIPlus.GetIconInfo(handle, out ii);
                 if (!ii.IsIcon)
-                    throw new NotImplementedException(Locale.GetText("Handle doesn't represent an ICON."));
+                    throw new NotImplementedException("Handle doesn't represent an ICON.");
 
                 // If this structure defines an icon, the hot spot is always in the center of the icon
                 iconSize = new Size(ii.xHotspot * 2, ii.yHotspot * 2);
@@ -264,7 +264,7 @@ namespace System.Drawing
             {
                 if (s == null)
                 {
-                    string msg = Locale.GetText("Resource '{0}' was not found.", resource);
+                    string msg = string.Format("Resource '{0}' was not found.", resource);
                     throw new FileNotFoundException(msg);
                 }
                 InitFromStreamWithSize(s, 32, 32);      // 32x32 is default
@@ -302,7 +302,7 @@ namespace System.Drawing
             {
                 if (s == null)
                 {
-                    string msg = Locale.GetText("Resource '{0}' was not found.", resourceName);
+                    string msg = string.Format("Resource '{0}' was not found.", resourceName);
                     throw new FileNotFoundException(msg);
                 }
                 InitFromStreamWithSize(s, 32, 32);      // 32x32 is default
@@ -343,9 +343,9 @@ namespace System.Drawing
         public static Icon ExtractAssociatedIcon(string filePath)
         {
             if (String.IsNullOrEmpty(filePath))
-                throw new ArgumentException(Locale.GetText("Null or empty path."), "filePath");
+                throw new ArgumentException("Null or empty path.", "filePath");
             if (!File.Exists(filePath))
-                throw new FileNotFoundException(Locale.GetText("Couldn't find specified file."), filePath);
+                throw new FileNotFoundException("Couldn't find specified file.", filePath);
 
             return SystemIcons.WinLogo;
         }
@@ -604,7 +604,7 @@ namespace System.Drawing
                     bmp = new Bitmap(bih.biWidth, biHeight, PixelFormat.Format32bppArgb);
                     break;
                 default:
-                    string msg = Locale.GetText("Unexpected number of bits: {0}", bih.biBitCount);
+                    string msg = string.Format("Unexpected number of bits: {0}", bih.biBitCount);
                     throw new Exception(msg);
             }
 
@@ -682,7 +682,7 @@ namespace System.Drawing
         public Bitmap ToBitmap()
         {
             if (disposed)
-                throw new ObjectDisposedException(Locale.GetText("Icon instance was disposed."));
+                throw new ObjectDisposedException("Icon instance was disposed.");
 
             // note: we can't return the original image because
             // (a) we have no control over the bitmap instance we return (i.e. it could be disposed)
@@ -937,7 +937,7 @@ Console.WriteLine ("\tbih.biClrImportant: {0}", bih.biClrImportant);
                 int nread = bihReader.Read(iidata.iconXOR, 0, xorSize);
                 if (nread != xorSize)
                 {
-                    string msg = Locale.GetText("{0} data length expected {1}, read {2}", "XOR", xorSize, nread);
+                    string msg = string.Format("{0} data length expected {1}, read {2}", "XOR", xorSize, nread);
                     throw new ArgumentException(msg, "stream");
                 }
 
@@ -948,7 +948,7 @@ Console.WriteLine ("\tbih.biClrImportant: {0}", bih.biClrImportant);
                 nread = bihReader.Read(iidata.iconAND, 0, andSize);
                 if (nread != andSize)
                 {
-                    string msg = Locale.GetText("{0} data length expected {1}, read {2}", "AND", andSize, nread);
+                    string msg = string.Format("{0} data length expected {1}, read {2}", "AND", andSize, nread);
                     throw new ArgumentException(msg, "stream");
                 }
 

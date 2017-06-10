@@ -40,9 +40,6 @@ namespace System.Drawing
     [AttributeUsage(AttributeTargets.All)]
     internal sealed class SRDescriptionAttribute : DescriptionAttribute
     {
-
-        private bool isReplaced = false;
-
         public SRDescriptionAttribute(string description)
             : base(description)
         {
@@ -52,11 +49,6 @@ namespace System.Drawing
         {
             get
             {
-                if (!isReplaced)
-                {
-                    isReplaced = true;
-                    DescriptionValue = Locale.GetText(DescriptionValue);
-                }
                 return DescriptionValue;
             }
         }

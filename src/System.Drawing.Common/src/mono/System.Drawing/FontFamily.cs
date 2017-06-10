@@ -113,7 +113,7 @@ namespace System.Drawing
             get
             {
                 if (nativeFontFamily == IntPtr.Zero)
-                    throw new ArgumentException("Name", Locale.GetText("Object was disposed."));
+                    throw new ArgumentException("Name", "Object was disposed.");
                 if (name == null)
                     refreshName();
                 return name;

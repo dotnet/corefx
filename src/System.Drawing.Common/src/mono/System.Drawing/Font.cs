@@ -76,7 +76,7 @@ namespace System.Drawing
             Status status = GDIPlus.GdipCreateFont(family.NativeObject, emSize, style, unit, out fontObject);
 
             if (status == Status.FontStyleNotFound)
-                throw new ArgumentException(Locale.GetText("Style {0} isn't supported by font {1}.", style.ToString(), familyName));
+                throw new ArgumentException(string.Format("Style {0} isn't supported by font {1}.", style.ToString(), familyName));
 
             GDIPlus.CheckStatus(status);
         }
@@ -283,7 +283,7 @@ namespace System.Drawing
         public IntPtr ToHfont()
         {
             if (fontObject == IntPtr.Zero)
-                throw new ArgumentException(Locale.GetText("Object has been disposed."));
+                throw new ArgumentException("Object has been disposed.");
 
             if (GDIPlus.RunningOnUnix())
                 return fontObject;
@@ -699,7 +699,7 @@ namespace System.Drawing
 
             Type st = logFont.GetType();
             if (!st.GetTypeInfo().IsLayoutSequential)
-                throw new ArgumentException("logFont", Locale.GetText("Layout must be sequential."));
+                throw new ArgumentException("logFont", "Layout must be sequential.");
 
             // note: there is no exception if 'logFont' isn't big enough
             Type lf = typeof(LOGFONT);

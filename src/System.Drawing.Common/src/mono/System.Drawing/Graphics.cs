@@ -182,7 +182,7 @@ namespace System.Drawing
         public void CopyFromScreen(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
         {
             if (!Enum.IsDefined(typeof(CopyPixelOperation), copyPixelOperation))
-                throw new InvalidEnumArgumentException(Locale.GetText("Enum argument value '{0}' is not valid for CopyPixelOperation", copyPixelOperation));
+                throw new InvalidEnumArgumentException(string.Format("Enum argument value '{0}' is not valid for CopyPixelOperation", copyPixelOperation));
 
             if (GDIPlus.UseX11Drawable)
             {
@@ -286,7 +286,7 @@ namespace System.Drawing
                             blue = (int)((pixel & blue_mask)) & 0xff;
                             break;
                         default:
-                            string text = Locale.GetText("{0}bbp depth not supported.", visual.depth);
+                            string text = string.Format("{0}bbp depth not supported.", visual.depth);
                             throw new NotImplementedException(text);
                     }
 
@@ -1791,7 +1791,7 @@ namespace System.Drawing
                 throw new ArgumentNullException("image");
 
             if ((image.PixelFormat & PixelFormat.Indexed) != 0)
-                throw new Exception(Locale.GetText("Cannot create Graphics from an indexed bitmap."));
+                throw new Exception("Cannot create Graphics from an indexed bitmap.");
 
             Status status = GDIPlus.GdipGetImageGraphicsContext(image.nativeObject, out graphics);
             GDIPlus.CheckStatus(status);

@@ -101,7 +101,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -120,7 +120,7 @@ namespace System.Drawing
                 if (value == null)
                     throw new ArgumentNullException("Brush");
                 if (!isModifiable)
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
 
                 Status status = GDIPlus.GdipSetPenBrushFill(nativeObject, value.nativeObject);
                 GDIPlus.CheckStatus(status);
@@ -145,7 +145,7 @@ namespace System.Drawing
             set
             {
                 if (!isModifiable)
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
 
                 Status status = GDIPlus.GdipSetPenColor(nativeObject, value.ToArgb());
                 GDIPlus.CheckStatus(status);
@@ -183,7 +183,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -203,7 +203,7 @@ namespace System.Drawing
                     endCap = value;
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -223,7 +223,7 @@ namespace System.Drawing
                     startCap = value;
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -249,7 +249,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -272,7 +272,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -319,7 +319,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -344,7 +344,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -370,7 +370,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -396,7 +396,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -422,7 +422,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
 
         }
@@ -446,7 +446,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
 
         }
@@ -486,7 +486,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -507,7 +507,7 @@ namespace System.Drawing
                     GDIPlus.CheckStatus(status);
                 }
                 else
-                    throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                    throw new ArgumentException("This Pen object can't be modified.");
             }
         }
 
@@ -532,7 +532,7 @@ namespace System.Drawing
         private void Dispose(bool disposing)
         {
             if (disposing && !isModifiable)
-                throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                throw new ArgumentException("This Pen object can't be modified.");
 
             if (nativeObject != IntPtr.Zero)
             {
@@ -594,7 +594,7 @@ namespace System.Drawing
                 GDIPlus.CheckStatus(status);
             }
             else
-                throw new ArgumentException(Locale.GetText("This Pen object can't be modified."));
+                throw new ArgumentException("This Pen object can't be modified.");
         }
 
         public void TranslateTransform(float dx, float dy)

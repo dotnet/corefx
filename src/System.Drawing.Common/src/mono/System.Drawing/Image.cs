@@ -195,7 +195,7 @@ namespace System.Drawing
                 case ImageType.Metafile:
                     return new Metafile(handle);
                 default:
-                    throw new NotSupportedException(Locale.GetText("Unknown image type."));
+                    throw new NotSupportedException("Unknown image type.");
             }
         }
 
@@ -469,7 +469,7 @@ namespace System.Drawing
                 encoder = findEncoderForFormat(RawFormat);
                 if (encoder == null)
                 {
-                    string msg = Locale.GetText("No codec available for saving format '{0}'.", format.Guid);
+                    string msg = string.Format("No codec available for saving format '{0}'.", format.Guid);
                     throw new ArgumentException(msg, "format");
                 }
             }
