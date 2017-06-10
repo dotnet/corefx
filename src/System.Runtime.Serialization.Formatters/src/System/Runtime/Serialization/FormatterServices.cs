@@ -43,6 +43,11 @@ namespace System.Runtime.Serialization
             return results.ToArray();
         }
 
+        public static string GetFullMemberInfoName(MemberInfo info, Type objectType)
+        {
+            return info.DeclaringType == objectType ? info.Name : info.DeclaringType.Name + "+" + info.Name;
+        }
+
         public static MemberInfo[] GetSerializableMembers(Type type)
         {
             return GetSerializableMembers(type, new StreamingContext(StreamingContextStates.All));
