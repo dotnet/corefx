@@ -20,7 +20,7 @@ namespace System.Security.AccessControl
         [Fact]
         public void ObjectInitialization_CommonSecurityDescriptor_Success()
         {
-            CommonSecurityDescriptor descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
+            var descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
             Assert.False(customObjectSecurity.IsDS);
             Assert.False(customObjectSecurity.IsContainer);
