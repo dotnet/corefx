@@ -618,8 +618,9 @@ namespace System.Runtime.Serialization.Formatters.Binary
             bool isFound = false;
             for (int i = 0; i < _cache._memberInfos.Length; i++)
             {
+                string fullMemberInfoName = FormatterServices.GetFullMemberInfoName(_cache._memberInfos[i], objectType);
                 if (!memberMissing && 
-                    inMemberNames[i].Equals(FormatterServices.GetFullMemberInfoName(_cache._memberInfos[i], objectType)))
+                    inMemberNames[i].Equals(fullMemberInfoName))
                 {
                     outMemberTypes[i] = _cache._memberTypes[i];
                 }
@@ -629,7 +630,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                     isFound = false;
                     for (int j = 0; j < inMemberNames.Length; j++)
                     {
-                        if (_cache._memberInfos[i].Name.Equals(inMemberNames[j]))
+                        if (fullMemberInfoName.Equals(inMemberNames[j]))
                         {
                             outMemberTypes[i] = _cache._memberTypes[i];
                             isFound = true;
