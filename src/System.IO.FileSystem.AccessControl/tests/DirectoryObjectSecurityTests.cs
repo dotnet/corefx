@@ -12,23 +12,24 @@ namespace System.Security.AccessControl
         [Fact]
         public void ObjectInitialization_DefaultConstructor_Success()
         {
-            var activeDirectorySecurity = new ActiveDirectorySecurity();
-            Assert.NotNull(activeDirectorySecurity);
+            var customObjectSecurity = new CustomDirectoryObjectSecurity();
+            Assert.True(customObjectSecurity.IsDS);
+            Assert.True(customObjectSecurity.IsContainer);
         }
 
         [Fact]
         public void ObjectInitialization_CommonSecurityDescriptor_Success()
         {
-            
             CommonSecurityDescriptor descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
-            Assert.NotNull(customObjectSecurity);
+            Assert.False(customObjectSecurity.IsDS);
+            Assert.False(customObjectSecurity.IsContainer);
         }
 
         [Fact]
-        public void ObjectInitialization_InvalidArgument()
+        public void ObjectInitialization_InvalidSecurityDescriptor()
         {
-            Assert.Throws<ArgumentNullException>(() => new CustomDirectoryObjectSecurity(null));
+            Assert.Throws<ArgumentNullException>("securityDescriptor",() => new CustomDirectoryObjectSecurity(null));
         }
 
         [Fact]
@@ -39,11 +40,11 @@ namespace System.Security.AccessControl
                activeDirectorySecurity
                .GetAccessRules(false, false, typeof(System.Security.Principal.GenericPrincipal)));
         }
-
+        
         [Fact]
         public void GetAccessRules_TargetType_SecurityIdentifier_ReturnsValidObject()
         {
-            CommonSecurityDescriptor descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
+            var descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             AuthorizationRuleCollection ruleCollection =
@@ -51,12 +52,13 @@ namespace System.Security.AccessControl
                .GetAccessRules(false, false, typeof(System.Security.Principal.SecurityIdentifier));
 
             Assert.NotNull(ruleCollection);
-        }
+            Assert.Empty(ruleCollection);
+        } 
 
         [Fact]
-        public void GetAccessRules_TargetType_NTAccount_ReturnsValidObject()
+         public void GetAccessRules_TargetType_NTAccount_ReturnsValidObject()
         {
-            CommonSecurityDescriptor descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
+            var descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             AuthorizationRuleCollection ruleCollection =
@@ -64,12 +66,13 @@ namespace System.Security.AccessControl
                .GetAccessRules(false, false, typeof(System.Security.Principal.NTAccount));
 
             Assert.NotNull(ruleCollection);
+            Assert.Empty(ruleCollection);
         }
-
+        
         [Fact]
         public void GetAuditRules_ReturnsValidObject()
         {
-            CommonSecurityDescriptor descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
+            var descriptor = new CommonSecurityDescriptor(false, false, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             AuthorizationRuleCollection ruleCollection =
@@ -78,81 +81,82 @@ namespace System.Security.AccessControl
 
             Assert.NotNull(ruleCollection);
         }
+        
 
         [Fact]
-        public void RemoveAuditRuleAll_InvalidArguments()
+        public void RemoveAuditRuleAll_InvalidObjectAuditRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAuditRuleAll(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAuditRuleAll(null));
         }
 
         [Fact]
-        public void RemoveAuditRuleSpecific_InvalidArguments()
+        public void RemoveAuditRuleSpecific_InvalidObjectAuditRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAuditRuleSpecific(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAuditRuleSpecific(null));
         }
 
         [Fact]
-        public void RemoveAuditRule_InvalidArguments()
+        public void RemoveAuditRule_InvalidObjectAuditRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAuditRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAuditRule(null));
         }
 
         [Fact]
-        public void SetAuditRule_InvalidArguments()
+        public void SetAuditRule_InvalidObjectAuditRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.SetAuditRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.SetAuditRule(null));
         }
         [Fact]
-        public void AdduditRule_InvalidArguments()
+        public void AddAuditRule_InvalidObjectAuditRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.AddAuditRule(null));
-        }
-
-        [Fact]
-        public void RemoveAccessRuleSpecific_InvalidArguments()
-        {
-            var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAccessRuleSpecific(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.AddAuditRule(null));
         }
 
         [Fact]
-        public void RemoveAccessRuleAll_InvalidArguments()
+        public void RemoveAccessRuleSpecific_InvalidObjectAccessRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAccessRuleAll(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAccessRuleSpecific(null));
         }
 
         [Fact]
-        public void RemoveAccessRule_InvalidArguments()
+        public void RemoveAccessRuleAll_InvalidObjectAccessRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.RemoveAccessRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAccessRuleAll(null));
         }
 
         [Fact]
-        public void ResetAccessRule_InvalidArguments()
+        public void RemoveAccessRule_InvalidObjectAccessRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.ResetAccessRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.RemoveAccessRule(null));
         }
 
         [Fact]
-        public void SetAccessRule_InvalidArguments()
+        public void ResetAccessRule_InvalidObjectAccessRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.SetAccessRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.ResetAccessRule(null));
         }
 
         [Fact]
-        public void AddAccessRule_InvalidArguments()
+        public void SetAccessRule_InvalidObjectAccessRule()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
-            Assert.Throws<ArgumentNullException>(() => customObjectSecurity.AddAccessRule(null));
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.SetAccessRule(null));
+        }
+
+        [Fact]
+        public void AddAccessRule_InvalidObjectAccessRule()
+        {
+            var customObjectSecurity = new CustomDirectoryObjectSecurity();
+            Assert.Throws<ArgumentNullException>("rule",() => customObjectSecurity.AddAccessRule(null));
         }
 
         class CustomDirectoryObjectSecurity : DirectoryObjectSecurity
@@ -176,7 +180,6 @@ namespace System.Security.AccessControl
             {
                 throw new NotImplementedException();
             }
-
             public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
             {
                 throw new NotImplementedException();
@@ -189,19 +192,19 @@ namespace System.Security.AccessControl
             {
                 base.RemoveAuditRuleSpecific(rule);
             }
-            public new  bool RemoveAuditRule(ObjectAuditRule rule)
+            public new bool RemoveAuditRule(ObjectAuditRule rule)
             {
                 return base.RemoveAuditRule(rule);
             }
             public new void SetAuditRule(ObjectAuditRule rule)
             {
-                 base.SetAuditRule(rule);
+                base.SetAuditRule(rule);
             }
             public new void AddAuditRule(ObjectAuditRule rule)
             {
                 base.AddAuditRule(rule);
             }
-            public new  void RemoveAccessRuleSpecific(ObjectAccessRule rule)
+            public new void RemoveAccessRuleSpecific(ObjectAccessRule rule)
             {
                 base.RemoveAccessRuleSpecific(rule);
             }
@@ -209,7 +212,7 @@ namespace System.Security.AccessControl
             {
                 base.RemoveAccessRuleAll(rule);
             }
-            public new  bool RemoveAccessRule(ObjectAccessRule rule)
+            public new bool RemoveAccessRule(ObjectAccessRule rule)
             {
                 return base.RemoveAccessRule(rule);
             }
@@ -221,9 +224,23 @@ namespace System.Security.AccessControl
             {
                 base.SetAccessRule(rule);
             }
-            public new  void AddAccessRule(ObjectAccessRule rule)
+            public new void AddAccessRule(ObjectAccessRule rule)
             {
                 base.AddAccessRule(rule);
+            }
+            public new bool IsDS
+            {
+                get
+                {
+                    return base.IsDS;
+                }
+            }
+            public new bool IsContainer
+            {
+                get
+                {
+                    return base.IsContainer;
+                }
             }
         }
 

@@ -104,13 +104,11 @@ namespace System.IO
         {
             using (var directory = new TempDirectory())
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
+            using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
             {
-                using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
-                {
-                    FileSecurity fileSecurity= FileSystemAclExtensions.GetAccessControl(fileStream);
-                    Assert.NotNull(fileSecurity);
-                    Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
-                }
+                FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileStream);
+                Assert.NotNull(fileSecurity);
+                Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
             }
         }
 
@@ -170,16 +168,12 @@ namespace System.IO
         [Fact]
         public void SetAccessControl_FileStream_FileSecurity_InvalidFileSecurityObject()
         {
-
             using (var directory = new TempDirectory())
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
+            using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
             {
-                using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
-                {
-                    Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.SetAccessControl(fileStream, (FileSecurity)null));
-                }
+                Assert.Throws<ArgumentNullException>("fileSecurity",() => FileSystemAclExtensions.SetAccessControl(fileStream, (FileSecurity)null));
             }
-            
         }
 
         [Fact]
@@ -187,12 +181,10 @@ namespace System.IO
         {
             using (var directory = new TempDirectory())
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
+            using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
             {
-                using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
-                {
-                    FileSecurity fileSecurity = new FileSecurity();
-                    FileSystemAclExtensions.SetAccessControl(fileStream, fileSecurity);
-                }
+                FileSecurity fileSecurity = new FileSecurity();
+                FileSystemAclExtensions.SetAccessControl(fileStream, fileSecurity);
             }
         }
     }
