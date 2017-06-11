@@ -196,7 +196,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909", TargetFrameworkMonikers.UapAot)]
         public void TestEnvironmentOfChildProcess()
         {
             const string ItemSeparator = "CAFF9451396B4EEF8A5155A15BDC2080"; // random string that shouldn't be in any env vars; used instead of newline to separate env var strings
@@ -323,7 +322,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory, InlineData(true), InlineData(false)]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909", TargetFrameworkMonikers.UapAot)]
         public void TestCreateNoWindowProperty(bool value)
         {
             Process testProcess = CreateProcessLong();
@@ -344,7 +342,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909", TargetFrameworkMonikers.UapAot)]
         public void TestWorkingDirectoryProperty()
         {
             CreateDefaultProcess();
@@ -961,7 +958,7 @@ namespace System.Diagnostics.Tests
         [MemberData(nameof(UseShellExecute))]
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void StartInfo_NotepadWithContent(bool useShellExecute)
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -998,7 +995,7 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Does not support UseShellExecute
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
         public void StartInfo_TextFile_ShellExecute()
         {

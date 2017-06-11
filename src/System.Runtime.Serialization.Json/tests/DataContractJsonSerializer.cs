@@ -2702,11 +2702,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(4, actual2["a4"]);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(18373)]
-#else
     [ActiveIssue("dotnet/corefx #20481", TargetFrameworkMonikers.UapAot)]
-#endif
     [Fact]
     public static void DCJS_VerifyDictionaryFormat()
     {
@@ -2764,7 +2760,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20483", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_VerifyIndentation()
     {
         var testClass = new TestClass()
