@@ -239,8 +239,6 @@ namespace System.Drawing
                     throw new FileNotFoundException(filePath);
                 }
 
-                Icon icon = new Icon();
-
                 StringBuilder sb = new StringBuilder(NativeMethods.MAX_PATH);
                 sb.Append(filePath);
 
@@ -248,8 +246,7 @@ namespace System.Drawing
 
                 if (hIcon != IntPtr.Zero)
                 {
-                    icon = new Icon(hIcon, true);
-                    return icon;
+                    return new Icon(hIcon, true);
                 }
             }
             return null;
@@ -1029,10 +1026,7 @@ namespace System.Drawing
                 }
                 finally
                 {
-                    if (graphics != null)
-                    {
-                        graphics.Dispose();
-                    }
+                    graphics?.Dispose();
                 }
 
 
