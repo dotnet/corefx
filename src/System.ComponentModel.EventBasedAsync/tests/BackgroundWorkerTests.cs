@@ -70,6 +70,18 @@ namespace System.ComponentModel.EventBasedAsync.Tests
             }
         }
 
+        [Fact]
+        public void RunWorkerAsync_NoOnWorkHandler_SetsResultToNull()
+        {
+            var backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            backgroundWorker.RunWorkerCompleted += (sender, e) =>
+            {
+                Assert.Null(e.Result);
+                Assert.False(backgroundWorker.IsBusy);
+            };
+            backgroundWorker.RunWorkerAsync();
+        }
+
         #region TestCancelAsync
 
         private ManualResetEventSlim manualResetEvent3;
@@ -281,6 +293,16 @@ namespace System.ComponentModel.EventBasedAsync.Tests
             }
 
             Assert.Equal(expectedProgress, actualProgress);
+        }
+
+        [Fact]
+        public void ReportProgress_NoProgressHandle_Nop()
+        {
+            var backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            foreach (int i in new int[] { 1, 2, 3, 4, 5 })
+            {
+                backgroundWorker.ReportProgress(i);
+            }
         }
 
         [Fact]
