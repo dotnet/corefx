@@ -156,25 +156,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return true;
         }
 
-        //public static bool IsEqual(this BitArray @this, BitArray other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Length == other.Length &&
-        //        @this.Count == other.Count &&
-        //        @this.SyncRoot == other.SyncRoot &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsSynchronized == other.IsSynchronized))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+        public static bool IsEqual(this BitArray @this, BitArray other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Length == other.Length &&
+                @this.Count == other.Count &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsSynchronized == other.IsSynchronized))
+                return false;
 
-        //    return true;
-        //}
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this Dictionary<int, string> @this, Dictionary<int, string> other)
         {
@@ -195,26 +188,36 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return true;
         }
 
+        // fix comparers
         //public static bool IsEqual(this HashSet<Point> @this, HashSet<Point> other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.Comparer == other.Comparer;
-        //    throw new NotImplementedException("finish me");
-        //}
-
-        //public static bool IsEqual(this LinkedList<Point> @this, LinkedList<Point> other)
         //{
         //    if (!(@this != null &&
         //        other != null &&
         //        @this.Count == other.Count &&
-        //        @this.First.Equals(other.First) &&
-        //        (@this.Last.Equals(other.Last))))
+        //        BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer)))
         //        return false;
 
         //    return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         //}
+
+        public static bool IsEqual(this LinkedListNode<Point> @this, LinkedListNode<Point> other)
+        {
+            return @this != null
+                && other != null &&
+                BinaryFormatterTests.CheckEquals(@this.Value, other.Value);
+        }
+
+        public static bool IsEqual(this LinkedList<Point> @this, LinkedList<Point> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                IsEqual(@this.First, other.First) &&
+                IsEqual(@this.Last, other.Last)))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this List<int> @this, List<int> other)
         {
@@ -237,36 +240,32 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        //public static bool IsEqual(this SortedList<int, Point> @this, SortedList<int, Point> other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Capacity == other.Capacity &&
-        //        @this.Comparer == other.Comparer &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values))
-        //        return false;
+        public static bool IsEqual(this SortedList<int, Point> @this, SortedList<int, Point> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Capacity == other.Capacity &&
+                BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer) &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values)))
+                return false;
 
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
-        //    throw new NotImplementedException("finish me");
-        //    return true;
-        //}
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
-        //public static bool IsEqual(this SortedSet<Point> @this, SortedSet<Point> other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.Comparer == other.Comparer &&
-        //        @this.Min == other.Min &&
-        //        @this.Max == other.Max;
-        //    throw new NotImplementedException("finish me");
-        //}
+        public static bool IsEqual(this SortedSet<Point> @this, SortedSet<Point> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer) &&
+                BinaryFormatterTests.CheckEquals(@this.Min, other.Min) &&
+                BinaryFormatterTests.CheckEquals(@this.Max, other.Max)))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         //public static bool IsEqual(this Stack<Point> @this, Stack<Point> other)
         //{
@@ -305,13 +304,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
-            {
-                if (@this[i] != other[i])
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
         public static bool IsEqual(this ObservableCollection<int> @this, ObservableCollection<int> other)
@@ -321,13 +314,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
-            {
-                if (@this[i] != other[i])
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
         public static bool IsEqual(this ReadOnlyCollection<int> @this, ReadOnlyCollection<int> other)
@@ -337,32 +324,26 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
+
+        public static bool IsEqual(this ReadOnlyDictionary<int, string> @this, ReadOnlyDictionary<int, string> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values) &&
+                @this.Count == other.Count))
+                return false;
+
+            foreach (var kv in @this)
             {
-                if (@this[i] != other[i])
+                if (kv.Value != other[kv.Key])
                     return false;
             }
 
             return true;
         }
-
-        //public static bool IsEqual(this ReadOnlyDictionary<int, string> @this, ReadOnlyDictionary<int, string> other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values &&
-        //        @this.Count == other.Count))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
-
-        //    return true;
-        //}
 
         public static bool IsEqual(this ReadOnlyObservableCollection<int> @this, ReadOnlyObservableCollection<int> other)
         {
@@ -371,127 +352,114 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
+
+        public static bool IsEqual(this Queue @this, Queue other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                @this.IsSynchronized == other.IsSynchronized))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
+
+        public static bool IsEqual(this SortedList @this, SortedList other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Capacity == other.Capacity &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values) &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsFixedSize == other.IsFixedSize &&
+                @this.IsSynchronized == other.IsSynchronized))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
+
+        public static bool IsEqual(this HybridDictionary @this, HybridDictionary other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsFixedSize == other.IsFixedSize &&
+                @this.IsSynchronized == other.IsSynchronized &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values)))
+                return false;
+
+            foreach (var key in @this.Keys)
             {
-                if (@this[i] != other[i])
+                if (!BinaryFormatterTests.CheckEquals(@this[key], other[key]))
                     return false;
             }
 
             return true;
         }
 
-        //public static bool IsEqual(this Queue @this, Queue other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot;
-        //}
+        public static bool IsEqual(this ListDictionary @this, ListDictionary other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsFixedSize == other.IsFixedSize &&
+                @this.IsSynchronized == other.IsSynchronized &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values)))
+                return false;
 
-        //public static bool IsEqual(this SortedList @this, SortedList other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Capacity == other.Capacity &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsFixedSize == other.IsFixedSize &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+            foreach (var key in @this.Keys)
+            {
+                if (!BinaryFormatterTests.CheckEquals(@this[key], other[key]))
+                    return false;
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
-        //public static bool IsEqual(this HybridDictionary @this, HybridDictionary other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsFixedSize == other.IsFixedSize &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot &&
-        //        @this.Values == other.Values))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+        public static bool IsEqual(this NameValueCollection @this, NameValueCollection other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.AllKeys, other.AllKeys) &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys)))
+                return false;
 
-        //    return true;
-        //}
+            foreach (var key in @this.AllKeys)
+            {
+                if (!BinaryFormatterTests.CheckEquals(@this[key], other[key]))
+                    return false;
+            }
 
-        //public static bool IsEqual(this ListDictionary @this, ListDictionary other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsFixedSize == other.IsFixedSize &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot &&
-        //        @this.Values == other.Values))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+            return true;
+        }
 
-        //    return true;
-        //}
+        public static bool IsEqual(this OrderedDictionary @this, OrderedDictionary other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                BinaryFormatterTests.CheckEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckEquals(@this.Values, other.Values)))
+                return false;
 
-        //public static bool IsEqual(this NameValueCollection @this, NameValueCollection other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.AllKeys == other.AllKeys &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+            foreach (var key in @this.Keys)
+            {
+                if (!BinaryFormatterTests.CheckEquals(@this[key], other[key]))
+                    return false;
+            }
 
-        //    return true;
-        //}
-
-        //public static bool IsEqual(this OrderedDictionary @this, OrderedDictionary other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
-
-        //    return true;
-        //}
+            return true;
+        }
 
         public static bool IsEqual(this StringCollection @this, StringCollection other)
         {
@@ -502,25 +470,21 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.IsSynchronized == other.IsSynchronized))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
-            {
-                if (!@this[i].Equals(other[i]))
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        //public static bool IsEqual(this Stack @this, Stack other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot;
-        //    throw new NotImplementedException("finish me");
-        //}
+        public static bool IsEqual(this Stack @this, Stack other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                @this.IsSynchronized == other.IsSynchronized))
+                return false;
 
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
+
+        // fix binary helpers
         //public static bool IsEqual(this BindingList<int> @this, BindingList<int> other)
         //{
         //    if (!(@this != null &&
@@ -532,13 +496,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         //        @this.Count == other.Count))
         //        return false;
 
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
-
-        //    return true;
+        //    return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         //}
 
         public static bool IsEqual(this BindingList<Point> @this, BindingList<Point> other)
@@ -552,36 +510,23 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
-            {
-                if (!IsEqual(@this[i], other[i]))
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        //public static bool IsEqual(this PropertyCollection @this, PropertyCollection other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsFixedSize == other.IsFixedSize &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values &&
-        //        @this.SyncRoot == other.SyncRoot &&
-        //        @this.Count == other.Count))
-        //        return false;
+        public static bool IsEqual(this PropertyCollection @this, PropertyCollection other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsFixedSize == other.IsFixedSize &&
+                @this.IsSynchronized == other.IsSynchronized &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values) &&
+                @this.Count == other.Count))
+                return false;
 
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
-
-        //    return true;
-        //}
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this CompareInfo @this, CompareInfo other)
         {
@@ -775,19 +720,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (!(@this != null &&
                 other != null &&
-                //@this.Comparer.Equals(other.Comparer) &&
+                @this.Comparer.Equals(other.Comparer) &&
                 @this.Count == other.Count))
                 return false;
 
-            Collection<Point> a = @this;
-            Collection<Point> b = other;
-            for (int i = 0; i < a.Count; i++)
-            {
-                if (!IsEqual(a[i], b[i]))
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
         public static bool IsEqual(this Tree<Colors> @this, Tree<Colors> other)
@@ -898,33 +835,33 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Rest.Item1.Item1 == other.Rest.Item1.Item1;
         }
 
-        //public static bool IsEqual(this Uri @this, Uri other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.AbsolutePath == other.AbsolutePath &&
-        //        @this.AbsoluteUri == other.AbsoluteUri &&
-        //        @this.LocalPath == other.LocalPath &&
-        //        @this.Authority == other.Authority &&
-        //        @this.HostNameType == other.HostNameType &&
-        //        @this.IsDefaultPort == other.IsDefaultPort &&
-        //        @this.IsFile == other.IsFile &&
-        //        @this.IsLoopback == other.IsLoopback &&
-        //        @this.PathAndQuery == other.PathAndQuery &&
-        //        @this.Segments.SequenceEqual(other.Segments) &&
-        //        @this.IsUnc == other.IsUnc &&
-        //        @this.Host == other.Host &&
-        //        @this.Port == other.Port &&
-        //        @this.Query == other.Query &&
-        //        @this.Fragment == other.Fragment &&
-        //        @this.Scheme == other.Scheme &&
-        //        @this.OriginalString == other.OriginalString &&
-        //        @this.DnsSafeHost == other.DnsSafeHost &&
-        //        @this.IdnHost == other.IdnHost &&
-        //        @this.IsAbsoluteUri == other.IsAbsoluteUri &&
-        //        @this.UserEscaped == other.UserEscaped &&
-        //        @this.UserInfo == other.UserInfo;
-        //}
+        public static bool IsEqual(this Uri @this, Uri other)
+        {
+            return @this != null &&
+                other != null &&
+                @this.AbsolutePath == other.AbsolutePath &&
+                @this.AbsoluteUri == other.AbsoluteUri &&
+                @this.LocalPath == other.LocalPath &&
+                @this.Authority == other.Authority &&
+                @this.HostNameType == other.HostNameType &&
+                @this.IsDefaultPort == other.IsDefaultPort &&
+                @this.IsFile == other.IsFile &&
+                @this.IsLoopback == other.IsLoopback &&
+                @this.PathAndQuery == other.PathAndQuery &&
+                @this.Segments.SequenceEqual(other.Segments) &&
+                @this.IsUnc == other.IsUnc &&
+                @this.Host == other.Host &&
+                @this.Port == other.Port &&
+                @this.Query == other.Query &&
+                @this.Fragment == other.Fragment &&
+                @this.Scheme == other.Scheme &&
+                //@this.OriginalString == other.OriginalString && // TODO
+                @this.DnsSafeHost == other.DnsSafeHost &&
+                @this.IdnHost == other.IdnHost &&
+                @this.IsAbsoluteUri == other.IsAbsoluteUri &&
+                @this.UserEscaped == other.UserEscaped &&
+                @this.UserInfo == other.UserInfo;
+        }
 
         public static bool IsEqual(this Version @this, Version other)
         {
