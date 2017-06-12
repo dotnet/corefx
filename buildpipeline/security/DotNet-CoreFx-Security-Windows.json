@@ -63,6 +63,27 @@
         },
         {
             "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "List all files",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            },
+            "inputs": {
+                "scriptType": "inlineScript",
+                "scriptName": "",
+                "arguments": "$(Build.SourcesDirectory)",
+                "workingFolder": "$(Build.SourcesDirectory)",
+                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
+                "failOnStandardError": "true"
+            }
+        },
+        {
+            "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
             "displayName": "Remove files other than DLLs and PDBs",
@@ -78,7 +99,7 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n",
+                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n\n",
                 "failOnStandardError": "true"
             }
         },
@@ -86,7 +107,7 @@
             "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
-            "displayName": "Workaround for long path - DELETE files with path length greater than or equal to 240 characters.",
+            "displayName": "Workaround for long path - DELETE files with path length greater than or equal to 240 characters",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -99,7 +120,28 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$longPath =New-Object System.Collections.ArrayList\ngci \"$SrcDir\\*\" -recurse | where {!$_.PSIsContainer}  | % {\nif ($($_.FullName.Length) -ge 240)\n{\n$longPath.Add($($_.Directory.FullName)) | Out-Null\n}\n}\n$longPath | % {\nStart-Process \"cmd\" -ArgumentList \"/c rd /S /Q $_\" -Wait\nWrite-Host \"DELETED $_\"\n}\n#gci \"$SrcDir\" | where {$_.PSIsContainer -and $_.Name -ne \"security\"} | % {\n#Start-Process \"cmd\" -ArgumentList \"/c rd /S /Q $($_.FullName)\" -Wait\n#Write-Host \"Removed: $_\"\n#}\n",
+                "inlineScript": "param($SrcDir)\n$longPath = New-Object System.Collections.ArrayList\ngci \"$SrcDir\\*\" -recurse | where {!$_.PSIsContainer}  | % {\nif ($($_.FullName.Length) -ge 240)\n{\n$longPath.Add($($_.Directory.FullName)) | Out-Null\n}\n}\n$longPath | % {\nStart-Process \"cmd\" -ArgumentList \"/c rd /S /Q $_\" -Wait\nWrite-Host \"DELETED $_\"\n}\n",
+                "failOnStandardError": "true"
+            }
+        },
+        {
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "List all files - post delete",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            },
+            "inputs": {
+                "scriptType": "inlineScript",
+                "scriptName": "",
+                "arguments": "$(Build.SourcesDirectory)",
+                "workingFolder": "$(Build.SourcesDirectory)",
+                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
                 "failOnStandardError": "true"
             }
         },
@@ -117,7 +159,7 @@
             },
             "inputs": {
                 "InputType": "CommandLine",
-                "arguments": "analyze security\\*.dll --recurse",
+                "arguments": "analyze security\\*.dll --recurse --sympath security\\*.pdb --verbose --statistics",
                 "Function": "analyze",
                 "AnalyzeTarget": "$(Build.ArtifactStagingDirectory)",
                 "AnalyzeSymPath": "",
@@ -150,14 +192,14 @@
             "inputs": {
                 "targetMode": "binarysym",
                 "softwareFolder": "$(Build.SourcesDirectory)\\security",
-                "mpdFolder": "$(Build.StagingDirectory)",
+                "mpdFolder": "",
                 "softwareName": "CoreFx",
                 "softwareVersionNum": "PB_BuildNumber",
                 "softwareBuildNum": "PB_BuildNumber",
                 "modeType": "prerelease",
                 "noCopySymbols": "false",
                 "noCopyBinaries": "false",
-                "noDecompress": "false",
+                "noDecompress": "true",
                 "exclusionList": "",
                 "email": "",
                 "symbolsFolder": "$(Build.SourcesDirectory)\\security;SRV*http://symweb",
@@ -331,32 +373,10 @@
                 "notificationAlias": "dncsec@microsoft.com",
                 "codeBaseAdmins": "NORTHAMERICA\\raeda",
                 "instanceUrlAzure": "MSAZURE",
-                "instanceUrlBing": "",
-                "instanceUrlCarbon": "",
                 "instanceUrlDevDiv": "DEVDIV",
-                "instanceUrlSkype": "",
-                "instanceUrlTsa": "",
-                "instanceUrlPpe": "",
-                "projectNameDAIPVSTF": "",
-                "projectNameDYNAMICSCRM": "",
                 "projectNameMSAZURE": "One",
-                "projectNameMSDYENG": "",
-                "projectNameMSECG": "",
                 "projectNameIDENTITYDIVISION": "",
-                "projectNameVSTFRD": "",
-                "projectNameMSASG": "",
-                "projectNameMICROSOFTVSTS": "",
-                "projectNameMSDATA": "",
-                "projectNameMSENG": "",
                 "projectNameDEVDIV": "DevDiv",
-                "projectNameSKYPETEST2": "",
-                "projectNameONEDRIVE": "",
-                "projectNameSQLBUVSTS": "",
-                "projectNamePOWERBI": "",
-                "projectNameAZUREVSTFPPE": "",
-                "projectNameSKYPE": "",
-                "projectNameDOMOREEXP": "",
-                "projectNameSQLBUVSTSTEST": "",
                 "areaPath": "One\\DevDiv\\DotNetCore",
                 "iterationPath": "One",
                 "uploadAPIScan": "true",
