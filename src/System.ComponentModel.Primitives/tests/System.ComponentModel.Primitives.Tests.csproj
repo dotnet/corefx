@@ -9,6 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="BrowsableAttributeTests.cs" />
+    <Compile Include="ComponentCollectionTests.cs" />
     <Compile Include="ComponentTests.cs" />
     <Compile Include="CategoryAttributeTests.cs" />
     <Compile Include="ComponentModelPrimitivesBasicTests.cs" />
