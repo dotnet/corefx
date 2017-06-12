@@ -6,7 +6,7 @@ using System.Data.SqlClient.SNI;
 
 namespace System.Data.SqlClient
 {
-    internal sealed partial class TdsParserStateObjectFactory
+    internal sealed class TdsParserStateObjectFactory
     {
 
         private const string UseLegacyNetworkingOnWindows = "System.Data.SqlClient.UseLegacyNetworkingOnWindows";
