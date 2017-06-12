@@ -61,6 +61,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "SetEnvironmentVariableW isn't supported in Appx.")] // Issue #19870
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
         [InlineData(EnvironmentVariableTarget.User)]
@@ -85,6 +86,7 @@ namespace System.Tests
 
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "SetEnvironmentVariableW isn't supported in Appx.")] // Issue #19870
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
         [InlineData(EnvironmentVariableTarget.User)]
@@ -112,6 +114,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "SetEnvironmentVariableW isn't supported in Appx.")] // Issue #19870
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
         [InlineData(EnvironmentVariableTarget.User)]

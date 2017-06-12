@@ -2,39 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.ExceptionServices;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
-    // No appdomain in UWP or CoreRT
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
+        private string DestTestAssemblyResolvePath { get; }
+        private string DestTestAssemblyTPAPath { get; }
+
         public AppDomainTests()
         {
-            string sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.dll");
-            string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll");
-            if (File.Exists(sourceTestAssemblyPath))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
-                File.Copy(sourceTestAssemblyPath, destTestAssemblyPath, true);
-                File.Delete(sourceTestAssemblyPath);
-            }
+            DestTestAssemblyResolvePath = Path.Combine(base.TestDirectory, "AssemblyResolveTests.dll");
+            DestTestAssemblyTPAPath = Path.Combine(base.TestDirectory, "TestAppOutsideOfTPA.exe");
 
-            sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA.exe");
-            destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
-            if (File.Exists(sourceTestAssemblyPath))
+            // There are no additional dlls or executables in .NET Native as they are all merged into one main executable file.
+            if (!PlatformDetection.IsNetNative)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
-                File.Copy(sourceTestAssemblyPath, destTestAssemblyPath, true);
-                File.Delete(sourceTestAssemblyPath);
+                string sourceTestAssemblyResolvePath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.dll");
+                string sourceTestAssemblyTPAPath = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA.exe");
+                File.Copy(sourceTestAssemblyResolvePath, DestTestAssemblyResolvePath);
+                File.Copy(sourceTestAssemblyTPAPath, DestTestAssemblyTPAPath);
             }
         }
 
@@ -61,7 +54,6 @@ namespace System.Tests
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
         } 
-
 
         [Fact]
         public void UnhandledException_Add_Remove()
@@ -110,7 +102,7 @@ namespace System.Tests
 
         static void MyHandler(object sender, UnhandledExceptionEventArgs args) 
         {
-            System.IO.File.Create("success.txt");
+            File.Create("success.txt");
         }
 
         [Fact]
@@ -126,7 +118,7 @@ namespace System.Tests
             Assert.NotNull(s);
             string expected = Assembly.GetEntryAssembly().GetName().Name;
             Assert.Equal(expected, s);
-        }        
+        }
 
         [Fact]
         public void Id()
@@ -162,7 +154,7 @@ namespace System.Tests
             bool flag = false;
             EventHandler<FirstChanceExceptionEventArgs> handler = (sender, e) =>
             {
-                Exception ex = (Exception) e.Exception;
+                Exception ex = e.Exception;
                 if (ex is FirstChanceTestException)
                 {
                     flag = !flag;
@@ -242,12 +234,14 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")] // Coreclr issue #9914
         public void ExecuteAssembly()
         {
-            string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
+            string name = DestTestAssemblyTPAPath;
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
+
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
-            Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] {"2", "3"}, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
+            Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
             Assert.Equal(10, AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }));
         }        
@@ -310,6 +304,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[], ...) is not supported in AppX.")] // Coreclr issue #9914
         public void Load()
         {
             AssemblyName assemblyName = typeof(AppDomainTests).Assembly.GetName();
@@ -411,6 +406,7 @@ namespace System.Tests
 #pragma warning restore 618
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported in AppX.")]  // Coreclr issue #9914
         public void GetAssemblies()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -445,6 +441,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyLoad()
         {
             bool AssemblyLoadFlag = false;
@@ -470,13 +467,14 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyResolve()
         {
             RemoteInvoke(() =>
             {
                 ResolveEventHandler handler = (sender, e) =>
                 {
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll"));
+                    return Assembly.LoadFile(DestTestAssemblyResolvePath);
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;
@@ -488,16 +486,17 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "Assembly.LoadFile is not supported inside an AppContainer.")] // Coreclr issue #9914
         public void AssemblyResolve_RequestingAssembly()
         {
             RemoteInvoke(() =>
             {
-                Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe"));
+                Assembly a = Assembly.LoadFile(DestTestAssemblyTPAPath);
 
                 ResolveEventHandler handler = (sender, e) =>
                 {
                     Assert.Equal(e.RequestingAssembly, a);
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll"));
+                    return Assembly.LoadFile(DestTestAssemblyResolvePath);
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;
