@@ -21,11 +21,11 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Finalizer_OperationCompleted_DoesNotCallOperationCompleted()
         {
-            MethodInfo finalizer = typeof(AsyncOperation).GetMethod("Finalize", BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.NotNull(finalizer);
-
             RemoteInvoke(() =>
             {
+                MethodInfo finalizer = typeof(AsyncOperation).GetMethod("Finalize", BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.NotNull(finalizer);
+
                 var tracker = new OperationCompletedTracker();
                 AsyncOperationManager.SynchronizationContext = tracker;
                 AsyncOperation operation = AsyncOperationManager.CreateOperation(new object());
@@ -44,11 +44,11 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Finalizer_OperationCompleted_CompletesOperation()
         {
-            MethodInfo finalizer = typeof(AsyncOperation).GetMethod("Finalize", BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.NotNull(finalizer);
-
             RemoteInvoke(() =>
             {
+                MethodInfo finalizer = typeof(AsyncOperation).GetMethod("Finalize", BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.NotNull(finalizer);
+
                 var tracker = new OperationCompletedTracker();
                 AsyncOperationManager.SynchronizationContext = tracker;
                 AsyncOperation operation = AsyncOperationManager.CreateOperation(new object());
