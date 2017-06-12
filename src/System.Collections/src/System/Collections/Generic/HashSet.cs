@@ -1693,6 +1693,16 @@ namespace System.Collections.Generic
                 }
                 return true;
             }
+            else if (set1.Comparer.Equals(comparer))
+            {
+                ElementCount result = set1.CheckUniqueAndUnfoundElements(set2, true);
+                return result.uniqueCount == set1.Count && result.unfoundCount == 0;
+            }
+            else if (set2.Comparer.Equals(comparer))
+            {
+                ElementCount result = set2.CheckUniqueAndUnfoundElements(set1, true);
+                return result.uniqueCount == set2.Count && result.unfoundCount == 0;
+            }
             else
             {  // n^2 search because items are hashed according to their respective ECs
                 foreach (T set2Item in set2)

@@ -885,7 +885,16 @@ namespace System.Collections.Generic
             {
                 return set1.Count == set2.Count && set1.SetEquals(set2);
             }
-            
+            else if (set1.Comparer.Equals(comparer))
+            {
+                ElementCount result = set1.CheckUniqueAndUnfoundElements(set2, true);
+                return result.UniqueCount == set1.Count && result.UnfoundCount == 0;
+            }
+            else if (set2.Comparer.Equals(comparer))
+            {
+                ElementCount result = set2.CheckUniqueAndUnfoundElements(set1, true);
+                return result.UniqueCount == set2.Count && result.UnfoundCount == 0;
+            }
             bool found = false;
             foreach (T item1 in set1)
             {
