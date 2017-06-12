@@ -61,9 +61,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void Default(EnvironmentVariableTarget target)
         {
             string varName = $"Test_SetEnvironmentVariable_Default ({target})";
@@ -85,9 +83,6 @@ namespace System.Tests
 
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
         public void ModifyEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable ({target})";
@@ -112,9 +107,6 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
         public void ModifyEnvironmentVariable_AndEnumerate(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable_AndEnumerate ({target})";
@@ -147,9 +139,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void DeleteEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_DeleteEnvironmentVariable ({target})";
