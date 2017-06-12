@@ -29,11 +29,6 @@ namespace System.Net.Http
         {
         }
 
-        internal StreamContent(Stream content, CancellationToken cancellationToken)
-            : this(content, DefaultBufferSize, cancellationToken)
-        {
-        }
-
         private StreamContent(Stream content, int bufferSize, CancellationToken cancellationToken)
         {
             if (content == null)
