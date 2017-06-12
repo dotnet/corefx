@@ -456,7 +456,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal sealed class PointEqualityComparer : IEqualityComparer<Point>
+    public sealed class PointEqualityComparer : IEqualityComparer<Point>
     {
         public bool Equals(Point x, Point y) => (x.X == y.X) && (x.Y == y.Y);
 

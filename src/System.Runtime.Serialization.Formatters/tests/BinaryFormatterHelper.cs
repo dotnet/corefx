@@ -36,7 +36,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 Type objType = objA.GetType();
 
                 // Check if custom equality extension method is available
-                MethodInfo customEqualityCheck = GetExtensionMethod(typeof(EqualityExtensions).Assembly, objType);
+                MethodInfo customEqualityCheck = GetExtensionMethod(objType);
                 if (customEqualityCheck != null)
                 {
                     equalityResult = customEqualityCheck.Invoke(objA, new object[] { objA, objB });
@@ -106,7 +106,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        private static MethodInfo GetExtensionMethod(Assembly assembly, Type extendedType)
+        private static MethodInfo GetExtensionMethod(Type extendedType)
         {
             if (extendedType.IsGenericType)
             {
@@ -114,11 +114,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
                         ?.SingleOrDefault(m =>
                             m.Name == "IsEqual" &&
                             m.GetParameters().Length == 2 &&
-                            m.GetParameters()[0].ParameterType.Name == extendedType.Name);
-                if (method == null)
-                    return null;
-
-                if (method.IsGenericMethodDefinition)
+                            m.GetParameters()[0].ParameterType.Name == extendedType.Name &&
+                            m.IsGenericMethodDefinition);
+                if (method != null)
                     return method.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
             }
 

@@ -188,17 +188,22 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return true;
         }
 
-        // fix comparers
-        //public static bool IsEqual(this HashSet<Point> @this, HashSet<Point> other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count &&
-        //        BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer)))
-        //        return false;
+        public static bool IsEqual(this PointEqualityComparer @this, PointEqualityComparer other)
+        {
+            return @this != null &&
+                other != null;
+        }
 
-        //    return BinaryFormatterTests.CheckSequenceEquals(@this, other);
-        //}
+        public static bool IsEqual(this HashSet<Point> @this, HashSet<Point> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer)))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this LinkedListNode<Point> @this, LinkedListNode<Point> other)
         {
@@ -267,35 +272,36 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        //public static bool IsEqual(this Stack<Point> @this, Stack<Point> other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count;
-        //    throw new NotImplementedException("finish me");
-        //}
+        public static bool IsEqual(this Stack<Point> @this, Stack<Point> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count))
+                return false;
 
-        //public static bool IsEqual(this Hashtable @this, Hashtable other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.IsFixedSize == other.IsFixedSize &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values &&
-        //        @this.SyncRoot == other.SyncRoot &&
-        //        @this.Count == other.Count))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
-        //    return true;
-        //}
+        public static bool IsEqual(this Hashtable @this, Hashtable other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.IsFixedSize == other.IsFixedSize &&
+                @this.IsSynchronized == other.IsSynchronized &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values) &&
+                @this.Count == other.Count))
+                return false;
+            
+            foreach (var key in @this.Keys)
+            {
+                if (!BinaryFormatterTests.CheckEquals(@this[key], other[key]))
+                    return false;
+            }
+
+            return true;
+        }
 
         public static bool IsEqual(this Collection<int> @this, Collection<int> other)
         {
@@ -484,20 +490,19 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        // fix binary helpers
-        //public static bool IsEqual(this BindingList<int> @this, BindingList<int> other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.RaiseListChangedEvents == other.RaiseListChangedEvents &&
-        //        @this.AllowNew == other.AllowNew &&
-        //        @this.AllowEdit == other.AllowEdit &&
-        //        @this.AllowRemove == other.AllowRemove &&
-        //        @this.Count == other.Count))
-        //        return false;
+        public static bool IsEqual(this BindingList<int> @this, BindingList<int> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.RaiseListChangedEvents == other.RaiseListChangedEvents &&
+                @this.AllowNew == other.AllowNew &&
+                @this.AllowEdit == other.AllowEdit &&
+                @this.AllowRemove == other.AllowRemove &&
+                @this.Count == other.Count))
+                return false;
 
-        //    return BinaryFormatterTests.CheckSequenceEquals(@this, other);
-        //}
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this BindingList<Point> @this, BindingList<Point> other)
         {
