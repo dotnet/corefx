@@ -375,8 +375,14 @@
   <data name="net_listener_close" xml:space="preserve">
     <value>Listener closed.</value>
   </data>
+  <data name="net_invalid_path" xml:space="preserve">
+    <value>Invalid path.</value>
+  </data>
   <data name="net_MethodNotImplementedException" xml:space="preserve">
     <value>This method is not implemented by this class.</value>
+  </data>
+  <data name="net_listener_auth_errors" xml:space="preserve">
+    <value>Authentication errors.</value>
   </data>
   <data name="net_invalid_port" xml:space="preserve">
     <value>Invalid port in prefix.</value>
