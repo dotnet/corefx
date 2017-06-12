@@ -66,6 +66,7 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
             if (params.OuterLoop) {
                 targetHelixQueues += ['Debian.90.Amd64.Open',
                                       'Fedora.26.Amd64.Open',
+                                      'SLES.12.Amd64.Open',
                                       'Ubuntu.1704.Amd64.Open',]
             }					 
 
