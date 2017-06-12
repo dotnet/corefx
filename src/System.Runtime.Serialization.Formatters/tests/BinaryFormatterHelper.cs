@@ -71,7 +71,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return objA.Equals(objB);
         }
 
-        private static bool CheckSequenceEquals(IEnumerable a, IEnumerable b)
+        public static bool CheckSequenceEquals(IEnumerable a, IEnumerable b)
         {
             if (a == null || b == null)
                 return a == b;

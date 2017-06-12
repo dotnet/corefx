@@ -176,24 +176,24 @@ namespace System.Runtime.Serialization.Formatters.Tests
         //    return true;
         //}
 
-        //public static bool IsEqual(this Dictionary<int, string> @this, Dictionary<int, string> other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Comparer == other.Comparer &&
-        //        @this.Count == other.Count &&
-        //        @this.Keys == other.Keys &&
-        //        @this.Values == other.Values))
-        //        return false;
-        //    throw new NotImplementedException("finish me");
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (@this[i] != other[i])
-        //            return false;
-        //    }
+        public static bool IsEqual(this Dictionary<int, string> @this, Dictionary<int, string> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer) &&
+                @this.Count == other.Count &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Keys, other.Keys) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Values, other.Values)))
+                return false;
 
-        //    return true;
-        //}
+            foreach (var kv in @this)
+            {
+                if (@this[kv.Key] != other[kv.Key])
+                    return false;
+            }
+
+            return true;
+        }
 
         //public static bool IsEqual(this HashSet<Point> @this, HashSet<Point> other)
         //{
@@ -206,12 +206,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         //public static bool IsEqual(this LinkedList<Point> @this, LinkedList<Point> other)
         //{
-        //    return @this != null &&
+        //    if (!(@this != null &&
         //        other != null &&
         //        @this.Count == other.Count &&
-        //        @this.First == other.First &&
-        //        @this.Last == other.Last;
-        //    throw new NotImplementedException("finish me");
+        //        @this.First.Equals(other.First) &&
+        //        (@this.Last.Equals(other.Last))))
+        //        return false;
+
+        //    return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         //}
 
         public static bool IsEqual(this List<int> @this, List<int> other)
@@ -222,22 +224,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Count == other.Count))
                 return false;
 
-            for (int i = 0; i < @this.Count; i++)
-            {
-                if (@this[i] != other[i])
-                    return false;
-            }
-
-            return true;
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
         }
 
-        //public static bool IsEqual(this Queue<int> @this, Queue<int> other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Count == other.Count;
-        //    throw new NotImplementedException("finish me");
-        //}
+        public static bool IsEqual(this Queue<int> @this, Queue<int> other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.Count == other.Count))
+                return false;
+
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         //public static bool IsEqual(this SortedList<int, Point> @this, SortedList<int, Point> other)
         //{
@@ -676,6 +674,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return ret;
         }
 
+        /// <summary>
+        /// Flattens the graph
+        /// </summary>
+        /// <param name="n">node of a graph</param>
+        /// <returns>returns ((id -> node), (node -> node[]))</returns>
         private static Tuple<Dictionary<int, Graph<int>>, List<List<int>>> FlattenGraph(Graph<int> n)
         {
             // ref -> id
