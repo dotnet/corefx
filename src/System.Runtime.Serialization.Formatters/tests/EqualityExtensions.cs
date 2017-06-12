@@ -11,6 +11,8 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
@@ -650,36 +652,84 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 other != null;
         }
 
-        //public static bool IsEqual(this Graph<int> @this, Graph<int> other)
-        //{
-        //    Graph can have cycles
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.Value == other.Value &&
-        //        @this.Links.Length == other.Links.Length))
-        //        return false;
+        private static void GetIdsForGraphDFS(Graph<int> n, Dictionary<Graph<int>, int> ids)
+        {
+            if (!ids.ContainsKey(n))
+            {
+                ids[n] = ids.Count;
+                foreach (var link in n.Links)
+                {
+                    GetIdsForGraphDFS(link, ids);
+                }
+            }
+        }
 
-        //    for (int i = 0; i < @this.Links.Length; i++)
-        //    {
-        //        if (!IsEqual(@this.Links[i], other.Links[i]))
-        //            return false;
-        //    }
+        private static Dictionary<int, Graph<int>> InvertDictionary(Dictionary<Graph<int>, int> dict)
+        {
+            var ret = new Dictionary<int, Graph<int>>();
+            foreach (var kv in dict)
+            {
+                Assert.False(ret.ContainsKey(kv.Value));
+                ret[kv.Value] = kv.Key;
+            }
 
-        //    return true;
-        //}
+            return ret;
+        }
 
-        //public static bool IsEqual(this ObjectWithArrays @this, ObjectWithArrays other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.IntArray.SequenceEqual(other.IntArray) &&
-        //        @this.StringArray.SequenceEqual(other.StringArray) &&
-        //        @this.TreeArray.SequenceEqual(other.TreeArray) &&
-        //        @this.ByteArray.SequenceEqual(other.ByteArray); // &&
-        //        //@this.JaggedArray.SequenceEqual(other.JaggedArray) &&
-        //        //@this.MultiDimensionalArray.Equals(other.MultiDimensionalArray);
-        //   throw new NotImplementedException("finish me");
-        //}
+        private static Tuple<Dictionary<int, Graph<int>>, List<List<int>>> FlattenGraph(Graph<int> n)
+        {
+            // ref -> id
+            var nodes = new Dictionary<Graph<int>, int>(new ReferenceComparer<Graph<int>>());
+            GetIdsForGraphDFS(n, nodes);
+
+            // id -> list of ids
+            var edges = new List<List<int>>();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                edges.Add(new List<int>());
+            }
+
+            foreach (var kv in nodes)
+            {
+                List<int> links = edges[kv.Value];
+                foreach (var link in kv.Key.Links)
+                {
+                    links.Add(nodes[link]);
+                }
+            }
+
+            return new Tuple<Dictionary<int, Graph<int>>, List<List<int>>>(InvertDictionary(nodes), edges);
+        }
+
+        public static bool IsEqual(this Graph<int> @this, Graph<int> other)
+        {
+            var thisFlattened = FlattenGraph(@this);
+            var otherFlattened = FlattenGraph(other);
+
+            if (thisFlattened.Item1.Count != otherFlattened.Item1.Count ||
+                thisFlattened.Item2.Count != otherFlattened.Item2.Count)
+                return false;
+
+            for (int i = 0; i < thisFlattened.Item1.Count; i++)
+            {
+                if (thisFlattened.Item1[i].Value != otherFlattened.Item1[i].Value)
+                    return false;
+            }
+
+            return BinaryFormatterTests.CheckEquals(thisFlattened.Item2, otherFlattened.Item2);
+        }
+
+        public static bool IsEqual(this ObjectWithArrays @this, ObjectWithArrays other)
+        {
+            return @this != null &&
+                other != null &&
+                BinaryFormatterTests.CheckEquals(@this.IntArray, other.IntArray) &&
+                BinaryFormatterTests.CheckEquals(@this.StringArray, other.StringArray) &&
+                BinaryFormatterTests.CheckEquals(@this.TreeArray, other.TreeArray) &&
+                BinaryFormatterTests.CheckEquals(@this.ByteArray, other.ByteArray) &&
+                BinaryFormatterTests.CheckEquals(@this.JaggedArray, other.JaggedArray) &&
+                BinaryFormatterTests.CheckEquals(@this.MultiDimensionalArray, other.MultiDimensionalArray);
+        }
 
         public static bool IsEqual(this ObjectWithIntStringUShortUIntULongAndCustomObjectFields @this, ObjectWithIntStringUShortUIntULongAndCustomObjectFields other)
         {
@@ -883,6 +933,19 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Revision == other.Revision &&
                 @this.MajorRevision == other.MajorRevision &&
                 @this.MinorRevision == other.MinorRevision;
+        }
+
+        public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
+        {
+            public bool Equals(T x, T y)
+            {
+                return ReferenceEquals(x, y);
+            }
+
+            public int GetHashCode(T x)
+            {
+                return RuntimeHelpers.GetHashCode(x);
+            }
         }
     }
 }
