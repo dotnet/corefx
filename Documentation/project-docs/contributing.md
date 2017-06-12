@@ -27,11 +27,16 @@ Pull Requests
 * **DO** tag any users that should know about and/or review the change.
 * **DO** ensure each commit successfully builds.  The entire PR must pass all tests in the Continuous Integration (CI) system before it'll be merged.
 * **DO** address PR feedback in an additional commit(s) rather than amending the existing commits, and only rebase/squash them when necessary.  This makes it easier for reviewers to track changes.
+* **DO** assume that ["Squash and Merge"](https://github.com/blog/2141-squash-your-commits) will be used to merge your commit unless you request otherwise in the PR. Reasons may include (but not limited to)
+
+  - The change is easier to understand as a series of focused commits. Each commit in the series must be buildable so as not to break `git bisect`.
+  - You're using an e-mail address other than your primary GitHub address and want that preserved in the history. You will be asked to squash the commit manually before we accept it.
+
 * **DO NOT** fix merge conflicts using a merge commit. Prefer `git rebase`.
 * **DO NOT** mix independent, unrelated changes in one PR. Separate real product/test code changes from larger code formatting/dead code removal changes. Separate unrelated fixes into separate PRs, especially if they are in different assemblies.
 
 Merging Pull Requests (for contributors with write access)
 ----------------------------------------------------------
 
-* **DO** use ["Squash and Merge"](https://github.com/blog/2141-squash-your-commits) by default for individual contributions unless requested otherwise in the PR. Do so, even if the PR contains only one commit. It creates a simpler history than "Create a Merge Commit".
+* **DO** use ["Squash and Merge"](https://github.com/blog/2141-squash-your-commits) by default for individual contributions unless requested by the PR author. Do so, even if the PR contains only one commit. It creates a simpler history than "Create a Merge Commit".
 
