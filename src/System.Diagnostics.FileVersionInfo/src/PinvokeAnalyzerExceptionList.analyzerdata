@@ -1,4 +1,2 @@
-kernel32.dll!VerLanguageNameW
-version.dll!GetFileVersionInfoExW
-version.dll!GetFileVersionInfoSizeExW
-version.dll!VerQueryValueW
+## need to create a uap config that uses CreateFileFromApp, then remove this baseline ##
+kernel32.dll!CreateFileW

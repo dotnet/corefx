@@ -1,2 +1,2 @@
+## need to create a uap config that uses CreateFileFromApp, then remove this baseline ##
 kernel32.dll!CreateFileW
-kernel32.dll!ReadDirectoryChangesW

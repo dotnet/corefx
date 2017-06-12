@@ -1,0 +1,2 @@
+## Break out caller into a non-uap file; uap returns fixed string. Then remove this baseline ##
+ntdll.dll!RtlGetVersion

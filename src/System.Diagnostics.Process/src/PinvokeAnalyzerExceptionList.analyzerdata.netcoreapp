@@ -1,0 +1,10 @@
+shell32.dll!ShellExecuteExW
+user32.dll!EnumWindows
+user32.dll!GetWindow
+user32.dll!GetWindowLongW
+user32.dll!GetWindowTextLengthW
+user32.dll!GetWindowTextW
+user32.dll!GetWindowThreadProcessId
+user32.dll!IsWindowVisible
+user32.dll!PostMessageW
+user32.dll!WaitForInputIdle

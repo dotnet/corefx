@@ -1,3 +1,4 @@
+## need to create a uap config that uses xxxFromApp versions, then remove this baseline ##
 kernel32.dll!CreateFileMappingW
 kernel32.dll!MapViewOfFile
 kernel32.dll!OpenFileMappingW
