@@ -247,7 +247,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                 // Calculate new arrays
                 for (int i = 0; i < count; i++)
                 {
-                    _cache._memberNames[i] = _cache._memberInfos[i].Name;
+                    _cache._memberNames[i] = FormatterServices.GetFullMemberInfoName(_cache._memberInfos[i], _objectType);
                     _cache._memberTypes[i] = ((FieldInfo)_cache._memberInfos[i]).FieldType;
                 }
                 _serObjectInfoInit._seenBeforeTable.Add(_objectType, _cache);
@@ -444,7 +444,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             // Calculate new arrays
             for (int i = 0; i < _count; i++)
             {
-                _cache._memberNames[i] = _cache._memberInfos[i].Name;
+                _cache._memberNames[i] = FormatterServices.GetFullMemberInfoName(_cache._memberInfos[i], _objectType);
                 _cache._memberTypes[i] = GetMemberType(_cache._memberInfos[i]);
             }
 
@@ -618,7 +618,9 @@ namespace System.Runtime.Serialization.Formatters.Binary
             bool isFound = false;
             for (int i = 0; i < _cache._memberInfos.Length; i++)
             {
-                if (!memberMissing && inMemberNames[i].Equals(_cache._memberInfos[i].Name))
+                string fullMemberInfoName = FormatterServices.GetFullMemberInfoName(_cache._memberInfos[i], objectType);
+                if (!memberMissing && 
+                    inMemberNames[i].Equals(fullMemberInfoName))
                 {
                     outMemberTypes[i] = _cache._memberTypes[i];
                 }
@@ -628,7 +630,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                     isFound = false;
                     for (int j = 0; j < inMemberNames.Length; j++)
                     {
-                        if (_cache._memberInfos[i].Name.Equals(inMemberNames[j]))
+                        if (fullMemberInfoName.Equals(inMemberNames[j]))
                         {
                             outMemberTypes[i] = _cache._memberTypes[i];
                             isFound = true;
