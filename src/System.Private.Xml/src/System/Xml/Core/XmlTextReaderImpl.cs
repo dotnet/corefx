@@ -452,7 +452,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, Stream input, XmlNameTable nt) : this(nt)
         {
-            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver : null);
+            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             if (url == null || url.Length == 0)
             {
