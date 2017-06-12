@@ -83,6 +83,7 @@ namespace System.Tests
 
 
         [Theory]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable ({target})";
@@ -107,6 +108,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable_AndEnumerate(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable_AndEnumerate ({target})";
