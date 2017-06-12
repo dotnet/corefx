@@ -550,43 +550,37 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.SortId == other.SortId;
         }
 
-        //public static bool IsEqual(this Cookie @this, Cookie other)
-        //{
-        //    return @this != null &&
-        //        other != null &&
-        //        @this.Comment == other.Comment &&
-        //        IsEqual(@this.CommentUri, other.CommentUri) &&
-        //        @this.HttpOnly == other.HttpOnly &&
-        //        @this.Discard == other.Discard &&
-        //        @this.Domain == other.Domain &&
-        //        @this.Expired == other.Expired &&
-        //        @this.Expires == other.Expires &&
-        //        @this.Name == other.Name &&
-        //        @this.Path == other.Path &&
-        //        @this.Port == other.Port &&
-        //        @this.Secure == other.Secure &&
-        //        @this.TimeStamp == other.TimeStamp &&
-        //        @this.Value == other.Value &&
-        //        @this.Version == other.Version;
-        //}
+        public static bool IsEqual(this Cookie @this, Cookie other)
+        {
+            return @this != null &&
+                other != null &&
+                @this.Comment == other.Comment &&
+                IsEqual(@this.CommentUri, other.CommentUri) &&
+                @this.HttpOnly == other.HttpOnly &&
+                @this.Discard == other.Discard &&
+                @this.Domain == other.Domain &&
+                @this.Expired == other.Expired &&
+                BinaryFormatterTests.CheckEquals(@this.Expires, other.Expires) &&
+                @this.Name == other.Name &&
+                @this.Path == other.Path &&
+                @this.Port == other.Port &&
+                @this.Secure == other.Secure &&
+                //BinaryFormatterTests.CheckEquals(@this.TimeStamp, other.TimeStamp) && // TODO
+                @this.Value == other.Value &&
+                @this.Version == other.Version;
+        }
 
-        //public static bool IsEqual(this CookieCollection @this, CookieCollection other)
-        //{
-        //    if (!(@this != null &&
-        //        other != null &&
-        //        @this.IsReadOnly == other.IsReadOnly &&
-        //        @this.Count == other.Count &&
-        //        @this.IsSynchronized == other.IsSynchronized &&
-        //        @this.SyncRoot == other.SyncRoot))
-        //        return false;
-        //    for (int i = 0; i < @this.Count; i++)
-        //    {
-        //        if (!IsEqual(@this[i], other[i]))
-        //            return false;
-        //    }
+        public static bool IsEqual(this CookieCollection @this, CookieCollection other)
+        {
+            if (!(@this != null &&
+                other != null &&
+                @this.IsReadOnly == other.IsReadOnly &&
+                @this.Count == other.Count &&
+                @this.IsSynchronized == other.IsSynchronized))
+                return false;
 
-        //    return true;
-        //}
+            return BinaryFormatterTests.CheckSequenceEquals(@this, other);
+        }
 
         public static bool IsEqual(this BasicISerializableObject @this, BasicISerializableObject other)
         {
@@ -842,6 +836,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool IsEqual(this Uri @this, Uri other)
         {
+            if (@this == null && other == null)
+                return true;
+
             return @this != null &&
                 other != null &&
                 @this.AbsolutePath == other.AbsolutePath &&
