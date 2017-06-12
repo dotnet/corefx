@@ -4,7 +4,7 @@
 
 namespace System.Net
 {
-    [Flags]
+   /* [Flags]
     internal enum ContextFlags
     {
         Zero = 0,
@@ -66,5 +66,5 @@ namespace System.Net
         AllowMissingBindings = 0x10000000,   // ASC_REQ_ALLOW_MISSING_BINDINGS
 
         UnverifiedTargetName = 0x20000000,   // ISC_REQ_UNVERIFIED_TARGET_NAME
-    }
+    }*/
 }
