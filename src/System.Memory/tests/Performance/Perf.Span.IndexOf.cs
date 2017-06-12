@@ -59,7 +59,6 @@ namespace System.Memory.Tests
                     }
                 }
             }
-
             Assert.Equal(size > 1 ? size : 0, index);
         }
         
