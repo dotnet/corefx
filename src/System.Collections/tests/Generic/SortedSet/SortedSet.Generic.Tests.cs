@@ -358,9 +358,18 @@ namespace System.Collections.Tests
                 new SortedSet<T> { objects[0], objects[1], objects[2] }
             };
 
+            var nonDefaultComparerSet = new HashSet<SortedSet<T>>(SortedSet<T>.CreateSetComparer())
+            {
+                new SortedSet<T>(GetIComparer()) { objects[3], objects[4], objects[5] },
+                new SortedSet<T>(GetIComparer()) { objects[0], objects[1], objects[2] }
+            };
+
             Assert.False(noComparerSet.SetEquals(set));
             Assert.True(comparerSet1.SetEquals(set));
             Assert.True(comparerSet2.SetEquals(set));
+            Assert.True(nonDefaultComparerSet.SetEquals(set));
+            Assert.True(comparerSet1.SetEquals(nonDefaultComparerSet));
+            Assert.False(set.SetEquals(nonDefaultComparerSet));
         }
 #endregion
     }

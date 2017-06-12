@@ -949,8 +949,7 @@ namespace System.Collections.Generic
                         return false;
                     }
                 }
-                ElementCount result = CheckUniqueAndUnfoundElements(other, true);
-                return (result.uniqueCount == _count && result.unfoundCount == 0);
+                return InnerSetEquals(other);
             }
         }
 
@@ -1693,6 +1692,14 @@ namespace System.Collections.Generic
                 }
                 return true;
             }
+            else if (set1.Comparer.Equals(comparer))
+            {
+                return set1.InnerSetEquals(set2);
+            }
+            else if (set2.Comparer.Equals(comparer))
+            {
+                return set2.InnerSetEquals(set1);
+            }
             else
             {  // n^2 search because items are hashed according to their respective ECs
                 foreach (T set2Item in set2)
@@ -1713,6 +1720,12 @@ namespace System.Collections.Generic
                 }
                 return true;
             }
+        }
+
+        private bool InnerSetEquals(IEnumerable<T> other)
+        {
+            ElementCount result = CheckUniqueAndUnfoundElements(other, true);
+            return result.uniqueCount == Count && result.unfoundCount == 0;
         }
 
         /// <summary>

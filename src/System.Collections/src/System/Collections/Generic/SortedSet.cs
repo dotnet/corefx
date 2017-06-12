@@ -885,7 +885,14 @@ namespace System.Collections.Generic
             {
                 return set1.Count == set2.Count && set1.SetEquals(set2);
             }
-            
+            else if (set1.Comparer.Equals(comparer))
+            {
+                return set1.SetEquals(set2);
+            }
+            else if (set2.Comparer.Equals(comparer))
+            {
+                return set2.SetEquals( set1);
+            }
             bool found = false;
             foreach (T item1 in set1)
             {
