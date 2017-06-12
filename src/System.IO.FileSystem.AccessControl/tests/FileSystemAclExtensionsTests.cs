@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Security.AccessControl;
 using Xunit;
@@ -142,7 +141,7 @@ namespace System.IO
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
             {
                 FileInfo fileInfo = new FileInfo(file.Path);
-                AssertExtensions.Throws<ArgumentNullException>("fileSecurity", () => fileInfo.SetAccessControl((FileSecurity) null));
+                AssertExtensions.Throws<ArgumentNullException>("fileSecurity", () => fileInfo.SetAccessControl((FileSecurity)null));
             }
         }
 
@@ -172,7 +171,7 @@ namespace System.IO
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
             using (FileStream fileStream = File.Open(file.Path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None))
             {
-                Assert.Throws<ArgumentNullException>("fileSecurity",() => FileSystemAclExtensions.SetAccessControl(fileStream, (FileSecurity)null));
+                Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileStream, (FileSecurity)null));
             }
         }
 
