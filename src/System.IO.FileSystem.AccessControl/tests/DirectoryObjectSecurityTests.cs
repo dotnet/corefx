@@ -168,11 +168,11 @@ namespace System.Security.AccessControl
             {
             }
 
-            public override Type AccessRightType => throw private new NotImplementedException();
+            public override Type AccessRightType => throw new NotImplementedException();
 
-            public override Type AccessRuleType => throw private new NotImplementedException();
+            public override Type AccessRuleType => throw new NotImplementedException();
 
-            public override Type AuditRuleType => throw private new NotImplementedException();
+            public override Type AuditRuleType => throw new NotImplementedException();
 
             public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
             {
