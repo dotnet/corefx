@@ -207,11 +207,11 @@ namespace System.Runtime.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            // Special case types likes primitive type arrays
+            // Special case types like arrays            
             Type attributedType = type;
-            if (type.HasElementType)
+            while (attributedType.HasElementType)
             {
-                attributedType = type.GetElementType();
+                attributedType = attributedType.GetElementType();
             }
 
             foreach (Attribute first in attributedType.GetCustomAttributes(typeof(TypeForwardedFromAttribute), false))

@@ -38,6 +38,9 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal static readonly Assembly s_urtAssembly = Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
         internal static readonly string s_urtAssemblyString = s_urtAssembly.FullName;
 
+        internal static readonly Assembly s_urtAlternativeAssembly = s_typeofString.Assembly;
+        internal static readonly string s_urtAlternativeAssemblyString = s_urtAlternativeAssembly.FullName;
+
         // Arrays
         internal static readonly Type s_typeofTypeArray = typeof(Type[]);
         internal static readonly Type s_typeofObjectArray = typeof(object[]);
