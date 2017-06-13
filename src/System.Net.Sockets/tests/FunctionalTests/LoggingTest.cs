@@ -13,7 +13,8 @@ namespace System.Net.Sockets.Tests
     public class LoggingTest : RemoteExecutorTestBase
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap, "NetEventSource is only part of .NET Core and requires internal Reflection.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public static void EventSource_ExistsWithCorrectId()
         {
             Type esType = typeof(Socket).Assembly.GetType("System.Net.NetEventSource", throwOnError: true, ignoreCase: false);
@@ -27,7 +28,8 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop]
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap, "NetEventSource is only part of .NET Core and requires internal Reflection.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void EventSource_EventsRaisedAsExpected()
         {
             RemoteInvoke(() =>
