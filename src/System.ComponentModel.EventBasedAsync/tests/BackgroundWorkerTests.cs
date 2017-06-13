@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,12 +75,24 @@ namespace System.ComponentModel.EventBasedAsync.Tests
         public void RunWorkerAsync_NoOnWorkHandler_SetsResultToNull()
         {
             var backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            bool isCompleted = false;
             backgroundWorker.RunWorkerCompleted += (sender, e) =>
             {
+                isCompleted = true;
                 Assert.Null(e.Result);
                 Assert.False(backgroundWorker.IsBusy);
             };
             backgroundWorker.RunWorkerAsync();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (!isCompleted)
+            {
+                if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+                {
+                    throw new Exception("The background worker never completed.");
+                }
+            }
         }
 
         #region TestCancelAsync
