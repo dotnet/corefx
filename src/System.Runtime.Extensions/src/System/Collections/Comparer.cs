@@ -25,7 +25,7 @@ namespace System.Collections
         public static readonly Comparer Default = new Comparer(CultureInfo.CurrentCulture);
         public static readonly Comparer DefaultInvariant = new Comparer(CultureInfo.InvariantCulture);
 
-        private const string CompareInfoName = "CompareInfo";
+        private const string CompareInfoName = "CompareInfo"; // Do not rename (binary serialization)
 
         public Comparer(CultureInfo culture)
         {

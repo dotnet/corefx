@@ -65,10 +65,10 @@ namespace System.Collections.Generic
         private const int ShrinkThreshold = 3;
 
         // constants for serialization
-        private const string CapacityName = "Capacity";
-        private const string ElementsName = "Elements";
-        private const string ComparerName = "Comparer";
-        private const string VersionName = "Version";
+        private const string CapacityName = "Capacity"; // Do not rename (binary serialization)
+        private const string ElementsName = "Elements"; // Do not rename (binary serialization)
+        private const string ComparerName = "Comparer"; // Do not rename (binary serialization)
+        private const string VersionName = "Version"; // Do not rename (binary serialization)
 
         private int[] _buckets;
         private Slot[] _slots;

@@ -32,9 +32,9 @@ namespace System.Numerics
         private static readonly double s_log2 = Math.Log(2.0);
 
         // Do not rename, these fields are needed for binary serialization
-        private double m_real;
-        private double m_imaginary;
-        
+        private double m_real; // Do not rename (binary serialization)
+        private double m_imaginary; // Do not rename (binary serialization)
+
         public Complex(double real, double imaginary)
         {
             m_real = real;

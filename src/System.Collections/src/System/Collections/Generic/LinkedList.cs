@@ -22,9 +22,9 @@ namespace System.Collections.Generic
         private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.  
 
         // names for serialization
-        private const string VersionName = "Version";
-        private const string CountName = "Count";  
-        private const string ValuesName = "Data";
+        private const string VersionName = "Version"; // Do not rename (binary serialization)
+        private const string CountName = "Count"; // Do not rename (binary serialization)
+        private const string ValuesName = "Data"; // Do not rename (binary serialization)
 
         public LinkedList()
         {

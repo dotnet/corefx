@@ -495,9 +495,9 @@ namespace System.Collections.Specialized
         [Serializable]
         public class DictionaryNode
         {
-            public object key;
-            public object value;
-            public DictionaryNode next;
+            public object key; // Do not rename (binary serialization)
+            public object value; // Do not rename (binary serialization)
+            public DictionaryNode next; // Do not rename (binary serialization)
         }
     }
 }

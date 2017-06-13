@@ -21,8 +21,8 @@ namespace System.Drawing
         /// </summary>
         public static readonly Point Empty = new Point();
 
-        private int x; // Do not rename (binary serialization) 
-        private int y; // Do not rename (binary serialization) 
+        private int x; // Do not rename (binary serialization)
+        private int y; // Do not rename (binary serialization)
 
         /// <summary>
         ///    Initializes a new instance of the <see cref='System.Drawing.Point'/> class
