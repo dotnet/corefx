@@ -240,8 +240,32 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 try
                 {
-                    // See if MetadataToken property is available.
                     Type memberInfo = typeof(MemberInfo);
+
+                    // First, try the actual API. (Post .NetCore 2.0) The api is the only one that gets it completely right on frameworks without MetadataToken.
+                    MethodInfo apiMethod = memberInfo.GetMethod(
+                        "HasSameMetadataDefinitionAs",
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding,
+                        binder: null,
+                        types: new Type[] { typeof(MemberInfo) },
+                        modifiers: null);
+                    if (apiMethod != null)
+                    {
+                        Func<MemberInfo, MemberInfo, bool> apiDelegate = (Func<MemberInfo, MemberInfo, bool>)(apiMethod.CreateDelegate(typeof(Func<MemberInfo, MemberInfo, bool>)));
+                        try
+                        {
+                            bool result = apiDelegate(m1, m2);
+                            // it worked, so publish it
+                            s_MemberEquivalence = apiDelegate;
+                            return result;
+                        }
+                        catch
+                        {
+                            // Api found but apparently stubbed as not supported. Continue on to the next fallback...
+                        }
+                    }
+
+                    // See if MetadataToken property is available.
                     PropertyInfo property = memberInfo.GetProperty("MetadataToken", typeof(int), Array.Empty<Type>());
 
                     if ((object)property != null && property.CanRead)
@@ -278,36 +302,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public static bool HasSameMetadataDefinitionAs(this MemberInfo mi1, MemberInfo mi2)
         {
-            if (s_lazyHasSameMetadataDefinitionAsApi == null)
-            {
-                MethodInfo apiMethod = typeof(MemberInfo).GetMethod(
-                    "HasSameMetadataDefinitionAs",
-                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding,
-                    binder: null,
-                    types: new Type[] { typeof(MemberInfo) },
-                    modifiers: null);
-                if (apiMethod != null)
-                {
-                    s_lazyHasSameMetadataDefinitionAsApi = (Func<MemberInfo, MemberInfo, bool>)Delegate.CreateDelegate(typeof(Func<MemberInfo, MemberInfo, bool>), apiMethod);
-                }
-                else
-                {
-                    s_lazyHasSameMetadataDefinitionAsApi = HasSameMetadataDefinitionAsEmulator;
-                }
-            }
-
-            return s_lazyHasSameMetadataDefinitionAsApi(mi1, mi2);
-        }
-
-        private static bool HasSameMetadataDefinitionAsEmulator(this MemberInfo mi1, MemberInfo mi2)
-        {
 #if UNSUPPORTEDAPI
             return (mi1.MetadataToken == mi2.MetadataToken) && (mi1.Module == mi2.Module));
 #else
             return mi1.Module.Equals(mi2.Module) && s_MemberEquivalence(mi1, mi2);
 #endif
         }
-
-        private static volatile Func<MemberInfo, MemberInfo, bool> s_lazyHasSameMetadataDefinitionAsApi;
     }
 }
