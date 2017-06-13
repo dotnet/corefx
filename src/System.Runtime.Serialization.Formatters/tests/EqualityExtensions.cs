@@ -565,7 +565,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Path == other.Path &&
                 @this.Port == other.Port &&
                 @this.Secure == other.Secure &&
-                //BinaryFormatterTests.CheckEquals(@this.TimeStamp, other.TimeStamp) && // TODO
+                // This needs to have m_Timestamp set by reflection in order to roundtrip correctly
+                // otherwise this field will change each time you create an object and cause this to fail
+                BinaryFormatterTests.CheckEquals(@this.TimeStamp, other.TimeStamp) &&
                 @this.Value == other.Value &&
                 @this.Version == other.Version;
         }
