@@ -138,10 +138,14 @@ namespace System.Drawing
             }
             catch (TypeInitializationException)
             {
+#if NETCORE
+                throw new PlatformNotSupportedException("Could not initialize the GDI+ library.");
+#else
                 Console.Error.WriteLine(
                     "* ERROR: Can not initialize GDI+ library{0}{0}" +
                     "Please check http://www.mono-project.com/Problem:GDIPlusInit for details",
                     Environment.NewLine);
+#endif
             }
 
             // under MS 1.x this event is raised only for the default application domain
