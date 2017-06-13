@@ -10,6 +10,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
 using System.Transactions;
+using Microsoft.SqlServer.Server;
+using System.Reflection;
+using System.IO;
+using System.Globalization;
 
 namespace System.Data.SqlClient
 {
@@ -161,6 +165,13 @@ namespace System.Data.SqlClient
             }
         }
 
+        internal Version TypeSystemAssemblyVersion
+        {
+            get
+            {
+                return ((SqlConnectionString)ConnectionOptions).TypeSystemAssemblyVersion;
+            }
+        }
 
         internal int ConnectRetryInterval
         {
@@ -1325,7 +1336,126 @@ namespace System.Data.SqlClient
                 _innerConnection = DbConnectionClosedPreviouslyOpened.SingletonInstance;
             }
         }
-    } // SqlConnection
-} // System.Data.SqlClient namespace
+
+        // UDT SUPPORT
+        private Assembly ResolveTypeAssembly(AssemblyName asmRef, bool throwOnError)
+        {
+            Debug.Assert(TypeSystemAssemblyVersion != null, "TypeSystemAssembly should be set !");
+            if (string.Compare(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                asmRef.Version = TypeSystemAssemblyVersion;
+            }
+            try
+            {
+                return Assembly.Load(asmRef);
+            }
+            catch (Exception e)
+            {
+                if (throwOnError || !ADP.IsCatchableExceptionType(e))
+                {
+                    throw;
+                }
+                else
+                {
+                    return null;
+                };
+            }
+        }
+
+        internal void CheckGetExtendedUDTInfo(SqlMetaDataPriv metaData, bool fThrow)
+        {
+            if (metaData.udtType == null)
+            { // If null, we have not obtained extended info.
+                Debug.Assert(!string.IsNullOrEmpty(metaData.udtAssemblyQualifiedName), "Unexpected state on GetUDTInfo");
+                // Parameter throwOnError determines whether exception from Assembly.Load is thrown.
+                metaData.udtType =
+                    Type.GetType(typeName: metaData.udtAssemblyQualifiedName, assemblyResolver: asmRef => ResolveTypeAssembly(asmRef, fThrow), typeResolver: null, throwOnError: fThrow);
+
+                if (fThrow && metaData.udtType == null)
+                {
+                    throw SQL.UDTUnexpectedResult(metaData.udtAssemblyQualifiedName);
+                }
+            }
+        }
+
+        internal object GetUdtValue(object value, SqlMetaDataPriv metaData, bool returnDBNull)
+        {
+            if (returnDBNull && ADP.IsNull(value))
+            {
+                return DBNull.Value;
+            }
+
+            object o = null;
+
+            // Since the serializer doesn't handle nulls...
+            if (ADP.IsNull(value))
+            {
+                Type t = metaData.udtType;
+                Debug.Assert(t != null, "Unexpected null of udtType on GetUdtValue!");
+                o = t.InvokeMember("Null", BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Static, null, null, new object[] { }, CultureInfo.InvariantCulture);
+                Debug.Assert(o != null);
+                return o;
+            }
+            else
+            {
+
+                MemoryStream stm = new MemoryStream((byte[])value);
+
+                o = SerializationHelperSql9.Deserialize(stm, metaData.udtType);
+
+                Debug.Assert(o != null, "object could NOT be created");
+                return o;
+            }
+        }
+
+        internal byte[] GetBytes(object o)
+        {
+            Format format = Format.Native;
+            return GetBytes(o, out format, out int maxSize);
+        }
+
+        internal byte[] GetBytes(object o, out Format format, out int maxSize)
+        {
+            SqlUdtInfo attr = GetInfoFromType(o.GetType());
+            maxSize = attr.MaxByteSize;
+            format = attr.SerializationFormat;
+
+            if (maxSize < -1 || maxSize >= ushort.MaxValue)
+            {
+                throw new InvalidOperationException(o.GetType() + ": invalid Size");
+            }
+
+            byte[] retval;
+
+            using (MemoryStream stm = new MemoryStream(maxSize < 0 ? 0 : maxSize))
+            {
+                SerializationHelperSql9.Serialize(stm, o);
+                retval = stm.ToArray();
+            }
+            return retval;
+        }
+
+        private SqlUdtInfo GetInfoFromType(Type t)
+        {
+            Debug.Assert(t != null, "Type object cant be NULL");
+            Type orig = t;
+            do
+            {
+                SqlUdtInfo attr = SqlUdtInfo.TryGetFromType(t);
+                if (attr != null)
+                {
+                    return attr;
+                }
+                else
+                {
+                    t = t.BaseType;
+                }
+            }
+            while (t != null);
+
+            throw SQL.UDTInvalidSqlType(orig.AssemblyQualifiedName);
+        }
+    }
+}
 
 
