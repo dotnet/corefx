@@ -45,6 +45,22 @@ def windowsPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'b
 	}
 }
 
+// Create a pipeline for UAP F5
+def uapPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'buildpipeline/uap-windows.groovy')
+['uap'].each { targetGroup ->
+    ['Debug', 'Release'].each { configurationGroup ->
+        ['Windows x64'].each { osName ->
+            // Runs the uap-windows.groovy pipeline on the target Helix queues mentioned in the pipeline.  Currently:
+            // Windows 10
+
+            // One for just innerloop
+            uapPipeline.triggerPipelineOnEveryGithubPR("UAP F5 ${osName} ${configurationGroup} Build", ['Config':configurationGroup, 'OuterLoop':false])
+            // Add one for outerloop
+            uapPipeline.triggerPipelineOnGithubPRComment("UAP F5 Outerloop ${osName} ${configurationGroup} Build", ['Config':configurationGroup, 'OuterLoop':true])
+        }
+    }
+}
+
 JobReport.Report.generateJobReport(out)
 
 // Make the call to generate the help job

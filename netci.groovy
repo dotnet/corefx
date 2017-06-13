@@ -214,7 +214,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 // Define target group vertical builds that will run on every merge.
 // **************************
 [true, false].each { isPR ->
-    ['uap', 'uapaot'].each { targetGroup ->
+    ['uapaot'].each { targetGroup ->
         ['Debug'].each { configurationGroup ->
             ['Windows_NT'].each { osName ->
                 def osGroup = osGroupMap[osName]
