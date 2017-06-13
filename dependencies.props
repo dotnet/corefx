@@ -16,7 +16,7 @@
     <ProjectNTfsCurrentRef>5002272371cd242387eb84c160da4e1449e0f483</ProjectNTfsCurrentRef>
     <ProjectNTfsTestILCCurrentRef>5002272371cd242387eb84c160da4e1449e0f483</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
-    <StandardCurrentRef>a6407630f7f63db38f7be5a867f6f5c4f904ad31</StandardCurrentRef>
+    <StandardCurrentRef>0f1e01558a6b20dfb5fd458639e65f171696f3bd</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
@@ -27,7 +27,7 @@
     <ProjectNTfsExpectedPrerelease>beta-25317-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25317-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25317-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.0-preview2-25401-01</NETStandardPackageVersion>
+    <NETStandardPackageVersion>2.0.0-preview3-25413-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.0.0-preview2-25317-03</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
