@@ -57,6 +57,7 @@ namespace System.ComponentModel.Tests
 
             yield return new object[] { CategoryAttribute.Action, null, false };
             yield return new object[] { CategoryAttribute.Action, new object(), false };
+            yield return new object[] { new CategoryAttribute(null), null, false };
         }
 
         [Theory]

@@ -45,7 +45,7 @@ namespace System.ComponentModel
             }
 
             DescriptionAttribute other = obj as DescriptionAttribute;
-            return other?.Description == Description;
+            return other != null && other.Description == Description;
         }
 
         public override int GetHashCode() => Description.GetHashCode();

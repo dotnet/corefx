@@ -50,6 +50,7 @@ namespace System.ComponentModel.Tests
 
             yield return new object[] { new DesignerCategoryAttribute("category"), new object(), false };
             yield return new object[] { new DesignerCategoryAttribute("category"), null, false };
+            yield return new object[] { new DesignerCategoryAttribute(null), null, false };
         }
 
         [Theory]

@@ -73,7 +73,7 @@ namespace System.ComponentModel
             }
 
             DesignerCategoryAttribute other = obj as DesignerCategoryAttribute;
-            return other?.Category == Category;
+            return other != null && other.Category == Category;
         }
 
         public override int GetHashCode() => Category.GetHashCode();

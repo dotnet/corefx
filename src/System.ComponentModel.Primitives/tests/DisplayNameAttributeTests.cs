@@ -40,6 +40,7 @@ namespace System.ComponentModel.Tests
 
             yield return new object[] { new DisplayNameAttribute("name"), new object(), false };
             yield return new object[] { new DisplayNameAttribute("name"), null, false };
+            yield return new object[] { new DisplayNameAttribute(null), null, false };
         }
 
         [Theory]

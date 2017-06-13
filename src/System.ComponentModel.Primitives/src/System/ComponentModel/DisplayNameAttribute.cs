@@ -45,7 +45,7 @@ namespace System.ComponentModel
             }
 
             DisplayNameAttribute other = obj as DisplayNameAttribute;
-            return other?.DisplayName == DisplayName;
+            return other != null && other.DisplayName == DisplayName;
         }
 
         public override int GetHashCode() => DisplayName.GetHashCode();
