@@ -161,18 +161,6 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Equal(new byte[] { 1, 2, 3 }, attribute[0]);
         }
 
-        [Fact]
-        public void Indexer_SearchResult_GetReturnsExpected()
-        {
-            var attribute = new DirectoryAttribute { "value", new byte[] { 97, 98, 99 }, new byte[] { 240, 144, 128 } };
-            FieldInfo field = attribute.GetType().GetField("isSearchResult", BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(attribute, true);
-
-            Assert.Equal("value", attribute[0]);
-            Assert.Equal("abc", attribute[1]);
-            Assert.Equal(new byte[] { 240, 144, 128 }, attribute[2]);
-        }
-
         [Theory]
         [InlineData(-1)]
         [InlineData(1)]

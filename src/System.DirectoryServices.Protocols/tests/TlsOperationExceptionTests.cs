@@ -66,26 +66,5 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Null(exception.Response);
             Assert.Same(innerException, exception.InnerException);
         }
-
-        [Fact]
-        public void SubClass_Deserialize_ThrowsPlatformNotSupportedException()
-        {
-            using (var stream = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(stream, new SubException());
-
-                stream.Position = 0;
-                TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => formatter.Deserialize(stream));
-                Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
-            }
-        }
-
-        [Serializable]
-        public class SubException : TlsOperationException
-        {
-            public SubException() : base() { }
-            public SubException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-        }
     }
 }
