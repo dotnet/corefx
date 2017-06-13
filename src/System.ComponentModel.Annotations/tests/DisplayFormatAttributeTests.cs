@@ -40,7 +40,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
-        public void HApplyFormatInEditMode_Set_GetReturnsExpected()
+        public void ApplyFormatInEditMode_Set_GetReturnsExpected()
         {
             var attribute = new DisplayFormatAttribute { ApplyFormatInEditMode = true };
             Assert.True(attribute.ApplyFormatInEditMode);
