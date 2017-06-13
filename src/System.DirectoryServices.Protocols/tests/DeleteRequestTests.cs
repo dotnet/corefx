@@ -11,8 +11,7 @@ namespace System.DirectoryServices.Protocols.Tests
         [Fact]
         public void Ctor_Default()
         {
-            var request
-                = new DeleteRequest();
+            var request = new DeleteRequest();
             Assert.Empty(request.Controls);
             Assert.Null(request.DistinguishedName);
             Assert.Null(request.RequestId);
