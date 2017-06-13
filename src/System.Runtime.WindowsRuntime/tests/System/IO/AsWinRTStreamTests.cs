@@ -140,33 +140,28 @@ namespace System.IO
         [Fact]
         public static void TestRead_MemoryStream_None()
         {
-            DoTestRead(() => { return TestStreamProvider.CreateMemoryStreamAsInputStream(); }, InputStreamOptions.None, false, true);
+            DoTestRead(TestStreamProvider.CreateMemoryStreamAsInputStream, InputStreamOptions.None, mustInvokeProgressHandler: false, completesSynchronously: true);
         }
 
         [Fact]
         public static void TestRead_MemoryStream_Partial()
         {
-            DoTestRead(() => { return TestStreamProvider.CreateMemoryStreamAsInputStream(); }, InputStreamOptions.Partial, false, true);
+            DoTestRead(TestStreamProvider.CreateMemoryStreamAsInputStream, InputStreamOptions.Partial, mustInvokeProgressHandler: false, completesSynchronously: true);
         }
 
         [Fact]
         public static void TestWrite_MemoryStream()
         {
-            DoTestWrite(() => { return TestStreamProvider.CreateMemoryStream(); }, false);
+            DoTestWrite(TestStreamProvider.CreateMemoryStream, mustInvokeProgressHandler: false);
         }
-
-        private static volatile bool s_progressCallbackInvoked = false;
-        private static volatile bool s_completedCallbackInvoked = false;
-        private static volatile IBuffer s_buffer;
-        private static volatile uint s_resultBytesWritten = 0;
 
         private static void DoTestRead(Func<IInputStream> createStreamFunc, InputStreamOptions inputStreamOptions, bool mustInvokeProgressHandler, bool completesSynchronously)
         {
 
             IInputStream stream = createStreamFunc();
-            s_buffer = WindowsRuntimeBuffer.Create(TestStreamProvider.ModelStreamLength);
+            IBuffer buffer = WindowsRuntimeBuffer.Create(TestStreamProvider.ModelStreamLength);
 
-            IAsyncOperationWithProgress<IBuffer, uint> readOp = stream.ReadAsync(s_buffer, (uint)TestStreamProvider.ModelStreamLength, inputStreamOptions);
+            IAsyncOperationWithProgress<IBuffer, uint> readOp = stream.ReadAsync(buffer, (uint)TestStreamProvider.ModelStreamLength, inputStreamOptions);
 
             if (completesSynchronously)
             {
@@ -180,16 +175,15 @@ namespace System.IO
                 Assert.True(readOpStatus == AsyncStatus.Completed || readOpStatus == AsyncStatus.Started, "New readOp must have Status = Started or Completed (race)");
             }
 
-            s_progressCallbackInvoked = false;
-            s_completedCallbackInvoked = false;
+            bool progressCallbackInvoked = false;
+            bool completedCallbackInvoked = false;
 
             uint readOpId = readOp.Id;
             EventWaitHandle waitHandle = new ManualResetEvent(false);
 
             readOp.Progress = (asyncReadOp, bytesCompleted) =>
             {
-
-                s_progressCallbackInvoked = true;
+                progressCallbackInvoked = true;
 
                 // asyncReadOp.Id in a progress callback must match the ID of the asyncReadOp to which the callback was assigned
                 Assert.Equal(readOpId, asyncReadOp.Id);
@@ -197,15 +191,15 @@ namespace System.IO
                 // asyncReadOp.Status must be 'Started' for a asyncReadOp in progress
                 Assert.Equal(AsyncStatus.Started, asyncReadOp.Status);
 
-                Assert.True(0 <= bytesCompleted && bytesCompleted <= (uint)TestStreamProvider.ModelStreamLength,
-                    "bytesCompleted must be in range [0, maxBytesToRead] asyncReadOp in progress");
+                // bytesCompleted must be in range [0, maxBytesToRead] asyncReadOp in progress
+                Assert.InRange(bytesCompleted, 0u, (uint)TestStreamProvider.ModelStreamLength);
             };
 
             readOp.Completed = (asyncReadOp, passedStatus) =>
             {
                 try
                 {
-                    s_completedCallbackInvoked = true;
+                    completedCallbackInvoked = true;
 
                     // asyncReadOp.Id in a completion callback must match the ID of the asyncReadOp to which the callback was assigned
                     Assert.Equal(readOpId, asyncReadOp.Id);
@@ -221,14 +215,9 @@ namespace System.IO
                     // asyncReadOp.GetResults() must not return null for a completed asyncReadOp
                     Assert.NotNull(resultBuffer);
 
-                    Assert.True(0 < resultBuffer.Capacity,
-                        "resultBuffer.Capacity when a completed asyncReadOp was expected to read more than zero bytes");
-
-                    Assert.True(0 < resultBuffer.Length,
-                        "resultBuffer.Length when a completed asyncReadOp was expected to read more than zero bytes");
-
-                    Assert.True(resultBuffer.Length <= resultBuffer.Capacity,
-                                           "resultBuffer.Length <= resultBuffer.Capacity is required for a completed asyncReadOp");
+                    AssertExtensions.GreaterThan(resultBuffer.Capacity, 0u, "resultBuffer.Capacity should be more than zero in completed callback");
+                    AssertExtensions.GreaterThan(resultBuffer.Length, 0u, "resultBuffer.Length should be more than zero in completed callback");
+                    AssertExtensions.LessThanOrEqualTo(resultBuffer.Length, resultBuffer.Capacity, "resultBuffer.Length should be <= Capacity in completed callback");
 
                     if (inputStreamOptions == InputStreamOptions.None)
                     {
@@ -239,11 +228,10 @@ namespace System.IO
 
                     if (inputStreamOptions == InputStreamOptions.Partial)
                     {
-                        Assert.True(resultBuffer.Length <= TestStreamProvider.ModelStreamLength,
-                            "resultBuffer.Length must be smaller-or-equal to requested number of bytes when an asyncReadOp with"
-                            + " InputStreamOptions.Partial completes successfully");
+                        AssertExtensions.LessThanOrEqualTo(resultBuffer.Length, (uint)TestStreamProvider.ModelStreamLength,
+                            "resultBuffer.Length must be <= requested number of bytes with InputStreamOptions.Partial in completed callback");
                     }
-                    s_buffer = resultBuffer;
+                    buffer = resultBuffer;
                 }
                 finally
                 {
@@ -260,43 +248,37 @@ namespace System.IO
 
             if (mustInvokeProgressHandler)
             {
-                Assert.True(s_progressCallbackInvoked,
+                Assert.True(progressCallbackInvoked,
                     "Progress callback specified to ReadAsync callback must be invoked when reading from this kind of stream");
             }
 
-            Assert.True(s_completedCallbackInvoked,
+            Assert.True(completedCallbackInvoked,
                 "Completion callback specified to ReadAsync callback must be invoked");
 
             // readOp.Status must be 'Completed' for a completed async readOp
             Assert.Equal(AsyncStatus.Completed, readOp.Status);
 
-            Assert.True(0 < s_buffer.Capacity,
-                "buffer.Capacity when a completed async readOp was expected to read more than zero bytes");
-
-            Assert.True(0 < s_buffer.Length,
-                "buffer.Length when a completed async readOp was expected to read more than zero bytes");
-
-            Assert.True(s_buffer.Length <= s_buffer.Capacity,
-                "buffer.Length <= buffer.Capacity is required for a completed async readOp");
+            AssertExtensions.GreaterThan(buffer.Capacity, 0u, "buffer.Capacity should be greater than zero bytes");
+            AssertExtensions.GreaterThan(buffer.Length, 0u, "buffer.Length should be greater than zero bytes");
+            AssertExtensions.LessThanOrEqualTo(buffer.Length, buffer.Capacity, "buffer.Length <= buffer.Capacity is required for a completed async readOp");
 
             if (inputStreamOptions == InputStreamOptions.None)
             {
                 // buffer.Length must be equal to requested number of bytes when an async readOp with
                 //  InputStreamOptions.None completes successfully
-                Assert.Equal((uint)TestStreamProvider.ModelStreamLength, s_buffer.Length);
+                Assert.Equal((uint)TestStreamProvider.ModelStreamLength, buffer.Length);
             }
 
             if (inputStreamOptions == InputStreamOptions.Partial)
             {
-                Assert.True(s_buffer.Length <= TestStreamProvider.ModelStreamLength,
-                    "buffer.Length must be smaller-or-equal to requested number of bytes when an async readOp with"
-                    + " InputStreamOptions.Partial completes successfully");
+                AssertExtensions.LessThanOrEqualTo(buffer.Length, (uint)TestStreamProvider.ModelStreamLength,
+                    "resultBuffer.Length must be <= requested number of bytes with InputStreamOptions.Partial");
             }
 
-            byte[] results = new byte[s_buffer.Length];
-            s_buffer.CopyTo(0, results, 0, (int)s_buffer.Length);
+            byte[] results = new byte[buffer.Length];
+            buffer.CopyTo(0, results, 0, (int)buffer.Length);
 
-            Assert.True(TestStreamProvider.CheckContent(results, 0, (int)s_buffer.Length),
+            Assert.True(TestStreamProvider.CheckContent(results, 0, (int)buffer.Length),
                 "Result data returned from AsyncRead must be the same as expected from the test data source");
         }
 
@@ -327,14 +309,15 @@ namespace System.IO
                 Assert.True(writeOpStatus == AsyncStatus.Completed || writeOpStatus == AsyncStatus.Started, "New writeOp must have Status = Started or Completed (race)");
 
                 uint writeOpId = writeOp.Id;
-                s_progressCallbackInvoked = false;
-                s_completedCallbackInvoked = false;
+                bool progressCallbackInvoked = false;
+                bool completedCallbackInvoked = false;
+                uint resultBytesWritten = 0;
 
                 EventWaitHandle waitHandle = new ManualResetEvent(false);
 
                 writeOp.Progress = (asyncWriteOp, bytesCompleted) =>
                 {
-                    s_progressCallbackInvoked = true;
+                    progressCallbackInvoked = true;
 
                     // asyncWriteOp.Id in a progress callback must match the ID of the asyncWriteOp to which the callback was assigned
                     Assert.Equal(writeOpId, asyncWriteOp.Id);
@@ -342,15 +325,15 @@ namespace System.IO
                     // asyncWriteOp.Status must be 'Started' for a asyncWriteOp in progress
                     Assert.Equal(AsyncStatus.Started, asyncWriteOp.Status);
 
-                    Assert.True(0 <= bytesCompleted && bytesCompleted <= (uint)TestStreamProvider.ModelStreamLength,
-                        "bytesCompleted must be in range [0, maxBytesToWrite] asyncWriteOp in progress");
+                    // bytesCompleted must be in range [0, maxBytesToWrite] asyncWriteOp in progress
+                    Assert.InRange(bytesCompleted, 0u, (uint)TestStreamProvider.ModelStreamLength);
                 };
 
                 writeOp.Completed = (asyncWriteOp, passedStatus) =>
                 {
                     try
                     {
-                        s_completedCallbackInvoked = true;
+                        completedCallbackInvoked = true;
 
                         // asyncWriteOp.Id in a completion callback must match the ID of the asyncWriteOp to which the callback was assigned
                         Assert.Equal(writeOpId, asyncWriteOp.Id);
@@ -366,7 +349,7 @@ namespace System.IO
                         // asyncWriteOp.GetResults() must return that all required bytes were written for a completed asyncWriteOp
                         Assert.Equal((uint)modelWriteData.Length, bytesWritten);
 
-                        s_resultBytesWritten = bytesWritten;
+                        resultBytesWritten = bytesWritten;
                     }
                     finally
                     {
@@ -383,17 +366,17 @@ namespace System.IO
 
                 if (mustInvokeProgressHandler)
                 {
-                    Assert.True(s_progressCallbackInvoked,
+                    Assert.True(progressCallbackInvoked,
                         "Progress callback specified to WriteAsync callback must be invoked when reading from this kind of stream");
                 }
 
-                Assert.True(s_completedCallbackInvoked, "Completion callback specified to WriteAsync callback must be invoked");
+                Assert.True(completedCallbackInvoked, "Completion callback specified to WriteAsync callback must be invoked");
 
                 // writeOp.Status must be 'Completed' for a completed async writeOp
                 Assert.Equal(AsyncStatus.Completed, writeOp.Status);
 
                 // writeOp.GetResults() must return that all required bytes were written for a completed async writeOp
-                Assert.Equal((uint)modelWriteData.Length, s_resultBytesWritten);
+                Assert.Equal((uint)modelWriteData.Length, resultBytesWritten);
 
                 // Check contents
 
