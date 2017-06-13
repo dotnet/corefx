@@ -9,7 +9,7 @@ namespace System.ComponentModel.Tests
     public class EventHandlerListTests
     {
         [Fact]
-        public void AddHandle_RemoveHandle_Roundtrips()
+        public void AddHandler_RemoveHandler_Roundtrips()
         {
             var list = new EventHandlerList();
 
@@ -38,7 +38,7 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public void AddHandle_SameKey_CombinesDelegates()
+        public void AddHandler_SameKey_CombinesDelegates()
         {
             var list = new EventHandlerList();
 
