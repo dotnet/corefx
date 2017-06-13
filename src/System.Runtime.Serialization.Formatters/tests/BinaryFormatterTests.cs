@@ -42,7 +42,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ValidateAgainstBlobs(object obj, string[] blobs)
         {
             if (blobs == null || blobs.Length == 0)
