@@ -400,7 +400,6 @@
     <Compile Include="mono\Locale.cs" />
     <Compile Include="mono\MonoTODOAttribute.cs" />
     <!-- Shared with Windows -->
-    <Compile Include="System\ComponentModel\InvalidEnumArgumentException.cs" />
     <Compile Include="System/Drawing/BitmapSuffixInSameAssemblyAttribute.cs" />
     <Compile Include="System/Drawing/BitmapSuffixInSatelliteAssemblyAttribute.cs" />
     <Compile Include="System/Drawing/IDeviceContext.cs" />
