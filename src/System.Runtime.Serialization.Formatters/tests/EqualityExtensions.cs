@@ -574,9 +574,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (!(@this != null &&
                 other != null &&
-                @this.IsReadOnly == other.IsReadOnly &&
-                @this.Count == other.Count &&
-                @this.IsSynchronized == other.IsSynchronized))
+                @this.Count == other.Count))
                 return false;
 
             return BinaryFormatterTests.CheckSequenceEquals(@this, other);

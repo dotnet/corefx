@@ -10,6 +10,7 @@ using System.Text;
 
 namespace System.Net
 {
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
     public enum CookieVariant
     {
         Unknown,
