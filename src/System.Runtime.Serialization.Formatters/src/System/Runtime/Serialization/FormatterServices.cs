@@ -207,7 +207,14 @@ namespace System.Runtime.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            foreach (Attribute first in type.GetCustomAttributes(typeof(TypeForwardedFromAttribute), false))
+            // Special case types likes primitive type arrays
+            Type attributedType = type;
+            if (type.HasElementType)
+            {
+                attributedType = type.GetElementType();
+            }
+
+            foreach (Attribute first in attributedType.GetCustomAttributes(typeof(TypeForwardedFromAttribute), false))
             {
                 hasTypeForwardedFrom = true;
                 return ((TypeForwardedFromAttribute)first).AssemblyFullName;

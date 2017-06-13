@@ -984,7 +984,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             {
                 assemId = 0;
             }
-            else if (Converter.s_urtAssembly.GetType(objectInfo.GetTypeFullName(), throwOnError: false) == objectInfo._objectType)
+            else if (assemblyString.Equals(Converter.s_urtAssemblyString))
             {
                 // Urt type is an assemId of 0. No assemblyString needs
                 // to be sent 

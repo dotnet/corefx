@@ -57,7 +57,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                             typeInformation = objectInfo.GetTypeFullName();
                         }
 
-                        if (Converter.s_urtAssembly.GetType(objectInfo.GetTypeFullName(), throwOnError: false) == objectInfo._objectType)
+                        if (assembly.Equals(Converter.s_urtAssemblyString))
                         {
                             binaryTypeEnum = BinaryTypeEnum.ObjectUrt;
                             assemId = 0;
