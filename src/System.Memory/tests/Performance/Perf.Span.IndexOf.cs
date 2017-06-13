@@ -16,14 +16,13 @@ namespace System.Memory.Tests
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
-        [InlineData(10000)]
         public void SpanIndexOfChar(int size)
         {
             Span<char> charSpan = new char[size];
             charSpan[size/2] = '5';
 
             int index = 0;
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
@@ -41,7 +40,6 @@ namespace System.Memory.Tests
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
-        [InlineData(10000)]
         public void SpanIndexOfCharAsBytes(int size)
         {
             Span<char> charSpan = new char[size];
@@ -49,7 +47,7 @@ namespace System.Memory.Tests
             Span<byte> byteSpan = charSpan.AsBytes();
 
             int index = 0;
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
@@ -67,7 +65,6 @@ namespace System.Memory.Tests
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
-        [InlineData(10000)]
         public void StringIndexOfChar(int size)
         {
             string str = new string('0', size/2) + "5";
@@ -77,7 +74,7 @@ namespace System.Memory.Tests
             }
 
             int index = 0;
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
