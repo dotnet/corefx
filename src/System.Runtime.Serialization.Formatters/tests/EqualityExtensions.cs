@@ -198,7 +198,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (!(@this != null &&
                 other != null &&
-                @this.Count != other.Count &&
+                @this.Count == other.Count &&
                 BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer)))
                 return false;
 
