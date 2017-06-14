@@ -591,14 +591,13 @@ namespace System.Net
                     string[] ports = value.Split(PortSplitDelimiters);
 
                     List<int> portList = new List<int>();
-                    int port;
 
                     for (int i = 0; i < ports.Length; ++i)
                     {
                         // Skip spaces
                         if (ports[i] != string.Empty)
                         {
-                            if (!Int32.TryParse(ports[i], out port))
+                            if (!Int32.TryParse(ports[i], out int port))
                             {
                                 throw new CookieException(SR.Format(SR.net_cookie_attribute, CookieFields.PortAttributeName, value));
                             }
