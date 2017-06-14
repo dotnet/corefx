@@ -1,5 +1,4 @@
-# Networking team expect to replace this implementation for UWP, at which
-# point this baseline will go away
+# Discussing with Networking team
 sspicli.dll!AcceptSecurityContext
 sspicli.dll!AcquireCredentialsHandleW
 sspicli.dll!ApplyControlToken
