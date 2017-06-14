@@ -742,8 +742,8 @@ namespace System.Net
             int port = uri.Port;
             CookieCollection cookies = null;
 
-            var domainAttributeMatchAnyCookieVariant = new Collections.Generic.List<string>();
-            Collections.Generic.List<string> domainAttributeMatchOnlyCookieVariantPlain = null;
+            var domainAttributeMatchAnyCookieVariant = new System.Collections.Generic.List<string>();
+            System.Collections.Generic.List<string> domainAttributeMatchOnlyCookieVariantPlain = null;
 
             string fqdnRemote = uri.Host;
 
@@ -787,7 +787,7 @@ namespace System.Net
                         {
                             if (domainAttributeMatchOnlyCookieVariantPlain == null)
                             {
-                                domainAttributeMatchOnlyCookieVariantPlain = new Collections.Generic.List<string>();
+                                domainAttributeMatchOnlyCookieVariantPlain = new System.Collections.Generic.List<string>();
                             }
 
                             // These candidates can only match CookieVariant.Plain cookies.
@@ -806,14 +806,14 @@ namespace System.Net
             return cookies;
         }
 
-        private void BuildCookieCollectionFromDomainMatches(Uri uri, bool isSecure, int port, ref CookieCollection cookies, Collections.Generic.List<string> domainAttribute, bool matchOnlyPlainCookie)
+        private void BuildCookieCollectionFromDomainMatches(Uri uri, bool isSecure, int port, ref CookieCollection cookies, System.Collections.Generic.List<string> domainAttribute, bool matchOnlyPlainCookie)
         {
             for (int i = 0; i < domainAttribute.Count; i++)
             {
                 bool found = false;
                 bool defaultAdded = false;
                 PathList pathList;
-                lock (m_domainTable)
+                lock (m_domainTable.SyncRoot)
                 {
                     object pathListValue = m_domainTable[domainAttribute[i]];
                     if (pathListValue == null)
@@ -863,7 +863,7 @@ namespace System.Net
                 // (This is the only place that does domain removal)
                 if (pathList.Count == 0)
                 {
-                    lock (m_domainTable)
+                    lock (m_domainTable.SyncRoot)
                     {
                         m_domainTable.Remove(domainAttribute[i]);
                     }
@@ -1073,7 +1073,7 @@ namespace System.Net
 
         [Serializable]
         [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-        sealed class PathListComparer : IComparer
+        private sealed class PathListComparer : IComparer
         {
             internal static readonly PathListComparer StaticInstance = new PathListComparer();
 

@@ -198,7 +198,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (!(@this != null &&
                 other != null &&
-                @this.Count == other.Count &&
+                @this.Count != other.Count &&
                 BinaryFormatterTests.CheckEquals(@this.Comparer, other.Comparer)))
                 return false;
 
@@ -857,7 +857,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Query == other.Query &&
                 @this.Fragment == other.Fragment &&
                 @this.Scheme == other.Scheme &&
-                //@this.OriginalString == other.OriginalString && // TODO
                 @this.DnsSafeHost == other.DnsSafeHost &&
                 @this.IdnHost == other.IdnHost &&
                 @this.IsAbsoluteUri == other.IsAbsoluteUri &&

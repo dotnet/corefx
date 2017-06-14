@@ -17,15 +17,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     {
         private static void CheckForAnyEquals(object obj, object deserializedObj)
         {
-            try
-            {
-                Assert.True(CheckEquals(obj, deserializedObj));
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error during equality check of type " + obj?.GetType()?.FullName);
-                throw;
-            }
+            Assert.True(CheckEquals(obj, deserializedObj), "Error during equality check of type " + obj?.GetType()?.FullName);
         }
 
         public static bool CheckEquals(object objA, object objB)
