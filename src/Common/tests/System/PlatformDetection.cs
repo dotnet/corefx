@@ -457,5 +457,28 @@ namespace System
                 return version >= Start && (Finish == null || version <= Finish);
             }
         }
+
+        public static bool IsEnvironmentCommandLineArgsSupported => s_IsEnvironmentCommandLineArgsSupported.Value;
+
+        private static readonly Lazy<bool> s_IsEnvironmentCommandLineArgsSupported = new Lazy<bool>(
+            delegate ()
+            {
+                if (!PlatformDetection.IsNetNative)
+                    return true;
+
+                try
+                {
+                    Environment.GetCommandLineArgs();
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    return false;
+                }
+                catch
+                {
+                    return true; // Hmm - threw something but not PNSE. Let the tests loose on it and report what they find...
+                }
+                return true;
+            });
     }
 }
