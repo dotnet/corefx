@@ -4,9 +4,9 @@
     <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
     <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(OSGroup)-$(ArchGroup)/</IntermediateOutputPath>
-    <RuntimeOS Condition="'$(PortableBuild)' == 'true'">linux</RuntimeOS>
-    <RuntimeOS Condition="'$(PortableBuild)' == 'true' and '$(_runtimeOSFamily)' == 'win'">win</RuntimeOS>
-    <RuntimeOS Condition="'$(PortableBuild)' == 'true' and '$(_runtimeOSFamily)' == 'osx'">osx</RuntimeOS>
+    <RuntimeOS>linux</RuntimeOS>
+    <RuntimeOS Condition="'$(_runtimeOSFamily)' == 'win'">win</RuntimeOS>
+    <RuntimeOS Condition="'$(_runtimeOSFamily)' == 'osx'">osx</RuntimeOS>
     <NugetRuntimeIdentifier>$(RuntimeOS)-$(ArchGroup)</NugetRuntimeIdentifier>
     <ContainsPackageReferences>true</ContainsPackageReferences>
     <!-- We need configuration-specific assets files. -->
