@@ -17,7 +17,10 @@ namespace System.Threading.ThreadPools.Tests
         static ThreadPoolTests()
         {
             // Run the following tests before any others
-            ConcurrentInitializeTest();
+            if (!PlatformDetection.IsNetNative)
+            {
+                ConcurrentInitializeTest();
+            }
         }
 
         // Tests concurrent calls to ThreadPool.SetMinThreads
