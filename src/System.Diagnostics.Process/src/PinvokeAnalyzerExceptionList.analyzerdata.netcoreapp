@@ -1,3 +1,5 @@
+# Not available in OneCore: we fall back gracefully on Nano because
+# stub APIs are present and our tests currently don't use actual windows
 shell32.dll!ShellExecuteExW
 user32.dll!EnumWindows
 user32.dll!GetWindow
