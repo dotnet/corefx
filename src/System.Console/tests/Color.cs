@@ -48,7 +48,6 @@ public class Color
             const char Esc = (char)0x1B;
             Assert.Equal(0, Encoding.UTF8.GetString(data.ToArray()).ToCharArray().Count(c => c == Esc));
             Assert.Equal("1234", Encoding.UTF8.GetString(data.ToArray()));
-            Assert.Equal(0, 1));
         });
     }
 
