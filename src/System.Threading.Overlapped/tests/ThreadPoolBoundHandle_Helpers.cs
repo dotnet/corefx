@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
-public partial class ThreadPoolBoundHandleTests
+public partial class ThreadPoolBoundHandleTests : FileCleanupTestBase
 {
     struct BlittableType
     {
@@ -19,14 +20,14 @@ public partial class ThreadPoolBoundHandleTests
         public string s;
     }
 
-    private static ThreadPoolBoundHandle CreateThreadPoolBoundHandle()
+    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle()
     {
         return CreateThreadPoolBoundHandle((SafeHandle)null);
     }
 
-    private static ThreadPoolBoundHandle CreateThreadPoolBoundHandle(SafeHandle handle)
+    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle(SafeHandle handle)
     {
-        handle = handle ?? HandleFactory.CreateAsyncFileHandleForWrite();
+        handle = handle ?? HandleFactory.CreateAsyncFileHandleForWrite(GetTestFilePath());
 
         return ThreadPoolBoundHandle.BindHandle(handle);
     }
