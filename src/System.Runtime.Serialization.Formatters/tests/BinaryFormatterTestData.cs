@@ -1,4 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Globalization;
@@ -204,6 +208,107 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 TreeArray = new Tree<int>[] { new Tree<int>(1, new Tree<int>(2, null, null), new Tree<int>(3, null, null)) }
             };
             yield return new object[] { objectWithArrays, new string[] { "AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAA+U3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLk9iamVjdFdpdGhBcnJheXMGAAAACEludEFycmF5C1N0cmluZ0FycmF5CVRyZWVBcnJheQlCeXRlQXJyYXkLSmFnZ2VkQXJyYXkVTXVsdGlEaW1lbnNpb25hbEFycmF5BwYEBwMDCJMBU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlRyZWVgMVtbU3lzdGVtLkludDMyLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXVtdAgAAAAIQU3lzdGVtLkludDMyW11bXQ9TeXN0ZW0uSW50MzJbLF0CAAAACQMAAAAJBAAAAAkFAAAACQYAAAAJBwAAAAkIAAAADwMAAAAAAAAACBEEAAAAAgAAAAYJAAAABWhlbGxvBgoAAAAFd29ybGQHBQAAAAABAAAAAQAAAASRAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5UcmVlYDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0CAAAACQsAAAAPBgAAABQAAAACAAECAwQFBgcICQoLDA0ODxAREhMHBwAAAAEBAAAAAgAAAAcICQwAAAAJDQAAAAcIAAAAAgIAAAADAAAAAgAAAAAIAQAAAAIAAAADAAAABAAAAAUAAAAGAAAABQsAAACRAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5UcmVlYDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAAFjxWYWx1ZT5rX19CYWNraW5nRmllbGQVPExlZnQ+a19fQmFja2luZ0ZpZWxkFjxSaWdodD5rX19CYWNraW5nRmllbGQABAQIkQFTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVHJlZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAgAAAJEBU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlRyZWVgMVtbU3lzdGVtLkludDMyLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQIAAAACAAAAAQAAAAkOAAAACQ8AAAAPDAAAAAMAAAAIAQAAAAIAAAADAAAADw0AAAAEAAAACAQAAAAFAAAABgAAAAcAAAABDgAAAAsAAAACAAAACgoBDwAAAAsAAAADAAAACgoL", "AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAA+U3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLk9iamVjdFdpdGhBcnJheXMGAAAACEludEFycmF5C1N0cmluZ0FycmF5CVRyZWVBcnJheQlCeXRlQXJyYXkLSmFnZ2VkQXJyYXkVTXVsdGlEaW1lbnNpb25hbEFycmF5BwYEBwMDCJMBU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlRyZWVgMVtbU3lzdGVtLkludDMyLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXVtdAgAAAAIQU3lzdGVtLkludDMyW11bXQ9TeXN0ZW0uSW50MzJbLF0CAAAACQMAAAAJBAAAAAkFAAAACQYAAAAJBwAAAAkIAAAADwMAAAAAAAAACBEEAAAAAgAAAAYJAAAABWhlbGxvBgoAAAAFd29ybGQHBQAAAAABAAAAAQAAAASRAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5UcmVlYDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0CAAAACQsAAAAPBgAAABQAAAACAAECAwQFBgcICQoLDA0ODxAREhMHBwAAAAEBAAAAAgAAAAcICQwAAAAJDQAAAAcIAAAAAgIAAAADAAAAAgAAAAAIAQAAAAIAAAADAAAABAAAAAUAAAAGAAAABQsAAACRAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5UcmVlYDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAAFjxWYWx1ZT5rX19CYWNraW5nRmllbGQVPExlZnQ+a19fQmFja2luZ0ZpZWxkFjxSaWdodD5rX19CYWNraW5nRmllbGQABAQIkQFTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuVHJlZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAgAAAJEBU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlRyZWVgMVtbU3lzdGVtLkludDMyLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQIAAAACAAAAAQAAAAkOAAAACQ8AAAAPDAAAAAMAAAAIAQAAAAIAAAADAAAADw0AAAAEAAAACAQAAAAFAAAABgAAAAcAAAABDgAAAAsAAAACAAAACgoBDwAAAAsAAAADAAAACgoL" } };
+
+            yield return new object[] { new List<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<int>(Enumerable.Range(0, 123)), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new List<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new Dictionary<int, int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Dictionary<int, Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Dictionary<int, Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Dictionary<Tuple<int, Point>, Graph<int>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new CookieCollection(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new PropertyCollection(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new ArrayList(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ArrayList(Enumerable.Range(0, 123).ToArray()), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ArrayList(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ArrayList(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ArrayList(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new HashSet<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<int>(Enumerable.Range(0, 123)), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HashSet<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new LinkedList<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<int>(Enumerable.Range(0, 123)), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new LinkedList<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new Queue(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Queue(Enumerable.Range(0, 123).ToArray()), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Queue(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Queue(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Queue(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new SortedDictionary<int, int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedDictionary<int, Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedDictionary<int, Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedDictionary<Tuple<int, Point>, Graph<int>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new SortedList(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new SortedSet<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<int>(Enumerable.Range(0, 123)), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new SortedSet<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new Stack(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Stack(Enumerable.Range(0, 123).ToArray()), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Stack(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Stack(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Stack(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new Hashtable(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new BindingList<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<int>(Enumerable.Range(0, 123).ToArray()), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new BindingList<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new StringDictionary(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new StringCollection(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new OrderedDictionary(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new NameValueCollection(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ListDictionary(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new HybridDictionary(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new ObservableCollection<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<int>(Enumerable.Range(0, 123)), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new ObservableCollection<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new SimpleKeyedCollection(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+
+            yield return new object[] { new Collection<int>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<int>(Enumerable.Range(0, 123).ToArray()), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<int>(new int[] { 5, 7, 9 }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<Point>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<Point>(new Point[] { new Point(1, 2), new Point(4, 3) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<Tuple<int, Graph<int>>>(), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
+            yield return new object[] { new Collection<Tuple<int, Graph<int>>>(new Tuple<int, Graph<int>>[] { Tuple.Create(1, new Graph<int>()), Tuple.Create(5, new Graph<int>()) }), new string[] { "AAEAAAD/////", "AAEAAAD/////" } };
 
             // .NET Native bug 445667 causes a crash in reflecting over multidimensional arrays
             if (!PlatformDetection.IsNetNative)
