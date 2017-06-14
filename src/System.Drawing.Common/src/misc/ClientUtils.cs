@@ -124,15 +124,15 @@ namespace System.Drawing
 
 #if DEBUG      
         [ThreadStatic]
-        private static Hashtable t_enumValueInfo;
-        public const int MAXCACHE = 300;  // we think we're going to get O(100) of these, put in a tripwire if it gets larger.
+        private static Hashtable s_enumValueInfo;
+        public const int MaxCache = 300;  // we think we're going to get O(100) of these, put in a tripwire if it gets larger.
 
         private class SequentialEnumInfo
         {
             public SequentialEnumInfo(Type t)
             {
-                int actualMinimum = Int32.MaxValue;
-                int actualMaximum = Int32.MinValue;
+                int actualMinimum = int.MaxValue;
+                int actualMaximum = int.MinValue;
                 int countEnumVals = 0;
 
                 foreach (int iVal in Enum.GetValues(t))
@@ -150,51 +150,51 @@ namespace System.Drawing
             public int MaxValue;
         }
 
-        private static void Debug_SequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal)
+        private static void Debug_SequentialEnumIsDefinedCheck(Enum value, int minVal, int maxVal)
         {
             Type t = value.GetType();
 
-            if (t_enumValueInfo == null)
+            if (s_enumValueInfo == null)
             {
-                t_enumValueInfo = new Hashtable();
+                s_enumValueInfo = new Hashtable();
             }
 
             SequentialEnumInfo sequentialEnumInfo = null;
 
-            if (t_enumValueInfo.ContainsKey(t))
+            if (s_enumValueInfo.ContainsKey(t))
             {
-                sequentialEnumInfo = t_enumValueInfo[t] as SequentialEnumInfo;
+                sequentialEnumInfo = s_enumValueInfo[t] as SequentialEnumInfo;
             }
             if (sequentialEnumInfo == null)
             {
                 sequentialEnumInfo = new SequentialEnumInfo(t);
-                Debug.Assert(t_enumValueInfo.Count < MAXCACHE);
-                t_enumValueInfo[t] = sequentialEnumInfo;
+                Debug.Assert(s_enumValueInfo.Count <= MaxCache);
+                s_enumValueInfo[t] = sequentialEnumInfo;
             }
             Debug.Assert(minVal == sequentialEnumInfo.MinValue, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
             Debug.Assert(maxVal == sequentialEnumInfo.MaxValue, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
         }
 
-        private static void Debug_ValidateMask(System.Enum value, UInt32 mask)
+        private static void Debug_ValidateMask(Enum value, uint mask)
         {
-            Type t = value.GetType();
-            UInt32 newmask = 0;
-            foreach (int iVal in Enum.GetValues(t))
+            Type enumType = value.GetType();
+            uint newMask = 0;
+            foreach (int iVal in Enum.GetValues(enumType))
             {
-                newmask = newmask | (UInt32)iVal;
+                newMask = newMask | (uint)iVal;
             }
-            Debug.Assert(newmask == mask, "Mask not valid in IsEnumValid!");
+            Debug.Assert(newMask == mask, "Mask not valid in IsEnumValid!");
         }
 
-        private static void Debug_NonSequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal, int maxBitsOn, bool isValid)
+        private static void Debug_NonSequentialEnumIsDefinedCheck(Enum value, int minVal, int maxVal, int maxBitsOn, bool isValid)
         {
-            Type t = value.GetType();
-            int actualMinimum = Int32.MaxValue;
-            int actualMaximum = Int32.MinValue;
+            Type enumType = value.GetType();
+            int actualMinimum = int.MaxValue;
+            int actualMaximum = int.MinValue;
             int checkedValue = Convert.ToInt32(value, CultureInfo.InvariantCulture);
             int maxBitsFound = 0;
             bool foundValue = false;
-            foreach (int iVal in Enum.GetValues(t))
+            foreach (int iVal in Enum.GetValues(enumType))
             {
                 actualMinimum = Math.Min(actualMinimum, iVal);
                 actualMaximum = Math.Max(actualMaximum, iVal);

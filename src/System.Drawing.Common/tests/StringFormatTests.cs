@@ -11,6 +11,9 @@ namespace System.Drawing.Tests
 {
     public class StringFormatTests
     {
+        private const int RandomLanguageCode = 10;
+        private const int EnglishLanguageCode = 2057;
+
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
@@ -40,8 +43,8 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(StringFormatFlags.DirectionRightToLeft | StringFormatFlags.DirectionVertical, 10)]
-        [InlineData(StringFormatFlags.NoClip, 2057)]
+        [InlineData(StringFormatFlags.DirectionRightToLeft | StringFormatFlags.DirectionVertical, RandomLanguageCode)]
+        [InlineData(StringFormatFlags.NoClip, EnglishLanguageCode)]
         [InlineData((StringFormatFlags)(-1), -1)]
         public void Ctor_Options_Language(StringFormatFlags options, int language)
         {
@@ -58,7 +61,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Format()
         {
-            var original = new StringFormat(StringFormatFlags.NoClip, 2057);
+            var original = new StringFormat(StringFormatFlags.NoClip, EnglishLanguageCode);
             var format = new StringFormat(original);
             Assert.Equal(StringAlignment.Near, format.Alignment);
             Assert.Equal(0, format.DigitSubstitutionLanguage);
@@ -98,7 +101,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Valid_Success()
         {
-            var original = new StringFormat(StringFormatFlags.NoClip, 2057);
+            var original = new StringFormat(StringFormatFlags.NoClip, EnglishLanguageCode);
             var format = (StringFormat)original.Clone();
             Assert.Equal(StringAlignment.Near, format.Alignment);
             Assert.Equal(0, format.DigitSubstitutionLanguage);
@@ -123,7 +126,7 @@ namespace System.Drawing.Tests
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, StringDigitSubstitute.None, 0)]
-        [InlineData(2057, StringDigitSubstitute.Traditional, 2057)]
+        [InlineData(EnglishLanguageCode, StringDigitSubstitute.Traditional, EnglishLanguageCode)]
         [InlineData(int.MaxValue, StringDigitSubstitute.Traditional + 1, 65535)]
         [InlineData(-1, StringDigitSubstitute.User - 1, 65535)]
         public void SetDigitSubstitution_Invoke_SetsProperties(int language, StringDigitSubstitute substitute, int expectedLanguage)
