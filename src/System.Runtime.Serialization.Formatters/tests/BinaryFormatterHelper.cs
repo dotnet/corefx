@@ -30,6 +30,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool CheckEquals(object objA, object objB)
         {
+            if (objA == null && objB == null)
+                return true;
+
             if (objA != null && objB != null)
             {
                 object equalityResult = null;

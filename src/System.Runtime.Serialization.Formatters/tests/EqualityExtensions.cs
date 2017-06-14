@@ -207,6 +207,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool IsEqual(this LinkedListNode<Point> @this, LinkedListNode<Point> other)
         {
+            if (@this == null && other == null)
+                return true;
+
             return @this != null
                 && other != null &&
                 BinaryFormatterTests.CheckEquals(@this.Value, other.Value);
@@ -700,6 +703,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool IsEqual(this Point @this, Point other)
         {
+            if (@this == null && other == null)
+                return true;
+
             return @this != null &&
                 other != null &&
                 @this.X == other.X &&
