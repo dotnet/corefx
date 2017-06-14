@@ -142,17 +142,13 @@ namespace System.Drawing
                     countEnumVals++;
                 }
 
-                if (countEnumVals - 1 != (actualMaximum - actualMinimum))
-                {
-                    Debug.Fail("this enum cannot be sequential.");
-                }
+                Debug.Assert(countEnumVals - 1 == actualMaximum - actualMinimum);
                 MinValue = actualMinimum;
                 MaxValue = actualMaximum;
             }
             public int MinValue;
             public int MaxValue;
         }
-
 
         private static void Debug_SequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal)
         {
@@ -172,28 +168,12 @@ namespace System.Drawing
             if (sequentialEnumInfo == null)
             {
                 sequentialEnumInfo = new SequentialEnumInfo(t);
-
-                if (t_enumValueInfo.Count > MAXCACHE)
-                {
-                    // see comment next to MAXCACHE declaration.
-                    Debug.Fail("cache is too bloated, clearing out, we need to revisit this.");
-                    t_enumValueInfo.Clear();
-                }
+                Debug.Assert(t_enumValueInfo.Count < MAXCACHE);
                 t_enumValueInfo[t] = sequentialEnumInfo;
             }
-            if (minVal != sequentialEnumInfo.MinValue)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
-            }
-            if (maxVal != sequentialEnumInfo.MaxValue)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                Debug.Fail("Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
-            }
+            Debug.Assert(minVal == sequentialEnumInfo.MinValue, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(maxVal == sequentialEnumInfo.MaxValue, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
         }
-
-
 
         private static void Debug_ValidateMask(System.Enum value, UInt32 mask)
         {
@@ -203,7 +183,7 @@ namespace System.Drawing
             {
                 newmask = newmask | (UInt32)iVal;
             }
-            System.Diagnostics.Debug.Assert(newmask == mask, "Mask not valid in IsEnumValid!");
+            Debug.Assert(newmask == mask, "Mask not valid in IsEnumValid!");
         }
 
         private static void Debug_NonSequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal, int maxBitsOn, bool isValid)
@@ -224,25 +204,11 @@ namespace System.Drawing
                     foundValue = true;
                 }
             }
-            if (minVal != actualMinimum)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
-            }
-            if (maxVal != actualMaximum)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
-            }
 
-            if (maxBitsFound != maxBitsOn)
-            {
-                System.Diagnostics.Debug.Fail("Incorrect usage of IsEnumValid function. The bits set to 1 in this enum was found to be: " + maxBitsFound.ToString(CultureInfo.InvariantCulture) + "this does not match what's passed in: " + maxBitsOn.ToString(CultureInfo.InvariantCulture));
-            }
-            if (foundValue != isValid)
-            {
-                System.Diagnostics.Debug.Fail(String.Format(CultureInfo.InvariantCulture, "Returning {0} but we actually {1} found the value in the enum! Consider using a different overload to IsValidEnum.", isValid, ((foundValue) ? "have" : "have not")));
-            }
+            Debug.Assert(minVal == actualMinimum, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(minVal == actualMinimum, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(maxBitsFound == maxBitsOn, "Incorrect usage of IsEnumValid function. The bits set to 1 in this enum was found to be: " + maxBitsFound.ToString(CultureInfo.InvariantCulture) + "this does not match what's passed in: " + maxBitsOn.ToString(CultureInfo.InvariantCulture));
+            Debug.Assert(foundValue == isValid, string.Format(CultureInfo.InvariantCulture, "Returning {0} but we actually {1} found the value in the enum! Consider using a different overload to IsValidEnum.", isValid, ((foundValue) ? "have" : "have not")));
         }
 #endif
 
