@@ -14,10 +14,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="AttributeTests.cs" />
-    <Compile Include="DebuggerTests.cs" Condition="'$(TargetGroup)'=='netcoreapp'" />
+    <Compile Include="DebuggerTypeProxyAttributeTests.cs" />
+    <Compile Include="DebuggerDisplayAttributeTests.cs" />
+    <Compile Include="DebuggerBrowsableAttributeTests.cs" />
+    <Compile Include="DebuggerTests.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="DebuggerVisualizerAttributeTests.cs" />
     <Compile Include="DebugTests.cs" />
+    <Compile Include="EmptyAttributeTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
