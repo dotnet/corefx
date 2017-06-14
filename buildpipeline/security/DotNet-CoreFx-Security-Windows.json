@@ -86,7 +86,7 @@
             "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
-            "displayName": "Remove files other than DLLs and PDBs",
+            "displayName": "Remove files other than DLLs, PDBs and TXT",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -99,7 +99,7 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n\n",
+                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\", \".txt\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n\n",
                 "failOnStandardError": "true"
             }
         },
@@ -194,15 +194,15 @@
                 "softwareFolder": "$(Build.SourcesDirectory)\\security",
                 "mpdFolder": "",
                 "softwareName": "CoreFx",
-                "softwareVersionNum": "PB_BuildNumber",
-                "softwareBuildNum": "PB_BuildNumber",
+                "softwareVersionNum": "$(PB_BuildNumber)",
+                "softwareBuildNum": "$(PB_BuildNumber)",
                 "modeType": "prerelease",
                 "noCopySymbols": "false",
                 "noCopyBinaries": "false",
                 "noDecompress": "true",
                 "exclusionList": "",
                 "email": "",
-                "symbolsFolder": "$(Build.SourcesDirectory)\\security;SRV*http://symweb",
+                "symbolsFolder": "$(Build.SourcesDirectory)\\security",
                 "preBbtBinariesFolder": "",
                 "preBbtSymbolsFolder": "",
                 "isLargeApp": "false",
@@ -226,9 +226,9 @@
             "inputs": {
                 "scriptType": "inlineScript",
                 "scriptName": "",
-                "arguments": "$(Build.SourcesDirectory) $(PB_Git)",
+                "arguments": "$(Build.SourcesDirectory) \"$(PB_Git)\"",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process $git -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process $git -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
+                "inlineScript": "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process \"$git\" -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process \"$git\" -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
                 "failOnStandardError": "true"
             }
         },
