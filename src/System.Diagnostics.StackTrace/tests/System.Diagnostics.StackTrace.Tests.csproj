@@ -18,6 +18,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="StackTraceTests.cs" />
+    <Compile Include="SymDocumentTypeTests.cs" />
+    <Compile Include="SymLanguageTypeTests.cs" />
+    <Compile Include="SymLanguageVendorTests.cs" />
+    <Compile Include="SymbolTokenTests.cs" />
+    <Compile Include="StackFrameTests.cs" />
+    <Compile Include="StackFrameExtensionsTests.cs" />
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>
