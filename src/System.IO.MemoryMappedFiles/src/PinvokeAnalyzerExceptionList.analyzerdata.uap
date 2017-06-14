@@ -1,4 +1,5 @@
-## Need to change these to FromApp versions and remove this baseline ##
+## need to create a uap config that uses xxxFromApp versions, then remove this baseline ##
+# https://github.com/dotnet/corefx/issues/21026
 kernel32.dll!CreateFileMappingW
 kernel32.dll!MapViewOfFile
 kernel32.dll!OpenFileMappingW

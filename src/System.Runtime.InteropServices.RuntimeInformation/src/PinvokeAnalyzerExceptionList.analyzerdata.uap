@@ -1,2 +1,3 @@
 ## Break out caller into a non-uap file; uap returns fixed string. Then remove this baseline ##
+# https://github.com/dotnet/corefx/issues/21024
 ntdll.dll!RtlGetVersion

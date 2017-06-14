@@ -2,4 +2,5 @@
 #     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
 #    <UWPCompatible>false</UWPCompatible>
 # then remove this baseline
+# https://github.com/dotnet/corefx/issues/21023
 advapi32.dll!OpenProcessToken
