@@ -611,11 +611,11 @@ namespace System.Collections
             Capacity = _size;
         }
 
+        [Serializable]
         private class SyncSortedList : SortedList
         {
-            private SortedList _list;
-            private Object _root;
-
+            private SortedList _list; // Do not rename (binary serialization)
+            private Object _root; // Do not rename (binary serialization)
 
             internal SyncSortedList(SortedList list)
             {

@@ -88,7 +88,7 @@ namespace System.Net
     //
     // Manage cookies for a user (implicit). Based on RFC 2965.
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class CookieContainer
     {
         public const int DefaultCookieLimit = 300;
@@ -991,6 +991,7 @@ namespace System.Net
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     internal struct PathList
     {
         // Usage of PathList depends on it being shallowly immutable;
