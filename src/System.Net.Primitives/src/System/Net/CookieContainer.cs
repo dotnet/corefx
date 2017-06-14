@@ -1072,7 +1072,8 @@ namespace System.Net
         }
 
         [Serializable]
-        private sealed class PathListComparer : IComparer
+        [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        sealed class PathListComparer : IComparer
         {
             internal static readonly PathListComparer StaticInstance = new PathListComparer();
 
