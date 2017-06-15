@@ -13,9 +13,6 @@
     <Compile Include="AsyncReaderLateInitTests.cs" />
     <Compile Include="DisposeTests.cs" />
     <Compile Include="BaseUriTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
