@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Xml.Tests
 {
-    public class BaseUriTests
+    public class BaseUriTests : FileCleanupTestBase
     {
         private const string DummyXml = @"<?xml version=""1.0""?>";
 
@@ -28,7 +28,7 @@ namespace System.Xml.Tests
         [MemberData(nameof(GetXmlReaderUrlCreateMethods))]
         public void CreateWithAbsolutePathGivesAbsoluteBaseUri(Func<string, XmlReader> factory)
         {
-            string tempPath = Path.GetTempFileName();
+            string tempPath = GetTestFilePath();
             try
             {
                 File.WriteAllText(tempPath, DummyXml);

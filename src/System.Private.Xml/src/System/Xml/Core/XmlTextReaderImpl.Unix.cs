@@ -6,7 +6,7 @@ namespace System.Xml
 {
     internal partial class XmlTextReaderImpl
     {
-        private static string ConvertAbsoluteUnixPathToAbsoluteUri(string url, XmlResolver resolver)
+        static partial void ConvertAbsoluteUnixPathToAbsoluteUri(ref string url, XmlResolver resolver)
         {
             // new Uri(uri, UriKind.RelativeOrAbsolute) returns a Relative Uri for absolute unix paths (e.g. /tmp).
             // We convert the native unix path to a 'file://' uri string to make it an Absolute Uri.
@@ -14,19 +14,17 @@ namespace System.Xml
             {
                 if (resolver != null)
                 {
-                    var uri = resolver.ResolveUri(null, url);
+                    Uri uri = resolver.ResolveUri(null, url);
                     if (uri.IsFile)
                     {
-                        return uri.ToString();
+                        url = uri.ToString();
                     }
-                    return url;
                 }
                 else
                 {
-                    return new Uri(url).ToString();
+                    url = new Uri(url).ToString();
                 }
             }
-            return url;
         }
     }
 }

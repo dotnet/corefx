@@ -452,7 +452,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, Stream input, XmlNameTable nt) : this(nt)
         {
-            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver: null);
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             if (url == null || url.Length == 0)
             {
@@ -479,7 +479,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, TextReader input, XmlNameTable nt) : this(nt)
         {
-            url = ConvertAbsoluteUnixPathToAbsoluteUri(url, resolver: null);
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             _reportedBaseUri = (url != null) ? url : string.Empty;
             InitTextReaderInput(_reportedBaseUri, input);
@@ -672,7 +672,7 @@ namespace System.Xml
                                     XmlParserContext context, bool closeInput)
             : this(settings.GetXmlResolver(), settings, context)
         {
-            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr, settings.GetXmlResolver());
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -738,7 +738,7 @@ namespace System.Xml
         internal XmlTextReaderImpl(TextReader input, XmlReaderSettings settings, string baseUriStr, XmlParserContext context)
             : this(settings.GetXmlResolver(), settings, context)
         {
-            baseUriStr = ConvertAbsoluteUnixPathToAbsoluteUri(baseUriStr, settings.GetXmlResolver());
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -9815,6 +9815,8 @@ namespace System.Xml
         {
             Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
         }
+
+        static partial void ConvertAbsoluteUnixPathToAbsoluteUri(ref string url, XmlResolver resolver);
     }
 }
 
