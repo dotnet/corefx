@@ -387,12 +387,14 @@ namespace System.Net
             }
             lock (m_domainTable.SyncRoot)
             {
-                foreach (DictionaryEntry entry in m_domainTable)
+                // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                IDictionaryEnumerator e = m_domainTable.GetEnumerator();
+                while (e.MoveNext())
                 {
                     if (domain == null)
                     {
-                        tempDomain = (string)entry.Key;
-                        pathList = (PathList)entry.Value; // Aliasing to trick foreach
+                        tempDomain = (string)e.Key;
+                        pathList = (PathList)e.Value; // Aliasing to trick foreach
                     }
                     else
                     {
