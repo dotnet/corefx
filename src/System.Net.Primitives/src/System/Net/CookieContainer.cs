@@ -297,7 +297,7 @@ namespace System.Net
                 CookieCollection cookies;
                 lock (pathList.SyncRoot)
                 {
-                    cookies = (CookieCollection)pathList[cookie.Path];
+                    cookies = pathList[cookie.Path];
 
                     if (cookies == null)
                     {
@@ -854,7 +854,7 @@ namespace System.Net
 
                 if (!defaultAdded)
                 {
-                    CookieCollection cc = (CookieCollection)pathList["/"];
+                    CookieCollection cc = pathList["/"];
 
                     if (cc != null)
                     {
@@ -1039,13 +1039,13 @@ namespace System.Net
             }
         }
 
-        public object this[string s]
+        public CookieCollection this[string s]
         {
             get
             {
                 lock (SyncRoot)
                 {
-                    return m_list[s];
+                    return (CookieCollection)m_list[s];
                 }
             }
             set
