@@ -14,10 +14,10 @@ namespace System.Net.NetworkInformation.Tests
         [Theory]
         public void DnsSuffixParsing(string file)
         {
-            string normalizedFile = $"{GetTestFilePath()}_{file}_normalized0";
-            FileUtil.NormalizeLineEndings(file, normalizedFile);
+            string fileName = GetTestFilePath();
+            FileUtil.NormalizeLineEndings(file, fileName);
 
-            string suffix = StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(normalizedFile);
+            string suffix = StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(fileName);
             Assert.Equal("fake.suffix.net", suffix);
         }
 
@@ -26,10 +26,10 @@ namespace System.Net.NetworkInformation.Tests
         [Theory]
         public void DnsAddressesParsing(string file)
         {
-            string normalizedFile = $"{GetTestFilePath()}_{file}_normalized1";
-            FileUtil.NormalizeLineEndings(file, normalizedFile);
+            string fileName = GetTestFilePath();
+            FileUtil.NormalizeLineEndings(file, fileName);
 
-            var dnsAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(normalizedFile);
+            var dnsAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(fileName);
             Assert.Equal(1, dnsAddresses.Count);
             Assert.Equal(IPAddress.Parse("127.0.1.1"), dnsAddresses[0]);
         }

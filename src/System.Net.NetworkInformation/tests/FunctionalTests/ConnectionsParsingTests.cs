@@ -12,8 +12,8 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void NumSocketConnectionsParsing()
         {
-            string sockstatFile = $"{GetTestFilePath()}_sockstat_normalized";
-            string sockstat6File = $"{GetTestFilePath()}_sockstat6_normalized";
+            string sockstatFile = GetTestFilePath();
+            string sockstat6File = GetTestFilePath();
             FileUtil.NormalizeLineEndings("sockstat", sockstatFile);
             FileUtil.NormalizeLineEndings("sockstat6", sockstat6File);
 
@@ -33,8 +33,8 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void ActiveTcpConnectionsParsing()
         {
-            string tcpFile = $"{GetTestFilePath()}_tcp_normalized0";
-            string tcp6File = $"{GetTestFilePath()}_tcp6_normalized0";
+            string tcpFile = GetTestFilePath();
+            string tcp6File = GetTestFilePath();
             FileUtil.NormalizeLineEndings("tcp", tcpFile);
             FileUtil.NormalizeLineEndings("tcp6", tcp6File);
 
@@ -86,8 +86,8 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void TcpListenersParsing()
         {
-            string tcpFile = $"{GetTestFilePath()}_tcp_normalized1";
-            string tcp6File = $"{GetTestFilePath()}_tcp6_normalized1";
+            string tcpFile = GetTestFilePath();
+            string tcp6File = GetTestFilePath();
             FileUtil.NormalizeLineEndings("tcp", tcpFile);
             FileUtil.NormalizeLineEndings("tcp6", tcp6File);
 
@@ -111,8 +111,8 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void UdpListenersParsing()
         {
-            string udpFile = $"{GetTestFilePath()}_udp_normalized0";
-            string udp6File = $"{GetTestFilePath()}_udp6_normalized0";
+            string udpFile = GetTestFilePath();
+            string udp6File = GetTestFilePath();
             FileUtil.NormalizeLineEndings("udp", udpFile);
             FileUtil.NormalizeLineEndings("udp6", udp6File);
 

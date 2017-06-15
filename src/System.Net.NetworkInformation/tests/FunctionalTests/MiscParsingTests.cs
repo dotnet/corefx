@@ -12,18 +12,18 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void NumRoutesParsing()
         {
-            string normalizedFile = GetTestFilePath();
-            FileUtil.NormalizeLineEndings("route", normalizedFile);
-            int numRoutes = StringParsingHelpers.ParseNumRoutesFromRouteFile(normalizedFile);
+            string fileName = GetTestFilePath();
+            FileUtil.NormalizeLineEndings("route", fileName);
+            int numRoutes = StringParsingHelpers.ParseNumRoutesFromRouteFile(fileName);
             Assert.Equal(4, numRoutes);
         }
 
         [Fact]
         public void DefaultTtlParsing()
         {
-            string normalizedFile = GetTestFilePath();
-            FileUtil.NormalizeLineEndings("snmp", normalizedFile);
-            int ttl = StringParsingHelpers.ParseDefaultTtlFromFile(normalizedFile);
+            string fileName = GetTestFilePath();
+            FileUtil.NormalizeLineEndings("snmp", fileName);
+            int ttl = StringParsingHelpers.ParseDefaultTtlFromFile(fileName);
             Assert.Equal(64, ttl);
         }
 
