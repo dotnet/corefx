@@ -16,8 +16,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     public partial class BinaryFormatterTests : RemoteExecutorTestBase
     {
         [Theory]
-        [MemberData(nameof(BasicObjectsRoundtrip))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] 
+        [MemberData(nameof(BasicObjectsRoundtrip_MemberData))]
         public void ValidateBasicObjectsRoundtrip(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
             object clone = FormatterClone(obj, null, assemblyFormat, filterLevel, typeFormat);
@@ -101,7 +100,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RoundtripManyObjectsInOneStream()
         {
             object[][] objects = SerializableObjects().ToArray();
