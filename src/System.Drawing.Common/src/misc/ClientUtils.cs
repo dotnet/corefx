@@ -124,7 +124,7 @@ namespace System.Drawing
 
 #if DEBUG      
         [ThreadStatic]
-        private static Hashtable s_enumValueInfo;
+        private static Hashtable t_enumValueInfo;
         public const int MaxCache = 300;  // we think we're going to get O(100) of these, put in a tripwire if it gets larger.
 
         private class SequentialEnumInfo
@@ -152,24 +152,24 @@ namespace System.Drawing
 
         private static void Debug_SequentialEnumIsDefinedCheck(Enum value, int minVal, int maxVal)
         {
-            Type t = value.GetType();
+            Type enumType = value.GetType();
 
-            if (s_enumValueInfo == null)
+            if (t_enumValueInfo == null)
             {
-                s_enumValueInfo = new Hashtable();
+                t_enumValueInfo = new Hashtable();
             }
 
             SequentialEnumInfo sequentialEnumInfo = null;
 
-            if (s_enumValueInfo.ContainsKey(t))
+            if (t_enumValueInfo.ContainsKey(enumType))
             {
-                sequentialEnumInfo = s_enumValueInfo[t] as SequentialEnumInfo;
+                sequentialEnumInfo = t_enumValueInfo[enumType] as SequentialEnumInfo;
             }
             if (sequentialEnumInfo == null)
             {
-                sequentialEnumInfo = new SequentialEnumInfo(t);
-                Debug.Assert(s_enumValueInfo.Count <= MaxCache);
-                s_enumValueInfo[t] = sequentialEnumInfo;
+                sequentialEnumInfo = new SequentialEnumInfo(enumType);
+                Debug.Assert(t_enumValueInfo.Count <= MaxCache);
+                t_enumValueInfo[enumType] = sequentialEnumInfo;
             }
             Debug.Assert(minVal == sequentialEnumInfo.MinValue, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
             Debug.Assert(maxVal == sequentialEnumInfo.MaxValue, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
