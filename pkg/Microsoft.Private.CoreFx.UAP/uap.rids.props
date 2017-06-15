@@ -3,7 +3,7 @@
   <PropertyGroup>
     <_aotSuffix Condition="'$(TargetGroup)' == 'uapaot'">-aot</_aotSuffix>
     <_targetOSVersionIndex>$(TargetOS.IndexOfAny(".-0123456789"))</_targetOSVersionIndex>
-    <_targetOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(TargetOS.SubString(0, $(_runtimeOSVersionIndex)))</_targetOSFamily>
+    <_targetOSFamily Condition="'$(_targetOSVersionIndex)' != '-1'">$(TargetOS.SubString(0, $(_targetOSVersionIndex)))</_targetOSFamily>
   </PropertyGroup>
   
   <Choose>
