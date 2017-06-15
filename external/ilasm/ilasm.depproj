@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <!-- Always restore the x64 assets. These are build-only assets, so they should match the environment of the build. -->
-    <NugetRuntimeIdentifier>$(HostRid)</NugetRuntimeIdentifier>
+    <NugetRuntimeIdentifier>$(HostFullRid)</NugetRuntimeIdentifier>
     <OutputPath>$(ToolsDir)ilasm</OutputPath>
     <EnableBinPlacing>false</EnableBinPlacing>
     <RidSpecificAssets>true</RidSpecificAssets>
