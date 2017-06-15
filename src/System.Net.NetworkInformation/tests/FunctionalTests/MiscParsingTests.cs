@@ -2,25 +2,28 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using Xunit;
 
 namespace System.Net.NetworkInformation.Tests
 {
-    public class MiscParsingTests
+    public class MiscParsingTests : FileCleanupTestBase
     {
         [Fact]
-        public static void NumRoutesParsing()
+        public void NumRoutesParsing()
         {
-            FileUtil.NormalizeLineEndings("route", "route_normalized0");
-            int numRoutes = StringParsingHelpers.ParseNumRoutesFromRouteFile("route_normalized0");
+            string normalizedFile = GetTestFilePath();
+            FileUtil.NormalizeLineEndings("route", normalizedFile);
+            int numRoutes = StringParsingHelpers.ParseNumRoutesFromRouteFile(normalizedFile);
             Assert.Equal(4, numRoutes);
         }
 
         [Fact]
-        public static void DefaultTtlParsing()
+        public void DefaultTtlParsing()
         {
-            FileUtil.NormalizeLineEndings("snmp", "snmp_normalized0");
-            int ttl = StringParsingHelpers.ParseDefaultTtlFromFile("snmp_normalized0");
+            string normalizedFile = GetTestFilePath();
+            FileUtil.NormalizeLineEndings("snmp", normalizedFile);
+            int ttl = StringParsingHelpers.ParseDefaultTtlFromFile(normalizedFile);
             Assert.Equal(64, ttl);
         }
 
