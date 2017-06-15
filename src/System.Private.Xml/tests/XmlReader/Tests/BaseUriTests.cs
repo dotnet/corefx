@@ -29,17 +29,10 @@ namespace System.Xml.Tests
         public void CreateWithAbsolutePathGivesAbsoluteBaseUri(Func<string, XmlReader> factory)
         {
             string tempPath = GetTestFilePath();
-            try
+            File.WriteAllText(tempPath, DummyXml);
+            using (XmlReader reader = factory(tempPath))
             {
-                File.WriteAllText(tempPath, DummyXml);
-                using (XmlReader reader = factory(tempPath))
-                {
-                    Assert.True(new Uri(reader.BaseURI).IsAbsoluteUri);
-                }
-            }
-            finally
-            {
-                File.Delete(tempPath);
+                Assert.True(new Uri(reader.BaseURI).IsAbsoluteUri);
             }
         }
     }
