@@ -9815,31 +9815,6 @@ namespace System.Xml
         {
             Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
         }
-
-        private static string ConvertAbsoluteUnixPathToAbsoluteUri(string url, XmlResolver resolver)
-        {
-            // new Uri(uri, UriKind.RelativeOrAbsolute) returns a Relative Uri for absolute unix paths (e.g. /tmp).
-            // We convert the native unix path to a 'file://' uri string to make it an Absolute Uri.
-            if (IsUnixSystem && url != null && url.Length > 0 && url[0] == '/')
-            {
-                if (resolver != null)
-                {
-                    var uri = resolver.ResolveUri(null, url);
-                    if (uri.IsFile)
-                    {
-                        return uri.ToString();
-                    }
-                    return url;
-                }
-                else
-                {
-                    return new Uri(url).ToString();
-                }
-            }
-            return url;
-        }
-
-        private static readonly bool IsUnixSystem = Path.DirectorySeparatorChar == '/';
     }
 }
 
