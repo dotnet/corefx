@@ -10,7 +10,7 @@
     <LKGSharedFrameworkExtractPath>$(RefRootPath)sharedFrameworkZip.LKG/shared/Microsoft.NETCore.App/$(_LKGSharedFrameworkVersion)</LKGSharedFrameworkExtractPath>
     <_RunTestsScriptName Condition="'$(RunningOnUnix)' != 'true'">CloneAndRunTests.cmd</_RunTestsScriptName>
     <_RunTestsScriptName Condition="'$(RunningOnUnix)' == 'true'">CloneAndRunTests.sh</_RunTestsScriptName>
-    <_PublishRID>$(RuntimeOS)-$(ArchGroup)</_PublishRID>
+    <_PublishRID>$(TargetRid)-$(ArchGroup)</_PublishRID>
   </PropertyGroup>
 
   <Target Name="CreateScriptToDownloadSharedFrameworkZip">

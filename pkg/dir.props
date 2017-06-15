@@ -2,11 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
-  <PropertyGroup>
-    <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
-    <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
-  </PropertyGroup>
-
   <!-- Packages opt-in to automatic RID-specific builds by placing a *.RID.props next to their project
        that defines the following:
        PackageRID property: the RID which we should be building for
