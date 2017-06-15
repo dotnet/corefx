@@ -160,6 +160,12 @@ namespace System.Diagnostics.Tests
 
         static void VerifyLogged(Action test, string expectedOutput)
         {
+            // The full .NET Framework doesn't have any internal extensibility points for unit tests.
+            if (PlatformDetection.IsFullFramework)
+            {
+                return;
+            }
+
             FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
 
             // First use our test logger to verify the output
@@ -188,6 +194,12 @@ namespace System.Diagnostics.Tests
 
         static void VerifyAssert(Action test, params string[] expectedOutputStrings)
         {
+            // The full .NET Framework doesn't have any internal extensibility points for unit tests.
+            if (PlatformDetection.IsFullFramework)
+            {
+                return;
+            }
+
             FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
             FieldInfo showAssertDialogHook = typeof(Debug).GetField("s_ShowAssertDialog", BindingFlags.Static | BindingFlags.NonPublic);
 
