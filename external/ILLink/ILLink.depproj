@@ -6,7 +6,7 @@
     <NuGetTargetMonikerShort>netcoreapp1.1</NuGetTargetMonikerShort>
     <OutputPath>$(ToolsDir)ILLink</OutputPath>
     <EnableBinPlacing>false</EnableBinPlacing>
-    <NugetRuntimeIdentifier>$(HostOS)-$(HostArch)</NugetRuntimeIdentifier>
+    <NugetRuntimeIdentifier>$(HostRid)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
   </PropertyGroup>
   <ItemGroup>

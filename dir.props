@@ -131,15 +131,13 @@
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'win'">win</_portableRID>
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'osx'">osx</_portableRID>
 
-    <HostArch>x64</HostArch>
-    <HostRid Condition="'$(HostRid)' == ''">$(RuntimeOS)</HostRid>
     <!-- Tizen does not provide the x64 runtime so replaces it with the ubuntu.14.04-x64 -->
-    <HostRid Condition="'$(HostRid)' == 'tizen.4.0.0'">ubuntu.14.04</HostRid>
+    <HostRid Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04-x64</HostRid>
+    <HostRid Condition="'$(HostRid)' == ''">$(RuntimeOS)-x64</HostRid>
 
-    <RuntimeRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)</RuntimeRid>
-    <RuntimeRid Condition="'$(RuntimeRid)' == ''">$(RuntimeOS)</RuntimeRid>
+    <RuntimeRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)-$(ArchGroup)</RuntimeRid>
+    <RuntimeRid Condition="'$(RuntimeRid)' == ''">$(RuntimeOS)-$(ArchGroup)</RuntimeRid>
 
-    <TargetRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)</TargetRid>
     <TargetRid Condition="'$(TargetRid)' == ''">$(RuntimeRid)</TargetRid>
   </PropertyGroup>
 
