@@ -26,9 +26,6 @@
     <Compile Include="ThreadPoolBoundHandle_DisposeTests.cs" />
     <Compile Include="ThreadPoolBoundHandle_BindHandleTests.cs" />
     <Compile Include="OverlappedTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>

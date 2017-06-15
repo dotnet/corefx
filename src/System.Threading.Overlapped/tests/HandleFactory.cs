@@ -12,7 +12,7 @@ internal static partial class HandleFactory
         return new Win32Handle(handle);
     }
 
-    public static Win32Handle CreateSyncFileHandleFoWrite(string fileName = null)
+    public static Win32Handle CreateSyncFileHandleForWrite(string fileName = null)
     {
         return CreateHandle(async:false, fileName:fileName);
     }

@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
@@ -20,14 +21,14 @@ public partial class ThreadPoolBoundHandleTests : FileCleanupTestBase
         public string s;
     }
 
-    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle()
+    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle([CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
     {
-        return CreateThreadPoolBoundHandle((SafeHandle)null);
+        return CreateThreadPoolBoundHandle((SafeHandle)null, memberName, lineNumber);
     }
 
-    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle(SafeHandle handle)
+    private ThreadPoolBoundHandle CreateThreadPoolBoundHandle(SafeHandle handle, [CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
     {
-        handle = handle ?? HandleFactory.CreateAsyncFileHandleForWrite(GetTestFilePath());
+        handle = handle ?? HandleFactory.CreateAsyncFileHandleForWrite(GetTestFilePath(null, memberName, lineNumber));
 
         return ThreadPoolBoundHandle.BindHandle(handle);
     }
