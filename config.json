@@ -30,6 +30,12 @@
       "values": ["True", "False"],
       "defaultValue": false
     },
+    "RuntimeOS": {
+      "description": "",
+      "valueType": "property",
+      "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
+      "defaultValue": ""
+    },
     "HostRID": {
       "description": "The RID used for restoring native OS dependent assets (i.e. RID specific binaries)",
       "valueType": "property",
