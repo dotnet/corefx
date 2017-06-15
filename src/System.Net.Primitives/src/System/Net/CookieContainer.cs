@@ -405,8 +405,11 @@ namespace System.Net
                     domain_count = 0; // Cookies in the domain
                     lock (pathList.SyncRoot)
                     {
-                        foreach (CookieCollection cc in pathList.Values)
+                        // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                        IDictionaryEnumerator enumerator = pathList.GetEnumerator();
+                        while (enumerator.MoveNext())
                         {
+                            var cc = (CookieCollection)enumerator.Value;
                             itemp = ExpireCollection(cc);
                             removed += itemp;
                             m_count -= itemp; // Update this container's count
@@ -428,26 +431,27 @@ namespace System.Net
                     if (domain_count > min_count)
                     {
                         // This case requires sorting all domain collections by timestamp.
-                        Array cookies;
-                        Array stamps;
+                        CookieCollection[] cookies;
+                        DateTime[] stamps;
                         lock (pathList.SyncRoot)
                         {
-                            cookies = Array.CreateInstance(typeof(CookieCollection), pathList.Count);
-                            stamps = Array.CreateInstance(typeof(DateTime), pathList.Count);
-                            foreach (CookieCollection cc in pathList.Values)
+                            cookies = new CookieCollection[pathList.Count];
+                            stamps = new DateTime[pathList.Count];
+                            // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                            IDictionaryEnumerator enumerator = pathList.GetEnumerator();
+                            while (enumerator.MoveNext())
                             {
-                                stamps.SetValue(cc.TimeStamp(CookieCollection.Stamp.Check), itemp);
-                                cookies.SetValue(cc, itemp);
+                                var cc = (CookieCollection)enumerator.Value;
+                                stamps[itemp] = cc.TimeStamp(CookieCollection.Stamp.Check);
+                                cookies[itemp] = cc;
                                 ++itemp;
                             }
                         }
                         Array.Sort(stamps, cookies);
 
                         itemp = 0;
-                        for (int i = 0; i < cookies.Length; ++i)
+                        foreach (CookieCollection cc in cookies)
                         {
-                            CookieCollection cc = (CookieCollection)cookies.GetValue(i);
-
                             lock (cc)
                             {
                                 while (domain_count > min_count && cc.Count > 0)
@@ -1023,20 +1027,15 @@ namespace System.Net
             int count = 0;
             lock (SyncRoot)
             {
-                foreach (CookieCollection cc in m_list.Values)
+                // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                IDictionaryEnumerator e = m_list.GetEnumerator();
+                while (e.MoveNext())
                 {
+                    var cc = (CookieCollection)e.Value;
                     count += cc.Count;
                 }
             }
             return count;
-        }
-
-        public ICollection Values
-        {
-            get
-            {
-                return m_list.Values;
-            }
         }
 
         public CookieCollection this[string s]
