@@ -827,14 +827,16 @@ namespace System.Net
 
                 lock (pathList.SyncRoot)
                 {
-                    foreach (DictionaryEntry entry in pathList)
+                    // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                    IDictionaryEnumerator e = pathList.GetEnumerator();
+                    while (e.MoveNext())
                     {
-                        string path = (string)entry.Key;
+                        string path = (string)e.Key;
                         if (uri.AbsolutePath.StartsWith(CookieParser.CheckQuoted(path)))
                         {
                             found = true;
 
-                            CookieCollection cc = (CookieCollection)entry.Value;
+                            CookieCollection cc = (CookieCollection)e.Value;
                             cc.TimeStamp(CookieCollection.Stamp.Set);
                             MergeUpdateCollections(ref cookies, cc, port, isSecure, matchOnlyPlainCookie);
 
@@ -1056,7 +1058,7 @@ namespace System.Net
             }
         }
 
-        public IEnumerator GetEnumerator()
+        public IDictionaryEnumerator GetEnumerator()
         {
             lock (SyncRoot)
             {
