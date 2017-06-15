@@ -23,9 +23,16 @@ internal static partial class Interop
     {
         static HttpInitializer()
         {
-            // CURL uses OpenSSL which me must initialize first to guarantee thread-safety
-            CryptoInitializer.Initialize();
-            
+            string opensslVersion = Interop.Http.GetSslVersionDescription();
+            if (string.IsNullOrEmpty(opensslVersion) ||
+                opensslVersion.IndexOf("openssl/1.0", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                // CURL uses OpenSSL which me must initialize first to guarantee thread-safety
+                // Only initialize for OpenSSL/1.0, any newer versions may have mismatched
+                // pointers, resulting in segfaults.
+                CryptoInitializer.Initialize();
+            }
+
             if (EnsureCurlIsInitialized() != 0)
             {
                 throw new InvalidOperationException();
