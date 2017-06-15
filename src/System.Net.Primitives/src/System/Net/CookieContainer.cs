@@ -1026,32 +1026,17 @@ namespace System.Net
 
         public CookieCollection this[string s]
         {
-            get
-            {
-                lock (SyncRoot)
-                {
-                    return (CookieCollection)m_list[s];
-                }
-            }
+            get => (CookieCollection)m_list[s];
             set
             {
-                lock (SyncRoot)
-                {
-                    Debug.Assert(value != null);
-                    m_list[s] = value;
-                }
+                Debug.Assert(value != null);
+                m_list[s] = value;
             }
         }
 
-        public IDictionaryEnumerator GetEnumerator()
-        {
-            lock (SyncRoot)
-            {
-                return m_list.GetEnumerator();
-            }
-        }
+        public IDictionaryEnumerator GetEnumerator() => m_list.GetEnumerator();
 
-        public object SyncRoot => m_list;
+        public object SyncRoot => m_list.SyncRoot;
 
         [Serializable]
         [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
