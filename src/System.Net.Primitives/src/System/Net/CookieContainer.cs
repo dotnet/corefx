@@ -657,11 +657,11 @@ namespace System.Net
             }
             else
             {
-                for (int i = 0; i < s_headerInfo.Length; ++i)
+                foreach (HeaderVariantInfo info in s_headerInfo)
                 {
-                    if ((String.Compare(headerName, s_headerInfo[i].Name, StringComparison.OrdinalIgnoreCase) == 0))
+                    if (string.Equals(headerName, info.Name, StringComparison.OrdinalIgnoreCase))
                     {
-                        variant = s_headerInfo[i].Variant;
+                        variant = info.Variant;
                     }
                 }
             }
