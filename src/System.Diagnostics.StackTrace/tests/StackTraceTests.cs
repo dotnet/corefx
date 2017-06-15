@@ -238,6 +238,7 @@ namespace System.Diagnostics.Tests
 
         public static IEnumerable<object[]> ToString_TestData()
         {
+#if DEBUG
             yield return new object[] { new StackTrace(InvokeException()), "   at System.Diagnostics.Tests.StackTraceTests.ThrowException()" };
             yield return new object[] { new StackTrace(new Exception()), "" };
             yield return new object[] { NoParameters(), "   at System.Diagnostics.Tests.StackTraceTests.NoParameters()" };
@@ -249,6 +250,8 @@ namespace System.Diagnostics.Tests
 
             // Methods belonging to the System.Diagnostics namespace are ignored.
             yield return new object[] { InvokeIgnoredMethod(), "   at System.Diagnostics.Tests.StackTraceTests.InvokeIgnoredMethod()" };
+#endif
+
             yield return new object[] { InvokeIgnoredMethodWithException(), "   at System.Diagnostics.Ignored.MethodWithException()" };
         }
 
@@ -329,8 +332,13 @@ namespace System.Diagnostics.Tests
                 StackFrame stackFrame = stackFrames[i];
                 Assert.NotNull(stackFrame.GetMethod());
 
-                // It appears that .NET Core strips this metadata.
-                if (!PlatformDetection.IsFullFramework || !hasFileInfo)
+                // It appears that .NET Core on Windows strips this metadata.
+#if DEBUG
+                bool hasNoMetadata = PlatformDetection.IsWindows && !PlatformDetection.IsFullFramework;
+#else
+                bool hasNoMetadata = false;
+#endif
+                if (hasNoMetadata || !hasFileInfo)
                 {
                     Assert.Null(stackFrame.GetFileName());
                     Assert.Equal(0, stackFrame.GetFileLineNumber());

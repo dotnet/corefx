@@ -20,7 +20,7 @@ namespace System.Diagnostics.Tests
         public void Ctor_Default()
         {
             var stackFrame = new StackFrame();
-            VerifyStackFrame(stackFrame, true, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Default)));
+            VerifyStackFrame(stackFrame, false, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Default)));
         }
 
         [Theory]
@@ -59,7 +59,12 @@ namespace System.Diagnostics.Tests
         public void SkipFrames_CallMethod_ReturnsExpected()
         {
             StackFrame stackFrame = CallMethod(1);
-            Assert.Equal(typeof(StackFrameTests).GetMethod(nameof(SkipFrames_CallMethod_ReturnsExpected)), stackFrame.GetMethod());
+            MethodInfo expectedMethod = typeof(StackFrameTests).GetMethod(nameof(SkipFrames_CallMethod_ReturnsExpected));
+#if DEBUG
+            Assert.Equal(expectedMethod, stackFrame.GetMethod());
+#else
+            Assert.NotEqual(expectedMethod, stackFrame.GetMethod());
+#endif
         }
 
         public StackFrame CallMethod(int skipFrames) => new StackFrame(skipFrames);
@@ -84,7 +89,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(lineNumber, stackFrame.GetFileLineNumber());
             Assert.Equal(0, stackFrame.GetFileColumnNumber());
 
-            VerifyStackFrameSkipFrames(stackFrame, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Filename_LineNumber)));
+            VerifyStackFrameSkipFrames(stackFrame, true, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Filename_LineNumber)));
         }
 
         [Theory]
@@ -98,24 +103,31 @@ namespace System.Diagnostics.Tests
             Assert.Equal(lineNumber, stackFrame.GetFileLineNumber());
             Assert.Equal(columnNumber, stackFrame.GetFileColumnNumber());
 
-            VerifyStackFrameSkipFrames(stackFrame, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Filename_LineNumber_ColNumber)));
+            VerifyStackFrameSkipFrames(stackFrame, true, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Filename_LineNumber_ColNumber)));
         }
 
         public static IEnumerable<object[]> ToString_TestData()
         {
-            yield return new object[] { new StackFrame(), "MoveNext at offset {offset} in file:line:column <filename unknown>:0:0" + Environment.NewLine };
+#if DEBUG
+            yield return new object[] { new StackFrame(), "MoveNext at offset {offset} in file:line:column {fileName}:{lineNumber}:{column}" + Environment.NewLine };
             yield return new object[] { new StackFrame("FileName", 1, 2), "MoveNext at offset {offset} in file:line:column FileName:1:2" + Environment.NewLine };
             yield return new object[] { new StackFrame(int.MaxValue), "<null>" + Environment.NewLine };
-            yield return new object[] { GenericMethod<string>(), "GenericMethod<T> at offset {offset} in file:line:column <filename unknown>:0:0" + Environment.NewLine };
-            yield return new object[] { GenericMethod<string, int>(), "GenericMethod<T,U> at offset {offset} in file:line:column <filename unknown>:0:0" + Environment.NewLine };
-            yield return new object[] { new ClassWithConstructor().StackFrame, ".ctor at offset {offset} in file:line:column <filename unknown>:0:0" + Environment.NewLine };
+            yield return new object[] { GenericMethod<string>(), "GenericMethod<T> at offset {offset} in file:line:column {fileName}:{lineNumber}:{column}" + Environment.NewLine };
+            yield return new object[] { GenericMethod<string, int>(), "GenericMethod<T,U> at offset {offset} in file:line:column {fileName}:{lineNumber}:{column}" + Environment.NewLine };
+            yield return new object[] { new ClassWithConstructor().StackFrame, ".ctor at offset {offset} in file:line:column {fileName}:{lineNumber}:{column}" + Environment.NewLine };
+#else
+            yield break;
+#endif
         }
 
         [Theory]
         [MemberData(nameof(ToString_TestData))]
         public void ToString_Invoke_ReturnsExpected(StackFrame stackFrame, string expectedToString)
         {
-            expectedToString = expectedToString.Replace("{offset}", stackFrame.GetNativeOffset().ToString());
+            expectedToString = expectedToString.Replace("{offset}", stackFrame.GetNativeOffset().ToString())
+                                               .Replace("{fileName}", stackFrame.GetFileName() ?? "<filename unknown>")
+                                               .Replace("{lineNumber}", stackFrame.GetFileLineNumber().ToString())
+                                               .Replace("{column}", stackFrame.GetFileLineNumber().ToString());
             Assert.Equal(expectedToString, stackFrame.ToString());
         }
 
@@ -130,31 +142,46 @@ namespace System.Diagnostics.Tests
 
         private static void VerifyStackFrame(StackFrame stackFrame, bool hasFileInfo, int skipFrames, MethodInfo expectedMethod)
         {
-            // It appears that .NET Core strips this metadata.
-            if (!PlatformDetection.IsFullFramework || !hasFileInfo)
+            // It appears that .NET Core on Windows strips this metadata in Debug mode.
+#if DEBUG
+            bool hasNoMetadata = PlatformDetection.IsWindows && !PlatformDetection.IsFullFramework;
+#else
+            bool hasNoMetadata = false;
+#endif
+            if (hasNoMetadata || !hasFileInfo)
             {
                 Assert.Null(stackFrame.GetFileName());
                 Assert.Equal(0, stackFrame.GetFileLineNumber());
                 Assert.Equal(0, stackFrame.GetFileColumnNumber());
             }
 
-            VerifyStackFrameSkipFrames(stackFrame, skipFrames, expectedMethod);
+            VerifyStackFrameSkipFrames(stackFrame, false, skipFrames, expectedMethod);
         }
 
-        private static void VerifyStackFrameSkipFrames(StackFrame stackFrame, int skipFrames, MethodInfo expectedMethod)
+        private static void VerifyStackFrameSkipFrames(StackFrame stackFrame, bool isFileConstructor, int skipFrames, MethodInfo expectedMethod)
         {
             // GetILOffset returns StackFrame.OFFSET_UNKNOWN for unknown frames.
             if (skipFrames == int.MinValue || skipFrames > 0)
             {
                 Assert.Equal(StackFrame.OFFSET_UNKNOWN, stackFrame.GetILOffset());
             }
+#if !DEBUG
+            else if (isFileConstructor)
+            {
+                Assert.Equal(0, stackFrame.GetILOffset());
+            }
+#endif
             else
             {
-                Assert.True(stackFrame.GetILOffset() > 0);
+                Assert.True(stackFrame.GetILOffset() > 0, $"Expected GetILOffset() {stackFrame.GetILOffset()} for {stackFrame} to be greater than zero.");
             }
 
             // GetMethod returns null for unknown frames.
-            if (skipFrames == 0 || expectedMethod == null)
+            if (expectedMethod == null)
+            {
+                Assert.Null(stackFrame.GetMethod());
+            }
+            else if (skipFrames == 0)
             {
                 Assert.Equal(expectedMethod, stackFrame.GetMethod());
             }
@@ -171,6 +198,7 @@ namespace System.Diagnostics.Tests
             }
             else if (skipFrames <= 0)
             {
+                Assert.True(stackFrame.GetNativeOffset() > 0, $"Expected GetNativeOffset() {stackFrame.GetNativeOffset()} for {stackFrame} to be greater than zero.");
                 Assert.True(stackFrame.GetNativeOffset() > 0);
             }
             else
