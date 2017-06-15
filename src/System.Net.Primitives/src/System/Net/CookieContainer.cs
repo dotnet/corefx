@@ -285,7 +285,7 @@ namespace System.Net
                     object pathValue = m_domainTable[cookie.DomainKey];
                     if (pathValue == null)
                     {
-                        m_domainTable[cookie.DomainKey] = (pathList = PathList.Create());
+                        m_domainTable[cookie.DomainKey] = (pathList = new PathList());
                     }
                     else
                     {
@@ -1000,27 +1000,13 @@ namespace System.Net
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    internal struct PathList
+    internal sealed class PathList
     {
         // Usage of PathList depends on it being shallowly immutable;
         // adding any mutable fields to it would result in breaks.
-        private readonly SortedList m_list; // Do not rename (binary serialization)
+        private readonly SortedList m_list = SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)); // Do not rename (binary serialization)
 
-        public static PathList Create() => new PathList(SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)));
-
-        private PathList(SortedList list)
-        {
-            Debug.Assert(list != null, $"{nameof(list)} must not be null.");
-            m_list = list;
-        }
-
-        public int Count
-        {
-            get
-            {
-                return m_list.Count;
-            }
-        }
+        public int Count => m_list.Count;
 
         public int GetCookiesCount()
         {
@@ -1065,14 +1051,7 @@ namespace System.Net
             }
         }
 
-        public object SyncRoot
-        {
-            get
-            {
-                Debug.Assert(m_list != null, $"{nameof(PathList)} should never be default initialized and only ever created with {nameof(Create)}.");
-                return m_list;
-            }
-        }
+        public object SyncRoot => m_list;
 
         [Serializable]
         [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
