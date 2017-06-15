@@ -15,7 +15,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
 
         public TextWriterTraceListener_WriteTests()
         {
-            _fileName = $"{GetTestFilePath(null, GetType().Name)}.xml";
+            _fileName = $"{GetTestFilePath()}.xml";
             CommonUtilities.DeleteFile(_fileName);
             _stream = new FileStream(_fileName, FileMode.OpenOrCreate, FileAccess.Write);
         }
