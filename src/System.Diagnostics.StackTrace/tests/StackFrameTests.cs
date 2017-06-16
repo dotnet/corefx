@@ -166,7 +166,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(StackFrame.OFFSET_UNKNOWN, stackFrame.GetILOffset());
             }
 #if !DEBUG
-            else if (!PlatformDetection.IsFullFramework)
+            else if (!PlatformDetection.IsFullFramework && isFileConstructor)
             {
                 Assert.Equal(0, stackFrame.GetILOffset());
             }
