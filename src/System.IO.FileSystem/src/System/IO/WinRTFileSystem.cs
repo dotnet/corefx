@@ -19,9 +19,6 @@ namespace System.IO
 {
     internal sealed partial class WinRTFileSystem : FileSystem
     {
-        public override int MaxPath { get { return Interop.Kernel32.MAX_PATH; } }
-        public override int MaxDirectoryPath { get { return Interop.Kernel32.MAX_DIRECTORY_PATH; } }
-
         private static System.IO.FileAttributes ConvertFileAttributes(WinRTFileAttributes fileAttributes)
         {
             //namespace Windows.Storage
