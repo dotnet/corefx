@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -725,6 +726,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 other != null &&
                 @this.X == other.X &&
                 @this.Y == other.Y;
+        }
+
+        public static bool IsEqual(this SqlGuid @this, SqlGuid other)
+        {
+            return @this.IsNull == other.IsNull && (@this.IsNull || @this.Value == other.Value);
         }
 
         public static bool IsEqual(this SealedObjectWithIntStringFields @this, SealedObjectWithIntStringFields other)
