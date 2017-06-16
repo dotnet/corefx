@@ -30,7 +30,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        [Fact]
+        //[Fact]
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
