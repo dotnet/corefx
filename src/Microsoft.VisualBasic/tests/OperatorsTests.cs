@@ -166,26 +166,9 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { null, null, 0 };
         }
 
-        public static IEnumerable<object[]> AddObject_NonIdempotent_TestData()
-        {
-            // DateTime + primitives
-            yield return new object[] { new DateTime(2017, 10, 10), null, "00:00:0010/10/2017" };
-            yield return new object[] { null, new DateTime(2017, 10, 10), "00:00:0010/10/2017" };
-            yield return new object[] { new DateTime(2017, 11, 11), new DateTime(2017, 10, 10), "11/11/201710/10/2017" };
-            yield return new object[] { new DateTime(2017, 10, 10), "String", "10/10/2017String" };
-            yield return new object[] { "String", new DateTime(2017, 10, 10), "String10/10/2017" };
-        }
-
-        [Theory]
-        [MemberData(nameof(AddObject_NonIdempotent_TestData))]
-        public void AddObject_NonIdempotent_ReturnsExpected(object left, object right, object expected)
-        {
-            Assert.Equal(expected, Operators.AddObject(left, right));
-        }
-
         [Theory]
         [MemberData(nameof(AddObject_Idempotent_TestData))]
-        public void AddObject_Idempotent_ReturnsExpected(object left, object right, object expected)
+        public void AddObject_Convertible_ReturnsExpected(object left, object right, object expected)
         {
             Assert.Equal(expected, Operators.AddObject(left, right));
 
@@ -198,6 +181,44 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             {
                 Assert.Equal(expected, Operators.AddObject(right, left));
             }
+        }
+
+        [Fact]
+        public void AddObject_DateString_ReturnsExpected()
+        {
+            string expected = Assert.IsType<string>(Operators.AddObject("String", new DateTime(2017, 10, 10)));
+            Assert.StartsWith("String", expected);
+            Assert.Contains("17", expected);
+        }
+
+        [Fact]
+        public void AddObject_DateDate_ReturnsExpected()
+        {
+            string expected = Assert.IsType<string>(Operators.AddObject(new DateTime(2018, 10, 10), new DateTime(2017, 10, 10)));
+            Assert.Contains("17", expected);
+            Assert.Contains("18", expected);
+        }
+
+        [Fact]
+        public void AddObject_DateNull_ReturnsExpected()
+        {
+            string expected = Assert.IsType<string>(Operators.AddObject(new DateTime(2018, 10, 10), null));
+            Assert.Contains("18", expected);
+        }
+
+        [Fact]
+        public void AddObject_NullDate_ReturnsExpected()
+        {
+            string expected = Assert.IsType<string>(Operators.AddObject(null, new DateTime(2018, 10, 10)));
+            Assert.Contains("18", expected);
+        }
+
+        [Fact]
+        public void AddObject_StringDate_ReturnsExpected()
+        {
+            string expected = Assert.IsType<string>(Operators.AddObject(new DateTime(2017, 10, 10), "String"));
+            Assert.EndsWith("String", expected);
+            Assert.Contains("17", expected);
         }
 
         [Fact]
