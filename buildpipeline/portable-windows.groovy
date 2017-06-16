@@ -1,4 +1,4 @@
-@Library('dotnet-ci@helixLogFix') _
+@Library('dotnet-ci@fixRace') _
 
 // Incoming parameters.  Access with "params.<param name>".
 // Config - Build configuration. Note that we don't using 'Configuration' since it's used
