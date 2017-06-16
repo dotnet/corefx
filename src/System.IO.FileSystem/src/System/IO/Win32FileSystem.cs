@@ -169,7 +169,7 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(firstError, errorString);
         }
 
-        public override void DeleteFile(System.string fullPath)
+        public override void DeleteFile(string fullPath)
         {
             bool r = Interop.Kernel32.DeleteFile(fullPath);
             if (!r)
@@ -338,7 +338,7 @@ namespace System.IO
             return errorCode;
         }
 
-        public override bool FileExists(System.string fullPath)
+        public override bool FileExists(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
             int errorCode = FillAttributeInfo(fullPath, ref data, false, true);
@@ -452,11 +452,6 @@ namespace System.IO
             }
         }
 
-        public override FileStream Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
-        {
-            return new FileStream(fullPath, mode, access, share, bufferSize, options);
-        }
-
         [System.Security.SecurityCritical]
         private static SafeFileHandle OpenHandle(string fullPath, bool asDirectory)
         {
@@ -470,11 +465,11 @@ namespace System.IO
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
             SafeFileHandle handle = Interop.Kernel32.SafeCreateFile(
                 fullPath,
-                (int)Interop.Kernel32.GenericOperations.GENERIC_WRITE,
+                Interop.Kernel32.GenericOperations.GENERIC_WRITE,
                 FileShare.ReadWrite | FileShare.Delete,
                 ref secAttrs,
                 FileMode.Open,
-                asDirectory ? (int)Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None,
+                asDirectory ? Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None,
                 IntPtr.Zero
             );
 

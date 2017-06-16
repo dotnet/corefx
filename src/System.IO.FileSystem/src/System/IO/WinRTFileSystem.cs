@@ -581,12 +581,6 @@ namespace System.IO
             }
         }
 
-        public override FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
-        {
-            EnsureBackgroundThread();
-            return SynchronousResultOf(OpenAsync(fullPath, mode, access, share, bufferSize, options, parent));
-        }
-
         private async Task<FileStreamBase> OpenAsync(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
         {
             // When trying to open the root directory, we need to throw an Access Denied

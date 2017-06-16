@@ -340,7 +340,6 @@ namespace System.IO
             return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
-
         public static FileStream OpenWrite(string path)
         {
             return new FileStream(path, FileMode.OpenOrCreate,
@@ -429,7 +428,7 @@ namespace System.IO
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1))
             {
                 long fileLength = fs.Length;
-                if (fileLength > Int32.MaxValue)
+                if (fileLength > int.MaxValue)
                     throw new IOException(SR.IO_FileTooLong2GB);
 
                 int index = 0;
