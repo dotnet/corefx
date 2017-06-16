@@ -148,14 +148,14 @@ namespace System.IO
                     string folderName = null;
                     PathHelpers.SplitDirectoryFile(workingPath, out workingPath, out folderName);
 
-                    if (String.IsNullOrEmpty(folderName))
+                    if (string.IsNullOrEmpty(folderName))
                     {
                         // we reached the root and it did not exist.  we can't create roots.
                         throw Win32Marshal.GetExceptionForWin32Error(Interop.Errors.ERROR_PATH_NOT_FOUND, workingPath);
                     }
 
                     stackDir.Push(folderName);
-                    Debug.Assert(!String.IsNullOrEmpty(workingPath));
+                    Debug.Assert(!string.IsNullOrEmpty(workingPath));
                 }
             }
 
@@ -221,7 +221,7 @@ namespace System.IO
             catch (IOException) { }
             catch (UnauthorizedAccessException) { }
 
-            if (String.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(fileName))
             {
                 // we were given a root
                 return parent != null;
@@ -360,7 +360,7 @@ namespace System.IO
             string directoryPath = null, fileName = null;
             PathHelpers.SplitDirectoryFile(fullPath, out directoryPath, out fileName);
 
-            if (String.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(fileName))
             {
                 // No filename was provided
                 return false;
@@ -496,7 +496,7 @@ namespace System.IO
 
             StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(directoryPath).TranslateWinRTTask(directoryPath, isDirectory: true);
 
-            if (String.IsNullOrEmpty(itemName))
+            if (string.IsNullOrEmpty(itemName))
                 return parent;
 
             return await parent.GetItemAsync(itemName).TranslateWinRTTask(fullPath);
@@ -519,10 +519,10 @@ namespace System.IO
             PathHelpers.SplitDirectoryFile(destFullPath, out destParent, out destFolderName);
 
             // same parent folder
-            if (String.Equals(sourceParent, destParent, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(sourceParent, destParent, StringComparison.OrdinalIgnoreCase))
             {
                 // not the same subfolder
-                if (!String.Equals(sourceFolderName, destFolderName, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(sourceFolderName, destFolderName, StringComparison.OrdinalIgnoreCase))
                 {
                     await sourceFolder.RenameAsync(destFolderName).TranslateWinRTTask(destFullPath, isDirectory: true);
                 }

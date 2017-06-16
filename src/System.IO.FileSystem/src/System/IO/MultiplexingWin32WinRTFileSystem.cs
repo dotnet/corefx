@@ -235,7 +235,7 @@ namespace System.IO
                 // the parent directory, so we walk up the path.
                 fullPath = PathHelpers.GetDirectoryNameInternal(fullPath);
                 // only walk up the path if we are creating a file/directory and not at the root
-            } while (isCreate && !String.IsNullOrEmpty(fullPath));
+            } while (isCreate && !string.IsNullOrEmpty(fullPath));
 
             return useWinRt;
         }

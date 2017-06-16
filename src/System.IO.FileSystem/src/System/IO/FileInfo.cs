@@ -17,13 +17,13 @@ namespace System.IO
     // routines such as Delete, etc.
     public sealed partial class FileInfo : FileSystemInfo
     {
-        private String _name;
+        private string _name;
 
         [System.Security.SecurityCritical]
         private FileInfo() { }
 
         [System.Security.SecuritySafeCritical]
-        public FileInfo(String fileName)
+        public FileInfo(string fileName)
         {
             if (fileName == null)
                 throw new ArgumentNullException(nameof(fileName));
@@ -33,24 +33,24 @@ namespace System.IO
         }
 
         [System.Security.SecurityCritical]
-        private void Init(String fileName)
+        private void Init(string fileName)
         {
             OriginalPath = fileName;
             // Must fully qualify the path for the security check
-            String fullPath = Path.GetFullPath(fileName);
+            string fullPath = Path.GetFullPath(fileName);
 
             _name = Path.GetFileName(fileName);
             FullPath = fullPath;
             DisplayPath = GetDisplayPath(fileName);
         }
 
-        private String GetDisplayPath(String originalPath)
+        private string GetDisplayPath(string originalPath)
         {
             return originalPath;
         }
 
         [System.Security.SecuritySafeCritical]
-        internal FileInfo(String fullPath, String originalPath)
+        internal FileInfo(string fullPath, string originalPath)
         {
             Debug.Assert(Path.IsPathRooted(fullPath), "fullPath must be fully qualified!");
             _name = originalPath ?? Path.GetFileName(fullPath);
@@ -59,7 +59,7 @@ namespace System.IO
             DisplayPath = _name;
         }
 
-        public override String Name
+        public override string Name
         {
             get { return _name; }
         }
@@ -79,7 +79,7 @@ namespace System.IO
         }
 
         /* Returns the name of the directory that the file is in */
-        public String DirectoryName
+        public string DirectoryName
         {
             [System.Security.SecuritySafeCritical]
             get
@@ -93,7 +93,7 @@ namespace System.IO
         {
             get
             {
-                String dirName = DirectoryName;
+                string dirName = DirectoryName;
                 if (dirName == null)
                     return null;
                 return new DirectoryInfo(dirName);
@@ -134,14 +134,14 @@ namespace System.IO
 
         // Copies an existing file to a new file. An exception is raised if the
         // destination file already exists. Use the 
-        // Copy(String, String, boolean) method to allow 
+        // Copy(string, string, boolean) method to allow 
         // overwriting an existing file.
         //
         // The caller must have certain FileIOPermissions.  The caller must have
         // Read permission to sourceFileName 
         // and Write permissions to destFileName.
         // 
-        public FileInfo CopyTo(String destFileName)
+        public FileInfo CopyTo(string destFileName)
         {
             if (destFileName == null)
                 throw new ArgumentNullException(nameof(destFileName), SR.ArgumentNull_FileName);
@@ -163,7 +163,7 @@ namespace System.IO
         // Read permission to sourceFileName and Create
         // and Write permissions to destFileName.
         // 
-        public FileInfo CopyTo(String destFileName, bool overwrite)
+        public FileInfo CopyTo(string destFileName, bool overwrite)
         {
             if (destFileName == null)
                 throw new ArgumentNullException(nameof(destFileName), SR.ArgumentNull_FileName);
@@ -257,7 +257,7 @@ namespace System.IO
         // permissions to destFileName.
         // 
         [System.Security.SecuritySafeCritical]
-        public void MoveTo(String destFileName)
+        public void MoveTo(string destFileName)
         {
             if (destFileName == null)
                 throw new ArgumentNullException(nameof(destFileName));
@@ -265,7 +265,7 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
             Contract.EndContractBlock();
 
-            String fullDestFileName = Path.GetFullPath(destFileName);
+            string fullDestFileName = Path.GetFullPath(destFileName);
 
             // These checks are in place to ensure Unix error throwing happens the same way
             // as it does on Windows.These checks can be removed if a solution to #2460 is
@@ -289,19 +289,19 @@ namespace System.IO
             Invalidate();
         }
 
-        public FileInfo Replace(String destinationFileName, String destinationBackupFileName)
+        public FileInfo Replace(string destinationFileName, string destinationBackupFileName)
         {
             return Replace(destinationFileName, destinationBackupFileName, ignoreMetadataErrors: false);
         }
 
-        public FileInfo Replace(String destinationFileName, String destinationBackupFileName, bool ignoreMetadataErrors)
+        public FileInfo Replace(string destinationFileName, string destinationBackupFileName, bool ignoreMetadataErrors)
         {
             File.Replace(FullPath, destinationFileName, destinationBackupFileName, ignoreMetadataErrors);
             return new FileInfo(destinationFileName);
         }
 
         // Returns the display path
-        public override String ToString()
+        public override string ToString()
         {
             return DisplayPath;
         }
