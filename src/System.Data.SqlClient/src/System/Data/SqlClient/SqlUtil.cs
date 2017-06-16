@@ -10,6 +10,8 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
+using SysTx = System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -157,6 +159,10 @@ namespace System.Data.SqlClient
         //
         // SQL.Connection
         //
+        static internal Exception CannotGetDTCAddress()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_CannotGetDTCAddress));
+        }
 
         internal static Exception InvalidInternalPacketSize(string str)
         {
@@ -198,6 +204,20 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_InstanceFailure));
         }
+
+        //
+        // Global Transactions.
+        //
+        static internal Exception GlobalTransactionsNotEnabled()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.GT_Disabled));
+        }
+        static internal Exception UnknownSysTxIsolationLevel(SysTx.IsolationLevel isolationLevel)
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_UnknownSysTxIsolationLevel, isolationLevel.ToString()));
+        }
+
+
         internal static Exception InvalidPartnerConfiguration(string server, string database)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_InvalidPartnerConfiguration, server, database));
@@ -461,6 +481,17 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerDatabaseStart));
         }
 
+		//
+        // SQL.SqlDelegatedTransaction
+        //
+        static internal SysTx.TransactionPromotionException PromotionFailed(Exception inner)
+        {
+            SysTx.TransactionPromotionException e = new SysTx.TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
+            ADP.TraceExceptionAsReturnValue(e);
+            return e;
+        }
+        //Failure while attempting to promote transaction.
+
         //
         // SQL.SqlMetaData
         //
@@ -611,6 +642,11 @@ namespace System.Data.SqlClient
         internal static Exception OpenResultCountExceeded()
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_OpenResultCountExceeded));
+        }
+
+        static internal Exception UnsupportedSysTxForGlobalTransactions()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_UnsupportedSysTxVersion));
         }
 
         internal static readonly byte[] AttentionHeader = new byte[] {
@@ -1047,6 +1083,58 @@ namespace System.Data.SqlClient
             else
             {
                 return "'" + EscapeStringAsLiteral(input) + "'";
+            }
+        }
+    }
+
+    /// <summary>
+    /// This class holds methods invoked on System.Transactions through reflection for Global Transactions
+    /// </summary>
+    static internal class SysTxForGlobalTransactions
+    {
+        private static readonly Lazy<MethodInfo> _enlistPromotableSinglePhase = new Lazy<MethodInfo>(() =>
+            typeof(SysTx.Transaction).GetMethod("EnlistPromotableSinglePhase", new Type[] { typeof(SysTx.IPromotableSinglePhaseNotification), typeof(Guid) }));
+
+        private static readonly Lazy<MethodInfo> _setDistributedTransactionIdentifier = new Lazy<MethodInfo>(() =>
+            typeof(SysTx.Transaction).GetMethod("SetDistributedTransactionIdentifier", new Type[] { typeof(SysTx.IPromotableSinglePhaseNotification), typeof(Guid) }));
+
+        private static readonly Lazy<MethodInfo> _getPromotedToken = new Lazy<MethodInfo>(() =>
+            typeof(SysTx.Transaction).GetMethod("GetPromotedToken"));
+
+        /// <summary>
+        /// Enlists the given IPromotableSinglePhaseNotification and Non-MSDTC Promoter type into a transaction
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo EnlistPromotableSinglePhase
+        {
+            get
+            {
+                return _enlistPromotableSinglePhase.Value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the given DistributedTransactionIdentifier for a Transaction instance.
+        /// Needs to be invoked when using a Non-MSDTC Promoter type
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo SetDistributedTransactionIdentifier
+        {
+            get
+            {
+                return _setDistributedTransactionIdentifier.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Promoted Token for a Transaction
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo GetPromotedToken
+        {
+            get
+            {
+                return _getPromotedToken.Value;
             }
         }
     }

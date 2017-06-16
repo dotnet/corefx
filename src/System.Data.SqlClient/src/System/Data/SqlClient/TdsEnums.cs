@@ -828,7 +828,10 @@ namespace System.Data.SqlClient
 
         internal enum TransactionManagerRequestType
         {
+            GetDTCAddress = 0,
+            Propagate = 1,
             Begin = 5,
+            Promote = 6,
             Commit = 7,
             Rollback = 8,
             Save = 9

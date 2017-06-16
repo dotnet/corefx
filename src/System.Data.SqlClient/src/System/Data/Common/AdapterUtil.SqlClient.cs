@@ -897,5 +897,13 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_NoStoredProcedureExists, sproc));
         }
+
+        //
+        // DbProviderException
+        //
+        static internal InvalidOperationException TransactionCompletedButNotDisposed()
+        {
+            return Provider(SR.GetString(SR.ADP_TransactionCompletedButNotDisposed));
+        }
     }
 }

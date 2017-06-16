@@ -1015,7 +1015,7 @@ namespace System.Data.SqlClient
             // Fail Fast in case an application is trying to enlist the SqlConnection in a Transaction Scope.
             if (connectionOptions.Enlist && ADP.GetCurrentTransaction() != null)
             {
-                throw ADP.AmbientTransactionIsNotSupported();
+                //throw ADP.AmbientTransactionIsNotSupported();
             }
 
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
@@ -1037,26 +1037,36 @@ namespace System.Data.SqlClient
             // does not require GC.KeepAlive(this) because of OnStateChange
 
             var tdsInnerConnection = (SqlInternalConnectionTds)InnerConnection;
-            Debug.Assert(tdsInnerConnection.Parser != null, "Where's the parser?");
-
-            if (!tdsInnerConnection.ConnectionOptions.Pooling)
+            /*
+            if (tdsInnerConnection == null)
             {
-                // For non-pooled connections, we need to make sure that the finalizer does actually run to avoid leaking SNI handles
-                GC.ReRegisterForFinalize(this);
-            }
-
-            // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
-            SqlStatistics statistics = _statistics;
-            if (StatisticsEnabled ||
-                ( s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
-            {
-                ADP.TimerCurrent(out _statistics._openTimestamp);
-                tdsInnerConnection.Parser.Statistics = _statistics;
+                SqlInternalConnectionSmi innerConnection = (InnerConnection as SqlInternalConnectionSmi);
+                innerConnection.AutomaticEnlistment();
             }
             else
+            */
             {
-                tdsInnerConnection.Parser.Statistics = null;
-                _statistics = null; // in case of previous Open/Close/reset_CollectStats sequence
+                Debug.Assert(tdsInnerConnection.Parser != null, "Where's the parser?");
+
+                if (!tdsInnerConnection.ConnectionOptions.Pooling)
+                {
+                    // For non-pooled connections, we need to make sure that the finalizer does actually run to avoid leaking SNI handles
+                    GC.ReRegisterForFinalize(this);
+                }
+
+                // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
+                SqlStatistics statistics = _statistics;
+                if (StatisticsEnabled ||
+                    (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
+                {
+                    ADP.TimerCurrent(out _statistics._openTimestamp);
+                    tdsInnerConnection.Parser.Statistics = _statistics;
+                }
+                else
+                {
+                    tdsInnerConnection.Parser.Statistics = null;
+                    _statistics = null; // in case of previous Open/Close/reset_CollectStats sequence
+                }
             }
 
             return true;

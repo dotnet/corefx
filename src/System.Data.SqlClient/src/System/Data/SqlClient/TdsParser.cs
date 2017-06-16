@@ -73,6 +73,9 @@ namespace System.Data.SqlClient
         private SqlInternalTransaction _currentTransaction;
         private SqlInternalTransaction _pendingTransaction;    // pending transaction for Yukon and beyond.
 
+        //  need to hold on to the transaction id if distributed transaction merely rolls back without defecting.
+        private long _retainedTransactionId = SqlInternalTransaction.NullTransactionId;
+
         // This counter is used for the entire connection to track the open result count for all
         // operations not under a transaction.
         private int _nonTransactedOpenResultCount = 0;
@@ -1835,8 +1838,14 @@ namespace System.Data.SqlClient
                                                 _statistics.SafeIncrement(ref _statistics._transactions);
                                             }
                                             _statisticsIsInTransaction = true;
+                                            _retainedTransactionId = SqlInternalTransaction.NullTransactionId;
                                             break;
+
                                         case TdsEnums.ENV_COMMITTRAN:
+                                            // SQLHOT 483
+                                            //  Must clear the retain id if the server-side transaction ends by anything other
+                                            //  than rollback.
+                                            _retainedTransactionId = SqlInternalTransaction.NullTransactionId;
                                             goto case TdsEnums.ENV_ROLLBACKTRAN;
                                         case TdsEnums.ENV_ROLLBACKTRAN:
                                             // When we get notification of a completed transaction
@@ -1867,11 +1876,13 @@ namespace System.Data.SqlClient
                                             }
                                             _statisticsIsInTransaction = false;
                                             break;
+
                                         case TdsEnums.ENV_ENLISTDTC:
                                         case TdsEnums.ENV_DEFECTDTC:
                                         case TdsEnums.ENV_TRANSACTIONENDED:
                                             Debug.Fail("Should have thrown if DTC token encountered");
                                             break;
+
                                         default:
                                             _connHandler.OnEnvChange(env[ii]);
                                             break;
@@ -2264,7 +2275,6 @@ namespace System.Data.SqlClient
                     case TdsEnums.ENV_BEGINTRAN:
                     case TdsEnums.ENV_COMMITTRAN:
                     case TdsEnums.ENV_ROLLBACKTRAN:
-
                         if (!stateObj.TryReadByte(out byteLength))
                         {
                             return false;
@@ -6305,8 +6315,62 @@ namespace System.Data.SqlClient
             ThrowExceptionAndWarning(_physicalStateObj);
         }
 
-        
+        internal byte[] GetDTCAddress(int timeout, TdsParserStateObject stateObj)
+        {
+            // If this fails, the server will return a server error - Sameet Agarwal confirmed.
+            // Success: DTCAddress returned.  Failure: SqlError returned.
 
+            byte[] dtcAddr = null;
+
+            using (SqlDataReader dtcReader = TdsExecuteTransactionManagerRequest(
+                                                        null,
+                                                        TdsEnums.TransactionManagerRequestType.GetDTCAddress,
+                                                        null,
+                                                        TdsEnums.TransactionManagerIsolationLevel.Unspecified,
+                                                        timeout, null, stateObj, true))
+            {
+
+                Debug.Assert(SniContext.Snix_Read == stateObj.SniContext, String.Format((IFormatProvider)null, "The SniContext should be Snix_Read but it actually is {0}", stateObj.SniContext));
+                if (null != dtcReader && dtcReader.Read())
+                {
+                    Debug.Assert(dtcReader.GetName(0) == "TM Address", "TdsParser: GetDTCAddress did not return 'TM Address'");
+
+                    // DTCAddress is of variable size, and does not have a maximum.  So we call GetBytes
+                    // to get the length of the dtcAddress, then allocate a byte array of that length,
+                    // then call GetBytes again on that byte[] with the length
+                    long dtcLength = dtcReader.GetBytes(0, 0, null, 0, 0);
+
+                    //
+                    if (dtcLength <= Int32.MaxValue)
+                    {
+                        int cb = (int)dtcLength;
+
+                        dtcAddr = new byte[cb];
+                        dtcReader.GetBytes(0, 0, dtcAddr, 0, cb);
+                    }
+#if DEBUG
+                    else
+                    {
+                        Debug.Assert(false, "unexpected length (> Int32.MaxValue) returned from dtcReader.GetBytes");
+                        // if we hit this case we'll just return a null address so that the user
+                        // will get a transcaction enlistment error in the upper layers
+                    }
+#endif
+                }
+            }
+            return dtcAddr;
+        }
+
+        // Propagate the dtc cookie to the server, enlisting the connection.
+        internal void PropagateDistributedTransaction(byte[] buffer, int timeout, TdsParserStateObject stateObj)
+        {
+            // if this fails, the server will return a server error - Sameet Agarwal confirmed
+            // Success: server will return done token.  Failure: SqlError returned.
+
+            TdsExecuteTransactionManagerRequest(buffer,
+                TdsEnums.TransactionManagerRequestType.Propagate, null,
+                TdsEnums.TransactionManagerIsolationLevel.Unspecified, timeout, null, stateObj, true);
+        }
 
         internal SqlDataReader TdsExecuteTransactionManagerRequest(
                     byte[] buffer,
@@ -6315,7 +6379,8 @@ namespace System.Data.SqlClient
                     TdsEnums.TransactionManagerIsolationLevel isoLevel,
                     int timeout,
                     SqlInternalTransaction transaction,
-                    TdsParserStateObject stateObj
+                    TdsParserStateObject stateObj,
+                    bool isDelegateControlRequest
         )
         {
             Debug.Assert(this == stateObj.Parser, "different parsers");
@@ -6350,6 +6415,12 @@ namespace System.Data.SqlClient
                 // Temporarily disable async writes
                 _asyncWrite = false;
 
+                // This validation step MUST be done after locking the connection to guarantee we don't 
+                //  accidentally execute after the transaction has completed on a different thread.
+                if (!isDelegateControlRequest)
+                {
+                    _connHandler.CheckEnlistedTransactionBinding();
+                }
 
                 stateObj._outputMessageType = TdsEnums.MT_TRANS;       // set message type
                 stateObj.SetTimeoutSeconds(timeout);
@@ -6367,8 +6438,26 @@ namespace System.Data.SqlClient
 
                 WriteShort((short)request, stateObj); // write TransactionManager Request type
 
+                bool returnReader = false;
+
                 switch (request)
                 {
+                    case TdsEnums.TransactionManagerRequestType.GetDTCAddress:
+                        WriteShort(0, stateObj);
+
+                        returnReader = true;
+                        break;
+                    case TdsEnums.TransactionManagerRequestType.Propagate:
+                        if (null != buffer)
+                        {
+                            WriteShort(buffer.Length, stateObj);
+                            stateObj.WriteByteArray(buffer, buffer.Length, 0);
+                        }
+                        else
+                        {
+                            WriteShort(0, stateObj);
+                        }
+                        break;
                     case TdsEnums.TransactionManagerRequestType.Begin:
                         Debug.Assert(null != transaction, "Should have specified an internalTransaction when doing a BeginTransaction request!");
 
@@ -6396,6 +6485,11 @@ namespace System.Data.SqlClient
 
                         stateObj.WriteByte((byte)(transactionName.Length * 2)); // Write number of bytes (unicode string).
                         WriteString(transactionName, stateObj);
+                        break;
+                    case TdsEnums.TransactionManagerRequestType.Promote:
+                        // No payload - except current transaction in header
+                        // Promote returns a DTC cookie.  However, the transaction cookie we use for the
+                        // connection does not change after a promote.
                         break;
                     case TdsEnums.TransactionManagerRequestType.Commit:
 
@@ -6434,10 +6528,33 @@ namespace System.Data.SqlClient
                 stateObj._pendingData = true;
                 stateObj._messageStatus = 0;
 
+                SqlDataReader dtcReader = null;
                 stateObj.SniContext = SniContext.Snix_Read;
-                Run(RunBehavior.UntilDone, null, null, null, stateObj);
+                if (returnReader)
+                {
+                    dtcReader = new SqlDataReader(null, CommandBehavior.Default);
+                    Debug.Assert(this == stateObj.Parser, "different parser");
+#if DEBUG
+                    // Remove the current owner of stateObj - otherwise we will hit asserts
+                    stateObj.Owner = null;
+#endif
+                    dtcReader.Bind(stateObj);
 
-                return null;
+                    // force consumption of metadata
+                    _SqlMetaDataSet metaData = dtcReader.MetaData;
+                }
+                else
+                {
+                    Run(RunBehavior.UntilDone, null, null, null, stateObj);
+                }
+
+                // If the retained ID is no longer valid (because we are enlisting in null or a new transaction) then it should be cleared
+                if (((request == TdsEnums.TransactionManagerRequestType.Begin) || (request == TdsEnums.TransactionManagerRequestType.Propagate)) && ((transaction == null) || (transaction.TransactionId != _retainedTransactionId)))
+                {
+                    _retainedTransactionId = SqlInternalTransaction.NullTransactionId;
+                }
+
+                return dtcReader;
             }
             catch (Exception e)
             {
@@ -6549,6 +6666,9 @@ namespace System.Data.SqlClient
                     throw ADP.ClosedConnectionError();
                 }
 
+                // This validation step MUST be done after locking the connection to guarantee we don't 
+                //  accidentally execute after the transaction has completed on a different thread.
+                _connHandler.CheckEnlistedTransactionBinding();
 
                 stateObj.SetTimeoutSeconds(timeout);
                 stateObj.SniContext = SniContext.Snix_Execute;

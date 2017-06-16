@@ -113,18 +113,23 @@
     <Compile Include="System\Data\SqlClient\SqlCommandSet.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnection.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionFactory.cs" />
-    <Compile Include="System\Data\SqlClient\SqlConnectionHelper.cs" />
+    <Compile Include="System\Data\SqlClient\SqlConnectionHelper.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\SqlClient\SqlConnectionPoolGroupProviderInfo.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionPoolKey.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionPoolProviderInfo.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionString.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionStringBuilder.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionTimeoutErrorInternal.cs" />
-    <Compile Include="System\Data\SqlClient\SqlDataAdapter.cs" />
+    <Compile Include="System\Data\SqlClient\SqlDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\SqlClient\SqlDataReader.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependency.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependencyListener.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependencyUtils.cs" />
+    <Compile Include="System\Data\SqlClient\SqlDelegatedTransaction.cs" />
     <Compile Include="System\Data\SqlClient\SqlEnums.cs" />
     <Compile Include="System\Data\SqlClient\SqlError.cs" />
     <Compile Include="System\Data\SqlClient\SqlErrorCollection.cs" />

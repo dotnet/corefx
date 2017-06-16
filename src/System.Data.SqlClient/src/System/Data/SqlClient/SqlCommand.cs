@@ -187,6 +187,8 @@ namespace System.Data.SqlClient
         internal int _rowsAffected = -1; // rows affected by the command
 
         private SqlNotificationRequest _notification;
+		
+		private bool _notificationAutoEnlist = true;            // Notifications auto enlistment is turned on by default
 
         // transaction support
         private SqlTransaction _transaction;
@@ -331,6 +333,18 @@ namespace System.Data.SqlClient
             {
                 _sqlDep = null;
                 _notification = value;
+            }
+        }
+
+        public bool NotificationAutoEnlist
+        {
+            get
+            {
+                return _notificationAutoEnlist;
+            }
+            set
+            {
+                _notificationAutoEnlist = value;
             }
         }
 

@@ -9,6 +9,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SysTx = System.Transactions;
 
 
 namespace System.Data.ProviderBase
@@ -28,7 +29,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        override protected void Activate()
+        override protected void Activate(SysTx.Transaction transaction)
         {
             throw ADP.ClosedConnectionError();
         }

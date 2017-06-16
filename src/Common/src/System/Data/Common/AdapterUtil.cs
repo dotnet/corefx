@@ -11,6 +11,7 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SysTx = System.Transactions;
 
 namespace System.Data.Common
 {
@@ -414,6 +415,11 @@ namespace System.Data.Common
 
         internal static bool IsEmptyArray(string[] array) => (null == array) || (0 == array.Length);
 
+        internal static bool IsEmpty(string str)
+        {
+            return ((null == str) || (0 == str.Length));
+        }
+
         internal static bool IsNull(object value)
         {
             if ((null == value) || (DBNull.Value == value))
@@ -427,6 +433,14 @@ namespace System.Data.Common
         internal static Exception InvalidSeekOrigin(string parameterName)
         {
             return ArgumentOutOfRange(SR.ADP_InvalidSeekOrigin, parameterName);
+        }
+
+        internal static readonly bool IsWindowsNT = (PlatformID.Win32NT == Environment.OSVersion.Platform);
+        internal static readonly bool IsPlatformNT5 = (ADP.IsWindowsNT && (Environment.OSVersion.Version.Major >= 5));
+
+        static internal void SetCurrentTransaction(SysTx.Transaction transaction)
+        {
+            SysTx.Transaction.Current = transaction;
         }
     }
 }

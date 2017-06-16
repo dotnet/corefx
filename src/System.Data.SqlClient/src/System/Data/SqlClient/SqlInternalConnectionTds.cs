@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using SysTx = System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -596,6 +597,64 @@ namespace System.Data.SqlClient
             }
         }
 
+        /// <summary>
+        /// Validate the enlisted transaction state, taking into consideration the ambient transaction and transaction unbinding mode.
+        /// If there is no enlisted transaction, this method is a nop.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method must be called while holding a lock on the SqlInternalConnection instance,
+        /// to ensure we don't accidentally execute after the transaction has completed on a different thread, 
+        /// causing us to unwittingly execute in auto-commit mode.
+        /// </para>
+        /// 
+        /// <para>
+        /// When using Explicit transaction unbinding, 
+        /// verify that the enlisted transaction is active and equal to the current ambient transaction.
+        /// </para>
+        /// 
+        /// <para>
+        /// When using Implicit transaction unbinding,
+        /// verify that the enlisted transaction is active.
+        /// If it is not active, and the transaction object has been diposed, unbind from the transaction.
+        /// If it is not active and not disposed, throw an exception.
+        /// </para>
+        /// </remarks>
+        internal void CheckEnlistedTransactionBinding()
+        {
+            // If we are enlisted in a transaction, check that transaction is active.
+            // When using explicit transaction unbinding, also verify that the enlisted transaction is the current transaction.
+            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
+
+            if (enlistedTransaction != null)
+            {
+                bool requireExplicitTransactionUnbind = ConnectionOptions.TransactionBinding == SqlConnectionString.TransactionBindingEnum.ExplicitUnbind;
+
+                if (requireExplicitTransactionUnbind)
+                {
+                    SysTx.Transaction currentTransaction = SysTx.Transaction.Current;
+
+                    if (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status || !enlistedTransaction.Equals(currentTransaction))
+                    {
+                        throw ADP.TransactionConnectionMismatch();
+                    }
+                }
+                else // implicit transaction unbind
+                {
+                    if (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status)
+                    {
+                        if (EnlistedTransactionDisposed)
+                        {
+                            DetachTransaction(enlistedTransaction, true);
+                        }
+                        else
+                        {
+                            throw ADP.TransactionCompletedButNotDisposed();
+                        }
+                    }
+                }
+            }
+        }
 
         internal override bool IsConnectionAlive(bool throwOnException)
         {
@@ -608,8 +667,27 @@ namespace System.Data.SqlClient
         // POOLING METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        override protected void Activate()
+        override protected void Activate(SysTx.Transaction transaction)
         {
+            // When we're required to automatically enlist in transactions and
+            // there is one we enlist in it. On the other hand, if there isn't a
+            // transaction and we are currently enlisted in one, then we
+            // unenlist from it.
+            //
+            // Regardless of whether we're required to automatically enlist,
+            // when there is not a current transaction, we cannot leave the
+            // connection enlisted in a transaction.
+            if (null != transaction)
+            {
+                if (ConnectionOptions.Enlist)
+                {
+                    Enlist(transaction);
+                }
+            }
+            else
+            {
+                Enlist(null);
+            }
         }
 
         override protected void InternalDeactivate()
@@ -690,7 +768,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction)
+        override internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest)
         {
             if (IsConnectionDoomed)
             {  // doomed means we can't do anything else...
@@ -714,7 +792,7 @@ namespace System.Data.SqlClient
 
             string transactionName = (null == name) ? String.Empty : name;
 
-            ExecuteTransactionYukon(transactionRequest, transactionName, iso, internalTransaction);
+            ExecuteTransactionYukon(transactionRequest, transactionName, iso, internalTransaction, isDelegateControlRequest);
         }
 
 
@@ -722,7 +800,8 @@ namespace System.Data.SqlClient
                     TransactionRequest transactionRequest,
                     string transactionName,
                     IsolationLevel iso,
-                    SqlInternalTransaction internalTransaction
+                    SqlInternalTransaction internalTransaction,
+                    bool isDelegateControlRequest
         )
         {
             TdsEnums.TransactionManagerRequestType requestType = TdsEnums.TransactionManagerRequestType.Begin;
@@ -808,14 +887,39 @@ namespace System.Data.SqlClient
                     }
                 }
 
+                // SQLBUDT #20010853 - Promote, Commit and Rollback requests for
+                // delegated transactions often happen while there is an open result
+                // set, so we need to handle them by using a different MARS session, 
+                // otherwise we'll write on the physical state objects while someone
+                // else is using it.  When we don't have MARS enabled, we need to 
+                // lock the physical state object to syncronize it's use at least 
+                // until we increment the open results count.  Once it's been 
+                // incremented the delegated transaction requests will fail, so they
+                // won't stomp on anything.
+                // 
+                // We need to keep this lock through the duration of the TM reqeuest
+                // so that we won't hijack a different request's data stream and a
+                // different request won't hijack ours, so we have a lock here on 
+                // an object that the ExecTMReq will also lock, but since we're on
+                // the same thread, the lock is a no-op.
 
-
+                if (null != internalTransaction && internalTransaction.IsDelegated)
+                {
+                    if (_parser.MARSOn)
+                    {
+                        stateObj = _parser.GetSession(this);
+                        mustPutSession = true;
+                    }
+                    else if (internalTransaction.OpenResultsCount != 0)
+                    {
+                        //throw SQL.CannotCompleteDelegatedTransactionWithOpenResults(this);
+                    }
+                }
 
                 //  _parser may be nulled out during TdsExecuteTrannsactionManagerRequest.
                 //  Only use local variable after this call.
                 _parser.TdsExecuteTransactionManagerRequest(null, requestType, transactionName, isoLevel,
-                    ConnectionOptions.ConnectTimeout, internalTransaction, stateObj
-                    );
+                    ConnectionOptions.ConnectTimeout, internalTransaction, stateObj, isDelegateControlRequest);
             }
             finally
             {
@@ -836,6 +940,17 @@ namespace System.Data.SqlClient
         // DISTRIBUTED TRANSACTION METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
+        override protected byte[] GetDTCAddress()
+        {
+            byte[] dtcAddress = _parser.GetDTCAddress(ConnectionOptions.ConnectTimeout, _parser.GetSession(this));
+            Debug.Assert(null != dtcAddress, "null dtcAddress?");
+            return dtcAddress;
+        }
+
+        override protected void PropagateTransactionCookie(byte[] cookie)
+        {
+            _parser.PropagateDistributedTransaction(cookie, ConnectionOptions.ConnectTimeout, _parser._physicalStateObj);
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////
         // LOGIN-RELATED METHODS
@@ -1585,12 +1700,14 @@ namespace System.Data.SqlClient
                     }
                     _routingInfo = rec.newRoutingInfo;
                     break;
+                case TdsEnums.ENV_PROMOTETRANSACTION:
+                    PromotedDTCToken = rec.newBinValue;
+                    break;
 
                 // ENVCHANGE tokens not supported by Project K\CoreCLR
                 case TdsEnums.ENV_ENLISTDTC:
                 case TdsEnums.ENV_DEFECTDTC:
                 case TdsEnums.ENV_TRANSACTIONENDED:
-                case TdsEnums.ENV_PROMOTETRANSACTION:
                 case TdsEnums.ENV_TRANSACTIONMANAGERADDRESS:
                     Debug.Assert(false, "Unsupported tokens were passed to OnEnvChange - TdsParser should have failed these");
                     break;

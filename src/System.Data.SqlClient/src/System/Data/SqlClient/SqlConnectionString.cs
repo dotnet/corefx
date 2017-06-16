@@ -153,6 +153,17 @@ namespace System.Data.SqlClient
             internal const string SQL_Server_2012 = "SQL Server 2012";
         }
 
+        internal enum TransactionBindingEnum
+        {
+            ImplicitUnbind,
+            ExplicitUnbind
+        }
+
+        internal static class TRANSACIONBINDING
+        {
+            internal const string ImplicitUnbind = "Implicit Unbind";
+            internal const string ExplicitUnbind = "Explicit Unbind";
+        }
 
         private static Dictionary<string, string> s_sqlClientSynonyms;
 
@@ -190,12 +201,14 @@ namespace System.Data.SqlClient
         private readonly string _workstationId;
 
         private readonly TypeSystem _typeSystemVersion;
+
+        private readonly TransactionBindingEnum _transactionBinding;
+
         internal SqlConnectionString(string connectionString) : base(connectionString, GetParseSynonyms())
         {
             ThrowUnsupportedIfKeywordSet(KEY.AsynchronousProcessing);
             ThrowUnsupportedIfKeywordSet(KEY.Connection_Reset);
             ThrowUnsupportedIfKeywordSet(KEY.Context_Connection);
-            ThrowUnsupportedIfKeywordSet(KEY.TransactionBinding);
 
             // Network Library has its own special error message
             if (ContainsKey(KEY.Network_Library))
@@ -233,6 +246,8 @@ namespace System.Data.SqlClient
             _trustServerCertificate = ConvertValueToBoolean(KEY.TrustServerCertificate, DEFAULT.TrustServerCertificate);
 
             // Temporary string - this value is stored internally as an enum.
+            string transactionBindingString = ConvertValueToString(KEY.TransactionBinding, null);
+
             string typeSystemVersionString = ConvertValueToString(KEY.Type_System_Version, null);
 
             _userID = ConvertValueToString(KEY.User_ID, DEFAULT.User_ID);
@@ -342,6 +357,23 @@ namespace System.Data.SqlClient
                 throw ADP.InvalidConnectionOptionValue(KEY.Type_System_Version);
             }
 
+            if (ADP.IsEmpty(transactionBindingString))
+            {
+                transactionBindingString = DbConnectionStringDefaults.TransactionBinding;
+            }
+
+            if (transactionBindingString.Equals(TRANSACIONBINDING.ImplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            {
+                _transactionBinding = TransactionBindingEnum.ImplicitUnbind;
+            }
+            else if (transactionBindingString.Equals(TRANSACIONBINDING.ExplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            {
+                _transactionBinding = TransactionBindingEnum.ExplicitUnbind;
+            }
+            else
+            {
+                throw ADP.InvalidConnectionOptionValue(KEY.TransactionBinding);
+            }
 
             if (_applicationIntent == ApplicationIntent.ReadOnly && !String.IsNullOrEmpty(_failoverPartner))
                 throw SQL.ROR_FailoverNotSupportedConnString();
@@ -395,6 +427,7 @@ namespace System.Data.SqlClient
             _userID = connectionOptions._userID;
             _workstationId = connectionOptions._workstationId;
             _typeSystemVersion = connectionOptions._typeSystemVersion;
+            _transactionBinding = connectionOptions._transactionBinding;
             _applicationIntent = connectionOptions._applicationIntent;
             _connectRetryCount = connectionOptions._connectRetryCount;
             _connectRetryInterval = connectionOptions._connectRetryInterval;
@@ -443,6 +476,8 @@ namespace System.Data.SqlClient
         internal string WorkstationId { get { return _workstationId; } }
 
         internal TypeSystem TypeSystemVersion { get { return _typeSystemVersion; } }
+
+        internal TransactionBindingEnum TransactionBinding { get { return _transactionBinding; } }
 
         // This dictionary is meant to be read-only translation of parsed string
         // keywords/synonyms to a known keyword string.
