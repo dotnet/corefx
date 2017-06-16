@@ -285,7 +285,7 @@ namespace System.Net
                     object pathValue = m_domainTable[cookie.DomainKey];
                     if (pathValue == null)
                     {
-                        m_domainTable[cookie.DomainKey] = (pathList = PathList.Create());
+                        m_domainTable[cookie.DomainKey] = (pathList = new PathList());
                     }
                     else
                     {
@@ -297,7 +297,7 @@ namespace System.Net
                 CookieCollection cookies;
                 lock (pathList.SyncRoot)
                 {
-                    cookies = (CookieCollection)pathList[cookie.Path];
+                    cookies = pathList[cookie.Path];
 
                     if (cookies == null)
                     {
@@ -387,12 +387,14 @@ namespace System.Net
             }
             lock (m_domainTable.SyncRoot)
             {
-                foreach (DictionaryEntry entry in m_domainTable)
+                // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                IDictionaryEnumerator e = m_domainTable.GetEnumerator();
+                while (e.MoveNext())
                 {
                     if (domain == null)
                     {
-                        tempDomain = (string)entry.Key;
-                        pathList = (PathList)entry.Value; // Aliasing to trick foreach
+                        tempDomain = (string)e.Key;
+                        pathList = (PathList)e.Value; // Aliasing to trick foreach
                     }
                     else
                     {
@@ -403,8 +405,11 @@ namespace System.Net
                     domain_count = 0; // Cookies in the domain
                     lock (pathList.SyncRoot)
                     {
-                        foreach (CookieCollection cc in pathList.Values)
+                        // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                        IDictionaryEnumerator enumerator = pathList.GetEnumerator();
+                        while (enumerator.MoveNext())
                         {
+                            var cc = (CookieCollection)enumerator.Value;
                             itemp = ExpireCollection(cc);
                             removed += itemp;
                             m_count -= itemp; // Update this container's count
@@ -426,26 +431,27 @@ namespace System.Net
                     if (domain_count > min_count)
                     {
                         // This case requires sorting all domain collections by timestamp.
-                        Array cookies;
-                        Array stamps;
+                        CookieCollection[] cookies;
+                        DateTime[] stamps;
                         lock (pathList.SyncRoot)
                         {
-                            cookies = Array.CreateInstance(typeof(CookieCollection), pathList.Count);
-                            stamps = Array.CreateInstance(typeof(DateTime), pathList.Count);
-                            foreach (CookieCollection cc in pathList.Values)
+                            cookies = new CookieCollection[pathList.Count];
+                            stamps = new DateTime[pathList.Count];
+                            // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                            IDictionaryEnumerator enumerator = pathList.GetEnumerator();
+                            while (enumerator.MoveNext())
                             {
-                                stamps.SetValue(cc.TimeStamp(CookieCollection.Stamp.Check), itemp);
-                                cookies.SetValue(cc, itemp);
+                                var cc = (CookieCollection)enumerator.Value;
+                                stamps[itemp] = cc.TimeStamp(CookieCollection.Stamp.Check);
+                                cookies[itemp] = cc;
                                 ++itemp;
                             }
                         }
                         Array.Sort(stamps, cookies);
 
                         itemp = 0;
-                        for (int i = 0; i < cookies.Length; ++i)
+                        foreach (CookieCollection cc in cookies)
                         {
-                            CookieCollection cc = (CookieCollection)cookies.GetValue(i);
-
                             lock (cc)
                             {
                                 while (domain_count > min_count && cc.Count > 0)
@@ -657,11 +663,11 @@ namespace System.Net
             }
             else
             {
-                for (int i = 0; i < s_headerInfo.Length; ++i)
+                foreach (HeaderVariantInfo info in s_headerInfo)
                 {
-                    if ((String.Compare(headerName, s_headerInfo[i].Name, StringComparison.OrdinalIgnoreCase) == 0))
+                    if (string.Equals(headerName, info.Name, StringComparison.OrdinalIgnoreCase))
                     {
-                        variant = s_headerInfo[i].Variant;
+                        variant = info.Variant;
                     }
                 }
             }
@@ -825,14 +831,16 @@ namespace System.Net
 
                 lock (pathList.SyncRoot)
                 {
-                    foreach (DictionaryEntry entry in pathList)
+                    // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                    IDictionaryEnumerator e = pathList.GetEnumerator();
+                    while (e.MoveNext())
                     {
-                        string path = (string)entry.Key;
+                        string path = (string)e.Key;
                         if (uri.AbsolutePath.StartsWith(CookieParser.CheckQuoted(path)))
                         {
                             found = true;
 
-                            CookieCollection cc = (CookieCollection)entry.Value;
+                            CookieCollection cc = (CookieCollection)e.Value;
                             cc.TimeStamp(CookieCollection.Stamp.Set);
                             MergeUpdateCollections(ref cookies, cc, port, isSecure, matchOnlyPlainCookie);
 
@@ -850,7 +858,7 @@ namespace System.Net
 
                 if (!defaultAdded)
                 {
-                    CookieCollection cc = (CookieCollection)pathList["/"];
+                    CookieCollection cc = pathList["/"];
 
                     if (cc != null)
                     {
@@ -992,84 +1000,43 @@ namespace System.Net
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    internal struct PathList
+    internal sealed class PathList
     {
         // Usage of PathList depends on it being shallowly immutable;
         // adding any mutable fields to it would result in breaks.
-        private readonly SortedList m_list; // Do not rename (binary serialization)
+        private readonly SortedList m_list = SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)); // Do not rename (binary serialization)
 
-        public static PathList Create() => new PathList(SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)));
-
-        private PathList(SortedList list)
-        {
-            Debug.Assert(list != null, $"{nameof(list)} must not be null.");
-            m_list = list;
-        }
-
-        public int Count
-        {
-            get
-            {
-                return m_list.Count;
-            }
-        }
+        public int Count => m_list.Count;
 
         public int GetCookiesCount()
         {
             int count = 0;
             lock (SyncRoot)
             {
-                foreach (CookieCollection cc in m_list.Values)
+                // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                IDictionaryEnumerator e = m_list.GetEnumerator();
+                while (e.MoveNext())
                 {
+                    var cc = (CookieCollection)e.Value;
                     count += cc.Count;
                 }
             }
             return count;
         }
 
-        public ICollection Values
+        public CookieCollection this[string s]
         {
-            get
-            {
-                return m_list.Values;
-            }
-        }
-
-        public object this[string s]
-        {
-            get
-            {
-                lock (SyncRoot)
-                {
-                    return m_list[s];
-                }
-            }
+            get => (CookieCollection)m_list[s];
             set
             {
-                lock (SyncRoot)
-                {
-                    Debug.Assert(value != null);
-                    m_list[s] = value;
-                }
+                Debug.Assert(value != null);
+                m_list[s] = value;
             }
         }
 
-        public IEnumerator GetEnumerator()
-        {
-            lock (SyncRoot)
-            {
-                return m_list.GetEnumerator();
-            }
-        }
+        public IDictionaryEnumerator GetEnumerator() => m_list.GetEnumerator();
 
-        public object SyncRoot
-        {
-            get
-            {
-                Debug.Assert(m_list != null, $"{nameof(PathList)} should never be default initialized and only ever created with {nameof(Create)}.");
-                return m_list;
-            }
-        }
+        public object SyncRoot => m_list.SyncRoot;
 
         [Serializable]
         [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
