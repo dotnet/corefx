@@ -30,7 +30,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        //[Fact]
+        [Fact]
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
@@ -54,6 +54,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 CheckForAnyEquals(obj, DeserializeBlobToObject(blob));
             }
+        }
+
+        [Fact]
+        public void ArraySegmentDefaultCtor()
+        {
+            // This is workaround for Xunit bug which tries to pretty print test case name and enumerate this object.
+            // When inner array is not initialized it throws an exception when this happens.
+            object obj = new ArraySegment<int>();
+            string corefxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
+            string netfxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
+            CheckForAnyEquals(obj, DeserializeBlobToObject(corefxBlob));
+            CheckForAnyEquals(obj, DeserializeBlobToObject(netfxBlob));
         }
 
         [Fact]
