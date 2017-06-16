@@ -152,9 +152,25 @@ namespace System.Diagnostics.Tests
 
             var stackTrace = new StackTrace(ex, skipFrames);
             Assert.Equal(exceptionStackTrace.FrameCount - skipFrames, stackTrace.FrameCount);
-            Assert.Equal(expectedMethods, stackTrace.GetFrames().Select(f => f.GetMethod()));
 
-            VerifyFrames(stackTrace, false);
+            // Netfx has null Frames if skipping frames in Release mode.
+            StackFrame[] frames = stackTrace.GetFrames();
+#if DEBUG
+            Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
+#else
+            if (PlatformDetection.IsFullFramework && skipFrames > 0)
+            {
+                Assert.Null(frames);
+            }
+            else
+            {
+                Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
+            }
+#endif
+            if (frames != null)
+            {
+                VerifyFrames(stackTrace, false);
+            }
         }
 
         [Fact]
@@ -186,10 +202,25 @@ namespace System.Diagnostics.Tests
             IEnumerable<MethodBase> expectedMethods = exceptionStackTrace.GetFrames().Skip(skipFrames).Select(f => f.GetMethod());
 
             var stackTrace = new StackTrace(ex, skipFrames, fNeedFileInfo);
-            Assert.Equal(exceptionStackTrace.FrameCount - skipFrames, stackTrace.FrameCount);
-            Assert.Equal(expectedMethods, stackTrace.GetFrames().Select(f => f.GetMethod()));
 
-            VerifyFrames(stackTrace, fNeedFileInfo);
+            // Netfx has null Frames if skipping frames in Release mode.
+            StackFrame[] frames = stackTrace.GetFrames();
+#if DEBUG
+            Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
+#else
+            if (PlatformDetection.IsFullFramework && skipFrames > 0)
+            {
+                Assert.Null(frames);
+            }
+            else
+            {
+                Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
+            }
+#endif
+            if (frames != null)
+            {
+                VerifyFrames(stackTrace, fNeedFileInfo);
+            }
         }
 
         [Theory]
@@ -238,6 +269,7 @@ namespace System.Diagnostics.Tests
 
         public static IEnumerable<object[]> ToString_TestData()
         {
+            // Debug mode and Release mode give different results.
 #if DEBUG
             yield return new object[] { new StackTrace(InvokeException()), "   at System.Diagnostics.Tests.StackTraceTests.ThrowException()" };
             yield return new object[] { new StackTrace(new Exception()), "" };
@@ -330,7 +362,6 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < stackFrames.Length; i++)
             {
                 StackFrame stackFrame = stackFrames[i];
-                Assert.NotNull(stackFrame.GetMethod());
 
                 // It appears that .NET Core on Windows strips this metadata.
 #if DEBUG
