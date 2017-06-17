@@ -130,6 +130,19 @@ namespace System.Composition.TypedParts.Discovery
             }
         }
 
+        private class ParameterInfoComparer : EqualityComparer<ParameterInfo>
+        {
+            public override int GetHashCode(ParameterInfo obj)
+            {
+                return obj.Position.GetHashCode();
+            }
+
+            public override bool Equals(ParameterInfo x, ParameterInfo y)
+            {
+                return ReferenceEquals(x, y) || (x != null && y != null && x.Position == y.Position);
+            }
+        }
+
         public CompositeActivator GetActivator(DependencyAccessor definitionAccessor, IEnumerable<CompositionDependency> dependencies)
         {
             if (_partActivator != null) return _partActivator;
@@ -142,7 +155,7 @@ namespace System.Composition.TypedParts.Discovery
 
             var partActivatorDependencies = dependencies
                 .Where(dep => dep.Site is ParameterImportSite)
-                .ToDictionary(d => ((ParameterImportSite)d.Site).Parameter);
+                .ToDictionary(d => ((ParameterImportSite)d.Site).Parameter, new ParameterInfoComparer());
 
             for (var i = 0; i < cps.Length; ++i)
             {
