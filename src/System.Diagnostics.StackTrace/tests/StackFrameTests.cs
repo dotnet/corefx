@@ -20,7 +20,7 @@ namespace System.Diagnostics.Tests
         public void Ctor_Default()
         {
             var stackFrame = new StackFrame();
-            VerifyStackFrame(stackFrame, false, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Default)));
+            VerifyStackFrame(stackFrame, false, 0, typeof(StackFrameTests).GetMethod(nameof(Ctor_Default)), isCurrentFrame: true);
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace System.Diagnostics.Tests
         public void Ctor_SkipFrames(int skipFrames)
         {
             var stackFrame = new StackFrame(skipFrames);
-            VerifyStackFrame(stackFrame, true, skipFrames, typeof(StackFrameTests).GetMethod(nameof(Ctor_SkipFrames)));
+            VerifyStackFrame(stackFrame, true, skipFrames, typeof(StackFrameTests).GetMethod(nameof(Ctor_SkipFrames)), isCurrentFrame: skipFrames == 0);
         }
 
         [Theory]
@@ -140,7 +140,7 @@ namespace System.Diagnostics.Tests
             public ClassWithConstructor() => StackFrame = new StackFrame();
         }
 
-        private static void VerifyStackFrame(StackFrame stackFrame, bool hasFileInfo, int skipFrames, MethodInfo expectedMethod)
+        private static void VerifyStackFrame(StackFrame stackFrame, bool hasFileInfo, int skipFrames, MethodInfo expectedMethod, bool isCurrentFrame = false)
         {
             // It appears that .NET Core on Windows strips this metadata in Debug mode.
 #if DEBUG
@@ -155,10 +155,10 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(0, stackFrame.GetFileColumnNumber());
             }
 
-            VerifyStackFrameSkipFrames(stackFrame, false, skipFrames, expectedMethod);
+            VerifyStackFrameSkipFrames(stackFrame, false, skipFrames, expectedMethod, isCurrentFrame);
         }
 
-        private static void VerifyStackFrameSkipFrames(StackFrame stackFrame, bool isFileConstructor, int skipFrames, MethodInfo expectedMethod)
+        private static void VerifyStackFrameSkipFrames(StackFrame stackFrame, bool isFileConstructor, int skipFrames, MethodInfo expectedMethod, bool isCurrentFrame = false)
         {
             // GetILOffset returns StackFrame.OFFSET_UNKNOWN for unknown frames.
             if (skipFrames == int.MinValue || skipFrames > 0)
@@ -166,7 +166,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(StackFrame.OFFSET_UNKNOWN, stackFrame.GetILOffset());
             }
 #if !DEBUG
-            else if (!PlatformDetection.IsFullFramework && isFileConstructor)
+            else if ((!PlatformDetection.IsFullFramework && isFileConstructor) || (PlatformDetection.IsFullFramework && !isFileConstructor && !isCurrentFrame && skipFrames == 0))
             {
                 Assert.Equal(0, stackFrame.GetILOffset());
             }
