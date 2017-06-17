@@ -6,7 +6,9 @@
     <RootNamespace>System.Composition.Lightweight.UnitTests</RootNamespace>
     <AssemblyName>System.Composition.Tests</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'">
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="ActivationEventOrderingTests.cs" />
@@ -36,6 +38,7 @@
     <Compile Include="OpenGenericsTests.cs" />
     <Compile Include="OptionalImportTests.cs" />
     <Compile Include="PropertyExportTests.cs" />
+    <Compile Include="ReflectionTests.cs" />
     <Compile Include="SharingTests.cs" />
     <Compile Include="Util\AssertX.cs" />
   </ItemGroup>
