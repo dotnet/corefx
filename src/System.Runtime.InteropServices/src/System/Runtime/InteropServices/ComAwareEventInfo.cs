@@ -81,7 +81,7 @@ namespace System.Runtime.InteropServices
 
         private static void GetDataForComInvocation(EventInfo eventInfo, out Guid sourceIid, out int dispid)
         {
-            object[] comEventInterfaces = eventInfo.DeclaringType.GetCustomAttributes(typeof(ComEventInterfaceAttribute), false);
+            object[] comEventInterfaces = eventInfo.DeclaringType.GetCustomAttributes(typeof(ComEventInterfaceAttribute), inherit: false);
 
             if (comEventInterfaces == null || comEventInterfaces.Length == 0)
             {
