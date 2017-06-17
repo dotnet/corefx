@@ -10,26 +10,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unux-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\HandleCollectorTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\AllowReversePInvokeCallsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\CallingConventionTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComAliasNameAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.Windows.cs" Condition="'$(TargetGroup)' == 'netfx' OR ('$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'uapaot')" />
     <Compile Include="System\Runtime\InteropServices\ComCompatibleVersionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComConversionLossAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComRegisterFunctionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComUnregisterFunctionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComVisibleAttributeTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttributeTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\HandleCollectorTests.cs" />
     <Compile Include="System\Runtime\InteropServices\HandleRefTests.cs" />
     <Compile Include="System\Runtime\InteropServices\LCIDConversionAttributeTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ProgIdAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\RuntimeEnvironmentTests.cs" />

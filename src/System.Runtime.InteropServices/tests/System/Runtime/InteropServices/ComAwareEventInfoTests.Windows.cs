@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using Xunit;
@@ -11,7 +12,7 @@ namespace System.Runtime.InteropServices.Tests
 #pragma warning disable 0618 // CompareEventInfo is marked as Obsolete.
     public partial class ComAwareEventInfoTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ComEventsHelper.Combine throws a PNSE in .NET Core")]
         public void AddEventHandler_DispIdAttribute_ThrowsPlatformNotSupportedException()
         {
@@ -35,7 +36,7 @@ namespace System.Runtime.InteropServices.Tests
             public void Event() { }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddEventHandler_ComObjectWithoutComEventInterfaceAttribute_ThrowsInvalidOperationException()
         {
             var attribute = new ComAwareEventInfo(typeof(NonComObject), nameof(NonComObject.Event));
@@ -46,7 +47,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<InvalidOperationException>(() => attribute.RemoveEventHandler(target, handler));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddEventHandler_ComObjectWithMultipleComEventInterfaceAttribute_ThrowsAmbiguousMatchException()
         {
             // C# doesn't let us apply multiple ComEventInterface values, so RefEmit is necessary.
@@ -70,7 +71,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<AmbiguousMatchException>(() => attribute.RemoveEventHandler(target, handler));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddEventHandler_NullSourceTypeEventInterface_ThrowsNullReferenceException()
         {
             var attribute = new ComAwareEventInfo(typeof(NullSourceType), nameof(NullSourceType.Event));
@@ -87,7 +88,7 @@ namespace System.Runtime.InteropServices.Tests
             event EventHandler Event;
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddEventHandler_NoSuchSourceTypeEventInterface_ThrowsArgumentNullException()
         {
             var attribute = new ComAwareEventInfo(typeof(NoSuchSourceType), nameof(NoSuchSourceType.Event));
@@ -104,7 +105,7 @@ namespace System.Runtime.InteropServices.Tests
             event EventHandler Event;
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddEventHandler_NoDispIdAttribute_ThrowsInvalidOperationException()
         {
             var attribute = new ComAwareEventInfo(typeof(NoDispAttributeInterface), nameof(NoDispAttributeInterface.Event));
