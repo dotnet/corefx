@@ -21,7 +21,7 @@ namespace Legacy.Support
         {
             if (PlatformDetection.IsWinRT)
             {
-                return new string[0]; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap
+                return new string[0]; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap https://github.com/dotnet/corefx/issues/21156
             }
 
             List<string> ports = new List<string>();
