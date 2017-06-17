@@ -171,78 +171,46 @@ namespace System.Drawing.Drawing2D
             return new LinearGradientBrush(cloneBrush);
         }
 
-        /**
-         * Get/set colors
-         */
-
-        private void _SetLinearColors(Color color1, Color color2)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetLineColors(new HandleRef(this, NativeBrush),
-                                                   color1.ToArgb(),
-                                                   color2.ToArgb());
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private Color[] _GetLinearColors()
-        {
-            int[] colors =
-            new int[]
-            {
-                0,
-                0
-            };
-
-            int status = SafeNativeMethods.Gdip.GdipGetLineColors(new HandleRef(this, NativeBrush), colors);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            Color[] lineColor = new Color[2];
-
-            lineColor[0] = Color.FromArgb(colors[0]);
-            lineColor[1] = Color.FromArgb(colors[1]);
-
-            return lineColor;
-        }
-
-        /// <include file='doc\LinearGradientBrush.uex' path='docs/doc[@for="LinearGradientBrush.LinearColors"]/*' />
-        /// <devdoc>
-        ///    Gets or sets the starting and ending colors of the
-        ///    gradient.
-        /// </devdoc>
         public Color[] LinearColors
         {
-            get { return _GetLinearColors(); }
-            set { _SetLinearColors(value[0], value[1]); }
+            get
+            {
+                int[] colors = new int[] { 0, 0 };
+                int status = SafeNativeMethods.Gdip.GdipGetLineColors(new HandleRef(this, NativeBrush), colors);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return new Color[]
+                {
+                    Color.FromArgb(colors[0]),
+                    Color.FromArgb(colors[1])
+                };
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipSetLineColors(new HandleRef(this, NativeBrush),
+                                                       value[0].ToArgb(),
+                                                       value[1].ToArgb());
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
-        /**
-         * Get source rectangle
-         */
-        private RectangleF _GetRectangle()
-        {
-            GPRECTF rect = new GPRECTF();
-
-            int status = SafeNativeMethods.Gdip.GdipGetLineRect(new HandleRef(this, NativeBrush), ref rect);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return rect.ToRectangleF();
-        }
-
-        /// <include file='doc\LinearGradientBrush.uex' path='docs/doc[@for="LinearGradientBrush.Rectangle"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets a rectangular region that defines the
-        ///       starting and ending points of the gradient.
-        ///    </para>
-        /// </devdoc>
         public RectangleF Rectangle
         {
-            get { return _GetRectangle(); }
+            get
+            {
+                GPRECTF rect = new GPRECTF();
+
+                int status = SafeNativeMethods.Gdip.GdipGetLineRect(new HandleRef(this, NativeBrush), ref rect);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return rect.ToRectangleF();
+            }
         }
 
         public bool GammaCorrection
@@ -563,40 +531,16 @@ namespace System.Drawing.Drawing2D
             set => _SetInterpolationColors(value);
         }
 
-        /**
-         * Set/get brush wrapping mode
-         */
-        private void _SetWrapMode(WrapMode wrapMode)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetLineWrapMode(new HandleRef(this, NativeBrush), unchecked((int)wrapMode));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private WrapMode _GetWrapMode()
-        {
-            int mode = 0;
-
-            int status = SafeNativeMethods.Gdip.GdipGetLineWrapMode(new HandleRef(this, NativeBrush), out mode);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return (WrapMode)mode;
-        }
-
-        /// <include file='doc\LinearGradientBrush.uex' path='docs/doc[@for="LinearGradientBrush.WrapMode"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.WrapMode'/> that indicates the wrap mode for this <see cref='System.Drawing.Drawing2D.LinearGradientBrush'/>.
-        ///    </para>
-        /// </devdoc>
         public WrapMode WrapMode
         {
             get
             {
-                return _GetWrapMode();
+                int status = SafeNativeMethods.Gdip.GdipGetLineWrapMode(new HandleRef(this, NativeBrush), out int mode);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return (WrapMode)mode;
             }
             set
             {
@@ -607,49 +551,38 @@ namespace System.Drawing.Drawing2D
                     throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(WrapMode));
                 }
 
-                _SetWrapMode(value);
+                int status = SafeNativeMethods.Gdip.GdipSetLineWrapMode(new HandleRef(this, NativeBrush), unchecked((int)value));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
             }
         }
 
-        /**
-         * Set/get brush transform
-         */
-        private void _SetTransform(Matrix matrix)
-        {
-            if (matrix == null)
-                throw new ArgumentNullException("matrix");
-
-            int status = SafeNativeMethods.Gdip.GdipSetLineTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private Matrix _GetTransform()
-        {
-            Matrix matrix = new Matrix();
-
-            // NOTE: new Matrix() will throw an exception if matrix == null.
-
-            int status = SafeNativeMethods.Gdip.GdipGetLineTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return matrix;
-        }
-
-        /// <include file='doc\LinearGradientBrush.uex' path='docs/doc[@for="LinearGradientBrush.Transform"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.Matrix'/> that defines a local geometrical transform for
-        ///       this <see cref='System.Drawing.Drawing2D.LinearGradientBrush'/>.
-        ///    </para>
-        /// </devdoc>
         public Matrix Transform
         {
-            get { return _GetTransform(); }
-            set { _SetTransform(value); }
+            get
+            {
+                Matrix matrix = new Matrix();
+
+                // NOTE: new Matrix() will throw an exception if matrix == null.
+
+                int status = SafeNativeMethods.Gdip.GdipGetLineTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return matrix;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("matrix");
+
+                int status = SafeNativeMethods.Gdip.GdipSetLineTransform(new HandleRef(this, NativeBrush), new HandleRef(value, value.nativeMatrix));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
         public void ResetTransform()

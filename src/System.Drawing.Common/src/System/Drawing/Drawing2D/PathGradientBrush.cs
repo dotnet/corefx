@@ -138,76 +138,55 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        /**
-         * Get/set colors
-         * !! NOTE: We do not have methods for GetSurroundColor or SetSurroundColor,
-         *    May need to add usage of Collection class
-         */
-
-        private void _SetSurroundColors(Color[] colors)
-        {
-            int count;
-
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorCount(new HandleRef(this, NativeBrush),
-                                                                       out count);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            if ((colors.Length > count) || (count <= 0))
-                throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
-
-            count = colors.Length;
-            int[] argbs = new int[count];
-            for (int i = 0; i < colors.Length; i++)
-                argbs[i] = colors[i].ToArgb();
-
-            status = SafeNativeMethods.Gdip.GdipSetPathGradientSurroundColorsWithCount(new HandleRef(this, NativeBrush),
-                                                                        argbs,
-                                                                        ref count);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private Color[] _GetSurroundColors()
-        {
-            int count;
-
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorCount(new HandleRef(this, NativeBrush),
-                                                                       out count);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            int[] argbs = new int[count];
-
-            status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorsWithCount(new HandleRef(this, NativeBrush),
-                                                                        argbs,
-                                                                        ref count);
-
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            Color[] colors = new Color[count];
-            for (int i = 0; i < count; i++)
-                colors[i] = Color.FromArgb(argbs[i]);
-
-            return colors;
-        }
-
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.SurroundColors"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets an array of colors that
-        ///       correspond to the points in the path this <see cref='System.Drawing.Drawing2D.LinearGradientBrush'/> fills.
-        ///    </para>
-        /// </devdoc>
         public Color[] SurroundColors
         {
-            get { return _GetSurroundColors(); }
-            set { _SetSurroundColors(value); }
+            get
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorCount(new HandleRef(this, NativeBrush),
+                                                                           out int count);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                int[] argbs = new int[count];
+
+                status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorsWithCount(new HandleRef(this, NativeBrush),
+                                                                            argbs,
+                                                                            ref count);
+
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                Color[] colors = new Color[count];
+                for (int i = 0; i < count; i++)
+                    colors[i] = Color.FromArgb(argbs[i]);
+
+                return colors;
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientSurroundColorCount(new HandleRef(this, NativeBrush),
+                                                                           out int count);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                if ((value.Length > count) || (count <= 0))
+                    throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
+
+                count = value.Length;
+                int[] argbs = new int[count];
+                for (int i = 0; i < value.Length; i++)
+                    argbs[i] = value[i].ToArgb();
+
+                status = SafeNativeMethods.Gdip.GdipSetPathGradientSurroundColorsWithCount(new HandleRef(this, NativeBrush),
+                                                                            argbs,
+                                                                            ref count);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
         public PointF CenterPoint
@@ -233,145 +212,117 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        /**
-         * Get source rectangle
-         */
-        private RectangleF _GetRectangle()
-        {
-            GPRECTF rect = new GPRECTF();
-
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientRect(new HandleRef(this, NativeBrush), ref rect);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return rect.ToRectangleF();
-        }
-
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.Rectangle"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets a bounding rectangle for this <see cref='System.Drawing.Drawing2D.PathGradientBrush'/>.
-        ///    </para>
-        /// </devdoc>
         public RectangleF Rectangle
         {
-            get { return _GetRectangle(); }
-        }
-
-        /**
-         * Set/get blend factors
-         */
-        private Blend _GetBlend()
-        {
-            Blend blend;
-
-            // Figure out the size of blend factor array
-            int retval = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientBlendCount(new HandleRef(this, NativeBrush), out retval);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
+            get
             {
-                throw SafeNativeMethods.Gdip.StatusException(status);
-            }
+                GPRECTF rect = new GPRECTF();
 
-            // Allocate temporary native memory buffer
-
-            int count = retval;
-
-            IntPtr factors = IntPtr.Zero;
-            IntPtr positions = IntPtr.Zero;
-
-            try
-            {
-                int size = checked(4 * count);
-                factors = Marshal.AllocHGlobal(size);
-                positions = Marshal.AllocHGlobal(size);
-
-                // Retrieve horizontal blend factors
-
-                status = SafeNativeMethods.Gdip.GdipGetPathGradientBlend(new HandleRef(this, NativeBrush), factors, positions, count);
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientRect(new HandleRef(this, NativeBrush), ref rect);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
-                {
                     throw SafeNativeMethods.Gdip.StatusException(status);
-                }
 
-                // Return the result in a managed array
-
-                blend = new Blend(count);
-
-                Marshal.Copy(factors, blend.Factors, 0, count);
-                Marshal.Copy(positions, blend.Positions, 0, count);
-            }
-            finally
-            {
-                if (factors != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(factors);
-                }
-                if (positions != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(positions);
-                }
-            }
-
-            return blend;
-        }
-
-        private void _SetBlend(Blend blend)
-        {
-            // Allocate temporary native memory buffer
-            // and copy input blend factors into it.
-
-            int count = blend.Factors.Length;
-
-            IntPtr factors = IntPtr.Zero;
-            IntPtr positions = IntPtr.Zero;
-
-            try
-            {
-                int size = checked(4 * count);
-                factors = Marshal.AllocHGlobal(size);
-                positions = Marshal.AllocHGlobal(size);
-
-                Marshal.Copy(blend.Factors, 0, factors, count);
-                Marshal.Copy(blend.Positions, 0, positions, count);
-
-                // Set blend factors
-
-                int status = SafeNativeMethods.Gdip.GdipSetPathGradientBlend(new HandleRef(this, NativeBrush), new HandleRef(null, factors), new HandleRef(null, positions), count);
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                {
-                    throw SafeNativeMethods.Gdip.StatusException(status);
-                }
-            }
-            finally
-            {
-                if (factors != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(factors);
-                }
-                if (positions != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(positions);
-                }
+                return rect.ToRectangleF();
             }
         }
 
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.Blend"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.Blend'/> that specifies positions and factors
-        ///       that define a custom falloff for the gradient.
-        ///    </para>
-        /// </devdoc>
         public Blend Blend
         {
-            get { return _GetBlend(); }
-            set { _SetBlend(value); }
+            get
+            {    // Figure out the size of blend factor array
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientBlendCount(new HandleRef(this, NativeBrush), out int retval);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                {
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+                }
+
+                // Allocate temporary native memory buffer
+
+                int count = retval;
+
+                IntPtr factors = IntPtr.Zero;
+                IntPtr positions = IntPtr.Zero;
+
+                try
+                {
+                    int size = checked(4 * count);
+                    factors = Marshal.AllocHGlobal(size);
+                    positions = Marshal.AllocHGlobal(size);
+
+                    // Retrieve horizontal blend factors
+
+                    status = SafeNativeMethods.Gdip.GdipGetPathGradientBlend(new HandleRef(this, NativeBrush), factors, positions, count);
+
+                    if (status != SafeNativeMethods.Gdip.Ok)
+                    {
+                        throw SafeNativeMethods.Gdip.StatusException(status);
+                    }
+
+                    // Return the result in a managed array
+
+                    Blend blend = new Blend(count);
+
+                    Marshal.Copy(factors, blend.Factors, 0, count);
+                    Marshal.Copy(positions, blend.Positions, 0, count);
+
+                    return blend;
+                }
+                finally
+                {
+                    if (factors != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(factors);
+                    }
+                    if (positions != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(positions);
+                    }
+                }
+            }
+            set
+            {
+                // Allocate temporary native memory buffer
+                // and copy input blend factors into it.
+
+                int count = value.Factors.Length;
+
+                IntPtr factors = IntPtr.Zero;
+                IntPtr positions = IntPtr.Zero;
+
+                try
+                {
+                    int size = checked(4 * count);
+                    factors = Marshal.AllocHGlobal(size);
+                    positions = Marshal.AllocHGlobal(size);
+
+                    Marshal.Copy(value.Factors, 0, factors, count);
+                    Marshal.Copy(value.Positions, 0, positions, count);
+
+                    // Set blend factors
+
+                    int status = SafeNativeMethods.Gdip.GdipSetPathGradientBlend(new HandleRef(this, NativeBrush), new HandleRef(null, factors), new HandleRef(null, positions), count);
+
+                    if (status != SafeNativeMethods.Gdip.Ok)
+                    {
+                        throw SafeNativeMethods.Gdip.StatusException(status);
+                    }
+                }
+                finally
+                {
+                    if (factors != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(factors);
+                    }
+                    if (positions != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(positions);
+                    }
+                }
+            }
         }
+
         public void SetSigmaBellShape(float focus) => SetSigmaBellShape(focus, (float)1.0);
 
         public void SetSigmaBellShape(float focus, float scale)
@@ -392,181 +343,149 @@ namespace System.Drawing.Drawing2D
                 throw SafeNativeMethods.Gdip.StatusException(status);
         }
 
-        /*
-         * Preset Color Blend
-         */
-
-        private ColorBlend _GetInterpolationColors()
-        {
-            ColorBlend blend;
-
-            // Figure out the size of blend factor array
-            int retval = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientPresetBlendCount(new HandleRef(this, NativeBrush), out retval);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-            {
-                throw SafeNativeMethods.Gdip.StatusException(status);
-            }
-
-            // If retVal is 0, then there is nothing to marshal.
-            // In this case, we'll return an empty ColorBlend...
-            //
-            if (retval == 0)
-            {
-                return new ColorBlend();
-            }
-
-            // Allocate temporary native memory buffer
-
-            int count = retval;
-
-            IntPtr colors = IntPtr.Zero;
-            IntPtr positions = IntPtr.Zero;
-
-            try
-            {
-                int size = checked(4 * count);
-                colors = Marshal.AllocHGlobal(size);
-                positions = Marshal.AllocHGlobal(size);
-
-                // Retrieve horizontal blend factors
-
-                status = SafeNativeMethods.Gdip.GdipGetPathGradientPresetBlend(new HandleRef(this, NativeBrush), colors, positions, count);
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                {
-                    throw SafeNativeMethods.Gdip.StatusException(status);
-                }
-
-                // Return the result in a managed array
-
-                blend = new ColorBlend(count);
-
-                int[] argb = new int[count];
-                Marshal.Copy(colors, argb, 0, count);
-                Marshal.Copy(positions, blend.Positions, 0, count);
-
-                // copy ARGB values into Color array of ColorBlend
-                blend.Colors = new Color[argb.Length];
-
-                for (int i = 0; i < argb.Length; i++)
-                {
-                    blend.Colors[i] = Color.FromArgb(argb[i]);
-                }
-            }
-            finally
-            {
-                if (colors != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(colors);
-                }
-                if (positions != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(positions);
-                }
-            }
-
-            return blend;
-        }
-
-        private void _SetInterpolationColors(ColorBlend blend)
-        {
-            // Allocate temporary native memory buffer
-            // and copy input blend factors into it.
-
-            int count = blend.Colors.Length;
-
-            IntPtr colors = IntPtr.Zero;
-            IntPtr positions = IntPtr.Zero;
-
-            try
-            {
-                int size = checked(4 * count);
-                colors = Marshal.AllocHGlobal(size);
-                positions = Marshal.AllocHGlobal(size);
-
-                int[] argbs = new int[count];
-                for (int i = 0; i < count; i++)
-                {
-                    argbs[i] = blend.Colors[i].ToArgb();
-                }
-
-                Marshal.Copy(argbs, 0, colors, count);
-                Marshal.Copy(blend.Positions, 0, positions, count);
-
-                // Set blend factors
-
-                int status = SafeNativeMethods.Gdip.GdipSetPathGradientPresetBlend(new HandleRef(this, NativeBrush), new HandleRef(null, colors), new HandleRef(null, positions), count);
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                {
-                    throw SafeNativeMethods.Gdip.StatusException(status);
-                }
-            }
-            finally
-            {
-                if (colors != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(colors);
-                }
-                if (positions != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(positions);
-                }
-            }
-        }
-
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.InterpolationColors"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.ColorBlend'/> that defines a multi-color linear
-        ///       gradient.
-        ///    </para>
-        /// </devdoc>
         public ColorBlend InterpolationColors
         {
-            get { return _GetInterpolationColors(); }
-            set { _SetInterpolationColors(value); }
+            get
+            {
+                // Figure out the size of blend factor array
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientPresetBlendCount(new HandleRef(this, NativeBrush), out int retval);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                {
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+                }
+
+                // If retVal is 0, then there is nothing to marshal.
+                // In this case, we'll return an empty ColorBlend...
+                //
+                if (retval == 0)
+                {
+                    return new ColorBlend();
+                }
+
+                // Allocate temporary native memory buffer
+
+                int count = retval;
+
+                IntPtr colors = IntPtr.Zero;
+                IntPtr positions = IntPtr.Zero;
+
+                try
+                {
+                    int size = checked(4 * count);
+                    colors = Marshal.AllocHGlobal(size);
+                    positions = Marshal.AllocHGlobal(size);
+
+                    // Retrieve horizontal blend factors
+
+                    status = SafeNativeMethods.Gdip.GdipGetPathGradientPresetBlend(new HandleRef(this, NativeBrush), colors, positions, count);
+
+                    if (status != SafeNativeMethods.Gdip.Ok)
+                    {
+                        throw SafeNativeMethods.Gdip.StatusException(status);
+                    }
+
+                    // Return the result in a managed array
+
+                    ColorBlend blend = new ColorBlend(count);
+
+                    int[] argb = new int[count];
+                    Marshal.Copy(colors, argb, 0, count);
+                    Marshal.Copy(positions, blend.Positions, 0, count);
+
+                    // copy ARGB values into Color array of ColorBlend
+                    blend.Colors = new Color[argb.Length];
+
+                    for (int i = 0; i < argb.Length; i++)
+                    {
+                        blend.Colors[i] = Color.FromArgb(argb[i]);
+                    }
+
+                    return blend;
+                }
+                finally
+                {
+                    if (colors != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(colors);
+                    }
+                    if (positions != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(positions);
+                    }
+                }
+            }
+            set
+            {
+                // Allocate temporary native memory buffer
+                // and copy input blend factors into it.
+
+                int count = value.Colors.Length;
+
+                IntPtr colors = IntPtr.Zero;
+                IntPtr positions = IntPtr.Zero;
+
+                try
+                {
+                    int size = checked(4 * count);
+                    colors = Marshal.AllocHGlobal(size);
+                    positions = Marshal.AllocHGlobal(size);
+
+                    int[] argbs = new int[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        argbs[i] = value.Colors[i].ToArgb();
+                    }
+
+                    Marshal.Copy(argbs, 0, colors, count);
+                    Marshal.Copy(value.Positions, 0, positions, count);
+
+                    // Set blend factors
+
+                    int status = SafeNativeMethods.Gdip.GdipSetPathGradientPresetBlend(new HandleRef(this, NativeBrush), new HandleRef(null, colors), new HandleRef(null, positions), count);
+
+                    if (status != SafeNativeMethods.Gdip.Ok)
+                    {
+                        throw SafeNativeMethods.Gdip.StatusException(status);
+                    }
+                }
+                finally
+                {
+                    if (colors != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(colors);
+                    }
+                    if (positions != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(positions);
+                    }
+                }
+            }
         }
 
-        /**
-         * Set/get brush transform
-         */
-        private void _SetTransform(Matrix matrix)
-        {
-            if (matrix == null)
-                throw new ArgumentNullException("matrix");
-
-            int status = SafeNativeMethods.Gdip.GdipSetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private Matrix _GetTransform()
-        {
-            Matrix matrix = new Matrix();
-
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return matrix;
-        }
-
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.Transform"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.Matrix'/> that defines a local geometrical
-        ///       transform for this <see cref='System.Drawing.Drawing2D.PathGradientBrush'/>.
-        ///    </para>
-        /// </devdoc>
         public Matrix Transform
         {
-            get { return _GetTransform(); }
-            set { _SetTransform(value); }
+            get
+            {
+                Matrix matrix = new Matrix();
+
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return matrix;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("matrix");
+
+                int status = SafeNativeMethods.Gdip.GdipSetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(value, value.nativeMatrix));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
         public void ResetTransform()
@@ -648,41 +567,16 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        /**
-         * Set/get brush wrapping mode
-         */
-        private void _SetWrapMode(WrapMode wrapMode)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetPathGradientWrapMode(new HandleRef(this, NativeBrush), unchecked((int)wrapMode));
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private WrapMode _GetWrapMode()
-        {
-            int mode = 0;
-
-            int status = SafeNativeMethods.Gdip.GdipGetPathGradientWrapMode(new HandleRef(this, NativeBrush), out mode);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return (WrapMode)mode;
-        }
-
-        /// <include file='doc\PathGradientBrush.uex' path='docs/doc[@for="PathGradientBrush.WrapMode"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a <see cref='System.Drawing.Drawing2D.WrapMode'/> that indicates the wrap mode for this
-        ///    <see cref='System.Drawing.Drawing2D.PathGradientBrush'/>. 
-        ///    </para>
-        /// </devdoc>
         public WrapMode WrapMode
         {
             get
             {
-                return _GetWrapMode();
+                int status = SafeNativeMethods.Gdip.GdipGetPathGradientWrapMode(new HandleRef(this, NativeBrush), out int mode);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return (WrapMode)mode;
             }
             set
             {
@@ -692,7 +586,10 @@ namespace System.Drawing.Drawing2D
                     throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(WrapMode));
                 }
 
-                _SetWrapMode(value);
+                int status = SafeNativeMethods.Gdip.GdipSetPathGradientWrapMode(new HandleRef(this, NativeBrush), unchecked((int)value));
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
             }
         }
     }

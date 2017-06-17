@@ -122,123 +122,84 @@ namespace System.Drawing.Drawing2D
                 throw SafeNativeMethods.Gdip.StatusException(status);
         }
 
-        private void _SetStrokeJoin(LineJoin lineJoin)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapStrokeJoin(new HandleRef(this, nativeCap), lineJoin);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private LineJoin _GetStrokeJoin()
-        {
-            LineJoin lineJoin;
-
-            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapStrokeJoin(new HandleRef(this, nativeCap), out lineJoin);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return lineJoin;
-        }
-
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.StrokeJoin"]/*' />
-        /// <devdoc>
-        ///    Gets or sets the <see cref='System.Drawing.Drawing2D.LineJoin'/> used by this custom cap.
-        /// </devdoc>
         public LineJoin StrokeJoin
         {
-            get { return _GetStrokeJoin(); }
-            set { _SetStrokeJoin(value); }
+            get
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapStrokeJoin(new HandleRef(this, nativeCap), out LineJoin lineJoin);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return lineJoin;
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapStrokeJoin(new HandleRef(this, nativeCap), value);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
-        private void _SetBaseCap(LineCap baseCap)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapBaseCap(new HandleRef(this, nativeCap), baseCap);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private LineCap _GetBaseCap()
-        {
-            LineCap baseCap;
-            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapBaseCap(new HandleRef(this, nativeCap), out baseCap);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return baseCap;
-        }
-
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.BaseCap"]/*' />
-        /// <devdoc>
-        ///    Gets or sets the <see cref='System.Drawing.Drawing2D.LineCap'/> on which this <see cref='System.Drawing.Drawing2D.CustomLineCap'/> is based.
-        /// </devdoc>
         public LineCap BaseCap
         {
-            get { return _GetBaseCap(); }
-            set { _SetBaseCap(value); }
+            get
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapBaseCap(new HandleRef(this, nativeCap), out LineCap baseCap);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return baseCap;
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapBaseCap(new HandleRef(this, nativeCap), value);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
-        private void _SetBaseInset(float inset)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapBaseInset(new HandleRef(this, nativeCap), inset);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private float _GetBaseInset()
-        {
-            float inset;
-            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapBaseInset(new HandleRef(this, nativeCap), out inset);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return inset;
-        }
-
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.BaseInset"]/*' />
-        /// <devdoc>
-        ///    Gets or sets the distance between the cap
-        ///    and the line.
-        /// </devdoc>
         public float BaseInset
         {
-            get { return _GetBaseInset(); }
-            set { _SetBaseInset(value); }
+            get
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapBaseInset(new HandleRef(this, nativeCap), out float inset);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return inset;
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapBaseInset(new HandleRef(this, nativeCap), value);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
 
-        private void _SetWidthScale(float widthScale)
-        {
-            int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapWidthScale(new HandleRef(this, nativeCap), widthScale);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-        }
-
-        private float _GetWidthScale()
-        {
-            float widthScale;
-            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapWidthScale(new HandleRef(this, nativeCap), out widthScale);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return widthScale;
-        }
-
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.WidthScale"]/*' />
-        /// <devdoc>
-        ///    Gets or sets the amount by which to scale
-        ///    the width of the cap.
-        /// </devdoc>
         public float WidthScale
         {
-            get { return _GetWidthScale(); }
-            set { _SetWidthScale(value); }
+            get
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapWidthScale(new HandleRef(this, nativeCap), out float widthScale);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+
+                return widthScale;
+            }
+            set
+            {
+                int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapWidthScale(new HandleRef(this, nativeCap), value);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+            }
         }
     }
 }
