@@ -160,8 +160,8 @@ namespace System.Diagnostics.Tests
 
         static void VerifyLogged(Action test, string expectedOutput)
         {
-            // The full .NET Framework doesn't have any internal extensibility points for unit tests.
-            if (PlatformDetection.IsFullFramework)
+            // .NET Core has an internal extensibility point for unit tests.
+            if (PlatformDetection.IsFullFramework || PlatformDetection.IsUap)
             {
                 return;
             }
@@ -194,8 +194,8 @@ namespace System.Diagnostics.Tests
 
         static void VerifyAssert(Action test, params string[] expectedOutputStrings)
         {
-            // The full .NET Framework doesn't have any internal extensibility points for unit tests.
-            if (PlatformDetection.IsFullFramework)
+            // .NET Core has an internal extensibility point for unit tests.
+            if (PlatformDetection.IsFullFramework || PlatformDetection.IsUap)
             {
                 return;
             }

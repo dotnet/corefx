@@ -32,7 +32,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         void Ctor_NullType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("type", () => new DebuggerTypeProxyAttribute((Type)null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => new DebuggerTypeProxyAttribute((Type)null));
         }
 
         [Theory]
