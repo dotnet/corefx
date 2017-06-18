@@ -14,7 +14,7 @@ namespace System.Drawing.Tests
             yield return new object[] { Color.PapayaWhip, Color.PapayaWhip };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Colors_TestData))]
         public void Ctor_Color(Color color, Color expectedColor)
         {
@@ -22,7 +22,7 @@ namespace System.Drawing.Tests
             Assert.Equal(expectedColor, brush.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Color_ReturnsClone()
         {
             var brush = new SolidBrush(Color.PeachPuff);
@@ -39,7 +39,7 @@ namespace System.Drawing.Tests
             Assert.NotEqual(Color.PapayaWhip, clone.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_ImmutableColor_ReturnsMutableClone()
         {
             SolidBrush brush = Assert.IsType<SolidBrush>(Brushes.Bisque);
@@ -50,7 +50,7 @@ namespace System.Drawing.Tests
             Assert.Equal(Color.Bisque, brush.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Disposed_ThrowsArgumentException()
         {
             var brush = new SolidBrush(Color.LavenderBlush);
@@ -59,7 +59,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentException>(null, () => brush.Clone());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Color_EmptyAndGetDisposed_ThrowsArgumentException()
         {
             var brush = new SolidBrush(new Color());
@@ -68,7 +68,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentException>(null, () => brush.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Color_NonEmptyAndGetDisposed_ReturnsExpected()
         {
             var brush = new SolidBrush(Color.Aquamarine);
@@ -77,14 +77,14 @@ namespace System.Drawing.Tests
             Assert.Equal(Color.Aquamarine, brush.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Color_SetValid_GetReturnsExpected()
         {
             var brush = new SolidBrush(Color.Goldenrod) { Color = Color.GhostWhite };
             Assert.Equal(Color.GhostWhite, brush.Color);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Color_SetDisposed_ThrowsArgumentException()
         {
             var brush = new SolidBrush(new Color());
@@ -93,14 +93,14 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentException>(null, () => brush.Color = Color.WhiteSmoke);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Color_SetImmutable_ThrowsArgumentException()
         {
             SolidBrush brush = Assert.IsType<SolidBrush>(SystemBrushes.ActiveBorder);
             Assert.Throws<ArgumentException>(null, () => brush.Color = Color.AntiqueWhite);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_MultipleTimes_Success()
         {
             var brush = new SolidBrush(Color.Plum);
@@ -108,7 +108,7 @@ namespace System.Drawing.Tests
             brush.Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_SetImmutable_ThrowsArgumentException()
         {
             SolidBrush brush = Assert.IsType<SolidBrush>(SystemBrushes.ActiveBorder);
