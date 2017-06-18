@@ -215,41 +215,26 @@ namespace System.Drawing.Printing
             get
             {
                 int returnCode;
-                int bufferSize;
-                int count;
-                int level, sizeofstruct;
-                // Note: Level 5 doesn't seem to work properly on NT platforms
-                // (atleast the call to get the size of the buffer reqd.),
-                // and Level 4 doesn't work on Win9x.
-                //
-                if (Environment.OSVersion.Platform == System.PlatformID.Win32NT)
+                int sizeofstruct;
+                // Note: The call to get the size of the buffer required for level 5 does not work property on NT platforms.
+                const int Level = 4;
+                // PRINTER_INFO_4 are 12 bytes in size
+                if (IntPtr.Size == 8)
                 {
-                    level = 4;
-                    // PRINTER_INFO_4 are 12 bytes in size
-                    if (IntPtr.Size == 8)
-                    {
-                        sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1) + PADDING_IA64;
-                    }
-                    else
-                    {
-                        sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1);
-                    }
+                    sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1) + PADDING_IA64;
                 }
                 else
                 {
-                    level = 5;
-                    // PRINTER_INFO_5 are 20 bytes in size
-                    sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 3);
+                    sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1);
                 }
-                string[] array;
 
-                SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS, null, level, IntPtr.Zero, 0, out bufferSize, out count);
+                SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS, null, Level, IntPtr.Zero, 0, out int bufferSize, out int count);
 
                 IntPtr buffer = Marshal.AllocCoTaskMem(bufferSize);
                 returnCode = SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS,
-                                                        null, level, buffer,
+                                                        null, Level, buffer,
                                                         bufferSize, out bufferSize, out count);
-                array = new string[count];
+                string[] array = new string[count];
 
                 if (returnCode == 0)
                 {
