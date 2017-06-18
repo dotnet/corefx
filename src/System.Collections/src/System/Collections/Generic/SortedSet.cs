@@ -891,7 +891,7 @@ namespace System.Collections.Generic
             }
             else if (set2.Comparer.Equals(comparer))
             {
-                return set2.SetEquals( set1);
+                return set2.SetEquals(set1);
             }
             bool found = false;
             foreach (T item1 in set1)
