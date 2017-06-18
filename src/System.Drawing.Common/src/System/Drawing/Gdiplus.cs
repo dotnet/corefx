@@ -3528,12 +3528,6 @@ namespace System.Drawing
 
         public static int AddFontFile(string fileName)
         {
-            // This is not supported in Win9x systems.
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                return 0;
-            }
-
             return AddFontResourceEx(fileName, /*FR_PRIVATE*/ 0x10, IntPtr.Zero);
         }
 
@@ -4613,40 +4607,7 @@ namespace System.Drawing
         public static extern int GetTextMetricsA(HandleRef hDC, [In, Out] ref SafeNativeMethods.TEXTMETRICA lptm);
 
         public static int GetTextMetrics(HandleRef hDC, ref SafeNativeMethods.TEXTMETRIC lptm) {
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                // ANSI
-                SafeNativeMethods.TEXTMETRICA lptmA = new SafeNativeMethods.TEXTMETRICA();
-                int retVal = SafeNativeMethods.GetTextMetricsA(hDC, ref lptmA);
-
-                lptm.tmHeight           = lptmA.tmHeight; 
-                lptm.tmAscent           = lptmA.tmAscent; 
-                lptm.tmDescent          = lptmA.tmDescent; 
-                lptm.tmInternalLeading  = lptmA.tmInternalLeading; 
-                lptm.tmExternalLeading  = lptmA.tmExternalLeading; 
-                lptm.tmAveCharWidth     = lptmA.tmAveCharWidth; 
-                lptm.tmMaxCharWidth     = lptmA.tmMaxCharWidth; 
-                lptm.tmWeight           = lptmA.tmWeight; 
-                lptm.tmOverhang         = lptmA.tmOverhang; 
-                lptm.tmDigitizedAspectX = lptmA.tmDigitizedAspectX; 
-                lptm.tmDigitizedAspectY = lptmA.tmDigitizedAspectY; 
-                lptm.tmFirstChar        = (char) lptmA.tmFirstChar; 
-                lptm.tmLastChar         = (char) lptmA.tmLastChar; 
-                lptm.tmDefaultChar      = (char) lptmA.tmDefaultChar; 
-                lptm.tmBreakChar        = (char) lptmA.tmBreakChar; 
-                lptm.tmItalic           = lptmA.tmItalic; 
-                lptm.tmUnderlined       = lptmA.tmUnderlined; 
-                lptm.tmStruckOut        = lptmA.tmStruckOut; 
-                lptm.tmPitchAndFamily   = lptmA.tmPitchAndFamily; 
-                lptm.tmCharSet          = lptmA.tmCharSet; 
-
-                return retVal;
-            }
-            else
-            {
-                // Unicode
-                return SafeNativeMethods.GetTextMetricsW(hDC, ref lptm);
-            }
+            return SafeNativeMethods.GetTextMetricsW(hDC, ref lptm);
         }
 
         [DllImport(ExternDll.Kernel32, SetLastError=true, CharSet=System.Runtime.InteropServices.CharSet.Auto)]

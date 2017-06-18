@@ -1385,18 +1385,9 @@ namespace System.Drawing.Printing
             if (str == null) str = "";
             IntPtr address = (IntPtr)(checked((long)bufferStart + index * Marshal.SystemDefaultCharSize));
 
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                byte[] bytes = System.Text.Encoding.Default.GetBytes(str);
-                Marshal.Copy(bytes, 0, address, bytes.Length);
-                Marshal.WriteByte(checked((IntPtr)((long)address + bytes.Length)), 0);
-            }
-            else
-            {
-                char[] data = str.ToCharArray();
-                Marshal.Copy(data, 0, address, data.Length);
-                Marshal.WriteInt16((IntPtr)(checked((long)address + data.Length * 2)), 0);
-            }
+            char[] data = str.ToCharArray();
+            Marshal.Copy(data, 0, address, data.Length);
+            Marshal.WriteInt16((IntPtr)(checked((long)address + data.Length * 2)), 0);
 
             return checked((short)(str.Length + 1));
         }

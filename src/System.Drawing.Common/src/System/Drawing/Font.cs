@@ -368,12 +368,7 @@ namespace System.Drawing
         public static Font FromLogFont(object lf, IntPtr hdc)
         {
             IntPtr font = IntPtr.Zero;
-            int status;
-
-            if (Marshal.SystemDefaultCharSize == 1)
-                status = SafeNativeMethods.Gdip.GdipCreateFontFromLogfontA(new HandleRef(null, hdc), lf, out font);
-            else
-                status = SafeNativeMethods.Gdip.GdipCreateFontFromLogfontW(new HandleRef(null, hdc), lf, out font);
+            int status = SafeNativeMethods.Gdip.GdipCreateFontFromLogfontW(new HandleRef(null, hdc), lf, out font);
 
             // Special case this incredibly common error message to give more information
             if (status == SafeNativeMethods.Gdip.NotTrueTypeFont)
@@ -385,20 +380,8 @@ namespace System.Drawing
             if (font == IntPtr.Zero)
                 throw new ArgumentException(SR.Format(SR.GdiplusNotTrueTypeFont, lf.ToString()));
 
-            bool gdiVerticalFont;
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
 #pragma warning disable 0618
-                gdiVerticalFont = (Marshal.ReadByte(lf, LogFontNameOffset) == (byte)(short)'@');
-#pragma warning restore 0618
-            }
-            else
-            {
-#pragma warning disable 0618
-                gdiVerticalFont = (Marshal.ReadInt16(lf, LogFontNameOffset) == (short)'@');
-#pragma warning restore 0618
-            }
-#pragma warning disable 0618
+            bool gdiVerticalFont = (Marshal.ReadInt16(lf, LogFontNameOffset) == (short)'@');
             return new Font(font, Marshal.ReadByte(lf, LogFontCharSetOffset), gdiVerticalFont);
 #pragma warning restore 0618
         }
