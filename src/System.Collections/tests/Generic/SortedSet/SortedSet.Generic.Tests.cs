@@ -371,6 +371,6 @@ namespace System.Collections.Tests
             Assert.True(comparerSet1.SetEquals(nonDefaultComparerSet));
             Assert.False(set.SetEquals(nonDefaultComparerSet));
         }
-#endregion
+        #endregion
     }
 }
