@@ -24,6 +24,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
@@ -33,7 +34,7 @@ using Xunit;
 
 namespace System.Drawing.Tests
 {
-    public class IconTests
+    public class IconTests : RemoteExecutorTestBase
     {
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData("48x48_multiple_entries_4bit.ico")]
@@ -471,15 +472,11 @@ namespace System.Drawing.Tests
             yield return new object[] { new Icon(Helpers.GetTestBitmapPath("256x256_two_entries_multiple_bits.ico"), 48, 48) };
             yield return new object[] { new Icon(Helpers.GetTestBitmapPath("256x256_two_entries_multiple_bits.ico"), 256, 256) };
             yield return new object[] { new Icon(Helpers.GetTestBitmapPath("256x256_two_entries_multiple_bits.ico"), 0, 0) };
-
-            // Handle rerring to icon without any colour.
-            var icon_48x48_one_entry_1bit = new Icon(Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico"));
-            yield return new object[] { Icon.FromHandle(icon_48x48_one_entry_1bit.Handle) };
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(ToBitmap_TestData))]
-        public void ToBitmap_BitmapIcon_Success(Icon icon)
+        public void ToBitmap_BitmapIcon_ReturnsExpected(Icon icon)
         {
             using (Bitmap bitmap = icon.ToBitmap())
             {
@@ -495,40 +492,96 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void ToBitmap_PngIcon_Success()
+        public void ToBitmap_BitmapIconFromHandle_ReturnsExpected()
         {
-            Icon icon;
-            using (var stream = new MemoryStream())
+            // Handle rerring to icon without any colour.
+            using (var originalIcon = new Icon(Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico")))
+            using (Icon icon = Icon.FromHandle(originalIcon.Handle))
             {
-                // Create a PNG inside an ICO.
-                var bitmap = new Bitmap(10, 10);
-                stream.Write(new byte[] { 0, 0, 1, 0, 1, 0, (byte)bitmap.Width, (byte)bitmap.Height, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 22, 0, 0, 0 }, 0, 22);
-
-                // Writing actual data
-                bitmap.Save(stream, ImageFormat.Png);
-
-                // Getting data length (file length minus header)
-                long length = stream.Length - 22;
-                stream.Seek(14, SeekOrigin.Begin);
-                stream.WriteByte((byte)length);
-                stream.WriteByte((byte)(length >> 8));
-
-                // Read the PNG inside an ICO.
-                stream.Position = 0;
-                icon = new Icon(stream);
+                ToBitmap_BitmapIcon_ReturnsExpected(icon);
             }
+        }
 
-            using (Bitmap bitmap = icon.ToBitmap())
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void ToBitmap_PngIconSupportedInSwitches_Success()
+        {
+            RemoteInvoke(() =>
             {
-                Assert.NotSame(icon.ToBitmap(), bitmap);
-                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-                Assert.Empty(bitmap.Palette.Entries);
-                Assert.Equal(icon.Width, bitmap.Width);
-                Assert.Equal(icon.Height, bitmap.Height);
+                // This switch should be on by default in .NET Core.
+                if (PlatformDetection.IsFullFramework)
+                {
+                    AppContext.SetSwitch("Switch.System.Drawing.DontSupportPngFramesInIcons", false);
+                }
 
-                Assert.Equal(ImageFormat.Png, bitmap.RawFormat);
-                Assert.Equal(77842, bitmap.Flags);
-            }
+                Icon icon;
+                using (var stream = new MemoryStream())
+                {
+                    // Create a PNG inside an ICO.
+                    var bitmap = new Bitmap(10, 10);
+                    stream.Write(new byte[] { 0, 0, 1, 0, 1, 0, (byte)bitmap.Width, (byte)bitmap.Height, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 22, 0, 0, 0 }, 0, 22);
+
+                    // Writing actual data
+                    bitmap.Save(stream, ImageFormat.Png);
+
+                    // Getting data length (file length minus header)
+                    long length = stream.Length - 22;
+                    stream.Seek(14, SeekOrigin.Begin);
+                    stream.WriteByte((byte)length);
+                    stream.WriteByte((byte)(length >> 8));
+
+                    // Read the PNG inside an ICO.
+                    stream.Position = 0;
+                    icon = new Icon(stream);
+                }
+
+                using (Bitmap bitmap = icon.ToBitmap())
+                {
+                    Assert.NotSame(icon.ToBitmap(), bitmap);
+                    Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                    Assert.Empty(bitmap.Palette.Entries);
+                    Assert.Equal(icon.Width, bitmap.Width);
+                    Assert.Equal(icon.Height, bitmap.Height);
+
+                    Assert.Equal(ImageFormat.Png, bitmap.RawFormat);
+                    Assert.Equal(77842, bitmap.Flags);
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void ToBitmap_PngIconNotSupportedInSwitches_ThrowsArgumentOutOfRangeException()
+        {
+            RemoteInvoke(() =>
+            {
+                AppContext.SetSwitch("Switch.System.Drawing.DontSupportPngFramesInIcons", true);
+
+                Icon icon;
+                using (var stream = new MemoryStream())
+                {
+                    // Create a PNG inside an ICO.
+                    var bitmap = new Bitmap(10, 10);
+                    stream.Write(new byte[] { 0, 0, 1, 0, 1, 0, (byte)bitmap.Width, (byte)bitmap.Height, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 22, 0, 0, 0 }, 0, 22);
+
+                    // Writing actual data
+                    bitmap.Save(stream, ImageFormat.Png);
+
+                    // Getting data length (file length minus header)
+                    long length = stream.Length - 22;
+                    stream.Seek(14, SeekOrigin.Begin);
+                    stream.WriteByte((byte)length);
+                    stream.WriteByte((byte)(length >> 8));
+
+                    // Read the PNG inside an ICO.
+                    stream.Position = 0;
+                    icon = new Icon(stream);
+                }
+
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => icon.ToBitmap());
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -653,6 +706,7 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The hardcoded bytes depend on the existance of the System.Drawing.Common assembly.")]
         public void Deserialize_InvalidBytes_ThrowsInvalidOperationException()
         {
             // In these bytes, IconData is set to null.
