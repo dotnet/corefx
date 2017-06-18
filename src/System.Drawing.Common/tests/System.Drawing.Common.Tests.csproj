@@ -13,6 +13,15 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="IconTests.cs" />
     <Compile Include="PensTests.cs" />
+    <Compile Include="Imaging\BitmapDataTests.cs" />
+    <Compile Include="Imaging\ColorMapTests.cs" />
+    <Compile Include="Imaging\ColorMatrixTests.cs" />
+    <Compile Include="Imaging\EncoderTests.cs" />
+    <Compile Include="Imaging\FrameDimensionTests.cs" />
+    <Compile Include="Imaging\ImageCodecInfoTests.cs" />
+    <Compile Include="Imaging\ImageFormatTests.cs" />
+    <Compile Include="Imaging\MetaHeaderTests.cs" />
+    <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
     <Compile Include="RegionTests.cs" />
     <Compile Include="SystemBrushesTests.cs" />
     <Compile Include="SystemPensTest.cs" />
@@ -41,6 +50,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="bitmaps\96x96_one_entry_8bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\milkmateya01.emf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\telescope_01.wmf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="bitmaps\48x48_multiple_entries_4bit.ico">
