@@ -13,9 +13,6 @@ namespace System.IO
     {
         internal const int GENERIC_READ = unchecked((int)0x80000000);
 
-        public override int MaxPath { get { return Interop.Kernel32.MAX_PATH; } }
-        public override int MaxDirectoryPath { get { return Interop.Kernel32.MAX_DIRECTORY_PATH; } }
-
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
@@ -99,7 +96,7 @@ namespace System.IO
                 int i = length - 1;
                 while (i >= lengthRoot && !somepathexists)
                 {
-                    String dir = fullPath.Substring(0, i + 1);
+                    string dir = fullPath.Substring(0, i + 1);
 
                     if (!DirectoryExists(dir)) // Create only the ones missing
                         stackDir.Add(dir);
@@ -119,12 +116,12 @@ namespace System.IO
 
             bool r = true;
             int firstError = 0;
-            String errorString = fullPath;
+            string errorString = fullPath;
 
             // If all the security checks succeeded create all the directories
             while (stackDir.Count > 0)
             {
-                String name = stackDir[stackDir.Count - 1];
+                string name = stackDir[stackDir.Count - 1];
                 stackDir.RemoveAt(stackDir.Count - 1);
 
                 r = Interop.Kernel32.CreateDirectory(name, ref secAttrs);
@@ -157,7 +154,7 @@ namespace System.IO
             // Handle CreateDirectory("X:\\") when X: doesn't exist. Similarly for n/w paths.
             if ((count == 0) && !somepathexists)
             {
-                String root = Directory.InternalGetDirectoryRoot(fullPath);
+                string root = Directory.InternalGetDirectoryRoot(fullPath);
                 if (!DirectoryExists(root))
                     throw Win32Marshal.GetExceptionForWin32Error(Interop.Errors.ERROR_PATH_NOT_FOUND, root);
                 return;
@@ -169,7 +166,7 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(firstError, errorString);
         }
 
-        public override void DeleteFile(System.String fullPath)
+        public override void DeleteFile(string fullPath)
         {
             bool r = Interop.Kernel32.DeleteFile(fullPath);
             if (!r)
@@ -188,10 +185,10 @@ namespace System.IO
             return DirectoryExists(fullPath, out lastError);
         }
 
-        private bool DirectoryExists(String path, out int lastError)
+        private bool DirectoryExists(string path, out int lastError)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            lastError = FillAttributeInfo(path, ref data, false, true);
+            lastError = FillAttributeInfo(path, ref data, returnErrorOnNotFound: true);
 
             return (lastError == 0) && (data.fileAttributes != -1)
                     && ((data.fileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
@@ -220,128 +217,68 @@ namespace System.IO
             }
         }
 
-        // Returns 0 on success, otherwise a Win32 error code.  Note that
-        // classes should use -1 as the uninitialized state for dataInitialized.
-        [System.Security.SecurityCritical]  // auto-generated
-        internal static int FillAttributeInfo(String path, ref Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data, bool tryagain, bool returnErrorOnNotFound)
+        /// <summary>
+        /// Returns 0 on success, otherwise a Win32 error code.  Note that
+        /// classes should use -1 as the uninitialized state for dataInitialized.
+        /// </summary>
+        /// <param name="returnErrorOnNotFound">Return the error code for not found errors?</param>
+        [System.Security.SecurityCritical]
+        internal static int FillAttributeInfo(string path, ref Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data, bool returnErrorOnNotFound)
         {
-            int errorCode = 0;
-            if (tryagain) // someone has a handle to the file open, or other error
+            int errorCode = Interop.Errors.ERROR_SUCCESS;
+
+            // Neither GetFileAttributes or FindFirstFile like trailing separators
+            path = path.TrimEnd(PathHelpers.DirectorySeparatorChars);
+
+            using (new DisableMediaInsertionPrompt())
             {
-                Interop.Kernel32.WIN32_FIND_DATA findData;
-                findData = new Interop.Kernel32.WIN32_FIND_DATA();
-
-                // Remove trailing slash since this can cause grief to FindFirstFile. You will get an invalid argument error
-                String tempPath = path.TrimEnd(PathHelpers.DirectorySeparatorChars);
-
-                // For removable media drives, normally the OS will pop up a dialog requesting insertion
-                // of the relevant media (CD, floppy, memory card, etc.). We don't want this prompt so we
-                // set SEM_FAILCRITICALERRORS to suppress it.
-                //
-                // Note that said dialog only shows once the relevant filesystem has been loaded, which
-                // does not happen until actual media is accessed at least once since booting.
-
-                uint oldMode;
-                bool success = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out oldMode);
-                try
-                {
-                    bool error = false;
-                    SafeFindHandle handle = Interop.Kernel32.FindFirstFile(tempPath, ref findData);
-                    try
-                    {
-                        if (handle.IsInvalid)
-                        {
-                            error = true;
-                            errorCode = Marshal.GetLastWin32Error();
-
-                            if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
-                                errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND ||
-                                errorCode == Interop.Errors.ERROR_NOT_READY)  // Removable media not inserted
-                            {
-                                if (!returnErrorOnNotFound)
-                                {
-                                    // Return default value for backward compatibility
-                                    errorCode = 0;
-                                    data.fileAttributes = -1;
-                                }
-                            }
-                            return errorCode;
-                        }
-                    }
-                    finally
-                    {
-                        // Close the Win32 handle
-                        try
-                        {
-                            handle.Dispose();
-                        }
-                        catch
-                        {
-                            // if we're already returning an error, don't throw another one. 
-                            if (!error)
-                            {
-                                throw Win32Marshal.GetExceptionForLastWin32Error();
-                            }
-                        }
-                    }
-                }
-                finally
-                {
-                    if (success)
-                        Interop.Kernel32.SetThreadErrorMode(oldMode, out oldMode);
-                }
-
-                // Copy the information to data
-                data.PopulateFrom(ref findData);
-            }
-            else
-            {
-                // For floppy drives, normally the OS will pop up a dialog saying
-                // there is no disk in drive A:, please insert one.  We don't want that.
-                // SetErrorMode will let us disable this, but we should set the error
-                // mode back, since this may have wide-ranging effects.
-                bool success = false;
-                uint oldMode;
-                bool errorModeSuccess = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out oldMode);
-                try
-                {
-                    success = Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data);
-                }
-                finally
-                {
-                    if (errorModeSuccess)
-                        Interop.Kernel32.SetThreadErrorMode(oldMode, out oldMode);
-                }
-
-                if (!success)
+                if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
                     errorCode = Marshal.GetLastWin32Error();
-                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_NOT_READY)  // floppy device not ready
+                    if (errorCode == Interop.Errors.ERROR_ACCESS_DENIED)
                     {
-                        // In case someone latched onto the file. Take the perf hit only for failure
-                        return FillAttributeInfo(path, ref data, true, returnErrorOnNotFound);
-                    }
-                    else
-                    {
-                        if (!returnErrorOnNotFound)
+                        // Files that are marked for deletion will not let you GetFileAttributes,
+                        // ERROR_ACCESS_DENIED is given back without filling out the data struct.
+                        // FindFirstFile, however, will. Historically we always gave back attributes
+                        // for marked-for-deletion files.
+
+                        var findData = new Interop.Kernel32.WIN32_FIND_DATA();
+                        using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(path, ref findData))
                         {
-                            // Return default value for backward compatibility
-                            errorCode = 0;
-                            data.fileAttributes = -1;
+                            if (handle.IsInvalid)
+                            {
+                                errorCode = Marshal.GetLastWin32Error();
+                            }
+                            else
+                            {
+                                errorCode = Interop.Errors.ERROR_SUCCESS;
+                                data.PopulateFrom(ref findData);
+                            }
                         }
                     }
+                }
+            }
+
+            if (errorCode != Interop.Errors.ERROR_SUCCESS && !returnErrorOnNotFound)
+            {
+                switch (errorCode)
+                {
+                    case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                    case Interop.Errors.ERROR_PATH_NOT_FOUND:
+                    case Interop.Errors.ERROR_NOT_READY: // Removable media not ready
+                        // Return default value for backward compatibility
+                        data.fileAttributes = -1;
+                        return Interop.Errors.ERROR_SUCCESS;
                 }
             }
 
             return errorCode;
         }
 
-        public override bool FileExists(System.String fullPath)
+        public override bool FileExists(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, true);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
 
             return (errorCode == 0) && (data.fileAttributes != -1)
                     && ((data.fileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0);
@@ -350,7 +287,7 @@ namespace System.IO
         public override FileAttributes GetAttributes(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, true);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
             if (errorCode != 0)
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
@@ -362,7 +299,7 @@ namespace System.IO
             StringBuilder sb = StringBuilderCache.Acquire(Interop.Kernel32.MAX_PATH + 1);
             if (Interop.Kernel32.GetCurrentDirectory(sb.Capacity, sb) == 0)
                 throw Win32Marshal.GetExceptionForLastWin32Error();
-            String currentDirectory = sb.ToString();
+            string currentDirectory = sb.ToString();
             // Note that if we have somehow put our command prompt into short
             // file name mode (i.e. by running edlin or a DOS grep, etc), then
             // this will return a short file name.
@@ -390,7 +327,7 @@ namespace System.IO
         public override DateTimeOffset GetCreationTime(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, false);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: false);
             if (errorCode != 0)
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
@@ -408,7 +345,7 @@ namespace System.IO
         public override DateTimeOffset GetLastAccessTime(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, false);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: false);
             if (errorCode != 0)
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
@@ -419,7 +356,7 @@ namespace System.IO
         public override DateTimeOffset GetLastWriteTime(string fullPath)
         {
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, false);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: false);
             if (errorCode != 0)
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
@@ -452,15 +389,10 @@ namespace System.IO
             }
         }
 
-        public override FileStream Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
-        {
-            return new FileStream(fullPath, mode, access, share, bufferSize, options);
-        }
-
         [System.Security.SecurityCritical]
         private static SafeFileHandle OpenHandle(string fullPath, bool asDirectory)
         {
-            String root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
+            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
             if (root == fullPath && root[1] == Path.VolumeSeparatorChar)
             {
                 // intentionally not fullpath, most upstack public APIs expose this as path.
@@ -470,11 +402,11 @@ namespace System.IO
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
             SafeFileHandle handle = Interop.Kernel32.SafeCreateFile(
                 fullPath,
-                (int)Interop.Kernel32.GenericOperations.GENERIC_WRITE,
+                Interop.Kernel32.GenericOperations.GENERIC_WRITE,
                 FileShare.ReadWrite | FileShare.Delete,
                 ref secAttrs,
                 FileMode.Open,
-                asDirectory ? (int)Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None,
+                asDirectory ? Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None,
                 IntPtr.Zero
             );
 
@@ -499,7 +431,7 @@ namespace System.IO
             // but for now we're much safer if we err on the conservative side.
             // This applies to symbolic links and mount points.
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, false, true);
+            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
             if (errorCode != 0)
             {
                 // Ensure we throw a DirectoryNotFoundException.
@@ -528,7 +460,7 @@ namespace System.IO
             // but for now we're much safer if we err on the conservative side.
             // This applies to symbolic links and mount points.
             // Note the logic to check whether fullPath is a reparse point is
-            // in Delete(String, String, bool), and will set "recursive" to false.
+            // in Delete(string, string, bool), and will set "recursive" to false.
             // Note that Win32's DeleteFile and RemoveDirectory will just delete
             // the reparse point itself.
 
@@ -576,7 +508,7 @@ namespace System.IO
                                 if (data.dwReserved0 == Interop.Kernel32.IOReparseOptions.IO_REPARSE_TAG_MOUNT_POINT)
                                 {
                                     // Use full path plus a trailing '\'
-                                    String mountPoint = Path.Combine(fullPath, data.cFileName + PathHelpers.DirectorySeparatorCharAsString);
+                                    string mountPoint = Path.Combine(fullPath, data.cFileName + PathHelpers.DirectorySeparatorCharAsString);
                                     if (!Interop.Kernel32.DeleteVolumeMountPoint(mountPoint))
                                     {
                                          errorCode = Marshal.GetLastWin32Error();
@@ -599,7 +531,7 @@ namespace System.IO
 
                                 // RemoveDirectory on a symbolic link will
                                 // remove the link itself.
-                                String reparsePoint = Path.Combine(fullPath, data.cFileName);
+                                string reparsePoint = Path.Combine(fullPath, data.cFileName);
                                 r = Interop.Kernel32.RemoveDirectory(reparsePoint);
                                 if (!r)
                                 {
@@ -621,7 +553,7 @@ namespace System.IO
                         }
                         else
                         {
-                            String fileName = Path.Combine(fullPath, data.cFileName);
+                            string fileName = Path.Combine(fullPath, data.cFileName);
                             r = Interop.Kernel32.DeleteFile(fileName);
                             if (!r)
                             {
