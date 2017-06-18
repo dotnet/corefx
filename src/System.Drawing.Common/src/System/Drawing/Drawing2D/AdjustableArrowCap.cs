@@ -2,15 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+
 namespace System.Drawing.Drawing2D
 {
-    using System.Runtime.InteropServices;
-
-    /// <include file='doc\AdjustableArrowCap.uex' path='docs/doc[@for="AdjustableArrowCap"]/*' />
-    /// <devdoc>
-    ///    Represents an adjustable arrow-shaped line
-    ///    cap.
-    /// </devdoc>
     public sealed class AdjustableArrowCap : CustomLineCap
     {
         internal AdjustableArrowCap(IntPtr nativeCap) :

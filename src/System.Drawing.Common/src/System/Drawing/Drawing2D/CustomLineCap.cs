@@ -2,25 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Drawing.Drawing2D
-{
-    using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
-    /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap"]/*' />
-    /// <devdoc>
-    ///    Encapsulates a custom user-defined line
-    ///    cap.
-    /// </devdoc>
+namespace System.Drawing.Drawing2D
+{    
     public class CustomLineCap : MarshalByRefObject, ICloneable, IDisposable
     {
 #if FINALIZATION_WATCH
         private string allocationSite = Graphics.GetAllocationStack();
 #endif
 
-
-        /*
-         * Handle to native line cap object
-         */
+        // Handle to native line cap object
         internal SafeCustomLineCapHandle nativeCap = null;
 
         private bool _disposed = false;
@@ -28,51 +20,16 @@ namespace System.Drawing.Drawing2D
         // For subclass creation
         internal CustomLineCap() { }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.CustomLineCap"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Drawing.Drawing2D.CustomLineCap'/> class with the specified outline
-        ///       and fill.
-        ///    </para>
-        /// </devdoc>
-        public CustomLineCap(GraphicsPath fillPath,
-                             GraphicsPath strokePath) :
-            this(fillPath, strokePath, LineCap.Flat)
-        { }
+        public CustomLineCap(GraphicsPath fillPath, GraphicsPath strokePath) : this(fillPath, strokePath, LineCap.Flat) { }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.CustomLineCap1"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Drawing.Drawing2D.CustomLineCap'/> class from the
-        ///       specified existing <see cref='System.Drawing.Drawing2D.LineCap'/> with the specified outline and
-        ///       fill.
-        ///    </para>
-        /// </devdoc>
-        public CustomLineCap(GraphicsPath fillPath,
-                             GraphicsPath strokePath,
-                             LineCap baseCap) :
-            this(fillPath, strokePath, baseCap, 0)
-        { }
+        public CustomLineCap(GraphicsPath fillPath, GraphicsPath strokePath, LineCap baseCap) : this(fillPath, strokePath, baseCap, 0) { }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.CustomLineCap2"]/*' />
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Drawing.Drawing2D.CustomLineCap'/> class from the
-        ///       specified existing <see cref='System.Drawing.Drawing2D.LineCap'/> with the specified outline, fill, and
-        ///       inset.
-        ///    </para>
-        /// </devdoc>
-        public CustomLineCap(GraphicsPath fillPath,
-                             GraphicsPath strokePath,
-                             LineCap baseCap,
-                             float baseInset)
+        public CustomLineCap(GraphicsPath fillPath, GraphicsPath strokePath, LineCap baseCap, float baseInset)
         {
-            IntPtr nativeLineCap = IntPtr.Zero;
-
             int status = SafeNativeMethods.Gdip.GdipCreateCustomLineCap(
                                 new HandleRef(fillPath, (fillPath == null) ? IntPtr.Zero : fillPath.nativePath),
                                 new HandleRef(strokePath, (strokePath == null) ? IntPtr.Zero : strokePath.nativePath),
-                                baseCap, baseInset, out nativeLineCap);
+                                baseCap, baseInset, out IntPtr nativeLineCap);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
@@ -80,10 +37,7 @@ namespace System.Drawing.Drawing2D
             SetNativeLineCap(nativeLineCap);
         }
 
-        internal CustomLineCap(IntPtr nativeLineCap)
-        {
-            SetNativeLineCap(nativeLineCap);
-        }
+        internal CustomLineCap(IntPtr nativeLineCap) => SetNativeLineCap(nativeLineCap);
 
         internal void SetNativeLineCap(IntPtr handle)
         {
@@ -93,18 +47,12 @@ namespace System.Drawing.Drawing2D
             nativeCap = new SafeCustomLineCapHandle(handle);
         }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.Dispose"]/*' />
-        /// <devdoc>
-        ///    Cleans up Windows resources for this
-        /// <see cref='System.Drawing.Drawing2D.CustomLineCap'/>.
-        /// </devdoc>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.Dispose2"]/*' />
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -123,37 +71,21 @@ namespace System.Drawing.Drawing2D
             _disposed = true;
         }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.Finalize"]/*' />
-        /// <devdoc>
-        ///    Cleans up Windows resources for this
-        /// <see cref='System.Drawing.Drawing2D.CustomLineCap'/>.
-        /// </devdoc>
-        ~CustomLineCap()
-        {
-            Dispose(false);
-        }
+        ~CustomLineCap() => Dispose(false);
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.Clone"]/*' />
-        /// <devdoc>
-        ///    Creates an exact copy of this <see cref='System.Drawing.Drawing2D.CustomLineCap'/>.
-        /// </devdoc>
         public object Clone()
         {
-            IntPtr cloneCap = IntPtr.Zero;
-
-            int status = SafeNativeMethods.Gdip.GdipCloneCustomLineCap(new HandleRef(this, nativeCap), out cloneCap);
+            int status = SafeNativeMethods.Gdip.GdipCloneCustomLineCap(new HandleRef(this, nativeCap), out IntPtr cloneCap);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return CustomLineCap.CreateCustomLineCapObject(cloneCap);
+            return CreateCustomLineCapObject(cloneCap);
         }
 
         internal static CustomLineCap CreateCustomLineCapObject(IntPtr cap)
         {
-            CustomLineCapType capType = 0;
-
-            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapType(new HandleRef(null, cap), out capType);
+            int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapType(new HandleRef(null, cap), out CustomLineCapType capType);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {
@@ -174,10 +106,6 @@ namespace System.Drawing.Drawing2D
             throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.NotImplemented);
         }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.SetStrokeCaps"]/*' />
-        /// <devdoc>
-        ///    Sets the caps used to start and end lines.
-        /// </devdoc>
         public void SetStrokeCaps(LineCap startCap, LineCap endCap)
         {
             int status = SafeNativeMethods.Gdip.GdipSetCustomLineCapStrokeCaps(new HandleRef(this, nativeCap), startCap, endCap);
@@ -186,10 +114,6 @@ namespace System.Drawing.Drawing2D
                 throw SafeNativeMethods.Gdip.StatusException(status);
         }
 
-        /// <include file='doc\CustomLineCap.uex' path='docs/doc[@for="CustomLineCap.GetStrokeCaps"]/*' />
-        /// <devdoc>
-        ///    Gets the caps used to start and end lines.
-        /// </devdoc>
         public void GetStrokeCaps(out LineCap startCap, out LineCap endCap)
         {
             int status = SafeNativeMethods.Gdip.GdipGetCustomLineCapStrokeCaps(new HandleRef(this, nativeCap), out startCap, out endCap);
