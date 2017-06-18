@@ -8,6 +8,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="BrushTests.cs" />
     <Compile Include="BrushesTests.cs" />
     <Compile Include="CharacterRangeTests.cs" />
     <Compile Include="ColorTranslatorTests.cs" />
