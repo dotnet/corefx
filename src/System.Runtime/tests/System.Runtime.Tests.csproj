@@ -180,7 +180,6 @@
     <Compile Include="TimeZoneTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="TimeZoneNotFoundExceptionTests.cs" />
-    <Compile Include="VersionTests.cs" />
     <Compile Include="System\Reflection\AssemblyTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameTests.cs" />
     <Compile Include="System\Reflection\ConstructorInfoTests.cs" />
