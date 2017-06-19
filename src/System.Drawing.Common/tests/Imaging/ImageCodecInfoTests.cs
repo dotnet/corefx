@@ -185,13 +185,13 @@ namespace System.Drawing.Imaging.Tests
             Assert.NotNull(GetEncoder(csid));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CountEncoders_ReturnsExcpected()
         {
             Assert.Equal(5, encoders.Count);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CountDecoders_ReturnsExcpected()
         {
             Assert.Equal(8, decoders.Count);
