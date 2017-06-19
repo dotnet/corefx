@@ -84,7 +84,6 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [ActiveIssue(21168, TestPlatforms.AnyUnix)]
         public void AddEventHandler_NullTarget_ThrowsArgumentNullException()
         {
             var attribute = new ComAwareEventInfo(typeof(NonComObject), nameof(NonComObject.Event));
