@@ -175,9 +175,9 @@
     <Compile Include="System\StackOverflowExceptionTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
     <Compile Include="System\TypeUnloadedExceptionTests.cs" />
-    <Compile Include="TimeZoneTests.cs" />
+    <Compile Include="System\TimeZoneTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
-    <Compile Include="TimeZoneNotFoundExceptionTests.cs" />
+    <Compile Include="System\TimeZoneNotFoundExceptionTests.cs" />
     <Compile Include="System\Reflection\AssemblyTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameTests.cs" />
     <Compile Include="System\Reflection\ConstructorInfoTests.cs" />
