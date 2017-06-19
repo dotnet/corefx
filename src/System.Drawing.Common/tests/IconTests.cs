@@ -478,23 +478,31 @@ namespace System.Drawing.Tests
         [MemberData(nameof(ToBitmap_TestData))]
         public void ToBitmap_BitmapIcon_ReturnsExpected(Icon icon)
         {
-            using (Bitmap bitmap = icon.ToBitmap())
+            try
             {
-                Assert.NotSame(icon.ToBitmap(), bitmap);
-                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-                Assert.Empty(bitmap.Palette.Entries);
-                Assert.Equal(icon.Width, bitmap.Width);
-                Assert.Equal(icon.Height, bitmap.Height);
+                using (Bitmap bitmap = icon.ToBitmap())
+                {
+                    Assert.NotSame(icon.ToBitmap(), bitmap);
+                    Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                    Assert.Empty(bitmap.Palette.Entries);
+                    Assert.Equal(icon.Width, bitmap.Width);
+                    Assert.Equal(icon.Height, bitmap.Height);
 
-                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
-                Assert.Equal(2, bitmap.Flags);
+                    Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+                    Assert.Equal(2, bitmap.Flags);
+                }
+            }
+            finally
+            {
+                icon.Dispose();
             }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ToBitmap_BitmapIconFromHandle_ReturnsExpected()
         {
-            // Handle referring to icon without any colour.
+            // Handle refers to an icon without any colour. This is not in ToBitmap_TestData as there is
+            // a chance that the original icon will be finalized as it is not kept alive in the iterator.
             using (var originalIcon = new Icon(Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico")))
             using (Icon icon = Icon.FromHandle(originalIcon.Handle))
             {
@@ -510,18 +518,19 @@ namespace System.Drawing.Tests
             void VerifyPng()
             {
                 using (Icon icon = GetPngIcon())
+                using (Bitmap bitmap = icon.ToBitmap())
                 {
-                    using (Bitmap bitmap = icon.ToBitmap())
+                    using (Bitmap secondBitmap = icon.ToBitmap())
                     {
                         Assert.NotSame(icon.ToBitmap(), bitmap);
-                        Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-                        Assert.Empty(bitmap.Palette.Entries);
-                        Assert.Equal(icon.Width, bitmap.Width);
-                        Assert.Equal(icon.Height, bitmap.Height);
-
-                        Assert.Equal(ImageFormat.Png, bitmap.RawFormat);
-                        Assert.Equal(77842, bitmap.Flags);
                     }
+                    Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                    Assert.Empty(bitmap.Palette.Entries);
+                    Assert.Equal(icon.Width, bitmap.Width);
+                    Assert.Equal(icon.Height, bitmap.Height);
+
+                    Assert.Equal(ImageFormat.Png, bitmap.RawFormat);
+                    Assert.Equal(77842, bitmap.Flags);
                 }
             }
 
@@ -753,26 +762,24 @@ namespace System.Drawing.Tests
                     Assert.Equal(icon.Width, loaded.Width);
 
                     using (Bitmap expected = icon.ToBitmap())
+                    using (Bitmap actual = loaded.ToBitmap())
                     {
-                        using (Bitmap actual = loaded.ToBitmap())
-                        {
-                            Assert.Equal(expected.Height, actual.Height);
-                            Assert.Equal(expected.Width, actual.Width);
+                        Assert.Equal(expected.Height, actual.Height);
+                        Assert.Equal(expected.Width, actual.Width);
 
-                            for (int y = 0; y < expected.Height; y++)
+                        for (int y = 0; y < expected.Height; y++)
+                        {
+                            for (int x = 0; x < expected.Width; x++)
                             {
-                                for (int x = 0; x < expected.Width; x++)
+                                Color e = expected.GetPixel(x, y);
+                                Color a = actual.GetPixel(x, y);
+                                if (alpha)
                                 {
-                                    Color e = expected.GetPixel(x, y);
-                                    Color a = actual.GetPixel(x, y);
-                                    if (alpha)
-                                    {
-                                        Assert.Equal(e.A, a.A);
-                                    }
-                                    Assert.Equal(e.R, a.R);
-                                    Assert.Equal(e.G, a.G);
-                                    Assert.Equal(e.B, a.B);
+                                    Assert.Equal(e.A, a.A);
                                 }
+                                Assert.Equal(e.R, a.R);
+                                Assert.Equal(e.G, a.G);
+                                Assert.Equal(e.B, a.B);
                             }
                         }
                     }
