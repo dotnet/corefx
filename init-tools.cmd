@@ -1,4 +1,7 @@
 @if not defined _echo @echo off
+:: want this environment variable to persist for the other build steps so moving above setlocal.
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 setlocal
 
 set INIT_TOOLS_LOG=%~dp0init-tools.log
@@ -56,7 +59,6 @@ if NOT exist "%BUILD_TOOLS_PATH%init-tools.cmd" (
 
 :afterbuildtoolsrestore
 
-echo Initializing BuildTools...
 echo Running: "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 call "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 set INIT_TOOLS_ERRORLEVEL=%ERRORLEVEL%
@@ -68,4 +70,6 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
 :: Create sempahore file
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
+
+type %INIT_TOOLS_LOG%
 exit /b 0
