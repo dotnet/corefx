@@ -8,7 +8,7 @@ namespace System.Drawing.Imaging.Tests
 {
     public class ColorMapTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             ColorMap cm = new ColorMap();
@@ -16,7 +16,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(new Color(), cm.NewColor);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void NewColor_SetValid_ReturnsExpected()
         {
             ColorMap cm = new ColorMap();
@@ -24,7 +24,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(Color.AliceBlue, cm.NewColor);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void OldColor_SetValid_ReturnsExpected()
         {
             ColorMap cm = new ColorMap();

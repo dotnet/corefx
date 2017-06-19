@@ -8,7 +8,7 @@ namespace System.Drawing.Imaging.Tests
 {
     public class WmfPlaceableFileHeaderTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             WmfPlaceableFileHeader fileHeader = new WmfPlaceableFileHeader();
@@ -23,7 +23,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(0, fileHeader.Reserved);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(short.MaxValue)]
         [InlineData(0)]
         [InlineData(short.MinValue)]
@@ -50,7 +50,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, fileHeader.Reserved);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]

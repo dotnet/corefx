@@ -9,10 +9,10 @@ namespace System.Drawing.Imaging.Tests
 {
     public class EncoderTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Guid()
         {
-            var guid = Guid.NewGuid();
+            Guid guid = Guid.NewGuid();
             Encoder encoder = new Encoder(guid);
             Assert.Equal(guid, encoder.Guid);
         }
@@ -34,7 +34,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(EncoderTestData))]
         public void DefinedEncoders_ReturnsExpected(Guid defined, Guid expected)
         {

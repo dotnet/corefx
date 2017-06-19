@@ -9,7 +9,7 @@ namespace System.Drawing.Imaging.Tests
 {
     public class BitmapDataTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             BitmapData bd = new BitmapData();
@@ -21,7 +21,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal((PixelFormat)0, bd.PixelFormat);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]
@@ -32,7 +32,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, bd.Height);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]
@@ -43,7 +43,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, bd.Width);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]
@@ -54,7 +54,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, bd.Reserved);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]
@@ -65,7 +65,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(new IntPtr(value), bd.Scan0);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]
@@ -76,7 +76,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, bd.Stride);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(PixelFormat.DontCare)]
         [InlineData(PixelFormat.Max)]
         [InlineData(PixelFormat.Indexed)]
@@ -106,7 +106,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(pixelFormat, bd.PixelFormat);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PixelFormat_SetInvalid_ThrowsInvalidEnumException()
         {
             BitmapData bd = new BitmapData();

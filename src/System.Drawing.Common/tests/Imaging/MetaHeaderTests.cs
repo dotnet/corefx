@@ -8,7 +8,7 @@ namespace System.Drawing.Imaging.Tests
 {
     public class MetaHeaderTests
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             MetaHeader mh = new MetaHeader();
@@ -21,7 +21,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(0, mh.Version);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(short.MaxValue)]
         [InlineData(0)]
         [InlineData(short.MinValue)]
@@ -40,7 +40,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(value, mh.Version);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(int.MaxValue)]
         [InlineData(0)]
         [InlineData(int.MinValue)]

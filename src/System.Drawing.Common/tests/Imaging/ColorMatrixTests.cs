@@ -34,8 +34,7 @@ namespace System.Drawing.Imaging.Tests
 {
     public class ColorMatrixTests
     {
-
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             ColorMatrix cm = new ColorMatrix();
@@ -99,14 +98,14 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(BadCtorParams))]
         public void Ctor_BadValues_ThrowsExpectedException(float[][] newColorMatrix, Type expectedException)
         {
             Assert.Throws(expectedException, () => new ColorMatrix(newColorMatrix));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_TooBigArraySize_MapOnly4and4Elements()
         {
             ColorMatrix cm = new ColorMatrix(new float[][] {
@@ -145,7 +144,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(4.4f, cm.Matrix44);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AccessToNotExistingElement_ThrowsIndexOutOfRangeException()
         {
             ColorMatrix cm = new ColorMatrix(new float[][] {
@@ -159,7 +158,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Throws<IndexOutOfRangeException>(() => { var x = cm[5, 5]; });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_SetValue_ReturnsExpected()
         {
             ColorMatrix cm = new ColorMatrix(IndexedColorMatrix);
@@ -203,7 +202,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MatrixElement_SetValues_ReturnsExpected()
         {
             ColorMatrix cm = new ColorMatrix();
@@ -261,7 +260,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(25, cm.Matrix44);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MatrixElementByIndexer_SetValue_ReturnsExpetecd()
         {
             ColorMatrix cm = new ColorMatrix(IndexedColorMatrix);
