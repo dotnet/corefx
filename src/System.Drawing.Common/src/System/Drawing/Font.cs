@@ -749,59 +749,23 @@ namespace System.Drawing
             if (graphics == null)
                 throw new ArgumentNullException("graphics");
 
-            int status;
+            int status = SafeNativeMethods.Gdip.GdipGetLogFontW(new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), logFont);
 
-            // handle proper marshalling of LogFontName as Unicode or ANSI
-            if (Marshal.SystemDefaultCharSize == 1)
-                status = SafeNativeMethods.Gdip.GdipGetLogFontA(new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), logFont);
-            else
-                status = SafeNativeMethods.Gdip.GdipGetLogFontW(new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), logFont);
-
-            // append "@" to the begining of the string if we are 
-            // a gdiVerticalFont.
-            //
+            // Prefix the string with '@' this is a gdiVerticalFont.
+#pragma warning disable 0618
             if (_gdiVerticalFont)
             {
-                if (Marshal.SystemDefaultCharSize == 1)
+                // Copy the Unicode contents of the name.
+                for (int i = 60; i >= 0; i -= 2)
                 {
-                    // copy contents of name, over 1 byte
-                    //
-                    for (int i = 30; i >= 0; i--)
-                    {
-#pragma warning disable 0618
-                        Marshal.WriteByte(logFont,
-                                          LogFontNameOffset + i + 1,
-                                          Marshal.ReadByte(logFont, LogFontNameOffset + i));
-#pragma warning restore 0618
-                    }
-
-                    // write ANSI '@' sign at begining of name
-                    //
-#pragma warning disable 0618
-                    Marshal.WriteByte(logFont, LogFontNameOffset, (byte)(int)'@');
-#pragma warning restore 0618
+                    Marshal.WriteInt16(logFont,
+                                        LogFontNameOffset + i + 2,
+                                        Marshal.ReadInt16(logFont, LogFontNameOffset + i));
                 }
-                else
-                {
-                    // copy contents of name, over 2 bytes (UNICODE)
-                    //
-                    for (int i = 60; i >= 0; i -= 2)
-                    {
-#pragma warning disable 0618
-                        Marshal.WriteInt16(logFont,
-                                           LogFontNameOffset + i + 2,
-                                           Marshal.ReadInt16(logFont, LogFontNameOffset + i));
-#pragma warning restore 0618
-                    }
 
-                    // write UNICODE '@' sign at begining of name
-                    //
-#pragma warning disable 0618
-                    Marshal.WriteInt16(logFont, LogFontNameOffset, (short)'@');
-#pragma warning restore 0618
-                }
+                // Prefix the name with an '@' sign.
+                Marshal.WriteInt16(logFont, LogFontNameOffset, (short)'@');
             }
-#pragma warning disable 0618
             if (Marshal.ReadByte(logFont, LogFontCharSetOffset) == 0)
             {
                 Marshal.WriteByte(logFont, LogFontCharSetOffset, _gdiCharSet);

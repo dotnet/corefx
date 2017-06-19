@@ -4843,7 +4843,7 @@ namespace System.Drawing
             return s_halftonePalette;
         }
 
-        // This is called from AppDomain.ProcessExit and AppDomain.DomainUnload
+        // This is called from AppDomain.ProcessExit and AppDomain.DomainUnload.
         [PrePrepareMethod]
         private static void OnDomainUnload(object sender, EventArgs e)
         {

@@ -26,7 +26,7 @@ namespace System.Drawing.Printing
         // though.
         //
         // Also, all properties have hidden tri-state logic -- yes/no/default
-        private const int PADDING_IA64 = 4;
+        private const int Padding64Bit = 4;
 
         private string _printerName; // default printer.
         private string _driverName = "";
@@ -214,14 +214,13 @@ namespace System.Drawing.Printing
         {
             get
             {
-                int returnCode;
                 int sizeofstruct;
-                // Note: The call to get the size of the buffer required for level 5 does not work property on NT platforms.
+                // Note: The call to get the size of the buffer required for level 5 does not work properly on NT platforms.
                 const int Level = 4;
-                // PRINTER_INFO_4 are 12 bytes in size
+                // PRINTER_INFO_4 is 12 or 24 bytes in size depending on the architecture.
                 if (IntPtr.Size == 8)
                 {
-                    sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1) + PADDING_IA64;
+                    sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1) + Padding64Bit;
                 }
                 else
                 {
@@ -231,10 +230,10 @@ namespace System.Drawing.Printing
                 SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS, null, Level, IntPtr.Zero, 0, out int bufferSize, out int count);
 
                 IntPtr buffer = Marshal.AllocCoTaskMem(bufferSize);
-                returnCode = SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS,
+                int returnCode = SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS,
                                                         null, Level, buffer,
                                                         bufferSize, out bufferSize, out count);
-                string[] array = new string[count];
+                var array = new string[count];
 
                 if (returnCode == 0)
                 {

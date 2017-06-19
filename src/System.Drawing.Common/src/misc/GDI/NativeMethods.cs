@@ -3,12 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace System.Drawing.Internal
 {
     internal partial class IntNativeMethods
     {
+        [SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources")]
+
         public const int
         DT_TOP = 0x00000000,
         DT_LEFT = 0x00000000,

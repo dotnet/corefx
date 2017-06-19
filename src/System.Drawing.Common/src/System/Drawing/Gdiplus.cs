@@ -2461,11 +2461,6 @@ namespace System.Drawing
             [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)] // 3 = Unicode
             internal static extern int GdipCreateFontFromDC(HandleRef hdc, ref IntPtr font);
 
-            [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)] // DIFFERENT: ANSI, not Unicode
-#pragma warning disable CS0618 // Legacy code: We don't care about using obsolete API's.
-            internal static extern int GdipCreateFontFromLogfontA(HandleRef hdc, [In, Out, MarshalAs(UnmanagedType.AsAny)] object lf, out IntPtr font);
-#pragma warning restore CS0618
-
             [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)] // 3 = Unicode
 #pragma warning disable CS0618 // Legacy code: We don't care about using obsolete API's.
             internal static extern int GdipCreateFontFromLogfontW(HandleRef hdc, [In, Out, MarshalAs(UnmanagedType.AsAny)] object lf, out IntPtr font);
@@ -2477,11 +2472,6 @@ namespace System.Drawing
             [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)] // 3 = Unicode
 #pragma warning disable CS0618 // Legacy code: We don't care about using obsolete API's.
             internal static extern int GdipGetLogFontW(HandleRef font, HandleRef graphics, [In, Out, MarshalAs(UnmanagedType.AsAny)] object lf);
-#pragma warning restore CS0618
-
-            [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)] // 3 = Unicode
-#pragma warning disable CS0618 // Legacy code: We don't care about using obsolete API's.
-            internal static extern int GdipGetLogFontA(HandleRef font, HandleRef graphics, [In, Out, MarshalAs(UnmanagedType.AsAny)] object lf);
 #pragma warning restore CS0618
 
             [DllImport(ExternDll.Gdiplus, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)] // 3 = Unicode
@@ -4602,9 +4592,6 @@ namespace System.Drawing
 
         [DllImport(ExternDll.Gdi32, SetLastError=true, ExactSpelling=true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int GetTextMetricsW(HandleRef hDC, [In, Out] ref SafeNativeMethods.TEXTMETRIC lptm);
-
-        [DllImport(ExternDll.Gdi32, SetLastError=true, ExactSpelling=true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int GetTextMetricsA(HandleRef hDC, [In, Out] ref SafeNativeMethods.TEXTMETRICA lptm);
 
         public static int GetTextMetrics(HandleRef hDC, ref SafeNativeMethods.TEXTMETRIC lptm) {
             return SafeNativeMethods.GetTextMetricsW(hDC, ref lptm);

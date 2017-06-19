@@ -348,7 +348,7 @@ namespace System.Drawing
                 {
                     try
                     {
-                        // Use MS Shell Dlg 2, 8pt for anything else than Japanese.
+                        // Use MS Shell Dlg 2, 8pt for anything other than than Japanese.
                         dialogFont = new Font("MS Shell Dlg 2", 8);
                     }
                     catch (ArgumentException)
@@ -366,7 +366,7 @@ namespace System.Drawing
                 }
 
                 // For Japanese cultures, SystemFonts.DefaultFont returns a new Font object every time it is invoked.
-                // So for Japanaese we return the DefaultFont with its SystemFontName set to DialogFont.
+                // So for Japanese we return the DefaultFont with its SystemFontName set to DialogFont.
                 dialogFont.SetSystemFontName("DialogFont");
                 return dialogFont;
             }

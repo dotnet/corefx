@@ -294,9 +294,6 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int DrawTextW(HandleRef hDC, string lpszString, int nCount, ref IntNativeMethods.RECT lpRect, int nFormat);
 
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int DrawTextA(HandleRef hDC, byte[] lpszString, int byteCount, ref IntNativeMethods.RECT lpRect, int nFormat);
-
         public static int DrawText(HandleRef hDC, string text, ref IntNativeMethods.RECT lpRect, int nFormat)
         {
             int retVal = DrawTextW(hDC, text, text.Length, ref lpRect, nFormat);
@@ -308,9 +305,6 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.User32, SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int DrawTextExW(HandleRef hDC, string lpszString, int nCount, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams);
 
-        [DllImport(ExternDll.User32, SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int DrawTextExA(HandleRef hDC, byte[] lpszString, int byteCount, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams);
-
         public static int DrawTextEx(HandleRef hDC, string text, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams)
         {
             int retVal = DrawTextExW(hDC, text, text.Length, ref lpRect, nFormat, lpDTParams);
@@ -321,9 +315,6 @@ namespace System.Drawing.Internal
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int GetTextExtentPoint32W(HandleRef hDC, string text, int len, [In, Out] IntNativeMethods.SIZE size);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int GetTextExtentPoint32A(HandleRef hDC, byte[] lpszString, int byteCount, [In, Out] IntNativeMethods.SIZE size);
 
         public static int GetTextExtentPoint32(HandleRef hDC, string text, [In, Out] IntNativeMethods.SIZE size)
         {
@@ -434,9 +425,6 @@ namespace System.Drawing.Internal
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int GetTextMetricsW(HandleRef hDC, [In, Out] ref IntNativeMethods.TEXTMETRIC lptm);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int GetTextMetricsA(HandleRef hDC, [In, Out] ref IntNativeMethods.TEXTMETRICA lptm);
 
         public static int GetTextMetrics(HandleRef hDC, ref IntNativeMethods.TEXTMETRIC lptm)
         {
