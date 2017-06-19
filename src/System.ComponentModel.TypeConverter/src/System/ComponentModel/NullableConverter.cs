@@ -113,7 +113,8 @@ namespace System.ComponentModel
                     return string.Empty;
                 }
             }
-            else if (UnderlyingTypeConverter != null)
+            
+            if (UnderlyingTypeConverter != null)
             {
                 return UnderlyingTypeConverter.ConvertTo(context, culture, value, destinationType);
             }
