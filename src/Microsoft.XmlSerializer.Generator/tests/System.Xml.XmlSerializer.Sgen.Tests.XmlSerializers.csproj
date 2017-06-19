@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <ProjectGuid>{1BCAF5A7-574E-4E74-9147-0572344C2C93}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Tests\netstandard\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Tests.csproj">
+      <Project>{4050f1d1-1dd2-4b48-a17b-e3f90dd18c4b}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Tests</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <!--<Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />-->
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

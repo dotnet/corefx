@@ -8,6 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
   <Compile Include=".\SGenTests.cs" />
+    <Content Include="System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>baseline\System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs</Link>
+    </Content>
   </ItemGroup>
 <ItemGroup>
 

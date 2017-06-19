@@ -1,0 +1,239 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for Security Issues" Description="Code analysis rules for Security Issues." ToolsVersion="14.0">
+  <Rules AnalyzerId="Desktop.Analyzers" RuleNamespace="Desktop.Analyzers">
+    <Rule Id="CA2153" Action="None" />
+    <Rule Id="CA5350" Action="None" />
+    <Rule Id="CA5351" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Desktop.CSharp.Analyzers" RuleNamespace="Desktop.CSharp.Analyzers">
+    <Rule Id="CA2153" Action="None" />
+    <Rule Id="CA5350" Action="None" />
+    <Rule Id="CA5351" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.AnalyzerPowerPack.CSharp" RuleNamespace="Microsoft.AnalyzerPowerPack.CSharp">
+    <Rule Id="CA1821" Action="None" />
+    <Rule Id="CA2200" Action="None" />
+    <Rule Id="CA2214" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.AnalyzerPowerPack.Common" RuleNamespace="Microsoft.AnalyzerPowerPack.Common">
+    <Rule Id="CA1715" Action="None" />
+    <Rule Id="CA2229" Action="None" />
+    <Rule Id="CA2235" Action="None" />
+    <Rule Id="CA2237" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.Analyzers" RuleNamespace="Microsoft.CodeAnalysis.Analyzers">
+    <Rule Id="RS1001" Action="None" />
+    <Rule Id="RS1004" Action="None" />
+    <Rule Id="RS1009" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="AD0001" Action="None" />
+    <Rule Id="CS0028" Action="None" />
+    <Rule Id="CS0078" Action="None" />
+    <Rule Id="CS0105" Action="None" />
+    <Rule Id="CS0108" Action="None" />
+    <Rule Id="CS0109" Action="None" />
+    <Rule Id="CS0114" Action="None" />
+    <Rule Id="CS0162" Action="None" />
+    <Rule Id="CS0164" Action="None" />
+    <Rule Id="CS0168" Action="None" />
+    <Rule Id="CS0183" Action="None" />
+    <Rule Id="CS0184" Action="None" />
+    <Rule Id="CS0197" Action="None" />
+    <Rule Id="CS0219" Action="None" />
+    <Rule Id="CS0251" Action="None" />
+    <Rule Id="CS0252" Action="None" />
+    <Rule Id="CS0253" Action="None" />
+    <Rule Id="CS0278" Action="None" />
+    <Rule Id="CS0279" Action="None" />
+    <Rule Id="CS0280" Action="None" />
+    <Rule Id="CS0282" Action="None" />
+    <Rule Id="CS0402" Action="None" />
+    <Rule Id="CS0419" Action="None" />
+    <Rule Id="CS0420" Action="None" />
+    <Rule Id="CS0435" Action="None" />
+    <Rule Id="CS0436" Action="None" />
+    <Rule Id="CS0437" Action="None" />
+    <Rule Id="CS0440" Action="None" />
+    <Rule Id="CS0458" Action="None" />
+    <Rule Id="CS0464" Action="None" />
+    <Rule Id="CS0465" Action="None" />
+    <Rule Id="CS0469" Action="None" />
+    <Rule Id="CS0472" Action="None" />
+    <Rule Id="CS0473" Action="None" />
+    <Rule Id="CS0612" Action="None" />
+    <Rule Id="CS0618" Action="None" />
+    <Rule Id="CS0626" Action="None" />
+    <Rule Id="CS0628" Action="None" />
+    <Rule Id="CS0642" Action="None" />
+    <Rule Id="CS0652" Action="None" />
+    <Rule Id="CS0657" Action="None" />
+    <Rule Id="CS0658" Action="None" />
+    <Rule Id="CS0659" Action="None" />
+    <Rule Id="CS0660" Action="None" />
+    <Rule Id="CS0661" Action="None" />
+    <Rule Id="CS0665" Action="None" />
+    <Rule Id="CS0672" Action="None" />
+    <Rule Id="CS0675" Action="None" />
+    <Rule Id="CS0684" Action="None" />
+    <Rule Id="CS0693" Action="None" />
+    <Rule Id="CS0728" Action="None" />
+    <Rule Id="CS0809" Action="None" />
+    <Rule Id="CS0811" Action="None" />
+    <Rule Id="CS0824" Action="None" />
+    <Rule Id="CS1030" Action="None" />
+    <Rule Id="CS1058" Action="None" />
+    <Rule Id="CS1062" Action="None" />
+    <Rule Id="CS1064" Action="None" />
+    <Rule Id="CS1066" Action="None" />
+    <Rule Id="CS1072" Action="None" />
+    <Rule Id="CS1522" Action="None" />
+    <Rule Id="CS1570" Action="None" />
+    <Rule Id="CS1571" Action="None" />
+    <Rule Id="CS1572" Action="None" />
+    <Rule Id="CS1573" Action="None" />
+    <Rule Id="CS1574" Action="None" />
+    <Rule Id="CS1580" Action="None" />
+    <Rule Id="CS1581" Action="None" />
+    <Rule Id="CS1584" Action="None" />
+    <Rule Id="CS1587" Action="None" />
+    <Rule Id="CS1589" Action="None" />
+    <Rule Id="CS1590" Action="None" />
+    <Rule Id="CS1591" Action="None" />
+    <Rule Id="CS1592" Action="None" />
+    <Rule Id="CS1616" Action="None" />
+    <Rule Id="CS1633" Action="None" />
+    <Rule Id="CS1634" Action="None" />
+    <Rule Id="CS1635" Action="None" />
+    <Rule Id="CS1645" Action="None" />
+    <Rule Id="CS1658" Action="None" />
+    <Rule Id="CS1668" Action="None" />
+    <Rule Id="CS1685" Action="None" />
+    <Rule Id="CS1687" Action="None" />
+    <Rule Id="CS1690" Action="None" />
+    <Rule Id="CS1692" Action="None" />
+    <Rule Id="CS1695" Action="None" />
+    <Rule Id="CS1696" Action="None" />
+    <Rule Id="CS1697" Action="None" />
+    <Rule Id="CS1700" Action="None" />
+    <Rule Id="CS1701" Action="None" />
+    <Rule Id="CS1702" Action="None" />
+    <Rule Id="CS1710" Action="None" />
+    <Rule Id="CS1711" Action="None" />
+    <Rule Id="CS1712" Action="None" />
+    <Rule Id="CS1717" Action="None" />
+    <Rule Id="CS1718" Action="None" />
+    <Rule Id="CS1720" Action="None" />
+    <Rule Id="CS1723" Action="None" />
+    <Rule Id="CS1734" Action="None" />
+    <Rule Id="CS1735" Action="None" />
+    <Rule Id="CS1762" Action="None" />
+    <Rule Id="CS1927" Action="None" />
+    <Rule Id="CS1956" Action="None" />
+    <Rule Id="CS1957" Action="None" />
+    <Rule Id="CS1974" Action="None" />
+    <Rule Id="CS1981" Action="None" />
+    <Rule Id="CS1998" Action="None" />
+    <Rule Id="CS2002" Action="None" />
+    <Rule Id="CS2008" Action="None" />
+    <Rule Id="CS2023" Action="None" />
+    <Rule Id="CS2029" Action="None" />
+    <Rule Id="CS2038" Action="None" />
+    <Rule Id="CS3000" Action="None" />
+    <Rule Id="CS3001" Action="None" />
+    <Rule Id="CS3002" Action="None" />
+    <Rule Id="CS3003" Action="None" />
+    <Rule Id="CS3005" Action="None" />
+    <Rule Id="CS3006" Action="None" />
+    <Rule Id="CS3007" Action="None" />
+    <Rule Id="CS3008" Action="None" />
+    <Rule Id="CS3009" Action="None" />
+    <Rule Id="CS3010" Action="None" />
+    <Rule Id="CS3011" Action="None" />
+    <Rule Id="CS3012" Action="None" />
+    <Rule Id="CS3013" Action="None" />
+    <Rule Id="CS3014" Action="None" />
+    <Rule Id="CS3015" Action="None" />
+    <Rule Id="CS3016" Action="None" />
+    <Rule Id="CS3017" Action="None" />
+    <Rule Id="CS3018" Action="None" />
+    <Rule Id="CS3019" Action="None" />
+    <Rule Id="CS3021" Action="None" />
+    <Rule Id="CS3022" Action="None" />
+    <Rule Id="CS3023" Action="None" />
+    <Rule Id="CS3024" Action="None" />
+    <Rule Id="CS3026" Action="None" />
+    <Rule Id="CS3027" Action="None" />
+    <Rule Id="CS4014" Action="None" />
+    <Rule Id="CS4024" Action="None" />
+    <Rule Id="CS4025" Action="None" />
+    <Rule Id="CS4026" Action="None" />
+    <Rule Id="CS7022" Action="None" />
+    <Rule Id="CS7033" Action="None" />
+    <Rule Id="CS7035" Action="None" />
+    <Rule Id="CS7080" Action="None" />
+    <Rule Id="CS7081" Action="None" />
+    <Rule Id="CS7082" Action="None" />
+    <Rule Id="CS7090" Action="None" />
+    <Rule Id="CS7095" Action="None" />
+    <Rule Id="CS8001" Action="None" />
+    <Rule Id="CS8002" Action="None" />
+    <Rule Id="CS8009" Action="None" />
+    <Rule Id="CS8012" Action="None" />
+    <Rule Id="CS8018" Action="None" />
+    <Rule Id="CS8019" Action="None" />
+    <Rule Id="CS8020" Action="None" />
+    <Rule Id="CS8021" Action="None" />
+    <Rule Id="CS8029" Action="None" />
+    <Rule Id="CS8032" Action="None" />
+    <Rule Id="CS8033" Action="None" />
+    <Rule Id="CS8034" Action="None" />
+    <Rule Id="CS8040" Action="None" />
+    <Rule Id="CS8073" Action="None" />
+    <Rule Id="CS8094" Action="None" />
+    <Rule Id="CS8105" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Analyzers" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Analyzers">
+    <Rule Id="RS1002" Action="None" />
+    <Rule Id="RS1003" Action="None" />
+    <Rule Id="RS1005" Action="None" />
+    <Rule Id="RS1006" Action="None" />
+    <Rule Id="RS1008" Action="None" />
+    <Rule Id="RS1010" Action="None" />
+    <Rule Id="RS1011" Action="None" />
+    <Rule Id="RS1012" Action="None" />
+    <Rule Id="RS1013" Action="None" />
+    <Rule Id="RS1014" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.EditorFeatures" RuleNamespace="Microsoft.CodeAnalysis.CSharp.EditorFeatures">
+    <Rule Id="UseAutoProperty" Action="None" />
+    <Rule Id="UseAutoPropertyFadedToken" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
+    <Rule Id="IDE0001" Action="None" />
+    <Rule Id="IDE0002" Action="None" />
+    <Rule Id="IDE0003" Action="None" />
+    <Rule Id="IDE0004" Action="None" />
+    <Rule Id="IDE0005" Action="None" />
+    <Rule Id="IDE1005" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="System.Runtime.Analyzers" RuleNamespace="System.Runtime.Analyzers">
+    <Rule Id="CA1016" Action="None" />
+    <Rule Id="CA1018" Action="None" />
+    <Rule Id="CA1036" Action="None" />
+    <Rule Id="CA2231" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="System.Runtime.CSharp.Analyzers" RuleNamespace="System.Runtime.CSharp.Analyzers">
+    <Rule Id="CA1001" Action="None" />
+    <Rule Id="CA2002" Action="None" />
+    <Rule Id="CA2213" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="System.Runtime.InteropServices.Analyzers" RuleNamespace="System.Runtime.InteropServices.Analyzers">
+    <Rule Id="CA1401" Action="None" />
+    <Rule Id="CA2101" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="System.Security.Cryptography.Hashing.Algorithms.CSharp.Analyzers" RuleNamespace="System.Security.Cryptography.Hashing.Algorithms.CSharp.Analyzers">
+    <Rule Id="CA5350" Action="None" />
+    <Rule Id="CA5351" Action="None" />
+  </Rules>
+</RuleSet>

@@ -13,20 +13,50 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1A2F9F4A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Tests", "tests\System.Xml.XmlSerializer.Sgen.Tests.csproj", "{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers", "tests\System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.csproj", "{1BCAF5A7-574E-4E74-9147-0572344C2C93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		netstandard-Debug|Any CPU = netstandard-Debug|Any CPU
+		netstandard-Release|Any CPU = netstandard-Release|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,5 +64,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0D1E2954-A5C7-4B8C-932A-31EB4A96A737} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
+		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{1BCAF5A7-574E-4E74-9147-0572344C2C93} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 	EndGlobalSection
 EndGlobal
