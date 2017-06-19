@@ -58,6 +58,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
         {

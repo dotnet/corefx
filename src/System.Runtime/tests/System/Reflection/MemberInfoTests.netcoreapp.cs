@@ -337,6 +337,7 @@ namespace System.Reflection.Tests
             );
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void HasSameMetadataDefinitionAs_CornerCase_CLSIDConstructor()
         {
