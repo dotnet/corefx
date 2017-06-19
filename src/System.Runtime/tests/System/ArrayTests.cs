@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -102,6 +103,21 @@ namespace System.Tests
             Assert.Equal(array.GetValue(0, 0, 0, 0), 1);
             Assert.Equal(array.GetValue(0, 0, 0, 1), 2);
             Assert.Equal(array.GetValue(0, 0, 0, 2), 3);
+        }
+
+        [Fact]
+        public void AsReadOnly_ValidArray_ReturnsExpected()
+        {
+            var array = new string[] { "a", "b" };
+            ReadOnlyCollection<string> readOnlyCollection = Array.AsReadOnly(array);
+            Assert.Equal(array, readOnlyCollection);
+            Assert.Equal(new ReadOnlyCollection<string>(array), readOnlyCollection);
+        }
+
+        [Fact]
+        public void AsReadOnly_NullArray_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.AsReadOnly<int>(null));
         }
 
         public static IEnumerable<object[]> BinarySearch_SZArray_TestData()
@@ -682,6 +698,40 @@ namespace System.Tests
 
             array[0, 0] = 10;
             Assert.Equal(0, clone[0, 0]);
+        }
+
+        [Fact]
+        public void ConvertAll()
+        {
+            int[] result = Array.ConvertAll(new int[] { }, new Converter<int, int>(i => { throw new InvalidOperationException(); }));
+            Assert.Equal(new int[] { }, result);
+
+            string[] result2 = Array.ConvertAll(new int[] { 1 }, new Converter<int, string>(i => (i + 1).ToString()));
+            Assert.Equal(new string[] { "2" }, result2);
+
+            result2 = Array.ConvertAll(new int[] { 1, 2 }, new Converter<int, string>(i => (i + 1).ToString()));
+            Assert.Equal(new string[] { "2", "3" }, result2);
+
+            result2 = Array.ConvertAll(new int[] { 1 }, new Converter<int, string>(i => null));
+            Assert.Equal(new string[] { null }, result2);
+        }
+
+        [Fact]
+        public void ConvertAll_NullArray_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.ConvertAll<short, short>(null, i => i));
+        }
+
+        [Fact]
+        public void ConvertAll_NullConverter_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("converter", () => Array.ConvertAll<string, string>(new string[] { }, null));
+        }
+        
+        [Fact]
+        public void ConvertAll_ConverterActionThrows_RethrowsException()
+        {
+            Assert.Throws<DivideByZeroException>(() => Array.ConvertAll<string, string>(new string[1], element => { throw new DivideByZeroException(); }));
         }
 
         public static IEnumerable<object[]> Copy_Array_Reliable_TestData()
@@ -1736,6 +1786,34 @@ namespace System.Tests
 
             // Start index + count > array.Length
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 3, 1, i => i == 43));
+        }
+
+        [Theory]
+        [InlineData(new int[0])]
+        [InlineData(new int[] { 1, 2, 3 })]
+        public void ForEach_Array_EvaluatesActionForEachElement(int[] array)
+        {
+            var elements = new List<int>();
+            Array.ForEach((int[])array.Clone(), element => elements.Add(element));
+            Assert.Equal(array, elements);
+            Assert.Equal(array, array);
+        }
+
+        [Fact]
+        public void ForEach_NullArray_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.ForEach<int>(null, element => { }));
+        }
+
+        [Fact]
+        public void ForEach_NullAction_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("action", () => Array.ForEach(new int[1], null));
+        }
+
+        [Fact]
+        public void ForEach_ActionThrows_RethrowsException()
+        {
         }
 
         public static IEnumerable<object[]> GetEnumerator_TestData()
@@ -3510,8 +3588,9 @@ namespace System.Tests
             for (int dimension = 0; dimension < array.Rank; dimension++)
             {
                 Assert.Equal(lengths[dimension], array.GetLength(dimension));
-                Assert.Equal(lowerBounds[dimension], array.GetLowerBound(dimension));
+                Assert.Equal(lengths[dimension], array.GetLongLength(dimension));
 
+                Assert.Equal(lowerBounds[dimension], array.GetLowerBound(dimension));
                 Assert.Equal(lowerBounds[dimension] + lengths[dimension] - 1, array.GetUpperBound(dimension));
             }
             
@@ -3528,6 +3607,12 @@ namespace System.Tests
             {
                 VerifyArrayAsIList(array);
             }
+
+            Assert.Same(array, array.SyncRoot);
+
+            Assert.False(array.IsSynchronized);
+            Assert.True(array.IsFixedSize);
+            Assert.False(array.IsReadOnly);
         }
 
         private static void VerifyArrayAsIList(Array array)
