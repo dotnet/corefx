@@ -160,7 +160,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 .Concat(SerializableObjects_MemberData());
         }
 
-        public static IEnumerable<string> GetCoreTypeBlobs(IEnumerable<object[]> records, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
+        public static IEnumerable<string> GetCoreTypeBlobs(IEnumerable<object[]> records, FormatterAssemblyStyle assemblyStyle)
         {
             foreach (object[] record in records)
             {
@@ -202,7 +202,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             File.WriteAllLines(testDataFilePath, updatedTestDataLines);
         }
 
-        public static byte[] SerializeObjectToRaw(object obj, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
+        public static byte[] SerializeObjectToRaw(object obj, FormatterAssemblyStyle assemblyStyle)
         {
             BinaryFormatter bf = new BinaryFormatter();
             bf.AssemblyFormat = assemblyStyle;
@@ -213,13 +213,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static string SerializeObjectToBlob(object obj, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
+        public static string SerializeObjectToBlob(object obj, FormatterAssemblyStyle assemblyStyle)
         {
             byte[] raw = SerializeObjectToRaw(obj, assemblyStyle);
             return Convert.ToBase64String(raw);
         }
 
-        public static object DeserializeRawToObject(byte[] raw, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
+        public static object DeserializeRawToObject(byte[] raw, FormatterAssemblyStyle assemblyStyle)
         {
             var binaryFormatter = new BinaryFormatter();
             binaryFormatter.AssemblyFormat = assemblyStyle;
@@ -229,7 +229,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static object DeserializeBlobToObject(string base64Str, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
+        public static object DeserializeBlobToObject(string base64Str, FormatterAssemblyStyle assemblyStyle)
         {
             byte[] raw = Convert.FromBase64String(base64Str);
             return DeserializeRawToObject(raw, assemblyStyle);
