@@ -9,7 +9,7 @@ namespace System.IO
     internal static partial class PathHelpers
     {
 
-        internal static bool ShouldReviseDirectoryPathToCurrent(string path)
+	internal static bool ShouldReviseDirectoryPathToCurrent(string path)
         {
             // In situations where this method is invoked, "<DriveLetter>:" should be special-cased 
             // to instead go to the current directory.
@@ -78,9 +78,7 @@ namespace System.IO
         internal static string NormalizeSearchPattern(string searchPattern)
         {
             Debug.Assert(searchPattern != null);
-
-            // Win32 normalization trims only U+0020.
-            string tempSearchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
+            string tempSearchPattern = searchPattern;
 
             // Make this corner case more useful, like dir
             if (tempSearchPattern.Equals("."))
