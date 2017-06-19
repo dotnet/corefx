@@ -13,9 +13,11 @@ namespace System.Xml.Tests
         private const int k_getUniqueFileNameAttempts = 10;
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]  //[ActiveIssue(13121)]  // Access to path is denied in UWP
         public static void TestResolveRelativePaths()
         {
+            if (PlatformDetection.IsWinRT)  // Access to path not authorized inside an AppContainer
+                return;
+
             string path = Path.GetRandomFileName();
             bool shouldDelete = !File.Exists(path);
             File.Open(path, FileMode.OpenOrCreate).Dispose();
@@ -86,7 +88,6 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]    //[ActiveIssue(13121)]  // Access to path is denied in UWP
         public static void TestResolveInvalidPath()
         {
             Assert.Throws<System.Net.WebException>(() => XmlReader.Create("ftp://www.bing.com"));
