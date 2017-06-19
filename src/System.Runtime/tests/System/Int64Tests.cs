@@ -48,22 +48,22 @@ namespace System.Tests
         [InlineData((long)-234, (long)234, -1)]
         [InlineData((long)-234, (long)-432, 1)]
         [InlineData((long)234, null, 1)]
-        public static void CompareTo(long i, object value, long expected)
+        public void CompareTo_Other_ReturnsExpected(long i, object value, int expected)
         {
-            if (value is long)
+            if (value is long longValue)
             {
-                Assert.Equal(expected, Math.Sign(i.CompareTo((long)value)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(longValue)));
             }
-            IComparable comparable = i;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotLong_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotLong_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (long)234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a long
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a long
+            AssertExtensions.Throws<ArgumentException>(null, () => ((long)123).CompareTo(value));
         }
 
         [Theory]

@@ -48,22 +48,22 @@ namespace System.Tests
         [InlineData((short)-234, (short)234, -1)]
         [InlineData((short)-234, (short)-432, 1)]
         [InlineData((short)234, null, 1)]
-        public static void CompareTo(short i, object obj, int expected)
+        public void CompareTo_Other_ReturnsExpected(short i, object value, int expected)
         {
-            if (obj is short)
+            if (value is short shortValue)
             {
-                Assert.Equal(expected, Math.Sign(i.CompareTo((short)obj)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(shortValue)));
             }
-            IComparable comparable = i;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(obj)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotShort_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotShort_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (short)234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a short
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a short
+            AssertExtensions.Throws<ArgumentException>(null, () => ((short)123).CompareTo(value));
         }
 
         [Theory]

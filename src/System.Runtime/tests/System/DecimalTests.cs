@@ -190,7 +190,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Compare_TestData))]
-        public static void Compare(decimal d1, object obj, int expected)
+        public void CompareTo_Other_ReturnsExpected(decimal d1, object obj, int expected)
         {
             if (obj is decimal d2)
             {
@@ -217,16 +217,16 @@ namespace System.Tests
                 }
                 Assert.Equal(expected, Math.Sign(decimal.Compare(d1, d2)));
             }
-            IComparable comparable = d1;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(obj)));
+
+            Assert.Equal(expected, Math.Sign(d1.CompareTo(obj)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotDecimal_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotDouble_ThrowsArgumentException(object value)
         {
-            IComparable comparable = 248m;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("248")); // Obj is not a decimal
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(248)); // Obj is not a decimal
+            AssertExtensions.Throws<ArgumentException>(null, () => ((decimal)123).CompareTo(value));
         }
 
         public static IEnumerable<object[]> Divide_Valid_TestData()
@@ -557,7 +557,7 @@ namespace System.Tests
         {
             NumberStyles defaultStyle = NumberStyles.Float;
 
-            var emptyFormat = NumberFormatInfo.CurrentInfo;
+            NumberFormatInfo emptyFormat = NumberFormatInfo.CurrentInfo;
 
             var customFormat1 = new NumberFormatInfo();
             customFormat1.CurrencySymbol = "$";

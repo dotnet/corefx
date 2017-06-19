@@ -44,22 +44,22 @@ namespace System.Tests
         [InlineData((ulong)234, (ulong)456, -1)]
         [InlineData((ulong)234, ulong.MaxValue, -1)]
         [InlineData((ulong)234, null, 1)]
-        public static void CompareTo(ulong i, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(ulong i, object value, int expected)
         {
-            if (value is ulong)
+            if (value is ulong ulongValue)
             {
-                Assert.Equal(expected, Math.Sign(i.CompareTo((ulong)value)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(ulongValue)));
             }
-            IComparable comparable = i;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotULong_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotUlong_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (ulong)234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a ulong
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a ulong
+            AssertExtensions.Throws<ArgumentException>(null, () => ((ulong)123).CompareTo(value));
         }
 
         [Theory]
@@ -71,9 +71,8 @@ namespace System.Tests
         [InlineData((ulong)789, 789, false)]
         public static void Equals(ulong i1, object obj, bool expected)
         {
-            if (obj is ulong)
+            if (obj is ulong i2)
             {
-                ulong i2 = (ulong)obj;
                 Assert.Equal(expected, i1.Equals(i2));
                 Assert.Equal(expected, i1.GetHashCode().Equals(i2.GetHashCode()));
                 Assert.Equal((int)i1, i1.GetHashCode());

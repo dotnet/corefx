@@ -44,22 +44,22 @@ namespace System.Tests
         [InlineData((byte)234, (byte)235, -1)]
         [InlineData((byte)234, byte.MaxValue, -1)]
         [InlineData((byte)234, null, 1)]
-        public static void CompareTo(byte b, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(byte i, object value, int expected)
         {
-            if (value is byte)
+            if (value is byte byteValue)
             {
-                Assert.Equal(expected, Math.Sign(b.CompareTo((byte)value)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(byteValue)));
             }
-            IComparable comparable = b;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotByte_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotByte_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (byte)234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a byte
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a byte
+            AssertExtensions.Throws<ArgumentException>(null, () => ((byte)123).CompareTo(value));
         }
 
         [Theory]
@@ -71,9 +71,8 @@ namespace System.Tests
         [InlineData((byte)78, 78, false)]
         public static void Equals(byte b, object obj, bool expected)
         {
-            if (obj is byte)
+            if (obj is byte b2)
             {
-                byte b2 = (byte)obj;
                 Assert.Equal(expected, b.Equals(b2));
                 Assert.Equal(expected, b.GetHashCode().Equals(b2.GetHashCode()));
                 Assert.Equal(b, b.GetHashCode());

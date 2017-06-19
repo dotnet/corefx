@@ -16,21 +16,22 @@ namespace System.Tests
         [InlineData('h', 'a', 1)]
         [InlineData('h', 'z', -1)]
         [InlineData('h', null, 1)]
-        public static void CompareTo(char c, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(char c, object value, int expected)
         {
-            if (value is char)
+            if (value is char charValue)
             {
-                Assert.Equal(expected, Math.Sign(c.CompareTo((char)value)));
+                Assert.Equal(expected, Math.Sign(c.CompareTo(charValue)));
             }
-            IComparable comparable = c;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(c.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotChar_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotDouble_ThrowsArgumentException(object value)
         {
-            IComparable comparable = 'h';
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("H")); // Value not a char
+            AssertExtensions.Throws<ArgumentException>(null, () => ((char)123).CompareTo(value));
         }
 
         public static IEnumerable<object[]> ConvertFromUtf32_TestData()
