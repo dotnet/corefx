@@ -118,6 +118,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
         }
 
+        public static void ValidateEqualityComparer(object obj)
+        {
+            Type objType = obj.GetType();
+            Assert.True(objType.IsGenericType, $"Type `{objType.FullName}` must be generic.");
+            Assert.Equal("System.Collections.Generic.ObjectEqualityComparer`1", objType.GetGenericTypeDefinition().FullName);
+            Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
+        }
+
         public static string GetTestDataFilePath()
         {
             string GetRepoRootPath()
@@ -152,16 +160,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 .Concat(SerializableObjects_MemberData());
         }
 
-        public static IEnumerable<string> GetCoreTypeBlobs(IEnumerable<object[]> records)
+        public static IEnumerable<string> GetCoreTypeBlobs(IEnumerable<object[]> records, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
         {
             foreach (object[] record in records)
             {
-                BinaryFormatter bf = new BinaryFormatter();
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    bf.Serialize(ms, record[0]); // Zero Index is the core type instance
-                    yield return Convert.ToBase64String(ms.ToArray());
-                }
+                yield return SerializeObjectToBlob(record[0], assemblyStyle);
             }
         }
 
@@ -199,9 +202,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
             File.WriteAllLines(testDataFilePath, updatedTestDataLines);
         }
 
-        public static byte[] SerializeObjectToRaw(object obj)
+        public static byte[] SerializeObjectToRaw(object obj, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
         {
             BinaryFormatter bf = new BinaryFormatter();
+            bf.AssemblyFormat = assemblyStyle;
             using (MemoryStream ms = new MemoryStream())
             {
                 bf.Serialize(ms, obj);
@@ -209,25 +213,26 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static string SerializeObjectToBlob(object obj)
+        public static string SerializeObjectToBlob(object obj, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
         {
-            byte[] raw = SerializeObjectToRaw(obj);
+            byte[] raw = SerializeObjectToRaw(obj, assemblyStyle);
             return Convert.ToBase64String(raw);
         }
 
-        public static object DeserializeRawToObject(byte[] raw)
+        public static object DeserializeRawToObject(byte[] raw, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
         {
             var binaryFormatter = new BinaryFormatter();
+            binaryFormatter.AssemblyFormat = assemblyStyle;
             using (var serializedStream = new MemoryStream(raw))
             {
                 return binaryFormatter.Deserialize(serializedStream);
             }
         }
 
-        public static object DeserializeBlobToObject(string base64Str)
+        public static object DeserializeBlobToObject(string base64Str, FormatterAssemblyStyle assemblyStyle = FormatterAssemblyStyle.Simple)
         {
             byte[] raw = Convert.FromBase64String(base64Str);
-            return DeserializeRawToObject(raw);
+            return DeserializeRawToObject(raw, assemblyStyle);
         }
 
         private static T FormatterClone<T>(

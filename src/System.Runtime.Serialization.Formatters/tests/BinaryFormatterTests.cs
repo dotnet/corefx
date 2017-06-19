@@ -34,7 +34,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             string testDataFilePath = GetTestDataFilePath();
             IEnumerable<object[]> coreTypeRecords = GetCoreTypeRecords();
-            string[] coreTypeBlobs = GetCoreTypeBlobs(coreTypeRecords).ToArray();
+            string[] coreTypeBlobs = GetCoreTypeBlobs(coreTypeRecords, FormatterAssemblyStyle.Full).ToArray();
 
             UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
         }
@@ -51,7 +51,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             foreach (string blob in blobs)
             {
-                CheckForAnyEquals(obj, DeserializeBlobToObject(blob));
+                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
+                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
             }
         }
 
@@ -93,7 +94,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableEqualityComparers_MemberData))]
-        public void ValidateDeserializationOfEqualityComparers(object obj, string[] blobs)
+        public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
         {
             if (blobs == null || blobs.Length == 0)
             {
@@ -101,13 +102,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     SerializeObjectToBlob(obj));
             }
 
-            foreach (string base64Serialized in blobs)
+            foreach (string blob in blobs)
             {
-                object deserializedInstance = DeserializeBlobToObject(base64Serialized);
-                Type objType = deserializedInstance.GetType();
-                Assert.True(objType.IsGenericType, $"Type `{objType.FullName}` must be generic.");
-                Assert.Equal("System.Collections.Generic.ObjectEqualityComparer`1", objType.GetGenericTypeDefinition().FullName);
-                Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
+                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
+                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
             }
         }
 
