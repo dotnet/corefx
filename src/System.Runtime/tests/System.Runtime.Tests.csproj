@@ -128,7 +128,6 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uapaot'">
     <Compile Include="System\TypeTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
-    <Compile Include="ArrayTests.netcoreapp.cs" />
     <Compile Include="Helpers.netcoreapp.cs" />
     <Compile Include="System\ActivatorTests.netcoreapp.cs" />
     <Compile Include="System\ArrayTests.netcoreapp.cs" />
@@ -158,7 +157,6 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.Generic.Serialization.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.Generic.Serialization.Tests.cs</Link>
     </Compile>
-    <Compile Include="ArrayTests.cs" />
     <Compile Include="CompareToTests.cs" />
     <Compile Include="DBNullTests.cs" />
     <Compile Include="DecimalTests.cs" />

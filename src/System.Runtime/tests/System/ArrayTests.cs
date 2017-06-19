@@ -1551,9 +1551,13 @@ namespace System.Tests
         }
         
         [Theory]
+        [InlineData(typeof(int), new int[] { 1 }, new int[] { 0 }, default(int))]
         [InlineData(typeof(int), new int[] { 1, 2 }, new int[] { 0, 0 }, default(int))]
         [InlineData(typeof(int), new int[] { 1, 2, 3 }, new int[] { 0, 0, 0 }, default(int))]
         [InlineData(typeof(int), new int[] { 1, 2, 3, 4 }, new int[] { 0, 0, 0, 0 }, default(int))]
+        [InlineData(typeof(int), new int[] { 1, 2, 3, 4 }, new int[] { -2, 3, -4, -5 }, default(int))]
+        [InlineData(typeof(int), new int[] { 7 }, new int[] { 1 }, default(int))]
+        [InlineData(typeof(int), new int[] { 7, 8 }, new int[] { 1, 2 }, default(int))]
         [InlineData(typeof(int), new int[] { 7, 8, 9 }, new int[] { 1, 2, 3 }, default(int))]
         public static void CreateInstance(Type elementType, int[] lengths, int[] lowerBounds, object repeatedValue)
         {
@@ -1568,20 +1572,41 @@ namespace System.Tests
                     Array array1 = Array.CreateInstance(elementType, lengths[0]);
                     VerifyArray(array1, elementType, lengths, lowerBounds, repeatedValue);
                 }
+                else if (lengths.Length == 2)
+                {
+                    // Use CreateInstance(Type, int, int)
+                    Array array2 = Array.CreateInstance(elementType, lengths[0], lengths[1]);
+                    VerifyArray(array2, elementType, lengths, lowerBounds, repeatedValue);
+                }
+                else if (lengths.Length == 3)
+                {
+                    // Use CreateInstance(Type, int, int, int)
+                    Array array3 = Array.CreateInstance(elementType, lengths[0], lengths[1], lengths[2]);
+                    VerifyArray(array3, elementType, lengths, lowerBounds, repeatedValue);
+                }
+
                 // Use CreateInstance(Type, int[])
-                Array array2 = Array.CreateInstance(elementType, lengths);
-                VerifyArray(array2, elementType, lengths, lowerBounds, repeatedValue);
+                Array array4 = Array.CreateInstance(elementType, lengths);
+                VerifyArray(array4, elementType, lengths, lowerBounds, repeatedValue);
+
+                // Use CreateInstance(Type, long[])
+                Array array5 = Array.CreateInstance(elementType, lengths.Select(length => (long)length).ToArray());
+                VerifyArray(array5, elementType, lengths, lowerBounds, repeatedValue);
+
             }
             // Use CreateInstance(Type, int[], int[])
-            Array array3 = Array.CreateInstance(elementType, lengths, lowerBounds);
-            VerifyArray(array3, elementType, lengths, lowerBounds, repeatedValue);
+            Array array6 = Array.CreateInstance(elementType, lengths, lowerBounds);
+            VerifyArray(array6, elementType, lengths, lowerBounds, repeatedValue);
         }
 
         [Fact]
         public static void CreateInstance_NullElementType_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 0, 0));
             AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1]));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new long[1]));
             AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1], new int[1]));
         }
 
@@ -1596,50 +1621,80 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(CreateInstance_NotSupportedType_TestData))]
-        public static void CreateInstance_NotSupportedType_ThrowsNotSupportedException(Type elementType)
+        public void CreateInstance_NotSupportedType_ThrowsNotSupportedException(Type elementType)
         {
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, 0));
+            Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, 0, 0));
+            Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, 0, 0, 0));
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, new int[1]));
+            Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, new long[1]));
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, new int[1], new int[1]));
         }
 
         [Fact]
-        public static void CreateInstance_NegativeLength_ThrowsArgumentOutOfRangeException()
+        public void CreateInstance_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.CreateInstance(typeof(int), -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => Array.CreateInstance(typeof(int), -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => Array.CreateInstance(typeof(int), -1, 0, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new long[] { -1 }));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }, new int[1]));
         }
 
         [Fact]
-        public static void CreateInstance_LengthsNull_ThrowsArgumentNullException()
+        public void CreateInstance_NegativeLength2_ThrowsArgumentOutOfRangeException()
         {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => Array.CreateInstance(typeof(int), 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => Array.CreateInstance(typeof(int), 0, -1, 0));
+        }
+
+        [Fact]
+        public void CreateInstance_NegativeLength3_ThrowsArgumentOutOfRangeException()
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length3", () => Array.CreateInstance(typeof(int), 0, 0, -1));
+        }
+
+        [Fact]
+        public void CreateInstance_LengthsNull_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("lengths", () => Array.CreateInstance(typeof(int), (int[])null));
+            AssertExtensions.Throws<ArgumentNullException>("lengths", () => Array.CreateInstance(typeof(int), (long[])null));
             AssertExtensions.Throws<ArgumentNullException>("lengths", () => Array.CreateInstance(typeof(int), null, new int[1]));
         }
 
         [Fact]
-        public static void CreateInstance_LengthsEmpty_ThrowsArgumentException()
+        public void CreateInstance_LengthsEmpty_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => Array.CreateInstance(typeof(int), new int[0]));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.CreateInstance(typeof(int), new long[0]));
             AssertExtensions.Throws<ArgumentException>(null, () => Array.CreateInstance(typeof(int), new int[0], new int[1]));
         }
 
         [Fact]
-        public static void CreateInstance_LowerBoundNull_ThrowsArgumentNullException()
+        public void CreateInstance_LowerBoundNull_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("lowerBounds", () => Array.CreateInstance(typeof(int), new int[] { 1 }, null));
         }
 
         [Theory]
+        [InlineData((long)int.MaxValue + 1)]
+        [InlineData((long)int.MinValue - 1)]
+        public void CreateInstance_InvalidLengthInLongLength_ThrowsArgumentOutOfRangeException(long length)
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("len", () => Array.CreateInstance(typeof(int), new long[] { length }));
+        }
+
+        [Theory]
         [InlineData(0)]
         [InlineData(2)]
-        public static void CreateInstance_LengthsAndLowerBoundsHaveDifferentLengths_ThrowsArgumentException(int length)
+        public void CreateInstance_LengthsAndLowerBoundsHaveDifferentLengths_ThrowsArgumentException(int length)
         {
             AssertExtensions.Throws<ArgumentException>(null, () => Array.CreateInstance(typeof(int), new int[1], new int[length]));
         }
         
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
-        public static void CreateInstance_Type_LengthsPlusLowerBoundOverflows_ThrowsArgumentOutOfRangeException()
+        public void CreateInstance_Type_LengthsPlusLowerBoundOverflows_ThrowsArgumentOutOfRangeException()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => Array.CreateInstance(typeof(int), new int[] { int.MaxValue }, new int[] { 2 }));
         }
@@ -1814,6 +1869,7 @@ namespace System.Tests
         [Fact]
         public void ForEach_ActionThrows_RethrowsException()
         {
+            Assert.Throws<DivideByZeroException>(() => Array.ForEach(new int[1], element => { throw new DivideByZeroException(); }));
         }
 
         public static IEnumerable<object[]> GetEnumerator_TestData()
