@@ -59,69 +59,6 @@ namespace System.Tests
             });
         }
 
-        public static IEnumerable<object[]> Copy_TestData()
-        {
-            yield return new object[] { new int[] { 0x12345678, 0x22334455, 0x778899aa }, 0, new int[3], 0, 3, new int[] { 0x12345678, 0x22334455, 0x778899aa } };
-
-            int[] intArray1 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            yield return new object[] { intArray1, 3, intArray1, 2, 2, new int[] { 0x12345678, 0x22334455, 0x55443322, 0x33445566, 0x33445566 } };
-
-            int[] intArray2 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            yield return new object[] { intArray2, 2, intArray2, 3, 2, new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x778899aa, 0x55443322 } };
-
-            yield return new object[] { new string[] { "Red", "Green", null, "Blue" }, 0, new string[] { "X", "X", "X", "X" }, 0, 4, new string[] { "Red", "Green", null, "Blue" } };
-
-            string[] stringArray = new string[] { "Red", "Green", null, "Blue" };
-            yield return new object[] { stringArray, 1, stringArray, 2, 2, new string[] { "Red", "Green", "Green", null } };
-
-            // Value type array to reference type array
-            yield return new object[] { new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new object[10], 5, 3, new object[] { null, null, null, null, null, 2, 3, 4, null, null } };
-            yield return new object[] { new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new IEquatable<int>[10], 5, 3, new IEquatable<int>[] { null, null, null, null, null, 2, 3, 4, null, null } };
-            yield return new object[] { new int?[] { 0, 1, 2, default(int?), 4, 5, 6, 7, 8, 9 }, 2, new object[10], 5, 3, new object[] { null, null, null, null, null, 2, null, 4, null, null } };
-
-            // Reference type array to value type array
-            yield return new object[] { new object[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
-            yield return new object[] { new IEquatable<int>[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
-            yield return new object[] { new IEquatable<int>[] { 0, new NotInt32(), 2, 3, 4, new NotInt32(), 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
-
-            yield return new object[] { new object[] { 0, 1, 2, 3, null, 5, 6, 7, 8, 9 }, 2, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, null, 0xcc, 0xcc } };
-        }
-
-        [Theory]
-        [MemberData(nameof(Copy_TestData))]
-        public static void Copy_Long(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length, Array expected)
-        {
-            if (sourceIndex == 0 && destinationIndex == 0)
-            {
-                // Use Copy(Array, Array, long)
-                Array testArray = (Array)sourceArray.Clone();
-                Array.Copy(sourceArray, destinationArray, (long)length);
-                Assert.Equal(expected, destinationArray);
-            }
-            // Use Copy(Array, long, Array, long, long)
-            Array.Copy(sourceArray, (long)sourceIndex, destinationArray, (long)destinationIndex, (long)length);
-            Assert.Equal(expected, destinationArray);
-        }
-
-        public static IEnumerable<object[]> CopyTo_TestData()
-        {
-            yield return new object[] { new B1[10], new D1[10], 0, new D1[10] };
-            yield return new object[] { new D1[10], new B1[10], 0, new B1[10] };
-            yield return new object[] { new B1[10], new I1[10], 0, new I1[10] };
-            yield return new object[] { new I1[10], new B1[10], 0, new B1[10] };
-
-            yield return new object[] { new int[] { 0, 1, 2, 3 }, new int[4], 0, new int[] { 0, 1, 2, 3 } };
-            yield return new object[] { new int[] { 0, 1, 2, 3 }, new int[7], 2, new int[] { 0, 0, 0, 1, 2, 3, 0 } };
-        }
-
-        [Theory]
-        [MemberData(nameof(CopyTo_TestData))]
-        public static void CopyTo_Long(Array source, Array destination, long index, Array expected)
-        {
-            source.CopyTo(destination, index);
-            Assert.Equal(expected, destination);
-        }
-
         [Fact]
         public static void CreateInstance_Type_Int_Int()
         {
@@ -364,20 +301,5 @@ namespace System.Tests
                 Assert.Throws<RankException>(() => ils.IndexOf(null));
             }
         }
-
-        private class NotInt32 : IEquatable<int>
-        {
-            public bool Equals(int other)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class B1 { }
-        private class D1 : B1 { }
-        private class B2 { }
-        private class D2 : B2 { }
-        private interface I1 { }
-        private interface I2 { }
     }
 }
