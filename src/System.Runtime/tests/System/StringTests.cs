@@ -1139,12 +1139,36 @@ namespace System.Tests
             }
         }
 
+        public static IEnumerable<object[]> Equals_EncyclopaediaData()
+        {
+            yield return new object[] { StringComparison.CurrentCulture, false };
+            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { StringComparison.Ordinal, false };
+            yield return new object[] { StringComparison.OrdinalIgnoreCase, false };
+
+            // Windows and ICU disagree about how these strings compare in the default locale.
+            yield return new object[] { StringComparison.InvariantCulture, PlatformDetection.IsWindows };
+            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, PlatformDetection.IsWindows };
+        }
+
+        [Theory]
+        [MemberData(nameof(Equals_EncyclopaediaData))]
+        public void Equals_Encyclopaedia_ReturnsExpected(StringComparison comparison, bool expected)
+        {
+            string source = "encyclop\u00e6dia";
+            string target = "encyclopaedia";
+
+            Helpers.PerformActionWithCulture(new CultureInfo("se-SE"), () =>
+            {
+                Assert.Equal(expected, string.Equals(source, target, comparison));
+            });
+        }
+
         [Theory]
         [InlineData(StringComparison.CurrentCulture - 1)]
         [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
         public static void Equals_InvalidComparisonType_ThrowsArgumentOutOfRangeException(StringComparison comparisonType)
         {
-            // Invalid comparison type
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Equals("a", "b", comparisonType));
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "a".Equals("a", comparisonType));
         }
