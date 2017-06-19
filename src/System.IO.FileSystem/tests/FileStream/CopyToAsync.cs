@@ -238,8 +238,9 @@ namespace System.IO.Tests
             Assert.Equal<byte>(expectedData, actualData);
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
         [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Creating pipes with CreateFile is not allowed on UAP")]
         [InlineData(false, 10, 1024)]
         [InlineData(true, 10, 1024)]
         public async Task NamedPipeViaFileStream_AllDataCopied(bool useAsync, int writeSize, int numWrites)
