@@ -20,7 +20,8 @@ namespace System.Drawing
         {
             _color = color;
 
-            int status = SafeNativeMethods.Gdip.GdipCreateSolidFill(_color.ToArgb(), out IntPtr brush);
+            IntPtr brush = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipCreateSolidFill(_color.ToArgb(), out brush);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             SetNativeBrushInternal(brush);
@@ -46,11 +47,12 @@ namespace System.Drawing
 
         public override object Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out IntPtr cloneBrush);
+            IntPtr clonedBrush = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out clonedBrush);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             // Clones of immutable brushes are not immutable.
-            return new SolidBrush(cloneBrush);
+            return new SolidBrush(clonedBrush);
         }
 
         protected override void Dispose(bool disposing)

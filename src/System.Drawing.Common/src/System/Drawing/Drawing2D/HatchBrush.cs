@@ -14,8 +14,9 @@ namespace System.Drawing.Drawing2D
         }
 
         public HatchBrush(HatchStyle hatchstyle, Color foreColor, Color backColor)
-        { 
-            int status = SafeNativeMethods.Gdip.GdipCreateHatchBrush(unchecked((int)hatchstyle), foreColor.ToArgb(), backColor.ToArgb(), out IntPtr brush);
+        {
+            IntPtr brush;
+            int status = SafeNativeMethods.Gdip.GdipCreateHatchBrush(unchecked((int)hatchstyle), foreColor.ToArgb(), backColor.ToArgb(), out brush);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             SetNativeBrushInternal(brush);
@@ -29,12 +30,11 @@ namespace System.Drawing.Drawing2D
 
         public override object Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out IntPtr cloneBrush);
+            IntPtr clonedBrush = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out clonedBrush);
+            SafeNativeMethods.Gdip.CheckStatus(status);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return new HatchBrush(cloneBrush);
+            return new HatchBrush(clonedBrush);
         }
 
         public HatchStyle HatchStyle

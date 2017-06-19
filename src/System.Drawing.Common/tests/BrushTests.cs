@@ -1,12 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Xunit;
 
 namespace System.Drawing.Tests
 {
-    public class BrushTests : RemoteExecutorTestBase
+    public class BrushTests
     {
         [Fact]
         public void SetNativeBrush_Brush_Success()
