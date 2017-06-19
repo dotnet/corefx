@@ -472,7 +472,7 @@ public static partial class DataContractJsonSerializerTests
 
 
     [Fact]
-    public static void DCJS_Dictionary_UseSimpleDictionaryFormat_KeyTypeIsInt()
+    public static void DCJS_Dictionary_UseSimpleDictionaryFormat_VariousKeyTypes()
     {
         DCJS_Dictionary_UseSimpleDictionaryFormat((int)1, 1);
         DCJS_Dictionary_UseSimpleDictionaryFormat((uint)1, 1);
