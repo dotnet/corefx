@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class ByteTests
+    public class ByteTests
     {
         [Fact]
         public static void Ctor_Empty()
@@ -80,6 +79,12 @@ namespace System.Tests
                 Assert.Equal(b, b.GetHashCode());
             }
             Assert.Equal(expected, b.Equals(obj));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsByte()
+        {
+            Assert.Equal(TypeCode.Byte, ((byte)1).GetTypeCode());
         }
 
         public static IEnumerable<object[]> ToString_TestData()

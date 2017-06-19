@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class CharTests
+    public class CharTests
     {
         [Theory]
         [InlineData('h', 'h', 0)]
@@ -191,6 +191,12 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("s", () => char.GetNumericValue(null, 0)); // String is null
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => char.GetNumericValue("abc", -1)); // Index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => char.GetNumericValue("abc", 3)); // Index >= string.Length
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsBoolean()
+        {
+            Assert.Equal(TypeCode.Char, 'a'.GetTypeCode());
         }
 
         [Fact]

@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class UInt16Tests
+    public class UInt16Tests
     {
         [Fact]
         public static void Ctor_Empty()
@@ -79,6 +78,12 @@ namespace System.Tests
                 Assert.Equal(i1, i1.GetHashCode());
             }
             Assert.Equal(expected, i1.Equals(obj));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsUInt16()
+        {
+            Assert.Equal(TypeCode.UInt16, ((ushort)1).GetTypeCode());
         }
 
         public static IEnumerable<object[]> ToString_TestData()

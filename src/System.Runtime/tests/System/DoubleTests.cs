@@ -194,6 +194,12 @@ namespace System.Tests
             Assert.Equal(expected, d1.Equals(value));
         }
 
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsDouble()
+        {
+            Assert.Equal(TypeCode.Double, 0.0.GetTypeCode());
+        }
+
         public static IEnumerable<object[]> ToString_TestData()
         {
             yield return new object[] { double.MinValue, "G", null, "-1.79769313486232E+308" };

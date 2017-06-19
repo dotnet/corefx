@@ -464,6 +464,12 @@ namespace System.Tests
             Assert.Equal(input, newValue);
         }
 
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsDecimal()
+        {
+            Assert.Equal(TypeCode.Decimal, decimal.MaxValue.GetTypeCode());
+        }
+
         public static IEnumerable<object[]> Multiply_Valid_TestData()
         {
             yield return new object[] { decimal.One, decimal.One, decimal.One };

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class Int32Tests
+    public class Int32Tests
     {
         [Fact]
         public static void Ctor_Empty()
@@ -85,6 +85,12 @@ namespace System.Tests
                 Assert.Equal(expected, i1.GetHashCode().Equals(i2.GetHashCode()));
             }
             Assert.Equal(expected, i1.Equals(obj));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsInt32()
+        {
+            Assert.Equal(TypeCode.Int32, 1.GetTypeCode());
         }
 
         public static IEnumerable<object[]> ToString_TestData()

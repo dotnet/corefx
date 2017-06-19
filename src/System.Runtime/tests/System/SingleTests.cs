@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -55,6 +54,12 @@ namespace System.Tests
         public static void IsInfinity(float f, bool expected)
         {
             Assert.Equal(expected, float.IsInfinity(f));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsSingle()
+        {
+            Assert.Equal(TypeCode.Single, 0.0f.GetTypeCode());
         }
 
         [Fact]

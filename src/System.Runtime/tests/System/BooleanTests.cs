@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class BooleanTests
+    public class BooleanTests
     {
         [Fact]
         public static void TrueString()
@@ -129,6 +128,12 @@ namespace System.Tests
         {
             Assert.Equal(1, true.GetHashCode());
             Assert.Equal(0, false.GetHashCode());
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsBoolean()
+        {
+            Assert.Equal(TypeCode.Boolean, true.GetTypeCode());
         }
     }
 }
