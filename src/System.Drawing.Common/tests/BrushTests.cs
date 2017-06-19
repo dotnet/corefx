@@ -20,6 +20,16 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
+        public void Dispose_NoSuchEntryPoint_SilentyCatchesException()
+        {
+            var brush = new SubBrush();
+            brush.PublicSetNativeBrush((IntPtr)10);
+
+            // No EntryPointNotFoundException will be thrown.
+            brush.Dispose();
+        }
+
         private class SubBrush : Brush
         {
             public override object Clone() => this;

@@ -2,23 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.InteropServices;
+
 namespace System.Drawing
 {
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-
-    /**
-     * Represent a Brush object
-     */
-    /// <include file='doc\Brush.uex' path='docs/doc[@for="Brush"]/*' />
-    /// <devdoc>
-    ///     <para>
-    ///         Classes derrived from this abstract base class define objects used to fill the 
-    ///         interiors of graphical shapes such as rectangles, ellipses, pies, polygons, and paths.
-    ///     </para>
-    /// </devdoc>
     public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
     {
 #if FINALIZATION_WATCH
@@ -59,6 +49,11 @@ namespace System.Drawing
 #if DEBUG
                     Debug.Assert(status == SafeNativeMethods.Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
 #endif
+                }
+                catch (Exception ex) when (!ClientUtils.IsSecurityOrCriticalException(ex))
+                {
+                    // Catch all non fatal exceptions. This includes exceptions like EntryPointNotFoundException, that is thrown
+                    // on Windows Nano.
                 }
                 finally
                 {
