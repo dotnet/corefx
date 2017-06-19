@@ -12,6 +12,7 @@ namespace System.DirectoryServices.Protocols
     {
         protected DirectoryException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
 
         public DirectoryException(string message, Exception inner) : base(message, inner)
@@ -30,9 +31,7 @@ namespace System.DirectoryServices.Protocols
     public class DirectoryOperationException : DirectoryException, ISerializable
     {
         internal DirectoryResponse response = null;
-        protected DirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        protected DirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public DirectoryOperationException() : base() { }
 
@@ -62,8 +61,7 @@ namespace System.DirectoryServices.Protocols
                 return response;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
@@ -72,9 +70,7 @@ namespace System.DirectoryServices.Protocols
 
     public class BerConversionException : DirectoryException
     {
-        protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public BerConversionException() : base(String.Format(CultureInfo.CurrentCulture, SR.BerConversionError))
         {

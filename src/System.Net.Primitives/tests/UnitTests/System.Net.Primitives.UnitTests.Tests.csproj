@@ -7,7 +7,6 @@
     <NoWarn>169,649</NoWarn>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
@@ -25,8 +24,7 @@
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.Primitives" />
   </ItemGroup>
-
-  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp' ">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' ">
     <Compile Include="CookieInternalTest.cs" />
     <Compile Include="CookieContainerTest.cs" />
     <Compile Include="..\..\src\System\Net\CookieCollection.cs">
@@ -72,7 +70,6 @@
       <Link>ProductionCode\System\Net\IPAddressParser.cs</Link>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="CookieCollectionTest.cs" />
     <Compile Include="Fakes\CookieException.cs" />

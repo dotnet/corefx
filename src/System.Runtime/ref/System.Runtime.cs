@@ -5667,6 +5667,7 @@ namespace System.Reflection
         public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
         public abstract bool IsDefined(Type attributeType, bool inherit);
         public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
+        public virtual bool HasSameMetadataDefinitionAs(System.Reflection.MemberInfo other) { throw null; }
     }
     [Flags]
     public enum MemberTypes
@@ -5724,6 +5725,7 @@ namespace System.Reflection
         public bool IsFinal { get { throw null; } }
         public virtual bool IsGenericMethod { get { throw null; } }
         public virtual bool IsGenericMethodDefinition { get { throw null; } }
+        public virtual bool IsConstructedGenericMethod { get { throw null; } }
         public bool IsHideBySig { get { throw null; } }
         public bool IsPrivate { get { throw null; } }
         public bool IsPublic { get { throw null; } }

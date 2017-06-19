@@ -26,7 +26,10 @@ namespace BasicEventSourceTests
                 if (eventSource.Name != "System.Threading.Tasks.TplEventSource" &&
                     eventSource.Name != "System.Diagnostics.Eventing.FrameworkEventSource" &&
                     eventSource.Name != "System.Buffers.ArrayPoolEventSource" &&
-                    eventSource.Name != "System.Threading.SynchronizationEventSource")
+                    eventSource.Name != "System.Threading.SynchronizationEventSource" &&
+                    eventSource.Name != "System.Runtime.InteropServices.InteropEventProvider" &&
+                    eventSource.Name != "System.Reflection.Runtime.Tracing"
+                    )
                 {
                     eventSourceNames += eventSource.Name + " ";
                 }

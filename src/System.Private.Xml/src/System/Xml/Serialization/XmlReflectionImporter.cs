@@ -1836,9 +1836,9 @@ namespace System.Xml.Serialization
                     if (flags != XmlAttributeFlags.XmlnsDeclarations)
                         throw new InvalidOperationException(SR.XmlSoleXmlnsAttribute);
 
-                    if (accessorType != typeof(XmlSerializerNamespaces))
+                    if (accessorType != typeof(System.Xml.Serialization.XmlSerializerNamespaces))
                     {
-                        throw new InvalidOperationException(SR.Format(SR.XmlXmlnsInvalidType, accessorName, accessorType.FullName, typeof(XmlSerializerNamespaces).FullName));
+                        throw new InvalidOperationException(SR.Format(SR.XmlXmlnsInvalidType, accessorName, accessorType.FullName, typeof(System.Xml.Serialization.XmlSerializerNamespaces).FullName));
                     }
                     accessor.Xmlns = new XmlnsAccessor();
                     accessor.Ignore = true;
@@ -2236,6 +2236,7 @@ namespace System.Xml.Serialization
         // will create a shallow type mapping for a top-level type
         internal static XmlTypeMapping GetTopLevelMapping(Type type, string defaultNamespace)
         {
+            defaultNamespace = defaultNamespace ?? string.Empty;
             XmlAttributes a = new XmlAttributes(type);
             TypeDesc typeDesc = new TypeScope().GetTypeDesc(type);
             ElementAccessor element = new ElementAccessor();

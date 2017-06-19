@@ -811,7 +811,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19516")]
     public static void DCS_TypeWithPrivateFieldAndPrivateGetPublicSetProperty()
     {
         TypeWithPrivateFieldAndPrivateGetPublicSetProperty x = new TypeWithPrivateFieldAndPrivateGetPublicSetProperty
@@ -819,8 +818,8 @@ public static partial class DataContractSerializerTests
             Name = "foo",
         };
 
-        TypeWithPrivateFieldAndPrivateGetPublicSetProperty y = SerializeAndDeserialize<TypeWithPrivateFieldAndPrivateGetPublicSetProperty>(x, @"<TypeWithPrivateFieldAndPrivateGetPublicSetProperty xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>foo</Name></TypeWithPrivateFieldAndPrivateGetPublicSetProperty>");
-        Assert.Equal(x.GetName(), y.GetName());
+        TypeWithPrivateFieldAndPrivateGetPublicSetProperty y = SerializeAndDeserialize<TypeWithPrivateFieldAndPrivateGetPublicSetProperty>(x, @"<TypeWithPrivateFieldAndPrivateGetPublicSetProperty xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""></TypeWithPrivateFieldAndPrivateGetPublicSetProperty>");
+        Assert.Null(y.GetName());
     }
 
     [Fact]
@@ -1437,13 +1436,13 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionObject()
     {
-        var value = new ArgumentException("Test Exception");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:nil=""true"" xmlns=""""/></ArgumentException>");
+        var value = new Exception("Test Exception");
+        var actual = SerializeAndDeserialize<Exception>(value, @"<Exception xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.Exception</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/></Exception>");
 
         Assert.StrictEqual(value.Message, actual.Message);
-        Assert.StrictEqual(value.ParamName, actual.ParamName);
         Assert.StrictEqual(value.Source, actual.Source);
         Assert.StrictEqual(value.StackTrace, actual.StackTrace);
         Assert.StrictEqual(value.HResult, actual.HResult);
@@ -1451,10 +1450,11 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArgumentExceptionObject()
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
+    public static void DCS_MyArgumentExceptionObject()
     {
-        var value = new ArgumentException("Test Exception", "paramName");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:type=""x:string"" xmlns="""">paramName</ParamName></ArgumentException>");
+        var value = new MyArgumentException("Test Exception", "paramName");
+        var actual = SerializeAndDeserialize<MyArgumentException>(value, @"<MyArgumentException xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">MyArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:type=""x:string"" xmlns="""">paramName</ParamName></MyArgumentException>");
 
         Assert.StrictEqual(value.Message, actual.Message);
         Assert.StrictEqual(value.ParamName, actual.ParamName);
@@ -1465,13 +1465,13 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionMessageWithSpecialChars()
     {
-        var value = new ArgumentException("Test Exception<>&'\"");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception&lt;&gt;&amp;'""</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:nil=""true"" xmlns=""""/></ArgumentException>");
+        var value = new Exception("Test Exception<>&'\"");
+        var actual = SerializeAndDeserialize<Exception>(value, @"<Exception xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.Exception</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception&lt;&gt;&amp;'""</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/></Exception>");
 
         Assert.StrictEqual(value.Message, actual.Message);
-        Assert.StrictEqual(value.ParamName, actual.ParamName);
         Assert.StrictEqual(value.Source, actual.Source);
         Assert.StrictEqual(value.StackTrace, actual.StackTrace);
         Assert.StrictEqual(value.HResult, actual.HResult);
@@ -1479,6 +1479,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_InnerExceptionMessageWithSpecialChars()
     {
         var value = new Exception("", new Exception("Test Exception<>&'\""));
@@ -1685,7 +1686,6 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual<TypeWithCommonTypeProperties>(value, deserializedValue);
     }
 
-#if !uapaot
     [Fact]
     public static void DCS_TypeWithTypeProperty()
     {
@@ -1695,7 +1695,6 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.Name, deserializedValue.Name);
         Assert.StrictEqual(value.Type, deserializedValue.Type);
     }
-#endif
 
     [Fact]
     public static void DCS_TypeWithExplicitIEnumerableImplementation()
@@ -1884,14 +1883,13 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18312")]
     public static void DCS_ReadOnlyDictionary()
     {
         var dict = new Dictionary<string, int>();
         dict["Foo"] = 1;
         dict["Bar"] = 2;
         ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
-        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></_dictionary></ReadOnlyDictionaryOfstringint>");
+        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><m_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></m_dictionary></ReadOnlyDictionaryOfstringint>");
 
         Assert.StrictEqual(value.Count, deserializedValue.Count);
         Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
@@ -3026,28 +3024,6 @@ public static partial class DataContractSerializerTests
         var value3 = new SerializationTestTypes.Wireformat3();
         var actual3 = SerializeAndDeserialize(value3, baseline3, dataContractSerializerSettings);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(value3, actual3);
-    }
-
-    [Fact]
-    public static void DCS_BasicRoundtripDCRDelegates()
-    {
-        var dataContractSerializerSettings = new DataContractSerializerSettings()
-        {
-            DataContractResolver = new VerySimpleResolver(),
-        };
-
-        string coreAssemblyName = typeof(System.Delegate).Assembly.FullName;
-        string assemblyName = typeof(DelegateClass).Assembly.FullName;
-        string baseline = $@"<DelegateClass xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><container i:type=""a:Del"" z:FactoryType=""b:System.DelegateSerializationHolder"" xmlns:a=""{assemblyName}"" xmlns:b=""{coreAssemblyName}"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Delegate i:type=""b:System.DelegateSerializationHolder+DelegateEntry"" xmlns=""""><assembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</assembly><delegateEntry i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><methodName xmlns=""http://schemas.datacontract.org/2004/07/System"">TestingTheDelegate</methodName><target i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><targetTypeAssembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</targetTypeAssembly><targetTypeName xmlns=""http://schemas.datacontract.org/2004/07/System"">DelegateClass</targetTypeName><type xmlns=""http://schemas.datacontract.org/2004/07/System"">Del</type></Delegate><method0 i:type=""b:System.Reflection.RuntimeMethodInfo"" z:FactoryType=""b:System.Reflection.MemberInfoSerializationHolder"" xmlns=""""><Name i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">TestingTheDelegate</Name><AssemblyName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">{assemblyName}</AssemblyName><ClassName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">DelegateClass</ClassName><Signature i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">Void TestingTheDelegate(People)</Signature><Signature2 i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">System.Void TestingTheDelegate(People)</Signature2><MemberType i:type=""c:int"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">8</MemberType><GenericArguments i:nil=""true""/></method0></container></DelegateClass>";
-        var value = new DelegateClass();
-        Del handle = DelegateClass.TestingTheDelegate;
-        value.container = handle;
-        People people = new People();
-        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
-        ((Del)actual.container).Invoke(people);
-        Assert.NotNull(actual);
-        Assert.NotNull(actual.container);
-        Assert.Equal(DelegateClass.delegateVariable, "Verifying the Delegate Test");
     }
 
     [Fact]

@@ -15,7 +15,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "uap: dotnet/corefx #20010, netfx: dotnet/corefx #16805")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.NetFramework, "uap: dotnet/corefx #20010, netfx: dotnet/corefx #16805")]
     public partial class HttpClientHandler_ServerCertificates_Test
     {
         [OuterLoop] // TODO: Issue #11345
@@ -160,6 +160,7 @@ namespace System.Net.Http.Functional.Tests
             new object[] { Configuration.Http.WrongHostNameCertRemoteServer },
         };
 
+        [ActiveIssue(7812, TestPlatforms.Windows)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CertificateValidationServers))]

@@ -38,14 +38,7 @@ namespace System.Net
 
         protected WebHeaderCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            int count = serializationInfo.GetInt32("Count");
-            for (int i = 0; i < count; i++)
-            {
-                string headerName = serializationInfo.GetString(i.ToString(NumberFormatInfo.InvariantInfo));
-                string headerValue = serializationInfo.GetString((i + count).ToString(NumberFormatInfo.InvariantInfo));
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Add() key:[{headerName}], value:[{headerValue}]");
-                InnerCollection.Add(headerName, headerValue);
-            }
+            throw new PlatformNotSupportedException();
         }
 
         private bool AllowHttpRequestHeader
@@ -187,20 +180,12 @@ namespace System.Net
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            //
-            // for now disregard streamingContext.
-            //
-            serializationInfo.AddValue("Count", Count);
-            for (int i = 0; i < Count; i++)
-            {
-                serializationInfo.AddValue(i.ToString(NumberFormatInfo.InvariantInfo), GetKey(i));
-                serializationInfo.AddValue((i + Count).ToString(NumberFormatInfo.InvariantInfo), Get(i));
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         public void Remove(HttpRequestHeader header)
@@ -306,7 +291,7 @@ namespace System.Net
 
         public void Add(string header)
         {
-            if (string.IsNullOrWhiteSpace(header))
+            if (string.IsNullOrEmpty(header))
             {
                 throw new ArgumentNullException(nameof(header));
             }
@@ -335,6 +320,15 @@ namespace System.Net
 
         public override void Add(string name, string value)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (name.Length == 0)
+            {
+                throw new ArgumentException(SR.Format(SR.net_emptyStringCall, nameof(name)), nameof(name));
+            }
+
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
             ThrowOnRestrictedHeader(name);
             value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
@@ -399,7 +393,7 @@ namespace System.Net
         /// </devdoc>
         public override void Remove(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
             }

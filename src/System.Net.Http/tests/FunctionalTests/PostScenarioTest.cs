@@ -19,7 +19,7 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "dotnet/corefx #20010")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
     public class PostScenarioTest
     {
         private const string ExpectedContent = "Test contest";
@@ -68,6 +68,14 @@ namespace System.Net.Http.Functional.Tests
         {
             await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(EchoServers))]
+        public async Task PostEmptyContentUsingConflictingSemantics_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+                useContentLengthUpload: true, useChunkedEncodingUpload: true);
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -165,7 +173,21 @@ namespace System.Net.Http.Functional.Tests
             var credential = new NetworkCredential(UserName, Password);
             await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: true);
         }
-        
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(EchoServers))]
+        public async Task PostAsync_EmptyContent_ContentTypeHeaderNotSent(Uri serverUri)
+        {
+            using (var client = new HttpClient())
+            using (HttpResponseMessage response = await client.PostAsync(serverUri, null))
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                bool sentContentType = TestHelper.JsonMessageContainsKey(responseContent, "Content-Type");
+
+                Assert.False(sentContentType);
+            }
+        }
+
         private async Task PostHelper(
             Uri serverUri,
             string requestBody,

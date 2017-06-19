@@ -58,19 +58,11 @@ namespace System.IO.Tests
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Assert.Throws<FileNotFoundException>(() => Copy(GetTestFilePath(), testFile.FullName));
-                Assert.Throws<DirectoryNotFoundException>(() => Copy(testFile.FullName, Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName())));
-                Assert.Throws<DirectoryNotFoundException>(() => Copy(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
-            }
-            else
-            {
-                Assert.Throws<FileNotFoundException>(() => Copy(GetTestFilePath(), testFile.FullName));
-                Assert.Throws<DirectoryNotFoundException>(() => Copy(testFile.FullName, Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName())));
-                Assert.Throws<FileNotFoundException>(() => Copy(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
-            }
-}
+
+            Assert.Throws<FileNotFoundException>(() => Copy(GetTestFilePath(), testFile.FullName));
+            Assert.Throws<DirectoryNotFoundException>(() => Copy(testFile.FullName, Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName())));
+            Assert.Throws<DirectoryNotFoundException>(() => Copy(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
+        }
 
         [Fact]
         public void CopyValid()

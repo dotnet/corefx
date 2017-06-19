@@ -34,6 +34,12 @@ namespace System.Data.Common
             TraceException("<comm.ADP.TraceException|ERR|THROW> '{0}'", e);
         }
 
+        internal static void TraceExceptionWithoutRethrow(Exception e)
+        {
+            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
+            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
+        }
+
         internal static ArgumentException Argument(string error)
         {
             ArgumentException e = new ArgumentException(error);
@@ -121,6 +127,11 @@ namespace System.Data.Common
             NotSupportedException e = new NotSupportedException(error);
             TraceExceptionAsReturnValue(e);
             return e;
+        }
+
+        internal static ArgumentOutOfRangeException NotSupportedEnumerationValue(Type type, string value, string method)
+        {
+            return ArgumentOutOfRange(SR.Format(SR.ADP_NotSupportedEnumerationValue, type.Name, value, method), type.Name);
         }
 
         internal static InvalidOperationException DataAdapter(string error)
@@ -396,7 +407,12 @@ namespace System.Data.Common
             return IndexOutOfRange(SR.Format(SR.SQL_InvalidDataLength, length.ToString(CultureInfo.InvariantCulture)));
         }
 
+        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst) =>
+            0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase);
+
         internal static int DstCompare(string strA, string strB) => CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, ADP.DefaultCompareOptions);
+
+        internal static bool IsEmptyArray(string[] array) => (null == array) || (0 == array.Length);
 
         internal static bool IsNull(object value)
         {

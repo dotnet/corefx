@@ -16,8 +16,9 @@ namespace System.Net.Sockets.Tests
         private readonly ITestOutputHelper _log;
 
         private IPAddress _serverAddress = IPAddress.IPv6Loopback;
-        // In the current directory
-        private const string TestFileName = "NCLTest.Socket.SendPacketsAsync.testpayload";
+        // Accessible directories for UWP app:
+        // C:\Users\<UserName>\AppData\Local\Packages\<ApplicationPackageName>\
+        private string TestFileName = Environment.GetEnvironmentVariable("LocalAppData") + @"\NCLTest.Socket.SendPacketsAsync.testpayload";
         private static int s_testFileSize = 1024;
 
         #region Additional test attributes
@@ -88,12 +89,8 @@ namespace System.Net.Sockets.Tests
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
                     sock.Connect(new IPEndPoint(_serverAddress, port));
-
-                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
-                    {
-                        sock.SendPacketsAsync(null);
-                    });
-                    Assert.Equal("e", ex.ParamName);
+                    
+                    AssertExtensions.Throws<ArgumentNullException>("e", () => sock.SendPacketsAsync(null));
                 }
             }
         }
@@ -117,18 +114,14 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void NullList_Throws(SocketImplementationType type)
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
-            {
-                SendPackets(type, (SendPacketsElement[])null, SocketError.Success, 0);
-            });
-
-            Assert.Equal("e.SendPacketsElements", ex.ParamName);
+            AssertExtensions.Throws<ArgumentNullException>("e.SendPacketsElements", () => SendPackets(type, (SendPacketsElement[])null, SocketError.Success, 0));
         }
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void NullElement_Ignored(SocketImplementationType type)
         {
             SendPackets(type, (SendPacketsElement)null, 0);
@@ -138,6 +131,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void EmptyList_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement[0], SocketError.Success, 0);
@@ -174,6 +168,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void EmptyBuffer_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[0]), 0);
@@ -182,6 +177,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void BufferZeroCount_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10], 4, 0), 0);
@@ -204,6 +200,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        [ActiveIssue(20135, TargetFrameworkMonikers.Uap)]
         public void BufferZeroCountThenNormal_ZeroCountIgnored(SocketImplementationType type)
         {
             Assert.True(Capability.IPv6Support());

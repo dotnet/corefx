@@ -27,7 +27,7 @@ namespace System.Collections.Generic
 #if DEBUG
             internal override bool versionUpToDate()
             {
-                return (_version == _underlying._version);
+                return (version == _underlying.version);
             }
 #endif
 
@@ -39,16 +39,10 @@ namespace System.Collections.Generic
                 _max = Max;
                 _lBoundActive = lowerBoundActive;
                 _uBoundActive = upperBoundActive;
-                _root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive); // root is first element within range
-                _count = 0;
-                _version = -1;
+                root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive); // root is first element within range
+                count = 0;
+                version = -1;
                 VersionCheckImpl();
-            }
-
-            private TreeSubSet(SerializationInfo info, StreamingContext context)
-            {
-                _siInfo = info;
-                OnDeserializationImpl(info);
             }
 
             internal override bool AddIfNotPresent(T item)
@@ -61,7 +55,7 @@ namespace System.Collections.Generic
                 bool ret = _underlying.AddIfNotPresent(item);
                 VersionCheck();
 #if DEBUG
-                Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(this.versionUpToDate() && root == _underlying.FindRange(_min, _max));
 #endif
 
                 return ret;
@@ -71,7 +65,7 @@ namespace System.Collections.Generic
             {
                 VersionCheck();
 #if DEBUG
-                Debug.Assert(versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(versionUpToDate() && root == _underlying.FindRange(_min, _max));
 #endif
                 return base.Contains(item);
             }
@@ -86,14 +80,14 @@ namespace System.Collections.Generic
                 bool ret = _underlying.Remove(item);
                 VersionCheck();
 #if DEBUG
-                Debug.Assert(versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(versionUpToDate() && root == _underlying.FindRange(_min, _max));
 #endif
                 return ret;
             }
 
             public override void Clear()
             {
-                if (_count == 0)
+                if (count == 0)
                 {
                     return;
                 }
@@ -106,9 +100,9 @@ namespace System.Collections.Generic
                     toRemove.RemoveAt(toRemove.Count - 1);
                 }
 
-                _root = null;
-                _count = 0;
-                _version = _underlying._version;
+                root = null;
+                count = 0;
+                version = _underlying.version;
             }
 
             internal override bool IsWithinRange(T item)
@@ -127,7 +121,7 @@ namespace System.Collections.Generic
             {
                 get
                 {
-                    Node current = _root;
+                    Node current = root;
                     T result = default(T);
 
                     while (current != null)
@@ -157,7 +151,7 @@ namespace System.Collections.Generic
             {
                 get
                 {
-                    Node current = _root;
+                    Node current = root;
                     T result = default(T);
 
                     while (current != null)
@@ -186,15 +180,15 @@ namespace System.Collections.Generic
             {
                 VersionCheck();
 
-                if (_root == null)
+                if (root == null)
                 {
                     return true;
                 }
 
                 // The maximum height of a red-black tree is 2*lg(n+1).
                 // See page 264 of "Introduction to algorithms" by Thomas H. Cormen
-                Stack<Node> stack = new Stack<Node>(2 * (int)SortedSet<T>.Log2(_count + 1)); // this is not exactly right if count is out of date, but the stack can grow
-                Node current = _root;
+                Stack<Node> stack = new Stack<Node>(2 * (int)SortedSet<T>.Log2(count + 1)); // this is not exactly right if count is out of date, but the stack can grow
+                Node current = root;
                 while (current != null)
                 {
                     if (IsWithinRange(current.Item))
@@ -245,13 +239,13 @@ namespace System.Collections.Generic
             {
                 VersionCheck();
 
-                if (_root == null)
+                if (root == null)
                 {
                     return true;
                 }
 
                 Queue<Node> processQueue = new Queue<Node>();
-                processQueue.Enqueue(_root);
+                processQueue.Enqueue(root);
                 Node current;
 
                 while (processQueue.Count != 0)
@@ -282,7 +276,7 @@ namespace System.Collections.Generic
 
                 VersionCheck();
 #if DEBUG
-                Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(this.versionUpToDate() && root == _underlying.FindRange(_min, _max));
 #endif
                 return base.FindNode(item);
             }
@@ -299,7 +293,7 @@ namespace System.Collections.Generic
                         return count;
                 }
 #if DEBUG
-                Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(this.versionUpToDate() && root == _underlying.FindRange(_min, _max));
 #endif
                 return -1;
             }
@@ -312,12 +306,12 @@ namespace System.Collections.Generic
             private void VersionCheckImpl()
             {
                 Debug.Assert(_underlying != null);
-                if (_version != _underlying._version)
+                if (version != _underlying.version)
                 {
-                    _root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
-                    _version = _underlying._version;
-                    _count = 0;
-                    InOrderTreeWalk(n => { _count++; return true; });
+                    root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
+                    version = _underlying.version;
+                    count = 0;
+                    InOrderTreeWalk(n => { count++; return true; });
                 }
             }
 
@@ -341,7 +335,7 @@ namespace System.Collections.Generic
             internal override void IntersectWithEnumerable(IEnumerable<T> other)
             {
                 base.IntersectWithEnumerable(other);
-                Debug.Assert(versionUpToDate() && _root == _underlying.FindRange(_min, _max));
+                Debug.Assert(versionUpToDate() && root == _underlying.FindRange(_min, _max));
             }
 #endif
 
@@ -349,68 +343,15 @@ namespace System.Collections.Generic
 
             protected override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(MaxName, _max, typeof(T));
-                info.AddValue(MinName, _min, typeof(T));
-                info.AddValue(LowerBoundActiveName, _lBoundActive);
-                info.AddValue(UpperBoundActiveName, _uBoundActive);
-
-                base.GetObjectData(info, context);
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)
             {
-                // Don't do anything here as the work has already been done by the constructor
+                throw new PlatformNotSupportedException();
             }
 
-            protected override void OnDeserialization(Object sender) => OnDeserializationImpl(sender);
-
-            private void OnDeserializationImpl(Object sender)
-            {
-                if (_siInfo == null)
-                {
-                    throw new SerializationException(SR.Serialization_InvalidOnDeser);
-                }
-
-                _comparer = (IComparer<T>)_siInfo.GetValue(ComparerName, typeof(IComparer<T>));
-                int savedCount = _siInfo.GetInt32(CountName);
-                _max = (T)_siInfo.GetValue(MaxName, typeof(T));
-                _min = (T)_siInfo.GetValue(MinName, typeof(T));
-                _lBoundActive = _siInfo.GetBoolean(LowerBoundActiveName);
-                _uBoundActive = _siInfo.GetBoolean(UpperBoundActiveName);
-                _underlying = new SortedSet<T>();
-
-                if (savedCount != 0)
-                {
-                    T[] items = (T[])_siInfo.GetValue(ItemsName, typeof(T[]));
-
-                    if (items == null)
-                    {
-                        throw new SerializationException(SR.Serialization_MissingValues);
-                    }
-
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        _underlying.Add(items[i]);
-                    }
-                }
-
-                _underlying._version = _siInfo.GetInt32(VersionName);
-                _count = _underlying._count;
-                _version = _underlying._version - 1;
-                VersionCheck(); // this should update the count to be right and update root to be right
-
-                if (_count != savedCount)
-                {
-                    throw new SerializationException(SR.Serialization_MismatchedCount);
-                }
-
-                _siInfo = null;
-            }
+            protected override void OnDeserialization(Object sender) => throw new PlatformNotSupportedException();
         }
     }
 }

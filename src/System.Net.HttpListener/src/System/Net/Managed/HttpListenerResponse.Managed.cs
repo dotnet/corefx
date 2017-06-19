@@ -31,80 +31,29 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
     public sealed partial class HttpListenerResponse : IDisposable
     {
         private long _contentLength;
-        private bool _clSet;
-        private string _contentType;
-        private bool _keepAlive = true;
-        private HttpResponseStream _outputStream;
         private Version _version = HttpVersion.Version11;
-        private string _location;
         private int _statusCode = 200;
-        private string _statusDescription = "OK";
-        private bool _chunked;
-        private HttpListenerContext _context;
         internal object _headersLock = new object();
         private bool _forceCloseChunked;
 
         internal HttpListenerResponse(HttpListenerContext context)
         {
-            _context = context;
+            _httpContext = context;
         }
 
         internal bool ForceCloseChunked => _forceCloseChunked;
 
-        public long ContentLength64
+        private void EnsureResponseStream()
         {
-            get => _contentLength;
-            set
+            if (_responseStream == null)
             {
-                CheckDisposed();
-                CheckSentHeaders();
-
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_clsmall);
-
-                _clSet = true;
-                _contentLength = value;
-            }
-        }
-
-        public string ContentType
-        {
-            get => _contentType;
-            set
-            {
-                CheckDisposed();
-                CheckSentHeaders();
-
-                _contentType = value;
-            }
-        }
-
-        public bool KeepAlive
-        {
-            get => _keepAlive;
-            set
-            {
-                CheckDisposed();
-                CheckSentHeaders();
-
-                _keepAlive = value;
-            }
-        }
-
-        public Stream OutputStream
-        {
-            get
-            {
-                if (_outputStream == null)
-                    _outputStream = _context.Connection.GetResponseStream();
-                return _outputStream;
+                _responseStream = _httpContext.Connection.GetResponseStream();
             }
         }
 
@@ -114,39 +63,16 @@ namespace System.Net
             set
             {
                 CheckDisposed();
-                CheckSentHeaders();
-
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
-
+                }
                 if (value.Major != 1 || (value.Minor != 0 && value.Minor != 1))
+                {
                     throw new ArgumentException(SR.net_wrongversion, nameof(value));
+                }
 
-                _version = value;
-            }
-        }
-
-        public string RedirectLocation
-        {
-            get => _location;
-            set
-            {
-                CheckDisposed();
-                CheckSentHeaders();
-
-                _location = value;
-            }
-        }
-
-        public bool SendChunked
-        {
-            get => _chunked;
-            set
-            {
-                CheckDisposed();
-                CheckSentHeaders();
-
-                _chunked = value;
+                _version = new Version(value.Major, value.Minor); // match Windows behavior, trimming to just Major.Minor
             }
         }
 
@@ -156,19 +82,12 @@ namespace System.Net
             set
             {
                 CheckDisposed();
-                CheckSentHeaders();
 
                 if (value < 100 || value > 999)
                     throw new ProtocolViolationException(SR.net_invalidstatus);
 
                 _statusCode = value;
             }
-        }
-
-        public string StatusDescription
-        {
-            get => _statusDescription;
-            set => _statusDescription = value;
         }
 
         private void Dispose() => Close(true);
@@ -192,20 +111,49 @@ namespace System.Net
         private void Close(bool force)
         {
             Disposed = true;
-            _context.Connection.Close(force);
+            _httpContext.Connection.Close(force);
         }
 
         public void Close(byte[] responseEntity, bool willBlock)
         {
-            if (Disposed)
-                return;
+            CheckDisposed();
 
             if (responseEntity == null)
+            {
                 throw new ArgumentNullException(nameof(responseEntity));
+            }
 
-            ContentLength64 = responseEntity.Length;
-            OutputStream.Write(responseEntity, 0, (int)_contentLength);
-            Close(false);
+            if (!SentHeaders && _boundaryType != BoundaryType.Chunked)
+            {
+                ContentLength64 = responseEntity.Length;
+            }
+
+            if (willBlock)
+            {
+                try
+                {
+                    OutputStream.Write(responseEntity, 0, responseEntity.Length);
+                }
+                finally
+                {
+                    Close(false);
+                }
+            }
+            else
+            {
+                OutputStream.BeginWrite(responseEntity, 0, responseEntity.Length, iar =>
+                {
+                    var thisRef = (HttpListenerResponse)iar.AsyncState;
+                    try
+                    {
+                        thisRef.OutputStream.EndWrite(iar);
+                    }
+                    finally
+                    {
+                        thisRef.Close(false);
+                    }
+                }, this);
+            }
         }
 
         public void CopyFrom(HttpListenerResponse templateResponse)
@@ -219,60 +167,54 @@ namespace System.Net
             _version = templateResponse._version;
         }
 
-        public void Redirect(string url)
-        {
-            StatusCode = 302; // Found
-            _location = url;
-        }
-
-        private bool FindCookie(Cookie cookie)
-        {
-            string name = cookie.Name;
-            string domain = cookie.Domain;
-            string path = cookie.Path;
-            foreach (Cookie c in _cookies)
-            {
-                if (name != c.Name)
-                    continue;
-                if (domain != c.Domain)
-                    continue;
-                if (path == c.Path)
-                    return true;
-            }
-
-            return false;
-        }
-
         internal void SendHeaders(bool closing, MemoryStream ms, bool isWebSocketHandshake = false)
         {
             if (!isWebSocketHandshake)
             {
-                if (_contentType != null)
+                if (_webHeaders[HttpKnownHeaderNames.Server] == null)
                 {
-                    _webHeaders.Set(HttpKnownHeaderNames.ContentType, _contentType);
+                    _webHeaders.Set(HttpKnownHeaderNames.Server, HttpHeaderStrings.NetCoreServerName);
                 }
 
-                if (_webHeaders[HttpKnownHeaderNames.Server] == null)
-                    _webHeaders.Set(HttpKnownHeaderNames.Server, HttpHeaderStrings.NetCoreServerName);
-                CultureInfo inv = CultureInfo.InvariantCulture;
                 if (_webHeaders[HttpKnownHeaderNames.Date] == null)
-                    _webHeaders.Set(HttpKnownHeaderNames.Date, DateTime.UtcNow.ToString("r", inv));
-
-                if (!_chunked)
                 {
-                    if (!_clSet && closing)
+                    _webHeaders.Set(HttpKnownHeaderNames.Date, DateTime.UtcNow.ToString("r", CultureInfo.InvariantCulture));
+                }
+
+                if (_boundaryType == BoundaryType.None)
+                {
+                    if (HttpListenerRequest.ProtocolVersion <= HttpVersion.Version10)
                     {
-                        _clSet = true;
-                        _contentLength = 0;
+                        _keepAlive = false;
+                    }
+                    else
+                    {
+                        _boundaryType = BoundaryType.Chunked;
                     }
 
-                    if (_clSet)
-                        _webHeaders.Set(HttpKnownHeaderNames.ContentLength, _contentLength.ToString(inv));
+                    if (CanSendResponseBody(_httpContext.Response.StatusCode))
+                    {
+                        _contentLength = -1;
+                    }
+                    else
+                    {
+                        _boundaryType = BoundaryType.ContentLength;
+                        _contentLength = 0;
+                    }
                 }
 
-                Version v = _context.Request.ProtocolVersion;
-                if (!_clSet && !_chunked && v >= HttpVersion.Version11)
-                    _chunked = true;
+                if (_boundaryType != BoundaryType.Chunked)
+                {
+                    if (_boundaryType != BoundaryType.ContentLength && closing)
+                    {
+                        _contentLength = CanSendResponseBody(_httpContext.Response.StatusCode) ? -1 : 0;
+                    }
+
+                    if (_boundaryType == BoundaryType.ContentLength)
+                    {
+                        _webHeaders.Set(HttpKnownHeaderNames.ContentLength, _contentLength.ToString("D", CultureInfo.InvariantCulture));
+                    }
+                }
 
                 /* Apache forces closing the connection for these status codes:
                  *	HttpStatusCode.BadRequest 		        400
@@ -288,8 +230,10 @@ namespace System.Net
                         || _statusCode == (int)HttpStatusCode.RequestUriTooLong || _statusCode == (int)HttpStatusCode.InternalServerError
                         || _statusCode == (int)HttpStatusCode.ServiceUnavailable);
 
-                if (conn_close == false)
-                    conn_close = !_context.Request.KeepAlive;
+                if (!conn_close)
+                {
+                    conn_close = !_httpContext.Request.KeepAlive;
+                }
 
                 // They sent both KeepAlive: true and Connection: close
                 if (!_keepAlive || conn_close)
@@ -298,10 +242,12 @@ namespace System.Net
                     conn_close = true;
                 }
 
-                if (_chunked)
+                if (SendChunked)
+                {
                     _webHeaders.Set(HttpKnownHeaderNames.TransferEncoding, HttpHeaderStrings.Chunked);
+                }
 
-                int reuses = _context.Connection.Reuses;
+                int reuses = _httpContext.Connection.Reuses;
                 if (reuses >= 100)
                 {
                     _forceCloseChunked = true;
@@ -312,37 +258,42 @@ namespace System.Net
                     }
                 }
 
-                if (!conn_close)
+                if (HttpListenerRequest.ProtocolVersion <= HttpVersion.Version10)
                 {
-                    _webHeaders.Set(HttpKnownHeaderNames.KeepAlive, String.Format("timeout=15,max={0}", 100 - reuses));
-                    if (_context.Request.ProtocolVersion <= HttpVersion.Version10)
+                    if (_keepAlive)
+                    {
+                        Headers[HttpResponseHeader.KeepAlive] = "true";
+                    }
+
+                    if (!conn_close)
+                    {
                         _webHeaders.Set(HttpKnownHeaderNames.Connection, HttpHeaderStrings.KeepAlive);
+                    }
                 }
 
-                if (_location != null)
-                    _webHeaders.Set(HttpKnownHeaderNames.Location, _location);
-
-                if (_cookies != null)
-                {
-                    foreach (Cookie cookie in _cookies)
-                        _webHeaders.Set(HttpKnownHeaderNames.SetCookie, CookieToClientString(cookie));
-                }
+                ComputeCookies();
             }
 
             Encoding encoding = Encoding.Default;
             StreamWriter writer = new StreamWriter(ms, encoding, 256);
-            writer.Write("HTTP/{0} {1} {2}\r\n", _version, _statusCode, _statusDescription);
-            string headers_str = FormatHeaders(_webHeaders);
-            writer.Write(headers_str);
+            writer.Write("HTTP/1.1 {0} ", _statusCode); // "1.1" matches Windows implementation, which ignores the response version
+            writer.Flush();
+            byte[] statusDescriptionBytes = WebHeaderEncoding.GetBytes(StatusDescription);
+            ms.Write(statusDescriptionBytes, 0, statusDescriptionBytes.Length);
+            writer.Write("\r\n");
+
+            writer.Write(FormatHeaders(_webHeaders));
             writer.Flush();
             int preamble = encoding.GetPreamble().Length;
-            if (_outputStream == null)
-                _outputStream = _context.Connection.GetResponseStream();
+            EnsureResponseStream();
 
             /* Assumes that the ms was at position 0 */
             ms.Position = preamble;
             SentHeaders = !isWebSocketHandshake;
         }
+
+        private static bool HeaderCanHaveEmptyValue(string name) =>
+            !string.Equals(name, HttpKnownHeaderNames.Location, StringComparison.OrdinalIgnoreCase);
 
         private static string FormatHeaders(WebHeaderCollection headers)
         {
@@ -352,59 +303,38 @@ namespace System.Net
             {
                 string key = headers.GetKey(i);
                 string[] values = headers.GetValues(i);
+
+                int startingLength = sb.Length;
+
+                sb.Append(key).Append(": ");
+                bool anyValues = false;
                 for (int j = 0; j < values.Length; j++)
                 {
-                    sb.Append(key).Append(": ").Append(values[j]).Append("\r\n");
+                    string value = values[j];
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        if (anyValues)
+                        {
+                            sb.Append(", ");
+                        }
+                        sb.Append(value);
+                        anyValues = true;
+                    }
+                }
+
+                if (anyValues || HeaderCanHaveEmptyValue(key))
+                {
+                    // Complete the header
+                    sb.Append("\r\n");
+                }
+                else
+                {
+                    // Empty header; remove it.
+                    sb.Length = startingLength;
                 }
             }
 
             return sb.Append("\r\n").ToString();
-        }
-
-        private static string CookieToClientString(Cookie cookie)
-        {
-            if (cookie.Name.Length == 0)
-                return String.Empty;
-
-            StringBuilder result = new StringBuilder(64);
-
-            if (cookie.Version > 0)
-                result.Append("Version=").Append(cookie.Version).Append(";");
-
-            result.Append(cookie.Name).Append("=").Append(cookie.Value);
-
-            if (cookie.Path != null && cookie.Path.Length != 0)
-                result.Append(";Path=").Append(QuotedString(cookie, cookie.Path));
-
-            if (cookie.Domain != null && cookie.Domain.Length != 0)
-                result.Append(";Domain=").Append(QuotedString(cookie, cookie.Domain));
-
-            if (cookie.Port != null && cookie.Port.Length != 0)
-                result.Append(";Port=").Append(cookie.Port);
-
-            return result.ToString();
-        }
-
-        private static string QuotedString(Cookie cookie, string value)
-        {
-            if (cookie.Version == 0 || IsToken(value))
-                return value;
-            else
-                return "\"" + value.Replace("\"", "\\\"") + "\"";
-        }
-
-        private static string s_tspecials = "()<>@,;:\\\"/[]?={} \t";   // from RFC 2965, 2068
-
-        private static bool IsToken(string value)
-        {
-            int len = value.Length;
-            for (int i = 0; i < len; i++)
-            {
-                char c = value[i];
-                if (c < 0x20 || c >= 0x7f || s_tspecials.IndexOf(c) != -1)
-                    return false;
-            }
-            return true;
         }
 
         private bool Disposed { get; set; }

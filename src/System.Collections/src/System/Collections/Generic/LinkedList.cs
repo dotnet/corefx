@@ -11,6 +11,7 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class LinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
     {
         // This LinkedList is a doubly-Linked circular list.
@@ -21,9 +22,9 @@ namespace System.Collections.Generic
         private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.  
 
         // names for serialization
-        private const string VersionName = "Version";
-        private const string CountName = "Count";  
-        private const string ValuesName = "Data";
+        private const string VersionName = "Version"; // Do not rename (binary serialization)
+        private const string CountName = "Count"; // Do not rename (binary serialization)
+        private const string ValuesName = "Data"; // Do not rename (binary serialization)
 
         public LinkedList()
         {
@@ -357,7 +358,7 @@ namespace System.Collections.Generic
         {
             if (_siInfo == null)
             {
-                return; //Somebody had a dependency on this Dictionary and fixed us up before the ObjectManager got to it.
+                return; //Somebody had a dependency on this LinkedList and fixed us up before the ObjectManager got to it.
             }
 
             int realVersion = _siInfo.GetInt32(VersionName);
@@ -544,7 +545,6 @@ namespace System.Collections.Generic
             private int _version;
             private T _current;
             private int _index;
-            private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.
 
             const string LinkedListName = "LinkedList";
             const string CurrentValueName = "Current";
@@ -558,17 +558,11 @@ namespace System.Collections.Generic
                 _node = list.head;
                 _current = default(T);
                 _index = 0;
-                _siInfo = null;
             }
 
             private Enumerator(SerializationInfo info, StreamingContext context)
             {
-                _siInfo = info;
-                _list = null;
-                _version = 0;
-                _node = null;
-                _current = default(T);
-                _index = 0;
+                throw new PlatformNotSupportedException();
             }
 
             public T Current
@@ -630,64 +624,12 @@ namespace System.Collections.Generic
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-
-                info.AddValue(LinkedListName, _list);
-                info.AddValue(VersionName, _version);
-                info.AddValue(CurrentValueName, _current);
-                info.AddValue(IndexName, _index);
+                throw new PlatformNotSupportedException();
             }
 
             void IDeserializationCallback.OnDeserialization(Object sender)
             {
-                if (_list != null)
-                {
-                    return; // Somebody had a dependency on this Dictionary and fixed us up before the ObjectManager got to it.
-                }
-
-                if (_siInfo == null)
-                {
-                    throw new SerializationException(SR.Serialization_InvalidOnDeser);
-                }
-
-                _list = (LinkedList<T>)_siInfo.GetValue(LinkedListName, typeof(LinkedList<T>));
-                _version = _siInfo.GetInt32(VersionName);
-                _current = (T)_siInfo.GetValue(CurrentValueName, typeof(T));
-                _index = _siInfo.GetInt32(IndexName);
-
-                if (_list._siInfo != null)
-                {
-                    _list.OnDeserialization(sender);
-                }
-
-                if (_index == _list.Count + 1)
-                {
-                    // end of enumeration
-                    _node = null;
-                }
-                else
-                {
-                    _node = _list.First;
-
-                    // We don't care if we can point to the correct node if the LinkedList was changed   
-                    // MoveNext will throw upon next call and Current has the correct value. 
-                    if (_node != null && _index != 0)
-                    {
-                        for (int i = 0; i < _index; i++)
-                        {
-                            _node = _node.next;
-                        }
-                        if (_node == _list.First)
-                        {
-                            _node = null;
-                        }
-                    }
-                }
-
-                _siInfo = null;
+                throw new PlatformNotSupportedException();
             }
         }
     }

@@ -47,7 +47,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [area-Serialization](https://github.com/dotnet/corefx/labels/area-Serialization)              | [@shmao](https://github.com/shmao), [@zhenlan](https://github.com/zhenlan) | Packages:<ul><li>System.Runtime.Serialization.Xml</li><li>System.Runtime.Serialization.Json</li><li>System.Private.DataContractSerialization</li><li>System.Xml.XmlSerialization</li></ul> Excluded:<ul><li>System.Runtime.Serialization.Formatters</li></ul> |
 | **System contract assemblies** | | |
 | [System.AppContext](https://github.com/dotnet/corefx/labels/area-System.AppContext)           | [@AlexGhiondea](https://github.com/AlexGhiondea) |  |  |
-| [System.Buffers](https://github.com/dotnet/corefx/labels/area-System.Buffers)                 | [@alexperovich](https://github.com/alexperovich), [@safern](https://github.com/safern) |  |
+| [System.Buffers](https://github.com/dotnet/corefx/labels/area-System.Buffers)                 | [@safern](https://github.com/safern) |  |
 | [System.CodeDom](https://github.com/dotnet/corefx/labels/area-System.CodeDom)                 | [@Priya91](https://github.com/Priya91) |  |
 | [System.Collections](https://github.com/dotnet/corefx/labels/area-System.Collections)         | [@ianhays](https://github.com/ianhays), [@safern](https://github.com/safern) | </ul>Excluded:<ul><li>System.Array -> System.Runtime</li></ul> |
 | [System.ComponentModel](https://github.com/dotnet/corefx/labels/area-System.ComponentModel)   |  [@safern](https://github.com/safern), [@AlexGhiondea](https://github.com/AlexGhiondea) |  |
@@ -61,14 +61,14 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Diagnostics.Process](https://github.com/dotnet/corefx/labels/area-System.Diagnostics.Process) | [@Priya91](https://github.com/Priya91) |  |
 | [System.Diagnostics.Tracing](https://github.com/dotnet/corefx/labels/area-System.Diagnostics.Tracing) |  [@brianrob](https://github.com/brianrob), [@vancem](https://github.com/vancem), [@valenis](https://github.com/valenis)| Packages:<ul><li>System.Diagnostics.DiagnosticSource</li><li>System.Diagnostics.PerformanceCounter</li><li>System.Diagnostics.Tracing</li><li>System.Diagnostics.TraceSource</li></ul><br/> |
 | [System.DirectoryServices](https://github.com/dotnet/corefx/labels/area-System.DirectoryServices) | [@tquerec](https://github.com/tquerec) |  |
-| [System.Drawing](https://github.com/dotnet/corefx/labels/area-System.Drawing)                 | [@alexperovich](https://github.com/alexperovich) |  |
+| [System.Drawing](https://github.com/dotnet/corefx/labels/area-System.Drawing)                 | [@mellinoe](https://github.com/mellinoe) |  |
 | [System.Dynamic.Runtime](https://github.com/dotnet/corefx/labels/area-System.Dynamic.Runtime) | [@VSadov](https://github.com/VSadov), [@OmarTawfik](https://github.com/OmarTawfik) |  |
 | [System.Globalization](https://github.com/dotnet/corefx/labels/area-System.Globalization)     | [@krwq](https://github.com/krwq), [@tarekgh](https://github.com/tarekgh) |  |
 | [System.IO](https://github.com/dotnet/corefx/labels/area-System.IO)                           | [@JeremyKuhne](https://github.com/JeremyKuhne), [@ianhays](https://github.com/ianhays) |  |
 | [System.IO.Compression](https://github.com/dotnet/corefx/labels/area-System.IO.Compression)   | [@ianhays](https://github.com/ianhays) |  |
 | [System.Linq](https://github.com/dotnet/corefx/labels/area-System.Linq)                       | [@VSadov](https://github.com/VSadov), [@OmarTawfik](https://github.com/OmarTawfik) |  |
 | [System.Linq.Expressions](https://github.com/dotnet/corefx/labels/area-System.Linq.Expressions)   | [@VSadov](https://github.com/VSadov), [@OmarTawfik](https://github.com/OmarTawfik) |  |
-| [System.Linq.Parallel](https://github.com/dotnet/corefx/labels/area-System.Linq.Parallel)     | [@alexperovich](https://github.com/alexperovich), [@kouvel](https://github.com/kouvel) |  |
+| [System.Linq.Parallel](https://github.com/dotnet/corefx/labels/area-System.Linq.Parallel)     | [@kouvel](https://github.com/kouvel) |  |
 | [System.Memory](https://github.com/dotnet/corefx/labels/area-System.Memory)                   | [@KrzysztofCwalina](https://github.com/KrzysztofCwalina), [@ahsonkhan](https://github.com/ahsonkhan), [@shiftylogic](https://github.com/shiftylogic) | |
 | [System.Net](https://github.com/dotnet/corefx/labels/area-System.Net)                         | [@davidsh](https://github.com/davidsh), [@CIPop](https://github.com/CIPop), [@Priya91](https://github.com/Priya91) | Included:<ul><li>System.Uri</li></ul> |
 | [System.Net.Http](https://github.com/dotnet/corefx/labels/area-System.Net.Http)               | [@davidsh](https://github.com/davidsh), [@CIPop](https://github.com/CIPop), [@Priya91](https://github.com/Priya91) | |
@@ -113,7 +113,7 @@ Feel free to use other labels if it helps your triage efforts (e.g. **needs more
 
 #### Motivation for triage rules
 
-1. Each issue has exactly one **area-&#42;** label
+1. Each issue has exactly one **area-\*** label
     * Motivation: Issues with multiple areas have loose responbility (everyone blames the other side) and issues are double counted in reports.
 1. Issue has no **Assignee**, unless someone is working on the issue at the moment
     * Motivation: Observation is that contributors are less likely to grab assigned issues, no matter what the repo rules say.
@@ -125,3 +125,19 @@ Feel free to use other labels if it helps your triage efforts (e.g. **needs more
     * Don't be afraid to be wrong when deciding 'bug' vs. 'test bug' (flip a coin if you must). The most useful values for tracking are 'api-&#42;' vs. 'enhancement', 'question', and 'documentation'.
 1. Don't be afraid to say no, or close issues - just explain why and be polite
 1. Don't be afraid to be wrong - just be flexible when new information appears
+
+#### PR rules
+
+1. Each PR has exactly one **area-\*** label
+    * Movitation: Area owners will get email notification about new issue in their area.
+1. PR has **Assignee** set to author of the PR, if it is non-CoreFX engineer, then area owners are co-assignees
+    * Motivation: Area owners are responsible to do code reviews for PRs from external contributors. CoreFX engineers know how to get code reviews from others.
+1. [Optional] Set milestone according to the branch (master = 2.1, release/2.0.0 = 2.0, release/1.0.0 = 1.0.x, release/1.1.0 = 1.1.x)
+    * Motivation: Easier to track where which fix ended and if it needs to be ported into another branch
+    * Note: This is easily done after merge via simple queries & bulk-edits, you don't have to do this one.
+1. Any other labels on PRs are superfluous and not needed (exceptions: **blocked**, **NO MERGE**)
+    * Motivation: All the important info (*issue type* label, api approval label, OS label, etc.) is already captured on the associated issue.
+1. Push PRs forward, don't let them go stale (response every 5+ days, ideally no PRs older than 2 weeks)
+1. Stuck or long-term blocked PRs (e.g. due to missing API approval, etc.) should be closed and reopened once they are unstuck
+    * Motivation: Keep only active PRs. WIP (work-in-progress) PRs should be rare and should not become stale (2+ weeks old). If a PR is stale and there is not immediate path forward, consider closing the PR until it is unblocked/unstuck.
+1. PR should be linked to related issue, use [auto-closing](https://help.github.com/articles/closing-issues-via-commit-messages/) (add "Fixes #12345" into your PR description)

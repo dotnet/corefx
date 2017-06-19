@@ -13,10 +13,8 @@ def projectFolder = Utilities.getFolderName(project) + '/' + Utilities.getFolder
 // Globals
 
 // Map of osName -> osGroup.
-def osGroupMap = ['Windows 10':'Windows_NT',
-                  'Windows 7':'Windows_NT',
+def osGroupMap = ['Windows 7':'Windows_NT',
                   'Windows_NT':'Windows_NT',
-                  'Windows Nano 2016' : 'Windows_NT',
                   'Ubuntu14.04':'Linux',
                   'Ubuntu16.04':'Linux',
                   'Ubuntu16.10':'Linux',
@@ -31,10 +29,8 @@ def osGroupMap = ['Windows 10':'Windows_NT',
                   'LinuxARMEmulator': 'Linux',
                   'PortableLinux': 'Linux']
 
-def osShortName = ['Windows 10': 'win10',
-                   'Windows 7' : 'win7',
+def osShortName = ['Windows 7' : 'win7',
                    'Windows_NT' : 'windows_nt',
-                   'Windows Nano 2016' : 'winnano16',
                    'Ubuntu14.04' : 'ubuntu14.04',
                    'Ubuntu16.04' : 'ubuntu16.04',
                    'Ubuntu16.10' : 'ubuntu16.10',
@@ -50,11 +46,11 @@ def osShortName = ['Windows 10': 'win10',
 def buildArchConfiguration = ['Debug': 'x86',
                               'Release': 'x64']
 
-def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 
+def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1',
                                         'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux'],
                         'netfx': ['Windows_NT']]
 
-def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1', 
+def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1',
                                         'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux'],
                         'netfx': ['Windows_NT']]
 
@@ -128,93 +124,6 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 }
 
 // **************************
-// Define outerloop windows Nano testing.  Run locally on each machine.
-// **************************
-[true, false].each { isPR ->
-    ['Windows Nano 2016'].each { osName ->
-        ['Debug', 'Release'].each { configurationGroup ->
-
-            def newJobName = "outerloop_${osShortName[osName]}_${configurationGroup.toLowerCase()}"
-
-            def newBuildJobName = "outerloop_${osShortName[osName]}_${configurationGroup.toLowerCase()}_bld"
-
-            def newBuildJob = job(Utilities.getFullJobName(project, newBuildJobName, isPR)) {
-                steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -os=Windows_NT -${configurationGroup} -skipTests -outerloop -- /p:IsCIBuild=true")
-                    // Package up the results.
-                    batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack . bin packages")
-                }
-            }
-
-            // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT', 'latest-or-auto')
-            // Set up standard options.
-            Utilities.standardJobSetup(newBuildJob, project, isPR, "*/${branch}")
-            // Archive the results
-            Utilities.addArchival(newBuildJob, "bin/build.pack,run-test.cmd,msbuild.log")
-
-            def fullCoreFXBuildJobName = projectFolder + '/' + newBuildJob.name
-            def newTestJobName =  "outerloop_${osShortName[osName]}_${configurationGroup.toLowerCase()}_tst"
-            def newTestJob = job(Utilities.getFullJobName(project, newTestJobName, isPR)) {
-                steps {
-                    // The tests/corefx components
-                    copyArtifacts(fullCoreFXBuildJobName) {
-                        includePatterns('bin/build.pack')
-                        includePatterns('run-test.cmd')
-                        buildSelector {
-                            buildNumber('\${COREFX_BUILD}')
-                        }
-                    }
-
-                    // Unpack the build data
-                    batchFile("PowerShell -command \"\"C:\\Packer\\unpacker.ps1 .\\bin\\build.pack . > .\\bin\\unpacker.log\"\"")
-                    // Run the tests
-                    batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup} %WORKSPACE%\\packages")
-                    // Run the tests
-                    batchFile("run-test.cmd .\\bin\\tests\\AnyOS.AnyCPU.${configurationGroup} %WORKSPACE%\\packages")
-                }
-
-                parameters {
-                    stringParam('COREFX_BUILD', '', 'Build number to use for copying binaries for nano server bld.')
-                }
-            }
-
-            // Set the affinity.  All of these run on Windows Nano currently.
-            Utilities.setMachineAffinity(newTestJob, osName)
-            // Set up standard options.
-            Utilities.addStandardOptions(newTestJob, isPR)
-            // Add the unit test results
-            Utilities.addXUnitDotNETResults(newTestJob, 'bin/**/testResults.xml')
-
-            def fullCoreFXTestJobName = projectFolder + '/' + newTestJob.name
-            def newJob = buildFlowJob(Utilities.getFullJobName(project, newJobName, isPR)) {
-                buildFlow("""
-                    b = build(params, '${fullCoreFXBuildJobName}')
-                    build(params +
-                    [COREFX_BUILD: b.build.number], '${fullCoreFXTestJobName}')
-                    """)
-            }
-
-            // Set the machine affinity to windows_nt, since git fails on Nano.
-            Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
-            // Set up standard options.
-            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-
-            // Set up appropriate triggers.  PR on demand, otherwise nightly
-            if (isPR) {
-                // Set PR trigger.
-                // TODO: More elaborate regex trigger?
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${osName} ${configurationGroup}", "(?i).*test\\W+outerloop\\W+${osName}\\W+${configurationGroup}.*")
-            }
-            else {
-                // Set a periodic trigger
-                Utilities.addPeriodicTrigger(newJob, '@daily')
-            }
-        }
-    }
-}
-
-// **************************
 // Define outerloop testing for OSes that can build and run.  Run locally on each machine.
 // **************************
 [true, false].each { isPR ->
@@ -234,7 +143,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     steps {
-                        if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
+                        if (osName == 'Windows 7' || osName == 'Windows_NT') {
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -framework:${targetGroup} -${configurationGroup}")
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -framework:${targetGroup} -${configurationGroup} -outerloop -- /p:IsCIBuild=true")
                             batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin\\runtime\\${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}")
@@ -380,13 +289,13 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
             ['Debug', 'Release'].each { configurationGroup ->
                 def osGroup = osGroupMap[osName]
                 def osForMachineAffinity = osName
-                
+
                 if (osForMachineAffinity == 'PortableLinux') {
                     // Portable Linux builds happen on RHEL7.2
                     osForMachineAffinity = "RHEL7.2"
                 }
                 def archGroup = "x64"
-                if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
+                if (osName == 'Windows 7' || osName == 'Windows_NT') {
                     // On Windows, use different architectures for Debug and Release.
                     archGroup = buildArchConfiguration[configurationGroup]
                 }
@@ -396,7 +305,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     // On Windows we use the packer to put together everything. On *nix we use tar
                     steps {
-                        if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
+                        if (osName == 'Windows 7' || osName == 'Windows_NT') {
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -os:${osGroup} -buildArch:${archGroup} -framework:${targetGroup}")
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -os:${osGroup} -buildArch:${archGroup} -framework:${targetGroup} -- /p:IsCIBuild=true")
                             batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
@@ -432,8 +341,8 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                 // Set up triggers
                 if (isPR) {
                     targetGroupString = targetGroupString.replaceAll('_', ' ');
-                    // Set PR trigger, we run Windows_NT, Ubuntu 14.04, CentOS 7.1, PortableLinux and OSX on every PR.
-                    if ( osName == 'Windows_NT' || osName == 'Ubuntu14.04' || osName == 'CentOS7.1' || osName == 'OSX10.12' || osName== 'PortableLinux') {
+                    // Set PR trigger only run netfx jobs automatically on every PR, the other legs except OSX10.12 are covered by the new portable pipeline legs
+                    if (targetGroup == 'netfx' || osName == 'OSX10.12') {
                         Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroupString}${osName} ${configurationGroup} ${archGroup} Build and Test")
                     }
                     else {
@@ -533,8 +442,8 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
             shell("tar -czf bin/build.tar.gz --directory=\"bin/Linux.${archGroup}.${configurationGroup}/native\" .")
         }
     }
-    
-    // The cross build jobs run on Ubuntu 14.04 in spite of the target is Ubuntu 16.04. 
+
+    // The cross build jobs run on Ubuntu 14.04 in spite of the target is Ubuntu 16.04.
     // The ubuntu 14.04 arm-cross-latest version contains the packages needed for cross building corefx
     Utilities.setMachineAffinity(newJob, 'Ubuntu14.04', 'arm-cross-latest')
 

@@ -16,7 +16,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot, "dotnet/corefx #20010")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
     public class ResponseStreamTest
     {
         private readonly ITestOutputHelper _output;
@@ -89,6 +89,18 @@ namespace System.Net.Http.Functional.Tests
                         false,
                         null);
                 }
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task GetStreamAsync_ReadZeroBytes_Success()
+        {
+            using (var client = new HttpClient())
+            using (Stream stream = await client.GetStreamAsync(Configuration.Http.RemoteEchoServer))
+            {
+                int bytesRead = await stream.ReadAsync(new byte[1], 0, 0);
+                Assert.Equal(0, bytesRead);
             }
         }
 

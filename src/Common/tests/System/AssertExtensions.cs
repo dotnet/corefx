@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
@@ -53,6 +54,17 @@ namespace System
             where T : ArgumentException
         {
             T exception = Assert.Throws<T>(testCode);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
+        }
+
+        public static async Task<T> ThrowsAsync<T>(string paramName, Func<Task> testCode)
+            where T : ArgumentException
+        {
+            T exception = await Assert.ThrowsAsync<T>(testCode);
 
             if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
                 Assert.Equal(paramName, exception.ParamName);
@@ -116,6 +128,96 @@ namespace System
             {
                 action();
             }
+        }
+
+        private static string AddOptionalUserMessage(string message, string userMessage)
+        {
+            if (userMessage == null)
+                return message;
+            else
+                return $"{message} {userMessage}";
+        }
+
+        /// <summary>
+        /// Validate that a given value is greater than another value.
+        /// </summary>
+        /// <param name="actual">The value that should be greater than <paramref name="greaterThan"/>.</param>
+        /// <param name="greaterThan">The value that <paramref name="actual"/> should be greater than.</param>
+        public static void GreaterThan<T>(T actual, T greaterThan, string userMessage = null) where T : IComparable
+        {
+            if (actual == null)
+                throw new XunitException(
+                    greaterThan == null
+                        ? AddOptionalUserMessage($"Expected: <null> to be greater than <null>.", userMessage)
+                        : AddOptionalUserMessage($"Expected: <null> to be greater than {greaterThan}.", userMessage));
+
+            if (actual.CompareTo(greaterThan) <= 0)
+                throw new XunitException(AddOptionalUserMessage($"Expected: {actual} to be greater than {greaterThan}", userMessage));
+        }
+
+        /// <summary>
+        /// Validate that a given value is less than another value.
+        /// </summary>
+        /// <param name="actual">The value that should be less than <paramref name="lessThan"/>.</param>
+        /// <param name="lessThan">The value that <paramref name="actual"/> should be less than.</param>
+        public static void LessThan<T>(T actual, T lessThan, string userMessage = null) where T : IComparable
+        {
+            if (actual == null)
+            {
+                if (lessThan == null)
+                {
+                    throw new XunitException(AddOptionalUserMessage($"Expected: <null> to be less than <null>.", userMessage));
+                }
+                else
+                {
+                    // Null is always less than non-null
+                    return;
+                }
+            }
+
+            if (actual.CompareTo(lessThan) >= 0)
+                throw new XunitException(AddOptionalUserMessage($"Expected: {actual} to be less than {lessThan}", userMessage));
+        }
+
+        /// <summary>
+        /// Validate that a given value is less than or equal to another value.
+        /// </summary>
+        /// <param name="actual">The value that should be less than or equal to <paramref name="lessThanOrEqualTo"/></param>
+        /// <param name="lessThanOrEqualTo">The value that <paramref name="actual"/> should be less than or equal to.</param>
+        public static void LessThanOrEqualTo<T>(T actual, T lessThanOrEqualTo, string userMessage = null) where T : IComparable
+        {
+            // null, by definition is always less than or equal to
+            if (actual == null)
+                return;
+
+            if (actual.CompareTo(lessThanOrEqualTo) > 0)
+                throw new XunitException(AddOptionalUserMessage($"Expected: {actual} to be less than or equal to {lessThanOrEqualTo}", userMessage));
+        }
+
+        /// <summary>
+        /// Validate that a given value is greater than or equal to another value.
+        /// </summary>
+        /// <param name="actual">The value that should be greater than or equal to <paramref name="greaterThanOrEqualTo"/></param>
+        /// <param name="greaterThanOrEqualTo">The value that <paramref name="actual"/> should be greater than or equal to.</param>
+        public static void GreaterThanOrEqualTo<T>(T actual, T greaterThanOrEqualTo, string userMessage = null) where T : IComparable
+        {
+            // null, by definition is always less than or equal to
+            if (actual == null)
+            {
+                if (greaterThanOrEqualTo == null)
+                {
+                    // We're equal
+                    return;
+                }
+                else
+                {
+                    // Null is always less than non-null
+                    throw new XunitException(AddOptionalUserMessage($"Expected: <null> to be greater than or equal to <null>.", userMessage));
+                }
+            }
+
+            if (actual.CompareTo(greaterThanOrEqualTo) < 0)
+                throw new XunitException(AddOptionalUserMessage($"Expected: {actual} to be greater than or equal to {greaterThanOrEqualTo}", userMessage));
         }
     }
 }

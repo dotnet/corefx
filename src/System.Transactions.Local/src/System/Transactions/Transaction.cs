@@ -907,37 +907,39 @@ namespace System.Transactions
             SerializationInfo serializationInfo,
             StreamingContext context)
         {
-            TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
-            if (etwLog.IsEnabled())
-            {
-                etwLog.MethodEnter(TraceSourceType.TraceSourceLtm, this);
-            }
+            //TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
+            //if (etwLog.IsEnabled())
+            //{
+            //    etwLog.MethodEnter(TraceSourceType.TraceSourceLtm, this);
+            //}
 
-            if (Disposed)
-            {
-                throw new ObjectDisposedException(nameof(Transaction));
-            }
+            //if (Disposed)
+            //{
+            //    throw new ObjectDisposedException(nameof(Transaction));
+            //}
 
-            if (serializationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(serializationInfo));
-            }
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
 
-            if (_complete)
-            {
-                throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
-            }
+            //if (_complete)
+            //{
+            //    throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
+            //}
 
-            lock (_internalTransaction)
-            {
-                _internalTransaction.State.GetObjectData(_internalTransaction, serializationInfo, context);
-            }
+            //lock (_internalTransaction)
+            //{
+            //    _internalTransaction.State.GetObjectData(_internalTransaction, serializationInfo, context);
+            //}
 
-            if (etwLog.IsEnabled())
-            {
-                etwLog.TransactionSerialized(this, "Transaction");
-                etwLog.MethodExit(TraceSourceType.TraceSourceLtm, this);
-            }
+            //if (etwLog.IsEnabled())
+            //{
+            //    etwLog.TransactionSerialized(this, "Transaction");
+            //    etwLog.MethodExit(TraceSourceType.TraceSourceLtm, this);
+            //}
+
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -1233,7 +1235,7 @@ namespace System.Transactions
         internal bool _asyncFlow;
 
         [ThreadStatic]
-        private static ContextData s_staticData;
+        private static ContextData t_staticData;
 
         internal ContextData(bool asyncFlow)
         {
@@ -1244,28 +1246,28 @@ namespace System.Transactions
         {
             get
             {
-                ContextData data = s_staticData;
+                ContextData data = t_staticData;
                 if (data == null)
                 {
                     data = new ContextData(false);
-                    s_staticData = data;
+                    t_staticData = data;
                 }
 
                 return data;
             }
             set
             {
-                if (value == null && s_staticData != null)
+                if (value == null && t_staticData != null)
                 {
                     // set each property to null to retain one TLS ContextData copy.
-                    s_staticData.CurrentScope = null;
-                    s_staticData.CurrentTransaction = null;
-                    s_staticData.DefaultComContextState = DefaultComContextState.Unknown;
-                    s_staticData.WeakDefaultComContext = null;
+                    t_staticData.CurrentScope = null;
+                    t_staticData.CurrentTransaction = null;
+                    t_staticData.DefaultComContextState = DefaultComContextState.Unknown;
+                    t_staticData.WeakDefaultComContext = null;
                 }
                 else
                 {
-                    s_staticData = value;
+                    t_staticData = value;
                 }
             }
         }

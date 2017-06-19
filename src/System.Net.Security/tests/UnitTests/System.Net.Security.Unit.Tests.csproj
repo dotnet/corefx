@@ -12,7 +12,6 @@
     -->
     <NoWarn>436</NoWarn>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Windows_NT-Debug|AnyCPU'" />
@@ -27,6 +26,9 @@
     <Compile Include="Fakes\FakeAuthenticatedStream.cs" />
     <Compile Include="Fakes\FakeLazyAsyncResult.cs" />
     <!-- Common test files -->
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\SslProtocolSupport.cs">
       <Link>CommonTest\System\Net\SslProtocolSupport.cs</Link>
     </Compile>

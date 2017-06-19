@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
@@ -280,6 +276,10 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SQL_PendingBeginXXXExists));
         }
 
+        internal static ArgumentOutOfRangeException InvalidSqlDependencyTimeout(string param)
+        {
+            return ADP.ArgumentOutOfRange(SR.GetString(SR.SqlDependency_InvalidTimeout), param);
+        }
 
         internal static Exception NonXmlResult()
         {
@@ -334,6 +334,14 @@ namespace System.Data.SqlClient
         internal static Exception MustSetTypeNameForParam(string paramType, string paramName)
         {
             return ADP.Argument(SR.GetString(SR.SQL_ParameterTypeNameRequired, paramType, paramName));
+        }
+        internal static Exception NullSchemaTableDataTypeNotSupported(string columnName)
+        {
+            return ADP.Argument(SR.GetString(SR.NullSchemaTableDataTypeNotSupported, columnName));
+        }
+        internal static Exception InvalidSchemaTableOrdinals()
+        {
+            return ADP.Argument(SR.GetString(SR.InvalidSchemaTableOrdinals));
         }
         internal static Exception EnumeratedRecordMetaDataChanged(string fieldName, int recordNumber)
         {
@@ -409,7 +417,53 @@ namespace System.Data.SqlClient
             return ADP.InvalidCast(SR.GetString(SR.SQL_XmlReaderNotSupportOnColumnType, columnName));
         }
 
+        //
+        // SQL.SqlDependency
+        //
+        internal static Exception SqlCommandHasExistingSqlNotificationRequest()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQLNotify_AlreadyHasCommand));
+        }
 
+        internal static Exception SqlDepDefaultOptionsButNoStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DefaultOptionsButNoStart));
+        }
+
+        internal static Exception SqlDependencyDatabaseBrokerDisabled()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DatabaseBrokerDisabled));
+        }
+
+        internal static Exception SqlDependencyEventNoDuplicate()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_EventNoDuplicate));
+        }
+
+        internal static Exception SqlDependencyDuplicateStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DuplicateStart));
+        }
+
+        internal static Exception SqlDependencyIdMismatch()
+        {
+            // do not include the id because it may require SecurityPermission(Infrastructure) permission
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_IdMismatch));
+        }
+
+        internal static Exception SqlDependencyNoMatchingServerStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerStart));
+        }
+
+        internal static Exception SqlDependencyNoMatchingServerDatabaseStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerDatabaseStart));
+        }
+
+        //
+        // SQL.SqlMetaData
+        //
         internal static Exception InvalidSqlDbTypeForConstructor(SqlDbType type)
         {
             return ADP.Argument(SR.GetString(SR.SqlMetaData_InvalidSqlDbTypeForConstructorFormat, type.ToString()));
@@ -433,6 +487,14 @@ namespace System.Data.SqlClient
         internal static Exception UnsupportedColumnTypeForSqlProvider(string columnName, string typeName)
         {
             return ADP.Argument(SR.GetString(SR.SqlProvider_InvalidDataColumnType, columnName, typeName));
+        }
+        internal static Exception InvalidColumnMaxLength(string columnName, long maxLength)
+        {
+            return ADP.Argument(SR.GetString(SR.SqlProvider_InvalidDataColumnMaxLength, columnName, maxLength));
+        }
+        internal static Exception InvalidColumnPrecScale()
+        {
+            return ADP.Argument(SR.GetString(SR.SqlMisc_InvalidPrecScaleMessage));
         }
         internal static Exception NotEnoughColumnsInStructuredType()
         {
@@ -537,10 +599,7 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SqlParameter_InvalidTableDerivedPrecisionForTvp, precision, columnName, System.Data.SqlTypes.SqlDecimal.MaxPrecision));
         }
-        internal static Exception InvalidColumnMaxLength(string columnName, long maxLength)
-        {
-            return ADP.Argument(SR.GetString(SR.SqlProvider_InvalidDataColumnMaxLength, columnName, maxLength));
-        }
+
         //
         // transactions.
         //
@@ -780,6 +839,11 @@ namespace System.Data.SqlClient
             return exc;
         }
 
+        internal static Exception BatchedUpdatesNotAvailableOnContextConnection()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_BatchedUpdatesNotAvailableOnContextConnection));
+        }
+
         /// <summary>
         /// gets a message for SNI error (sniError must be valid, non-zero error code)
         /// </summary>
@@ -790,6 +854,12 @@ namespace System.Data.SqlClient
             string errorMessageId = String.Format((IFormatProvider)null, "SNI_ERROR_{0}", sniError);
             return SR.GetResourceString(errorMessageId, errorMessageId);
         }
+
+        // Default values for SqlDependency and SqlNotificationRequest
+        internal const int SqlDependencyTimeoutDefault = 0;
+        internal const int SqlDependencyServerTimeout = 5 * 24 * 3600; // 5 days - used to compute default TTL of the dependency
+        internal const string SqlNotificationServiceDefault = "SqlQueryNotificationService";
+        internal const string SqlNotificationStoredProcedureDefault = "SqlQueryNotificationStoredProcedure";
     }
 
     sealed internal class SQLMessage
@@ -959,6 +1029,25 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(input != null, "input string cannot be null");
             return input.Replace("'", "''");
+        }
+
+        /// <summary>
+        /// Escape a string as a TSQL literal, wrapping it around with single quotes.
+        /// Use this method to escape input strings to prevent SQL injection 
+        /// and to get correct behavior for embedded quotes.
+        /// </summary>
+        /// <param name="input">unescaped string</param>
+        /// <returns>escaped and quoted literal string</returns>
+        internal static string MakeStringLiteral(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return "''";
+            }
+            else
+            {
+                return "'" + EscapeStringAsLiteral(input) + "'";
+            }
         }
     }
 }//namespace
