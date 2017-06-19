@@ -158,7 +158,7 @@
       <Link>Common\System\Collections\IEnumerable.Generic.Serialization.Tests.cs</Link>
     </Compile>
     <Compile Include="CompareToTests.cs" />
-    <Compile Include="DBNullTests.cs" />
+    <Compile Include="System\DBNullTests.cs" />
     <Compile Include="GetTypeCodeTests.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\BadImageFormatExceptionTests.cs" />
