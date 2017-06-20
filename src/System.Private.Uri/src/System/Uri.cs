@@ -2191,7 +2191,7 @@ namespace System
                     if (err != ParsingError.None)
                         return err;
 
-                    if (idx < (ushort)length)
+                    if (idx < length)
                     {
                         char hostTerminator = pUriString[idx];
 
