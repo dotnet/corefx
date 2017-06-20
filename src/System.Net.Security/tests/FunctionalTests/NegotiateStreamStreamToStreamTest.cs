@@ -21,6 +21,7 @@ namespace System.Net.Security.Tests
         protected abstract Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName);
         protected abstract Task AuthenticateAsServerAsync(NegotiateStream server);
 
+        [ActiveIssue(18760, TargetFrameworkMonikers.UapAot)] // In order to properly test this, we need UWP-AOT to run within an App Container.
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_Success()
         {
@@ -69,7 +70,7 @@ namespace System.Net.Security.Tests
 
                 if (PlatformDetection.IsUap)
                 {
-                    // TODO : UWP issue - clientIdentity.IsAuthenticated == false.
+                    // TODO #21282: UWP AppContainer issue - clientIdentity.IsAuthenticated == false.
                     Assert.Equal(false, clientIdentity.IsAuthenticated);
                 }
                 else
@@ -81,6 +82,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [ActiveIssue(18760, TargetFrameworkMonikers.UapAot)] // In order to properly test this, we need UWP-AOT to run within an App Container.
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
@@ -132,7 +134,7 @@ namespace System.Net.Security.Tests
 
                 if (PlatformDetection.IsUap)
                 {
-                    // TODO : UWP issue - clientIdentity.IsAuthenticated == false.
+                    // TODO #21282: UWP issue - clientIdentity.IsAuthenticated == false.
                     Assert.Equal(false, clientIdentity.IsAuthenticated);
                 }
                 else
