@@ -386,24 +386,10 @@ namespace System.Tests
         private static readonly Lazy<bool> s_EnvironmentRegKeysStillAccessDenied = new Lazy<bool>(
             delegate ()
             {
-                if (!PlatformDetection.IsWindows)
-                    return false;  // On Unix, registry-based environment api's won't throw a SecurityException - they just eat all writes.
-                if (!PlatformDetection.IsWinRT)
-                    return false;  // On non-appcontainer apps, these won't throw (except writes to Target.Machine on non-elevated but that's accounted for separately.)
-
-                try
-                {
-                    Environment.GetEnvironmentVariables(EnvironmentVariableTarget.User);
-                }
-                catch (SecurityException)
-                {
-                    return true; // AppX registry exemptions not yet granted (at least on this build.)
-                }
-                catch
-                {
-                    return false; // Hmm... some other exception. We'll enable the individual tests and let them report it...
-                }
-                return false;
+                //ActiveIssue("TFS 453758" - Environment apis for User and Machine inside appcontainers should behave as "black holes" (as Unix does.)
+                // Once both CoreCLR and CoreRT work this way, get rid of s_EnvironmentRegKeysStillAccessDenied and change IsSupportedTarget to
+                // return false for IsWinRT. (and maybe IsNetNative if UAPAOT tests are still running outside appcontainer.)
+                return PlatformDetection.IsWinRT || PlatformDetection.IsNetNative;
             });
     }
 }
