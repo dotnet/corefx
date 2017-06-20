@@ -52,7 +52,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(21102)]
+        [ActiveIssue(21102, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessageBeforeCompleteMessageArrives_Success(Uri server)
