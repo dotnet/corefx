@@ -36,17 +36,38 @@ namespace System.Runtime.Serialization.Formatters.Tests
             IEnumerable<object[]> coreTypeRecords = GetCoreTypeRecords();
             string[] coreTypeBlobs = GetCoreTypeBlobs(coreTypeRecords, FormatterAssemblyStyle.Full).ToArray();
 
-            UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
+            var (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs) = UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
+            Console.WriteLine($"{numberOfBlobs} existing blobs" +
+                $"{Environment.NewLine}{numberOfFoundBlobs} found blobs with regex search" +
+                $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
         }
 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
         public void ValidateAgainstBlobs(object obj, string[] blobs)
         {
+            if (obj == null)
+            {
+                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
+            }
+
             if (blobs == null || blobs.Length == 0)
             {
                 throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
                     SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+            }
+
+            // Check if runtime generated blob is the same as the stored one
+            int frameworkBlobNumber = PlatformDetection.IsFullFramework ? 1 : 0;
+            if (frameworkBlobNumber < blobs.Length &&
+                // WeakReference<Point> and HybridDictionary with default constructor are generating
+                // different blobs at runtime for some obscure reason. Excluding those from the check.
+                !(obj is WeakReference<Point>) &&
+                !(obj is Collections.Specialized.HybridDictionary))
+            {
+                string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
+                Assert.True(blobs[frameworkBlobNumber] == runtimeBlob,
+                    $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
             }
 
             foreach (string blob in blobs)
@@ -96,10 +117,24 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [MemberData(nameof(SerializableEqualityComparers_MemberData))]
         public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
         {
+            if (obj == null)
+            {
+                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
+            }
+
             if (blobs == null || blobs.Length == 0)
             {
                 throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
                     SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+            }
+
+            // Check if runtime generated blob is the same as the stored one
+            int frameworkBlobNumber = PlatformDetection.IsFullFramework ? 1 : 0;
+            if (frameworkBlobNumber < blobs.Length)
+            {
+                string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
+                Assert.True(blobs[frameworkBlobNumber] == runtimeBlob,
+                    $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
             }
 
             foreach (string blob in blobs)

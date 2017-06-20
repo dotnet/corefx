@@ -168,12 +168,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static void UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)
+        public static (int blobs, int foundBlobs, int updatedBlobs) UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)
         {
             // Replace existing test data blobs with updated ones
             string[] testDataLines = File.ReadAllLines(testDataFilePath);
             List<string> updatedTestDataLines = new List<string>();
             int numberOfBlobs = 0;
+            int numberOfFoundBlobs = 0;
+            int numberOfUpdatedBlobs = 0;
 
             for (int i = 0; i < testDataLines.Length; i++)
             {
@@ -184,14 +186,31 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     continue;
                 }
 
+                string pattern = null;
+                string replacement = null;
                 if (PlatformDetection.IsFullFramework)
                 {
-                    testDataLine = Regex.Replace(testDataLine, ", \"AAEAAAD[^\"]+\"(?!,)", ", \"" + blobs[numberOfBlobs] + "\"");
+                    pattern = ", \"AAEAAAD[^\"]+\"(?!,)";
+                    replacement = ", \"" + blobs[numberOfBlobs] + "\"";
                 }
                 else
                 {
-                    testDataLine = Regex.Replace(testDataLine, "\"AAEAAAD[^\"]+\",", "\"" + blobs[numberOfBlobs] + "\",");
+                    pattern = "\"AAEAAAD[^\"]+\",";
+                    replacement = "\"" + blobs[numberOfBlobs] + "\",";
                 }
+
+                Regex regex = new Regex(pattern);
+                Match match = regex.Match(testDataLine);
+                if (match.Success)
+                {
+                    numberOfFoundBlobs++;
+                }
+                string updatedLine = regex.Replace(testDataLine, replacement);
+                if (testDataLine != updatedLine)
+                {
+                    numberOfUpdatedBlobs++;
+                }
+                testDataLine = updatedLine;
 
                 updatedTestDataLines.Add(testDataLine);
                 numberOfBlobs++;
@@ -200,6 +219,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // Check if all blobs were recognized and write updates to file
             Assert.Equal(numberOfBlobs, blobs.Length);
             File.WriteAllLines(testDataFilePath, updatedTestDataLines);
+
+            return (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs);
         }
 
         public static byte[] SerializeObjectToRaw(object obj, FormatterAssemblyStyle assemblyStyle)
