@@ -6,20 +6,18 @@
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'nestandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'nestandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Runtime\InteropServices\AllowReversePInvokeCallsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\CallingConventionTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComAliasNameAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.Windows.cs" Condition="'$(TargetGroup)' == 'netfx' OR ('$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'uapaot')" />
+    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\ComCompatibleVersionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComConversionLossAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComRegisterFunctionAttributeTests.cs" />
