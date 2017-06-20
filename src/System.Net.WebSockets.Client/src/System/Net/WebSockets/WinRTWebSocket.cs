@@ -662,25 +662,7 @@ namespace System.Net.WebSockets
                 "ReceiveMode");
         }
 
-        // Regardless of whether we're running on a machine that supports this WinRT API, we still might not be able
-        // to call the API. This is due to the calling app being compiled against an older Windows 10 Tools SDK. Since
-        // this library was compiled against the newer SDK, having these new API calls in this class will cause JIT
-        // failures in CoreCLR which generate a MissingMethodException before the code actually runs. So, we need
-        // these helper methods and try/catch handling.
         private void InitMessageWebSocketReceiveMode(MessageWebSocket socket)
-        {
-            try
-            {
-                InitMessageWebSocketReceiveModeHelper(socket);
-            }
-            catch (MissingMethodException)
-            {
-                Debug.WriteLine("WinRTWebSocket.InitMessageWebSocketReceiveMode: MissingMethodException");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void InitMessageWebSocketReceiveModeHelper(MessageWebSocket socket)
         {
             // Always enable partial message receive mode if the WinRT API supports it.
             if (MessageWebSocketReceiveModeSupported)
@@ -689,29 +671,7 @@ namespace System.Net.WebSockets
             }
         }
 
-        // Regardless of whether we're running on a machine that supports this WinRT API, we still might not be able
-        // to call the API. This is due to the calling app being compiled against an older Windows 10 Tools SDK. Since
-        // this library was compiled against the newer SDK, having these new API calls in this class will cause JIT
-        // failures in CoreCLR which generate a MissingMethodException before the code actually runs. So, we need
-        // these helper methods and try/catch handling.
         private bool IsPartialMessageEvent(MessageWebSocketMessageReceivedEventArgs eventArgs)
-        {
-            try
-            {
-                return IsPartialMessageEventHelper(eventArgs);
-            }
-            catch (MissingMethodException)
-            {
-                Debug.WriteLine("WinRTWebSocket.IsPartialMessageEvent: MissingMethodException");
-
-                // When MessageWebSocketMessageReceivedEventArgs.IsMessageComplete is not available, WinRT's behavior
-                // is always to wait for the entire WebSocket message to arrive before raising a MessageReceived event.
-                return false;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private bool IsPartialMessageEventHelper(MessageWebSocketMessageReceivedEventArgs eventArgs)
         {
             // The MessageWebSocketMessageReceivedEventArgs.IsMessageComplete property was introduced in the same
             // Windows SDK flight as MessageWebSocketControl.ReceiveMode.
