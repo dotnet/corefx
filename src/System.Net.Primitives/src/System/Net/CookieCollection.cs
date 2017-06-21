@@ -65,7 +65,6 @@ namespace System.Net
             {
                 throw new ArgumentNullException(nameof(cookie));
             }
-            ++m_version;
             int idx = IndexOf(cookie);
             if (idx == -1)
             {
