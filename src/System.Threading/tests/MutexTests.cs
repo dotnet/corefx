@@ -75,6 +75,9 @@ namespace System.Threading.Tests
         [SkipOnTargetFramework(
             TargetFrameworkMonikers.Uap,
             "Impersonation APIs are not available and creating global sync objects is not allowed in UWP apps.")]
+        [SkipOnTargetFramework(
+            TargetFrameworkMonikers.NetFramework,
+            "The fix necessary for this test (PR https://github.com/dotnet/coreclr/pull/12381) is not in the .NET Framework.")]
         public void Ctor_ImpersonateAnonymousAndTryCreateGlobalMutexTest()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(() =>
