@@ -49,11 +49,13 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Ctor_FilePath_TestData))]
         public void Ctor_FilePath(string filename, int width, int height, PixelFormat pixelFormat, ImageFormat rawFormat)
         {
-            var bitmap = new Bitmap(Helpers.GetTestBitmapPath(filename));
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(pixelFormat, bitmap.PixelFormat);
-            Assert.Equal(rawFormat, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(Helpers.GetTestBitmapPath(filename)))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(pixelFormat, bitmap.PixelFormat);
+                Assert.Equal(rawFormat, bitmap.RawFormat);
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -62,11 +64,13 @@ namespace System.Drawing.Tests
         {
             foreach (bool useIcm in new bool[] { true, false })
             {
-                var bitmap = new Bitmap(Helpers.GetTestBitmapPath(filename), useIcm);
-                Assert.Equal(width, bitmap.Width);
-                Assert.Equal(height, bitmap.Height);
-                Assert.Equal(pixelFormat, bitmap.PixelFormat);
-                Assert.Equal(rawFormat, bitmap.RawFormat);
+                using (var bitmap = new Bitmap(Helpers.GetTestBitmapPath(filename), useIcm))
+                {
+                    Assert.Equal(width, bitmap.Width);
+                    Assert.Equal(height, bitmap.Height);
+                    Assert.Equal(pixelFormat, bitmap.PixelFormat);
+                    Assert.Equal(rawFormat, bitmap.RawFormat);
+                }
             }
         }
 
@@ -78,24 +82,26 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData("", null)]
-        [InlineData("\0", "path")]
-        [InlineData("NoSuchPath", null)]
-        public void Ctor_InvalidFilePath_ThrowsArgumentException(string filename, string paramName)
+        [InlineData("")]
+        [InlineData("\0")]
+        [InlineData("NoSuchPath")]
+        public void Ctor_InvalidFilePath_ThrowsArgumentException(string filename)
         {
-            Assert.Throws<ArgumentException>(paramName, () => new Bitmap(filename));
-            Assert.Throws<ArgumentException>(paramName, () => new Bitmap(filename, false));
-            Assert.Throws<ArgumentException>(paramName, () => new Bitmap(filename, true));
+            Assert.Throws<ArgumentException>(() => new Bitmap(filename));
+            Assert.Throws<ArgumentException>(() => new Bitmap(filename, false));
+            Assert.Throws<ArgumentException>(() => new Bitmap(filename, true));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Type_ResourceName()
         {
-            var bitmap = new Bitmap(typeof(BitmapTests), "173x183_indexed_8bit.bmp");
-            Assert.Equal(173, bitmap.Width);
-            Assert.Equal(183, bitmap.Height);
-            Assert.Equal(PixelFormat.Format8bppIndexed, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.Bmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(typeof(BitmapTests), "173x183_indexed_8bit.bmp"))
+            {
+                Assert.Equal(173, bitmap.Width);
+                Assert.Equal(183, bitmap.Height);
+                Assert.Equal(PixelFormat.Format8bppIndexed, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.Bmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -120,8 +126,8 @@ namespace System.Drawing.Tests
         public void Ctor_Stream(string filename, int width, int height, PixelFormat pixelFormat, ImageFormat rawFormat)
         {
             using (Stream stream = File.OpenRead(Helpers.GetTestBitmapPath(filename)))
+            using (var bitmap = new Bitmap(stream))
             {
-                var bitmap = new Bitmap(stream);
                 Assert.Equal(width, bitmap.Width);
                 Assert.Equal(height, bitmap.Height);
                 Assert.Equal(pixelFormat, bitmap.PixelFormat);
@@ -136,8 +142,8 @@ namespace System.Drawing.Tests
             foreach (bool useIcm in new bool[] { true, false })
             {
                 using (Stream stream = File.OpenRead(Helpers.GetTestBitmapPath(filename)))
+                using (var bitmap = new Bitmap(stream, useIcm))
                 {
-                    var bitmap = new Bitmap(stream, useIcm);
                     Assert.Equal(width, bitmap.Width);
                     Assert.Equal(height, bitmap.Height);
                     Assert.Equal(pixelFormat, bitmap.PixelFormat);
@@ -193,11 +199,13 @@ namespace System.Drawing.Tests
         [InlineData(1, 1, PixelFormat.Format64bppPArgb)]
         public void Ctor_Width_Height_PixelFormat(int width, int height, PixelFormat pixelFormat)
         {
-            var bitmap = new Bitmap(width, height, pixelFormat);
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(pixelFormat, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(width, height, pixelFormat))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(pixelFormat, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         public static IEnumerable<object[]> Ctor_Width_Height_Stride_PixelFormat_Scan0_TestData()
@@ -212,11 +220,13 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Ctor_Width_Height_Stride_PixelFormat_Scan0_TestData))]
         public void Ctor_Width_Height_Stride_PixelFormat_Scan0(int width, int height, int stride, PixelFormat pixelFormat, IntPtr scan0)
         {
-            var bitmap = new Bitmap(width, height, stride, pixelFormat, scan0);
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(pixelFormat, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(width, height, stride, pixelFormat, scan0))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(pixelFormat, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -292,13 +302,14 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Image_TestData))]
         public void Ctor_Width_Height_Graphics(Bitmap image, int width, int height)
         {
-            Graphics graphics = graphics = Graphics.FromImage(image);
-            var bitmap = new Bitmap(width, height, graphics);
-
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(PixelFormat.Format32bppPArgb, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (Graphics graphics = Graphics.FromImage(image))
+            using (var bitmap = new Bitmap(width, height, graphics))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(PixelFormat.Format32bppPArgb, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -310,12 +321,14 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Image()
         {
-            var image = new Bitmap(Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico"));
-            var bitmap = new Bitmap(image);
-            Assert.Equal(16, bitmap.Width);
-            Assert.Equal(16, bitmap.Height);
-            Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var image = new Bitmap(Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico")))
+            using (var bitmap = new Bitmap(image))
+            {
+                Assert.Equal(16, bitmap.Width);
+                Assert.Equal(16, bitmap.Height);
+                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -328,22 +341,26 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Image_TestData))]
         public void Ctor_Image_Width_Height(Image image, int width, int height)
         {
-            var bitmap = new Bitmap(image, width, height);
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(image, width, height))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Image_TestData))]
         public void Ctor_Size(Image image, int width, int height)
         {
-            var bitmap = new Bitmap(image, new Size(width, height));
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(image, new Size(width, height)))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -376,28 +393,37 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Clone_TestData))]
         public void Clone_Rectangle_ReturnsExpected(Bitmap bitmap, Rectangle rectangle, PixelFormat targetFormat)
         {
-            Bitmap clone = bitmap.Clone(rectangle, targetFormat);
-            Assert.NotSame(bitmap, clone);
-
-            Assert.Equal(rectangle.Width, clone.Width);
-            Assert.Equal(rectangle.Height, clone.Height);
-            Assert.Equal(targetFormat, clone.PixelFormat);
-            Assert.Equal(bitmap.RawFormat, clone.RawFormat);
-
-            for (int x = 0; x < rectangle.Width; x++)
+            try
             {
-                for (int y = 0; y < rectangle.Height; y++)
+                using (Bitmap clone = bitmap.Clone(rectangle, targetFormat))
                 {
-                    Color expectedColor = bitmap.GetPixel(rectangle.X + x, rectangle.Y + y);
-                    if (Image.IsAlphaPixelFormat(targetFormat))
+                    Assert.NotSame(bitmap, clone);
+
+                    Assert.Equal(rectangle.Width, clone.Width);
+                    Assert.Equal(rectangle.Height, clone.Height);
+                    Assert.Equal(targetFormat, clone.PixelFormat);
+                    Assert.Equal(bitmap.RawFormat, clone.RawFormat);
+
+                    for (int x = 0; x < rectangle.Width; x++)
                     {
-                        Assert.Equal(expectedColor, clone.GetPixel(x, y));
-                    }
-                    else
-                    {
-                        Assert.Equal(Color.FromArgb(255, expectedColor.R, expectedColor.G, expectedColor.B), clone.GetPixel(x, y));
+                        for (int y = 0; y < rectangle.Height; y++)
+                        {
+                            Color expectedColor = bitmap.GetPixel(rectangle.X + x, rectangle.Y + y);
+                            if (Image.IsAlphaPixelFormat(targetFormat))
+                            {
+                                Assert.Equal(expectedColor, clone.GetPixel(x, y));
+                            }
+                            else
+                            {
+                                Assert.Equal(Color.FromArgb(255, expectedColor.R, expectedColor.G, expectedColor.B), clone.GetPixel(x, y));
+                            }
+                        }
                     }
                 }
+            }
+            finally
+            {
+                bitmap.Dispose();
             }
         }
 
@@ -405,12 +431,21 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Clone_TestData))]
         public void Clone_RectangleF_ReturnsExpected(Bitmap bitmap, Rectangle rectangle, PixelFormat format)
         {
-            Bitmap clone = bitmap.Clone((RectangleF)rectangle, format);
-            Assert.NotSame(bitmap, clone);
+            try
+            {
+                using (Bitmap clone = bitmap.Clone((RectangleF)rectangle, format))
+                {
+                    Assert.NotSame(bitmap, clone);
 
-            Assert.Equal(rectangle.Width, clone.Width);
-            Assert.Equal(rectangle.Height, clone.Height);
-            Assert.Equal(format, clone.PixelFormat);
+                    Assert.Equal(rectangle.Width, clone.Width);
+                    Assert.Equal(rectangle.Height, clone.Height);
+                    Assert.Equal(format, clone.PixelFormat);
+                }
+            }
+            finally
+            {
+                bitmap.Dispose();
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -418,9 +453,11 @@ namespace System.Drawing.Tests
         [InlineData(1, 0)]
         public void Clone_ZeroWidthOrHeightRect_ThrowsArgumentException(int width, int height)
         {
-            var bitmap = new Bitmap(3, 3);
-            Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new Rectangle(0, 0, width, height), bitmap.PixelFormat));
-            Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, width, height), bitmap.PixelFormat));
+            using (var bitmap = new Bitmap(3, 3))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new Rectangle(0, 0, width, height), bitmap.PixelFormat));
+                Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, width, height), bitmap.PixelFormat));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -433,9 +470,11 @@ namespace System.Drawing.Tests
         [InlineData(1, 4, 1, 1)]
         public void Clone_InvalidRect_ThrowsOutOfMemoryException(int x, int y, int width, int height)
         {
-            var bitmap = new Bitmap(3, 3);
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(x, y, width, height), bitmap.PixelFormat));
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(x, y, width, height), bitmap.PixelFormat));
+            using (var bitmap = new Bitmap(3, 3))
+            {
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(x, y, width, height), bitmap.PixelFormat));
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(x, y, width, height), bitmap.PixelFormat));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -449,27 +488,33 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Canonical)]
         public void Clone_InvalidPixelFormat_ThrowsOutOfMemoryException(PixelFormat format)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(0, 0, 1, 1), format));
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(0, 0, 1, 1), format));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(0, 0, 1, 1), format));
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(0, 0, 1, 1), format));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_GrayscaleFormat_ThrowsOutOfMemoryException()
         {
-            var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(0, 0, 1, 1), PixelFormat.Format32bppArgb));
-            Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new Rectangle(0, 0, 1, 1), PixelFormat.Format32bppArgb));
+                Assert.Throws<OutOfMemoryException>(() => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_ValidBitmap_Success()
         {
-            var bitmap = new Bitmap(1, 1);
-            Bitmap clone = Assert.IsType<Bitmap>(bitmap.Clone());
-            Assert.NotSame(bitmap, clone);
-            Assert.Equal(1, clone.Width);
-            Assert.Equal(1, clone.Height);
+            using (var bitmap = new Bitmap(1, 1))
+            using (Bitmap clone = Assert.IsType<Bitmap>(bitmap.Clone()))
+            {
+                Assert.NotSame(bitmap, clone);
+                Assert.Equal(1, clone.Width);
+                Assert.Equal(1, clone.Height);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -477,6 +522,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.Clone());
             Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new Rectangle(0, 0, 1, 1), PixelFormat.Format32bppArgb));
             Assert.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
@@ -485,11 +531,13 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetFrameCount_NewBitmap_ReturnsZero()
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Page));
-            Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Resolution));
-            Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Time));
-            Assert.Equal(1, bitmap.GetFrameCount(new FrameDimension(Guid.Empty)));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Page));
+                Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Resolution));
+                Assert.Equal(1, bitmap.GetFrameCount(FrameDimension.Time));
+                Assert.Equal(1, bitmap.GetFrameCount(new FrameDimension(Guid.Empty)));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -497,6 +545,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.GetFrameCount(FrameDimension.Page));
         }
 
@@ -506,11 +555,13 @@ namespace System.Drawing.Tests
         [InlineData(1)]
         public void SelectActiveFrame_InvalidFrameIndex_ThrowsArgumentException(int index)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Page, index));
-            Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Resolution, index));
-            Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Time, index));
-            Assert.Equal(0, bitmap.SelectActiveFrame(new FrameDimension(Guid.Empty), index));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Page, index));
+                Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Resolution, index));
+                Assert.Equal(0, bitmap.SelectActiveFrame(FrameDimension.Time, index));
+                Assert.Equal(0, bitmap.SelectActiveFrame(new FrameDimension(Guid.Empty), index));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -518,6 +569,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.SelectActiveFrame(FrameDimension.Page, 0));
         }
 
@@ -534,7 +586,14 @@ namespace System.Drawing.Tests
         [MemberData(nameof(GetPixel_TestData))]
         public void GetPixel_ValidPixelFormat_Success(Bitmap bitmap, int x, int y, Color color)
         {
-            Assert.Equal(color, bitmap.GetPixel(x, y));
+            try
+            {
+                Assert.Equal(color, bitmap.GetPixel(x, y));
+            }
+            finally
+            {
+                bitmap.Dispose();
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -542,8 +601,10 @@ namespace System.Drawing.Tests
         [InlineData(1)]
         public void GetPixel_InvalidX_ThrowsArgumentOutOfRangeException(int x)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.GetPixel(x, 0));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.GetPixel(x, 0));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -551,15 +612,19 @@ namespace System.Drawing.Tests
         [InlineData(1)]
         public void GetPixel_InvalidY_ThrowsArgumentOutOfRangeException(int y)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.GetPixel(0, y));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.GetPixel(0, y));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetPixel_GrayScalePixelFormat_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.GetPixel(0, 0));
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.GetPixel(0, 0));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -567,6 +632,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.GetPixel(0, 0));
         }
 
@@ -624,8 +690,10 @@ namespace System.Drawing.Tests
         [InlineData(1, short.MaxValue)]
         public void GetHbitmap_Grayscale_ThrowsArgumentException(int width, int height)
         {
-            var bitmap = new Bitmap(width, height, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.GetHbitmap());
+            using (var bitmap = new Bitmap(width, height, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.GetHbitmap());
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -633,14 +701,15 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.GetHbitmap());
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FromHbitmap_InvalidHandle_ThrowsExternalException()
         {
-            Assert.Throws<ExternalException>(() => Bitmap.FromHbitmap(IntPtr.Zero));
-            Assert.Throws<ExternalException>(() => Bitmap.FromHbitmap((IntPtr)10));
+            Assert.Throws<ExternalException>(() => Image.FromHbitmap(IntPtr.Zero));
+            Assert.Throws<ExternalException>(() => Image.FromHbitmap((IntPtr)10));
         }
 
         public static IEnumerable<object[]> FromHicon_Icon_TestData()
@@ -699,8 +768,10 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetHicon_Grayscale_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.GetHicon());
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.GetHicon());
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -708,6 +779,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.GetHicon());
         }
 
@@ -744,34 +816,36 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MakeTransparent_NoColorWithMatches_SetsMatchingPixelsToTransparent()
         {
-            var bitmap = new Bitmap(10, 10);
-            for (int x = 0; x < bitmap.Width; x++)
+            using (var bitmap = new Bitmap(10, 10))
             {
-                for (int y = 0; y < bitmap.Height; y++)
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    if (y % 2 == 0)
+                    for (int y = 0; y < bitmap.Height; y++)
                     {
-                        bitmap.SetPixel(x, y, Color.LightGray);
-                    }
-                    else
-                    {
-                        bitmap.SetPixel(x, y, Color.Red);
+                        if (y % 2 == 0)
+                        {
+                            bitmap.SetPixel(x, y, Color.LightGray);
+                        }
+                        else
+                        {
+                            bitmap.SetPixel(x, y, Color.Red);
+                        }
                     }
                 }
-            }
 
-            bitmap.MakeTransparent();
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
+                bitmap.MakeTransparent();
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    if (y % 2 == 0)
+                    for (int y = 0; y < bitmap.Height; y++)
                     {
-                        Assert.Equal(Color.FromArgb(255, 211, 211, 211), bitmap.GetPixel(x, y));
-                    }
-                    else
-                    {
-                        Assert.Equal(Color.FromArgb(0, 0, 0, 0), bitmap.GetPixel(x, y));
+                        if (y % 2 == 0)
+                        {
+                            Assert.Equal(Color.FromArgb(255, 211, 211, 211), bitmap.GetPixel(x, y));
+                        }
+                        else
+                        {
+                            Assert.Equal(Color.FromArgb(0, 0, 0, 0), bitmap.GetPixel(x, y));
+                        }
                     }
                 }
             }
@@ -780,34 +854,36 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MakeTransparent_CustomColorExists_SetsMatchingPixelsToTransparent()
         {
-            var bitmap = new Bitmap(10, 10);
-            for (int x = 0; x < bitmap.Width; x++)
+            using (var bitmap = new Bitmap(10, 10))
             {
-                for (int y = 0; y < bitmap.Height; y++)
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    if (y % 2 == 0)
+                    for (int y = 0; y < bitmap.Height; y++)
                     {
-                        bitmap.SetPixel(x, y, Color.Blue);
-                    }
-                    else
-                    {
-                        bitmap.SetPixel(x, y, Color.Red);
+                        if (y % 2 == 0)
+                        {
+                            bitmap.SetPixel(x, y, Color.Blue);
+                        }
+                        else
+                        {
+                            bitmap.SetPixel(x, y, Color.Red);
+                        }
                     }
                 }
-            }
 
-            bitmap.MakeTransparent(Color.Blue);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
+                bitmap.MakeTransparent(Color.Blue);
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    if (y % 2 == 0)
+                    for (int y = 0; y < bitmap.Height; y++)
                     {
-                        Assert.Equal(Color.FromArgb(0, 0, 0, 0), bitmap.GetPixel(x, y));
-                    }
-                    else
-                    {
-                        Assert.Equal(Color.FromArgb(255, 255, 0, 0), bitmap.GetPixel(x, y));
+                        if (y % 2 == 0)
+                        {
+                            Assert.Equal(Color.FromArgb(0, 0, 0, 0), bitmap.GetPixel(x, y));
+                        }
+                        else
+                        {
+                            Assert.Equal(Color.FromArgb(255, 255, 0, 0), bitmap.GetPixel(x, y));
+                        }
                     }
                 }
             }
@@ -816,21 +892,23 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MakeTransparent_CustomColorDoesntExist_DoesNothing()
         {
-            var bitmap = new Bitmap(10, 10);
-            for (int x = 0; x < bitmap.Width; x++)
+            using (var bitmap = new Bitmap(10, 10))
             {
-                for (int y = 0; y < bitmap.Height; y++)
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    bitmap.SetPixel(x, y, Color.Blue);
+                    for (int y = 0; y < bitmap.Height; y++)
+                    {
+                        bitmap.SetPixel(x, y, Color.Blue);
+                    }
                 }
-            }
 
-            bitmap.MakeTransparent(Color.Red);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
+                bitmap.MakeTransparent(Color.Red);
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    Assert.Equal(Color.FromArgb(255, 0, 0, 255), bitmap.GetPixel(x, y));
+                    for (int y = 0; y < bitmap.Height; y++)
+                    {
+                        Assert.Equal(Color.FromArgb(255, 0, 0, 255), bitmap.GetPixel(x, y));
+                    }
                 }
             }
         }
@@ -840,6 +918,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.MakeTransparent());
             Assert.Throws<ArgumentException>(null, () => bitmap.MakeTransparent(Color.Red));
         }
@@ -847,16 +926,20 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MakeTransparent_GrayscalePixelFormat_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.MakeTransparent());
-            Assert.Throws<ExternalException>(() => bitmap.MakeTransparent(Color.Red));
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.MakeTransparent());
+                Assert.Throws<ExternalException>(() => bitmap.MakeTransparent(Color.Red));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MakeTransparent_Icon_ThrowsInvalidOperationException()
         {
-            var bitmap = new Bitmap(Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico"));
-            Assert.Throws<InvalidOperationException>(() => bitmap.MakeTransparent(Color.Red));
+            using (var bitmap = new Bitmap(Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico")))
+            {
+                Assert.Throws<InvalidOperationException>(() => bitmap.MakeTransparent(Color.Red));
+            }
         }
 
         public static IEnumerable<object[]> SetPixel_TestData()
@@ -879,8 +962,10 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Format8bppIndexed)]
         public void SetPixel_IndexedPixelFormat_ThrowsInvalidOperationException(PixelFormat format)
         {
-            var bitmap = new Bitmap(1, 1, format);
-            Assert.Throws<InvalidOperationException>(() => bitmap.SetPixel(0, 0, Color.Red));
+            using (var bitmap = new Bitmap(1, 1, format))
+            {
+                Assert.Throws<InvalidOperationException>(() => bitmap.SetPixel(0, 0, Color.Red));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -888,8 +973,10 @@ namespace System.Drawing.Tests
         [InlineData(1)]
         public void SetPixel_InvalidX_ThrowsArgumentOutOfRangeException(int x)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.SetPixel(x, 0, Color.Red));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.SetPixel(x, 0, Color.Red));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -897,15 +984,19 @@ namespace System.Drawing.Tests
         [InlineData(1)]
         public void SetPixel_InvalidY_ThrowsArgumentOutOfRangeException(int y)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.SetPixel(0, y, Color.Red));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.SetPixel(0, y, Color.Red));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetPixel_GrayScalePixelFormat_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.SetPixel(0, 0, Color.Red));
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format16bppGrayScale))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.SetPixel(0, 0, Color.Red));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -913,6 +1004,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.SetPixel(0, 0, Color.Red));
         }
 
@@ -922,8 +1014,10 @@ namespace System.Drawing.Tests
         [InlineData(float.MaxValue, float.MaxValue)]
         public void SetResolution_ValidDpi_Success(float xDpi, float yDpi)
         {
-            var bitmap = new Bitmap(1, 1);
-            bitmap.SetResolution(xDpi, yDpi);
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                bitmap.SetResolution(xDpi, yDpi);
+            }
         }
         
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -933,8 +1027,10 @@ namespace System.Drawing.Tests
         [InlineData(float.NegativeInfinity)]
         public void SetResolution_InvalidXDpi_ThrowsArgumentException(float xDpi)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentException>(null, () => bitmap.SetResolution(xDpi, 1));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.SetResolution(xDpi, 1));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -944,8 +1040,10 @@ namespace System.Drawing.Tests
         [InlineData(float.NegativeInfinity)]
         public void SetResolution_InvalidYDpi_ThrowsArgumentException(float yDpi)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentException>(null, () => bitmap.SetResolution(1, yDpi));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.SetResolution(1, yDpi));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -953,6 +1051,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.SetResolution(1, 1));
         }
 
@@ -1009,26 +1108,38 @@ namespace System.Drawing.Tests
         [MemberData(nameof(LockBits_TestData))]
         public void LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
         {
-            BitmapData data = bitmap.LockBits(rectangle, lockMode, pixelFormat);
-            Assert.Equal(pixelFormat, data.PixelFormat);
-            Assert.Equal(rectangle.Width, data.Width);
-            Assert.Equal(rectangle.Height, data.Height);
-            Assert.Equal(expectedStride, data.Stride);
-            Assert.Equal(expectedReserved, data.Reserved);
-
-            // Unlocking 16bppGrayscale fails.
             try
             {
-                bitmap.UnlockBits(data);
+                BitmapData data = bitmap.LockBits(rectangle, lockMode, pixelFormat);
+                Assert.Equal(pixelFormat, data.PixelFormat);
+                Assert.Equal(rectangle.Width, data.Width);
+                Assert.Equal(rectangle.Height, data.Height);
+                Assert.Equal(expectedStride, data.Stride);
+                Assert.Equal(expectedReserved, data.Reserved);
+
+                // Locking with 16bppGrayscale succeeds, but the data can't be unlocked.
+                if (pixelFormat == PixelFormat.Format16bppGrayScale)
+                {
+                    Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(data));
+                }
+                else
+                {
+                    bitmap.UnlockBits(data);
+                }
             }
-            catch { }
+            finally
+            {
+                bitmap.Dispose();
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LockBits_NullBitmapData_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(Rectangle.Empty, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb, null));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(Rectangle.Empty, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb, null));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1045,12 +1156,14 @@ namespace System.Drawing.Tests
         [InlineData(1, 1, 0, 1)]
         public void LockBits_InvalidRect_ThrowsArgumentException(int x, int y, int width, int height)
         {
-            var bitmap = new Bitmap(2, 2);
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat));
+            using (var bitmap = new Bitmap(2, 2))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat));
 
-            var bitmapData = new BitmapData();
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat, bitmapData));
-            Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+                var bitmapData = new BitmapData();
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat, bitmapData));
+                Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1064,30 +1177,33 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Canonical)]
         public void LockBits_InvalidPixelFormat_ThrowsArgumentException(PixelFormat format)
         {
-            var bitmap = new Bitmap(1, 1);
-            foreach (ImageLockMode lockMode in Enum.GetValues(typeof(ImageLockMode)))
+            using (var bitmap = new Bitmap(1, 1))
             {
-                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, format));
+                foreach (ImageLockMode lockMode in Enum.GetValues(typeof(ImageLockMode)))
+                {
+                    Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, format));
 
-                var bitmapData = new BitmapData();
-                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, format, bitmapData));
-                Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+                    var bitmapData = new BitmapData();
+                    Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, format, bitmapData));
+                    Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+                }
             }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LockBits_ReadOnlyGrayscale_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1);
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, PixelFormat.Format16bppGrayScale));
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, PixelFormat.Format16bppGrayScale, new BitmapData()));
 
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, PixelFormat.Format16bppGrayScale));
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, PixelFormat.Format16bppGrayScale, new BitmapData()));
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadWrite, PixelFormat.Format16bppGrayScale));
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadWrite, PixelFormat.Format16bppGrayScale, new BitmapData()));
 
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadWrite, PixelFormat.Format16bppGrayScale));
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadWrite, PixelFormat.Format16bppGrayScale, new BitmapData()));
-
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.WriteOnly, PixelFormat.Format16bppGrayScale);
-            Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(data));
+                BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.WriteOnly, PixelFormat.Format16bppGrayScale);
+                Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(data));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1096,12 +1212,14 @@ namespace System.Drawing.Tests
         [InlineData(ImageLockMode.UserInputBuffer)]
         public void LockBits_InvalidLockMode_ThrowsArgumentException(ImageLockMode lockMode)
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, bitmap.PixelFormat));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, bitmap.PixelFormat));
 
-            var bitmapData = new BitmapData();
-            Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, bitmap.PixelFormat, bitmapData));
-            Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+                var bitmapData = new BitmapData();
+                Assert.Throws<ArgumentException>(null, () => bitmap.LockBits(new Rectangle(0, 0, 1, 1), lockMode, bitmap.PixelFormat, bitmapData));
+                Assert.Equal(IntPtr.Zero, bitmapData.Scan0);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1119,14 +1237,16 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LockBits_AlreadyLocked_ThrowsInvalidOperationException()
         {
-            var bitmap = new Bitmap(1, 1);
-            bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
-            Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat));
-            Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat, new BitmapData()));
+                Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat));
+                Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat, new BitmapData()));
 
-            Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(1, 1, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat));
-            Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(1, 1, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat, new BitmapData()));
+                Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(1, 1, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat));
+                Assert.Throws<InvalidOperationException>(() => bitmap.LockBits(new Rectangle(1, 1, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat, new BitmapData()));
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1135,22 +1255,26 @@ namespace System.Drawing.Tests
         [InlineData(1, 2)]
         public void UnlockBits_InvalidHeightWidth_Nop(int offset, int invalidParameter)
         {
-            var bitmap = new Bitmap(2, 2);
-            BitmapData data = bitmap.LockBits(new Rectangle(offset, offset, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            data.Height = invalidParameter;
-            data.Width = invalidParameter;
+            using (var bitmap = new Bitmap(2, 2))
+            {
+                BitmapData data = bitmap.LockBits(new Rectangle(offset, offset, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                data.Height = invalidParameter;
+                data.Width = invalidParameter;
 
-            bitmap.UnlockBits(data);
+                bitmap.UnlockBits(data);
+            }
         }
         
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void UnlockBits_Scan0Zero_Nop()
         {
-            var bitmap = new Bitmap(1, 1);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            data.Scan0 = IntPtr.Zero;
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                data.Scan0 = IntPtr.Zero;
 
-            bitmap.UnlockBits(data);
+                bitmap.UnlockBits(data);
+            }
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1158,35 +1282,43 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Gdi)]
         public void UnlockBits_InvalidPixelFormat_Nop(PixelFormat format)
         {
-            var bitmap = new Bitmap(1, 1);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            data.PixelFormat = format;
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                data.PixelFormat = format;
 
-            bitmap.UnlockBits(data);
+                bitmap.UnlockBits(data);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void UnlockBits_NullBitmapData_ThrowsArgumentException()
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(null));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(null));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void UnlockBits_NotLocked_ThrowsExternalException()
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<ExternalException>(() => bitmap.UnlockBits(new BitmapData()));
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<ExternalException>(() => bitmap.UnlockBits(new BitmapData()));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void UnlockBits_AlreadyUnlocked_ThrowsExternalException()
         {
-            var bitmap = new Bitmap(1, 1);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            bitmap.UnlockBits(data);
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                BitmapData data = bitmap.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                bitmap.UnlockBits(data);
 
-            Assert.Throws<ExternalException>(() => bitmap.UnlockBits(new BitmapData()));
+                Assert.Throws<ExternalException>(() => bitmap.UnlockBits(new BitmapData()));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1194,6 +1326,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(new BitmapData()));
         }
 
@@ -1208,25 +1341,32 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Serialize_TestData))]
         public void Serialize_Deserialize_Roundtrips(Bitmap bitmap, ImageFormat expectedFormat)
         {
-            using (var memoryStream = new MemoryStream())
+            try
             {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(memoryStream, bitmap);
-                memoryStream.Position = 0;
+                using (var memoryStream = new MemoryStream())
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(memoryStream, bitmap);
+                    memoryStream.Position = 0;
 
-                Bitmap deserializedBitmap = (Bitmap)formatter.Deserialize(memoryStream);
-                Assert.Equal(bitmap.Size, deserializedBitmap.Size);
-                Assert.Equal(bitmap.PixelFormat, deserializedBitmap.PixelFormat);
-                Assert.Equal(expectedFormat, deserializedBitmap.RawFormat);
+                    Bitmap deserializedBitmap = (Bitmap)formatter.Deserialize(memoryStream);
+                    Assert.Equal(bitmap.Size, deserializedBitmap.Size);
+                    Assert.Equal(bitmap.PixelFormat, deserializedBitmap.PixelFormat);
+                    Assert.Equal(expectedFormat, deserializedBitmap.RawFormat);
+                }
+
+                var xmlSerializer = new XmlSerializer(typeof(Bitmap));
+                using (var memoryStream = new MemoryStream())
+                {
+                    xmlSerializer.Serialize(memoryStream, bitmap);
+                    memoryStream.Position = 0;
+
+                    Assert.ThrowsAny<Exception>(() => xmlSerializer.Deserialize(memoryStream));
+                }
             }
-
-            var xmlSerializer = new XmlSerializer(typeof(Bitmap));
-            using (var memoryStream = new MemoryStream())
+            finally
             {
-                xmlSerializer.Serialize(memoryStream, bitmap);
-                memoryStream.Position = 0;
-
-                Assert.ThrowsAny<Exception>(() => xmlSerializer.Deserialize(memoryStream));
+                bitmap.Dispose();
             }
         }
 
@@ -1235,6 +1375,7 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.Width);
             Assert.Throws<ArgumentException>(null, () => bitmap.Height);
             Assert.Throws<ArgumentException>(null, () => bitmap.Size);
@@ -1252,14 +1393,14 @@ namespace System.Drawing.Tests
         {
             bool alpha = Image.IsAlphaPixelFormat(format);
             int size = Image.GetPixelFormatSize(format) / 8 * 2;
-            using (Bitmap bmp = new Bitmap(2, 1, format))
+            using (var bitmap = new Bitmap(2, 1, format))
             {
                 Color a = Color.FromArgb(128, 64, 32, 16);
                 Color b = Color.FromArgb(192, 96, 48, 24);
-                bmp.SetPixel(0, 0, a);
-                bmp.SetPixel(1, 0, b);
-                Color c = bmp.GetPixel(0, 0);
-                Color d = bmp.GetPixel(1, 0);
+                bitmap.SetPixel(0, 0, a);
+                bitmap.SetPixel(1, 0, b);
+                Color c = bitmap.GetPixel(0, 0);
+                Color d = bitmap.GetPixel(1, 0);
                 if (size == 4)
                 {
                     Assert.Equal(255, c.A);
@@ -1291,13 +1432,11 @@ namespace System.Drawing.Tests
                     if (format == PixelFormat.Format32bppPArgb)
                     {
                         Assert.Equal(a.A, c.A);
-                        // note sure why the -1
                         Assert.Equal(a.R - 1, c.R);
                         Assert.Equal(a.G - 1, c.G);
                         Assert.Equal(a.B - 1, c.B);
 
                         Assert.Equal(b.A, d.A);
-                        // note sure why the -1
                         Assert.Equal(b.R - 1, d.R);
                         Assert.Equal(b.G - 1, d.G);
                         Assert.Equal(b.B - 1, d.B);
@@ -1313,11 +1452,11 @@ namespace System.Drawing.Tests
                     Assert.Equal(Color.FromArgb(255, 64, 32, 16), c);
                     Assert.Equal(Color.FromArgb(255, 96, 48, 24), d);
                 }
-                BitmapData bd = bmp.LockBits(new Rectangle(0, 0, 2, 1), ImageLockMode.ReadOnly, format);
+                BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, 2, 1), ImageLockMode.ReadOnly, format);
                 try
                 {
                     byte[] data = new byte[size];
-                    Marshal.Copy(bd.Scan0, data, 0, size);
+                    Marshal.Copy(bitmapData.Scan0, data, 0, size);
                     if (format == PixelFormat.Format32bppPArgb)
                     {
                         Assert.Equal(Math.Ceiling((float)c.B * c.A / 255), data[0]);
@@ -1331,26 +1470,25 @@ namespace System.Drawing.Tests
                     }
                     else if (size == 4)
                     {
-                        int n = 0;
                         switch (format)
                         {
                             case PixelFormat.Format16bppRgb565:
-                                Assert.Equal(2, data[n++]);
-                                Assert.Equal(65, data[n++]);
-                                Assert.Equal(131, data[n++]);
-                                Assert.Equal(97, data[n++]);
+                                Assert.Equal(2, data[0]);
+                                Assert.Equal(65, data[1]);
+                                Assert.Equal(131, data[2]);
+                                Assert.Equal(97, data[3]);
                                 break;
                             case PixelFormat.Format16bppArgb1555:
-                                Assert.Equal(130, data[n++]);
-                                Assert.Equal(160, data[n++]);
-                                Assert.Equal(195, data[n++]);
-                                Assert.Equal(176, data[n++]);
+                                Assert.Equal(130, data[0]);
+                                Assert.Equal(160, data[1]);
+                                Assert.Equal(195, data[2]);
+                                Assert.Equal(176, data[3]);
                                 break;
                             case PixelFormat.Format16bppRgb555:
-                                Assert.Equal(130, data[n++]);
-                                Assert.Equal(32, data[n++]);
-                                Assert.Equal(195, data[n++]);
-                                Assert.Equal(48, data[n++]);
+                                Assert.Equal(130, data[0]);
+                                Assert.Equal(32, data[1]);
+                                Assert.Equal(195, data[2]);
+                                Assert.Equal(48, data[3]);
                                 break;
                         }
                     }
@@ -1389,30 +1527,35 @@ namespace System.Drawing.Tests
                 }
                 finally
                 {
-                    bmp.UnlockBits(bd);
+                    bitmap.UnlockBits(bitmapData);
                 }
             }
         }
 
         public static IEnumerable<object[]> Palette_TestData()
         {
-            yield return new object[] { new Bitmap(1, 1, PixelFormat.Format1bppIndexed), new int[] { -16777216, -1 } };
-            yield return new object[] { new Bitmap(1, 1, PixelFormat.Format4bppIndexed), new int[] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -8355712, -4144960, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, } };
-            yield return new object[] { new Bitmap(1, 1, PixelFormat.Format8bppIndexed), new int[] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -8355712, -4144960, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16777216, -16777165, -16777114, -16777063, -16777012, -16776961, -16764160, -16764109, -16764058, -16764007, -16763956, -16763905, -16751104, -16751053, -16751002, -16750951, -16750900, -16750849, -16738048, -16737997, -16737946, -16737895, -16737844, -16737793, -16724992, -16724941, -16724890, -16724839, -16724788, -16724737, -16711936, -16711885, -16711834, -16711783, -16711732, -16711681, -13434880, -13434829, -13434778, -13434727, -13434676, -13434625, -13421824, -13421773, -13421722, -13421671, -13421620, -13421569, -13408768, -13408717, -13408666, -13408615, -13408564, -13408513, -13395712, -13395661, -13395610, -13395559, -13395508, -13395457, -13382656, -13382605, -13382554, -13382503, -13382452, -13382401, -13369600, -13369549, -13369498, -13369447, -13369396, -13369345, -10092544, -10092493, -10092442, -10092391, -10092340, -10092289, -10079488, -10079437, -10079386, -10079335, -10079284, -10079233, -10066432, -10066381, -10066330, -10066279, -10066228, -10066177, -10053376, -10053325, -10053274, -10053223, -10053172, -10053121, -10040320, -10040269, -10040218, -10040167, -10040116, -10040065, -10027264, -10027213, -10027162, -10027111, -10027060, -10027009, -6750208, -6750157, -6750106, -6750055, -6750004, -6749953, -6737152, -6737101, -6737050, -6736999, -6736948, -6736897, -6724096, -6724045, -6723994, -6723943, -6723892, -6723841, -6711040, -6710989, -6710938, -6710887, -6710836, -6710785, -6697984, -6697933, -6697882, -6697831, -6697780, -6697729, -6684928, -6684877, -6684826, -6684775, -6684724, -6684673, -3407872, -3407821, -3407770, -3407719, -3407668, -3407617, -3394816, -3394765, -3394714, -3394663, -3394612, -3394561, -3381760, -3381709, -3381658, -3381607, -3381556, -3381505, -3368704, -3368653, -3368602, -3368551, -3368500, -3368449, -3355648, -3355597, -3355546, -3355495, -3355444, -3355393, -3342592, -3342541, -3342490, -3342439, -3342388, -3342337, -65536, -65485, -65434, -65383, -65332, -65281, -52480, -52429, -52378, -52327, -52276, -52225, -39424, -39373, -39322, -39271, -39220, -39169, -26368, -26317, -26266, -26215, -26164, -26113, -13312, -13261, -13210, -13159, -13108, -13057, -256, -205, -154, -103, -52, -1 } };
+            yield return new object[] { PixelFormat.Format1bppIndexed, new int[] { -16777216, -1 } };
+            yield return new object[] { PixelFormat.Format4bppIndexed, new int[] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -8355712, -4144960, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, } };
+            yield return new object[] { PixelFormat.Format8bppIndexed, new int[] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -8355712, -4144960, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16777216, -16777165, -16777114, -16777063, -16777012, -16776961, -16764160, -16764109, -16764058, -16764007, -16763956, -16763905, -16751104, -16751053, -16751002, -16750951, -16750900, -16750849, -16738048, -16737997, -16737946, -16737895, -16737844, -16737793, -16724992, -16724941, -16724890, -16724839, -16724788, -16724737, -16711936, -16711885, -16711834, -16711783, -16711732, -16711681, -13434880, -13434829, -13434778, -13434727, -13434676, -13434625, -13421824, -13421773, -13421722, -13421671, -13421620, -13421569, -13408768, -13408717, -13408666, -13408615, -13408564, -13408513, -13395712, -13395661, -13395610, -13395559, -13395508, -13395457, -13382656, -13382605, -13382554, -13382503, -13382452, -13382401, -13369600, -13369549, -13369498, -13369447, -13369396, -13369345, -10092544, -10092493, -10092442, -10092391, -10092340, -10092289, -10079488, -10079437, -10079386, -10079335, -10079284, -10079233, -10066432, -10066381, -10066330, -10066279, -10066228, -10066177, -10053376, -10053325, -10053274, -10053223, -10053172, -10053121, -10040320, -10040269, -10040218, -10040167, -10040116, -10040065, -10027264, -10027213, -10027162, -10027111, -10027060, -10027009, -6750208, -6750157, -6750106, -6750055, -6750004, -6749953, -6737152, -6737101, -6737050, -6736999, -6736948, -6736897, -6724096, -6724045, -6723994, -6723943, -6723892, -6723841, -6711040, -6710989, -6710938, -6710887, -6710836, -6710785, -6697984, -6697933, -6697882, -6697831, -6697780, -6697729, -6684928, -6684877, -6684826, -6684775, -6684724, -6684673, -3407872, -3407821, -3407770, -3407719, -3407668, -3407617, -3394816, -3394765, -3394714, -3394663, -3394612, -3394561, -3381760, -3381709, -3381658, -3381607, -3381556, -3381505, -3368704, -3368653, -3368602, -3368551, -3368500, -3368449, -3355648, -3355597, -3355546, -3355495, -3355444, -3355393, -3342592, -3342541, -3342490, -3342439, -3342388, -3342337, -65536, -65485, -65434, -65383, -65332, -65281, -52480, -52429, -52378, -52327, -52276, -52225, -39424, -39373, -39322, -39271, -39220, -39169, -26368, -26317, -26266, -26215, -26164, -26113, -13312, -13261, -13210, -13159, -13108, -13057, -256, -205, -154, -103, -52, -1 } };
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Palette_TestData))]
-        public void Palette_Get_ReturnsExpected(Bitmap bitmap, int[] expectedEntries)
+        public void Palette_Get_ReturnsExpected(PixelFormat pixelFormat, int[] expectedEntries)
         {
-            Assert.Equal(expectedEntries, bitmap.Palette.Entries.Select(c => c.ToArgb()));
+            using (var bitmap = new Bitmap(1, 1, pixelFormat))
+            {
+                Assert.Equal(expectedEntries, bitmap.Palette.Entries.Select(c => c.ToArgb()));
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Palette_SetNull_ThrowsNullReferenceException()
         {
-            var bitmap = new Bitmap(1, 1);
-            Assert.Throws<NullReferenceException>(() => bitmap.Palette = null);
+            using (var bitmap = new Bitmap(1, 1))
+            {
+                Assert.Throws<NullReferenceException>(() => bitmap.Palette = null);
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -1420,8 +1563,8 @@ namespace System.Drawing.Tests
         {
             var bitmap = new Bitmap(1, 1);
             ColorPalette palette = bitmap.Palette;
-
             bitmap.Dispose();
+
             Assert.Throws<ArgumentException>(null, () => bitmap.Palette);
             Assert.Throws<ArgumentException>(null, () => bitmap.Palette = palette);
             Assert.Throws<ArgumentException>(null, () => bitmap.Size);
@@ -1430,10 +1573,10 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LockBits_Marshalling_Success()
         {
-            Color red = Color.FromArgb(Color.Red.A, Color.Red.R, Color.Red.G, Color.Red.B);
-            Color blue = Color.FromArgb(Color.Blue.A, Color.Blue.R, Color.Blue.G, Color.Blue.B);
+            Color red = Color.FromArgb(Color.Red.ToArgb());
+            Color blue = Color.FromArgb(Color.Blue.ToArgb());
 
-            using (Bitmap bitmap = new Bitmap(1, 1, PixelFormat.Format32bppRgb))
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format32bppRgb))
             {
                 bitmap.SetPixel(0, 0, red);
                 Color pixelColor = bitmap.GetPixel(0, 0);
@@ -1488,7 +1631,7 @@ namespace System.Drawing.Tests
                 }
             }
 
-            using (Bitmap bitmap = new Bitmap(1, 1, PixelFormat.Format32bppArgb))
+            using (var bitmap = new Bitmap(1, 1, PixelFormat.Format32bppArgb))
             {
                 bitmap.SetPixel(0, 0, red);
 
