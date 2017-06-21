@@ -155,11 +155,5 @@ namespace System.DirectoryServices.Protocols.Tests
         {
             Assert.Throws<BerConversionException>(() => BerConverter.Decode(format, values));
         }
-
-        [Fact]
-        public void PrivateCtor_Invoke_CanBeConstructed()
-        {
-            Assert.NotNull(Activator.CreateInstance(typeof(BerConverter), nonPublic: true));
-        }
     }
 }
