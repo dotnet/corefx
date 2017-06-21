@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using System.Threading;
 using Xunit;
-
-[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true, MaxParallelThreads = 1)]
 
 namespace System.Composition.UnitTests
 {
@@ -25,7 +24,46 @@ namespace System.Composition.UnitTests
         [ConditionalFact(nameof(HasMultiplerProcessors))]
         public void MultiThreadedGetExportsWorkWithImportingConstuctor()
         {
-            Parallel.For(0, Environment.ProcessorCount, _ => GetExport());
+            var errors = new ConcurrentBag<Exception>();
+
+            using (var evnt = new ManualResetEventSlim())
+            {
+                var threads = new Thread[Environment.ProcessorCount];
+                for (var idx = 0; idx < threads.Length; idx++)
+                {
+                    threads[idx] = new Thread(() => Run(evnt, errors));
+                }
+
+                foreach (var thread in threads)
+                {
+                    thread.Start();
+                }
+
+                evnt.Set();
+
+                foreach (var thread in threads)
+                {
+                    thread.Join();
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new AggregateException(errors);
+            }
+        }
+
+        private static void Run(ManualResetEventSlim evnt, ConcurrentBag<Exception> errors)
+        {
+            try
+            {
+                evnt.Wait();
+                GetExport();
+            }
+            catch (Exception ex)
+            {
+                errors.Add(ex);
+            }
         }
 
         private static void GetExport()
