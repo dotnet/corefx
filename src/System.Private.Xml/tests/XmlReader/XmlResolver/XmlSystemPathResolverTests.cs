@@ -15,8 +15,9 @@ namespace System.Xml.Tests
         [Fact]
         public static void TestResolveRelativePaths()
         {
-            if (PlatformDetection.IsWinRT)  // Access to path not authorized inside an AppContainer
-                return;
+            // Workaround for System.UnauthorizedAccessException on relative path in File.Open on UWP F5
+            string curDir = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(Path.GetTempPath());
 
             string path = Path.GetRandomFileName();
             bool shouldDelete = !File.Exists(path);
@@ -31,6 +32,7 @@ namespace System.Xml.Tests
                 if (shouldDelete)
                 {
                     File.Delete(path);
+                    Directory.SetCurrentDirectory(curDir);
                 }
             }
         }
