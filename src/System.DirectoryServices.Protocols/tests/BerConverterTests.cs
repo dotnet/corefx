@@ -38,7 +38,7 @@ namespace System.DirectoryServices.Protocols.Tests
         [MemberData(nameof(Encode_TestData))]
         public void Encode_Objects_ReturnsExpected(string format, object[] values, byte[] expected)
         {
-            AssertEqual(expected, BerConverter.Encode(format, values));
+            AssertExtensions.Equal(expected, BerConverter.Encode(format, values));
         }
 
         [Fact]
@@ -156,19 +156,10 @@ namespace System.DirectoryServices.Protocols.Tests
             Assert.Throws<BerConversionException>(() => BerConverter.Decode(format, values));
         }
 
-        private static void AssertEqual(byte[] expected, byte[] actual)
+        [Fact]
+        public void PrivateCtor_Invoke_CanBeConstructed()
         {
-            try
-            {
-                Assert.Equal(expected.Length, actual.Length);
-                Assert.Equal(expected, actual);
-            }
-            catch
-            {
-                Console.WriteLine($"Expected: {string.Join(", ", expected)}");
-                Console.WriteLine($"Actual: {string.Join(", ", actual)}");
-                throw new Exception();
-            }
+            Assert.NotNull(Activator.CreateInstance(typeof(BerConverter), nonPublic: true));
         }
     }
 }
