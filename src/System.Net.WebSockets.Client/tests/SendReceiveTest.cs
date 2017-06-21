@@ -54,11 +54,20 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(21102, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessageBeforeCompleteMessageArrives_Success(Uri server)
         {
+            if (PlatformDetection.IsUap && PlatformDetection.IsWindows &&
+                PlatformDetection.WindowsVersion == 10 && PlatformDetection.WindowsBuildNumber < 16215)
+            {
+                // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
+                // ClientWebSocket.ReceiveAsync to consume partial message data as it arrives, without having to wait
+                // for "end of message" to be signaled.
+                _output.WriteLine("Skipping UAP test due to Windows 10 version prior to Insider Preview Build 16215.");
+                return;
+            }
+
             var rand = new Random();
             var sendBuffer = new byte[ushort.MaxValue + 1];
             rand.NextBytes(sendBuffer);
