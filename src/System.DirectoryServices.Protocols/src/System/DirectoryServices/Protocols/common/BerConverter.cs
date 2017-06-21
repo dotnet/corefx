@@ -10,10 +10,8 @@ using System.Text;
 
 namespace System.DirectoryServices.Protocols
 {
-    public sealed class BerConverter
+    public static class BerConverter
     {
-        private BerConverter() { }
-
         public static byte[] Encode(string format, params object[] value)
         {
             if (format == null)
