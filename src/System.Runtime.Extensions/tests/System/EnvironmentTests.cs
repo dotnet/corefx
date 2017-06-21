@@ -375,21 +375,9 @@ namespace System.Tests
             get
             {
                 yield return new object[] { EnvironmentVariableTarget.Process };
-                if (!(s_EnvironmentRegKeysStillAccessDenied.Value))
-                {
-                    yield return new object[] { EnvironmentVariableTarget.User };
-                    yield return new object[] { EnvironmentVariableTarget.Machine };
-                }
+                yield return new object[] { EnvironmentVariableTarget.User };
+                yield return new object[] { EnvironmentVariableTarget.Machine };
             }
         }
-
-        private static readonly Lazy<bool> s_EnvironmentRegKeysStillAccessDenied = new Lazy<bool>(
-            delegate ()
-            {
-                //ActiveIssue("TFS 453758" - Environment apis for User and Machine inside appcontainers should behave as "black holes" (as Unix does.)
-                // Once both CoreCLR and CoreRT work this way, get rid of s_EnvironmentRegKeysStillAccessDenied and change IsSupportedTarget to
-                // return false for IsWinRT. (and maybe IsNetNative if UAPAOT tests are still running outside appcontainer.)
-                return PlatformDetection.IsWinRT || PlatformDetection.IsNetNative;
-            });
     }
 }

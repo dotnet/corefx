@@ -16,7 +16,7 @@ namespace System.Tests
 
         internal static bool IsSupportedTarget(EnvironmentVariableTarget target)
         {
-            return target == EnvironmentVariableTarget.Process || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !PlatformDetection.IsWinRT && !PlatformDetection.IsNetNative);
+            return target == EnvironmentVariableTarget.Process || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !PlatformDetection.IsUap);
         }
 
         [Fact]
