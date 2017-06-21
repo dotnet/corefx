@@ -8,6 +8,8 @@ namespace System.Drawing
 {
     public sealed class SystemIcons
     {
+        private SystemIcons() { }
+
         private static Icon s_application = null;
         private static Icon s_asterisk = null;
         private static Icon s_error = null;

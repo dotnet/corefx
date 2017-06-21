@@ -10,6 +10,8 @@ namespace System.Drawing
 {
     public sealed class SystemFonts
     {
+        private SystemFonts() { }
+
         private static readonly object s_systemFontsKey = new object();
 
         public static Font CaptionFont
