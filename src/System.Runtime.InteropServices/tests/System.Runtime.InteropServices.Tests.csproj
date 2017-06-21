@@ -30,7 +30,6 @@
     <Compile Include="System\Runtime\InteropServices\ComSourceInterfacesAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComUnregisterFunctionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComVisibleAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\CurrencyWrapperTests.cs" />
     <Compile Include="System\Runtime\InteropServices\DefaultCharSetAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\DefaultDllImportSearchPathsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttributeTests.cs" />
@@ -50,7 +49,6 @@
     <Compile Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ProgIdAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\RuntimeEnvironmentTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\SecureStringMarshalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\SetWin32ContextInIDispatchAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeIdentifierAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibFuncAttributeTests.cs" />
