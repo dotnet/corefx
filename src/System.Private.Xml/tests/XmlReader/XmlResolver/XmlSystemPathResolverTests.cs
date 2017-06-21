@@ -15,15 +15,14 @@ namespace System.Xml.Tests
         [Fact]
         public static void TestResolveRelativePaths()
         {
-            // Workaround for System.UnauthorizedAccessException on relative path in File.Open on UWP F5
             string curDir = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(Path.GetTempPath());
-
             string path = Path.GetRandomFileName();
             bool shouldDelete = !File.Exists(path);
-            File.Open(path, FileMode.OpenOrCreate).Dispose();
             try
             {
+                Directory.SetCurrentDirectory(Path.GetTempPath()); // Workaround for System.UnauthorizedAccessException on relative path in File.Open on UWP F5
+                File.Open(path, FileMode.OpenOrCreate).Dispose();
+
                 XmlReader.Create(path).Dispose();
                 XmlReader.Create(Path.Combine(".", path)).Dispose();
             }
@@ -32,8 +31,9 @@ namespace System.Xml.Tests
                 if (shouldDelete)
                 {
                     File.Delete(path);
-                    Directory.SetCurrentDirectory(curDir);
                 }
+
+                Directory.SetCurrentDirectory(curDir);
             }
         }
 
