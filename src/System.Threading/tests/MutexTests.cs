@@ -158,14 +158,16 @@ namespace System.Threading.Tests
             }
         }
 
-        private static string[] GetNamePrefixes()
+        private static IEnumerable<string> GetNamePrefixes()
         {
-            if (PlatformDetection.IsUap)
+            yield return string.Empty;
+            yield return "Local\\";
+
+            // Creating global sync objects is not allowed in UWP apps
+            if (!PlatformDetection.IsUap)
             {
-                // Creating global sync objects is not allowed in UWP apps
-                return new[] { string.Empty, "Local\\" };
+                yield return "Global\\";
             }
-            return new[] { string.Empty, "Local\\", "Global\\" };
         }
 
         public static IEnumerable<object[]> AbandonExisting_MemberData()
