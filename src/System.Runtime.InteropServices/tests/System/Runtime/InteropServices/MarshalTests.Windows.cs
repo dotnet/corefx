@@ -19,7 +19,7 @@ namespace System.Runtime.InteropServices
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(IsComImport_Windows_ReturnsExpected))]
-        public void IsComImport_Windows_ReturnsExpected(object value, bool expected)
+        public void IsComObject_Windows_ReturnsExpected(object value, bool expected)
         {
             Assert.Equal(expected, Marshal.IsComObject(value));
         }

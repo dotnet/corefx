@@ -449,7 +449,7 @@ namespace System.Runtime.InteropServices
         [Theory]
         [InlineData(0)]
         [InlineData("String")]
-        public void IsComObject_NonComObject_ReturnsTrue(object value)
+        public void IsComObject_NonComObject_ReturnsFalse(object value)
         {
             Assert.False(Marshal.IsComObject(value));
         }
