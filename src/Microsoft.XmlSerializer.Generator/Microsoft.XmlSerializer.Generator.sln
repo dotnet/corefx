@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Tests", "tests\System.Xml.XmlSerializer.Sgen.Tests.csproj", "{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers", "tests\System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.csproj", "{1BCAF5A7-574E-4E74-9147-0572344C2C93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.XmlSerializers.Tests", "tests\System.Xml.XmlSerializer.Sgen.XmlSerializers.Tests.csproj", "{1BCAF5A7-574E-4E74-9147-0572344C2C93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

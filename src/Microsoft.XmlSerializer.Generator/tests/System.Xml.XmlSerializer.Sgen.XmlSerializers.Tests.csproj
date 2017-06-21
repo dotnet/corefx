@@ -6,10 +6,14 @@
     <ProjectGuid>{1BCAF5A7-574E-4E74-9147-0572344C2C93}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <!--<CodeAnalysisRuleSet>.\CodeAnalysis.ruleset</CodeAnalysisRuleSet>-->
     <OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Tests\netstandard\</OutputPath>
+    <!--<TreatWarningsAsErrors>false</TreatWarningsAsErrors>-->
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup>
+    <AssemblyName>System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs" />
   </ItemGroup>

@@ -3,7 +3,7 @@
 [assembly:System.Security.SecurityRules(System.Security.SecurityRuleSet.Level1)]
 [assembly:System.Xml.Serialization.XmlSerializerVersionAttribute(ParentAssemblyId=@"579ae18f-2fe1-4e91-a75c-7fb07d000783,", Version=@"1.0.0.0")]
 namespace Microsoft.Xml.Serialization.GeneratedAssembly {
-
+#pragma warning disable
     public class XmlSerializationWriter1 : System.Xml.Serialization.XmlSerializationWriter {
 
         public void Write94_TypeWithXmlElementProperty(object o) {
@@ -7427,8 +7427,8 @@ namespace Microsoft.Xml.Serialization.GeneratedAssembly {
                 int whileIterations36 = 0;
                 int readerCount36 = ReaderCount;
                 while (Reader.NodeType != System.Xml.XmlNodeType.EndElement && Reader.NodeType != System.Xml.XmlNodeType.None) {
-                    string tmp = null;
-                    if (Reader.NodeType == System.Xml.XmlNodeType.Element) {
+                string tmp = null;
+                if (Reader.NodeType == System.Xml.XmlNodeType.Element) {
                         UnknownNode((object)o, @"");
                     }
                     else if (Reader.NodeType == System.Xml.XmlNodeType.Text || 
@@ -14111,4 +14111,5 @@ namespace Microsoft.Xml.Serialization.GeneratedAssembly {
                 return null;
             }
         }
-    }
+#pragma warning restore
+}

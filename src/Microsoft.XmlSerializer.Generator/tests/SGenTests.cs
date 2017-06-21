@@ -55,7 +55,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             var newalllines = new List<string>();
             foreach (var line in alllines)
             {
-                if (line == String.Empty)
+                if (line == String.Empty || line.Contains("#pragma"))
                 {
                     continue;
                 }
