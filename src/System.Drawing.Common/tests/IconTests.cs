@@ -66,6 +66,7 @@ namespace System.Drawing.Tests
             yield return new object[] { "256x256_one_entry_32bit.ico", new Size(int.MaxValue, int.MaxValue), new Size(256, 256) };
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_FilePath_Width_Height(string fileName, Size size, Size expectedSize)
@@ -76,6 +77,7 @@ namespace System.Drawing.Tests
             Assert.Equal(expectedSize, icon.Size);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_FilePath_Size(string fileName, Size size, Size expectedSize)
@@ -106,6 +108,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Width_Height(string fileName, Size size, Size expectedSize)
@@ -119,6 +122,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Size(string fileName, Size size, Size expectedSize)
@@ -132,6 +136,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullStream_ThrowsArgumentException()
         {
@@ -184,6 +189,7 @@ namespace System.Drawing.Tests
             yield return new object[] { new byte[] { 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, typeof(Win32Exception) };
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_InvalidBytesInStream_TestData))]
         public void Ctor_InvalidBytesInStream_ThrowsException(byte[] bytes, Type exceptionType)
@@ -197,6 +203,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Icon_Width_Height(string fileName, Size size, Size expectedSize)
@@ -209,6 +216,7 @@ namespace System.Drawing.Tests
             Assert.NotSame(sourceIcon.Handle, icon.Handle);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Icon_Size(string fileName, Size size, Size expectedSize)
@@ -228,6 +236,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentException>(null, () => new Icon((Icon)null, new Size(32, 32)));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_InvalidIconHandle_SetsHandleToZero()
         {
@@ -250,6 +259,7 @@ namespace System.Drawing.Tests
             Assert.Throws<NullReferenceException>(() => new Icon(null, "48x48_multiple_entries_4bit.ico"));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(typeof(Icon), null)]
         [InlineData(typeof(Icon), "")]
@@ -284,6 +294,7 @@ namespace System.Drawing.Tests
             Assert.Equal(SystemIcons.Hand.Size, clone.Size);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_IconData_DestroysHandle()
         {
@@ -293,6 +304,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ObjectDisposedException>(() => icon.Handle);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_OwnsHandle_DestroysHandle()
         {
@@ -340,12 +352,14 @@ namespace System.Drawing.Tests
             Assert.Equal(32, icon.Height);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ExtractAssociatedIcon_NonFilePath_ReturnsNull()
         {
             Assert.Null(Icon.ExtractAssociatedIcon("http://microsoft.com"));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(null)]
         [InlineData("")]
@@ -405,6 +419,7 @@ namespace System.Drawing.Tests
             Assert.Throws<NullReferenceException>(() => icon.Save(null));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Save_NullOutputStreamNoIconData_ThrowsArgumentNullException()
         {
@@ -415,6 +430,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentNullException>("dataStream", () => icon.Save(null));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Save_ClosedOutputStreamIconData_ThrowsException()
         {
@@ -425,6 +441,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ObjectDisposedException>(() => icon.Save(stream));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Save_ClosedOutputStreamNoIconData_DoesNothing()
         {
@@ -436,6 +453,7 @@ namespace System.Drawing.Tests
             icon.Save(stream);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Save_NoIconDataOwnsHandleAndDisposed_ThrowsObjectDisposedException()
         {
@@ -445,6 +463,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ObjectDisposedException>(() => icon.Save(new MemoryStream()));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Save_InvalidHandle_ThrowsCOMException()
         {
@@ -454,6 +473,7 @@ namespace System.Drawing.Tests
             Assert.True(ex is COMException || ex is ObjectDisposedException, $"{ex.GetType().ToString()} was thrown.");
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ToBitmap_InvalidHandle_ThrowsArgumentException()
         {
@@ -494,6 +514,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ToBitmap_PngIcon_Success()
         {
@@ -609,6 +630,7 @@ namespace System.Drawing.Tests
             Assert.Throws<ArgumentException>(null, () => Icon.FromHandle(IntPtr.Zero));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Size_GetFromInvalidHandle_ReturnsZeroSize()
         {
@@ -616,6 +638,7 @@ namespace System.Drawing.Tests
             Assert.Equal(Size.Empty, icon.Size);
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Size_GetWhenDisposed_ThrowsObjectDisposedException()
         {
@@ -652,6 +675,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Deserialize_InvalidBytes_ThrowsInvalidOperationException()
         {
