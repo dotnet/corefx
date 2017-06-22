@@ -26,11 +26,11 @@ namespace System.DirectoryServices.Protocols
         {
             get
             {
-                return directoryRequestID;
+                return _directoryRequestID;
             }
             set
             {
-                directoryRequestID = value;
+                _directoryRequestID = value;
             }
         }
 
