@@ -18,14 +18,19 @@ namespace System.Drawing.Tests
             using (Graphics graphics = Graphics.FromImage(bitmap))
             {
                 IntPtr hdc = graphics.GetHdc();
-                Assert.NotEqual(IntPtr.Zero, hdc);
-
-                using (Graphics graphicsCopy = Graphics.FromHdc(hdc))
+                try
                 {
-                    VerifyGraphics(graphicsCopy, graphicsCopy.VisibleClipBounds);
-                }
+                    Assert.NotEqual(IntPtr.Zero, hdc);
 
-                graphics.ReleaseHdc();
+                    using (Graphics graphicsCopy = Graphics.FromHdc(hdc))
+                    {
+                        VerifyGraphics(graphicsCopy, graphicsCopy.VisibleClipBounds);
+                    }
+                }
+                finally
+                {
+                    graphics.ReleaseHdc();
+                }
             }
         }
 
@@ -36,9 +41,15 @@ namespace System.Drawing.Tests
             using (Graphics graphics1 = Graphics.FromImage(bitmap))
             using (Graphics graphics2 = Graphics.FromImage(bitmap))
             {
-                Assert.Equal(graphics1.GetHdc(), graphics2.GetHdc());
-                graphics1.ReleaseHdc();
-                graphics2.ReleaseHdc();
+                try
+                {
+                    Assert.Equal(graphics1.GetHdc(), graphics2.GetHdc());
+                }
+                finally
+                {
+                    graphics1.ReleaseHdc();
+                    graphics2.ReleaseHdc();
+                }
             }
         }
 
@@ -49,8 +60,14 @@ namespace System.Drawing.Tests
             using (Graphics graphics = Graphics.FromImage(bitmap))
             {
                 IntPtr hdc = graphics.GetHdc();
-                Assert.Throws<InvalidOperationException>(() => graphics.GetHdc());
-                graphics.ReleaseHdc();
+                try
+                {
+                    Assert.Throws<InvalidOperationException>(() => graphics.GetHdc());
+                }
+                finally
+                {
+                    graphics.ReleaseHdc();
+                }
             }
         }
 
