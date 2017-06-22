@@ -10,16 +10,31 @@
   <ItemGroup>
     <Compile Include="BitmapTests.cs" />
     <Compile Include="BrushesTests.cs" />
+    <Compile Include="CharacterRangeTests.cs" />
     <Compile Include="ColorTranslatorTests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IconTests.cs" />
     <Compile Include="PensTests.cs" />
+    <Compile Include="Imaging\BitmapDataTests.cs" />
+    <Compile Include="Imaging\ColorMapTests.cs" />
+    <Compile Include="Imaging\ColorMatrixTests.cs" />
+    <Compile Include="Imaging\EncoderTests.cs" />
+    <Compile Include="Imaging\FrameDimensionTests.cs" />
+    <Compile Include="Imaging\ImageCodecInfoTests.cs" />
+    <Compile Include="Imaging\ImageFormatTests.cs" />
+    <Compile Include="Imaging\MetaHeaderTests.cs" />
+    <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
     <Compile Include="RegionTests.cs" />
+    <Compile Include="StringFormatTests.cs" />
     <Compile Include="SystemBrushesTests.cs" />
+    <Compile Include="SystemIconsTests.cs" />
     <Compile Include="SystemPensTest.cs" />
     <Compile Include="Drawing2D\MatrixTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
@@ -74,6 +89,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <LogicalName>System.Drawing.Tests.empty.file</LogicalName>
     </EmbeddedResource>
+    <Compile Include="Printing\MarginsTests.cs" />
+    <Compile Include="Printing\PrinterResolutionTests.cs" />
+    <Compile Include="Printing\PageSettingsTests.cs" />
+    <Compile Include="Printing\PaperSizeTests.cs" />
+    <Compile Include="Printing\PaperSourceTests.cs" />
+    <Compile Include="Printing\PrinterUnitConvertTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
