@@ -25,7 +25,7 @@ namespace BasicEventSourceTests
         /// EventSource would fail when an EventSource was named "EventSource".
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18808")]
+        [ActiveIssue("dotnet/corefx #18808", TargetFrameworkMonikers.NetFramework)]
         public void Test_EventSource_NamedEventSource()
         {
             using (var es = new SdtEventSources.DontPollute.EventSource())
@@ -35,9 +35,9 @@ namespace BasicEventSourceTests
                     int i = 12;
                     es.EventWrite(i);
 
-                    Assert.Equal(1, LoudListener.LastEvent.EventId);
-                    Assert.Equal(1, LoudListener.LastEvent.Payload.Count);
-                    Assert.Equal(i, LoudListener.LastEvent.Payload[0]);
+                    Assert.Equal(1, LoudListener.t_lastEvent.EventId);
+                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Equal(i, LoudListener.t_lastEvent.Payload[0]);
                 }
             }
         }

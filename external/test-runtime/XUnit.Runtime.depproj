@@ -3,9 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <!-- Given that xunit packages bring with them part of the framework, we need to specify a runtime in order to get the assets
-         This RID value doesn't really matter, since the assets we are copying are not RID specific, so defaulting to Windows here
-    -->
-    <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
+         The only asset that we copy which is RID-specific is sni.dll which is only used in windows, which is why we default to Windows as the RID -->
+    <NugetRuntimeIdentifier>win10-$(ArchGroup)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
     <OutputPath>$(RuntimePath)</OutputPath>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' != 'netfx'">xunit.console.netcore</XUnitRunnerPackageId>
@@ -87,6 +86,26 @@
     <PackageToInclude Include="$(XUnitRunnerPackageId)" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
+    <UAPToolsPackageVersion>1.0.11</UAPToolsPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <PackageReference Include="Microsoft.DotNet.UAP.TestTools">
+      <Version>$(UAPToolsPackageVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- System.Data.SqlClient tests require sni.dll in the test folder -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
+    <PackageReference Include="runtime.native.System.Data.SqlClient.sni">
+      <Version>$(PackageVersion)-$(CoreFxExpectedPrerelease)</Version>
+    </PackageReference>
+    <PackageToInclude Include="runtime.win-arm64.runtime.native.System.Data.SqlClient.sni"/>
+    <PackageToInclude Include="runtime.win-x64.runtime.native.System.Data.SqlClient.sni"/>
+    <PackageToInclude Include="runtime.win-x86.runtime.native.System.Data.SqlClient.sni"/>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <PackageToInclude Include="xunit.performance.core"/>
     <PackageToInclude Include="xunit.performance.api"/>
@@ -105,10 +124,9 @@
           Condition="'$(TargetGroup)'=='uap'" >
 
     <PropertyGroup>
-      <UAPToolsPackageVersion>1.0.2</UAPToolsPackageVersion>
       <UAPToolsPackageName>microsoft.dotnet.uap.testtools</UAPToolsPackageName>
 
-      <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools</UAPToolsFolder>
+      <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools\$(ArchGroup)</UAPToolsFolder>
       <UAPToolsFolder>$(UAPToolsFolder.Replace('/', '\'))</UAPToolsFolder>
     </PropertyGroup>
 

@@ -19,6 +19,7 @@
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FakeDiagnosticListenerObserver.cs" />
     <Compile Include="SqlBulkCopyColumnMappingCollectionTest.cs" />
+    <Compile Include="SqlDataRecordTest.cs" />
     <Compile Include="SqlParameterTest.cs" />
     <Compile Include="SqlClientFactoryTest.cs" />
     <Compile Include="SqlConnectionTest.RetrieveStatistics.cs" />
@@ -29,12 +30,6 @@
     <Compile Include="..\ManualTests\DataCommon\DataTestUtility.cs" />
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>

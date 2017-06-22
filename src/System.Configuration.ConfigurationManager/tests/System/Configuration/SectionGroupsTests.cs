@@ -53,7 +53,8 @@ namespace System.ConfigurationTests
 </configuration>";
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19383")]
+        [ActiveIssue("dotnet/corefx #19383", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(21000, TargetFrameworkMonikers.UapAot)]
         public void SimpleSectionGroup()
         {
             using (var temp = new TempConfig(SimpleSectionGroupConfiguration))

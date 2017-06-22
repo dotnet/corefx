@@ -121,7 +121,7 @@ namespace System.Xml.Serialization
     /// </devdoc>
     public class XmlSerializer
     {
-#if uapaot
+#if uap
         public enum SerializationMode
 #else
         internal enum SerializationMode
@@ -132,7 +132,7 @@ namespace System.Xml.Serialization
             ReflectionAsBackup
         }
 
-#if uapaot
+#if uap
         public static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
 #else
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
@@ -153,14 +153,13 @@ namespace System.Xml.Serialization
         private Type _primitiveType;
         private XmlMapping _mapping;
         private XmlDeserializationEvents _events = new XmlDeserializationEvents();
-#if uapaot
+#if uap
         private XmlSerializer innerSerializer;
         public string DefaultNamespace = null;
 #else
         internal string DefaultNamespace = null;
 #endif
         private Type _rootType;
-        private Type[] _extraTypes;
 
         private static TempAssemblyCache s_cache = new TempAssemblyCache();
         private static volatile XmlSerializerNamespaces s_defaultNamespaces;
@@ -211,13 +210,8 @@ namespace System.Xml.Serialization
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-#if !uapaot
         public XmlSerializer(Type type, Type[] extraTypes) : this(type, null, extraTypes, null, null, null)
-#else
-        public XmlSerializer(Type type, Type[] extraTypes) : this(type)
-#endif
         {
-            _extraTypes = extraTypes;
         }
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.XmlSerializer4"]/*' />
@@ -237,7 +231,7 @@ namespace System.Xml.Serialization
             if (xmlTypeMapping == null)
                 throw new ArgumentNullException(nameof(xmlTypeMapping));
 
-#if !uapaot
+#if !uap
             _tempAssembly = GenerateTempAssembly(xmlTypeMapping);
 #endif
             _mapping = xmlTypeMapping;
@@ -269,7 +263,7 @@ namespace System.Xml.Serialization
                 _primitiveType = type;
                 return;
             }
-#if !uapaot
+#if !uap
             _tempAssembly = s_cache[defaultNamespace, type];
             if (_tempAssembly == null)
             {
@@ -326,7 +320,7 @@ namespace System.Xml.Serialization
             DefaultNamespace = defaultNamespace;
             _rootType = type;
             _mapping = GenerateXmlTypeMapping(type, overrides, extraTypes, root, defaultNamespace);
-#if !uapaot
+#if !uap
             _tempAssembly = GenerateTempAssembly(_mapping, type, defaultNamespace, location);
 #endif
         }
@@ -452,7 +446,7 @@ namespace System.Xml.Serialization
                 {
                     SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
                 }
-#if !uapaot
+#if !uap
                 else if (_tempAssembly == null || _typedSerializer)
                 {
                     // The contion for the block is never true, thus the block is never hit.
@@ -521,7 +515,7 @@ namespace System.Xml.Serialization
         {
             if (_mapping == null || !_mapping.GenerateSerializer)
             {
-                _mapping = GenerateXmlTypeMapping(_rootType, null, _extraTypes, null, DefaultNamespace);
+                _mapping = GenerateXmlTypeMapping(_rootType, null, null, null, DefaultNamespace);
             }
 
             return _mapping;
@@ -592,7 +586,7 @@ namespace System.Xml.Serialization
                 {
                     return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                 }
-#if !uapaot
+#if !uap
                 else if (_tempAssembly == null || _typedSerializer)
                 {
                     XmlSerializationReader reader = CreateReader();
@@ -621,7 +615,7 @@ namespace System.Xml.Serialization
                         }
 
                         XmlSerializationReader reader = this.innerSerializer.CreateReader();
-                        reader.Init(xmlReader, encodingStyle);
+                        reader.Init(xmlReader, events, encodingStyle);
                         try
                         {
                             return this.innerSerializer.Deserialize(reader);
@@ -685,7 +679,7 @@ namespace System.Xml.Serialization
                 TypeDesc typeDesc = (TypeDesc)TypeScope.PrimtiveTypes[_primitiveType];
                 return xmlReader.IsStartElement(typeDesc.DataType.Name, string.Empty);
             }
-#if !uapaot
+#if !uap
             else if (_tempAssembly != null)
             {
                 return _tempAssembly.CanRead(_mapping, xmlReader);
@@ -722,7 +716,7 @@ namespace System.Xml.Serialization
         public static XmlSerializer[] FromMappings(XmlMapping[] mappings, Type type)
         {
             if (mappings == null || mappings.Length == 0) return Array.Empty<XmlSerializer>();
-#if uapaot
+#if uap
             XmlSerializer[] serializers = GetReflectionBasedSerializers(mappings, type);
             return serializers;
 #else
@@ -900,7 +894,7 @@ namespace System.Xml.Serialization
             if (types == null)
                 return Array.Empty<XmlSerializer>();
 
-#if uapaot
+#if uap
             var serializers = new XmlSerializer[types.Length];
             for (int i = 0; i < types.Length; i++)
             {
@@ -918,7 +912,7 @@ namespace System.Xml.Serialization
 #endif
         }
 
-#if uapaot
+#if uap
         // this the global XML serializer contract introduced for multi-file
         private static XmlSerializerImplementation xmlSerializerContract;
 

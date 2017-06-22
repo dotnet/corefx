@@ -14,9 +14,9 @@ namespace System.Tests
         private const int MAX_VAR_LENGTH_ALLOWED = 32767;
         private const string NullString = "\u0000";
 
-        private static bool IsSupportedTarget(EnvironmentVariableTarget target)
+        internal static bool IsSupportedTarget(EnvironmentVariableTarget target)
         {
-            return target == EnvironmentVariableTarget.Process || RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            return target == EnvironmentVariableTarget.Process || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !PlatformDetection.IsUap);
         }
 
         [Fact]
@@ -61,9 +61,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void Default(EnvironmentVariableTarget target)
         {
             string varName = $"Test_SetEnvironmentVariable_Default ({target})";
@@ -85,9 +83,7 @@ namespace System.Tests
 
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable ({target})";
@@ -107,14 +103,12 @@ namespace System.Tests
             () =>
             {
                 // Clear the test variable
-                Environment.SetEnvironmentVariable(varName, null);
+                Environment.SetEnvironmentVariable(varName, null, target);
             });
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable_AndEnumerate(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable_AndEnumerate ({target})";
@@ -142,14 +136,12 @@ namespace System.Tests
             () =>
             {
                 // Clear the test variable
-                Environment.SetEnvironmentVariable(varName, null);
+                Environment.SetEnvironmentVariable(varName, null, target);
             });
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void DeleteEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_DeleteEnvironmentVariable ({target})";

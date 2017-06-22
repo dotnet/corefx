@@ -667,7 +667,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
             // Processes are not hosted by dotnet in the full .NET Framework.
-            string expected = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            string expected = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
             Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(expected), StringComparer.OrdinalIgnoreCase);
         }
 
@@ -880,7 +880,7 @@ namespace System.Diagnostics.Tests
             process.Start();
 
             // Processes are not hosted by dotnet in the full .NET Framework.
-            string expectedFileName = PlatformDetection.IsFullFramework ? TestConsoleApp : HostRunner;
+            string expectedFileName = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
             Assert.Equal(expectedFileName, process.StartInfo.FileName);
 
             process.Kill();
@@ -922,7 +922,7 @@ namespace System.Diagnostics.Tests
         public void StartInfo_SetNull_ThrowsArgumentNullException()
         {
             var process = new Process();
-            Assert.Throws<ArgumentNullException>("value", () => process.StartInfo = null);
+            Assert.Throws<ArgumentNullException>(() => process.StartInfo = null);
         }
 
         [Fact]
@@ -1135,6 +1135,8 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowHandle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1152,6 +1154,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // MainWindowTitle is a no-op and always returns string.Empty on Unix.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowTitle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1186,6 +1189,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Responding always returns true on Unix.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void Responding_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();

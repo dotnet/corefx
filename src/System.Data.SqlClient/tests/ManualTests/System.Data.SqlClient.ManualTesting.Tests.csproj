@@ -11,6 +11,7 @@
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
     <Compile Include="DataCommon\CheckConnStrSetupFactAttribute.cs" />
+    <Compile Include="SQL\AdapterTest\AdapterTest.cs" />
     <Compile Include="SQL\Common\AsyncDebugScope.cs" />
     <Compile Include="SQL\Common\ConnectionPoolWrapper.cs" />
     <Compile Include="SQL\Common\InternalConnectionWrapper.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="SQL\MARSSessionPoolingTest\MARSSessionPoolingTest.cs" />
     <Compile Include="SQL\MARSTest\MARSTest.cs" />
     <Compile Include="SQL\ParallelTransactionsTest\ParallelTransactionsTest.cs" />
+    <Compile Include="SQL\SqlSchemaInfoTest\SqlSchemaInfoTest.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\ErrorOnRowsMarkedAsDeleted.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\Bug84548.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\Bug85007.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="SQL\RandomStressTest\SqlRandomTypesForSqlServer.cs" />
     <Compile Include="SQL\RandomStressTest\RandomStressTest.cs" />
     <Compile Include="SQL\SplitPacketTest\SplitPacketTest.cs" />
+    <Compile Include="SQL\SqlNotificationTest\SqlNotificationTest.cs" />
     <Compile Include="SQL\TransactionTest\TransactionTest.cs" />
     <Compile Include="SQL\WeakRefTest\WeakRefTest.cs" />
     <Compile Include="SQL\WeakRefTestYukonSpecific\WeakRefTestYukonSpecific.cs" />

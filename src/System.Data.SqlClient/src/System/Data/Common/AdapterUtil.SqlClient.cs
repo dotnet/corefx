@@ -9,22 +9,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Transactions;
 
-namespace System
-{
-    internal static partial class SR
-    {
-        internal static string GetString(string value)
-        {
-            return value;
-        }
-
-        internal static string GetString(string format, params object[] args)
-        {
-            return SR.Format(format, args);
-        }
-    }
-}
-
 namespace System.Data.Common
 {
     internal static partial class ADP
@@ -328,11 +312,6 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSequentialColumnAccess, badCol.ToString(CultureInfo.InvariantCulture), currCol.ToString(CultureInfo.InvariantCulture)));
         }
 
-        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst)
-        {
-            return (0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase));
-        }
-
         static internal Exception InvalidXmlInvalidValue(string collectionName, string columnName)
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
@@ -481,11 +460,6 @@ namespace System.Data.Common
         internal static ArgumentException UnknownDataType(Type dataType)
         {
             return Argument(SR.GetString(SR.ADP_UnknownDataType, dataType.FullName));
-        }
-
-        internal static bool IsEmptyArray(string[] array)
-        {
-            return (array == null || array.Length == 0);
         }
 
         internal static ArgumentException DbTypeNotSupported(DbType type, Type enumtype)
@@ -809,6 +783,119 @@ namespace System.Data.Common
             }
 #endif
             return InvalidEnumerationValue(typeof(DataRowVersion), (int)value);
+        }
+
+        internal static ArgumentException SingleValuedProperty(string propertyName, string value)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_SingleValuedProperty, propertyName, value));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static ArgumentException DoubleValuedProperty(string propertyName, string value1, string value2)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_DoubleValuedProperty, propertyName, value1, value2));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static ArgumentException InvalidPrefixSuffix()
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidPrefixSuffix));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        // the return value is true if the string was quoted and false if it was not
+        // this allows the caller to determine if it is an error or not for the quotedString to not be quoted
+        internal static bool RemoveStringQuotes(string quotePrefix, string quoteSuffix, string quotedString, out string unquotedString)
+        {
+            int prefixLength = quotePrefix != null ? quotePrefix.Length : 0;
+            int suffixLength = quoteSuffix != null ? quoteSuffix.Length : 0;
+
+            if ((suffixLength + prefixLength) == 0)
+            {
+                unquotedString = quotedString;
+                return true;
+            }
+
+            if (quotedString == null)
+            {
+                unquotedString = quotedString;
+                return false;
+            }
+
+            int quotedStringLength = quotedString.Length;
+
+            // is the source string too short to be quoted
+            if (quotedStringLength < prefixLength + suffixLength)
+            {
+                unquotedString = quotedString;
+                return false;
+            }
+
+            // is the prefix present?
+            if (prefixLength > 0)
+            {
+                if (!quotedString.StartsWith(quotePrefix, StringComparison.Ordinal))
+                {
+                    unquotedString = quotedString;
+                    return false;
+                }
+            }
+
+            // is the suffix present?
+            if (suffixLength > 0)
+            {
+                if (!quotedString.EndsWith(quoteSuffix, StringComparison.Ordinal))
+                {
+                    unquotedString = quotedString;
+                    return false;
+                }
+                unquotedString = quotedString.Substring(prefixLength, quotedStringLength - (prefixLength + suffixLength)).Replace(quoteSuffix + quoteSuffix, quoteSuffix);
+            }
+            else
+            {
+                unquotedString = quotedString.Substring(prefixLength, quotedStringLength - prefixLength);
+            }
+            return true;
+        }
+
+        internal static ArgumentOutOfRangeException InvalidCommandBehavior(CommandBehavior value)
+        {
+            Debug.Assert((0 > (int)value) || ((int)value > 0x3F), "valid CommandType " + value.ToString());
+
+            return InvalidEnumerationValue(typeof(CommandBehavior), (int)value);
+        }
+
+        internal static void ValidateCommandBehavior(CommandBehavior value)
+        {
+            if (((int)value < 0) || (0x3F < (int)value))
+            {
+                throw InvalidCommandBehavior(value);
+            }
+        }
+
+        internal static ArgumentOutOfRangeException NotSupportedCommandBehavior(CommandBehavior value, string method)
+        {
+            return NotSupportedEnumerationValue(typeof(CommandBehavior), value.ToString(), method);
+        }
+
+        internal static ArgumentException BadParameterName(string parameterName)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_BadParameterName, parameterName));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static Exception DeriveParametersNotSupported(IDbCommand value)
+        {
+            return DataAdapter(SR.GetString(SR.ADP_DeriveParametersNotSupported, value.GetType().Name, value.CommandType.ToString()));
+        }
+
+        internal static Exception NoStoredProcedureExists(string sproc)
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_NoStoredProcedureExists, sproc));
         }
     }
 }

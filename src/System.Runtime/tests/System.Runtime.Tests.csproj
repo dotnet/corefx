@@ -48,6 +48,9 @@
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
+      <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
+    </Compile>
     <Compile Include="Helpers.cs" />
     <Compile Include="System\ActivatorTests.cs" />
     <Compile Include="System\ArrayTests.cs" />
@@ -141,6 +144,7 @@
     <Compile Include="System\LazyTests.netcoreapp.cs" />
     <Compile Include="System\StringTests.netcoreapp.cs" />
     <Compile Include="System\TimeSpanTests.netcoreapp.cs" />
+    <Compile Include="System\Reflection\MemberInfoTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeInfoTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
@@ -224,12 +228,6 @@
     <Compile Include="System\AppContext\AppContext.Switch.Validation.cs" />
     <Compile Include="System\Reflection\StrongNameKeyPairTests.cs" />
     <Compile Include="System\Runtime\Tests.netstandard.1.7.cs" />
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>

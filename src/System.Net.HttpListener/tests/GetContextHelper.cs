@@ -59,23 +59,15 @@ namespace System.Net.Tests
     public static class Helpers
     {
         public static bool IsWindowsImplementation { get; } =
-            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) != null &&
-            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
-        public static bool IsNotWindowsImplementation =>
-            typeof(HttpListener).Assembly.GetType("Interop+HttpApi", throwOnError: false, ignoreCase: false) == null &&
-            PlatformDetection.IsNotOneCoreUAP; // never run for UAP
+            (TypeExists("Interop+HttpApi") || TypeExists("System.Net.UnsafeNclNativeMethods")); // types only in Windows netcoreapp/netfx builds, respectively
+
+        public static bool IsManagedImplementation => TypeExists("System.Net.WebSockets.ManagedWebSocket"); // type only in managed build
+
+        private static bool TypeExists(string name) => typeof(HttpListener).Assembly.GetType(name, throwOnError: false, ignoreCase: false) != null;
 
         public static void WaitForSocketShutdown(Socket socket)
         {
-            if (PlatformDetection.IsWindows || PlatformDetection.IsOSX)
-            {
-                socket.Shutdown(SocketShutdown.Both);
-                while (SocketConnected(socket));
-            }
-            else
-            {
-                socket.Close();
-            }
+            socket.Close();
         }
 
         public static bool SocketConnected(Socket socket)

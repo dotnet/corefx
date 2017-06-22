@@ -32,10 +32,11 @@ namespace System.Net.Tests
             _helper.Dispose();
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        //[InlineData(true, "")] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true, "")]
         [InlineData(false, "")]
-        //[InlineData(true, "Non-Empty")]  // [ActiveIssue(20246)] // CI hanging frequently
+        [InlineData(true, "Non-Empty")]
         [InlineData(false, "Non-Empty")]
         public async Task Read_FullLengthAsynchronous_Success(bool transferEncodingChunked, string text)
         {
@@ -76,10 +77,58 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true, "")] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true, "")]
         [InlineData(false, "")]
-        // [InlineData(true, "Non-Empty")] // [ActiveIssue(20246)] // CI hanging frequently
+        [InlineData(true, "Non-Empty")]
+        [InlineData(false, "Non-Empty")]
+        public async Task Read_FullLengthAsynchronous_PadBuffer_Success(bool transferEncodingChunked, string text)
+        {
+            byte[] expected = Encoding.UTF8.GetBytes(text);
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(text));
+
+                HttpListenerContext context = await contextTask;
+                if (transferEncodingChunked)
+                {
+                    Assert.Equal(-1, context.Request.ContentLength64);
+                    Assert.Equal("chunked", context.Request.Headers["Transfer-Encoding"]);
+                }
+                else
+                {
+                    Assert.Equal(expected.Length, context.Request.ContentLength64);
+                    Assert.Null(context.Request.Headers["Transfer-Encoding"]);
+                }
+
+                const int pad = 128;
+
+                // Add padding at beginning and end to test for correct offset/size handling
+                byte[] buffer = new byte[pad + expected.Length + pad];
+                int bytesRead = await context.Request.InputStream.ReadAsync(buffer, pad, expected.Length);
+                Assert.Equal(expected.Length, bytesRead);
+                Assert.Equal(expected, buffer.Skip(pad).Take(bytesRead));
+
+                // Subsequent reads don't do anything.
+                Assert.Equal(0, await context.Request.InputStream.ReadAsync(buffer, pad, 1));
+
+                context.Response.Close();
+                using (HttpResponseMessage response = await clientTask)
+                {
+                    Assert.Equal(200, (int)response.StatusCode);
+                }
+            }
+        }
+
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true, "")]
+        [InlineData(false, "")]
+        [InlineData(true, "Non-Empty")]
         [InlineData(false, "Non-Empty")]
         public async Task Read_FullLengthSynchronous_Success(bool transferEncodingChunked, string text)
         {
@@ -120,8 +169,9 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true)] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true)]
         [InlineData(false)]
         public async Task Read_LargeLengthAsynchronous_Success(bool transferEncodingChunked)
         {
@@ -159,8 +209,9 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true)] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true)]
         [InlineData(false)]
         public async Task Read_LargeLengthSynchronous_Success(bool transferEncodingChunked)
         {
@@ -198,8 +249,9 @@ namespace System.Net.Tests
             }
         }
         
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true)] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchAsynchronous_Success(bool transferEncodingChunked)
         {
@@ -223,8 +275,9 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true)] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchSynchronous_Success(bool transferEncodingChunked)
         {
@@ -248,8 +301,9 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        // [InlineData(true)] // [ActiveIssue(20246)] // CI hanging frequently
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(true)]
         [InlineData(false)]
         public async Task Read_NotEnoughThenCloseAsynchronous_Success(bool transferEncodingChunked)
         {
@@ -273,6 +327,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_Disposed_ReturnsZero(bool transferEncodingChunked)
@@ -301,6 +356,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanSeek_Get_ReturnsFalse()
         {
             HttpListenerRequest response = await _helper.GetRequest(chunked: true);
@@ -319,6 +375,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanRead_Get_ReturnsTrue()
         {
             HttpListenerRequest request = await _helper.GetRequest(chunked: true);
@@ -329,6 +386,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanWrite_Get_ReturnsFalse()
         {
             HttpListenerRequest request = await _helper.GetRequest(chunked: true);
@@ -347,6 +405,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_NullBuffer_ThrowsArgumentNullException(bool chunked)
@@ -360,6 +419,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(-1, true)]
         [InlineData(3, true)]
         [InlineData(-1, false)]
@@ -375,6 +435,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(0, 3, true)]
         [InlineData(1, 2, true)]
         [InlineData(2, 1, true)]
@@ -392,6 +453,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_NullAsyncResult_ThrowsArgumentNullException(bool chunked)
@@ -404,6 +466,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_InvalidAsyncResult_ThrowsArgumentException(bool chunked)
@@ -422,6 +485,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_CalledTwice_ThrowsInvalidOperationException(bool chunked)
@@ -436,9 +500,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20246)] // CI hanging frequently
         [Fact]
-        [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Read_FromClosedConnectionAsynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -461,15 +524,11 @@ namespace System.Net.Tests
                 byte[] buffer = new byte[expected.Length];
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Request.InputStream.ReadAsync(buffer, 0, buffer.Length));
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Request.InputStream.ReadAsync(buffer, 0, buffer.Length));
-
-                // Closing a response from a closed client if no writing has failed should fail.
-                Assert.Throws<HttpListenerException>(() => context.Response.Close());
             }
         }
 
-        [ActiveIssue(20246)] // CI hanging frequently
         [Fact]
-        [ActiveIssue(19983, platforms: TestPlatforms.AnyUnix)] // No exception thrown
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Read_FromClosedConnectionSynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -492,9 +551,6 @@ namespace System.Net.Tests
                 byte[] buffer = new byte[expected.Length];
                 Assert.Throws<HttpListenerException>(() => context.Request.InputStream.Read(buffer, 0, buffer.Length));
                 Assert.Throws<HttpListenerException>(() => context.Request.InputStream.Read(buffer, 0, buffer.Length));
-
-                // Closing a response from a closed client if no writing has occured should fail.
-                Assert.Throws<HttpListenerException>(() => context.Response.Close());
             }
         }
     }

@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System.Collections.Generic;
 using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-    public static class MarshalTests
+    public partial class MarshalTests
     {
         public static readonly object[][] StringData =
         {
@@ -417,11 +416,11 @@ namespace System.Runtime.InteropServices
             Marshal.FreeCoTaskMem(ptr);                          
         }
         
-        [Fact]
+        [Fact]        
         public static void BindToMoniker()
         {
             String monikerName = null;
-            if(PlatformDetection.IsWindows)
+            if(PlatformDetection.IsWindows && !PlatformDetection.IsNetNative)
             {
                 if (PlatformDetection.IsNotWindowsNanoServer)
                 {
@@ -434,10 +433,10 @@ namespace System.Runtime.InteropServices
             }        
         }
 
-        [Fact]
+        [Fact]        
         public static void ChangeWrapperHandleStrength() 
         {
-            if(PlatformDetection.IsWindows)
+            if(PlatformDetection.IsWindows && !PlatformDetection.IsNetNative)
             {
                 Assert.Throws<ArgumentNullException>(() => Marshal.ChangeWrapperHandleStrength(null, true));
             }  
@@ -447,5 +446,18 @@ namespace System.Runtime.InteropServices
             }        
         }    
         
+        [Theory]
+        [InlineData(0)]
+        [InlineData("String")]
+        public void IsComObject_NonComObject_ReturnsFalse(object value)
+        {
+            Assert.False(Marshal.IsComObject(value));
+        }
+
+        [Fact]
+        public void IsComObject_NullObject_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("o", () => Marshal.IsComObject(null));
+        }
     }
 }

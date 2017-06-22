@@ -506,6 +506,13 @@ namespace System.Diagnostics.Tests
         {
             var psi = new ProcessStartInfo { FileName = $"{Process.GetCurrentProcess().ProcessName}.exe" };
 
+            if (PlatformDetection.IsNetNative)
+            {
+                // UapAot doesn't have RegistryKey apis available so ProcessStartInfo.Verbs returns Array<string>.Empty().
+                Assert.Equal(0, psi.Verbs.Length);
+                return;
+            }
+
             Assert.Contains("open", psi.Verbs, StringComparer.OrdinalIgnoreCase);
             if (PlatformDetection.IsNotWindowsNanoServer)
             {
@@ -944,14 +951,13 @@ namespace System.Diagnostics.Tests
                 FileName = @"http://www.microsoft.com"
             };
 
-            Process.Start(info);
+            Process.Start(info); // Returns null after navigating browser
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
         [MemberData(nameof(UseShellExecute))]
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
         public void StartInfo_NotepadWithContent(bool useShellExecute)
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -967,17 +973,27 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
+                Assert.True(process != null, $"Could not start {info.FileName} {info.Arguments} UseShellExecute={info.UseShellExecute}");
+
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
                     Assert.Equal("notepad", process.ProcessName);
 
-                    // On some Windows versions, the file extension is not included in the title
-                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    if (PlatformDetection.IsUap)
+                    {
+                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
+                    }
+                    else
+                    {
+                        // On some Windows versions, the file extension is not included in the title
+                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    }
                 }
                 finally
                 {
-                    process.Kill();
+                    if (process != null && !process.HasExited)
+                        process.Kill();
                 }
             }
         }
@@ -985,7 +1001,10 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Does not support UseShellExecute
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
+        // Re-enabling with extra diagnostic info
+        // [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
+        // We don't have the ability yet for UseShellExecute in UAP
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20204", TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void StartInfo_TextFile_ShellExecute()
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -1000,20 +1019,75 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
+                Assert.True(process != null, $"Could not start {info.FileName} UseShellExecute={info.UseShellExecute}\r\n{GetAssociationDetails()}");
+
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
                     Assert.Equal("notepad", process.ProcessName);
 
-                    // On some Windows versions, the file extension is not included in the title
-                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    if (PlatformDetection.IsUap)
+                    {
+                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
+                    }
+                    else
+                    {
+                        // On some Windows versions, the file extension is not included in the title
+                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    }
                 }
                 finally
                 {
-                    process.Kill();
+                    if (process != null && !process.HasExited)
+                        process.Kill();
                 }
             }
         }
+
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        private unsafe static extern int AssocQueryStringW(
+            int flags,
+            int str,
+            string pszAssoc,
+            string pszExtra,
+            char* pszOut,
+            ref uint pcchOut);
+
+        private unsafe static string GetAssociationString(int flags, int str, string pszAssoc, string pszExtra)
+        {
+            uint count = 0;
+            int result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, null, ref count);
+            if (result != 1)
+                return $"Didn't get expected HRESULT (1) when getting char count. HRESULT was 0x{result:x8}";
+
+            string value = new string((char)0, (int)count - 1);
+            fixed(char* s = value)
+            {
+                result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, s, ref count);
+            }
+
+            if (result != 0)
+                return $"Didn't get expected HRESULT (0), when getting char count. HRESULT was 0x{result:x8}";
+
+            return value;
+        }
+
+        private static string GetAssociationDetails()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Association details for '.txt'");
+            sb.AppendLine("------------------------------");
+
+            string open = GetAssociationString(0, 1 /* ASSOCSTR_COMMAND */, ".txt", "open");
+            sb.AppendFormat("Open command: {0}", open);
+            sb.AppendLine();
+
+            string progId = GetAssociationString(0, 20 /* ASSOCSTR_PROGID */, ".txt", null);
+            sb.AppendFormat("ProgID: {0}", progId);
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
         public void ShellExecute_Nano_Fails_Start()

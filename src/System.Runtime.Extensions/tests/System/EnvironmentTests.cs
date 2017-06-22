@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -368,5 +369,15 @@ namespace System.Tests
             IntPtr hToken,
             uint dwFlags,
             char* pszPath);
+
+        public static IEnumerable<object[]> EnvironmentVariableTargets
+        {
+            get
+            {
+                yield return new object[] { EnvironmentVariableTarget.Process };
+                yield return new object[] { EnvironmentVariableTarget.User };
+                yield return new object[] { EnvironmentVariableTarget.Machine };
+            }
+        }
     }
 }

@@ -66,25 +66,34 @@ namespace System
             return runningVersion != null && runningVersion >= net470;
         }
 
+        public static bool IsNetfx471OrNewer()
+        {
+            if (!IsFullFramework)
+            {
+                return false;
+            }
+
+            Version net471 = new Version(4, 7, 1);
+            Version runningVersion = GetFrameworkVersion();
+            return runningVersion != null && runningVersion >= net471;
+        }
+
         public static Version GetFrameworkVersion()
         {
             string[] descriptionArray = RuntimeInformation.FrameworkDescription.Split(' ');
             if (descriptionArray.Length < 3)
-            {
                 return null;
-            }
-                
-            string runningVersion = descriptionArray[2];
 
-            // we could get a version with build number > 1 e.g 4.6.1375 but we only want to have 4.6.1
-            // so that we get the actual Framework Version
-            if (runningVersion.Length > 5)
+            if (!Version.TryParse(descriptionArray[2], out Version actualVersion))
+                return null;
+
+            foreach (Range currentRange in FrameworkRanges)
             {
-                runningVersion = runningVersion.Substring(0, 5);
+                if (currentRange.IsInRange(actualVersion))
+                    return currentRange.FrameworkVersion;
             }
 
-            Version result;
-            return Version.TryParse(runningVersion, out result) ? result : null;
+            return null;
         }
 
         private static int s_isWinRT = -1;
@@ -177,6 +186,7 @@ namespace System
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
+        public static bool IsTizen => IsDistroAndVersion("tizen");
 
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.
@@ -188,7 +198,7 @@ namespace System
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                IdVersionPair v = ParseOsReleaseFile();
+                DistroInfo v = ParseOsReleaseFile();
                 if (v.Id == distroId && (versionId == null || v.VersionId == versionId))
                 {
                     return true;
@@ -198,13 +208,27 @@ namespace System
             return false;
         }
 
-        private static IdVersionPair ParseOsReleaseFile()
+        public static string GetDistroVersionString()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return "";
+            }
+
+            DistroInfo v = ParseOsReleaseFile();
+
+            return "Distro=" + v.Id + " VersionId=" + v.VersionId + " Pretty=" + v.PrettyName + " Version=" + v.Version;
+        }
+
+        private static DistroInfo ParseOsReleaseFile()
         {
             Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
 
-            IdVersionPair ret = new IdVersionPair();
+            DistroInfo ret = new DistroInfo();
             ret.Id = "";
             ret.VersionId = "";
+            ret.Version = "";
+            ret.PrettyName = "";
 
             if (File.Exists("/etc/os-release"))
             {
@@ -212,35 +236,44 @@ namespace System
                 {
                     if (line.StartsWith("ID=", System.StringComparison.Ordinal))
                     {
-                        ret.Id = line.Substring("ID=".Length);
+                        ret.Id = RemoveQuotes(line.Substring("ID=".Length));
                     }
                     else if (line.StartsWith("VERSION_ID=", System.StringComparison.Ordinal))
                     {
-                        ret.VersionId = line.Substring("VERSION_ID=".Length);
+                        ret.VersionId = RemoveQuotes(line.Substring("VERSION_ID=".Length));
+                    }
+                    else if (line.StartsWith("VERSION=", System.StringComparison.Ordinal))
+                    {
+                        ret.Version = RemoveQuotes(line.Substring("VERSION=".Length));
+                    }
+                    else if (line.StartsWith("PRETTY_NAME=", System.StringComparison.Ordinal))
+                    {
+                        ret.PrettyName = RemoveQuotes(line.Substring("PRETTY_NAME=".Length));
                     }
                 }
-            }
-
-            string versionId = ret.VersionId;
-            if (versionId.Length >= 2 && versionId[0] == '"' && versionId[versionId.Length - 1] == '"')
-            {
-                // Remove quotes.
-                ret.VersionId = versionId.Substring(1, versionId.Length - 2);
-            }
-
-            if (ret.Id.Length >= 2 && ret.Id[0] == '"' && ret.Id[ret.Id.Length - 1] == '"')
-            {
-                // Remove quotes.
-                ret.Id = ret.Id.Substring(1, ret.Id.Length - 2);
             }
 
             return ret;
         }
 
-        private struct IdVersionPair
+        private static string RemoveQuotes(string s)
+        {
+            s = s.Trim();
+            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
+            {
+                // Remove quotes.
+                s = s.Substring(1, s.Length - 2);
+            }
+
+            return s;
+        }
+
+        private struct DistroInfo
         {
             public string Id { get; set; }
             public string VersionId { get; set; }
+            public string Version { get; set; }
+            public string PrettyName { get; set; }
         }
 
         private static int GetWindowsVersion()
@@ -396,5 +429,33 @@ namespace System
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
         public static bool IsXmlDsigXsltTransformSupported => PlatformDetection.IsReflectionEmitSupported;
+
+        public static Range[] FrameworkRanges => new Range[]{
+          new Range(new Version(4, 7, 2500, 0), null, new Version(4, 7, 1)),
+          new Range(new Version(4, 6, 2000, 0), new Version(4, 7, 2090, 0), new Version(4, 7, 0)),
+          new Range(new Version(4, 6, 1500, 0), new Version(4, 6, 1999, 0), new Version(4, 6, 2)),
+          new Range(new Version(4, 6, 1000, 0), new Version(4, 6, 1499, 0), new Version(4, 6, 1)),
+          new Range(new Version(4, 6, 55, 0), new Version(4, 6, 999, 0), new Version(4, 6, 0)),
+          new Range(new Version(4, 0, 30319, 0), new Version(4, 0, 52313, 36313), new Version(4, 5, 2))
+        };
+
+        public class Range
+        {
+            public Version Start { get; private set; }
+            public Version Finish { get; private set; }
+            public Version FrameworkVersion { get; private set; }
+
+            public Range(Version start, Version finish, Version frameworkVersion)
+            {
+                Start = start;
+                Finish = finish;
+                FrameworkVersion = frameworkVersion;
+            }
+
+            public bool IsInRange(Version version)
+            {
+                return version >= Start && (Finish == null || version <= Finish);
+            }
+        }
     }
 }

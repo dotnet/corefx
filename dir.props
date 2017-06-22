@@ -75,6 +75,8 @@
     <!-- Default any assembly not specifying a key to use the Open Key -->
     <AssemblyKey>Open</AssemblyKey>
     <RunApiCompat>true</RunApiCompat>
+    <!-- Build as portable by default -->
+    <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(Configuration)' != ''">
@@ -241,6 +243,12 @@
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
     <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Properties related to multi-file mode for ILC tests -->
+  <PropertyGroup>
+    <!-- Only enable multi-file for Uapaot-Release-x64 for now -->
+    <EnableMultiFileILCTests Condition="'$(TargetGroup)' == 'uapaot' And '$(ConfigurationGroup)' == 'Release' And '$(ArchGroup)' == 'x64'">true</EnableMultiFileILCTests>
   </PropertyGroup>
 
   <PropertyGroup>

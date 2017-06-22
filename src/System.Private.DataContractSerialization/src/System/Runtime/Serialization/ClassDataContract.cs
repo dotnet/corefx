@@ -459,8 +459,7 @@ namespace System.Runtime.Serialization
             //
             string typeFullName = GetGeneralTypeName(type);
 
-            return s_knownSerializableTypeInfos.ContainsKey(typeFullName)
-                || Globals.TypeOfException.IsAssignableFrom(type);
+            return s_knownSerializableTypeInfos.ContainsKey(typeFullName);
         }
 
         internal static bool IsNonSerializedMember(Type type, string memberName)
@@ -1031,7 +1030,7 @@ namespace System.Runtime.Serialization
                         DataMember memberContract = new DataMember(member);
                         if (property != null)
                         {
-                            MethodInfo getMethod = property.GetMethod;
+                            MethodInfo getMethod = property.GetGetMethod();
                             if (getMethod == null || IsMethodOverriding(getMethod) || getMethod.GetParameters().Length > 0)
                                 continue;
 

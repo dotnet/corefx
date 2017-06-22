@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="BrushesTests.cs" />
+    <Compile Include="CharacterRangeTests.cs" />
+    <Compile Include="ColorTranslatorTests.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="IconTests.cs" />
+    <Compile Include="PensTests.cs" />
+    <Compile Include="Imaging\BitmapDataTests.cs" />
+    <Compile Include="Imaging\ColorMapTests.cs" />
+    <Compile Include="Imaging\ColorMatrixTests.cs" />
+    <Compile Include="Imaging\EncoderTests.cs" />
+    <Compile Include="Imaging\FrameDimensionTests.cs" />
+    <Compile Include="Imaging\ImageCodecInfoTests.cs" />
+    <Compile Include="Imaging\ImageFormatTests.cs" />
+    <Compile Include="Imaging\MetaHeaderTests.cs" />
+    <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
+    <Compile Include="RegionTests.cs" />
+    <Compile Include="StringFormatTests.cs" />
+    <Compile Include="SystemBrushesTests.cs" />
+    <Compile Include="SystemIconsTests.cs" />
+    <Compile Include="SystemPensTest.cs" />
+    <Compile Include="Drawing2D\MatrixTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
+      <Link>Common\System\AssertExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
+      <Link>Common\System\ThreadCultureChange.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bitmaps\16x16_one_entry_4bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\32x32_one_entry_4bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\48x48_one_entry_1bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\64x64_one_entry_8bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\96x96_one_entry_8bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="bitmaps\48x48_multiple_entries_4bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <LogicalName>System.Drawing.Tests.48x48_multiple_entries_4bit.ico</LogicalName>
+    </EmbeddedResource>
+    <Content Include="bitmaps\256x256_seven_entries_multiple_bits.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\48x48_multiple_entries_32bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\10x16_one_entry_32bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\256x256_one_entry_32bit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bitmaps\256x256_two_entries_multiple_bits.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Printing\MarginsTests.cs" />
+    <Compile Include="Printing\PrinterResolutionTests.cs" />
+    <Compile Include="Printing\PageSettingsTests.cs" />
+    <Compile Include="Printing\PaperSizeTests.cs" />
+    <Compile Include="Printing\PaperSourceTests.cs" />
+    <Compile Include="Printing\PrinterUnitConvertTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>
