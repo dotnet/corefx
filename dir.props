@@ -125,24 +125,17 @@
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
   <PropertyGroup>
-    <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
-    <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
-    <_portableRID>linux</_portableRID>
-    <_portableRID Condition="'$(_runtimeOSFamily)' == 'win'">win</_portableRID>
-    <_portableRID Condition="'$(_runtimeOSFamily)' == 'osx'">osx</_portableRID>
+    <HostOS>$(RuntimeOS)</HostOS>
+    <HostRid>$(HostOS)-x64</HostRid>
 
-    <!-- Tizen does not provide the x64 runtime so replaces it with the ubuntu.14.04-x64 -->
-    <HostRid Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</HostRid>
-    <HostRid Condition="'$(HostRid)' == ''">$(RuntimeOS)</HostRid>
+    <_portableRID Condition="'$(OSGroup)' == 'Unix'">linux</_portableRID>
+    <_portableRID Condition="'$(OSGroup)' == 'Windows_NT'">win</_portableRID>
+    <_portableRID Condition="'$(OSGroup)' == 'OSX'">osx</_portableRID>
 
-    <RuntimeRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)</RuntimeRid>
-    <RuntimeRid Condition="'$(RuntimeRid)' == ''">$(RuntimeOS)</RuntimeRid>
-
-    <TargetRid Condition="'$(TargetRid)' == ''">$(RuntimeRid)</TargetRid>
-
-    <HostFullRid>$(HostRid)-x64</HostFullRid>
-    <TargetFullRid>$(TargetRid)-$(ArchGroup)</TargetFullRid>
-    <RuntimeFullRid>$(RuntimeRid)-$(ArchGroup)</RuntimeFullRid>
+    <TargetRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)-$(ArchGroup)</TargetRid>
+    <TargetRid Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</TargetRid>
+    <TargetRid Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</TargetRid>
+    <TargetRid Condition="'$(TargetRid)' == ''">$(RuntimeOS)-$(ArchGroup)</TargetRid>
   </PropertyGroup>
 
   <!-- Import packaging props -->

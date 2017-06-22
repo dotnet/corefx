@@ -31,28 +31,16 @@
       "defaultValue": false
     },
     "RuntimeOS": {
-      "description": "",
+      "description": "The RuntimeOS used for building and restoring native OS dependent assets (i.e. RID specific binaries)",
       "valueType": "property",
       "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
       "defaultValue": ""
     },
-    "HostRid": {
+    "HostOS": {
       "description": "The RID used for restoring native OS dependent assets (i.e. RID specific binaries)",
       "valueType": "property",
       "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
-      "defaultValue": ""
-    },
-    "RuntimeRid": {
-      "description": "The RID used for restoring the .NET Core runtime",
-      "valueType": "property",
-      "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
-      "defaultValue": ""
-    },
-    "TargetRid": {
-      "description": "The RID of the target packages.",
-      "valueType": "property",
-      "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
-      "defaultValue": "${RuntimeRid}"
+      "defaultValue": "${RuntimeOs}"
     },
     "PortableBuild": {
       "description": "Indicates if this is a portable build.",
