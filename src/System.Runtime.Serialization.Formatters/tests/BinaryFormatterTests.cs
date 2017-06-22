@@ -42,21 +42,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
         }
 
-        [Theory]
-        [MemberData(nameof(SerializableObjects_MemberData))]
-        public void ValidateAgainstBlobs(object obj, string[] blobs)
+        private static void SanityCheckBlob(object obj, string[] blobs)
         {
-            if (obj == null)
-            {
-                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
-            }
-
-            if (blobs == null || blobs.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
-                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
-            }
-
             // Check if runtime generated blob is the same as the stored one
             int frameworkBlobNumber = PlatformDetection.IsFullFramework ? 1 : 0;
             if (frameworkBlobNumber < blobs.Length &&
@@ -68,6 +55,29 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
                 Assert.True(CreateComparableBlobInfo(blobs[frameworkBlobNumber]) == CreateComparableBlobInfo(runtimeBlob),
                     $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SerializableObjects_MemberData))]
+        public void ValidateAgainstBlobs(object obj, string[] blobs)
+        {
+            bool verifyBlob = false;
+
+            if (obj == null)
+            {
+                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
+            }
+
+            if (blobs == null || blobs.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
+                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+            }
+
+            if (verifyBlob)
+            {
+                SanityCheckBlob(obj, blobs);
             }
 
             foreach (string blob in blobs)
