@@ -1399,8 +1399,8 @@ namespace System.DirectoryServices.Protocols
                                         }
                                     }
 
-                                    ((ExtendedResponse)response).name = name;
-                                    ((ExtendedResponse)response).value = requestValueArray;
+                                    ((ExtendedResponse)response).ResponseName = name;
+                                    ((ExtendedResponse)response).ResponseValue = requestValueArray;
                                 }
                             }
                         }
@@ -1445,8 +1445,8 @@ namespace System.DirectoryServices.Protocols
                                 referenceMessage = Wldap32.ldap_next_reference(ldapHandle, referenceMessage);
                             }
 
-                            ((SearchResponse)response).SetEntries(searchResultEntries);
-                            ((SearchResponse)response).SetReferences(searchResultReferences);
+                            ((SearchResponse)response).Entries = searchResultEntries;
+                            ((SearchResponse)response).References = searchResultReferences;
                         }
 
                         if (resulterror != (int)ResultCode.Success && resulterror != (int)ResultCode.CompareFalse && resulterror != (int)ResultCode.CompareTrue && resulterror != (int)ResultCode.Referral && resulterror != (int)ResultCode.ReferralV2)
