@@ -91,6 +91,19 @@ namespace System.Tests
         }
 
         [Benchmark]
+        [MemberData(nameof(ContainsStringComparisonArgs))]
+        public void Contains(StringComparison comparisonType, int size)
+        {
+            PerfUtils utils = new PerfUtils();
+            string testString = utils.CreateString(size);
+            string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
+            foreach (var iteration in Benchmark.Iterations)
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < 10000; i++)
+                        testString.Contains(subString, comparisonType);
+        }
+
+        [Benchmark]
         [MemberData(nameof(TestStringSizes))]
         public void Equals(int size)
         {
@@ -450,6 +463,7 @@ namespace System.Tests
         public static IEnumerable<object[]> SplitArgs => Permutations(s_trimStrings, s_trimCharArrays, s_splitOptions);
         public static IEnumerable<object[]> CompareArgs => Permutations(s_comparePairs, s_compareOptions);
         public static IEnumerable<object[]> IndexOfArgs => Permutations(s_compareOptions);
+        public static IEnumerable<object[]> ContainsStringComparisonArgs => Permutations(s_compareOptions, TestStringSizes());
 
         [Benchmark]
         [MemberData(nameof(CaseArgs))]
