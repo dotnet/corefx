@@ -126,6 +126,7 @@
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
   <PropertyGroup>
     <HostOS>$(RuntimeOS)</HostOS>
+    <HostOS Condition="'$(HostOS)' == 'tizen.4.0.0'">ubuntu.14.04</HostOS>
     <HostRid>$(HostOS)-x64</HostRid>
 
     <_portableRID Condition="'$(OSGroup)' == 'Unix'">linux</_portableRID>
