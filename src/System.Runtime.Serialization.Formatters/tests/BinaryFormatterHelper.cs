@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Text.RegularExpressions;
 using Xunit;
 
@@ -166,6 +167,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 yield return SerializeObjectToBlob(record[0], assemblyStyle);
             }
+        }
+
+        public static string CreateComparableBlobInfo(string base64Blob)
+        {
+            byte[] data = Convert.FromBase64String(base64Blob);
+            string decodedString = Encoding.UTF8.GetString(data);
+            return Regex.Replace(decodedString, @"System\.Runtime\.Serialization\.Formatters\.Tests, Version=\d.\d.\d.\d. Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb", "");
         }
 
         public static (int blobs, int foundBlobs, int updatedBlobs) UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)

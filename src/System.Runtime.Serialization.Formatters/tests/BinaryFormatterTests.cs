@@ -66,7 +66,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 !(obj is Collections.Specialized.HybridDictionary))
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
-                Assert.True(blobs[frameworkBlobNumber] == runtimeBlob,
+                Assert.True(CreateComparableBlobInfo(blobs[frameworkBlobNumber]) == CreateComparableBlobInfo(runtimeBlob),
                     $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
             }
 
@@ -133,7 +133,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             if (frameworkBlobNumber < blobs.Length)
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
-                Assert.True(blobs[frameworkBlobNumber] == runtimeBlob,
+                Assert.True(CreateComparableBlobInfo(blobs[frameworkBlobNumber]) == CreateComparableBlobInfo(runtimeBlob),
                     $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
             }
 

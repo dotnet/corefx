@@ -24,9 +24,9 @@ namespace System.Net
 
         private readonly ArrayList m_list = new ArrayList();
 
-#pragma warning disable 0169
-        private int m_version; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
-#pragma warning restore 0169
+#pragma warning disable 0414
+        private int m_version = 0; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
+#pragma warning restore 0414
         private DateTime m_TimeStamp = DateTime.MinValue; // Do not rename (binary serialization)
         private bool m_has_other_versions; // Do not rename (binary serialization)
 
