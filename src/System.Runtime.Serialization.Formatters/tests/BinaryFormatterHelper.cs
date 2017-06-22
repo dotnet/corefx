@@ -173,7 +173,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             byte[] data = Convert.FromBase64String(base64Blob);
             string decodedString = Encoding.UTF8.GetString(data);
-            return Regex.Replace(decodedString, @"System\.Runtime\.Serialization\.Formatters\.Tests, Version=\d.\d.\d.\d. Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb", "");
+            return Regex.Replace(decodedString, @"Version=\d.\d.\d.\d.", "Version=0.0.0.0", RegexOptions.Multiline);
         }
 
         public static (int blobs, int foundBlobs, int updatedBlobs) UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)
