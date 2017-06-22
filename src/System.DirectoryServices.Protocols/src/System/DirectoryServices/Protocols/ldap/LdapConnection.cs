@@ -1674,7 +1674,7 @@ namespace System.DirectoryServices.Protocols
         internal DirectoryAttribute ConstructAttribute(IntPtr entryMessage, IntPtr attributeName)
         {
             DirectoryAttribute attribute = new DirectoryAttribute();
-            attribute.isSearchResult = true;
+            attribute._isSearchResult = true;
 
             // get name
             string name = Marshal.PtrToStringUni(attributeName);
