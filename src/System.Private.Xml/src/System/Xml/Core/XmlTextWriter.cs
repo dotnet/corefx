@@ -343,20 +343,7 @@ namespace System.Xml
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Xml_InvalidIndentation);
-                if(_indentation != value)
-                {
-                    _indentation = value;
-                    int arraySize = _indentation * IndentArrayLength;
-                    if (arraySize > _indentChars.Length)
-                    {
-                        char indentChar = _indentChars[0];
-                        _indentChars = new char[arraySize];
-                        for (int i = 0; i < arraySize; i++)
-                        {
-                            _indentChars[i] = indentChar;
-                        }
-                    }
-                }
+                _indentation = value;
             }
         }
 

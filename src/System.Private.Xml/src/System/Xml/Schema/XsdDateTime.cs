@@ -108,7 +108,9 @@ namespace System.Xml.Schema
         private static readonly int s_Lz___ = "---".Length;
         private static readonly int s_lz___dd = "---dd".Length;
 
-        // Constants needed to convert ticks to year, month and day
+        // These values were copied from the DateTime class and are
+        // needed to convert ticks to year, month and day. See comment
+        // for method GetYearMonthDay for rationale.
         // Number of 100ns ticks per time unit
         private const long TicksPerMillisecond = 10000;
         private const long TicksPerSecond = TicksPerMillisecond * 1000;
@@ -571,6 +573,14 @@ namespace System.Xml.Schema
             sb.Append(text);
         }
 
+        // When printing the date, we need the year, month and the day. When
+        // requesting these values from DateTime, it needs to redo the year
+        // calculation before it can calculate the month, and it needs to redo
+        // the year and month calculation before it can calculate the day. This
+        // results in the year being calculated 3 times, the month twice and the
+        // day once. As we know that we need all 3 values, by duplicating the
+        // logic here we can calculate the number of days and return the intermediate
+        // calculations for month and year without the added cost.
         private void GetYearMonthDay(out int year, out int month, out int day)
         {
             long ticks = _dt.Ticks;

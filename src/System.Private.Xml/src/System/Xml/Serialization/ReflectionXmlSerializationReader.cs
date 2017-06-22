@@ -616,15 +616,14 @@ namespace System.Xml.Serialization
             }
         }
 
-        private static IDictionary<Tuple<Type, Type>, Func<MemberInfo, SetMemberValueDelegate>> s_GetSetMemberValueDelegateWithTypeCache = new ConcurrentDictionary<Tuple<Type, Type>, Func<MemberInfo, SetMemberValueDelegate>>();
-        private static IDictionary<Tuple<Type, string>, SetMemberValueDelegate> s_SetMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, SetMemberValueDelegate>();
-        private delegate void SetMemberValueDelegate(object o, object val);
+        private static ConcurrentDictionary<Tuple<Type, string>, SetMemberValueDelegate> s_setMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, SetMemberValueDelegate>();
+        public delegate void SetMemberValueDelegate(object o, object val);
 
         private static SetMemberValueDelegate GetSetMemberValueDelegate(object o, string memberName)
         {
             SetMemberValueDelegate result;
             var typeMemberNameTuple = Tuple.Create(o.GetType(), memberName);
-            if (!s_SetMemberValueDelegateCache.TryGetValue(typeMemberNameTuple, out result))
+            if (!s_setMemberValueDelegateCache.TryGetValue(typeMemberNameTuple, out result))
             {
                 MemberInfo memberInfo = ReflectionXmlSerializationHelper.GetMember(o.GetType(), memberName);
                 Type memberType;
@@ -642,23 +641,19 @@ namespace System.Xml.Serialization
                 }
 
                 var typeMemberTypeTuple = Tuple.Create(o.GetType(), memberType);
-                Func<MemberInfo, SetMemberValueDelegate> getSetMemberValueDelegateWithType;
-                if (!s_GetSetMemberValueDelegateWithTypeCache.TryGetValue(typeMemberTypeTuple, out getSetMemberValueDelegateWithType))
-                {
-                    MethodInfo getSetMemberValueDelegateWithTypeGenericMi = typeof(ReflectionXmlSerializationReader).GetMethod(nameof(GetSetMemberValueDelegateWithType), BindingFlags.Static | BindingFlags.NonPublic);
-                    MethodInfo getSetMemberValueDelegateWithTypeMi = getSetMemberValueDelegateWithTypeGenericMi.MakeGenericMethod(o.GetType(), memberType);
-                    getSetMemberValueDelegateWithType = (Func<MemberInfo, SetMemberValueDelegate>)getSetMemberValueDelegateWithTypeMi.CreateDelegate(typeof(Func<MemberInfo, SetMemberValueDelegate>));
-                    s_GetSetMemberValueDelegateWithTypeCache.TryAdd(typeMemberTypeTuple, getSetMemberValueDelegateWithType);
-                }
+                MethodInfo getSetMemberValueDelegateWithTypeGenericMi = typeof(ReflectionXmlSerializationReader).GetMethod(nameof(GetSetMemberValueDelegateWithType), BindingFlags.Static | BindingFlags.NonPublic);
+                MethodInfo getSetMemberValueDelegateWithTypeMi = getSetMemberValueDelegateWithTypeGenericMi.MakeGenericMethod(o.GetType(), memberType);
+                var getSetMemberValueDelegateWithType = (Func<MemberInfo, SetMemberValueDelegate>)getSetMemberValueDelegateWithTypeMi.CreateDelegate(typeof(Func<MemberInfo, SetMemberValueDelegate>));
 
                 result = getSetMemberValueDelegateWithType(memberInfo);
-                s_SetMemberValueDelegateCache.TryAdd(typeMemberNameTuple, result);
+                s_setMemberValueDelegateCache.TryAdd(typeMemberNameTuple, result);
             }
 
             return result;
         }
 
-        private static SetMemberValueDelegate GetSetMemberValueDelegateWithType<TObj, TParam>(MemberInfo memberInfo)
+        // This method needs to be public so that reflection metadata is available on uapaot
+        public static SetMemberValueDelegate GetSetMemberValueDelegateWithType<TObj, TParam>(MemberInfo memberInfo)
         {
             if (typeof(TObj).IsValueType)
             {
