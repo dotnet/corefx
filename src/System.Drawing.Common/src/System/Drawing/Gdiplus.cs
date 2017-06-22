@@ -2630,7 +2630,9 @@ namespace System.Drawing
             internal static void CheckStatus(int status)
             {
                 if (status != Ok)
+                {
                     throw StatusException(status);
+                }
             }
 
             internal static Exception StatusException(int status)

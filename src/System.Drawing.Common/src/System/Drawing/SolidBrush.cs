@@ -20,11 +20,11 @@ namespace System.Drawing
         {
             _color = color;
 
-            IntPtr brush = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateSolidFill(_color.ToArgb(), out brush);
+            IntPtr nativeBrush = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipCreateSolidFill(_color.ToArgb(), out nativeBrush);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
 
 #if FEATURE_SYSTEM_EVENTS
             if (color.IsSystemColor)
@@ -75,7 +75,8 @@ namespace System.Drawing
             {
                 if (_color == Color.Empty)
                 {
-                    int status = SafeNativeMethods.Gdip.GdipGetSolidFillColor(new HandleRef(this, NativeBrush), out int colorARGB);
+                    int colorARGB;
+                    int status = SafeNativeMethods.Gdip.GdipGetSolidFillColor(new HandleRef(this, NativeBrush), out colorARGB);
                     SafeNativeMethods.Gdip.CheckStatus(status);
 
                     _color = Color.FromArgb(colorARGB);
