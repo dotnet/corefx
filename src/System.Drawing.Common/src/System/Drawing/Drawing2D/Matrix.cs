@@ -13,22 +13,24 @@ namespace System.Drawing.Drawing2D
 
         public Matrix()
         {
-            int status = SafeNativeMethods.Gdip.GdipCreateMatrix(out IntPtr matrix);
+            IntPtr nativeMatrix;
+            int status = SafeNativeMethods.Gdip.GdipCreateMatrix(out nativeMatrix);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            nativeMatrix = matrix;
+            this.nativeMatrix = nativeMatrix;
         }
 
         public Matrix(float m11, float m12, float m21, float m22, float dx, float dy)
         {
-            int status = SafeNativeMethods.Gdip.GdipCreateMatrix2(m11, m12, m21, m22, dx, dy, out IntPtr matrix);
+            IntPtr nativeMatrix;
+            int status = SafeNativeMethods.Gdip.GdipCreateMatrix2(m11, m12, m21, m22, dx, dy, out nativeMatrix);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            nativeMatrix = matrix;
+            this.nativeMatrix = nativeMatrix;
         }
 
         public Matrix(RectangleF rect, PointF[] plgpts)
@@ -47,14 +49,15 @@ namespace System.Drawing.Drawing2D
             try
             {
                 GPRECTF gprectf = new GPRECTF(rect);
-                int status = SafeNativeMethods.Gdip.GdipCreateMatrix3(ref gprectf, new HandleRef(null, buf), out IntPtr matrix);
+                IntPtr nativeMatrix;
+                int status = SafeNativeMethods.Gdip.GdipCreateMatrix3(ref gprectf, new HandleRef(null, buf), out nativeMatrix);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                 {
                     throw SafeNativeMethods.Gdip.StatusException(status);
                 }
 
-                nativeMatrix = matrix;
+                this.nativeMatrix = nativeMatrix;
             }
             finally
             {
@@ -78,14 +81,15 @@ namespace System.Drawing.Drawing2D
             try
             {
                 GPRECT gprect = new GPRECT(rect);
-                int status = SafeNativeMethods.Gdip.GdipCreateMatrix3I(ref gprect, new HandleRef(null, buf), out IntPtr matrix);
+                IntPtr nativeMatrix;
+                int status = SafeNativeMethods.Gdip.GdipCreateMatrix3I(ref gprect, new HandleRef(null, buf), out nativeMatrix);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                 {
                     throw SafeNativeMethods.Gdip.StatusException(status);
                 }
 
-                nativeMatrix = matrix;
+                this.nativeMatrix = nativeMatrix;
             }
             finally
             {
@@ -112,12 +116,13 @@ namespace System.Drawing.Drawing2D
 
         public Matrix Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneMatrix(new HandleRef(this, nativeMatrix), out IntPtr cloneMatrix);
+            IntPtr clonedMatrix;
+            int status = SafeNativeMethods.Gdip.GdipCloneMatrix(new HandleRef(this, nativeMatrix), out clonedMatrix);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return new Matrix(cloneMatrix);
+            return new Matrix(clonedMatrix);
         }
     
         public float[] Elements

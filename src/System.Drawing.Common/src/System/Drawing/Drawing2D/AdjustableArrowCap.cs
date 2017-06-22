@@ -14,7 +14,8 @@ namespace System.Drawing.Drawing2D
 
         public AdjustableArrowCap(float width, float height, bool isFilled)
         {
-            int status = SafeNativeMethods.Gdip.GdipCreateAdjustableArrowCap(height, width, isFilled, out IntPtr nativeCap);
+            IntPtr nativeCap;
+            int status = SafeNativeMethods.Gdip.GdipCreateAdjustableArrowCap(height, width, isFilled, out nativeCap);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);

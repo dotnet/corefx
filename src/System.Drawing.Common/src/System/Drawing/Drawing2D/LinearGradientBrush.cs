@@ -15,32 +15,34 @@ namespace System.Drawing.Drawing2D
 
         public LinearGradientBrush(PointF point1, PointF point2, Color color1, Color color2)
         {
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrush(new GPPOINTF(point1),
                                                      new GPPOINTF(point2),
                                                      color1.ToArgb(),
                                                      color2.ToArgb(),
                                                      (int)WrapMode.Tile,
-                                                     out IntPtr brush);
+                                                     out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         public LinearGradientBrush(Point point1, Point point2, Color color1, Color color2)
         {
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrushI(new GPPOINT(point1),
                                                       new GPPOINT(point2),
                                                       color1.ToArgb(),
                                                       color2.ToArgb(),
                                                       (int)WrapMode.Tile,
-                                                      out IntPtr brush);
+                                                      out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         public LinearGradientBrush(RectangleF rect, Color color1, Color color2, LinearGradientMode linearGradientMode)
@@ -59,17 +61,18 @@ namespace System.Drawing.Drawing2D
             }
 
             GPRECTF gprectf = new GPRECTF(rect);
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrushFromRect(ref gprectf,
                                                              color1.ToArgb(),
                                                              color2.ToArgb(),
                                                              unchecked((int)linearGradientMode),
                                                              (int)WrapMode.Tile,
-                                                             out IntPtr brush);
+                                                             out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         public LinearGradientBrush(Rectangle rect, Color color1, Color color2, LinearGradientMode linearGradientMode)
@@ -88,17 +91,18 @@ namespace System.Drawing.Drawing2D
             }
 
             GPRECT gpRect = new GPRECT(rect);
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrushFromRectI(ref gpRect,
                                                               color1.ToArgb(),
                                                               color2.ToArgb(),
                                                               unchecked((int)linearGradientMode),
                                                               (int)WrapMode.Tile,
-                                                              out IntPtr brush);
+                                                              out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         public LinearGradientBrush(RectangleF rect, Color color1, Color color2, float angle) : this(rect, color1, color2, angle, false)
@@ -114,18 +118,19 @@ namespace System.Drawing.Drawing2D
             }
 
             GPRECTF gprectf = new GPRECTF(rect);
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrushFromRectWithAngle(ref gprectf,
                                                                       color1.ToArgb(),
                                                                       color2.ToArgb(),
                                                                       angle,
                                                                       isAngleScaleable,
                                                                       (int)WrapMode.Tile,
-                                                                      out IntPtr brush);
+                                                                      out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         public LinearGradientBrush(Rectangle rect, Color color1, Color color2, float angle) : this(rect, color1, color2, angle, false)
@@ -141,18 +146,19 @@ namespace System.Drawing.Drawing2D
             }
 
             GPRECT gprect = new GPRECT(rect);
+            IntPtr nativeBrush;
             int status = SafeNativeMethods.Gdip.GdipCreateLineBrushFromRectWithAngleI(ref gprect,
                                                                        color1.ToArgb(),
                                                                        color2.ToArgb(),
                                                                        angle,
                                                                        isAngleScaleable,
                                                                        (int)WrapMode.Tile,
-                                                                       out IntPtr brush);
+                                                                       out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         internal LinearGradientBrush(IntPtr nativeBrush)
@@ -163,12 +169,13 @@ namespace System.Drawing.Drawing2D
 
         public override object Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out IntPtr cloneBrush);
+            IntPtr clonedBrush;
+            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out clonedBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return new LinearGradientBrush(cloneBrush);
+            return new LinearGradientBrush(clonedBrush);
         }
 
         public Color[] LinearColors

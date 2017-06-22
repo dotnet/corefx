@@ -18,7 +18,8 @@ namespace System.Drawing.Drawing2D
 
         public GraphicsPath(FillMode fillMode)
         {
-            int status = SafeNativeMethods.Gdip.GdipCreatePath(unchecked((int)fillMode), out IntPtr nativePath);
+            IntPtr nativePath;
+            int status = SafeNativeMethods.Gdip.GdipCreatePath(unchecked((int)fillMode), out nativePath);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
@@ -32,7 +33,6 @@ namespace System.Drawing.Drawing2D
         {
             if (pts == null)
                 throw new ArgumentNullException("pts");
-            IntPtr nativePath = IntPtr.Zero;
 
             if (pts.Length != types.Length)
                 throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
@@ -40,6 +40,7 @@ namespace System.Drawing.Drawing2D
             int count = types.Length;
             IntPtr ptbuf = SafeNativeMethods.Gdip.ConvertPointToMemory(pts);
             IntPtr typebuf = Marshal.AllocHGlobal(count);
+            IntPtr nativePath = IntPtr.Zero;
             try
             {
                 Marshal.Copy(types, 0, typebuf, count);
@@ -66,7 +67,6 @@ namespace System.Drawing.Drawing2D
         {
             if (pts == null)
                 throw new ArgumentNullException("pts");
-            IntPtr nativePath = IntPtr.Zero;
 
             if (pts.Length != types.Length)
                 throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
@@ -74,6 +74,7 @@ namespace System.Drawing.Drawing2D
             int count = types.Length;
             IntPtr ptbuf = SafeNativeMethods.Gdip.ConvertPointToMemory(pts);
             IntPtr typebuf = Marshal.AllocHGlobal(count);
+            IntPtr nativePath = IntPtr.Zero;
             try
             {
                 Marshal.Copy(types, 0, typebuf, count);
@@ -94,14 +95,13 @@ namespace System.Drawing.Drawing2D
 
         public object Clone()
         {
-            IntPtr clonePath = IntPtr.Zero;
-
-            int status = SafeNativeMethods.Gdip.GdipClonePath(new HandleRef(this, nativePath), out clonePath);
+            IntPtr clonedPath = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipClonePath(new HandleRef(this, nativePath), out clonedPath);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return new GraphicsPath(clonePath, 0);
+            return new GraphicsPath(clonedPath, 0);
         }
 
         private GraphicsPath(IntPtr nativePath, int extra)

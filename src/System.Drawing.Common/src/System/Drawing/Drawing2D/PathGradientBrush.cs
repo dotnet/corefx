@@ -28,15 +28,16 @@ namespace System.Drawing.Drawing2D
             IntPtr pointsBuf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
             try
             {
+                IntPtr nativeBrush;
                 int status = SafeNativeMethods.Gdip.GdipCreatePathGradient(new HandleRef(null, pointsBuf),
                                                             points.Length,
                                                             unchecked((int)wrapMode),
-                                                            out IntPtr brush);
+                                                            out nativeBrush);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
 
-                SetNativeBrushInternal(brush);
+                SetNativeBrushInternal(nativeBrush);
             }
             finally
             {
@@ -66,15 +67,16 @@ namespace System.Drawing.Drawing2D
             IntPtr pointsBuf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
             try
             {
+                IntPtr nativeBrush;
                 int status = SafeNativeMethods.Gdip.GdipCreatePathGradientI(new HandleRef(null, pointsBuf),
                                                              points.Length,
                                                              unchecked((int)wrapMode),
-                                                             out IntPtr brush);
+                                                             out nativeBrush);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
 
-                SetNativeBrushInternal(brush);
+                SetNativeBrushInternal(nativeBrush);
             }
             finally
             {
@@ -93,12 +95,13 @@ namespace System.Drawing.Drawing2D
             if (path == null)
                 throw new ArgumentNullException("path");
 
-            int status = SafeNativeMethods.Gdip.GdipCreatePathGradientFromPath(new HandleRef(path, path.nativePath), out IntPtr brush);
+            IntPtr nativeBrush;
+            int status = SafeNativeMethods.Gdip.GdipCreatePathGradientFromPath(new HandleRef(path, path.nativePath), out nativeBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            SetNativeBrushInternal(brush);
+            SetNativeBrushInternal(nativeBrush);
         }
 
         internal PathGradientBrush(IntPtr nativeBrush)
@@ -109,12 +112,13 @@ namespace System.Drawing.Drawing2D
 
         public override object Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out IntPtr cloneBrush);
+            IntPtr clonedBrush;
+            int status = SafeNativeMethods.Gdip.GdipCloneBrush(new HandleRef(this, NativeBrush), out clonedBrush);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return new PathGradientBrush(cloneBrush);
+            return new PathGradientBrush(clonedBrush);
         }
 
         public Color CenterColor

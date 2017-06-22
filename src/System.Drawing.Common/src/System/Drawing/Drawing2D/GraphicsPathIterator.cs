@@ -14,7 +14,6 @@ namespace System.Drawing.Drawing2D
         public GraphicsPathIterator(GraphicsPath path)
         {
             IntPtr nativeIter = IntPtr.Zero;
-
             int status = SafeNativeMethods.Gdip.GdipCreatePathIter(out nativeIter, new HandleRef(path, (path == null) ? IntPtr.Zero : path.nativePath));
 
             if (status != SafeNativeMethods.Gdip.Ok)

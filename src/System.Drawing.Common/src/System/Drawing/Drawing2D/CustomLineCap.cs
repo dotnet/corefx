@@ -26,10 +26,11 @@ namespace System.Drawing.Drawing2D
 
         public CustomLineCap(GraphicsPath fillPath, GraphicsPath strokePath, LineCap baseCap, float baseInset)
         {
+            IntPtr nativeLineCap;
             int status = SafeNativeMethods.Gdip.GdipCreateCustomLineCap(
                                 new HandleRef(fillPath, (fillPath == null) ? IntPtr.Zero : fillPath.nativePath),
                                 new HandleRef(strokePath, (strokePath == null) ? IntPtr.Zero : strokePath.nativePath),
-                                baseCap, baseInset, out IntPtr nativeLineCap);
+                                baseCap, baseInset, out nativeLineCap);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
@@ -75,12 +76,13 @@ namespace System.Drawing.Drawing2D
 
         public object Clone()
         {
-            int status = SafeNativeMethods.Gdip.GdipCloneCustomLineCap(new HandleRef(this, nativeCap), out IntPtr cloneCap);
+            IntPtr clonedCap;
+            int status = SafeNativeMethods.Gdip.GdipCloneCustomLineCap(new HandleRef(this, nativeCap), out clonedCap);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return CreateCustomLineCapObject(cloneCap);
+            return CreateCustomLineCapObject(clonedCap);
         }
 
         internal static CustomLineCap CreateCustomLineCapObject(IntPtr cap)
