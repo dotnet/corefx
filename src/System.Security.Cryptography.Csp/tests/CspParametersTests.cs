@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.Csp.Tests
             CspParameters cspParameters = new CspParameters();
 
             // Unmapped values (> 0xFF) throw
-            Assert.Throws<ArgumentException>(() => cspParameters.Flags = (CspProviderFlags)0x0100);
+            AssertExtensions.Throws<ArgumentException>(null, () => cspParameters.Flags = (CspProviderFlags)0x0100);
 
             // Unmapped values (> 0xFF) throw, even when combined with known values.
             Assert.Throws<ArgumentException>(

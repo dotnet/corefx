@@ -59,9 +59,9 @@ namespace System.Security.Cryptography.Cng.Tests
                 Assert.True(closedAndInvalid.IsInvalid, "closedAndInvalid.IsInvalid");
 
                 // Tests
-                Assert.Throws<ArgumentException>(() => new SafeNCryptKeyHandle(IntPtr.Zero, openButInvalid));
-                Assert.Throws<ArgumentException>(() => new SafeNCryptKeyHandle(IntPtr.Zero, closedButValid));
-                Assert.Throws<ArgumentException>(() => new SafeNCryptKeyHandle(IntPtr.Zero, closedAndInvalid));
+                AssertExtensions.Throws<ArgumentException>(null, () => new SafeNCryptKeyHandle(IntPtr.Zero, openButInvalid));
+                AssertExtensions.Throws<ArgumentException>(null, () => new SafeNCryptKeyHandle(IntPtr.Zero, closedButValid));
+                AssertExtensions.Throws<ArgumentException>(null, () => new SafeNCryptKeyHandle(IntPtr.Zero, closedAndInvalid));
             }
         }
 
