@@ -26,7 +26,7 @@ namespace System.Net.Http.Functional.Tests
 #endif
 
         private static bool CanTestCertificates =>
-            Capability.IsTrustedRootCertificateInstalled() &&
+            Capability.IsTrustedRootCertificateInstalled() && 
             (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
 
         private static bool CanTestClientCertificates =>
@@ -36,7 +36,7 @@ namespace System.Net.Http.Functional.Tests
         [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
         private static extern string CurlSslVersionDescription();
 #endif
-
+        
         public const int TestTimeoutMilliseconds = 15 * 1000;
 
         public static X509Certificate2 serverCertificateServerEku = Configuration.Certificates.GetServerCertificate();
