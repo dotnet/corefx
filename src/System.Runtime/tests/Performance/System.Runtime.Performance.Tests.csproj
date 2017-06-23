@@ -18,7 +18,6 @@
     <Compile Include="Perf.Guid.cs" />
     <Compile Include="Perf.Object.cs" />
     <Compile Include="Perf.String.cs" />
-    <Compile Include="Perf.String.netcoreapp.cs" />
     <Compile Include="Perf.TimeSpan.cs" />
     <Compile Include="Perf.Type.cs" />
     <Compile Include="Perf.UInt32.cs" />
@@ -29,6 +28,9 @@
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="Perf.String.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
