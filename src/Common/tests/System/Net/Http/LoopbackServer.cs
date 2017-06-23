@@ -114,9 +114,9 @@ namespace System.Net.Test.Common
                 if (tokens.Length == 2)
                 {
                     string headerName = tokens[0];
-                    string headerValue = tokens[1].Trim();
                     if (headerName == "Sec-WebSocket-Key")
                     {
+                        string headerValue = tokens[1].Trim();
                         string responseSecurityAcceptValue = ComputeWebSocketHandshakeSecurityAcceptValue(headerValue);
                         serverResponse =
                             "HTTP/1.1 101 Switching Protocols\r\n" +
