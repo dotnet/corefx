@@ -10,11 +10,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />
+    <!--<Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />-->
     <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" />
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Data.csproj">
+      <Project>{4ef0e49d-20e4-4113-9717-fe3860939c26}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.csproj">
+      <Project>{1bcaf5a7-574e-4e74-9147-0572344c2c93}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Data.XmlSerializers</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

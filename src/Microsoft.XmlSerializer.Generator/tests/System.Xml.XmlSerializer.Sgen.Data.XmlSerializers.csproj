@@ -4,23 +4,25 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{1BCAF5A7-574E-4E74-9147-0572344C2C93}</ProjectGuid>
+    <NoWarn>CS0219</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'">
     <!--<CodeAnalysisRuleSet>.\CodeAnalysis.ruleset</CodeAnalysisRuleSet>-->
-    <OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Tests\netstandard\</OutputPath>
+    <!--<OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Tests\netstandard\</OutputPath>-->
     <!--<TreatWarningsAsErrors>false</TreatWarningsAsErrors>-->
+    <OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Data.XmlSerializers\netstandard\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup>
-    <AssemblyName>System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers</AssemblyName>
+    <AssemblyName>System.Xml.XmlSerializer.Sgen.Data.XmlSerializers</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs" />
+    <Compile Include="System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Tests.csproj">
-      <Project>{4050f1d1-1dd2-4b48-a17b-e3f90dd18c4b}</Project>
-      <Name>System.Xml.XmlSerializer.Sgen.Tests</Name>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Data.csproj">
+      <Project>{4ef0e49d-20e4-4113-9717-fe3860939c26}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Data</Name>
     </ProjectReference>
   </ItemGroup>
   <!--<Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />-->

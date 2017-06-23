@@ -8,15 +8,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include=".\SGenTests.cs" />
-    <Content Include="System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs">
+    <Content Include="System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>baseline\System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs</Link>
+      <Link>baseline\System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\Microsoft.XmlSerializer.Generator.csproj">
       <Project>{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}</Project>
       <Name>Microsoft.XmlSerializer.Generator</Name>
+    </ProjectReference>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Data.csproj">
+      <Project>{4ef0e49d-20e4-4113-9717-fe3860939c26}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Data</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

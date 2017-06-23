@@ -24,13 +24,19 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         [Fact]
         public static void GeneralBaselineTest()
         {
-            string codefile = "System.Xml.XmlSerializer.Sgen.Tests.XmlSerializers.cs";
+            string codefile = "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs";
             if (File.Exists(codefile))
             {
                 File.Delete(codefile);
             }
 
-            int n = Sgen.Main(new string[] { @"..\..\System.Xml.XmlSerializer.Sgen.Tests\netstandard\System.Xml.XmlSerializer.Sgen.Tests.dll", "/force", "/out:..\\..\\Microsoft.XmlSerializer.Generator.Tests\\netstandard\\" });
+            //int n = Sgen.Main(new string[] { @"..\..\System.Xml.XmlSerializer.Sgen.Tests\netstandard\System.Xml.XmlSerializer.Sgen.Tests.dll", "/force", "/out:..\\..\\Microsoft.XmlSerializer.Generator.Tests\\netstandard\\" });
+            if(!File.Exists("System.Xml.XmlSerializer.Sgen.Data.dll"))
+            {
+                throw new FileNotFoundException(string.Format("Cannot find file {0}.", "System.Xml.XmlSerializer.Sgen.Data.dll"));
+            }
+
+            int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force"});
             Assert.Equal(0, n);
             if(!File.Exists(codefile))
             {

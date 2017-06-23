@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Tests", "tests\System.Xml.XmlSerializer.Sgen.Tests.csproj", "{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.XmlSerializers.Tests", "tests\System.Xml.XmlSerializer.Sgen.XmlSerializers.Tests.csproj", "{1BCAF5A7-574E-4E74-9147-0572344C2C93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers", "tests\System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.csproj", "{1BCAF5A7-574E-4E74-9147-0572344C2C93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlSerializer.Sgen.Data", "tests\System.Xml.XmlSerializer.Sgen.Data.csproj", "{4EF0E49D-20E4-4113-9717-FE3860939C26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,14 @@ Global
 		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{1BCAF5A7-574E-4E74-9147-0572344C2C93}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{4EF0E49D-20E4-4113-9717-FE3860939C26}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,5 +76,6 @@ Global
 		{80958E8B-2FEB-4F95-83F9-825CA1ED26F8} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
 		{4050F1D1-1DD2-4B48-A17B-E3F90DD18C4B} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{1BCAF5A7-574E-4E74-9147-0572344C2C93} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{4EF0E49D-20E4-4113-9717-FE3860939C26} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 	EndGlobalSection
 EndGlobal
