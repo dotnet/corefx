@@ -2158,7 +2158,7 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
         public void BeginReceiveMessageFromV4BoundToSpecificV6_NotReceived_Linux()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () =>
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
             {
                 BeginReceiveMessageFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, expectedToTimeout: true);
             });
@@ -2333,7 +2333,7 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
         public void ReceiveMessageFromAsyncV4BoundToSpecificV6_NotReceived_Linux()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () =>
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
             {
                 ReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
             });

@@ -75,7 +75,7 @@ namespace System.Security.Cryptography.OpenSsl.Tests
                 {
                 }
 
-                AssertExtensions.Throws<ArgumentException>("pKeyHandle", () => new RSAOpenSsl(pkey));
+                AssertExtensions.Throws<ArgumentException>("pkeyHandle", () => new RSAOpenSsl(pkey));
             }
         }
 
