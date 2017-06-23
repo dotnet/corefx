@@ -1293,10 +1293,10 @@ namespace System.Tests
         [Fact]
         public static void IndexOf_TurkishI()
         {
-            string str = "Turkish I \u0131s TROUBL\u0130NG!";
-
-            RemoteInvoke((s) =>
+            RemoteInvoke(() =>
             {
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                  string value = "\u0130";
@@ -1335,17 +1335,17 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, str).Dispose();
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_HungarianDoubleCompression()
         {
-            string src = "dzsdzs";
-            string trgt = "ddzs";
-
-            RemoteInvoke((source, target) =>
+            RemoteInvoke(() =>
             {
+                string source = "dzsdzs";
+                string target = "ddzs";
+
                 CultureInfo.CurrentCulture = new CultureInfo("hu-HU");
                 /*
                  There are differences between Windows and ICU regarding contractions.
@@ -1367,17 +1367,17 @@ namespace System.Tests
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, src, trgt).Dispose();
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics()
         {
-            string str = "Exhibit a\u0300\u00C0";
-            string val = "\u00C0";
-
-            RemoteInvoke((s, value) =>
+            RemoteInvoke(() =>
             {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1405,17 +1405,17 @@ namespace System.Tests
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, str, val).Dispose();
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE()
         {
-            string str = "Foo\u0400Bar";
-            string val = "\u0400";
-
-            RemoteInvoke((s, value) =>
+            RemoteInvoke(() =>
             {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1443,7 +1443,7 @@ namespace System.Tests
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, str, val).Dispose();
+            }).Dispose();
         }
 
         [Fact]
@@ -1835,10 +1835,10 @@ namespace System.Tests
         [Fact]
         public static void LastIndexOf_TurkishI()
         {
-            string str = "Turkish I \u0131s TROUBL\u0130NG!";
-
-            RemoteInvoke((s) =>
+            RemoteInvoke(() =>
             {
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                 string value = "\u0130";
@@ -1877,7 +1877,7 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, str).Dispose();
+            }).Dispose();
         }
 
         [Theory]
@@ -2270,23 +2270,15 @@ namespace System.Tests
             {
                 foreach (var testdata in ToLower_Culture_TestData())
                 {
-                    CultureInfo originalCulture = CultureInfo.CurrentCulture;
-                    try
-                    {
-                        CultureInfo.CurrentCulture = (CultureInfo)testdata[2];
-                        ToLower_Culture((string)testdata[0], (string)testdata[1]);
-                    }
-                    finally
-                    {
-                        CultureInfo.CurrentCulture = originalCulture;
-                    }
+                    ToLower_Culture((string)testdata[0], (string)testdata[1], (CultureInfo)testdata[2]);
                 }
                 return SuccessExitCode;
             }).Dispose();
         }
 
-        private static void ToLower_Culture(string actual, string expected)
+        private static void ToLower_Culture(string actual, string expected, CultureInfo culture)
         {
+            CultureInfo.CurrentCulture = culture;
             Assert.True(actual.ToLower().Equals(expected, StringComparison.Ordinal));
         }
 
