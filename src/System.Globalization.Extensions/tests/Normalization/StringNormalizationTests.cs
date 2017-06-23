@@ -27,7 +27,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void IsNormalized_Invalid()
         {
-            Assert.Throws<ArgumentException>(() => "\uFB01".IsNormalized((NormalizationForm)10));
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFB01".IsNormalized((NormalizationForm)10));
             AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFFFE".IsNormalized()); // Invalid codepoint
             AssertExtensions.Throws<ArgumentException>("strInput", () => "\uD800\uD800".IsNormalized()); // Invalid surrogate pair
         }
@@ -63,7 +63,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void Normalize_Invalid()
         {
-            Assert.Throws<ArgumentException>(() => "\uFB01".Normalize((NormalizationForm)7));
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFB01".Normalize((NormalizationForm)7));
 
             AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFFFE".Normalize()); // Invalid codepoint
             AssertExtensions.Throws<ArgumentException>("strInput", () => "\uD800\uD800".Normalize()); // Invalid surrogate pair

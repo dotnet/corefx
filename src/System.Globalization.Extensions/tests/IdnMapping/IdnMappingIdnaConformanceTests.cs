@@ -78,7 +78,7 @@ namespace System.Globalization.Tests
                 if (!entry.ASCIIResult.Success)
                 {
                     var map = new IdnMapping();
-                    Assert.Throws<ArgumentException>(() => map.GetAscii(entry.Source));
+                    AssertExtensions.Throws<ArgumentException>("unicode", () => map.GetAscii(entry.Source));
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace System.Globalization.Tests
                 if (!entry.UnicodeResult.Success)
                 {
                     var map = new IdnMapping();
-                    Assert.Throws<ArgumentException>(() => map.GetUnicode(entry.Source));
+                    AssertExtensions.Throws<ArgumentException>("ascii", () => map.GetUnicode(entry.Source));
                 }
             }
         }
