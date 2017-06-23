@@ -17,8 +17,25 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientEKUTest
     {
-        private static bool CanTestCertificates => Capability.CanTestCertificates;
-        private static bool CanTestClientCertificates => Capability.CanTestClientCertificates;
+        // Curl + OSX SecureTransport doesn't support the custom certificate callback.
+        private static bool BackendSupportsCustomCertificateHandling =>
+#if TargetsWindows
+            true;
+#else
+            CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false;
+#endif
+
+        private static bool CanTestCertificates =>
+            Capability.IsTrustedRootCertificateInstalled() &&
+            (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
+
+        private static bool CanTestClientCertificates =>
+            CanTestCertificates && BackendSupportsCustomCertificateHandling;
+
+#if !TargetsWindows
+        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
+        private static extern string CurlSslVersionDescription();
+#endif
 
         public const int TestTimeoutMilliseconds = 15 * 1000;
 

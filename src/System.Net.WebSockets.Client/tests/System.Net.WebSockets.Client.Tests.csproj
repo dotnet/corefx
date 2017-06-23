@@ -3,7 +3,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{7C395A91-D955-444C-98BF-D3F809A56CE1}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
     <StringResourcesPath>../src/Resources/Strings.resx</StringResourcesPath>
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
@@ -45,6 +44,8 @@
     <Compile Include="AbortTest.cs" />
     <Compile Include="CancelTest.cs" />
     <Compile Include="ClientWebSocketOptionsTests.cs" />
+    <Compile Include="ClientWebSocketOptionsTests.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="ClientWebSocketOptionsTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="ClientWebSocketTestBase.cs" />
     <Compile Include="ClientWebSocketUnitTest.cs" />
     <Compile Include="CloseTest.cs" />

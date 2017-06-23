@@ -16,9 +16,14 @@ using Xunit.Abstractions;
 
 namespace System.Net.WebSockets.Client.Tests
 {
-    public class ClientWebSocketOptionsTests : ClientWebSocketTestBase
+    public partial class ClientWebSocketOptionsTests : ClientWebSocketTestBase
     {
-        private static bool CanTestClientCertificates => Capability.CanTestClientCertificates;
+        public static bool CanTestCertificates =>
+            Capability.IsTrustedRootCertificateInstalled() &&
+            (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
+
+        public static bool CanTestClientCertificates =>
+            CanTestCertificates && BackendSupportsCustomCertificateHandling;
 
         public ClientWebSocketOptionsTests(ITestOutputHelper output) : base(output) { }
 

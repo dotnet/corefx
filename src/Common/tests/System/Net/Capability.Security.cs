@@ -10,26 +10,6 @@ namespace System.Net.Test.Common
 {
     public static partial class Capability
     {
-        // Curl + OSX SecureTransport doesn't support the custom certificate callback.
-        public static bool BackendSupportsCustomCertificateHandling =>
-#if TargetsWindows
-            true;
-#else
-            CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false;
-#endif
-
-        public static bool CanTestCertificates =>
-            IsTrustedRootCertificateInstalled() &&
-            (BackendSupportsCustomCertificateHandling || AreHostsFileNamesInstalled());
-
-        public static bool CanTestClientCertificates =>
-            CanTestCertificates && BackendSupportsCustomCertificateHandling;
-
-#if !TargetsWindows
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
-#endif
-
         // Thumbprint for CN = NDX Test Root CA.
         // The certificate is part of the chain at
         // https://github.com/dotnet/corefx-testdata/blob/master/System.Net.TestData/contoso.com.p7b
