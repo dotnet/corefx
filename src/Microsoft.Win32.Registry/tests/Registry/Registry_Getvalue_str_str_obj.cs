@@ -34,7 +34,7 @@ namespace Microsoft.Win32.RegistryTests
         [MemberData(nameof(ArgumentExceptionTestData))]
         public static void InvalidKeyName_ThrowsArgumentException(string keyName)
         {
-            Assert.Throws<ArgumentException>(() => Registry.GetValue(keyName, null, null));
+            AssertExtensions.Throws<ArgumentException>("keyName", () => Registry.GetValue(keyName, null, null));
         }
 
         [Fact]
