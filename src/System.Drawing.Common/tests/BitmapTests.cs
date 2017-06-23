@@ -28,10 +28,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Serialization;
 using Xunit;
 
 namespace System.Drawing.Tests
@@ -1328,46 +1324,6 @@ namespace System.Drawing.Tests
             bitmap.Dispose();
 
             Assert.Throws<ArgumentException>(null, () => bitmap.UnlockBits(new BitmapData()));
-        }
-
-        public static IEnumerable<object[]> Serialize_TestData()
-        {
-            yield return new object[] { new Bitmap(10, 10), ImageFormat.Png };
-            yield return new object[] { new Bitmap(Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico")), ImageFormat.Png };
-            yield return new object[] { new Bitmap(Helpers.GetTestBitmapPath("173x183_indexed_8bit.bmp")), ImageFormat.Bmp };
-        }
-
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [MemberData(nameof(Serialize_TestData))]
-        public void Serialize_Deserialize_Roundtrips(Bitmap bitmap, ImageFormat expectedFormat)
-        {
-            try
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(memoryStream, bitmap);
-                    memoryStream.Position = 0;
-
-                    Bitmap deserializedBitmap = (Bitmap)formatter.Deserialize(memoryStream);
-                    Assert.Equal(bitmap.Size, deserializedBitmap.Size);
-                    Assert.Equal(bitmap.PixelFormat, deserializedBitmap.PixelFormat);
-                    Assert.Equal(expectedFormat, deserializedBitmap.RawFormat);
-                }
-
-                var xmlSerializer = new XmlSerializer(typeof(Bitmap));
-                using (var memoryStream = new MemoryStream())
-                {
-                    xmlSerializer.Serialize(memoryStream, bitmap);
-                    memoryStream.Position = 0;
-
-                    Assert.ThrowsAny<Exception>(() => xmlSerializer.Deserialize(memoryStream));
-                }
-            }
-            finally
-            {
-                bitmap.Dispose();
-            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
