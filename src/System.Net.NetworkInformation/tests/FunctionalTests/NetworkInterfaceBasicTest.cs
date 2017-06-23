@@ -254,7 +254,6 @@ namespace System.Net.NetworkInformation.Tests
         [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(false)]
         [InlineData(true)]
-        [ActiveIssue(19314, TargetFrameworkMonikers.UapAot)]
         public async Task NetworkInterface_LoopbackInterfaceIndex_MatchesReceivedPackets(bool ipv6)
         {
             using (var client = new Socket(SocketType.Dgram, ProtocolType.Udp))
