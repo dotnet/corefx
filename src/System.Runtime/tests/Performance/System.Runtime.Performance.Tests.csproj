@@ -18,6 +18,7 @@
     <Compile Include="Perf.Guid.cs" />
     <Compile Include="Perf.Object.cs" />
     <Compile Include="Perf.String.cs" />
+    <Compile Include="Perf.String.netcoreapp.cs" />
     <Compile Include="Perf.TimeSpan.cs" />
     <Compile Include="Perf.Type.cs" />
     <Compile Include="Perf.UInt32.cs" />
