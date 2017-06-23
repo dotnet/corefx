@@ -30,14 +30,14 @@ namespace Microsoft.Win32.RegistryTests
             Assert.Throws<ArgumentNullException>(() => Registry.SetValue(keyName: null, valueName: "test", value: "test"));
 
             // Should throw if passed string does NOT start with one of the valid base key names
-            AssertExtensions.Throws<ArgumentException>("keyName", () => Registry.SetValue("HHHH_MMMM", "test", "test"));
+            AssertExtensions.Throws<ArgumentException>("keyName", null, () => Registry.SetValue("HHHH_MMMM", "test", "test"));
 
             // Should throw if passed string which only starts with one of the valid base key names but actually it isn't valid.
-            AssertExtensions.Throws<ArgumentException>("keyName", () => Registry.SetValue("HKEY_LOCAL_MACHINE_FOOBAR", "test", "test"));
+            AssertExtensions.Throws<ArgumentException>("keyName", null, () => Registry.SetValue("HKEY_LOCAL_MACHINE_FOOBAR", "test", "test"));
 
             // Should throw if key length above 255 characters but prior to V4, the limit is 16383
             const int maxValueNameLength = 16383;
-            AssertExtensions.Throws<ArgumentException>("name", () => Registry.SetValue(TestRegistryKey.Name, new string('a', maxValueNameLength + 1), 5));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => Registry.SetValue(TestRegistryKey.Name, new string('a', maxValueNameLength + 1), 5));
 
             // Should throw if passed value is array with uninitialized elements
             AssertExtensions.Throws<ArgumentException>(null, () => Registry.SetValue(TestRegistryKey.Name, "StringArr", value: new string[1]));

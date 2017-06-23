@@ -30,7 +30,7 @@ namespace System.Threading.Tests
         [Fact]
         public void Ctor_InvalidNames()
         {
-            AssertExtensions.Throws<ArgumentException>("name", () => new EventWaitHandle(true, EventResetMode.AutoReset, new string('a', 1000)));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new EventWaitHandle(true, EventResetMode.AutoReset, new string('a', 1000)));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // names aren't supported on Unix
@@ -145,8 +145,8 @@ namespace System.Threading.Tests
         public void OpenExisting_InvalidNames_Windows()
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => EventWaitHandle.OpenExisting(null));
-            AssertExtensions.Throws<ArgumentException>("name", () => EventWaitHandle.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", () => EventWaitHandle.OpenExisting(new string('a', 10000)));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(string.Empty));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(new string('a', 10000)));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // OpenExisting not supported on Unix

@@ -28,7 +28,7 @@ namespace Microsoft.Win32.RegistryTests
 
             // Should throw if key length above 255 characters but prior to V4, the limit is 16383
             const int maxValueNameLength = 16383;
-            AssertExtensions.Throws<ArgumentException>("name", () => TestRegistryKey.SetValue(new string('a', maxValueNameLength + 1), 5));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => TestRegistryKey.SetValue(new string('a', maxValueNameLength + 1), 5));
 
             // Should throw if passed value is array with uninitialized elements
             AssertExtensions.Throws<ArgumentException>(null, () => TestRegistryKey.SetValue("StringArr", value: new string[1]));

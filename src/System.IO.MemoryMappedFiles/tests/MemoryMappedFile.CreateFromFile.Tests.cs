@@ -64,7 +64,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             // FileMode.Truncate can't be used with default capacity, as resulting file will be empty
             using (TempFile file = new TempFile(GetTestFilePath()))
             {
-                AssertExtensions.Throws<ArgumentException>("mode", () => MemoryMappedFile.CreateFromFile(file.Path, FileMode.Truncate));
+                AssertExtensions.Throws<ArgumentException>("mode", null, () => MemoryMappedFile.CreateFromFile(file.Path, FileMode.Truncate));
             }
         }
 

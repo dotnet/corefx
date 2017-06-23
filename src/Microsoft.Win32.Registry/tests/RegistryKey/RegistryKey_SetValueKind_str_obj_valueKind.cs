@@ -172,7 +172,7 @@ namespace Microsoft.Win32.RegistryTests
             // Should throw if key length above 255 characters but prior to V4 the limit is 16383
             const int maxValueNameLength = 16383;
             string tooLongValueName = new string('a', maxValueNameLength + 1);
-            AssertExtensions.Throws<ArgumentException>("name", () => TestRegistryKey.SetValue(tooLongValueName, ulong.MaxValue, RegistryValueKind.String));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => TestRegistryKey.SetValue(tooLongValueName, ulong.MaxValue, RegistryValueKind.String));
 
             const string valueName = "FooBar";
             // Should throw if passed value is null

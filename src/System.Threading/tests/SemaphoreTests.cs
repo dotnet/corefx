@@ -78,9 +78,9 @@ namespace System.Threading.Tests
         [Fact]
         public void Ctor_InvalidNames()
         {
-            AssertExtensions.Throws<ArgumentException>("name", () => new Semaphore(0, 1, new string('a', 10000)));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000)));
             bool createdNew;
-            AssertExtensions.Throws<ArgumentException>("name", () => new Semaphore(0, 1, new string('a', 10000), out createdNew));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000), out createdNew));
         }
 
         [Fact]
@@ -213,8 +213,8 @@ namespace System.Threading.Tests
         public void OpenExisting_InvalidNames_Windows()
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => Semaphore.OpenExisting(null));
-            AssertExtensions.Throws<ArgumentException>("name", () => Semaphore.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", () => Semaphore.OpenExisting(new string('a', 10000)));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => Semaphore.OpenExisting(string.Empty));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => Semaphore.OpenExisting(new string('a', 10000)));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // named semaphores aren't supported on Unix

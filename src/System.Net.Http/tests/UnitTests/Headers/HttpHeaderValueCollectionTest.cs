@@ -355,7 +355,7 @@ namespace System.Net.Http.Tests
             Uri[] array = new Uri[2];
             
             // startIndex + Count = 1 + 2 > array.Length
-            AssertExtensions.Throws<ArgumentException>("destinationArray", () => { collection.CopyTo(array, 1); });
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 1); });
         }
 
         [Fact]
@@ -515,18 +515,18 @@ namespace System.Net.Http.Tests
             headers.Add(knownHeader, "special");
             headers.Add(knownHeader, "special");
             array = new string[1];
-            AssertExtensions.Throws<ArgumentException>("destinationArray", () => { collection.CopyTo(array, 0); });
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 0); });
 
             headers.Add(knownHeader, "value1");
             array = new string[0];
-            AssertExtensions.Throws<ArgumentException>("destinationArray", () => { collection.CopyTo(array, 0); });
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 0); });
 
             headers.Add(knownHeader, "value2");
             array = new string[1];
-            AssertExtensions.Throws<ArgumentException>("destinationArray", () => { collection.CopyTo(array, 0); });
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 0); });
 
             array = new string[2];
-            AssertExtensions.Throws<ArgumentException>("destinationArray", () => { collection.CopyTo(array, 1); });
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 1); });
         }
 
         [Fact]

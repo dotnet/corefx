@@ -379,7 +379,7 @@ namespace System.Drawing.Tests
         [InlineData("\\\\uncpath", null)]
         public void ExtractAssociatedIcon_InvalidFilePath_ThrowsArgumentException(string filePath, string paramName)
         {
-            AssertExtensions.Throws<ArgumentException>(paramName, () => Icon.ExtractAssociatedIcon(filePath));
+            AssertExtensions.Throws<ArgumentException>(paramName, null, () => Icon.ExtractAssociatedIcon(filePath));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
