@@ -152,6 +152,9 @@ namespace System
             }
         }
 
+        public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
+        public static bool IsNotWinRTSupported => !IsWinRTSupported;
+
         private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
 
         public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
@@ -428,7 +431,7 @@ namespace System
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
-        public static bool IsXmlDsigXsltTransformSupported => PlatformDetection.IsReflectionEmitSupported;
+        public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;
 
         public static Range[] FrameworkRanges => new Range[]{
           new Range(new Version(4, 7, 2500, 0), null, new Version(4, 7, 1)),
