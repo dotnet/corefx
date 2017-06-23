@@ -12,258 +12,115 @@ namespace System.Composition.Tests
     public class CompositionContextTests
     {
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExportT_Default_ReturnsExpected(bool success)
+        [InlineData(true, null)]
+        [InlineData(false, null)]
+        [InlineData(true, "contractName")]
+        [InlineData(false, "contractName")]
+        public void GetExport_Invoke_ReturnsExpected(bool success, string contractName)
         {
             var context = new SubContext(contract =>
             {
                 Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Null(contract.ContractName);
+                Assert.Equal(contractName, contract.ContractName);
                 Assert.Null(contract.MetadataConstraints);
 
                 return (success, 10);
             });
             if (success)
             {
-                Assert.Equal(10, context.GetExport<int>());
+                if (contractName == null)
+                {
+                    Assert.Equal(10, context.GetExport<int>());
+                    Assert.Equal(10, context.GetExport(typeof(int)));
+
+                    Assert.True(context.TryGetExport(out int export1));
+                    Assert.Equal(10, export1);
+
+                    Assert.True(context.TryGetExport(typeof(int), out object export2));
+                    Assert.Equal(10, export2);
+                }
+                else
+                {
+                    Assert.Equal(10, context.GetExport<int>(contractName));
+                    Assert.Equal(10, context.GetExport(typeof(int), contractName));
+
+                    Assert.True(context.TryGetExport(contractName, out int export1));
+                    Assert.Equal(10, export1);
+
+                    Assert.True(context.TryGetExport(typeof(int), contractName, out object export2));
+                    Assert.Equal(10, export2);
+                }
             }
             else
             {
-                Assert.Throws<CompositionFailedException>(() => context.GetExport<int>());
+                if (contractName == null)
+                {
+                    Assert.Throws<CompositionFailedException>(() => context.GetExport<int>());
+                    Assert.Throws<CompositionFailedException>(() => context.GetExport(typeof(int)));
+
+                    Assert.False(context.TryGetExport(out int export1));
+                    Assert.Equal(0, export1);
+
+                    // Failure leaks through.
+                    Assert.False(context.TryGetExport(typeof(int), out object export2));
+                    Assert.Equal(10, export2);
+                }
+                else
+                {
+                    Assert.Throws<CompositionFailedException>(() => context.GetExport<int>(contractName));
+                    Assert.Throws<CompositionFailedException>(() => context.GetExport(typeof(int), contractName));
+
+                    Assert.False(context.TryGetExport(contractName, out int export1));
+                    Assert.Equal(0, export1);
+
+                    // Failure leaks through.
+                    Assert.False(context.TryGetExport(typeof(int), contractName, out object export2));
+                    Assert.Equal(10, export2);
+                }
             }
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExportT_ContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-            if (success)
-            {
-                Assert.Equal(10, context.GetExport<int>("contractName"));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExport<int>("contractName"));
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TryGetExportT_Default_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Null(contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-            Assert.Equal(success, context.TryGetExport(out int export));
-            Assert.Equal(success ? 10 : 0, export);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TryGetExportT_ContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-            Assert.Equal(success, context.TryGetExport("contractName", out int export));
-            Assert.Equal(success ? 10 : 0, export);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExport_ContractType_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Null(contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-            if (success)
-            {
-                Assert.Equal(10, context.GetExport(typeof(int)));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExport(typeof(int)));
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExport_ContractTypeContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-            if (success)
-            {
-                Assert.Equal(10, context.GetExport(typeof(int), "contractName"));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExport(typeof(int), "contractName"));
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TryGetExport_ContractType_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Null(contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-
-            // Failure leaks through.
-            Assert.Equal(success, context.TryGetExport(typeof(int), out object export));
-            Assert.Equal(10, export);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TryGetExport_ContractTypeContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Null(contract.MetadataConstraints);
-
-                return (success, 10);
-            });
-
-            // Failure leaks through.
-            Assert.Equal(success, context.TryGetExport(typeof(int), "contractName", out object export));
-            Assert.Equal(10, export);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExportsT_Default_ReturnsExpected(bool success)
+        [InlineData(true, null)]
+        [InlineData(false, null)]
+        [InlineData(true, "contractName")]
+        [InlineData(false, "contractName")]
+        public void GetExports_Invoke_ReturnsExpected(bool success, string contractName)
         {
             var context = new SubContext(contract =>
             {
                 Assert.Equal(typeof(object[]), contract.ContractType);
-                Assert.Null(contract.ContractName);
+                Assert.Equal(contractName, contract.ContractName);
                 Assert.Equal(new Dictionary<string, object> { { "IsImportMany", true } }, contract.MetadataConstraints);
 
                 return (success, new object[] { 10 });
             });
             if (success)
             {
-                Assert.Equal(new object[] { 10 }, context.GetExports<object>());
+
+                if (contractName == null)
+                {
+                    Assert.Equal(new object[] { 10 }, context.GetExports<object>());
+                    Assert.Equal(new object[] { 10 }, context.GetExports(typeof(object)));
+                }
+                else
+                {
+                    Assert.Equal(new object[] { 10 }, context.GetExports<object>(contractName));
+                    Assert.Equal(new object[] { 10 }, context.GetExports(typeof(object), contractName));
+                }
             }
             else
             {
-                Assert.Throws<CompositionFailedException>(() => context.GetExports<object>());
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExportsT_ContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(object[]), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Equal(new Dictionary<string, object> { { "IsImportMany", true } }, contract.MetadataConstraints);
-
-                return (success, new object[] { 10 });
-            });
-            if (success)
-            {
-                Assert.Equal(new object[] { 10 }, context.GetExports<object>("contractName"));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExports<object>("contractName"));
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExports_ContractType_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int[]), contract.ContractType);
-                Assert.Null(contract.ContractName);
-                Assert.Equal(new Dictionary<string, object> { { "IsImportMany", true } }, contract.MetadataConstraints);
-
-                return (success, new object[] { 10 });
-            });
-            if (success)
-            {
-                Assert.Equal(new object[] { 10 }, context.GetExports(typeof(int)));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExports(typeof(int)));
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetExports_ContractTypeContractName_ReturnsExpected(bool success)
-        {
-            var context = new SubContext(contract =>
-            {
-                Assert.Equal(typeof(int[]), contract.ContractType);
-                Assert.Equal("contractName", contract.ContractName);
-                Assert.Equal(new Dictionary<string, object> { { "IsImportMany", true } }, contract.MetadataConstraints);
-
-                return (success, new object[] { 10 });
-            });
-            if (success)
-            {
-                Assert.Equal(new object[] { 10 }, context.GetExports(typeof(int), "contractName"));
-            }
-            else
-            {
-                Assert.Throws<CompositionFailedException>(() => context.GetExports(typeof(int), "contractName"));
+                if (contractName == null)
+                {
+                    Assert.Throws<CompositionFailedException>(() => context.GetExports<object>());
+                    Assert.Throws<CompositionFailedException>(() => context.GetExports(typeof(object)));
+                }
+                else
+                {
+                    Assert.Throws<CompositionFailedException>(() => context.GetExports<object>(contractName));
+                    Assert.Throws<CompositionFailedException>(() => context.GetExports(typeof(object), contractName));
+                }
             }
         }
 
