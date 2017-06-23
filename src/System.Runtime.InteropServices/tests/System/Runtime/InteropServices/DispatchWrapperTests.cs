@@ -10,10 +10,18 @@ namespace System.Runtime.InteropServices.Tests
     public class DispatchWrapperTests
     {
         [Fact]
-        public void Ctor_Null_Success()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Ctor_NullWindows_Success()
         {
             var wrapper = new DispatchWrapper(null);
             Assert.Null(wrapper.WrappedObject);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void Ctor_NullUnix_ThrowsPlatformNotSupportedException()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new DispatchWrapper(null));
         }
 
         [Theory]
