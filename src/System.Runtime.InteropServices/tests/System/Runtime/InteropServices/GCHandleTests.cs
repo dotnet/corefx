@@ -140,6 +140,10 @@ namespace System.Runtime.InteropServices.Tests
             finally
             {
                 handle.Free();
+                if (other is GCHandle otherHandle && !ReferenceEquals(handle, otherHandle))
+                {
+                    otherHandle.Free();
+                }
             }
         }
 
