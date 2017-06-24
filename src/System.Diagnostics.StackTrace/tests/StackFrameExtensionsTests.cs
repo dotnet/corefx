@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "StackFrame is not supported in uapaot.")]
     public class StackFrameExtensionsTests
     {
         public static IEnumerable<object[]> StackFrame_TestData()

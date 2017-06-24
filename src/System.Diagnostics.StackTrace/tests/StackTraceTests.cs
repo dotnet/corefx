@@ -29,7 +29,7 @@ namespace System.Diagnostics
 
 namespace System.Diagnostics.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "StackTrace is not supported in uapaot.")]
     public class StackTraceTests
     {
         [Fact]
