@@ -29,6 +29,7 @@ namespace System.Diagnostics
 
 namespace System.Diagnostics.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
     public class StackTraceTests
     {
         [Fact]

@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
     public class StackFrameTests
     {
         [Fact]
