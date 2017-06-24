@@ -20,7 +20,7 @@ namespace System.Composition.Hosting
     /// </summary>
     public sealed class CompositionHost : CompositionContext, IDisposable
     {
-        private static readonly string[] s_noBoundaries = EmptyArray<string>.Value;
+        private static readonly string[] s_noBoundaries = Array.Empty<string>();
 
         private readonly LifetimeContext _rootLifetimeContext;
 

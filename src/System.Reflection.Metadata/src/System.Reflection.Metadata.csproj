@@ -99,7 +99,6 @@
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamMemoryBlockProvider.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\StringUtils.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\EmptyArray.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.cs" Condition="'$(TargetGroup)' != 'netstandard1.1'" />

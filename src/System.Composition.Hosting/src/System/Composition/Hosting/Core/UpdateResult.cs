@@ -13,7 +13,7 @@ namespace System.Composition.Hosting.Core
     // providers, with providers being removed from the list before querying.
     internal class UpdateResult
     {
-        private static readonly ExportDescriptorPromise[] s_noPromises = EmptyArray<ExportDescriptorPromise>.Value;
+        private static readonly ExportDescriptorPromise[] s_noPromises = Array.Empty<ExportDescriptorPromise>();
 
         private readonly Queue<ExportDescriptorProvider> _remainingProviders;
         private readonly IList<ExportDescriptorPromise> _providedDescriptors = new List<ExportDescriptorPromise>();
