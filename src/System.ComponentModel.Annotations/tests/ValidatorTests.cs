@@ -38,11 +38,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void TestTryValidateObjectThrowsIfInstanceNotMatch()
         {
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateObject(new object(), s_estValidationContext, validationResults: null));
-
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateObject(new object(), s_estValidationContext, validationResults: null, validateAllProperties: true));
+            AssertExtensions.Throws<ArgumentException>("instance", () => Validator.TryValidateObject(new object(), s_estValidationContext, validationResults: null));
+            AssertExtensions.Throws<ArgumentException>("instance", () => Validator.TryValidateObject(new object(), s_estValidationContext, validationResults: null, validateAllProperties: true));
         }
 
         [Fact]
@@ -161,11 +158,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void ValidateObjectThrowsIf_instance_does_not_match_ValidationContext_ObjectInstance()
         {
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateObject(new object(), s_estValidationContext));
-
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateObject(new object(), s_estValidationContext, true));
+            AssertExtensions.Throws<ArgumentException>("instance", () => Validator.ValidateObject(new object(), s_estValidationContext));
+            AssertExtensions.Throws<ArgumentException>("instance", () => Validator.ValidateObject(new object(), s_estValidationContext, true));
         }
 
         [Fact]
@@ -269,53 +263,43 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 () => Validator.TryValidateProperty(null, validationContext, null));
         }
 
-        // TryValidatePropertyThrowsIf_ValidationContext_MemberName_does_not_exist_on_object()
         [Fact]
         public static void TryValidatePropertyThrowsIf_ValidationContext_MemberName_does_not_exist_on_object()
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "NonExist";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, null));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.TryValidateProperty(null, validationContext, null));
         }
 
-        // TryValidatePropertyThrowsIf_ValidationContext_MemberName_is_not_public()
         [Fact]
         public static void TryValidatePropertyThrowsIf_ValidationContext_MemberName_is_not_public()
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "InternalProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, null));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.TryValidateProperty(null, validationContext, null));
 
             validationContext.MemberName = "ProtectedProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, null));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.TryValidateProperty(null, validationContext, null));
 
             validationContext.MemberName = "PrivateProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, null));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.TryValidateProperty(null, validationContext, null));
         }
 
-        // TryValidatePropertyThrowsIf_ValidationContext_MemberName_is_for_a_public_indexer()
         [Fact]
         public static void TryValidatePropertyThrowsIf_ValidationContext_MemberName_is_for_a_public_indexer()
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "Item";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
         }
 
-        // TryValidatePropertyThrowsIf_value_passed_is_of_wrong_type_to_be_assigned_to_property()
         [Fact]
         public static void TryValidatePropertyThrowsIf_value_passed_is_of_wrong_type_to_be_assigned_to_property()
         {
             var validationContext = new ValidationContext(new ToBeValidated());
 
             validationContext.MemberName = "NoAttributesProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(123, validationContext, validationResults: null));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.TryValidateProperty(123, validationContext, validationResults: null));
         }
 
         [Fact]
@@ -325,13 +309,11 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             // cannot assign null to a non-value-type property
             validationContext.MemberName = "EnumProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
 
             // cannot assign null to a non-nullable property
             validationContext.MemberName = "NonNullableProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.TryValidateProperty(null, validationContext, validationResults: null));
         }
 
         [Fact]
@@ -431,8 +413,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "NonExist";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.ValidateProperty(null, validationContext));
         }
 
         [Fact]
@@ -440,16 +421,13 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "InternalProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.ValidateProperty(null, validationContext));
 
             validationContext.MemberName = "ProtectedProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.ValidateProperty(null, validationContext));
 
             validationContext.MemberName = "PrivateProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.ValidateProperty(null, validationContext));
         }
 
         [Fact]
@@ -457,8 +435,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             var validationContext = new ValidationContext(new ToBeValidated());
             validationContext.MemberName = "Item";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Validator.ValidateProperty(null, validationContext));
         }
 
         [Fact]
@@ -467,8 +444,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationContext = new ValidationContext(new ToBeValidated());
 
             validationContext.MemberName = "NoAttributesProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(123, validationContext));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.ValidateProperty(123, validationContext));
         }
 
         [Fact]
@@ -478,13 +454,11 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             // cannot assign null to a non-value-type property
             validationContext.MemberName = "EnumProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.ValidateProperty(null, validationContext));
 
             // cannot assign null to a non-nullable property
             validationContext.MemberName = "NonNullableProperty";
-            Assert.Throws<ArgumentException>(
-                () => Validator.ValidateProperty(null, validationContext));
+            AssertExtensions.Throws<ArgumentException>("value", () => Validator.ValidateProperty(null, validationContext));
         }
 
         [Fact]

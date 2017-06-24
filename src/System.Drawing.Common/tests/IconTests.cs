@@ -273,7 +273,7 @@ namespace System.Drawing.Tests
         [InlineData(typeof(IconTests), "48x48_MULTIPLE_entries_4bit.ico")]
         public void Ctor_InvalidResource_ThrowsArgumentException(Type type, string resource)
         {
-            Assert.Throws<ArgumentException>(null, () => new Icon(type, resource));
+            AssertExtensions.Throws<ArgumentException>(null, () => new Icon(type, resource));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -503,7 +503,7 @@ namespace System.Drawing.Tests
         {
             using (Icon icon = Icon.FromHandle((IntPtr)100))
             {
-                Assert.Throws<ArgumentException>(null, () => icon.ToBitmap());
+                AssertExtensions.Throws<ArgumentException>(null, () => icon.ToBitmap());
             }
         }
 
@@ -718,7 +718,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FromHandle_Zero_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Icon.FromHandle(IntPtr.Zero));
+            AssertExtensions.Throws<ArgumentException>(null, () => Icon.FromHandle(IntPtr.Zero));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
