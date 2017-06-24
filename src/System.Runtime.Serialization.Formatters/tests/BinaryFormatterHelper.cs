@@ -191,9 +191,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static string CreateComparableBlobInfo(string base64Blob)
         {
+            string lineSeparator = ((char)0x2028).ToString();
+            string paragraphSeparator = ((char)0x2029).ToString();
+
             byte[] data = Convert.FromBase64String(base64Blob);
-            string decodedString = Encoding.UTF8.GetString(data);
-            return Regex.Replace(decodedString, @"Version=\d.\d.\d.\d.", "Version=0.0.0.0", RegexOptions.Multiline);
+            base64Blob = Encoding.UTF8.GetString(data);
+
+            return Regex.Replace(base64Blob, @"Version=\d.\d.\d.\d.", "Version=0.0.0.0", RegexOptions.Multiline)
+                .Replace("\r\n", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace(lineSeparator, string.Empty)
+                .Replace(paragraphSeparator, string.Empty);
         }
 
         public static (int blobs, int foundBlobs, int updatedBlobs) UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)
