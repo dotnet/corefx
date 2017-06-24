@@ -86,16 +86,24 @@ namespace System.Tests
         [Fact]
         public static void Contains_StringComparison_TurkishI()
         {
-            string source = "\u0069\u0130";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            string str = "\u0069\u0130";
+            RemoteInvoke((source) =>
             {
-                Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
-            });
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+                Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }, str).Dispose();
+
+            RemoteInvoke((source) =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
                 Assert.False(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }, str).Dispose();
         }
 
         [Theory]
