@@ -13,6 +13,7 @@
     <Compile Include="System\DirectoryServices\DirectoryVirtualListViewContextTests.cs" />
     <Compile Include="System\DirectoryServices\DirectoryVirtualListViewTests.cs" />
     <Compile Include="System\DirectoryServices\PropertyCollectionTests.cs" />
+    <Compile Include="System\DirectoryServices\SortOptionTests.cs" />
     <Compile Include="System\DirectoryServices\ActiveDirectory\DirectoryContextTests.cs" />
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
