@@ -30,9 +30,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonStrings.resx</DependentUpon>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Internal\EmptyArray.cs">
-      <Link>Microsoft\Internal\EmptyArray.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Internal\Requires.cs">
       <Link>Microsoft\Internal\Requires.cs</Link>
     </Compile>
