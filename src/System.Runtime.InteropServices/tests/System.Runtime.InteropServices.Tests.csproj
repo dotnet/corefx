@@ -80,8 +80,5 @@
     <Compile Include="System\Runtime\InteropServices\TypeLibVarAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibVersionAttributeTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
-    <Compile Include="System\Runtime\InteropServices\SecureStringMarshalTests.cs" />
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

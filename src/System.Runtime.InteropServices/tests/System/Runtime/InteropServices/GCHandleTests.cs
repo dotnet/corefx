@@ -104,14 +104,7 @@ namespace System.Runtime.InteropServices.Tests
         public void AddrOfPinnedObject_NotPinned_ThrowsInvalidOperationException()
         {
             GCHandle handle = GCHandle.Alloc(new object());
-            try
-            {
-                Assert.Throws<InvalidOperationException>(() => handle.AddrOfPinnedObject());
-            }
-            finally
-            {
-                handle.Free();
-            }
+            Assert.Throws<InvalidOperationException>(() => handle.AddrOfPinnedObject());
         }
 
         [Fact]
@@ -123,23 +116,30 @@ namespace System.Runtime.InteropServices.Tests
 
         public static IEnumerable<object[]> Equals_TestData()
         {
-            var handle = GCHandle.Alloc(new object());
+            GCHandle handle = GCHandle.Alloc(new object());
             yield return new object[] { handle, handle, true };
-            yield return new object[] { handle, GCHandle.Alloc(new object()), false };
+            yield return new object[] { GCHandle.Alloc(new object()), GCHandle.Alloc(new object()), false };
 
-            yield return new object[] { handle, new object(), false };
-            yield return new object[] { handle, null, false };
+            yield return new object[] { GCHandle.Alloc(new object()), new object(), false };
+            yield return new object[] { GCHandle.Alloc(new object()), null, false };
         }
 
         [Theory]
         [MemberData(nameof(Equals_TestData))]
         public void Equals_Object_ReturnsExpected(GCHandle handle, object other, bool expected)
         {
-            Assert.Equal(expected, handle.Equals(other));
-            if (other is GCHandle otherHandle)
+            try
             {
-                Assert.Equal(expected, handle == otherHandle);
-                Assert.Equal(!expected, handle != otherHandle);
+                Assert.Equal(expected, handle.Equals(other));
+                if (other is GCHandle otherHandle)
+                {
+                    Assert.Equal(expected, handle == otherHandle);
+                    Assert.Equal(!expected, handle != otherHandle);
+                }
+            }
+            finally
+            {
+                handle.Free();
             }
         }
 
