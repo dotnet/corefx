@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="System\DirectoryServices\ActiveDirectorySecurityTests.cs" />
     <Compile Include="System\DirectoryServices\DirectoryEntryTests.cs" />
+    <Compile Include="System\DirectoryServices\DirectorySynchronizationTests.cs" />
     <Compile Include="System\DirectoryServices\DirectoryVirtualListViewContextTests.cs" />
     <Compile Include="System\DirectoryServices\DirectoryVirtualListViewTests.cs" />
     <Compile Include="System\DirectoryServices\PropertyCollectionTests.cs" />
