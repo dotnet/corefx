@@ -104,7 +104,14 @@ namespace System.Runtime.InteropServices.Tests
         public void AddrOfPinnedObject_NotPinned_ThrowsInvalidOperationException()
         {
             GCHandle handle = GCHandle.Alloc(new object());
-            Assert.Throws<InvalidOperationException>(() => handle.AddrOfPinnedObject());
+            try
+            {
+                Assert.Throws<InvalidOperationException>(() => handle.AddrOfPinnedObject());
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         [Fact]
@@ -140,7 +147,7 @@ namespace System.Runtime.InteropServices.Tests
             finally
             {
                 handle.Free();
-                if (other is GCHandle otherHandle && !ReferenceEquals(handle, otherHandle))
+                if (other is GCHandle otherHandle)
                 {
                     otherHandle.Free();
                 }
