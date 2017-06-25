@@ -9,6 +9,50 @@ namespace System.DirectoryServices.AccountManagement.Tests
     public class ComputerPrincipalTest : PrincipalTest
     {
         [Fact]
+        public void Ctor_Context()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            var principal = new ComputerPrincipal(context);
+            Assert.Equal(context, principal.Context);
+            Assert.Empty(principal.ServicePrincipalNames);
+        }
+
+        [Fact]
+        public void Ctor_NullContext_ThrowsArgumentException()
+        {
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null));
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null, "samAcountName", "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_NullSamAccountName_ThrowsArgumentException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, null, "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_EmptySamAccountName_ThrowsArgumentNullException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_NullPassword_ThrowsArgumentException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, "samAccountName", null, enabled: true));
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void Ctor_MachineContext_ThrowsInvalidCastException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            Assert.Throws<InvalidCastException>(() => new ComputerPrincipal(context, "samAccountName", "password", enabled: true));
+        }
+
+        [Fact]
         public void ComputerPrincipalConstructorTest()
         {
             if (DomainContext == null)
