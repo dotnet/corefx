@@ -11,23 +11,26 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [Fact]
         public void ComputerPrincipalConstructorTest()
         {
+            if (DomainContext == null)
+            {
+                return;
+            }
+
             ComputerPrincipal computer = new ComputerPrincipal(DomainContext);
             computer.Dispose();
         }
 
-        internal override Principal CreatePrincipal(PrincipalContext context, string name)
+        public override Principal CreatePrincipal(PrincipalContext context, string name)
         {
-            ComputerPrincipal computer = new ComputerPrincipal(context);
-            computer.Name = name;
-            return computer;
+            return new ComputerPrincipal(context) { Name = name };
         }
 
-        internal override Principal CreateExtendedPrincipal(PrincipalContext context, string name)
+        public override Principal CreateExtendedPrincipal(PrincipalContext context, string name)
         {
             throw new NotImplementedException();
         }
 
-        internal override Principal FindExtendedPrincipal(PrincipalContext context, string name)
+        public override Principal FindExtendedPrincipal(PrincipalContext context, string name)
         {
             throw new NotImplementedException();
         }
