@@ -142,6 +142,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
     [InlineData(0)]
     [InlineData(1)]
+    [InlineData(255)]
     [InlineData(256)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
