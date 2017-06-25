@@ -53,8 +53,8 @@ namespace System.DirectoryServices.Protocols
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public class SortKey
     {
-        private string _name = null;
-        private string _rule = null;
+        private string _name;
+        private string _rule;
         private bool _order = false;
 
         public SortKey()
@@ -89,7 +89,7 @@ namespace System.DirectoryServices.Protocols
 
     public class DirectoryControl
     {
-        internal byte[] _directoryControlValue = null;
+        internal byte[] _directoryControlValue;
 
         public DirectoryControl(string type, byte[] value, bool isCritical, bool serverSide)
         {
@@ -136,7 +136,7 @@ namespace System.DirectoryServices.Protocols
                 byte[] value = controls[i].GetValue();
                 if (controls[i].Type == "1.2.840.113556.1.4.319")
                 {
-                    // PageControl.
+                    // The control is a PageControl.
                     object[] result = BerConverter.Decode("{iO}", value);
                     Debug.Assert((result != null) && (result.Length == 2));
 
@@ -149,7 +149,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 else if (controls[i].Type == "1.2.840.113556.1.4.1504")
                 {
-                    // AsqControl.
+                    // The control is an AsqControl.
                     object[] o = BerConverter.Decode("{e}", value);
                     Debug.Assert((o != null) && (o.Length == 1));
 
@@ -159,7 +159,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 else if (controls[i].Type == "1.2.840.113556.1.4.841")
                 {
-                    // DirSyncControl.
+                    // The control is a DirSyncControl.
                     object[] o = BerConverter.Decode("{iiO}", value);
                     Debug.Assert(o != null && o.Length == 3);
 
@@ -172,7 +172,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 else if (controls[i].Type == "1.2.840.113556.1.4.474")
                 {
-                    //SortControl.
+                    // The control is a SortControl.
                     int result = 0;
                     string attribute = null;
                     object[] o = BerConverter.TryDecode("{ea}", value, out bool decodeSucceeded);
@@ -198,6 +198,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 else if (controls[i].Type == "2.16.840.1.113730.3.4.10")
                 {
+                    // The control is a VlvResponseControl.
                     int position;
                     int count;
                     int result;
@@ -403,7 +404,7 @@ namespace System.DirectoryServices.Protocols
 
     public class VerifyNameControl : DirectoryControl
     {
-        private string _serverName = null;
+        private string _serverName;
 
         public VerifyNameControl() : base("1.2.840.113556.1.4.1338", null, true, true) { }
 
@@ -441,7 +442,7 @@ namespace System.DirectoryServices.Protocols
 
     public class DirSyncRequestControl : DirectoryControl
     {
-        private byte[] _dirsyncCookie = null;
+        private byte[] _dirsyncCookie;
         private int _count = 1048576;
 
         public DirSyncRequestControl() : base("1.2.840.113556.1.4.841", null, true, true) { }
@@ -508,7 +509,7 @@ namespace System.DirectoryServices.Protocols
 
     public class DirSyncResponseControl : DirectoryControl
     {
-        private byte[] _dirsyncCookie = null;
+        private byte[] _dirsyncCookie;
 
         internal DirSyncResponseControl(byte[] cookie, bool moreData, int resultSize, bool criticality, byte[] controlValue) : base("1.2.840.113556.1.4.841", controlValue, criticality, true)
         {
@@ -544,7 +545,7 @@ namespace System.DirectoryServices.Protocols
     public class PageResultRequestControl : DirectoryControl
     {
         private int _size = 512;
-        private byte[] _pageCookie = null;
+        private byte[] _pageCookie;
 
         public PageResultRequestControl() : base("1.2.840.113556.1.4.319", null, true, true) { }
 
@@ -602,7 +603,8 @@ namespace System.DirectoryServices.Protocols
 
     public class PageResultResponseControl : DirectoryControl
     {
-        private byte[] _pageCookie = null;
+        private byte[] _pageCookie;
+
         internal PageResultResponseControl(int count, byte[] cookie, bool criticality, byte[] controlValue) : base("1.2.840.113556.1.4.319", controlValue, criticality, true)
         {
             TotalCount = count;
@@ -811,8 +813,8 @@ namespace System.DirectoryServices.Protocols
         private int _after = 0;
         private int _offset = 0;
         private int _estimateCount = 0;
-        private byte[] _target = null;
-        private byte[] _context = null;
+        private byte[] _target;
+        private byte[] _context;
 
         public VlvRequestControl() : base("2.16.840.1.113730.3.4.9", null, true, true) { }
 
@@ -984,7 +986,7 @@ namespace System.DirectoryServices.Protocols
 
     public class VlvResponseControl : DirectoryControl
     {
-        private byte[] _context = null;
+        private byte[] _context;
 
         internal VlvResponseControl(int targetPosition, int count, byte[] context, ResultCode result, bool criticality, byte[] value) : base("2.16.840.1.113730.3.4.10", value, criticality, true)
         {
@@ -1021,7 +1023,7 @@ namespace System.DirectoryServices.Protocols
 
     public class QuotaControl : DirectoryControl
     {
-        private byte[] _sid = null;
+        private byte[] _sid;
 
         public QuotaControl() : base("1.2.840.113556.1.4.1852", null, true, true) { }
 

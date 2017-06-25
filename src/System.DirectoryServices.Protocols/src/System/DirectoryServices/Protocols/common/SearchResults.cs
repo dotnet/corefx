@@ -8,8 +8,8 @@ namespace System.DirectoryServices.Protocols
 {
     public class SearchResultReference
     {
-        private Uri[] _resultReferences = null;
-        private DirectoryControl[] _resultControls = null;
+        private Uri[] _resultReferences;
+        private DirectoryControl[] _resultControls;
 
         internal SearchResultReference(Uri[] uris) => _resultReferences = uris;
 

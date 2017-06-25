@@ -6,16 +6,16 @@ namespace System.DirectoryServices.Protocols
 {
     public abstract class DirectoryResponse : DirectoryOperation
     {
-        private DirectoryControl[] directoryControls = null;
-        internal Uri[] directoryReferral = null;
+        private DirectoryControl[] _directoryControls;
+        internal Uri[] _directoryReferral;
 
         internal DirectoryResponse(string dn, DirectoryControl[] controls, ResultCode result, string message, Uri[] referral)
         {
             MatchedDN = dn;
-            directoryControls = controls;
+            _directoryControls = controls;
             ResultCode = result;
             ErrorMessage = message;
-            directoryReferral = referral;
+            _directoryReferral = referral;
         }
 
         public string RequestId { get; }
@@ -26,15 +26,15 @@ namespace System.DirectoryServices.Protocols
         {
             get
             {
-                if (directoryControls == null)
+                if (_directoryControls == null)
                 {
                     return Array.Empty<DirectoryControl>();
                 }
 
-                DirectoryControl[] tempControls = new DirectoryControl[directoryControls.Length];
-                for (int i = 0; i < directoryControls.Length; i++)
+                DirectoryControl[] tempControls = new DirectoryControl[_directoryControls.Length];
+                for (int i = 0; i < _directoryControls.Length; i++)
                 {
-                    tempControls[i] = new DirectoryControl(directoryControls[i].Type, directoryControls[i].GetValue(), directoryControls[i].IsCritical, directoryControls[i].ServerSide);
+                    tempControls[i] = new DirectoryControl(_directoryControls[i].Type, _directoryControls[i].GetValue(), _directoryControls[i].IsCritical, _directoryControls[i].ServerSide);
                 }
                 DirectoryControl.TransformControls(tempControls);
                 return tempControls;
@@ -49,15 +49,15 @@ namespace System.DirectoryServices.Protocols
         {
             get
             {
-                if (directoryReferral == null)
+                if (_directoryReferral == null)
                 {
                     return Array.Empty<Uri>();
                 }
 
-                Uri[] tempReferral = new Uri[directoryReferral.Length];
-                for (int i = 0; i < directoryReferral.Length; i++)
+                Uri[] tempReferral = new Uri[_directoryReferral.Length];
+                for (int i = 0; i < _directoryReferral.Length; i++)
                 {
-                    tempReferral[i] = new Uri(directoryReferral[i].AbsoluteUri);
+                    tempReferral[i] = new Uri(_directoryReferral[i].AbsoluteUri);
                 }
                 return tempReferral;
             }
@@ -91,7 +91,7 @@ namespace System.DirectoryServices.Protocols
 
     public class ExtendedResponse : DirectoryResponse
     {
-        private byte[] _value = null;
+        private byte[] _value;
 
         internal ExtendedResponse(string dn, DirectoryControl[] controls, ResultCode result, string message, Uri[] referral) : base(dn, controls, result, message, referral) { }
 

@@ -6,7 +6,7 @@ namespace System.DirectoryServices.Protocols
 {
     public abstract class DirectoryOperation
     {
-        internal string _directoryRequestID = null;
+        internal string _directoryRequestID;
 
         protected DirectoryOperation() { }
     }

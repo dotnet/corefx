@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
 using System.ComponentModel;
 using System.Collections.Specialized;
 
@@ -10,7 +9,7 @@ namespace System.DirectoryServices.Protocols
 {
     public abstract class DirectoryRequest : DirectoryOperation
     {
-        internal DirectoryControlCollection directoryControlCollection = null;
+        internal DirectoryControlCollection directoryControlCollection;
 
         internal DirectoryRequest()
         {

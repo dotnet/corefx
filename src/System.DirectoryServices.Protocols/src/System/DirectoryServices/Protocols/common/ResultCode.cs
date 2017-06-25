@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
+using System.Collections.Generic;
 
 namespace System.DirectoryServices.Protocols
 {
@@ -55,11 +55,11 @@ namespace System.DirectoryServices.Protocols
 
     internal class OperationErrorMappings
     {
-        private static Hashtable s_resultCodeHash = null;
+        private static Dictionary<ResultCode, string> s_resultCodeHash;
 
         static OperationErrorMappings()
         {
-            s_resultCodeHash = new Hashtable
+            s_resultCodeHash = new Dictionary<ResultCode, string>
             {
                 { ResultCode.Success, SR.LDAP_SUCCESS },
                 { ResultCode.OperationsError, SR.LDAP_OPERATIONS_ERROR },
