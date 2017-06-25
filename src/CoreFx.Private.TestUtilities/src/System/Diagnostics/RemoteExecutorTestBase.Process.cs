@@ -51,9 +51,9 @@ namespace System.Diagnostics
             }
 
             // If we need the host (if it exists), use it, otherwise target the console app directly.
-            string metadataArgs = PasteArguments.Paste(new string[] { ExtraParameter, a.FullName, t.FullName, method.Name }, pasteFirstArgumentUsingArgV0Rules: false);
+            string metadataArgs = PasteArguments.Paste(new string[] { a.FullName, t.FullName, method.Name }, pasteFirstArgumentUsingArgV0Rules: false);
             string passedArgs = pasteArguments ? PasteArguments.Paste(args, pasteFirstArgumentUsingArgV0Rules: false) : string.Join(" ", args);
-            string testConsoleAppArgs = metadataArgs + " " + passedArgs;
+            string testConsoleAppArgs = ExtraParameter + " " + metadataArgs + " " + passedArgs;
 
             if (!File.Exists(TestConsoleApp))
                 throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
