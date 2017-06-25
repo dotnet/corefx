@@ -150,7 +150,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     {
         // Try to set the title to some other value.
         RemoteInvoke(lengthOfTitleString =>
-        {      
+        {
             string newTitle = new string('a', int.Parse(lengthOfTitleString));
             Console.Title = newTitle;
             Assert.Equal(newTitle, Console.Title);
