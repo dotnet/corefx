@@ -26,7 +26,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentException>("context", () => DomainController.GetDomainController(context));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData("\0")]
         [InlineData("server:port")]
         [InlineData("[")]
@@ -36,7 +36,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetDomainController_InvalidIPV6_ThrowsInvalidCastException()
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, "[::1]:port");
@@ -398,7 +398,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         public void IPAddress_GetWithNoContext_ThrowsArgumentNullException()
         {
             var controller = new SubController();
-            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => controller.IPAddress);
+            AssertExtensions.Throws<ArgumentNullException>("hostNameOrAddress", () => controller.IPAddress);
         }
 
         [Fact]

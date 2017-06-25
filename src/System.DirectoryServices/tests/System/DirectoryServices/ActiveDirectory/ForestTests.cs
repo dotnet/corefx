@@ -31,7 +31,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Throws<ActiveDirectoryOperationException>(() => Forest.GetForest(context));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.DirectoryServer, "\0")]
         [InlineData(DirectoryContextType.DirectoryServer, "server:port")]
         [InlineData(DirectoryContextType.Forest, "\0")]

@@ -28,24 +28,24 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException(string name)
         {
             var context = new DirectoryContext(DirectoryContextType.Forest, name);
-            Assert.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
+            AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
         [Fact]
         public void FindByTransportType_DomainNoDomainAssociatedWithoutName_ThrowsArgumentException()
         {
             var context = new DirectoryContext(DirectoryContextType.Domain);
-            Assert.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
+            AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.ApplicationPartition)]
         [InlineData(DirectoryContextType.DirectoryServer)]
         [InlineData(DirectoryContextType.Domain)]
-        public void FindByTransportType_InvalidContextTypeWithName_ThrowsArguemntException(DirectoryContextType type)
+        public void FindByTransportType_InvalidContextTypeWithName_ThrowsArgumentException(DirectoryContextType type)
         {
             var context = new DirectoryContext(type, "Name");
-            Assert.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
+            AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
         [Fact]

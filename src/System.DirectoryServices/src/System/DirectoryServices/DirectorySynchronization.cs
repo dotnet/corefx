@@ -66,7 +66,7 @@ namespace System.DirectoryServices
             return tempcookie;
         }
 
-        public void ResetDirectorySynchronizationCookie() => _cookie = new byte[0];
+        public void ResetDirectorySynchronizationCookie() => _cookie = Array.Empty<byte>();
 
         public void ResetDirectorySynchronizationCookie(byte[] cookie)
         {

@@ -22,14 +22,14 @@ namespace System.DirectoryServices
             Direction = direction;
         }
 
-        [DefaultValue(null),]
+        [DefaultValue(null)]
         public string PropertyName
         {
             get => _propertyName;
             set => _propertyName = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [DefaultValue(SortDirection.Ascending),]
+        [DefaultValue(SortDirection.Ascending)]
         public SortDirection Direction
         {
             get => _sortDirection;
