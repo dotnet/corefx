@@ -69,7 +69,7 @@ internal partial class Interop
                 }
 
                 // We need to increase the sb capacity and retry.
-                sb.Capacity = CharCountToByteCount(len == 0 ? Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars) : len + 1);
+                sb.Capacity = CharCountToByteCount(len == 0 ? Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars) : len);
             }
         }
     }
