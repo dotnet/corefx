@@ -133,26 +133,41 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
     public static void Title_Get_Windows()
     {
         Assert.NotNull(Console.Title);
     }
 
     [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
-    [InlineData(10)]
+    [InlineData(0)]
+    [InlineData(1)]
     [InlineData(256)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
     public static void Title_Set_Windows(int lengthOfTitle)
     {
         // Try to set the title to some other value.
         RemoteInvoke(lengthOfTitleString =>
-        {
+        {      
             string newTitle = new string('a', int.Parse(lengthOfTitleString));
             Console.Title = newTitle;
             Assert.Equal(newTitle, Console.Title);
             return SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
+    }
+
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot)]
+    public static void Title_Get_Windows_Uap()
+    {
+        Assert.Throws<IOException>(() => Console.Title);
+    }
+
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot)]
+    public static void Title_Set_Windows_Uap(int lengthOfTitle)
+    {
+        Assert.Throws<IOException>(() => Console.Title = "x");
     }
 
     [Fact]
