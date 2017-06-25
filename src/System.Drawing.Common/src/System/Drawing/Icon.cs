@@ -79,7 +79,7 @@ namespace System.Drawing
         {
             if (original == null)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(original), "null"));
+                throw new ArgumentNullException(nameof(original));
             }
 
             _iconData = original._iconData;
@@ -120,7 +120,7 @@ namespace System.Drawing
         {
             if (stream == null)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(stream), "null"));
+                throw new ArgumentNullException(nameof(stream));
             }
 
             _iconData = new byte[(int)stream.Length];
@@ -134,7 +134,7 @@ namespace System.Drawing
         {
             if (filePath == null)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(filePath), "null"));
+                throw new ArgumentNullException(nameof(filePath));
             }
 
             Uri uri;
@@ -148,14 +148,17 @@ namespace System.Drawing
                 filePath = Path.GetFullPath(filePath);
                 uri = new Uri(filePath);
             }
+
             if (uri.IsUnc)
             {
                 throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(filePath), filePath));
             }
+
             if (!uri.IsFile)
             {
                 return null;
             }
+
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException(filePath);
@@ -226,16 +229,16 @@ namespace System.Drawing
 
         public object Clone() => new Icon(this, Size.Width, Size.Height);
 
-        /// Called when this object is going to destroy it's Win32 handle.  You
-        /// may override this if there is something special you need to do to
-        /// destroy the handle.  This will be called even if the handle is not
-        /// owned by this object, which is handy if you want to create a
-        /// derived class that has it's own create/destroy semantics.
-        ///
-        /// The default implementation will call the appropriate Win32
-        /// call to destroy the handle if this object currently owns the
-        /// handle.  It will do nothing if the object does not currently
-        /// own the handle.
+        // Called when this object is going to destroy it's Win32 handle.  You
+        // may override this if there is something special you need to do to
+        // destroy the handle.  This will be called even if the handle is not
+        // owned by this object, which is handy if you want to create a
+        // derived class that has it's own create/destroy semantics.
+        //
+        // The default implementation will call the appropriate Win32
+        // call to destroy the handle if this object currently owns the
+        // handle.  It will do nothing if the object does not currently
+        // own the handle.
         internal void DestroyHandle()
         {
             if (_ownHandle)
@@ -265,10 +268,10 @@ namespace System.Drawing
             }
         }
 
-        /// Draws this image to a graphics object.  The drawing command originates on the graphics
-        /// object, but a graphics object generally has no idea how to render a given image.  So,
-        /// it passes the call to the actual image.  This version crops the image to the given
-        /// dimensions and allows the user to specify a rectangle within the image to draw.
+        // Draws this image to a graphics object.  The drawing command originates on the graphics
+        // object, but a graphics object generally has no idea how to render a given image.  So,
+        // it passes the call to the actual image.  This version crops the image to the given
+        // dimensions and allows the user to specify a rectangle within the image to draw.
         private void DrawIcon(IntPtr dc, Rectangle imageRect, Rectangle targetRect, bool stretch)
         {
             int imageX = 0;
@@ -356,10 +359,10 @@ namespace System.Drawing
             Draw(graphics, new Rectangle(x, y, size.Width, size.Height));
         }
 
-        /// Draws this image to a graphics object.  The drawing command originates on the graphics
-        /// object, but a graphics object generally has no idea how to render a given image.  So,
-        /// it passes the call to the actual image.  This version stretches the image to the given
-        /// dimensions and allows the user to specify a rectangle within the image to draw.
+        // Draws this image to a graphics object.  The drawing command originates on the graphics
+        // object, but a graphics object generally has no idea how to render a given image.  So,
+        // it passes the call to the actual image.  This version stretches the image to the given
+        // dimensions and allows the user to specify a rectangle within the image to draw.
         internal void Draw(Graphics graphics, Rectangle targetRect)
         {
             Rectangle copy = targetRect;
@@ -373,10 +376,10 @@ namespace System.Drawing
             }
         }
 
-        /// Draws this image to a graphics object.  The drawing command originates on the graphics
-        /// object, but a graphics object generally has no idea how to render a given image.  So,
-        /// it passes the call to the actual image.  This version crops the image to the given
-        /// dimensions and allows the user to specify a rectangle within the image to draw.
+        // Draws this image to a graphics object.  The drawing command originates on the graphics
+        // object, but a graphics object generally has no idea how to render a given image.  So,
+        // it passes the call to the actual image.  This version crops the image to the given
+        // dimensions and allows the user to specify a rectangle within the image to draw.
         internal void DrawUnstretched(Graphics graphics, Rectangle targetRect)
         {
             Rectangle copy = targetRect;
@@ -427,9 +430,9 @@ namespace System.Drawing
             return retval;
         }
 
-        /// Initializes this Image object.  This is identical to calling the image's
-        /// constructor with picture, but this allows non-constructor initialization,
-        /// which may be necessary in some instances.
+        // Initializes this Image object.  This is identical to calling the image's
+        // constructor with picture, but this allows non-constructor initialization,
+        // which may be necessary in some instances.
         private unsafe void Initialize(int width, int height)
         {
             if (_iconData == null || _handle != IntPtr.Zero)

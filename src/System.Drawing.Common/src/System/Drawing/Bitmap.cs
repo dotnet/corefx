@@ -79,7 +79,7 @@ namespace System.Drawing
         {
             if (stream == null)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(stream), "null"));
+                throw new ArgumentNullException(nameof(stream));
             }
 
             IntPtr bitmap = IntPtr.Zero;
@@ -96,7 +96,7 @@ namespace System.Drawing
         {
             if (stream == null)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(stream), "null"));
+                throw new ArgumentNullException(nameof(stream));
             }
 
             IntPtr bitmap = IntPtr.Zero;
@@ -144,7 +144,7 @@ namespace System.Drawing
         {
             if (g == null)
             {
-                throw new ArgumentNullException(SR.Format(SR.InvalidArgument, nameof(g), "null"));
+                throw new ArgumentNullException(nameof(g));
             }
 
             IntPtr bitmap = IntPtr.Zero;
