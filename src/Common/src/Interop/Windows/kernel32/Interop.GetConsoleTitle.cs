@@ -39,7 +39,7 @@ internal partial class Interop
 
             while (true)
             {
-                // If capacity is insufficient, sometimes it returns length,
+                // If capacity is insufficient, sometimes it returns length (in chars, w/o null terminator),
                 // and sometimes it returns 0 with an error ERROR_INSUFFICIENT_BUFFER
                 int len = GetConsoleTitle(sb, sb.Capacity + 1); // +1 for null which marshaler adds
 
@@ -61,8 +61,9 @@ internal partial class Interop
                     titleLength = len;
                     return 0;
                 }
-                else
+                else if (sb.Capacity >= len)
                 {
+                    // Success
                     title = sb.ToString();
                     titleLength = title.Length;
                     return 0;
