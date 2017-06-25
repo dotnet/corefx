@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -13,6 +14,8 @@ namespace System.Diagnostics
     /// <summary>Base class used for all tests that need to spawn a remote process.</summary>
     public abstract partial class RemoteExecutorTestBase : FileCleanupTestBase
     {
+        private static bool outOfProc = (Environment.GetEnvironmentVariable("FORCE_LOCAL_INVOKE") != "1");
+
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
         /// <param name="args">The arguments to pass to the method.</param>
@@ -32,35 +35,73 @@ namespace System.Diagnostics
             Type t = method.DeclaringType;
             Assembly a = t.GetTypeInfo().Assembly;
 
-            // Start the other process and return a wrapper for it to handle its lifetime and exit checking.
-            var psi = options.StartInfo;
-            psi.UseShellExecute = false;
-
-            if (!options.EnableProfiling)
+            if (outOfProc)
             {
-                // Profilers / code coverage tools doing coverage of the test process set environment
-                // variables to tell the targeted process what profiler to load.  We don't want the child process 
-                // to be profiled / have code coverage, so we remove these environment variables for that process 
-                // before it's started.
-                psi.Environment.Remove("Cor_Profiler");
-                psi.Environment.Remove("Cor_Enable_Profiling");
-                psi.Environment.Remove("CoreClr_Profiler");
-                psi.Environment.Remove("CoreClr_Enable_Profiling");
+                // Start the other process and return a wrapper for it to handle its lifetime and exit checking.
+                var psi = options.StartInfo;
+                psi.UseShellExecute = false;
+
+                if (!options.EnableProfiling)
+                {
+                    // Profilers / code coverage tools doing coverage of the test process set environment
+                    // variables to tell the targeted process what profiler to load.  We don't want the child process 
+                    // to be profiled / have code coverage, so we remove these environment variables for that process 
+                    // before it's started.
+                    psi.Environment.Remove("Cor_Profiler");
+                    psi.Environment.Remove("Cor_Enable_Profiling");
+                    psi.Environment.Remove("CoreClr_Profiler");
+                    psi.Environment.Remove("CoreClr_Enable_Profiling");
+                }
+
+                // If we need the host (if it exists), use it, otherwise target the console app directly.
+                string testConsoleAppArgs = "\"" + a.FullName + "\" " + t.FullName + " " + method.Name + " " + string.Join(" ", args);
+
+                if (!File.Exists(TestConsoleApp))
+                    throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
+
+                psi.FileName = HostRunner;
+                psi.Arguments = ExtraParameter + testConsoleAppArgs;
+
+                    // Return the handle to the process, which may or not be started
+                    return new RemoteInvokeHandle(options.Start ?
+                        Process.Start(psi) :
+                        new Process() { StartInfo = psi }, options);
             }
+            else
+            {
+                // Load the specified assembly, type, and method, then invoke the method.
+                // The program's exit code is the return value of the invoked method.
+                object instance = null;
+                int exitCode;
+                try
+                {
+                    if (!method.IsStatic)
+                    {
+                        instance = Activator.CreateInstance(t);
+                    }
 
-            // If we need the host (if it exists), use it, otherwise target the console app directly.
-            string testConsoleAppArgs = "\"" + a.FullName + "\" " + t.FullName + " " + method.Name + " " + string.Join(" ", args);
+                    // Invoke the test
+                    object result = method.Invoke(instance, args);
+                    exitCode = result is Task<int> task ?
+                        task.GetAwaiter().GetResult() :
+                        (int)result;
+                }
+                catch (Exception exc)
+                {
+                    Console.Error.WriteLine("Exception from RemoteExecutorConsoleApp({0}):", string.Join(" ", args));
+                    Console.Error.WriteLine("Assembly: {0}", a);
+                    Console.Error.WriteLine("Type: {0}", t);
+                    Console.Error.WriteLine("Method: {0}", method);
+                    Console.Error.WriteLine("Exception: {0}", exc);
+                    throw exc;
+                }
+                finally
+                {
+                    (instance as IDisposable)?.Dispose();
+                }
 
-            if (!File.Exists(TestConsoleApp))
-                throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
-
-            psi.FileName = HostRunner;
-            psi.Arguments = ExtraParameter + testConsoleAppArgs;
-
-            // Return the handle to the process, which may or not be started
-            return new RemoteInvokeHandle(options.Start ?
-                Process.Start(psi) :
-                new Process() { StartInfo = psi }, options);
+                return new RemoteInvokeHandle(null, options);
+            }
         }
     }
 }
