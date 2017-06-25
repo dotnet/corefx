@@ -9,28 +9,28 @@ using Xunit;
 public class NegativeTesting
 {
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardOutNegativeTests()
     {
         NegativeConsoleOutputTests(Console.OpenStandardOutput());
     }
 
     [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardOutNegativeTests_Uap()
     {
         Assert.Same(Stream.Null, Console.OpenStandardOutput());
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardErrorNegativeTests()
     {
         NegativeConsoleOutputTests(Console.OpenStandardError());
     }
 
     [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardErrorNegativeTests_Uap()
     {
         Assert.Same(Stream.Null, Console.OpenStandardError());

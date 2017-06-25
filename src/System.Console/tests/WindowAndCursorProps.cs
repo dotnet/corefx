@@ -133,7 +133,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Get_Windows()
     {
         Assert.NotNull(Console.Title);
@@ -146,7 +146,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [InlineData(256)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows(int lengthOfTitle)
     {
         // Try to set the title to some other value.
@@ -159,13 +159,13 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
         }, lengthOfTitle.ToString()).Dispose();
     }
 
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot)]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Get_Windows_Uap()
     {
         Assert.Throws<IOException>(() => Console.Title);
     }
 
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot)]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows_Uap(int lengthOfTitle)
     {
         Assert.Throws<IOException>(() => Console.Title = "x");
