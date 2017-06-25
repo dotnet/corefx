@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -35,38 +36,41 @@ internal partial class Interop
         {
             int lastError = 0;
             StringBuilder sb = new StringBuilder(CharCountToByteCount(InitialBufferSizeInChars + 1));
-            int len = GetConsoleTitle(sb, sb.Capacity);
 
-            if (len <= 0)
+            while (true)
             {
-                lastError = Marshal.GetLastWin32Error();
-            }
-            else if (len > MaxAllowedBufferSizeInChars)
-            {
-                // Title is greater than the allowed buffer so we do not read the title and only pass the length to the caller.
-                title = string.Empty;
-                titleLength = len;
-                return 0;
-            }
-            else
-            {
-                if (len > InitialBufferSizeInChars)
+                // If capacity is insufficient, sometimes it returns length,
+                // and sometimes it returns 0 with an error ERROR_INSUFFICIENT_BUFFER
+                int len = GetConsoleTitle(sb, sb.Capacity + 1); // +1 for null which marshaler adds
+
+                if (len <= 0)
                 {
-                    // We need to increase the sb capacity and retry.
-                    sb.Capacity = CharCountToByteCount(len + 1);
-                    len = GetConsoleTitle(sb, sb.Capacity);
-                    if (len <= 0)
+                    lastError = Marshal.GetLastWin32Error();
+
+                    if (len < 0 || lastError != Errors.ERROR_INSUFFICIENT_BUFFER)
                     {
-                        lastError = Marshal.GetLastWin32Error();
+                        title = string.Empty;
+                        titleLength = title.Length;
+                        return lastError;
                     }
                 }
-            }
+                else if (sb.Capacity > MaxAllowedBufferSizeInChars)
+                {
+                    // Title is greater than the allowed buffer so we do not read the title and only pass the length to the caller.
+                    title = string.Empty;
+                    titleLength = len;
+                    return 0;
+                }
+                else
+                {
+                    title = sb.ToString();
+                    titleLength = title.Length;
+                    return 0;
+                }
 
-            // If the call succeeds the size must be less than or equal to sb capacity as retrieved from the first call.
-            Debug.Assert(lastError != 0 || len + 1 <= sb.Capacity);
-            title = len > 0 ? sb.ToString() : string.Empty;
-            titleLength = title.Length;
-            return lastError;
+                // We need to increase the sb capacity and retry.
+                sb.Capacity = CharCountToByteCount(len == 0 ? Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars) : len + 1);
+            }
         }
     }
 }
