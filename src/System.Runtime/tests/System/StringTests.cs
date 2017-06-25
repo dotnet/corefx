@@ -1155,13 +1155,17 @@ namespace System.Tests
         [MemberData(nameof(Equals_EncyclopaediaData))]
         public void Equals_Encyclopaedia_ReturnsExpected(StringComparison comparison, bool expected)
         {
-            string source = "encyclop\u00e6dia";
-            string target = "encyclopaedia";
-
-            Helpers.PerformActionWithCulture(new CultureInfo("se-SE"), () =>
+            RemoteInvoke((comparisonString, expectedString) =>
             {
-                Assert.Equal(expected, string.Equals(source, target, comparison));
-            });
+                string source = "encyclop\u00e6dia";
+                string target = "encyclopaedia";
+
+                CultureInfo.CurrentCulture = new CultureInfo("se-SE");
+                StringComparison comparisonType = (StringComparison)Enum.Parse(typeof(StringComparison), comparisonString);
+                Assert.Equal(bool.Parse(expectedString), string.Equals(source, target, comparisonType));
+
+                return SuccessExitCode;
+            }, comparison.ToString(), expected.ToString());
         }
 
         [Theory]
