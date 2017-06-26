@@ -125,21 +125,18 @@
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
   <PropertyGroup>
-    <HostOS>$(RuntimeOS)</HostOS>
-    <HostOS Condition="'$(HostOS)' == 'tizen.4.0.0'">ubuntu.14.04</HostOS>
-    <HostRid>$(HostOS)-x64</HostRid>
+    <RuntimeOS Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</RuntimeOS>
+    <RuntimeRid>$(RuntimeOS)-x64</RuntimeRid>
 
     <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
     <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
     <_portableRID>linux</_portableRID>
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'win'">win</_portableRID>
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'osx'">osx</_portableRID>
-<!--
-    Why doesn't this work?
+    <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
     <_portableRID Condition="'$(OSGroup)' == 'Unix'">linux</_portableRID>
     <_portableRID Condition="'$(OSGroup)' == 'Windows_NT'">win</_portableRID>
     <_portableRID Condition="'$(OSGroup)' == 'OSX'">osx</_portableRID>
--->
 
     <TargetRid Condition="'$(PortableBuild)' == 'true'">$(_portableRID)-$(ArchGroup)</TargetRid>
     <TargetRid Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</TargetRid>
