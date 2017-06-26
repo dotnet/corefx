@@ -150,12 +150,28 @@ namespace System.IO
             if (Interop.Sys.Unlink(fullPath) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-                // ENOENT means it already doesn't exist; nop
-                if (errorInfo.Error != Interop.Error.ENOENT)
+                switch(errorInfo.Error)
                 {
-                    if (errorInfo.Error == Interop.Error.EISDIR)
+                    case Interop.Error.ENOENT:
+                        // ENOENT means it already doesn't exist; nop
+                        return;
+                    case Interop.Error.EROFS:
+                        // EROFS means the file system is read-only
+                        // Need to manually check file existence
+                        // github.com/dotnet/corefx/issues/21273
+                        Interop.ErrorInfo fileExistsError;
+
+                        // Windows doesn't care about the trailing separator
+                        if (!FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath),
+                            Interop.Sys.FileTypes.S_IFREG, out fileExistsError) &&
+                            fileExistsError.Error == Interop.Error.ENOENT)
+                            return;
+                        goto default;
+                    case Interop.Error.EISDIR:
                         errorInfo = Interop.Error.EACCES.Info();
-                    throw Interop.GetExceptionForIoErrno(errorInfo, fullPath);
+                        goto default;
+                    default: 
+                        throw Interop.GetExceptionForIoErrno(errorInfo, fullPath);
                 }
             }
         }
