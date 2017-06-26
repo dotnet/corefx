@@ -131,8 +131,10 @@
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'win'">win</_portableRID>
     <_portableRID Condition="'$(_runtimeOSFamily)' == 'osx'">osx</_portableRID>
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
+    <!--
     <_portableRID Condition="'$(OSGroup)' == 'Unix'">linux</_portableRID>
     <_portableRID Condition="'$(OSGroup)' == 'Windows_NT'">win</_portableRID>
+    -->
 
     <_packageRID/>
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableRID)-$(ArchGroup)</_packageRID>
