@@ -10,15 +10,18 @@ namespace System.Tests
 
         [Benchmark]
         [MemberData(nameof(ContainsStringComparisonArgs))]
-        public void Contains(StringComparison comparisonType, int size)
+        public void Contains(StringComparison comparisonType, int[] sizes)
         {
             PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
-                        testString.Contains(subString, comparisonType);
+            foreach (var size in sizes)
+            {
+                string testString = utils.CreateString(size);
+                string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
+                foreach (var iteration in Benchmark.Iterations)
+                    using (iteration.StartMeasurement())
+                        for (int i = 0; i < 10000; i++)
+                            testString.Contains(subString, comparisonType);
+            }
         }
     }
 }
