@@ -383,7 +383,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "")]
         public void MonitoringIsEnabled()
         {
             RemoteInvoke(() => {
