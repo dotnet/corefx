@@ -2,19 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.ExceptionServices;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
-    // No appdomain in UWP or CoreRT
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot | TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18718")]
     public class AppDomainTests : RemoteExecutorTestBase
     {
         [Fact]
@@ -40,7 +36,6 @@ namespace System.Tests
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
         } 
-
 
         [Fact]
         public void UnhandledException_Add_Remove()
@@ -99,7 +94,7 @@ namespace System.Tests
 
         static void MyHandler(object sender, UnhandledExceptionEventArgs args) 
         {
-            System.IO.File.Create("success.txt");
+            File.Create("success.txt");
         }
 
         [Fact]
@@ -115,7 +110,7 @@ namespace System.Tests
             Assert.NotNull(s);
             string expected = Assembly.GetEntryAssembly().GetName().Name;
             Assert.Equal(expected, s);
-        }        
+        }
 
         //[Fact]
         public void Id()
@@ -173,7 +168,6 @@ namespace System.Tests
                 Assert.True(flag, "FirstChanceHandler not called");
                 return SuccessExitCode;
             }).Dispose();
-
         }
 
         class FirstChanceTestException : Exception
