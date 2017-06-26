@@ -5285,9 +5285,6 @@ public class NetNativeTestData
             new NetNativeTestData(typeof(Invalid_Class_Derived_With_DataContract),
                 () => new Invalid_Class_Derived_With_DataContract(),
                 "Type 'Invalid_Class_Derived_With_DataContract' cannot inherit from a type that is not marked with DataContractAttribute or SerializableAttribute.  Consider marking the base type 'Invalid_Class_Base_Without_DataContract' with DataContractAttribute or SerializableAttribute, or removing them from the derived type." ),
-            new NetNativeTestData(typeof(Invalid_Class_KnownType_Uses_Method),
-                () => new Invalid_Class_KnownType_Uses_Method(),
-                "The 'MethodName' property of the KnownTypeAttribute on type 'Invalid_Class_KnownType_Uses_Method' is not currently supported."),
             new NetNativeTestData(typeof(Invalid_Class_KnownType_Invalid_Type),
                 () => new Invalid_Class_KnownType_Invalid_Type(),
                 "Type 'Invalid_Class_No_Parameterless_Ctor' cannot be serialized. Consider marking it with the DataContractAttribute attribute, and marking all of its members you want serialized with the DataMemberAttribute attribute.  If the type is a collection, consider marking it with the CollectionDataContractAttribute.  See the Microsoft .NET Framework documentation for other supported types." ),
@@ -5302,7 +5299,6 @@ public class NetNativeTestData
             new DataContractSerializer(typeof(Invalid_Class_No_Parameterless_Ctor)),
             new DataContractSerializer(typeof(List<Invalid_Class_No_Parameterless_Ctor>)),
             new DataContractSerializer(typeof(Invalid_Class_Derived_With_DataContract)),
-            new DataContractSerializer(typeof(Invalid_Class_KnownType_Uses_Method)),
             new DataContractSerializer(typeof(Invalid_Class_KnownType_Invalid_Type))
     };
 
@@ -5332,44 +5328,6 @@ public abstract class Invalid_Class_Base_Without_DataContract
 public class Invalid_Class_Derived_With_DataContract : Invalid_Class_Base_Without_DataContract
 {
 
-}
-
-public class Invalid_Class_No_Auto_Property_Setter
-{
-    public Invalid_Class_No_Auto_Property_Setter()
-    {
-
-    }
-
-    public string ID { get; private set; }
-
-}
-
-public class Invalid_Class_No_Explicit_Property_Setter
-{
-    public Invalid_Class_No_Explicit_Property_Setter()
-    {
-
-    }
-    public string ID { get { return null; } }
-}
-
-[KnownType("GetKnownTypes")]
-public class Invalid_Class_KnownType_Uses_Method
-{
-    public Invalid_Class_KnownType_Uses_Method()
-    {
-
-    }
-    public static IEnumerable<Type> GetKnownTypes()
-    {
-#if FULL_FRAMEWORK
-                // On the full framework, simulate what will happen in N when evaluating known types
-                throw new InvalidDataContractException("The 'MethodName' property of KnownTypeAttribute attribute on type 'Invalid_Class_KnownType_Uses_Method' is not supported."); 
-#else
-        throw new NotImplementedException("MethodName in KnownTypes should not be called.");
-#endif
-    }
 }
 
 // Invalid because it's [KnownType] is an invalid type

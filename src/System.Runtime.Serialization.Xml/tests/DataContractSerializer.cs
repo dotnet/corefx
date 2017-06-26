@@ -3148,7 +3148,7 @@ public static partial class DataContractSerializerTests
             object o = td.Instantiate();
             DataContractSerializer dcs = new DataContractSerializer(o.GetType());
             MemoryStream ms = new MemoryStream();
-            Assert.Throws<InvalidDataContractException>(() => 
+            Assert.Throws<InvalidDataContractException>(() =>
             {
                 dcs.WriteObject(ms, o);
             });
@@ -3164,13 +3164,21 @@ public static partial class DataContractSerializerTests
             DataContractSerializer dcs = new DataContractSerializer(td.Type);
             MemoryStream ms = new MemoryStream();
             new DataContractSerializer(typeof(string)).WriteObject(ms, "test");
-            var str = new StreamReader(ms).ReadToEnd();
-            ms.Position = 0;
             ms.Seek(0L, SeekOrigin.Begin);
-            Assert.Throws<InvalidDataContractException>(() =>
+            if (td.Type.Equals(typeof(Invalid_Class_KnownType_Invalid_Type)))
             {
-                dcs.ReadObject(ms);
-            });
+                Assert.Throws<SerializationException>(() =>
+                {
+                    dcs.ReadObject(ms);
+                });
+            }
+            else
+            {
+                Assert.Throws<InvalidDataContractException>(() =>
+                {
+                    dcs.ReadObject(ms);
+                });
+            }
         }
     }
 
