@@ -143,6 +143,7 @@ namespace System.Net.Test.Common
             const string Rfc6455Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
             string combinedKey = secWebSocketKey + Rfc6455Guid;
 
+            // Use of SHA1 hash is required by RFC 6455.
             SHA1 sha1Provider = new SHA1CryptoServiceProvider();
             byte[] sha1Hash = sha1Provider.ComputeHash(Encoding.UTF8.GetBytes(combinedKey));
             return Convert.ToBase64String(sha1Hash);
