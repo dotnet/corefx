@@ -24,7 +24,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Point(4, 6), new Point(1, 2), Color.Black, Color.Wheat, new RectangleF(1, 2, 3, 4) };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Point_TestData))]
         public void Ctor_PointF_PointF_Color_Color(Point point1, Point point2, Color color1, Color color2, RectangleF expectedRectangle)
         {
@@ -42,7 +42,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.False(brush.Transform.IsIdentity);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_PointF_PointF_Color_Color_FloatRanges()
         {
             var brush = new LinearGradientBrush(new PointF(float.NaN, float.NaN), new PointF(float.PositiveInfinity, float.NegativeInfinity), Color.Plum, Color.Red);
@@ -52,7 +52,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(float.NaN, brush.Rectangle.Height);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Point_TestData))]
         public void Ctor_Point_Point_Color_Color(Point point1, Point point2, Color color1, Color color2, RectangleF expectedRectangle)
         {
@@ -70,7 +70,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.False(brush.Transform.IsIdentity);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, 0)]
         [InlineData(1, 1)]
         public void Ctor_EqualPoints_ThrowsOutOfMemoryException(int x, int y)
@@ -87,7 +87,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Rectangle(1, 2, 3, 4), Color.Red, Color.Plum, LinearGradientMode.Vertical };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_LinearGradientMode_TestData))]
         public void Ctor_Rectangle_Color_Color_LinearGradientMode(Rectangle rectangle, Color color1, Color color2, LinearGradientMode linearGradientMode)
         {
@@ -105,7 +105,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(linearGradientMode == LinearGradientMode.Horizontal, brush.Transform.IsIdentity);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_LinearGradientMode_TestData))]
         public void Ctor_RectangleF_Color_Color_LinearGradientMode(Rectangle rectangle, Color color1, Color color2, LinearGradientMode linearGradientMode)
         {
@@ -132,7 +132,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Rectangle(1, 2, 3, 4), Color.Red, Color.Plum, 90 };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_Angle_TestData))]
         public void Ctor_Rectangle_Color_Color_Angle(Rectangle rectangle, Color color1, Color color2, float angle)
         {
@@ -150,7 +150,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_Angle_TestData))]
         public void Ctor_RectangleF_Color_Color_Angle(Rectangle rectangle, Color color1, Color color2, float angle)
         {
@@ -176,7 +176,7 @@ namespace System.Drawing.Drawing2D.Tests
                 yield return new object[] { testData[0], testData[1], testData[2], testData[3], false };
             }
         }
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_Angle_IsAngleScalable_TestData))]
         public void Ctor_Rectangle_Color_Color_Angle_IsAngleScalable(Rectangle rectangle, Color color1, Color color2, float angle, bool isAngleScalable)
         {
@@ -194,7 +194,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_Rectangle_Angle_IsAngleScalable_TestData))]
         public void Ctor_RectangleF_Color_Color_Angle_IsAngleScalable(Rectangle rectangle, Color color1, Color color2, float angle, bool isAngleScalable)
         {
@@ -212,7 +212,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_ZeroWidth_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new Rectangle(1, 2, 0, 4), Color.Empty, Color.Empty, 0f));
@@ -223,7 +223,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new RectangleF(1, 2, 0, 4), Color.Empty, Color.Empty, 0, true));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_ZeroHeight_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new Rectangle(1, 2, 3, 0), Color.Empty, Color.Empty, 0f));
@@ -234,7 +234,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new RectangleF(1, 2, 3, 0), Color.Empty, Color.Empty, 0, true));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(LinearGradientMode.Horizontal - 1)]
         [InlineData(LinearGradientMode.BackwardDiagonal + 1)]
         public void Ctor_InvalidLinearGradientMode_ThrowsEnumArgumentException(LinearGradientMode linearGradientMode)
@@ -249,7 +249,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { HatchStyle.SolidDiamond, Color.PapayaWhip, Color.Plum };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Ctor_HatchStyle_ForeColor_BackColor_TestData))]
         public void Ctor_HatchStyle_ForeColor_BackColor(HatchStyle hatchStyle, Color foreColor, Color backColor)
         {
@@ -263,7 +263,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(backColor.ToArgb(), brush.BackgroundColor.ToArgb());
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(HatchStyle.Horizontal - 1)]
         [InlineData(HatchStyle.SolidDiamond + 1)]
         public void Ctor_InvalidHatchStyle_ThrowsArgumentException(HatchStyle hatchStyle)
@@ -272,7 +272,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new HatchBrush(hatchStyle, Color.Empty, Color.Empty));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Brush_ReturnsClone()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -286,7 +286,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(brush.Transform, clone.Transform);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -295,7 +295,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Clone());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_GetWithInterpolationColorsSet_ReturnsNull()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -309,7 +309,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Null(brush.Blend);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(new float[] { 1 }, new float[] { 1 })]
         [InlineData(new float[] { 0 }, new float[] { 0 })]
         [InlineData(new float[] { float.MaxValue }, new float[] { float.MaxValue })]
@@ -333,7 +333,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(factors.Length, brush.Blend.Positions.Length);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 2 })]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 1 })]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 0 })]
@@ -349,42 +349,42 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = blend);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_SetNullBlend_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.Blend = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_SetNullBlendFactors_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.Blend = new Blend { Factors = null });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_SetNullBlendPositions_ThrowsArgumentNullException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentNullException>("source", () => brush.Blend = new Blend { Factors = new float[2], Positions = null });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_SetFactorsLengthGreaterThanPositionsLength_ThrowsArgumentOutOfRangeException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => brush.Blend = new Blend { Factors = new float[2], Positions = new float[1] });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_SetInvalidBlendFactorsLength_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = new Blend { Factors = new float[0], Positions = new float[0] });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Blend_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -394,7 +394,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = new Blend());
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public void GammaCorrection_Set_GetReturnsExpected(bool gammaCorrection)
@@ -403,7 +403,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(gammaCorrection, brush.GammaCorrection);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GammaCorrection_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -413,7 +413,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.GammaCorrection = true);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(float.PositiveInfinity)]
         [InlineData(1)]
         [InlineData(0.5f)]
@@ -433,7 +433,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(blend.Positions, brush.InterpolationColors.Positions);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetWithExistingInterpolationColors_OverwritesInterpolationColors()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -455,21 +455,21 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(blend.Positions, brush.InterpolationColors.Positions);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetNullBlend_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetBlendWithNullColors_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend { Colors = null });
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
         public void InterpolationColors_SetBlendWithTooFewColors_ThrowsArgumentException(int colorsLength)
@@ -478,14 +478,14 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = new ColorBlend { Colors = new Color[colorsLength] });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetNullBlendPositions_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend { Colors = new Color[2], Positions = null });
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(3)]
@@ -499,7 +499,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(new float[] { 1, 0, 1 })]
         [InlineData(new float[] { 0, 0, 0 })]
         public void InterpolationColors_InvalidPositions_ThrowsArgumentException(float[] positions)
@@ -512,7 +512,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -533,7 +533,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetBlendTriangularShape_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -550,7 +550,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InterpolationColors_SetBlend_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -571,7 +571,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LinearColors_SetValid_GetReturnsExpected()
         {
             Color[] colors = new Color[] { Color.Red, Color.Blue, Color.AntiqueWhite };
@@ -579,14 +579,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(colors.Take(2).Select(c => Color.FromArgb(c.ToArgb())), brush.LinearColors);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LinearColors_SetNull_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.LinearColors = null);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
         public void LinearColors_SetInvalidLength_ThrowsIndexOutOfRangeException(int length)
@@ -595,7 +595,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Throws<IndexOutOfRangeException>(() => brush.LinearColors = new Color[length]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void LinearColors_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -605,7 +605,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.LinearColors = new Color[] { Color.Red, Color.Wheat });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Rectangle_GetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -614,7 +614,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Rectangle);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_SetValid_GetReturnsExpected()
         {
             var transform = new Matrix(1, 2, 3, 4, 5, 6);
@@ -622,14 +622,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(transform, brush.Transform);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_SetNull_ThrowsArgumentNullException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentNullException>("matrix", () => brush.Transform = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -639,7 +639,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Transform = new Matrix());
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(WrapMode.Tile)]
         [InlineData(WrapMode.TileFlipX)]
         [InlineData(WrapMode.TileFlipXY)]
@@ -650,7 +650,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(wrapMode, brush.WrapMode);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(WrapMode.Tile - 1)]
         [InlineData(WrapMode.Clamp + 1)]
         public void WrapMode_SetInvalid_ThrowsInvalidEnumArgumentException(WrapMode wrapMode)
@@ -659,14 +659,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Throws<InvalidEnumArgumentException>("value", () => brush.WrapMode = wrapMode);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void WrapMode_Clamp_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode = WrapMode.Clamp);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void WrapMode_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -676,7 +676,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode = WrapMode.TileFlipX);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ResetTransform_Invoke_SetsTransformToIdentity()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -686,7 +686,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.True(brush.Transform.IsIdentity);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ResetTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -695,7 +695,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ResetTransform());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_NoOrder_Success()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -707,7 +707,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(MatrixOrder.Prepend)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend - 1)]
@@ -732,7 +732,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_NullMatrix_ThrowsArgumentNullException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -740,7 +740,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentNullException>("matrix", () => brush.MultiplyTransform(null, MatrixOrder.Append));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_DisposedMatrix_Nop()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -755,7 +755,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(transform, brush.Transform);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_NonInvertibleMatrix_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -765,7 +765,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(matrix, MatrixOrder.Append));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -775,7 +775,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(new Matrix(), MatrixOrder.Prepend));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-1, -2)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
@@ -789,7 +789,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(0, 0, MatrixOrder.Prepend)]
@@ -806,7 +806,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void TranslateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -815,7 +815,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(0, 0, order));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void TranslateTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -825,7 +825,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(0, 0, MatrixOrder.Append));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-1, -2)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
@@ -839,7 +839,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(0, 0, MatrixOrder.Prepend)]
@@ -856,7 +856,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void ScaleTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -865,7 +865,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0, 0, order));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ScaleTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -875,7 +875,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0, 0, MatrixOrder.Append));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
@@ -890,7 +890,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, MatrixOrder.Prepend)]
         [InlineData(1, MatrixOrder.Append)]
         [InlineData(0, MatrixOrder.Prepend)]
@@ -907,7 +907,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void RotateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -916,7 +916,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(0, order));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void RotateTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -926,7 +926,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(0, MatrixOrder.Append));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(0.5)]
         [InlineData(1)]
@@ -937,7 +937,7 @@ namespace System.Drawing.Drawing2D.Tests
             brush.SetSigmaBellShape(focus);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -949,7 +949,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(focus, 1));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -960,7 +960,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(0.1f, scale));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetSigmalBellShape_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -970,7 +970,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(0, 1));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, new float[] { 1, 0 }, new float[] { 0, 1 })]
         [InlineData(0.5, new float[] { 0, 1, 0 }, new float[] { 0, 0.5f, 1 })]
         [InlineData(1, new float[] { 0, 1 }, new float[] { 0, 1 })]
@@ -983,7 +983,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedPositions, brush.Blend.Positions);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, 1, new float[] { 1, 0 }, new float[] { 0, 1 })]
         [InlineData(0.5, 0, new float[] { 0, 0, 0 }, new float[] { 0, 0.5f, 1 })]
         [InlineData(0.5, 1, new float[] { 0, 1, 0 }, new float[] { 0, 0.5f, 1 })]
@@ -997,7 +997,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedPositions, brush.Blend.Positions);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -1009,7 +1009,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(focus, 1));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -1020,7 +1020,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(0.1f, scale));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetBlendTriangularShape_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -1030,7 +1030,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(0, 1));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_MultipleTimes_Success()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
