@@ -9,8 +9,6 @@ namespace System.DirectoryServices.Protocols
 {
     public abstract class DirectoryRequest : DirectoryOperation
     {
-        internal DirectoryControlCollection directoryControlCollection;
-
         internal DirectoryRequest()
         {
         }
@@ -340,10 +338,10 @@ namespace System.DirectoryServices.Protocols
 {
     public class DsmlAuthRequest : DirectoryRequest
     {
-        public DsmlAuthRequest() { }
+        public DsmlAuthRequest() => Principal = string.Empty;
 
         public DsmlAuthRequest(string principal) => Principal = principal;
 
-        public string Principal { get; set; } = string.Empty;
+        public string Principal { get; set; }
     }
 }

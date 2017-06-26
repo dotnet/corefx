@@ -130,6 +130,7 @@ namespace System.DirectoryServices.Protocols
                 {
                     return List[index];
                 }
+
                 if (List[index] is byte[] temp)
                 {
                     try
@@ -142,7 +143,7 @@ namespace System.DirectoryServices.Protocols
                     }
                 }
                 
-                // should not happen
+                // This hould not happen.
                 return List[index];
             }
             set

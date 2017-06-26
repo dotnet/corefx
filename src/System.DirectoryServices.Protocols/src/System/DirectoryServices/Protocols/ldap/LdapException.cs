@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace System.DirectoryServices.Protocols
@@ -35,41 +33,34 @@ namespace System.DirectoryServices.Protocols
 
     internal class LdapErrorMappings
     {
-        private static Dictionary<LdapError, string> s_resultCodeHash = null;
-
-        static LdapErrorMappings()
+        private static readonly Dictionary<LdapError, string> s_resultCodeMapping = new Dictionary<LdapError, string>(capacity: 20)
         {
-            s_resultCodeHash = new Dictionary<LdapError, string>
-            {
-                { LdapError.IsLeaf, SR.LDAP_IS_LEAF },
-                { LdapError.InvalidCredentials, SR.LDAP_INVALID_CREDENTIALS },
-                { LdapError.ServerDown, SR.LDAP_SERVER_DOWN },
-                { LdapError.LocalError, SR.LDAP_LOCAL_ERROR },
-                { LdapError.EncodingError, SR.LDAP_ENCODING_ERROR },
-                { LdapError.DecodingError, SR.LDAP_DECODING_ERROR },
-                { LdapError.TimeOut, SR.LDAP_TIMEOUT },
-                { LdapError.AuthUnknown, SR.LDAP_AUTH_UNKNOWN },
-                { LdapError.FilterError, SR.LDAP_FILTER_ERROR },
-                { LdapError.UserCancelled, SR.LDAP_USER_CANCELLED },
-                { LdapError.ParameterError, SR.LDAP_PARAM_ERROR },
-                { LdapError.NoMemory, SR.LDAP_NO_MEMORY },
-                { LdapError.ConnectError, SR.LDAP_CONNECT_ERROR },
-                { LdapError.NotSupported, SR.LDAP_NOT_SUPPORTED },
-                { LdapError.NoResultsReturned, SR.LDAP_NO_RESULTS_RETURNED },
-                { LdapError.ControlNotFound, SR.LDAP_CONTROL_NOT_FOUND },
-                { LdapError.MoreResults, SR.LDAP_MORE_RESULTS_TO_RETURN },
-                { LdapError.ClientLoop, SR.LDAP_CLIENT_LOOP },
-                { LdapError.ReferralLimitExceeded, SR.LDAP_REFERRAL_LIMIT_EXCEEDED },
-                { LdapError.SendTimeOut, SR.LDAP_SEND_TIMEOUT }
-            };
-        }
+            { LdapError.IsLeaf, SR.LDAP_IS_LEAF },
+            { LdapError.InvalidCredentials, SR.LDAP_INVALID_CREDENTIALS },
+            { LdapError.ServerDown, SR.LDAP_SERVER_DOWN },
+            { LdapError.LocalError, SR.LDAP_LOCAL_ERROR },
+            { LdapError.EncodingError, SR.LDAP_ENCODING_ERROR },
+            { LdapError.DecodingError, SR.LDAP_DECODING_ERROR },
+            { LdapError.TimeOut, SR.LDAP_TIMEOUT },
+            { LdapError.AuthUnknown, SR.LDAP_AUTH_UNKNOWN },
+            { LdapError.FilterError, SR.LDAP_FILTER_ERROR },
+            { LdapError.UserCancelled, SR.LDAP_USER_CANCELLED },
+            { LdapError.ParameterError, SR.LDAP_PARAM_ERROR },
+            { LdapError.NoMemory, SR.LDAP_NO_MEMORY },
+            { LdapError.ConnectError, SR.LDAP_CONNECT_ERROR },
+            { LdapError.NotSupported, SR.LDAP_NOT_SUPPORTED },
+            { LdapError.NoResultsReturned, SR.LDAP_NO_RESULTS_RETURNED },
+            { LdapError.ControlNotFound, SR.LDAP_CONTROL_NOT_FOUND },
+            { LdapError.MoreResults, SR.LDAP_MORE_RESULTS_TO_RETURN },
+            { LdapError.ClientLoop, SR.LDAP_CLIENT_LOOP },
+            { LdapError.ReferralLimitExceeded, SR.LDAP_REFERRAL_LIMIT_EXCEEDED },
+            { LdapError.SendTimeOut, SR.LDAP_SEND_TIMEOUT }
+        };
 
-        /// <summary>
-        /// This function maps a string containing a DSML v2 errorResult into a LDAPResultCode.
-        /// </summary>
-		static public string MapResultCode(int errorCode)
+        public static string MapResultCode(int errorCode)
         {
-            return (string)s_resultCodeHash[(LdapError)errorCode];
+            s_resultCodeMapping.TryGetValue((LdapError)errorCode, out string errorMessage);
+            return errorMessage;
         }
     }
 
