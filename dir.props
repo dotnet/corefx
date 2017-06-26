@@ -125,8 +125,6 @@
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
   <PropertyGroup>
-    <RuntimeOS Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</RuntimeOS>
-    <RuntimeRid>$(RuntimeOS)-x64</RuntimeRid>
 
     <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
     <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
@@ -142,6 +140,9 @@
     <TargetRid Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</TargetRid>
     <TargetRid Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</TargetRid>
     <TargetRid Condition="'$(TargetRid)' == ''">$(RuntimeOS)-$(ArchGroup)</TargetRid>
+
+    <RuntimeOS Condition="'$(RuntimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</RuntimeOS>
+    <RuntimeRid>$(RuntimeOS)-x64</RuntimeRid>
   </PropertyGroup>
 
   <!-- Import packaging props -->
