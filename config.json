@@ -36,8 +36,8 @@
       "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
       "defaultValue": ""
     },
-    "TargetRid": {
-      "description": "The RID of the target system.",
+    "PackageRID": {
+      "description": "The RID of the target package.",
       "valueType": "property",
       "values": ["win7-x64", "ubuntu.14.04-x64"],
       "defaultValue": "${RuntimeOS}-${ArchGroup}"
