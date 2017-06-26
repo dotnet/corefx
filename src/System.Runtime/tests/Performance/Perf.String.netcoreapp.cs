@@ -6,22 +6,24 @@ namespace System.Tests
 {
     public partial class Perf_String
     {
-        public static IEnumerable<object[]> ContainsStringComparisonArgs => Permutations(s_compareOptions, TestStringSizes());
+        private static readonly object[] s_testStringSizes = new object[]
+        {
+            10, 100, 1000
+        };
+
+        public static IEnumerable<object[]> ContainsStringComparisonArgs => Permutations(s_compareOptions, s_testStringSizes);
 
         [Benchmark]
         [MemberData(nameof(ContainsStringComparisonArgs))]
-        public void Contains(StringComparison comparisonType, int[] sizes)
+        public void Contains(StringComparison comparisonType, int size)
         {
             PerfUtils utils = new PerfUtils();
-            foreach (var size in sizes)
-            {
-                string testString = utils.CreateString(size);
-                string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
-                foreach (var iteration in Benchmark.Iterations)
-                    using (iteration.StartMeasurement())
-                        for (int i = 0; i < 10000; i++)
-                            testString.Contains(subString, comparisonType);
-            }
+            string testString = utils.CreateString(size);
+            string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
+            foreach (var iteration in Benchmark.Iterations)
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < 10000; i++)
+                        testString.Contains(subString, comparisonType);
         }
     }
 }
