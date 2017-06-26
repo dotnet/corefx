@@ -13,7 +13,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         {
             var context = new PrincipalContext(ContextType.Machine);
             var principal = new ComputerPrincipal(context);
-            Assert.Equal(context, principal.Context);
+            Assert.Same(context, principal.Context);
             Assert.Empty(principal.ServicePrincipalNames);
         }
 

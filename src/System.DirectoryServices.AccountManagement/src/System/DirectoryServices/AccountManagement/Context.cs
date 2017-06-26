@@ -1242,14 +1242,10 @@ namespace System.DirectoryServices.AccountManagement
             {
                 return DefaultContextOptions.MachineDefaultContextOption;
             }
-            else if (storeType == ContextType.Domain || storeType == ContextType.ApplicationDirectory)
+            else
             {
                 return DefaultContextOptions.ADDefaultContextOption;
             }
-
-            // The actual value of this is unimportant, as an invalid contextType will cause an
-            // exception to be thrown in the constructor later.
-            return ContextOptions.Negotiate;
         }
 
         // Helper method: given a typeof(User/Computer/etc.), returns the userCtx/computerCtx/etc.
