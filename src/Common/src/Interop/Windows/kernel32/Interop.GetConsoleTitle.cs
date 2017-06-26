@@ -19,8 +19,7 @@ internal partial class Interop
         // Although msdn states that the max allowed limit is 65K,
         // desktop limits this to 24500 as buffer sizes greater than it
         // throw.
-        // See note below for why we're pessimistically setting the capacity as if it was bytes, even though it's in chars.
-        private const int MaxAllowedBufferSizeInChars = 24500 * sizeof(char);
+        private const int MaxAllowedBufferSizeInChars = 24500;
 
         // 1. We first try to call the GetConsoleTitle with an InitialBufferSizeInChars of 256.
         // 2. Then based on the return value either increase the capacity or return failure.
@@ -64,7 +63,7 @@ internal partial class Interop
                 }
 
                 // We need to increase the sb capacity and retry.
-                if (sb.Capacity >= MaxAllowedBufferSizeInChars)
+                if (sb.Capacity >= MaxAllowedBufferSizeInChars * sizeof(char))
                 {
                     // No more room to grow.
                     // Title is greater than the allowed buffer so we do not read the title and only pass the length to the caller.
@@ -77,12 +76,12 @@ internal partial class Interop
                 {
                     // Add one for the null terminator in case length doesn't include it
                     // Double the length requested, in case it will interpret sb.Capacity as bytes
-                    sb.Capacity = Math.Min((len + 1) * sizeof(char), MaxAllowedBufferSizeInChars);
+                    sb.Capacity = Math.Min((len + 1) * sizeof(char), MaxAllowedBufferSizeInChars * sizeof(char));
                 }
                 else
                 {
                     // Don't know what length is needed: just double
-                    sb.Capacity = Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars);
+                    sb.Capacity = Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars * sizeof(char));
                 }
             }
         }
