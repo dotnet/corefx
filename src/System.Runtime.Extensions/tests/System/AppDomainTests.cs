@@ -103,19 +103,28 @@ namespace System.Tests
             Assert.Null(AppDomain.CurrentDomain.DynamicDirectory);
         }
 
-        //[Fact]
+        [Fact]
         public void FriendlyName()
         {
             string s = AppDomain.CurrentDomain.FriendlyName;
             Assert.NotNull(s);
-            string expected = Assembly.GetEntryAssembly().GetName().Name;
+            string expected = Assembly.GetEntryAssembly()?.GetName()?.Name;
+
+            // Desktop
+            if (expected == null)
+                expected = Assembly.GetExecutingAssembly().GetName().Name;
+
             Assert.Equal(expected, s);
         }
 
-        //[Fact]
+        [Fact]
         public void Id()
         {
-            Assert.Equal(1, AppDomain.CurrentDomain.Id);
+            RemoteInvoke(() =>
+            {
+                Assert.Equal(1, AppDomain.CurrentDomain.Id);
+                return SuccessExitCode;
+            }).Dispose();
         }        
 
         [Fact]
@@ -211,19 +220,29 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         public void ApplyPolicy()
         {
             AssertExtensions.Throws<ArgumentNullException>("assemblyName", () => { AppDomain.CurrentDomain.ApplyPolicy(null); });
             AssertExtensions.Throws<ArgumentException>(null, () => { AppDomain.CurrentDomain.ApplyPolicy(""); });
-            Assert.Equal(AppDomain.CurrentDomain.ApplyPolicy(Assembly.GetEntryAssembly().FullName), Assembly.GetEntryAssembly().FullName);
+            string entryAssembly = Assembly.GetEntryAssembly()?.FullName ?? Assembly.GetExecutingAssembly().FullName;
+            Assert.Equal(AppDomain.CurrentDomain.ApplyPolicy(entryAssembly), entryAssembly);
         }
 
-        //[Fact]
-        public void CreateDomain()
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void CreateDomainNonNetfx()
         {
             AssertExtensions.Throws<ArgumentNullException>("friendlyName", () => { AppDomain.CreateDomain(null); });
             Assert.Throws<PlatformNotSupportedException>(() => { AppDomain.CreateDomain("test"); });
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void CreateDomainNetfx()
+        {
+            Assert.Throws<ArgumentNullException>(() => { AppDomain.CreateDomain(null); });
+            AppDomain.CreateDomain("test");
         }
 
         [Fact]
@@ -242,8 +261,9 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void ExecuteAssembly()
         {
             CopyTestAssemblies();
@@ -251,7 +271,7 @@ namespace System.Tests
             string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
-            Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] {"2", "3"}, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
+            Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
             Assert.Equal(10, AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }));
         }        
@@ -284,7 +304,8 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx is more permissive and does not throw")]
         public void IsCompatibilitySwitchSet()
         {
             Assert.Throws<ArgumentNullException>(() => { AppDomain.CurrentDomain.IsCompatibilitySwitchSet(null); });
@@ -292,31 +313,46 @@ namespace System.Tests
             Assert.Null(AppDomain.CurrentDomain.IsCompatibilitySwitchSet("randomSwitch"));
         }
 
-        //[Fact]
+        [Fact]
         public void IsDefaultAppDomain()
         {
-            Assert.True(AppDomain.CurrentDomain.IsDefaultAppDomain());
+            RemoteInvoke(() =>
+            {
+                Assert.True(AppDomain.CurrentDomain.IsDefaultAppDomain());
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public void IsFinalizingForUnload()
         {
-            Assert.False(AppDomain.CurrentDomain.IsFinalizingForUnload());
+            RemoteInvoke(() => {
+                Assert.False(AppDomain.CurrentDomain.IsFinalizingForUnload());
+                return SuccessExitCode;
+            }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         public void toString()
         {
             string actual = AppDomain.CurrentDomain.ToString();
+
+            // NetFx has additional line endings
+            if (PlatformDetection.IsFullFramework)
+                actual = actual.Trim();
+
             string expected = "Name:" + AppDomain.CurrentDomain.FriendlyName + Environment.NewLine + "There are no context policies.";
             Assert.Equal(expected, actual);
         }
 
-        //[Fact] // hang
+        [Fact]
         public void Unload()
         {
-            AssertExtensions.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null);});
-            Assert.Throws<CannotUnloadAppDomainException>(() => { AppDomain.Unload(AppDomain.CurrentDomain); });
+            RemoteInvoke(() => {
+                AssertExtensions.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null); });
+                Assert.Throws<CannotUnloadAppDomainException>(() => { AppDomain.Unload(AppDomain.CurrentDomain); });
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
@@ -337,21 +373,37 @@ namespace System.Tests
             Assert.NotNull(AppDomain.CurrentDomain.Load(aBytes));
         }
 
-        //[Fact]
+        [Fact]
         public void ReflectionOnlyGetAssemblies()
         {
-            Assert.Equal(Array.Empty<Assembly>(), AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies());
+            RemoteInvoke(() => {
+                Assert.Equal(0, AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().Length);
+                return SuccessExitCode;
+            }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "")]
         public void MonitoringIsEnabled()
         {
-            Assert.False(AppDomain.MonitoringIsEnabled);
-            AssertExtensions.Throws<ArgumentException>(null, () => {AppDomain.MonitoringIsEnabled = false;});
-            Assert.Throws<PlatformNotSupportedException>(() => {AppDomain.MonitoringIsEnabled = true;});
+            RemoteInvoke(() => {
+                Assert.False(AppDomain.MonitoringIsEnabled);
+                Assert.Throws<ArgumentException>(() => { AppDomain.MonitoringIsEnabled = false; });
+
+                if (PlatformDetection.IsFullFramework)
+                {
+                    AppDomain.MonitoringIsEnabled = true;
+                    Assert.True(AppDomain.MonitoringIsEnabled);
+                }
+                else
+                {
+                    Assert.Throws<PlatformNotSupportedException>(() => { AppDomain.MonitoringIsEnabled = true; });
+                }
+                return SuccessExitCode;
+            }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         public void MonitoringSurvivedMemorySize()
         {
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringSurvivedMemorySize; });
@@ -363,23 +415,35 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.MonitoringSurvivedProcessMemorySize; });
         }
 
-        //[Fact]
+        [Fact]
         public void MonitoringTotalAllocatedMemorySize()
         {
-            Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize; } );
+            RemoteInvoke(() => {
+                Assert.Throws<InvalidOperationException>(() => {
+                    var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
+                });
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public void MonitoringTotalProcessorTime()
         {
-            Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringTotalProcessorTime; } );
+            Assert.Throws<InvalidOperationException>(() => {
+                var t = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
+            } );
         }
 
 #pragma warning disable 618
-        //[Fact]
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetCurrentThreadId()
         {
-            Assert.True(AppDomain.GetCurrentThreadId() == Environment.CurrentManagedThreadId);
+            RemoteInvoke(() =>
+            {
+                Assert.Equal(AppDomain.GetCurrentThreadId(), Environment.CurrentManagedThreadId);
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
@@ -444,8 +508,9 @@ namespace System.Tests
         }
 
 #pragma warning restore 618
-        //[Fact]
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetAssemblies()
         {
             RemoteInvoke(() => {
@@ -482,8 +547,9 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AssemblyLoad()
         {
             RemoteInvoke(() => {
@@ -511,8 +577,9 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory'
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void AssemblyResolve()
         {
             CopyTestAssemblies();
@@ -532,8 +599,9 @@ namespace System.Tests
             }).Dispose();
         }
 
-        //[Fact]
+        [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void AssemblyResolve_RequestingAssembly()
         {
             CopyTestAssemblies();
