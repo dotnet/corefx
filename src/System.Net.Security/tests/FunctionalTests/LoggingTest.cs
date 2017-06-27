@@ -25,6 +25,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
         public void EventSource_EventsRaisedAsExpected()
         {
