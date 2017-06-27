@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace System.Net
 {
@@ -24,7 +25,8 @@ namespace System.Net
 
         private readonly ArrayList m_list = new ArrayList();
 
-        private DateTime m_timeStamp = DateTime.MinValue; // Do not rename (binary serialization)
+        private int m_version; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
+        private DateTime m_TimeStamp = DateTime.MinValue; // Do not rename (binary serialization)
         private bool m_has_other_versions; // Do not rename (binary serialization)
 
         public CookieCollection()
@@ -56,6 +58,12 @@ namespace System.Net
                 }
                 return null;
             }
+        }
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            m_version = m_list.Count;
         }
 
         public void Add(Cookie cookie)
@@ -134,19 +142,19 @@ namespace System.Net
             switch (how)
             {
                 case Stamp.Set:
-                    m_timeStamp = DateTime.Now;
+                    m_TimeStamp = DateTime.Now;
                     break;
                 case Stamp.SetToMaxUsed:
-                    m_timeStamp = DateTime.MaxValue;
+                    m_TimeStamp = DateTime.MaxValue;
                     break;
                 case Stamp.SetToUnused:
-                    m_timeStamp = DateTime.MinValue;
+                    m_TimeStamp = DateTime.MinValue;
                     break;
                 case Stamp.Check:
                 default:
                     break;
             }
-            return m_timeStamp;
+            return m_TimeStamp;
         }
 
 

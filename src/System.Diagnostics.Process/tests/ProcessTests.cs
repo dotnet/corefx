@@ -58,14 +58,16 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
         {
             CreateDefaultProcess();
 
             ProcessPriorityClass originalPriority = _process.PriorityClass;
-            Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
+
+            var expected = PlatformDetection.IsWindowsNanoServer ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal; // For some reason we're BelowNormal initially on Nano
+            Assert.Equal(expected, originalPriority);
 
             try
             {
@@ -954,6 +956,14 @@ namespace System.Diagnostics.Tests
         [InlineData(@"a""b c""d e""f g""h i""j k""l", @"ab cd,ef gh,ij kl")]
         [InlineData(@"a b c""def", @"a,b,cdef")]
         [InlineData(@"""\a\"" \\""\\\ b c", @"\a"" \\\\,b,c")]
+        [InlineData("\"\" b \"\"", ",b,")]
+        [InlineData("\"\"\"\" b c", "\",b,c")]
+        [InlineData("c\"\"\"\" b \"\"\\", "c\",b,\\")]
+        [InlineData("\"\"c \"\"b\"\" d\"\\", "c,b,d\\")]
+        [InlineData("\"\"a\"\" b d", "a,b,d")]
+        [InlineData("b d \"\"a\"\" ", "b,d,a")]
+        [InlineData("\\\"\\\"a\\\"\\\" b d", "\"\"a\"\",b,d")]
+        [InlineData("b d \\\"\\\"a\\\"\\\"", "b,d,\"\"a\"\"")]
         public void TestArgumentParsing(string inputArguments, string expectedArgv)
         {
             using (var handle = RemoteInvokeRaw((Func<string, string, string, int>)ConcatThreeArguments,
@@ -1403,7 +1413,7 @@ namespace System.Diagnostics.Tests
             string domain = "thisDomain";
             SecureString password = AsSecureString("Value");
 
-            Process p = Process.Start(currentProcessName, userName, password, domain);
+            Process p = Process.Start(currentProcessName, userName, password, domain); // This writes junk to the Console but with this overload, we can't prevent that.
             Assert.NotNull(p);
             Assert.Equal(currentProcessName, p.StartInfo.FileName);
             Assert.Equal(userName, p.StartInfo.UserName);

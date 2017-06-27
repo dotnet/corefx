@@ -83,7 +83,7 @@ public partial class ThreadPoolBoundHandleTests
     {
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
         {
-            Assert.Throws<ArgumentException>(() => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), new NonBlittableType() { s = "foo" }));
+            AssertExtensions.Throws<ArgumentException>(null, () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), new NonBlittableType() { s = "foo" }));
         }
     }
 
@@ -131,7 +131,7 @@ public partial class ThreadPoolBoundHandleTests
         };
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
         {
-            Assert.Throws<ArgumentException>(() => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), array));
+            AssertExtensions.Throws<ArgumentException>(null, () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), array));
         }
     }
 
@@ -200,6 +200,7 @@ public partial class ThreadPoolBoundHandleTests
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
+    [ActiveIssue("https://github.com/dotnet/corefx/issues/18058", TargetFrameworkMonikers.Uap)]
     public unsafe void AllocateNativeOverlapped_PreAllocated_ReusedReturnedNativeOverlapped_OffsetLowAndOffsetHighSetToZero()
     {   // The CLR reuses NativeOverlapped underneath, check to make sure that they reset fields back to zero
 
@@ -277,7 +278,7 @@ public partial class ThreadPoolBoundHandleTests
             {
                 NativeOverlapped* overlapped = handle.AllocateNativeOverlapped(preAlloc);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("preAllocated", () =>
                 {
                     handle.AllocateNativeOverlapped(preAlloc);
                 });

@@ -28,12 +28,12 @@ namespace System.Tests
         [Fact]
         public void IncorrectVariableThrowsArgument()
         {
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(string.Empty, "test"));
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(NullString, "test"));
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable("Variable=Something", "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(string.Empty, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(NullString, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable("Variable=Something", "test"));
 
             string varWithLenLongerThanAllowed = new string('c', MAX_VAR_LENGTH_ALLOWED + 1);
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(varWithLenLongerThanAllowed, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable(varWithLenLongerThanAllowed, "test"));
         }
 
         private static void ExecuteAgainstTarget(
@@ -49,7 +49,8 @@ namespace System.Tests
             catch (SecurityException)
             {
                 shouldCleanUp = false;
-                Assert.True(target == EnvironmentVariableTarget.Machine, "only machine target should have access issues");
+                Assert.True(target == EnvironmentVariableTarget.Machine || (target == EnvironmentVariableTarget.User && PlatformDetection.IsUap),
+                            "only machine target, or user when in uap, should have access issues");
                 Assert.True(PlatformDetection.IsWindows, "and it should be Windows");
                 Assert.False(PlatformDetection.IsWindowsAndElevated, "and we shouldn't be elevated");
             }

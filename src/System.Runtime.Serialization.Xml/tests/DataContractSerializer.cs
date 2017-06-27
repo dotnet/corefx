@@ -1312,7 +1312,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(deserializedValue.GetPrivatePropertyValue(), value.GetPrivatePropertyValue());
     }
 
-    #region private type has to be in with in the class
+#region private type has to be in with in the class
     [DataContract]
     private class PrivateType
     {
@@ -1338,7 +1338,7 @@ public static partial class DataContractSerializerTests
             return PrivateProperty;
         }
     }
-    #endregion
+#endregion
 
     [Fact]
     public static void DCS_RootNameAndNamespaceThroughConstructorAsString()
@@ -2773,7 +2773,7 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.IntProperty, actual.IntProperty);
     }
 
-    #region DesktopTest
+#region DesktopTest
 
     [Fact]
     public static void DCS_ResolveNameReturnsEmptyNamespace()
@@ -3055,7 +3055,21 @@ public static partial class DataContractSerializerTests
         SerializationTestTypes.ComparisonHelper.CompareRecursively(defaultCollections, actual);
     }
 
-    #endregion
+#endregion
+
+    [Fact]
+    public static void DCS_TypeWithVirtualGenericProperty()
+    {
+        var value1 = new TypeWithVirtualGenericProperty<int>() { Value = 1 };
+        var actual1 = SerializeAndDeserialize(value1, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual1);
+        Assert.Equal(value1.Value, actual1.Value);
+
+        var value2 = new TypeWithVirtualGenericPropertyDerived<int>() { Value = 2 };
+        var actual2 = SerializeAndDeserialize(value2, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual2);
+        Assert.Equal(value2.Value, actual2.Value);
+    }
 
     [Fact]
     public static void DCS_MyPersonSurrogate()
@@ -3137,6 +3151,25 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.emps.Count(), actual.emps.Count());
         Assert.Equal(value.emps[0].Name, actual.emps[0].Name);
         Assert.Equal(value.emps[1].Name, actual.emps[1].Name);
+    }
+
+    [Fact]
+    public static void DCS_SampleICollectionTExplicitWithoutDC()
+    {
+        var value = new SampleICollectionTExplicitWithoutDC(true);
+        SampleICollectionTExplicitWithoutDC roundtripObject = SerializeAndDeserialize(value, string.Empty, skipStringCompare: true);
+        Assert.NotNull(roundtripObject);
+        ComparisonHelper.CompareRecursively(value, roundtripObject);
+
+        string netcorePayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedNetcoreObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(netcorePayload);
+        Assert.NotNull(deserializedNetcoreObject);
+        ComparisonHelper.CompareRecursively(value, deserializedNetcoreObject);
+
+        string desktopPayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedDesktopObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(desktopPayload);
+        Assert.NotNull(deserializedDesktopObject);
+        ComparisonHelper.CompareRecursively(value, deserializedDesktopObject);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
