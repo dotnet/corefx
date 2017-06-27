@@ -242,38 +242,18 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_InvalidHandle_Success()
         {
-            var random = new Random();
-
-            // First, generate a random handle. There are 2^32 numbers in the range, so it's likely that
-            // there will be no such icon associated with this handle.
-            // However, if there is an icon associated with this handle, the test will fail.
-            // Instead, repeat 100 times with another random number. The chance of an icon existing 100 times
-            // with a random handle is minimal.
-            for (int i = 0; i < 100; i++)
+            using (Icon icon = Icon.FromHandle((IntPtr)1))
+            using (var stream = new MemoryStream())
             {
-                IntPtr handle = (IntPtr)random.Next();
+                Exception ex = Assert.ThrowsAny<Exception>(() => icon.Save(stream));
+                Assert.True(ex is COMException || ex is ObjectDisposedException, $"{ex.GetType().ToString()} was thrown.");
 
-                try
+                Assert.Throws<ArgumentException>(null, () => icon.ToBitmap());
+                Assert.Equal(Size.Empty, icon.Size);
+
+                using (var newIcon = new Icon(icon, 10, 10))
                 {
-                    using (Icon icon = Icon.FromHandle(handle))
-                    using (var stream = new MemoryStream())
-                    {
-                        Exception ex = Assert.ThrowsAny<Exception>(() => icon.Save(stream));
-                        Assert.True(ex is COMException || ex is ObjectDisposedException, $"{ex.GetType().ToString()} was thrown.");
-
-                        Assert.Throws<ArgumentException>(null, () => icon.ToBitmap());
-                        Assert.Equal(Size.Empty, icon.Size);
-
-                        using (var newIcon = new Icon(icon, 10, 10))
-                        {
-                            Assert.Throws<ObjectDisposedException>(() => newIcon.Handle);
-                        }
-
-                        return;
-                    }
-                }
-                catch (Exception) when (i < 99)
-                {
+                    Assert.Throws<ObjectDisposedException>(() => newIcon.Handle);
                 }
             }
         }
