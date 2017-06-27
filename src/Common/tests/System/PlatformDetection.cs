@@ -38,7 +38,6 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
         public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
         public static bool IsNotArmProcess => !IsArmProcess;
-        public static bool IsNotArmProcessAndIsNotWindowsNanoServer => IsNotArmProcess && IsNotWindowsNanoServer;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
