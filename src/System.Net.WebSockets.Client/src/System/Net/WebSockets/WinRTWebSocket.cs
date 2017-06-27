@@ -279,46 +279,59 @@ namespace System.Net.WebSockets
 
         private void OnMessageReceived(MessageWebSocket sender, MessageWebSocketMessageReceivedEventArgs args)
         {
-            using (DataReader reader = args.GetDataReader())
+            // GetDataReader() throws an exception when either:
+            // (1) The underlying TCP connection is closed prematurely (e.g., FIN/RST received without sending/receiving a WebSocket Close frame).
+            // (2) The server sends invalid data (e.g., corrupt HTTP headers or a message exceeding the MaxMessageSize).
+            //
+            // In both cases, the appropriate thing to do is to close the socket, as we have reached an unexpected state in
+            // the WebSocket protocol.
+            try
             {
-                uint dataAvailable;
-                while ((dataAvailable = reader.UnconsumedBufferLength) > 0)
+                using (DataReader reader = args.GetDataReader())
                 {
-                    ArraySegment<byte> buffer;
-                    try
+                    uint dataAvailable;
+                    while ((dataAvailable = reader.UnconsumedBufferLength) > 0)
                     {
-                        buffer = _receiveAsyncBufferTcs.Task.GetAwaiter().GetResult();
-                    }
-                    catch (OperationCanceledException) // Caused by Abort call on WebSocket
-                    {
-                        return;
-                    }
-                    
-                    _receiveAsyncBufferTcs = new TaskCompletionSource<ArraySegment<byte>>();
-                    WebSocketMessageType messageType;
-                    if (args.MessageType == SocketMessageType.Binary)
-                    {
-                        messageType = WebSocketMessageType.Binary;
-                    }
-                    else
-                    {
-                        messageType = WebSocketMessageType.Text;
-                    }
+                        ArraySegment<byte> buffer;
+                        try
+                        {
+                            buffer = _receiveAsyncBufferTcs.Task.GetAwaiter().GetResult();
+                        }
+                        catch (OperationCanceledException) // Caused by Abort call on WebSocket
+                        {
+                            return;
+                        }
 
-                    bool endOfMessage = false;
-                    uint readCount = Math.Min(dataAvailable, (uint) buffer.Count);
-                    var dataBuffer = reader.ReadBuffer(readCount);
-                    // Safe to cast readCount to int as the maximum value that readCount can be is buffer.Count.
-                    dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
-                    if (dataAvailable == readCount)
-                    {
-                        endOfMessage = true;
-                    }
+                        _receiveAsyncBufferTcs = new TaskCompletionSource<ArraySegment<byte>>();
+                        WebSocketMessageType messageType;
+                        if (args.MessageType == SocketMessageType.Binary)
+                        {
+                            messageType = WebSocketMessageType.Binary;
+                        }
+                        else
+                        {
+                            messageType = WebSocketMessageType.Text;
+                        }
 
-                    WebSocketReceiveResult recvResult = new WebSocketReceiveResult((int) readCount, messageType,
-                        endOfMessage);
-                    _webSocketReceiveResultTcs.TrySetResult(recvResult);
+                        bool endOfMessage = false;
+                        uint readCount = Math.Min(dataAvailable, (uint) buffer.Count);
+                        var dataBuffer = reader.ReadBuffer(readCount);
+                        // Safe to cast readCount to int as the maximum value that readCount can be is buffer.Count.
+                        dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
+                        if (dataAvailable == readCount)
+                        {
+                            endOfMessage = true;
+                        }
+
+                        WebSocketReceiveResult recvResult = new WebSocketReceiveResult((int) readCount, messageType,
+                            endOfMessage);
+                        _webSocketReceiveResultTcs.TrySetResult(recvResult);
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                Abort();
             }
         }
 
@@ -441,7 +454,9 @@ namespace System.Net.WebSockets
                 validStatesText = string.Join(", ", validStates);
             }
 
-            throw new WebSocketException(SR.Format(SR.net_WebSockets_InvalidState, _state, validStatesText));
+            throw new WebSocketException(
+                WebSocketError.InvalidState,
+                SR.Format(SR.net_WebSockets_InvalidState, _state, validStatesText));
         }
 
         private void UpdateState(WebSocketState value)

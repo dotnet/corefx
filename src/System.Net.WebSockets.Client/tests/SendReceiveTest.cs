@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -348,6 +350,89 @@ namespace System.Net.WebSockets.Client.Tests
                 Array.Reverse(receiveBuffer);
                 Assert.Equal<byte>(sendBuffer, receiveBuffer);
             }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalFact(nameof(WebSocketsSupported))]
+        public async Task SendReceive_ConnectionClosedPrematurely_SubsequentReceiveFailsAndWebSocketStateUpdated()
+        {
+            var options = new LoopbackServer.Options { WebSocketEndpoint = true };
+
+            Func<ClientWebSocket, Socket, Uri, Task> connectToServerWithClientCert = async (clientSocket, server, url) =>
+            {
+                AutoResetEvent connectAsyncCompleted =  new AutoResetEvent(false);
+
+                // Start listening for incoming connections on the server side.
+                Task<List<string>> acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                {
+                    // Complete the WebSocket upgrade. After this is done, the client-side ConnectAsync should complete.
+                    Assert.True(await LoopbackServer.WebSocketHandshakeAsync(socket, reader, writer));
+
+                    // Wait for client-side ConnectAsync to complete.
+                    connectAsyncCompleted.WaitOne(TimeOutMilliseconds);
+
+                    // Close the underlying connection prematurely (without sending a WebSocket Close frame).
+                    socket.Shutdown(SocketShutdown.Both);
+                    socket.Close();
+
+                    return null;
+                }, options);
+
+                // Initiate a connection attempt.
+                var cts = new CancellationTokenSource(TimeOutMilliseconds);
+                await clientSocket.ConnectAsync(url, cts.Token);
+                connectAsyncCompleted.Set();
+
+                // Wait for the server to close the underlying connection.
+                acceptTask.Wait(cts.Token);
+
+                // Validate I/O errors and socket state.
+                var recvBuffer = new byte[100];
+                var recvSegment = new ArraySegment<byte>(recvBuffer);
+
+                if (!PlatformDetection.IsWindows || PlatformDetection.IsFullFramework)
+                {
+                    _output.WriteLine("ManagedWebSocket-based implementation.");
+
+                    WebSocketException receiveException =
+                        await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
+                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, receiveException.WebSocketErrorCode);
+
+                    Assert.Equal(WebSocketState.Aborted, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
+                }
+                else if (PlatformDetection.IsUap)
+                {
+                    _output.WriteLine("WinRTWebSocket-based implementation.");
+
+                    WebSocketException receiveException =
+                        await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
+                    Assert.Equal(WebSocketError.InvalidState, receiveException.WebSocketErrorCode);
+
+                    Assert.Equal(WebSocketState.Aborted, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
+                }
+                else
+                {
+                    _output.WriteLine("WinHttpWebSocket-based implementation.");
+
+                    const uint WININET_E_CONNECTION_RESET = 0x80072eff;
+                    Win32Exception receiveException =
+                        await Assert.ThrowsAnyAsync<Win32Exception>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
+                    Assert.Equal(WININET_E_CONNECTION_RESET, (uint)receiveException.HResult);
+
+                    Assert.Equal(WebSocketState.Open, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
+                }
+            };
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (ClientWebSocket clientSocket = new ClientWebSocket())
+                {
+                    await connectToServerWithClientCert(clientSocket, server, url);
+                }
+            }, options);
         }
     }
 }
