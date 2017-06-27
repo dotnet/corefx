@@ -269,6 +269,7 @@ namespace System.Tests
 
         // The commented out folders aren't set on all systems.
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // https://github.com/dotnet/corefx/issues/19110
+        [ActiveIssue(20782, TargetFrameworkMonikers.Uap)]
         [InlineData(Environment.SpecialFolder.ApplicationData, false)]
         [InlineData(Environment.SpecialFolder.CommonApplicationData, false)]
         [InlineData(Environment.SpecialFolder.LocalApplicationData, true)]
