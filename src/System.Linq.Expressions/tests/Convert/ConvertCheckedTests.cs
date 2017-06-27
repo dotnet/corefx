@@ -6923,6 +6923,101 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedIntIntTupleToLongLongTest(bool useInterpreter)
+        {
+            foreach ((int, int) value in new[] { (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue) })
+            {
+                VerifyCheckedIntIntTupleToLongLongTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedLongLongTupleToIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long) value in new[] { (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyCheckedLongLongTupleToIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedLongLongTupleToNullableIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long) value in new[] { (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyCheckedLongLongTupleToNullableIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedNullableLongLongTupleToNullableIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long)? value in new(long, long)?[] { null, (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyCheckedNullableLongLongTupleToNullableIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedNullableLongLongTupleToIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long)? value in new(long, long)?[] { null, (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyCheckedNullableLongLongTupleToIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedLongStringTupleToIntObjectTest(bool useInterpreter)
+        {
+            foreach ((long, string) value in new[] { (0, "hello"), (1, null), (0, "world"), (int.MinValue, "abc"), (long.MinValue, "123") })
+            {
+                VerifyCheckedLongStringTupleToIntObjectTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedIntObjectToLongStringTest(bool useInterpreter)
+        {
+            foreach ((int, object) value in new(int, object)[] { (0, "hello"), (1, null), (0, "world"), (int.MinValue, "abc"), (int.MinValue, new Uri("http://example.net/")) })
+            {
+                VerifyCheckedIntObjectToLongStringTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedHighArityLongToInt(bool useInterpreter)
+        {
+            (long, long, long, long, long, long, long, long, long, long, long, long)[] values = new(long, long, long, long, long, long, long, long, long, long, long, long)[]
+            {
+                (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+                (long.MinValue, int.MaxValue, 0, long.MaxValue, int.MinValue, int.MaxValue, 0, long.MaxValue, int.MinValue, int.MaxValue, 0, long.MaxValue),
+                (0, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+            };
+
+            foreach ((long, long, long, long, long, long, long, long, long, long, long, long) value in values)
+            {
+                VerifyCheckedHighArityLongToInt(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertCheckedDeepTupleLongToInt(bool useInterpreter)
+        {
+            (((((((((((long, long), long), long), long), long), long), long), long), long), long), long)[] values = new(((((((((((long, long), long), long), long), long), long), long), long), long), long), long)[]
+            {
+                (((((((((((1, 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12),
+                (((((((((((long.MinValue, int.MaxValue), 0), long.MaxValue), int.MinValue), int.MaxValue), 0), long.MaxValue), int.MinValue), int.MaxValue), 0), long.MaxValue),
+                (((((((((((0, 2), 4), 8), 10), 12), 14), 16), 18), 20), 22), 24)
+            };
+
+            foreach ((((((((((((long, long), long), long), long), long), long), long), long), long), long), long) value in values)
+            {
+                VerifyCheckedDeepTupleLongToInt(value, useInterpreter);
+            }
+        }
+
         #endregion
 
         #region Test verifiers
@@ -18397,6 +18492,134 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(value, f());
         }
 
+
+        private static void VerifyCheckedIntIntTupleToLongLongTest((int, int) value, bool useInterpreter)
+        {
+            Expression<Func<(long, long)>> e =
+                Expression.Lambda<Func<(long, long)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((long, long))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(long, long)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(value, f());
+        }
+
+        private static void VerifyCheckedLongLongTupleToIntIntTest((long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)>> e =
+                Expression.Lambda<Func<(int, int)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)> f = e.Compile(useInterpreter);
+
+            if (value.Item1 > int.MaxValue || value.Item1 < int.MinValue || value.Item2 > int.MaxValue || value.Item2 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, int))value, f());
+        }
+
+        private static void VerifyCheckedLongLongTupleToNullableIntIntTest((long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)?>> e =
+                Expression.Lambda<Func<(int, int)?>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((int, int)?)),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)?> f = e.Compile(useInterpreter);
+
+            if (value.Item1 > int.MaxValue || value.Item1 < int.MinValue || value.Item2 > int.MaxValue || value.Item2 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, int))value, f());
+        }
+
+        private static void VerifyCheckedNullableLongLongTupleToNullableIntIntTest((long, long)? value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)?>> e =
+                Expression.Lambda<Func<(int, int)?>>(
+                    Expression.ConvertChecked(Expression.Constant(value, typeof((long, long)?)), typeof((int, int)?)),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)?> f = e.Compile(useInterpreter);
+
+            if (value.HasValue && (value.Value.Item1 > int.MaxValue || value.Value.Item1 < int.MinValue || value.Value.Item2 > int.MaxValue || value.Value.Item2 < int.MinValue))
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, int)?)value, f());
+        }
+
+        private static void VerifyCheckedNullableLongLongTupleToIntIntTest((long, long)? value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)>> e =
+                Expression.Lambda<Func<(int, int)>>(
+                    Expression.ConvertChecked(Expression.Constant(value, typeof((long, long)?)), typeof((int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)> f = e.Compile(useInterpreter);
+
+            if (!value.HasValue)
+                Assert.Throws<InvalidOperationException>(() => f());
+            else if (value.Value.Item1 > int.MaxValue || value.Value.Item1 < int.MinValue || value.Value.Item2 > int.MaxValue || value.Value.Item2 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, int))value, f());
+        }
+
+        private static void VerifyCheckedLongStringTupleToIntObjectTest((long, string) value, bool useInterpreter)
+        {
+            Expression<Func<(int, object)>> e =
+                Expression.Lambda<Func<(int, object)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((int, object))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, object)> f = e.Compile(useInterpreter);
+
+            if (value.Item1 > int.MaxValue || value.Item1 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, object))value, f());
+        }
+
+        private static void VerifyCheckedIntObjectToLongStringTest((int, object) value, bool useInterpreter)
+        {
+            Expression<Func<(long, string)>> e =
+                Expression.Lambda<Func<(long, string)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((long, string))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(long, string)> f = e.Compile(useInterpreter);
+
+            if (value.Item2 == null || value.Item2 is string)
+                Assert.Equal(((long, string))value, f());
+            else
+                Assert.Throws<InvalidCastException>(() => f());
+        }
+
+        private static void VerifyCheckedHighArityLongToInt(
+            (long, long, long, long, long, long, long, long, long, long, long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int, int, int, int, int, int, int, int, int, int, int)>> e =
+                Expression.Lambda<Func<(int, int, int, int, int, int, int, int, int, int, int, int)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((int, int, int, int, int, int, int, int, int, int, int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int, int, int, int, int, int, int, int, int, int, int)> f = e.Compile(useInterpreter);
+
+            if (value.Item1 > int.MaxValue || value.Item1 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((int, int, int, int, int, int, int, int, int, int, int, int))value, f());
+        }
+
+        private static void VerifyCheckedDeepTupleLongToInt(
+            (((((((((((long, long), long), long), long), long), long), long), long), long), long), long) value, bool useInterpreter)
+        {
+            Expression<Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)>> e =
+                Expression.Lambda<Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)>>(
+                    Expression.ConvertChecked(Expression.Constant(value), typeof((((((((((((int, int), int), int), int), int), int), int), int), int), int), int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)> f = e.Compile(useInterpreter);
+
+            if (value.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1 > int.MaxValue || value.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1.Item1 < int.MinValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(((((((((((((int, int), int), int), int), int), int), int), int), int), int), int))value, f());
+        }
+
         #endregion
 
         [Fact]
@@ -18457,6 +18680,14 @@ namespace System.Linq.Expressions.Tests
             Action act = Expression.Lambda<Action>(Expression.ConvertChecked(Expression.Empty(), typeof(void)))
                 .Compile(useInterpreter);
             act();
+        }
+
+        [Fact]
+        public static void CantConvertTupleIfCantConvertElement()
+        {
+            ConstantExpression operand = Expression.Constant((0, "", 0, 0, 0, 0));
+            Assert.Throws<InvalidOperationException>(
+                () => Expression.ConvertChecked(operand, typeof((long, long, long, long, long, long))));
         }
     }
 }

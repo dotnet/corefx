@@ -303,18 +303,19 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitExpressionAsVoid(node.Operand, flags);
             }
+            else if (TypeUtils.AreEquivalent(node.Operand.Type, node.Type))
+            {
+                EmitExpression(node.Operand, flags);
+            }
+            else if (node.IsTupleConversion)
+            {
+                EmitExpression(node.ReduceTupleConversion(), flags);
+            }
             else
             {
-                if (TypeUtils.AreEquivalent(node.Operand.Type, node.Type))
-                {
-                    EmitExpression(node.Operand, flags);
-                }
-                else
-                {
-                    // A conversion is emitted after emitting the operand, no tail call is emitted
-                    EmitExpression(node.Operand);
-                    _ilg.EmitConvertToType(node.Operand.Type, node.Type, node.NodeType == ExpressionType.ConvertChecked, this);
-                }
+                // A conversion is emitted after emitting the operand, no tail call is emitted
+                EmitExpression(node.Operand);
+                _ilg.EmitConvertToType(node.Operand.Type, node.Type, node.NodeType == ExpressionType.ConvertChecked, this);
             }
         }
 

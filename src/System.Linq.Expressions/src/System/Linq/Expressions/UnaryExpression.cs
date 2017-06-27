@@ -287,6 +287,88 @@ namespace System.Linq.Expressions
             }
             return Expression.MakeUnary(NodeType, operand, Type, Method);
         }
+
+        internal bool IsTupleConversion
+        {
+            get
+            {
+                Debug.Assert(NodeType == ExpressionType.Convert || NodeType == ExpressionType.ConvertChecked);
+                if (Method != null)
+                {
+                    return false;
+                }
+
+                Type type = Type.GetNonNullableType();
+                Type opType = Operand.Type.GetNonNullableType();
+                return type != opType && type.IsValueTupleType() && opType.IsValueTupleType();
+            }
+        }
+
+        internal Expression ReduceTupleConversion()
+        {
+            Debug.Assert(IsTupleConversion);
+
+            Expression operand = Operand;
+            ParameterExpression nullableOperand = null;
+            if (operand.Type.IsNullableType())
+            {
+                // Handle lifting of this type of conversion within the reduction
+                if (Type.IsNullableType())
+                {
+                    // We'll use nullableOperand to test and possibly skip the rest of the conversion
+                    nullableOperand = Variable(operand.Type);
+                    // Which means if the conversion is happening, it's guaranteed not to be null.
+                    operand = Call(nullableOperand, operand.Type.GetMethod("GetValueOrDefault", Type.EmptyTypes));
+                }
+                else
+                {
+                    // Convert to non-nullable first, throwing if null.
+                    operand = Convert(operand, operand.Type.GetNonNullableType());
+                }
+            }
+
+            ParameterExpression tuple = Variable(operand.Type);
+            Type type = Type.GetNonNullableType();
+            Type[] destTypes = type.GetGenericArguments();
+            Debug.Assert(destTypes.Length <= 8);
+            Expression[] conversions = new Expression[destTypes.Length];
+            for (int i = 0; i < destTypes.Length; ++i)
+            {
+                Type itemType = destTypes[i];
+                Expression field = Field(tuple, i == 7 ? "Rest" : $"Item{i + 1}");
+
+                if (field.Type == itemType)
+                {
+                    // No conversion needed for this element.
+                    conversions[i] = field;
+                }
+                else
+                {
+                    UnaryExpression convItem = MakeUnary(NodeType, field, itemType);
+                    conversions[i] = convItem.IsTupleConversion ? convItem.ReduceTupleConversion() : convItem;
+                }
+            }
+
+            Expression conversion = Block(new[] {tuple}, Assign(tuple, operand), New(type.GetConstructors()[0], conversions));
+            if (!ReferenceEquals(Type, type))
+            {
+                // We've a conversion to non-nullable, add a further conversion to the nullable form.
+                conversion = Convert(conversion, Type);
+
+                if (nullableOperand != null)
+                {
+                    // If both source and destination types are nullable then if the operand is
+                    // null we want to skip the conversion, and return null of the appropriate
+                    // nullable type.
+                    conversion = Block(
+                        new[] {nullableOperand},
+                        Assign(nullableOperand, Operand),
+                        Condition(NotEqual(nullableOperand, Utils.Null), conversion, Default(Type)));
+                }
+            }
+
+            return conversion;
+        }
     }
 
     public partial class Expression
@@ -772,7 +854,8 @@ namespace System.Linq.Expressions
             if (method == null)
             {
                 if (expression.Type.HasIdentityPrimitiveOrNullableConversionTo(type) ||
-                    expression.Type.HasReferenceConversionTo(type))
+                    expression.Type.HasReferenceConversionTo(type) ||
+                    expression.Type.HasTupleConversionTo(type))
                 {
                     return new UnaryExpression(ExpressionType.Convert, expression, type, null);
                 }
@@ -811,16 +894,25 @@ namespace System.Linq.Expressions
             TypeUtils.ValidateType(type, nameof(type));
             if (method == null)
             {
-                if (expression.Type.HasIdentityPrimitiveOrNullableConversionTo(type))
+                Type opType = expression.Type;
+                if (opType.HasIdentityPrimitiveOrNullableConversionTo(type))
                 {
                     return new UnaryExpression(ExpressionType.ConvertChecked, expression, type, null);
                 }
-                if (expression.Type.HasReferenceConversionTo(type))
+
+                if (opType.HasReferenceConversionTo(type))
                 {
                     return new UnaryExpression(ExpressionType.Convert, expression, type, null);
                 }
+
+                if (opType.HasTupleConversionTo(type))
+                {
+                    return new UnaryExpression(ExpressionType.ConvertChecked, expression, type, null);
+                }
+
                 return GetUserDefinedCoercionOrThrow(ExpressionType.ConvertChecked, expression, type);
             }
+
             return GetMethodBasedCoercionOperator(ExpressionType.ConvertChecked, expression, type, method);
         }
 

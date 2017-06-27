@@ -235,6 +235,70 @@ namespace System.Dynamic.Utils
                    || source.IsEnum && source.GetEnumUnderlyingType() == typeof(bool));
         }
 
+        public static bool IsValueTupleType(this Type type) =>
+            type.IsConstructedGenericType && IsValueTupleType(type, type.GetGenericArguments().Length);
+
+        private static bool IsValueTupleType(Type type, int argumentCount)
+        {
+            Debug.Assert(type.IsConstructedGenericType);
+            type = type.GetGenericTypeDefinition();
+            switch (argumentCount)
+            {
+                case 1:
+                    return type == typeof(ValueTuple<>);
+                case 2:
+                    return type == typeof(ValueTuple<,>);
+                case 3:
+                    return type == typeof(ValueTuple<,,>);
+                case 4:
+                    return type == typeof(ValueTuple<,,,>);
+                case 5:
+                    return type == typeof(ValueTuple<,,,,>);
+                case 6:
+                    return type == typeof(ValueTuple<,,,,,>);
+                case 7:
+                    return type == typeof(ValueTuple<,,,,,,>);
+                case 8:
+                    return type == typeof(ValueTuple<,,,,,,,>);
+            }
+
+            return false;
+        }
+
+        public static bool HasTupleConversionTo(this Type source, Type dest)
+        {
+            source = source.GetNonNullableType();
+            dest = dest.GetNonNullableType();
+            if (source.IsConstructedGenericType && dest.IsConstructedGenericType)
+            {
+                Type[] sourceArgs = source.GetGenericArguments();
+                int argLen = sourceArgs.Length;
+                if (IsValueTupleType(source, argLen))
+                {
+                    Type[] destArgs = dest.GetGenericArguments();
+                    if (destArgs.Length == argLen && IsValueTupleType(dest, argLen))
+                    {
+                        for (int i = 0; i < sourceArgs.Length; ++i)
+                        {
+                            Type sourceArg = sourceArgs[i];
+                            Type destArg = destArgs[i];
+                            if (!sourceArg.HasIdentityPrimitiveOrNullableConversionTo(destArg)
+                                && !sourceArg.HasReferenceConversionTo(destArg)
+                                && !sourceArg.HasTupleConversionTo(destArg)
+                                && GetUserDefinedCoercionMethod(sourceArg, destArg) == null)
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static bool HasReferenceConversionTo(this Type source, Type dest)
         {
             Debug.Assert(source != null && dest != null);

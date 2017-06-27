@@ -6924,6 +6924,101 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertIntIntTupleToLongIntTest(bool useInterpreter)
+        {
+            foreach ((int, int) value in new [] {(0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue)})
+            {
+                VerifyIntIntTupleToLongIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertLongLongTupleToIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long) value in new[] { (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyLongLongTupleToIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertLongLongTupleToNullableIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long) value in new[] { (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyLongLongTupleToNullableIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertNullableLongLongTupleToNullableIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long)? value in new(long, long)?[] { null, (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyNullableLongLongTupleToNullableIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertNullableLongLongTupleToIntIntTest(bool useInterpreter)
+        {
+            foreach ((long, long)? value in new(long, long)?[] { null, (0, 0), (1, 0), (0, 1), (int.MinValue, int.MaxValue), (long.MinValue, long.MaxValue) })
+            {
+                VerifyNullableLongLongTupleToIntIntTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertLongStringTupleToIntObjectTest(bool useInterpreter)
+        {
+            foreach ((long, string) value in new [] { (0, "hello"), (1, null), (0, "world"), (int.MinValue, "abc"), (long.MinValue, "123") })
+            {
+                VerifyLongStringTupleToIntObjectTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertIntObjectToLongStringTest(bool useInterpreter)
+        {
+            foreach ((int, object) value in new (int, object)[] { (0, "hello"), (1, null), (0, "world"), (int.MinValue, "abc"), (int.MinValue, new Uri("http://example.net/")) })
+            {
+                VerifyIntObjectToLongStringTest(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertHighArityLongToInt(bool useInterpreter)
+        {
+            (long, long, long, long, long, long, long, long, long, long, long, long)[] values = new (long, long, long, long, long, long, long, long, long, long, long, long)[]
+            {
+                (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+                (int.MinValue, int.MaxValue, 0, long.MaxValue, int.MinValue, int.MaxValue, 0, long.MaxValue, int.MinValue, int.MaxValue, 0, long.MaxValue),
+                (0, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+            };
+
+            foreach ((long, long, long, long, long, long, long, long, long, long, long, long) value in values)
+            {
+                VerifyHighArityLongToInt(value, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertDeepTupleLongToInt(bool useInterpreter)
+        {
+            (((((((((((long, long), long), long), long), long), long), long), long), long), long), long)[] values = new(((((((((((long, long), long), long), long), long), long), long), long), long), long), long)[]
+            {
+                (((((((((((1, 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12),
+                (((((((((((int.MinValue, int.MaxValue), 0), long.MaxValue), int.MinValue), int.MaxValue), 0), long.MaxValue), int.MinValue), int.MaxValue), 0), long.MaxValue),
+                (((((((((((0, 2), 4), 8), 10), 12), 14), 16), 18), 20), 22), 24)
+            };
+
+            foreach ((((((((((((long, long), long), long), long), long), long), long), long), long), long), long) value in values)
+            {
+                VerifyDeepTupleLongToInt(value, useInterpreter);
+            }
+        }
+
         #endregion
 
         #region Test verifiers
@@ -16458,6 +16553,113 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(value, f());
         }
 
+        private static void VerifyIntIntTupleToLongIntTest((int, int) value, bool useInterpreter)
+        {
+            Expression<Func<(long, int)>> e =
+                Expression.Lambda<Func<(long, int)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((long, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(long, int)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(value, f());
+        }
+
+        private static void VerifyLongLongTupleToIntIntTest((long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)>> e =
+                Expression.Lambda<Func<(int, int)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((int, int))value, f());
+        }
+
+        private static void VerifyLongLongTupleToNullableIntIntTest((long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)?>> e =
+                Expression.Lambda<Func<(int, int)?>>(
+                    Expression.Convert(Expression.Constant(value), typeof((int, int)?)),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)?> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((int, int))value, f());
+        }
+
+        private static void VerifyNullableLongLongTupleToNullableIntIntTest((long, long)? value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)?>> e =
+                Expression.Lambda<Func<(int, int)?>>(
+                    Expression.Convert(Expression.Constant(value, typeof((long, long)?)), typeof((int, int)?)),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)?> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((int, int)?)value, f());
+        }
+
+        private static void VerifyNullableLongLongTupleToIntIntTest((long, long)? value, bool useInterpreter)
+        {
+            Expression<Func<(int, int)>> e =
+                Expression.Lambda<Func<(int, int)>>(
+                    Expression.Convert(Expression.Constant(value, typeof((long, long)?)), typeof((int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int)> f = e.Compile(useInterpreter);
+
+            if (value.HasValue)
+                Assert.Equal(((int, int))value, f());
+            else
+                Assert.Throws<InvalidOperationException>(() => f());
+        }
+
+        private static void VerifyLongStringTupleToIntObjectTest((long, string) value, bool useInterpreter)
+        {
+            Expression<Func<(int, object)>> e =
+                Expression.Lambda<Func<(int, object)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((int, object))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, object)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((int, object))value, f());
+        }
+
+        private static void VerifyIntObjectToLongStringTest((int, object) value, bool useInterpreter)
+        {
+            Expression<Func<(long, string)>> e =
+                Expression.Lambda<Func<(long, string)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((long, string))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(long, string)> f = e.Compile(useInterpreter);
+
+            if (value.Item2 == null || value.Item2 is string)
+                Assert.Equal(((long, string))value, f());
+            else
+                Assert.Throws<InvalidCastException>(() => f());
+        }
+
+        private static void VerifyHighArityLongToInt(
+            (long, long, long, long, long, long, long, long, long, long, long, long) value, bool useInterpreter)
+        {
+            Expression<Func<(int, int, int, int, int, int, int, int, int, int, int, int)>> e =
+                Expression.Lambda<Func<(int, int, int, int, int, int, int, int, int, int, int, int)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((int, int, int, int, int, int, int, int, int, int, int, int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(int, int, int, int, int, int, int, int, int, int, int, int)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((int, int, int, int, int, int, int, int, int, int, int, int))value, f());
+        }
+
+        private static void VerifyDeepTupleLongToInt(
+            (((((((((((long, long), long), long), long), long), long), long), long), long), long), long) value, bool useInterpreter)
+        {
+            Expression<Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)>> e =
+                Expression.Lambda<Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)>>(
+                    Expression.Convert(Expression.Constant(value), typeof((((((((((((int, int), int), int), int), int), int), int), int), int), int), int))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<(((((((((((int, int), int), int), int), int), int), int), int), int), int), int)> f = e.Compile(useInterpreter);
+
+            Assert.Equal(((((((((((((int, int), int), int), int), int), int), int), int), int), int), int))value, f());
+        }
+
         #endregion
 
         private class PerverselyNamedMembers
@@ -16574,6 +16776,21 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(f(new ExplicitHalfLiftedFrom { NullEquiv = true }));
             Assert.Null(f(null));
         }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ExplicitHalfLiftedConversionInTuple(bool useInterpreter)
+        {
+            ParameterExpression x = Expression.Parameter(typeof((ExplicitHalfLiftedFrom?, int)));
+            Expression<Func<(ExplicitHalfLiftedFrom?, int), (HalfLiftedTo?, long)>> e =
+                Expression.Lambda<Func<(ExplicitHalfLiftedFrom?, int), (HalfLiftedTo?, long)>>(
+                    Expression.Convert(x, typeof((HalfLiftedTo?, long))),
+                    x);
+            Func<(ExplicitHalfLiftedFrom?, int), (HalfLiftedTo?, long)> f = e.Compile(useInterpreter);
+            Assert.NotNull(f((new ExplicitHalfLiftedFrom(), 23)).Item1);
+            Assert.Null(f((new ExplicitHalfLiftedFrom { NullEquiv = true }, 14)).Item1);
+            Assert.Null(f((null, 9)).Item1);
+        }
+
 
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void ImplicitHalfLiftedOverloadedConversion(bool useInterpreter)
@@ -16888,6 +17105,52 @@ namespace System.Linq.Expressions.Tests
             Action act = Expression.Lambda<Action>(Expression.Convert(Expression.Empty(), typeof(void)))
                 .Compile(useInterpreter);
             act();
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void TupleConversion(bool useInterpreter)
+        {
+            Expression operand = Expression.Constant((1, 2));
+            Expression convert = Expression.Convert(operand, typeof((long, long)));
+            Func<(long, long)> func = Expression.Lambda<Func<(long, long)>>(convert).Compile(useInterpreter);
+            (long x, long y) = func();
+            Assert.Equal(1L, x);
+            Assert.Equal(2L, y);
+        }
+
+        private class CountedAccess
+        {
+            public int Count { get; private set; }
+
+            public (int, int ) TupleProperty
+            {
+                get
+                {
+                    ++Count;
+                    return (1, 2);
+                }
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void TupleConvserionEvaluationsOperandOnlyOnce(bool useInterpreter)
+        {
+            CountedAccess counter = new CountedAccess();
+            Expression<Func<(long, long)>> lambda = Expression.Lambda<Func<(long, long)>>(
+                Expression.Convert(
+                    Expression.Property(Expression.Constant(counter), nameof(CountedAccess.TupleProperty)),
+                    typeof((long, long))));
+            Func<(long, long)> func = lambda.Compile(useInterpreter);
+            Assert.Equal((1L, 2L), func());
+            Assert.Equal(1, counter.Count);
+        }
+
+        [Fact]
+        public static void CantConvertTupleIfCantConvertElement()
+        {
+            ConstantExpression operand = Expression.Constant((0, "", 0, 0));
+            Assert.Throws<InvalidOperationException>(
+                () => Expression.Convert(operand, typeof((long, long, long, long))));
         }
     }
 }

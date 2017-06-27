@@ -1072,6 +1072,10 @@ namespace System.Linq.Expressions.Interpreter
             {
                 CompileAsVoid(node.Operand);
             }
+            else if (node.IsTupleConversion)
+            {
+                Compile(node.ReduceTupleConversion());
+            }
             else
             {
                 Compile(node.Operand);
