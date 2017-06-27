@@ -11,6 +11,8 @@ using Xunit;
 
 public partial class ConsoleEncoding : RemoteExecutorTestBase
 {
+    public static bool ConsoleEncodingAvailable => !PlatformDetection.IsUap || PlatformDetection.IsWindows10RS3OrGreater;
+
     public static IEnumerable<object[]> InputData()
     {
         yield return new object[] { "This is Ascii string" };
@@ -78,8 +80,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
         }
     }
 
-    [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
+    [ConditionalFact(nameof(ConsoleEncodingAvailable))]
     public void TestValidEncodings()
     {
         Action<Encoding> check = encoding =>
