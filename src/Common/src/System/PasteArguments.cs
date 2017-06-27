@@ -3,18 +3,17 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace System
 {
-    public static class PasteArguments
+    internal static class PasteArguments
     {
          /// <summary>
         /// Repastes a set of arguments into a linear string that parses back into the originals under pre- or post-2008 VC parsing rules.
         /// The rules for parsing the executable name (argv[0]) are special, so you must indicate whether the first argument actually is argv[0].
         /// </summary>
-        public static string Paste(this IEnumerable<string> arguments, bool pasteFirstArgumentUsingArgV0Rules)
+        public static string Paste(IEnumerable<string> arguments, bool pasteFirstArgumentUsingArgV0Rules)
         {
             var stringBuilder = new StringBuilder();
 
@@ -137,7 +136,6 @@ namespace System
             return true;
         }
 
-        private const char Nul = (char)0;
         private const char Quote = '\"';
         private const char Backslash = '\\';
     }
