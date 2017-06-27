@@ -11,8 +11,6 @@ namespace System.Security.Cryptography
 {
     public sealed class Oid
     {
-		private const OidGroup CRYPT_OID_DISABLE_SEARCH_DS_FLAG = (OidGroup)(unchecked((int)0x80000000));
-		
         public Oid() { }
 
         public Oid(String oid)
@@ -57,13 +55,10 @@ namespace System.Security.Cryptography
             return new Oid(oidValue, friendlyName, group);
         }
 
-        public static Oid FromOidValue(String oidValue, OidGroup group, bool disableActiveDirectorySearch = false)
+        public static Oid FromOidValue(String oidValue, OidGroup group)
         {
             if (oidValue == null)
                 throw new ArgumentNullException(nameof(oidValue));
-			
-			if (disableActiveDirectorySearch)
-				group = CRYPT_OID_DISABLE_SEARCH_DS_FLAG | group;
 
             String friendlyName = OidLookup.ToFriendlyName(oidValue, group, fallBackToAllGroups: false);
             if (friendlyName == null)
