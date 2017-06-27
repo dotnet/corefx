@@ -115,24 +115,24 @@ namespace System.Xml.Serialization
         public virtual XmlSerializer GetSerializer(Type type) { throw new NotSupportedException(); }
     }
 
+#if FEATURE_SERIALIZATION_UAPAOT
+    public enum SerializationMode
+#else
+    internal enum SerializationMode
+#endif
+    {
+        CodeGenOnly,
+        ReflectionOnly,
+        ReflectionAsBackup,
+        PreGenOnly
+    }
+
     /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer"]/*' />
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
     public class XmlSerializer
     {
-#if FEATURE_SERIALIZATION_UAPAOT
-        public enum SerializationMode
-#else
-        internal enum SerializationMode
-#endif
-        {
-            CodeGenOnly,
-            ReflectionOnly,
-            ReflectionAsBackup,
-            PreGenOnly
-        }
-
 #if FEATURE_SERIALIZATION_UAPAOT
         public static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
 #else

@@ -317,6 +317,8 @@ namespace System.Xml
             {
                 CheckReadOnly("ValidationType");
 
+                _addValidationFunc = AddValidationInternal;
+
                 if ((uint)value > (uint)ValidationType.Schema)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
@@ -574,25 +576,36 @@ namespace System.Xml
 
         internal XmlReader AddValidation(XmlReader reader)
         {
+            XmlResolver resolver = null;
             if (_validationType == ValidationType.Schema)
             {
-                XmlResolver resolver = GetXmlResolver_CheckConfig();
+                resolver = GetXmlResolver_CheckConfig();
 
                 if (resolver == null &&
                     !this.IsXmlResolverSet)
                 {
                     resolver = new XmlUrlResolver();
                 }
-                reader = new XsdValidatingReader(reader, resolver, this);
             }
-            else if (_validationType == ValidationType.DTD)
-            {
-                reader = CreateDtdValidatingReader(reader);
-            }
-            return reader;
+
+            return _addValidationFunc(reader, resolver, addConformanceWrapper: false);
         }
 
         private XmlReader AddValidationAndConformanceWrapper(XmlReader reader)
+        {
+            XmlResolver resolver = null;
+            if (_validationType == ValidationType.Schema)
+            {
+                resolver = GetXmlResolver_CheckConfig();
+            }
+
+            return _addValidationFunc(reader, resolver, addConformanceWrapper: true);
+        }
+
+        delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
+        private AddValidationFunc _addValidationFunc;
+
+        private XmlReader AddValidationInternal(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper)
         {
             // wrap with DTD validating reader
             if (_validationType == ValidationType.DTD)
