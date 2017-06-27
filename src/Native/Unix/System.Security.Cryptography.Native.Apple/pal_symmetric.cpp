@@ -128,6 +128,10 @@ extern "C" int AppleCryptoNative_CryptorReset(CCCryptorRef cryptor, const uint8_
     if (cryptor == nullptr)
         return -1;
 
+    // 10.13 Beta reports an error when resetting ECB, which is the only mode which has a null IV.
+    if (pbIv == nullptr)
+        return 1;
+
     CCStatus status = CCCryptorReset(cryptor, pbIv);
     *pccStatus = status;
     return status == kCCSuccess;
