@@ -257,7 +257,6 @@ namespace System.Tests
 
         [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void ExecuteAssembly()
         {
             CopyTestAssemblies();
@@ -265,7 +264,14 @@ namespace System.Tests
             string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
-            Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
+
+            Func<int> executeAssembly = () => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1);
+
+            if (PlatformDetection.IsFullFramework)
+                Assert.Equal(10, executeAssembly());
+            else
+                Assert.Throws<PlatformNotSupportedException>(() => executeAssembly());
+
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
             Assert.Equal(10, AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }));
         }        
@@ -559,7 +565,6 @@ namespace System.Tests
 
         [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory'
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void AssemblyResolve()
         {
             CopyTestAssemblies();
@@ -580,7 +585,6 @@ namespace System.Tests
 
         [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Access issues when copying assemblies")]
         public void AssemblyResolve_RequestingAssembly()
         {
             CopyTestAssemblies();
@@ -673,19 +677,18 @@ namespace System.Tests
         private void CopyTestAssemblies()
         {
             string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll");
-            if (File.Exists("AssemblyResolveTests.dll"))
+            Console.WriteLine($"destinationPat={destTestAssemblyPath}");
+            if (!File.Exists(destTestAssemblyPath) && File.Exists("AssemblyResolveTests.dll"))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
-                File.Copy("AssemblyResolveTests.dll", destTestAssemblyPath, true);
-                File.Delete("AssemblyResolveTests.dll");
+                File.Copy("AssemblyResolveTests.dll", destTestAssemblyPath, false);
             }
 
             destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
-            if (File.Exists("TestAppOutsideOfTPA.exe"))
+            if (!File.Exists(destTestAssemblyPath) && File.Exists("TestAppOutsideOfTPA.exe"))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
-                File.Copy("TestAppOutsideOfTPA.exe", destTestAssemblyPath, true);
-                File.Delete("TestAppOutsideOfTPA.exe");
+                File.Copy("TestAppOutsideOfTPA.exe", destTestAssemblyPath, false);
             }
         }        
     }
