@@ -1235,7 +1235,8 @@
     "System.Diagnostics.DiagnosticSource": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
