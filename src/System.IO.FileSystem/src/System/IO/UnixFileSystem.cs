@@ -150,7 +150,7 @@ namespace System.IO
             if (Interop.Sys.Unlink(fullPath) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-                switch(errorInfo.Error)
+                switch (errorInfo.Error)
                 {
                     case Interop.Error.ENOENT:
                         // ENOENT means it already doesn't exist; nop
@@ -161,11 +161,14 @@ namespace System.IO
                         // github.com/dotnet/corefx/issues/21273
                         Interop.ErrorInfo fileExistsError;
 
-                        // Windows doesn't care about the trailing separator
+                        // Input allows trailing separators in order to match Windows behavior
+                        // Unix does not accept trailing separators, so must be trimmed
                         if (!FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath),
                             Interop.Sys.FileTypes.S_IFREG, out fileExistsError) &&
                             fileExistsError.Error == Interop.Error.ENOENT)
+                        {
                             return;
+                        }
                         goto default;
                     case Interop.Error.EISDIR:
                         errorInfo = Interop.Error.EACCES.Info();
@@ -415,7 +418,8 @@ namespace System.IO
         {
             Interop.ErrorInfo ignored;
 
-            // Windows doesn't care about the trailing separator
+            // Input allows trailing separators in order to match Windows behavior
+            // Unix does not accept trailing separators, so must be trimmed
             return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
