@@ -677,7 +677,6 @@ namespace System.Tests
         private void CopyTestAssemblies()
         {
             string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll");
-            Console.WriteLine($"destinationPat={destTestAssemblyPath}");
             if (!File.Exists(destTestAssemblyPath) && File.Exists("AssemblyResolveTests.dll"))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
