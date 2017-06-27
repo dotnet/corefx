@@ -69,22 +69,19 @@ namespace System.Tests
         [Fact]
         public void UnhandledException_Called()
         {
-            RemoteInvoke(() => {
-                System.IO.File.Delete("success.txt");
-                RemoteInvokeOptions options = new RemoteInvokeOptions();
-                options.CheckExitCode = false;
-                RemoteInvoke(() =>
-                {
-                    AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
-                    throw new Exception("****This Unhandled Exception is Expected****");
+            System.IO.File.Delete("success.txt");
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.CheckExitCode = false;
+            RemoteInvoke(() =>
+            {
+                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+                throw new Exception("****This Unhandled Exception is Expected****");
 #pragma warning disable 0162
                     return SuccessExitCode;
 #pragma warning restore 0162
-                }, options).Dispose();
+            }, options).Dispose();
 
-                Assert.True(System.IO.File.Exists("success.txt"));
-                return SuccessExitCode;
-            }).Dispose();
+            Assert.True(System.IO.File.Exists("success.txt"));
         }
 
         static void NotExpectedToBeCalledHandler(object sender, UnhandledExceptionEventArgs args) 
@@ -110,7 +107,7 @@ namespace System.Tests
             Assert.NotNull(s);
             string expected = Assembly.GetEntryAssembly()?.GetName()?.Name;
 
-            // Desktop
+            // GetEntryAssembly may be null (i.e. desktop)
             if (expected == null)
                 expected = Assembly.GetExecutingAssembly().GetName().Name;
 
@@ -120,8 +117,8 @@ namespace System.Tests
         [Fact]
         public void Id()
         {
-            RemoteInvoke(() =>
-            {
+            // if running directly on some platforms Xunit may be Id = 1
+            RemoteInvoke(() => {
                 Assert.Equal(1, AppDomain.CurrentDomain.Id);
                 return SuccessExitCode;
             }).Dispose();
@@ -202,22 +199,19 @@ namespace System.Tests
         [ActiveIssue("https://github.com/dotnet/corefx/issues/21410", TargetFrameworkMonikers.Uap)]
         public void ProcessExit_Called()
         {
-            RemoteInvoke(() => {
-                string path = GetTestFilePath();
-                RemoteInvoke((pathToFile) =>
+            string path = GetTestFilePath();
+            RemoteInvoke((pathToFile) =>
+            {
+                EventHandler handler = (sender, e) =>
                 {
-                    EventHandler handler = (sender, e) =>
-                    {
-                        File.Create(pathToFile);
-                    };
+                    File.Create(pathToFile);
+                };
 
-                    AppDomain.CurrentDomain.ProcessExit += handler;
-                    return SuccessExitCode;
-                }, path).Dispose();
-
-                Assert.True(File.Exists(path));
+                AppDomain.CurrentDomain.ProcessExit += handler;
                 return SuccessExitCode;
-            }).Dispose();
+            }, path).Dispose();
+
+            Assert.True(File.Exists(path));
         }
 
         [Fact]
@@ -316,6 +310,7 @@ namespace System.Tests
         [Fact]
         public void IsDefaultAppDomain()
         {
+            // Xunit may be default app domain if run directly
             RemoteInvoke(() =>
             {
                 Assert.True(AppDomain.CurrentDomain.IsDefaultAppDomain());
@@ -326,10 +321,7 @@ namespace System.Tests
         [Fact]
         public void IsFinalizingForUnload()
         {
-            RemoteInvoke(() => {
-                Assert.False(AppDomain.CurrentDomain.IsFinalizingForUnload());
-                return SuccessExitCode;
-            }).Dispose();
+            Assert.False(AppDomain.CurrentDomain.IsFinalizingForUnload());
         }
 
         [Fact]
@@ -376,10 +368,7 @@ namespace System.Tests
         [Fact]
         public void ReflectionOnlyGetAssemblies()
         {
-            RemoteInvoke(() => {
-                Assert.Equal(0, AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().Length);
-                return SuccessExitCode;
-            }).Dispose();
+            Assert.Equal(0, AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().Length);
         }
 
         [Fact]
@@ -417,12 +406,9 @@ namespace System.Tests
         [Fact]
         public void MonitoringTotalAllocatedMemorySize()
         {
-            RemoteInvoke(() => {
-                Assert.Throws<InvalidOperationException>(() => {
-                    var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
-                });
-                return SuccessExitCode;
-            }).Dispose();
+            Assert.Throws<InvalidOperationException>(() => {
+                var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
+            });
         }
 
         [Fact]
@@ -430,7 +416,7 @@ namespace System.Tests
         {
             Assert.Throws<InvalidOperationException>(() => {
                 var t = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
-            } );
+            });
         }
 
 #pragma warning disable 618
@@ -438,11 +424,7 @@ namespace System.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetCurrentThreadId()
         {
-            RemoteInvoke(() =>
-            {
-                Assert.Equal(AppDomain.GetCurrentThreadId(), Environment.CurrentManagedThreadId);
-                return SuccessExitCode;
-            }).Dispose();
+            Assert.Equal(AppDomain.GetCurrentThreadId(), Environment.CurrentManagedThreadId);
         }
 
         [Fact]
@@ -463,8 +445,7 @@ namespace System.Tests
         [Fact]
         public void ClearPrivatePath()
         {
-            RemoteInvoke(() =>
-            {
+            RemoteInvoke(() => {
                 AppDomain.CurrentDomain.ClearPrivatePath();
                 return SuccessExitCode;
             }).Dispose();
@@ -583,8 +564,7 @@ namespace System.Tests
         {
             CopyTestAssemblies();
 
-            RemoteInvoke(() =>
-            {
+            RemoteInvoke(() => {
                 ResolveEventHandler handler = (sender, e) =>
                 {
                     return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll"));
@@ -605,8 +585,7 @@ namespace System.Tests
         {
             CopyTestAssemblies();
 
-            RemoteInvoke(() =>
-            {
+            RemoteInvoke(() => {
                 Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe"));
 
                 ResolveEventHandler handler = (sender, e) =>
