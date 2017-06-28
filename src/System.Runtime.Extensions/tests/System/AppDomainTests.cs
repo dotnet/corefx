@@ -150,6 +150,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void FirstChanceException_Called()
         {
             RemoteInvoke(() => {
@@ -240,6 +241,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void ExecuteAssemblyByName()
         {
             RemoteInvoke(() => {
@@ -290,6 +292,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void SetData_SameKeyMultipleTimes_ReplacesOldValue()
         {
             RemoteInvoke(() => {
@@ -608,6 +611,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void TypeResolve()
         {
             RemoteInvoke(() => {
@@ -635,6 +639,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void ResourceResolve()
         {
             RemoteInvoke(() => {
