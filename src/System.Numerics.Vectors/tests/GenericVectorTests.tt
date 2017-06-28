@@ -216,7 +216,7 @@ namespace System.Numerics.Tests
             Assert.Throws<NullReferenceException>(() => vector.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => vector.CopyTo(array, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => vector.CopyTo(array, array.Length));
-            Assert.Throws<ArgumentException>(() => vector.CopyTo(array, array.Length - 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => vector.CopyTo(array, array.Length - 1));
 
             vector.CopyTo(array);
             for (int g = 0; g < array.Length; g++)
@@ -1383,13 +1383,14 @@ namespace System.Numerics.Tests
 <# 
     foreach (var type in supportedTypes)
     {
+        int precision = type == typeof(float) ? 6 : type == typeof(double) ? 15 : -1;
 #>
         [Fact]
-        public void SquareRoot<#=type.Name#>() { TestSquareRoot<<#=type.Name#>>(); }
+        public void SquareRoot<#=type.Name#>() { TestSquareRoot<<#=type.Name#>>(<#=precision#>); }
 <#
     }
 #>
-        private void TestSquareRoot<T>() where T : struct
+        private void TestSquareRoot<T>(int precision = -1) where T : struct, IEquatable<T>
         {
             T[] values = GenerateRandomValuesForVector<T>();
             Vector<T> vector = new Vector<T>(values);
@@ -1399,7 +1400,7 @@ namespace System.Numerics.Tests
                 (index, val) =>
                 {
                     T expected = Util.Sqrt(values[index]);
-                    Assert.Equal(expected, val);
+                    AssertEqual(expected, val, precision);
                 });
         }
 
@@ -1702,6 +1703,22 @@ namespace System.Numerics.Tests
         #endregion Narrow / Widen
 
         #region Helper Methods
+        private static void AssertEqual<T>(T left, T right, int precision = -1) where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(float))
+            {
+                Assert.Equal((float)(object)left, (float)(object)right, precision);
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                Assert.Equal((double)(object)left, (double)(object)right, precision);
+            }
+            else
+            {
+                Assert.Equal(left, right);
+            }
+        }
+
         private static void ValidateVector<T>(Vector<T> vector, Action<int, T> indexValidationFunc) where T : struct
         {
             for (int g = 0; g < Vector<T>.Count; g++)
