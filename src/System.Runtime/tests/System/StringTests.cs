@@ -2733,7 +2733,8 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void InternalTestAotSubset()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, ".NetNative does not even intern empty string in multifile")]
+        public static void InternEmptyStringTest()
         {
             string emptyFromField = string.Empty;
             string emptyFromInternTable = string.IsInterned(emptyFromField);
