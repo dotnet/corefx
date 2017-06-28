@@ -126,6 +126,11 @@ namespace System.Net.WebSockets
 
         public override void Abort()
         {
+            AbortInternal();
+        }
+
+        private void AbortInternal(WebSocketException customException = null)
+        {
             lock (_stateLock)
             {
                 if ((_state != WebSocketState.None) && (_state != WebSocketState.Connecting))
@@ -137,14 +142,13 @@ namespace System.Net.WebSockets
                     // ClientWebSocket Desktop behavior: a ws that was not connected will not switch state to Aborted.
                     UpdateState(WebSocketState.Closed);
                 }
-
-                Dispose();
             }
 
-            CancelAllOperations();
+            CancelAllOperations(customException);
+            Dispose();
         }
 
-        private void CancelAllOperations(WebSocketException customException = null)
+        private void CancelAllOperations(WebSocketException customException)
         {
             if (_receiveAsyncBufferTcs != null)
             {
@@ -362,8 +366,7 @@ namespace System.Net.WebSockets
 
                 // Propagate a custom exception to any pending SendAsync/ReceiveAsync operations and close the socket.
                 WebSocketException customException = new WebSocketException(actualError, exc);
-                CancelAllOperations(customException);
-                Abort();
+                AbortInternal(customException);
             }
         }
 
