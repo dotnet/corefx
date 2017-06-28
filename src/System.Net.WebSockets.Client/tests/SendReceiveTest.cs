@@ -401,7 +401,6 @@ namespace System.Net.WebSockets.Client.Tests
 
                     WebSocketException newReceiveException =
                         await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
-                    _output.WriteLine(newReceiveException.ToString());
                     Assert.Equal(WebSocketError.Success, newReceiveException.WebSocketErrorCode);
                     Assert.Equal(
                         ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
