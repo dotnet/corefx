@@ -14,5 +14,8 @@ namespace System.Data
                 return IntPtr.Zero;
             }
         }
+
+        private static LocalDBFormatMessageDelegate LocalDBFormatMessage =>
+                throw new PlatformNotSupportedException(SR.LocalDBNotSupported); // LocalDB is not available for Unix and hence it cannot be supported.
     }
 }
