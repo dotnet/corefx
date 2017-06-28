@@ -49,5 +49,51 @@ namespace System.IO.Tests
 
             return success;
         });
+
+        /// <summary>
+        /// Runs the given command as sudo
+        /// </summary>
+        /// <param name="commandLine">The command line to run as sudo</param>
+        /// <returns> Returns 0 if the process exits</returns>
+        protected static int RunAsSudo(string commandLine)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                FileName = "sudo",
+                Arguments = commandLine
+            };
+
+            using (Process process = Process.Start(startInfo))
+            {
+                process.WaitForExit();
+                return process.ExitCode;
+            }
+        }
+
+        protected void ReadOnly_FileSystemHelper(Action<string> testAction)
+        {
+            // Set up read only file system
+            // Set up the source directory
+            string sourceDirectory = GetTestFilePath();
+            string sourceSubDirectory = Path.Combine(sourceDirectory, "subdir");
+            Directory.CreateDirectory(sourceSubDirectory);
+
+            // Set up the target directory and mount as a read only
+            string readOnlyDirectory = GetTestFilePath();
+            Directory.CreateDirectory(readOnlyDirectory);
+
+            Assert.Equal(0, RunAsSudo($"mount --bind {sourceDirectory} {readOnlyDirectory}"));
+            Assert.Equal(0, RunAsSudo($"mount -o remount,ro,bind {sourceDirectory} {readOnlyDirectory}"));
+
+            try
+            {
+                testAction(readOnlyDirectory);
+            }
+            finally
+            {
+                // Clean up test environment
+                Assert.Equal(0, RunAsSudo($"umount {readOnlyDirectory}"));
+            }
+        }
     }
 }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Tests
 {
@@ -122,6 +124,30 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [OuterLoop("Needs sudo access")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void Unix_NonExistentPath_ReadOnlyVolume()
+        {
+            ReadOnly_FileSystemHelper(readOnlyDirectory =>
+            {
+                Delete(Path.Combine(readOnlyDirectory, "DoesNotExist"));
+            });
+        }
+
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void Unix_ExistingDirectory_ReadOnlyVolume()
+        {
+            ReadOnly_FileSystemHelper(readOnlyDirectory =>
+            {
+                Assert.Throws<IOException>(() => Delete(Path.Combine(readOnlyDirectory, "subdir")));
+            });
+        }
+
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Deleting already-open file throws
         public void Windows_File_Already_Open_Throws_IOException()
         {
@@ -136,6 +162,7 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Deleting already-open file allowed
         public void Unix_File_Already_Open_Allowed()
         {
+            // DeleteOpenFile_Allowed_Unix
             string path = GetTestFilePath();
             using (File.Create(path))
             {
