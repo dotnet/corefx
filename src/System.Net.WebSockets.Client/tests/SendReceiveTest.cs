@@ -392,9 +392,23 @@ namespace System.Net.WebSockets.Client.Tests
                 acceptTask.Wait(cts.Token);
 
                 // Validate I/O errors and socket state.
-                if (!PlatformDetection.IsWindows || PlatformDetection.IsFullFramework)
+                if (!PlatformDetection.IsWindows)
                 {
-                    _output.WriteLine("ManagedWebSocket-based implementation.");
+                    _output.WriteLine("[Non-Windows] ManagedWebSocket-based implementation.");
+
+                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
+                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
+
+                    WebSocketException newReceiveException =
+                        await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
+                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, newReceiveException.WebSocketErrorCode);
+
+                    Assert.Equal(WebSocketState.Open, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
+                }
+                else if (PlatformDetection.IsFullFramework)
+                {
+                    _output.WriteLine("[Windows] ManagedWebSocket-based implementation.");
 
                     WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
                     Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
@@ -407,6 +421,7 @@ namespace System.Net.WebSockets.Client.Tests
                         newReceiveException.Message);
 
                     Assert.Equal(WebSocketState.Aborted, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
                 }
                 else if (PlatformDetection.IsUap)
                 {
@@ -427,6 +442,7 @@ namespace System.Net.WebSockets.Client.Tests
                         newReceiveException.Message);
 
                     Assert.Equal(WebSocketState.Aborted, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
                 }
                 else
                 {
@@ -442,6 +458,7 @@ namespace System.Net.WebSockets.Client.Tests
                     Assert.Equal(WININET_E_CONNECTION_RESET, (uint)newReceiveException.HResult);
 
                     Assert.Equal(WebSocketState.Open, clientSocket.State);
+                    Assert.Null(clientSocket.CloseStatus);
                 }
             };
 
