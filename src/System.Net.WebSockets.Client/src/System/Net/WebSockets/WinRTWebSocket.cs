@@ -15,6 +15,8 @@ using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using Windows.Web;
 
+using RTWeb​Socket​Error = Windows.Networking.Sockets.Web​Socket​Error;
+
 namespace System.Net.WebSockets
 {
     internal class WinRTWebSocket : WebSocket
@@ -142,7 +144,7 @@ namespace System.Net.WebSockets
             CancelAllOperations();
         }
 
-        private void CancelAllOperations()
+        private void CancelAllOperations(WebSocketException customException = null)
         {
             if (_receiveAsyncBufferTcs != null)
             {
@@ -154,26 +156,40 @@ namespace System.Net.WebSockets
 
             if (_webSocketReceiveResultTcs != null)
             {
-                var exception = new WebSocketException(
-                    WebSocketError.InvalidState,
-                    SR.Format(
-                        SR.net_WebSockets_InvalidState_ClosedOrAborted,
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"));
+                if (customException != null)
+                {
+                    _webSocketReceiveResultTcs.TrySetException(customException);
+                }
+                else
+                {
+                    var exception = new WebSocketException(
+                        WebSocketError.InvalidState,
+                        SR.Format(
+                            SR.net_WebSockets_InvalidState_ClosedOrAborted,
+                            "System.Net.WebSockets.InternalClientWebSocket",
+                            "Aborted"));
 
-                _webSocketReceiveResultTcs.TrySetException(exception);
+                    _webSocketReceiveResultTcs.TrySetException(exception);
+                }
             }
 
             if (_closeWebSocketReceiveResultTcs != null)
             {
-                var exception = new WebSocketException(
-                    WebSocketError.InvalidState,
-                    SR.Format(
-                        SR.net_WebSockets_InvalidState_ClosedOrAborted,
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"));
+                if (customException != null)
+                {
+                    _closeWebSocketReceiveResultTcs.TrySetException(customException);
+                }
+                else
+                {
+                    var exception = new WebSocketException(
+                        WebSocketError.InvalidState,
+                        SR.Format(
+                            SR.net_WebSockets_InvalidState_ClosedOrAborted,
+                            "System.Net.WebSockets.InternalClientWebSocket",
+                            "Aborted"));
 
-                _closeWebSocketReceiveResultTcs.TrySetException(exception);
+                    _closeWebSocketReceiveResultTcs.TrySetException(exception);
+                }
             }
         }
 
@@ -329,8 +345,24 @@ namespace System.Net.WebSockets
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception exc)
             {
+                // WinRT WebSockets always throw exceptions of type System.Exception. However, we can determine whether
+                // or not we're dealing with a known error by using WinRT's WebSocketError.GetStatus method.
+                WebErrorStatus status = RTWeb​Socket​Error.GetStatus(exc.HResult);
+                WebSocketError actualError = WebSocketError.Faulted;
+                switch (status)
+                {
+                    case WebErrorStatus.ConnectionAborted:
+                    case WebErrorStatus.ConnectionReset:
+                    case WebErrorStatus.Disconnected:
+                        actualError = WebSocketError.ConnectionClosedPrematurely;
+                        break;
+                }
+
+                // Propagate a custom exception to any pending SendAsync/ReceiveAsync operations and close the socket.
+                WebSocketException customException = new WebSocketException(actualError, exc);
+                CancelAllOperations(customException);
                 Abort();
             }
         }
@@ -454,9 +486,7 @@ namespace System.Net.WebSockets
                 validStatesText = string.Join(", ", validStates);
             }
 
-            throw new WebSocketException(
-                WebSocketError.InvalidState,
-                SR.Format(SR.net_WebSockets_InvalidState, _state, validStatesText));
+            throw new WebSocketException(SR.Format(SR.net_WebSockets_InvalidState, _state, validStatesText));
         }
 
         private void UpdateState(WebSocketState value)

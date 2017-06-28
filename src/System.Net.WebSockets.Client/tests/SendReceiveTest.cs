@@ -354,13 +354,13 @@ namespace System.Net.WebSockets.Client.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
-        public async Task SendReceive_ConnectionClosedPrematurely_SubsequentReceiveFailsAndWebSocketStateUpdated()
+        public async Task SendReceive_ConnectionClosedPrematurely_ReceiveAsyncFailsAndWebSocketStateUpdated()
         {
             var options = new LoopbackServer.Options { WebSocketEndpoint = true };
 
-            Func<ClientWebSocket, Socket, Uri, Task> connectToServerWithClientCert = async (clientSocket, server, url) =>
+            Func<ClientWebSocket, Socket, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
             {
-                AutoResetEvent connectAsyncCompleted =  new AutoResetEvent(false);
+                AutoResetEvent pendingReceiveAsyncPosted =  new AutoResetEvent(false);
 
                 // Start listening for incoming connections on the server side.
                 Task<List<string>> acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
@@ -368,8 +368,8 @@ namespace System.Net.WebSockets.Client.Tests
                     // Complete the WebSocket upgrade. After this is done, the client-side ConnectAsync should complete.
                     Assert.True(await LoopbackServer.WebSocketHandshakeAsync(socket, reader, writer));
 
-                    // Wait for client-side ConnectAsync to complete.
-                    connectAsyncCompleted.WaitOne(TimeOutMilliseconds);
+                    // Wait for client-side ConnectAsync to complete and for a pending ReceiveAsync to be posted.
+                    pendingReceiveAsyncPosted.WaitOne(TimeOutMilliseconds);
 
                     // Close the underlying connection prematurely (without sending a WebSocket Close frame).
                     socket.Shutdown(SocketShutdown.Both);
@@ -381,48 +381,68 @@ namespace System.Net.WebSockets.Client.Tests
                 // Initiate a connection attempt.
                 var cts = new CancellationTokenSource(TimeOutMilliseconds);
                 await clientSocket.ConnectAsync(url, cts.Token);
-                connectAsyncCompleted.Set();
+
+                // Post a pending ReceiveAsync before the TCP connection is torn down.
+                var recvBuffer = new byte[100];
+                var recvSegment = new ArraySegment<byte>(recvBuffer);
+                Task pendingReceiveAsync = clientSocket.ReceiveAsync(recvSegment, cts.Token);
+                pendingReceiveAsyncPosted.Set();
 
                 // Wait for the server to close the underlying connection.
                 acceptTask.Wait(cts.Token);
 
                 // Validate I/O errors and socket state.
-                var recvBuffer = new byte[100];
-                var recvSegment = new ArraySegment<byte>(recvBuffer);
-
                 if (!PlatformDetection.IsWindows || PlatformDetection.IsFullFramework)
                 {
                     _output.WriteLine("ManagedWebSocket-based implementation.");
 
-                    WebSocketException receiveException =
+                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
+                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
+
+                    WebSocketException newReceiveException =
                         await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
-                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, receiveException.WebSocketErrorCode);
+                    _output.WriteLine(newReceiveException.ToString());
+                    Assert.Equal(WebSocketError.Success, newReceiveException.WebSocketErrorCode);
+                    Assert.Equal(
+                        ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
+                        newReceiveException.Message);
 
                     Assert.Equal(WebSocketState.Aborted, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
                 }
                 else if (PlatformDetection.IsUap)
                 {
                     _output.WriteLine("WinRTWebSocket-based implementation.");
 
-                    WebSocketException receiveException =
+                    const uint WININET_E_CONNECTION_ABORTED = 0x80072EFE;
+
+                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
+                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
+                    Assert.NotNull(pendingReceiveException.InnerException);
+                    Assert.Equal(WININET_E_CONNECTION_ABORTED, (uint)pendingReceiveException.InnerException.HResult);
+
+                    WebSocketException newReceiveException =
                         await Assert.ThrowsAsync<WebSocketException>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
-                    Assert.Equal(WebSocketError.InvalidState, receiveException.WebSocketErrorCode);
+                    Assert.Equal(WebSocketError.Success, newReceiveException.WebSocketErrorCode);
+                    Assert.Equal(
+                        ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
+                        newReceiveException.Message);
 
                     Assert.Equal(WebSocketState.Aborted, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
                 }
                 else
                 {
                     _output.WriteLine("WinHttpWebSocket-based implementation.");
 
                     const uint WININET_E_CONNECTION_RESET = 0x80072eff;
-                    Win32Exception receiveException =
+
+                    Win32Exception pendingReceiveException = await Assert.ThrowsAnyAsync<Win32Exception>(() => pendingReceiveAsync);
+                    Assert.Equal(WININET_E_CONNECTION_RESET, (uint)pendingReceiveException.HResult);
+
+                    Win32Exception newReceiveException =
                         await Assert.ThrowsAnyAsync<Win32Exception>(() => clientSocket.ReceiveAsync(recvSegment, cts.Token));
-                    Assert.Equal(WININET_E_CONNECTION_RESET, (uint)receiveException.HResult);
+                    Assert.Equal(WININET_E_CONNECTION_RESET, (uint)newReceiveException.HResult);
 
                     Assert.Equal(WebSocketState.Open, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
                 }
             };
 
@@ -430,7 +450,7 @@ namespace System.Net.WebSockets.Client.Tests
             {
                 using (ClientWebSocket clientSocket = new ClientWebSocket())
                 {
-                    await connectToServerWithClientCert(clientSocket, server, url);
+                    await connectToServerThatAbortsConnection(clientSocket, server, url);
                 }
             }, options);
         }
