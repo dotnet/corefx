@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
 namespace System.Drawing.Internal
 {
-    using System.Diagnostics;
-    using System.Runtime.InteropServices;
-
     [System.Security.SuppressUnmanagedCodeSecurityAttribute]
     internal static partial class IntUnsafeNativeMethods
     {
@@ -19,10 +19,10 @@ namespace System.Drawing.Internal
             return hdc;
         }
 
-        /// <devdoc>
-        ///     NOTE: DeleteDC is to be used to delete the hdc created from CreateCompatibleDC ONLY.  All other hdcs should be
-        ///     deleted with DeleteHDC.
-        /// </devdoc>
+        /// <summary>
+        /// NOTE: DeleteDC is to be used to delete the hdc created from CreateCompatibleDC ONLY. All other hdcs shoul
+        /// be deleted with DeleteHDC.
+        /// </summary>
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "DeleteDC", CharSet = CharSet.Auto)]
         public static extern bool IntDeleteDC(HandleRef hDC);
         public static bool DeleteDC(HandleRef hDC)
@@ -67,10 +67,10 @@ namespace System.Drawing.Internal
             return hdc;
         }
 
-        /// <devdoc>
-        ///     CreateCompatibleDC requires to add a GDI handle instead of an HDC handle to avoid perf penalty in HandleCollector.
-        ///     The hdc obtained from this method needs to be deleted with DeleteDC instead of DeleteHDC.
-        /// </devdoc>
+        /// <summary>
+        /// CreateCompatibleDC requires to add a GDI handle instead of an HDC handle to avoid perf penalty in HandleCollector.
+        /// The hdc obtained from this method needs to be deleted with DeleteDC instead of DeleteHDC.
+        /// </summary>
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "CreateCompatibleDC", CharSet = CharSet.Auto)]
         public static extern IntPtr IntCreateCompatibleDC(HandleRef hDC);
         public static IntPtr CreateCompatibleDC(HandleRef hDC)
@@ -294,35 +294,9 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int DrawTextW(HandleRef hDC, string lpszString, int nCount, ref IntNativeMethods.RECT lpRect, int nFormat);
 
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int DrawTextA(HandleRef hDC, byte[] lpszString, int byteCount, ref IntNativeMethods.RECT lpRect, int nFormat);
-
         public static int DrawText(HandleRef hDC, string text, ref IntNativeMethods.RECT lpRect, int nFormat)
         {
-            int retVal;
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                // CapRectangleForWin9x(ref lpRect);
-                // we have to do this because if we pass too big of a value (<= 2^31) to win9x
-                // it fails and returns negative values as the rect in which it painted the text
-                lpRect.top = Math.Min(Int16.MaxValue, lpRect.top);
-                lpRect.left = Math.Min(Int16.MaxValue, lpRect.left);
-                lpRect.right = Math.Min(Int16.MaxValue, lpRect.right);
-                lpRect.bottom = Math.Min(Int16.MaxValue, lpRect.bottom);
-
-                // Convert Unicode string to ANSI.
-                int byteCount = IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, null, 0, IntPtr.Zero, IntPtr.Zero);
-                byte[] textBytes = new byte[byteCount];
-                IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, textBytes, textBytes.Length, IntPtr.Zero, IntPtr.Zero);
-
-                // Security: Windows 95/98/Me: This value may not exceed 8192.
-                byteCount = Math.Min(byteCount, IntNativeMethods.MaxTextLengthInWin9x);
-                retVal = DrawTextA(hDC, textBytes, byteCount, ref lpRect, nFormat);
-            }
-            else
-            {
-                retVal = DrawTextW(hDC, text, text.Length, ref lpRect, nFormat);
-            }
+            int retVal = DrawTextW(hDC, text, text.Length, ref lpRect, nFormat);
 
             DbgUtil.AssertWin32(retVal != 0, "DrawText(hdc=[0x{0:X8}], text=[{1}], rect=[{2}], flags=[{3}] failed.", hDC.Handle, text, lpRect, nFormat);
             return retVal;
@@ -331,35 +305,9 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.User32, SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int DrawTextExW(HandleRef hDC, string lpszString, int nCount, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams);
 
-        [DllImport(ExternDll.User32, SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int DrawTextExA(HandleRef hDC, byte[] lpszString, int byteCount, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams);
-
         public static int DrawTextEx(HandleRef hDC, string text, ref IntNativeMethods.RECT lpRect, int nFormat, [In, Out] IntNativeMethods.DRAWTEXTPARAMS lpDTParams)
         {
-            int retVal;
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                // CapRectangleForWin9x(ref lpRect);
-                // we have to do this because if we pass too big of a value (<= 2^31) to win9x
-                // it fails and returns negative values as the rect in which it painted the text
-                lpRect.top = Math.Min(Int16.MaxValue, lpRect.top);
-                lpRect.left = Math.Min(Int16.MaxValue, lpRect.left);
-                lpRect.right = Math.Min(Int16.MaxValue, lpRect.right);
-                lpRect.bottom = Math.Min(Int16.MaxValue, lpRect.bottom);
-
-                // Convert Unicode string to ANSI.
-                int byteCount = IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, null, 0, IntPtr.Zero, IntPtr.Zero);
-                byte[] textBytes = new byte[byteCount];
-                IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, textBytes, textBytes.Length, IntPtr.Zero, IntPtr.Zero);
-
-                // Security: Windows 95/98/Me: This value may not exceed 8192.
-                byteCount = Math.Min(byteCount, IntNativeMethods.MaxTextLengthInWin9x);
-                retVal = DrawTextExA(hDC, textBytes, byteCount, ref lpRect, nFormat, lpDTParams);
-            }
-            else
-            {
-                retVal = DrawTextExW(hDC, text, text.Length, ref lpRect, nFormat, lpDTParams);
-            }
+            int retVal = DrawTextExW(hDC, text, text.Length, ref lpRect, nFormat, lpDTParams);
 
             DbgUtil.AssertWin32(retVal != 0, "DrawTextEx(hdc=[0x{0:X8}], text=[{1}], rect=[{2}], flags=[{3}] failed.", hDC.Handle, text, lpRect, nFormat);
             return retVal;
@@ -368,29 +316,10 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int GetTextExtentPoint32W(HandleRef hDC, string text, int len, [In, Out] IntNativeMethods.SIZE size);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int GetTextExtentPoint32A(HandleRef hDC, byte[] lpszString, int byteCount, [In, Out] IntNativeMethods.SIZE size);
-
         public static int GetTextExtentPoint32(HandleRef hDC, string text, [In, Out] IntNativeMethods.SIZE size)
         {
-            int retVal;
             int byteCount = text.Length;
-
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                // Convert Unicode string to ANSI.
-                byteCount = IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, null, 0, IntPtr.Zero, IntPtr.Zero);
-                byte[] textBytes = new byte[byteCount];
-                IntUnsafeNativeMethods.WideCharToMultiByte(IntNativeMethods.CP_ACP, 0, text, text.Length, textBytes, textBytes.Length, IntPtr.Zero, IntPtr.Zero);
-
-                // Security: Windows 95/98/Me: This value may not exceed 8192.
-                byteCount = Math.Min(text.Length, IntNativeMethods.MaxTextLengthInWin9x);
-                retVal = GetTextExtentPoint32A(hDC, textBytes, byteCount, size);
-            }
-            else
-            {
-                retVal = GetTextExtentPoint32W(hDC, text, text.Length, size);
-            }
+            int retVal = GetTextExtentPoint32W(hDC, text, text.Length, size);
 
             DbgUtil.AssertWin32(retVal != 0, "GetTextExtentPoint32(hdc=[0x{0:X8}], text=[{1}], size=[{2}] failed.", hDC.Handle, text, size);
             return retVal;
@@ -497,45 +426,9 @@ namespace System.Drawing.Internal
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         public static extern int GetTextMetricsW(HandleRef hDC, [In, Out] ref IntNativeMethods.TEXTMETRIC lptm);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
-        public static extern int GetTextMetricsA(HandleRef hDC, [In, Out] ref IntNativeMethods.TEXTMETRICA lptm);
-
         public static int GetTextMetrics(HandleRef hDC, ref IntNativeMethods.TEXTMETRIC lptm)
         {
-            int retVal;
-
-            if (Marshal.SystemDefaultCharSize == 1)
-            {
-                // ANSI
-                IntNativeMethods.TEXTMETRICA lptmA = new IntNativeMethods.TEXTMETRICA();
-                retVal = IntUnsafeNativeMethods.GetTextMetricsA(hDC, ref lptmA);
-
-                lptm.tmHeight = lptmA.tmHeight;
-                lptm.tmAscent = lptmA.tmAscent;
-                lptm.tmDescent = lptmA.tmDescent;
-                lptm.tmInternalLeading = lptmA.tmInternalLeading;
-                lptm.tmExternalLeading = lptmA.tmExternalLeading;
-                lptm.tmAveCharWidth = lptmA.tmAveCharWidth;
-                lptm.tmMaxCharWidth = lptmA.tmMaxCharWidth;
-                lptm.tmWeight = lptmA.tmWeight;
-                lptm.tmOverhang = lptmA.tmOverhang;
-                lptm.tmDigitizedAspectX = lptmA.tmDigitizedAspectX;
-                lptm.tmDigitizedAspectY = lptmA.tmDigitizedAspectY;
-                lptm.tmFirstChar = (char)lptmA.tmFirstChar;
-                lptm.tmLastChar = (char)lptmA.tmLastChar;
-                lptm.tmDefaultChar = (char)lptmA.tmDefaultChar;
-                lptm.tmBreakChar = (char)lptmA.tmBreakChar;
-                lptm.tmItalic = lptmA.tmItalic;
-                lptm.tmUnderlined = lptmA.tmUnderlined;
-                lptm.tmStruckOut = lptmA.tmStruckOut;
-                lptm.tmPitchAndFamily = lptmA.tmPitchAndFamily;
-                lptm.tmCharSet = lptmA.tmCharSet;
-            }
-            else
-            {
-                // Unicode
-                retVal = IntUnsafeNativeMethods.GetTextMetricsW(hDC, ref lptm);
-            }
+            int retVal = GetTextMetricsW(hDC, ref lptm);
 
             DbgUtil.AssertWin32(retVal != 0, "GetTextMetrics(hdc=[0x{0:X8}], [out TEXTMETRIC] failed.", hDC.Handle);
             return retVal;

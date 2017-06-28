@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    public class HttpClientHandler : HttpMessageHandler
+    public partial class HttpClientHandler : HttpMessageHandler
     {
         #region Fields
 
@@ -332,8 +332,6 @@ namespace System.Net.Http
             }
         }
 
-        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
-
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
             get
@@ -526,12 +524,13 @@ namespace System.Net.Http
                 webRequest.ServerCertificateValidationCallback = ServerCertificateValidationCallback;
             }
 
-            if (_defaultProxyCredentials != null && _useProxy && _proxy == null)
+            if (_defaultProxyCredentials != null && _useProxy && _proxy == null && webRequest.Proxy != null)
             {
-                // The HttpClientHandler has specified to use a proxy but has not
-                // set an explicit IWebProxy. That means to use the system default
-                // proxy setting object which is the default value of webRequest.Proxy.
-                Debug.Assert(webRequest.Proxy != null);
+                // The HttpClientHandler has specified to use a proxy but has not set an explicit IWebProxy.
+                // That means to use the default proxy on the underlying webrequest object. The initial value
+                // of the webrequest.Proxy when first created comes from the static WebRequest.DefaultWebProxy.
+                // In the default case, this value is non-null. But can be set later to null. That is why the
+                // 'if' check above validates for a non-null webRequest.Proxy.
                 webRequest.Proxy.Credentials = _defaultProxyCredentials;
             }
 

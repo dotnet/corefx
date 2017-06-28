@@ -19,25 +19,26 @@ namespace System.Runtime.InteropServices
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(IsComImport_Windows_ReturnsExpected))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void IsComObject_Windows_ReturnsExpected(object value, bool expected)
         {
             Assert.Equal(expected, Marshal.IsComObject(value));
         }
-
-        [ComImport]
-        [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
-        public interface IComImportObject { }
-
-        public class InterfaceComImportObject : IComImportObject { }
-
-        [ComImport]
-        [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
-        public class InterfaceAndComImportObject : IComImportObject { }
-
-        [ComImport]
-        [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
-        public class ComImportObject { }
-
-        public class SubComImportObject : ComImportObject { }
     }
+
+    [ComImport]
+    [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
+    public interface IComImportObject { }
+
+    public class InterfaceComImportObject : IComImportObject { }
+
+    [ComImport]
+    [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
+    public class InterfaceAndComImportObject : IComImportObject { }
+
+    [ComImport]
+    [Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
+    public class ComImportObject { }
+
+    public class SubComImportObject : ComImportObject { }
 }

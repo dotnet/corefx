@@ -68,6 +68,7 @@ namespace System.ServiceProcess.Tests
     }
 
     [OuterLoop(/* Modifies machine state */)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Appx doesn't allow to access ServiceController")]
     public class ServiceControllerTests : IDisposable
     {
         private const int ExpectedDependentServiceCount = 3;
@@ -123,7 +124,7 @@ namespace System.ServiceProcess.Tests
             var controller = new ServiceController(_testService.TestServiceName, _testService.TestMachineName);
             AssertExpectedProperties(controller);
 
-            Assert.Throws<ArgumentException>(() => { var c = new ServiceController(_testService.TestServiceName, ""); });
+            AssertExtensions.Throws<ArgumentException>(null, () => { var c = new ServiceController(_testService.TestServiceName, ""); });
         }
 
         [ConditionalFact(nameof(RunningWithElevatedPrivileges))]

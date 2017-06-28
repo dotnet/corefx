@@ -6,10 +6,8 @@ using System.Diagnostics.Contracts;
 
 namespace System.Drawing
 {
-    public sealed class SystemIcons
+    public static class SystemIcons
     {
-        private SystemIcons() { }
-
         private static Icon s_application = null;
         private static Icon s_asterisk = null;
         private static Icon s_error = null;
@@ -49,17 +47,13 @@ namespace System.Drawing
                 {
                     try
                     {
-                        // IDI_SHIELD is defined in OS Vista and above
-                        if (Environment.OSVersion.Version.Major >= 6)
-                        {
-                            // we hard-code size here, to prevent breaking change
-                            // the size of _shield before this change is always 32 * 32  
-                            IntPtr hIcon = IntPtr.Zero;
-                            int result = SafeNativeMethods.LoadIconWithScaleDown(NativeMethods.NullHandleRef, SafeNativeMethods.IDI_SHIELD, 32, 32, ref hIcon);
+                        // we hard-code size here, to prevent breaking change
+                        // the size of _shield before this change is always 32 * 32  
+                        IntPtr hIcon = IntPtr.Zero;
+                        int result = SafeNativeMethods.LoadIconWithScaleDown(NativeMethods.NullHandleRef, SafeNativeMethods.IDI_SHIELD, 32, 32, ref hIcon);
 
-                            if (result == 0)
-                                s_shield = new Icon(hIcon);
-                        }
+                        if (result == 0)
+                            s_shield = new Icon(hIcon);
                     }
                     catch
                     {

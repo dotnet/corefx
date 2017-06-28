@@ -141,6 +141,7 @@ namespace System.DirectoryServices.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ActiveIssue(21346, TargetFrameworkMonikers.UapAot)]
         public void DeleteTree_NoObject_ThrowsCOMException()
         {
             var entry = new DirectoryEntry("path");
@@ -148,6 +149,7 @@ namespace System.DirectoryServices.Tests
         }
 
         [Fact]
+        [ActiveIssue(21346, TargetFrameworkMonikers.UapAot)]
         public void DeleteTree_DisposedObject_ObjectDisposedException()
         {
             var entry = new DirectoryEntry("path");
@@ -218,6 +220,7 @@ namespace System.DirectoryServices.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "PNSE in UAP")]
         public void ObjectSecurity_Set_GetReturnsExpected()
         {
             var security = new ActiveDirectorySecurity();
