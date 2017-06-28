@@ -1880,26 +1880,26 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void SquareRootByte() { TestSquareRoot<Byte>(); }
+        public void SquareRootByte() { TestSquareRoot<Byte>(-1); }
         [Fact]
-        public void SquareRootSByte() { TestSquareRoot<SByte>(); }
+        public void SquareRootSByte() { TestSquareRoot<SByte>(-1); }
         [Fact]
-        public void SquareRootUInt16() { TestSquareRoot<UInt16>(); }
+        public void SquareRootUInt16() { TestSquareRoot<UInt16>(-1); }
         [Fact]
-        public void SquareRootInt16() { TestSquareRoot<Int16>(); }
+        public void SquareRootInt16() { TestSquareRoot<Int16>(-1); }
         [Fact]
-        public void SquareRootUInt32() { TestSquareRoot<UInt32>(); }
+        public void SquareRootUInt32() { TestSquareRoot<UInt32>(-1); }
         [Fact]
-        public void SquareRootInt32() { TestSquareRoot<Int32>(); }
+        public void SquareRootInt32() { TestSquareRoot<Int32>(-1); }
         [Fact]
-        public void SquareRootUInt64() { TestSquareRoot<UInt64>(); }
+        public void SquareRootUInt64() { TestSquareRoot<UInt64>(-1); }
         [Fact]
-        public void SquareRootInt64() { TestSquareRoot<Int64>(); }
+        public void SquareRootInt64() { TestSquareRoot<Int64>(-1); }
         [Fact]
-        public void SquareRootSingle() { TestSquareRoot<Single>(); }
+        public void SquareRootSingle() { TestSquareRoot<Single>(6); }
         [Fact]
-        public void SquareRootDouble() { TestSquareRoot<Double>(); }
-        private void TestSquareRoot<T>() where T : struct
+        public void SquareRootDouble() { TestSquareRoot<Double>(15); }
+        private void TestSquareRoot<T>(int precision = -1) where T : struct, IEquatable<T>
         {
             T[] values = GenerateRandomValuesForVector<T>();
             Vector<T> vector = new Vector<T>(values);
@@ -1909,7 +1909,7 @@ namespace System.Numerics.Tests
                 (index, val) =>
                 {
                     T expected = Util.Sqrt(values[index]);
-                    Assert.Equal(expected, val);
+                    AssertEqual(expected, val, precision);
                 });
         }
 
@@ -2610,6 +2610,22 @@ namespace System.Numerics.Tests
         #endregion Narrow / Widen
 
         #region Helper Methods
+        private static void AssertEqual<T>(T left, T right, int precision = -1) where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(float))
+            {
+                Assert.Equal((float)(object)left, (float)(object)right, precision);
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                Assert.Equal((double)(object)left, (double)(object)right, precision);
+            }
+            else
+            {
+                Assert.Equal(left, right);
+            }
+        }
+
         private static void ValidateVector<T>(Vector<T> vector, Action<int, T> indexValidationFunc) where T : struct
         {
             for (int g = 0; g < Vector<T>.Count; g++)
