@@ -616,16 +616,18 @@ namespace System.Xml.Serialization
             }
         }
 
-        private static ConcurrentDictionary<Tuple<Type, string>, SetMemberValueDelegate> s_setMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, SetMemberValueDelegate>();
-        public delegate void SetMemberValueDelegate(object o, object val);
+        private static ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate> s_setMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate>();
 
-        private static SetMemberValueDelegate GetSetMemberValueDelegate(object o, string memberName)
+        private static ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate GetSetMemberValueDelegate(object o, string memberName)
         {
-            SetMemberValueDelegate result;
+            Debug.Assert(o != null, "Object o should not be null");
+            Debug.Assert(!string.IsNullOrEmpty(memberName), "memberName must have a value");
+            ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate result;
             var typeMemberNameTuple = Tuple.Create(o.GetType(), memberName);
             if (!s_setMemberValueDelegateCache.TryGetValue(typeMemberNameTuple, out result))
             {
                 MemberInfo memberInfo = ReflectionXmlSerializationHelper.GetMember(o.GetType(), memberName);
+                Debug.Assert(memberInfo != null, "memberInfo could not be retrieved");
                 Type memberType;
                 if (memberInfo is PropertyInfo propInfo)
                 {
@@ -641,70 +643,14 @@ namespace System.Xml.Serialization
                 }
 
                 var typeMemberTypeTuple = Tuple.Create(o.GetType(), memberType);
-                MethodInfo getSetMemberValueDelegateWithTypeGenericMi = typeof(ReflectionXmlSerializationReader).GetMethod(nameof(GetSetMemberValueDelegateWithType), BindingFlags.Static | BindingFlags.NonPublic);
+                MethodInfo getSetMemberValueDelegateWithTypeGenericMi = typeof(ReflectionXmlSerializationReaderHelper).GetMethod("GetSetMemberValueDelegateWithType", BindingFlags.Static | BindingFlags.Public);
                 MethodInfo getSetMemberValueDelegateWithTypeMi = getSetMemberValueDelegateWithTypeGenericMi.MakeGenericMethod(o.GetType(), memberType);
-                var getSetMemberValueDelegateWithType = (Func<MemberInfo, SetMemberValueDelegate>)getSetMemberValueDelegateWithTypeMi.CreateDelegate(typeof(Func<MemberInfo, SetMemberValueDelegate>));
-
+                var getSetMemberValueDelegateWithType = (Func<MemberInfo, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate>)getSetMemberValueDelegateWithTypeMi.CreateDelegate(typeof(Func<MemberInfo, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate>));
                 result = getSetMemberValueDelegateWithType(memberInfo);
                 s_setMemberValueDelegateCache.TryAdd(typeMemberNameTuple, result);
             }
 
             return result;
-        }
-
-        // This method needs to be public so that reflection metadata is available on uapaot
-        public static SetMemberValueDelegate GetSetMemberValueDelegateWithType<TObj, TParam>(MemberInfo memberInfo)
-        {
-            if (typeof(TObj).IsValueType)
-            {
-                if (memberInfo is PropertyInfo propInfo)
-                {
-                    return delegate (object o, object p)
-                    {
-                        propInfo.SetValue(o, p);
-                    };
-                }
-                else if (memberInfo is FieldInfo fieldInfo)
-                {
-                    return delegate (object o, object p)
-                    {
-                        fieldInfo.SetValue(o, p);
-                    };
-                }
-
-                throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
-            }
-            else
-            {
-                Action<TObj, TParam> setTypedDelegate = null;
-                if (memberInfo is PropertyInfo propInfo)
-                {
-                    var setMethod = propInfo.GetSetMethod(true);
-                    if(setMethod == null)
-                    {
-                        return delegate (object o, object p)
-                        {
-                            // Maintain the same failure behavior as non-cached delegate
-                            propInfo.SetValue(o, p);
-                        };
-                    }
-
-                    setTypedDelegate = (Action<TObj, TParam>)setMethod.CreateDelegate(typeof(Action<TObj, TParam>));
-                }
-                else if (memberInfo is FieldInfo fieldInfo)
-                {
-                    var objectParam = Expression.Parameter(typeof(TObj));
-                    var valueParam = Expression.Parameter(typeof(TParam));
-                    var fieldExpr = Expression.Field(objectParam, fieldInfo);
-                    var assignExpr = Expression.Assign(fieldExpr, valueParam);
-                    setTypedDelegate = Expression.Lambda<Action<TObj, TParam>>(assignExpr, objectParam, valueParam).Compile();
-                }
-
-                return delegate (object o, object p)
-                {
-                    setTypedDelegate((TObj)o, (TParam)p);
-                };
-            }
         }
 
         private static void SetMemberValue(object o, object value, MemberInfo memberInfo)
@@ -2168,6 +2114,66 @@ namespace System.Xml.Serialization
         internal class ObjectHolder
         {
             public object Object;
+        }
+    }
+
+    // This class and it's contained members must be public so that reflection metadata is available on uapaot
+    public static class ReflectionXmlSerializationReaderHelper
+    {
+        public delegate void SetMemberValueDelegate(object o, object val);
+
+        public static SetMemberValueDelegate GetSetMemberValueDelegateWithType<TObj, TParam>(MemberInfo memberInfo)
+        {
+            if (typeof(TObj).IsValueType)
+            {
+                if (memberInfo is PropertyInfo propInfo)
+                {
+                    return delegate (object o, object p)
+                    {
+                        propInfo.SetValue(o, p);
+                    };
+                }
+                else if (memberInfo is FieldInfo fieldInfo)
+                {
+                    return delegate (object o, object p)
+                    {
+                        fieldInfo.SetValue(o, p);
+                    };
+                }
+
+                throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
+            }
+            else
+            {
+                Action<TObj, TParam> setTypedDelegate = null;
+                if (memberInfo is PropertyInfo propInfo)
+                {
+                    var setMethod = propInfo.GetSetMethod(true);
+                    if (setMethod == null)
+                    {
+                        return delegate (object o, object p)
+                        {
+                            // Maintain the same failure behavior as non-cached delegate
+                            propInfo.SetValue(o, p);
+                        };
+                    }
+
+                    setTypedDelegate = (Action<TObj, TParam>)setMethod.CreateDelegate(typeof(Action<TObj, TParam>));
+                }
+                else if (memberInfo is FieldInfo fieldInfo)
+                {
+                    var objectParam = Expression.Parameter(typeof(TObj));
+                    var valueParam = Expression.Parameter(typeof(TParam));
+                    var fieldExpr = Expression.Field(objectParam, fieldInfo);
+                    var assignExpr = Expression.Assign(fieldExpr, valueParam);
+                    setTypedDelegate = Expression.Lambda<Action<TObj, TParam>>(assignExpr, objectParam, valueParam).Compile();
+                }
+
+                return delegate (object o, object p)
+                {
+                    setTypedDelegate((TObj)o, (TParam)p);
+                };
+            }
         }
     }
 }

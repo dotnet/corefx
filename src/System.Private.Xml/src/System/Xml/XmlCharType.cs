@@ -75,7 +75,7 @@ namespace System.Xml
                     return;
                 }
 
-                UnmanagedMemoryStream memStream = (UnmanagedMemoryStream)Assembly.GetExecutingAssembly().GetManifestResourceStream("XmlCharType.bin");
+                UnmanagedMemoryStream memStream = (UnmanagedMemoryStream)typeof(XmlWriter).Assembly.GetManifestResourceStream("XmlCharType.bin");
                 Debug.Assert(memStream.Length == CharPropertiesSize);
 
                 byte* chProps = memStream.PositionPointer;

@@ -140,7 +140,13 @@ namespace System.Xml
         private bool _indented; // perf - faster to check a boolean.
         private int _indentation;
         private char[] _indentChars;
-        private static char[] s_defaultIndentChars = new string(DefaultIndentChar, IndentArrayLength).ToCharArray();
+        private static char[] s_defaultIndentChars = CreateDefaultIndentChars();
+
+        // This method is needed as the native code compiler fails when this initialization is inline
+        private static char[] CreateDefaultIndentChars()
+        {
+            return new string(DefaultIndentChar, IndentArrayLength).ToCharArray();
+        }
 
         // element stack
         private TagInfo[] _stack;
