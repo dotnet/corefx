@@ -486,14 +486,7 @@ namespace System.Diagnostics
 
         public static int GetProcessIdFromHandle(SafeProcessHandle processHandle)
         {
-            Interop.NtDll.NtProcessBasicInfo info = new Interop.NtDll.NtProcessBasicInfo();
-            int status = Interop.NtDll.NtQueryInformationProcess(processHandle, Interop.NtDll.NtQueryProcessBasicInfo, info, (int)Marshal.SizeOf(info), null);
-            if (status != 0)
-            {
-                throw new InvalidOperationException(SR.CantGetProcessId, new Win32Exception(status));
-            }
-            // We should change the signature of this function and ID property in process class.
-            return info.UniqueProcessId.ToInt32();
+            return Interop.Kernel32.GetProcessId(processHandle);
         }
 
         public static ProcessInfo[] GetProcessInfos(string machineName, bool isRemoteMachine)

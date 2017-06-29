@@ -142,6 +142,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetProcessAffinityMask.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetProcessAffinityMask.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetProcessId.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.GetProcessId.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetThreadPriorityBoost.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetThreadPriorityBoost.cs</Link>
     </Compile>
@@ -174,9 +177,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetPriorityClass.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.SetPriorityClass.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtQueryInformationProcess.cs">
-      <Link>Common\Interop\Windows\NtDll\Interop.NtQueryInformationProcess.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtQuerySystemInformation.cs">
       <Link>Common\Interop\Windows\NtDll\Interop.NtQuerySystemInformation.cs</Link>

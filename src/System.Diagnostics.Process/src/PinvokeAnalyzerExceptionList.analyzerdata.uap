@@ -3,5 +3,4 @@ kernel32.dll!GetProcessAffinityMask
 kernel32.dll!K32EnumProcessModules
 kernel32.dll!SetProcessAffinityMask
 kernel32.dll!SetThreadAffinityMask
-ntdll.dll!NtQueryInformationProcess
 ntdll.dll!NtQuerySystemInformation
