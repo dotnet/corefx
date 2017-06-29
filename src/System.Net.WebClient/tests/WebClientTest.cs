@@ -18,7 +18,7 @@ namespace System.Net.Tests
     public class WebClientTest
     {
         [Fact]
-        public static void DefaultCtor_PropertiesReturnExpectedValues()
+        public static void WebClient_DefaultCtor_PropertiesReturnExpectedValues()
         {
             var wc = new WebClient();
 
@@ -34,7 +34,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Properties_InvalidArguments_ThrowExceptions()
+        public static void WebClient_Properties_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -43,7 +43,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void DownloadData_InvalidArguments_ThrowExceptions()
+        public static void WebClient_DownloadData_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -58,7 +58,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void DownloadFile_InvalidArguments_ThrowExceptions()
+        public static void WebClient_DownloadFile_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -82,7 +82,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void DownloadString_InvalidArguments_ThrowExceptions()
+        public static void WebClient_DownloadString_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -97,7 +97,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UploadData_InvalidArguments_ThrowExceptions()
+        public static void WebClient_UploadData_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -131,7 +131,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UploadFile_InvalidArguments_ThrowExceptions()
+        public static void WebClient_UploadFile_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -166,7 +166,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UploadString_InvalidArguments_ThrowExceptions()
+        public static void WebClient_UploadString_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
             
@@ -200,7 +200,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UploadValues_InvalidArguments_ThrowExceptions()
+        public static void WebClient_UploadValues_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
             
@@ -234,7 +234,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void OpenWrite_InvalidArguments_ThrowExceptions()
+        public static void WebClient_OpenWrite_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -245,7 +245,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void OpenRead_InvalidArguments_ThrowExceptions()
+        public static void WebClient_OpenRead_InvalidArguments_ThrowExceptions()
         {
             var wc = new WebClient();
 
@@ -254,7 +254,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void BaseAddress_Roundtrips()
+        public static void WebClient_BaseAddress_Roundtrips()
         {
             var wc = new WebClient();
             wc.BaseAddress = "http://localhost/";
@@ -264,7 +264,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void CachePolicy_Roundtrips()
+        public static void WebClient_CachePolicy_Roundtrips()
         {
             var wc = new WebClient();
             var c = new RequestCachePolicy(RequestCacheLevel.BypassCache);
@@ -273,7 +273,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Credentials_Roundtrips()
+        public static void WebClient_Credentials_Roundtrips()
         {
             var wc = new WebClient();
             var c = new DummyCredentials();
@@ -289,7 +289,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Proxy_Roundtrips()
+        public static void WebClient_Proxy_Roundtrips()
         {
             var wc = new WebClient();
             Assert.Same(WebRequest.DefaultWebProxy, wc.Proxy);
@@ -311,7 +311,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Encoding_Roundtrips()
+        public static void WebClient_Encoding_Roundtrips()
         {
             var wc = new WebClient();
             Encoding e = Encoding.UTF8;
@@ -320,7 +320,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Headers_Roundtrips()
+        public static void WebClient_Headers_Roundtrips()
         {
             var wc = new WebClient();
             Assert.NotNull(wc.Headers);
@@ -336,7 +336,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void QueryString_Roundtrips()
+        public static void WebClient_QueryString_Roundtrips()
         {
             var wc = new WebClient();
             Assert.NotNull(wc.QueryString);
@@ -352,7 +352,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UseDefaultCredentials_Roundtrips()
+        public static void WebClient_UseDefaultCredentials_Roundtrips()
         {
             var wc = new WebClient();
             for (int i = 0; i < 2; i++)
@@ -364,9 +364,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public static async Task ResponseHeaders_ContainsHeadersAfterOperation()
+        public static async Task WebClient_ResponseHeaders_ContainsHeadersAfterOperation()
         {
             var wc = new DerivedWebClient(); // verify we can use a derived type as well
             Assert.Null(wc.ResponseHeaders);
@@ -388,25 +387,22 @@ namespace System.Net.Tests
             Assert.Equal("ArbitraryValue", wc.ResponseHeaders["ArbitraryHeader"]);
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
-        [ActiveIssue(18680)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [InlineData("Connection", "close")]
         [InlineData("Expect", "100-continue")]
-        public static async Task RequestHeaders_AddDisallowedHeaderAndSendRequest_ThrowsWebException(string headerName, string headerValue)
+        public static async Task WebClient_RequestHeaders_AddDisallowedHeaderAndSendRequest_ThrowsWebException(string headerName, string headerValue)
         {
             var wc = new WebClient();
             wc.Headers[headerName] = headerValue;
             await Assert.ThrowsAsync<WebException>(() => wc.DownloadStringTaskAsync(System.Net.Test.Common.Configuration.Http.RemoteEchoServer));
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [InlineData("http://localhost", true)]
         [InlineData("localhost", false)]
-        public static async Task RequestHeaders_AddHostHeaderAndSendRequest_ExpectedResult(string hostHeaderValue, bool throwsWebException)
+        public static async Task WebClient_RequestHeaders_AddHostHeaderAndSendRequest_ExpectedResult(string hostHeaderValue, bool throwsWebException)
         {
             var wc = new WebClient();
             wc.Headers["Host"] = hostHeaderValue;
@@ -420,9 +416,8 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public static async Task RequestHeaders_SpecialHeaders_RequestSucceeds()
+        public static async Task WebClient_RequestHeaders_SpecialHeaders_RequestSucceeds()
         {
             var wc = new WebClient();
 
@@ -444,9 +439,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public static async Task ConcurrentOperations_Throw()
+        public static async Task WebClient_ConcurrentOperations_Throw()
         {
             await LoopbackServer.CreateServerAsync((server, url) =>
             {
@@ -511,12 +505,11 @@ namespace System.Net.Tests
         protected abstract Task<Stream> OpenReadAsync(WebClient wc, string address);
         protected abstract Task<Stream> OpenWriteAsync(WebClient wc, string address);
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Theory]
         [InlineData(null)]
         [InlineData("text/html; charset=utf-8")]
         [InlineData("text/html; charset=us-ascii")]
-        public async Task DownloadString_Success(string contentType)
+        public async Task WebClient_DownloadString_Success(string contentType)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -537,9 +530,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public async Task DownloadData_Success()
+        public async Task WebClient_DownloadData_Success()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -560,9 +552,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public async Task DownloadData_LargeData_Success()
+        public async Task WebClient_DownloadData_LargeData_Success()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -580,9 +571,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public async Task DownloadFile_Success()
+        public async Task WebClient_DownloadFile_Success()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -608,9 +598,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [Fact]
-        public async Task OpenRead_Success()
+        public async Task WebClient_OpenRead_Success()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -630,11 +619,10 @@ namespace System.Net.Tests
             });
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task OpenWrite_Success(Uri echoServer)
+        public async Task WebClient_OpenWrite_Success(Uri echoServer)
         {
             var wc = new WebClient();
             using (Stream s = await OpenWriteAsync(wc, echoServer.ToString()))
@@ -644,11 +632,10 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task UploadData_Success(Uri echoServer)
+        public async Task WebClient_UploadData_Success(Uri echoServer)
         {
             var wc = new WebClient();
 
@@ -660,11 +647,10 @@ namespace System.Net.Tests
             Assert.True(!IsAsync || await uploadProgressInvoked.Task, "Expected upload progress callback to be invoked");
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task UploadData_LargeData_Success(Uri echoServer)
+        public async Task WebClient_UploadData_LargeData_Success(Uri echoServer)
         {
             var wc = new WebClient();
             string largeText = GetRandomText(512 * 1024);
@@ -678,11 +664,10 @@ namespace System.Net.Tests
             return new string(Enumerable.Range(0, 512 * 1024).Select(_ => (char)('a' + rand.Next(0, 26))).ToArray());
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task UploadFile_Success(Uri echoServer)
+        public async Task WebClient_UploadFile_Success(Uri echoServer)
         {
             string tempPath = Path.GetTempFileName();
             try
@@ -698,22 +683,20 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task UploadString_Success(Uri echoServer)
+        public async Task WebClient_UploadString_Success(Uri echoServer)
         {
             var wc = new WebClient();
             string result = await UploadStringAsync(wc, echoServer.ToString(), ExpectedText);
             Assert.Contains(ExpectedText, result);
         }
 
-        [ActiveIssue(20141, TargetFrameworkMonikers.UapAot)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task UploadValues_Success(Uri echoServer)
+        public async Task WebClient_UploadValues_Success(Uri echoServer)
         {
             var wc = new WebClient();
             byte[] result = await UploadValuesAsync(wc, echoServer.ToString(), new NameValueCollection() { { "Data", ExpectedText } });
