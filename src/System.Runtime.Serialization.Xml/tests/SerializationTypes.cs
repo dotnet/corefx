@@ -5285,6 +5285,25 @@ public class MyArgumentException : Exception, ISerializable
     }
 }
 
+public class BaseType1
+{
+    public virtual string Name1 { get; set; }
+    public string Name2 { get; set; }
+    public string Name3 { get; set; }
+    public string Name4 { get; set; }
+    public string @Name5 { get; set; }
+}
+
+
+
+public class DerivedTypeWithDifferentOverrides : BaseType1
+{
+    public override string Name1 { get; set; }
+    new public string Name2 { get; set; }
+    new public string Name3 { get; set; }
+    new internal string Name4 { get; set; }
+    new public string Name5 { get; set; }
+}
 [DataContract(IsReference = true)]
 public class DC
 {
