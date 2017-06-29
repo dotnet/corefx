@@ -98,7 +98,7 @@ namespace System.Composition.Hosting.Core.Tests
         }
 
         [Fact]
-        public void GetDescriptor_GetWhenReturnsNull_ThrowsInternalErrorException()
+        public void GetDescriptor_GetWhenReturnsNull_ThrowsArgumentNullException()
         {
             var descriptor = ExportDescriptor.Create(Activator, new Dictionary<string, object>());
             var promise = new ExportDescriptorPromise(new CompositionContract(typeof(int)), "Origin", true, () => Enumerable.Empty<CompositionDependency>(), depdendencies =>
@@ -106,8 +106,7 @@ namespace System.Composition.Hosting.Core.Tests
                 return null;
             });
 
-            Exception ex = Assert.ThrowsAny<Exception>(() => promise.GetDescriptor());
-            Assert.Equal("Microsoft.Internal.Assumes+InternalErrorException", ex.GetType().ToString());
+            AssertExtensions.Throws<ArgumentNullException>("getDescriptor", () => promise.GetDescriptor());
         }
 
         [Fact]
