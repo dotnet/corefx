@@ -66,11 +66,12 @@ namespace System.Net.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void GetResponse_InvalidServerAddress_ThrowsWebException()
+        public void GetResponse_NameResolutionFailure_ThrowsWebException()
         {
             string serverUrl = "ftp://server.invalid";
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
             WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
+            Assert.Equal(WebExceptionStatus.NameResolutionFailure,ex.Status);
         }
 
         private static bool LocalServerAvailable => (Environment.GetEnvironmentVariable("USE_LOCAL_FTP_SERVER") != null);
