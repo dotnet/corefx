@@ -1,13 +1,14 @@
 ﻿using System.Collections.Concurrent;
+using System.Composition.Hosting;
 using System.Threading;
 using Xunit;
 
-namespace System.Composition.UnitTests
+namespace System.Composition.TypedParts.Tests
 {
     /// <summary>
     /// Tests dealing with reflection usage in System.Composition
     /// </summary>
-    public class ReflectionTests : ContainerTests
+    public class ReflectionTests
     {
         public static bool HasMultiplerProcessors { get; } = Environment.ProcessorCount > 1;
 
@@ -76,6 +77,13 @@ namespace System.Composition.UnitTests
             Assert.IsAssignableFrom(typeof(C), d.C);
             Assert.IsAssignableFrom(typeof(A), d.C.A);
             Assert.IsAssignableFrom(typeof(B), d.C.B);
+        }
+
+        private static CompositionContext CreateContainer(params Type[] types)
+        {
+            return new ContainerConfiguration()
+                .WithParts(types)
+                .CreateContainer();
         }
 
         public interface IA { }
