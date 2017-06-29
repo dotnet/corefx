@@ -4380,7 +4380,9 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(deserializedValue.IsFirstRun, value.IsFirstRun);
     }
 
+#if !ReflectionOnly
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
     public static void DerivedTypeWithDifferentOverrides()
     {
         DerivedTypeWithDifferentOverrides value = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
@@ -4391,6 +4393,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual.Name4);
         Assert.StrictEqual(value.Name5, actual.Name5);
     }
+#endif
 
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)

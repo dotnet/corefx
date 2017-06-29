@@ -1194,11 +1194,14 @@ namespace System.Xml.Serialization
                             replacedInfo = info;
                             if (replacedInfo != memberInfoToBeReplaced)
                             {
-                                if(memberInfoToBeReplaced is PropertyInfo propertyInfoToBeReplaced)
+                                if (!info.GetMethod.IsPublic)
                                 {
-                                    if (!info.GetMethod.IsPublic && propertyInfoToBeReplaced.GetMethod.IsPublic)
+                                    if (memberInfoToBeReplaced is PropertyInfo propertyInfoToBeReplaced)
                                     {
-                                        return false;
+                                        if (propertyInfoToBeReplaced.GetMethod.IsPublic)
+                                        {
+                                            return false;
+                                        }
                                     }
                                 }
 
