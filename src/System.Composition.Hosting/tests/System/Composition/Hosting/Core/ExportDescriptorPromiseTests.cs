@@ -202,15 +202,14 @@ namespace System.Composition.Hosting.Core.Tests
         }
 
         [Fact]
-        public void GetDescriptor_CycleActivatorNotCompleted_ThrowsInternalErrorException()
+        public void GetDescriptor_CycleActivatorNotCompleted_ThrowsNotImplementedException()
         {
             ExportDescriptorPromise promise = null;
             promise = new ExportDescriptorPromise(new CompositionContract(typeof(int)), "Origin", true, () => Enumerable.Empty<CompositionDependency>(), depdendencies =>
             {
                 ExportDescriptor cycleDescriptor = promise.GetDescriptor();
                 CompositeActivator activator = cycleDescriptor.Activator;
-                Exception ex = Assert.ThrowsAny<Exception>(() => activator(null, null));
-                Assert.Equal("Microsoft.Internal.Assumes+InternalErrorException", ex.GetType().ToString());
+                Assert.Throws<NotImplementedException>(() => activator(null, null));
 
                 return ExportDescriptor.Create(Activator, new Dictionary<string, object> { { "key", "value" } });
             });
