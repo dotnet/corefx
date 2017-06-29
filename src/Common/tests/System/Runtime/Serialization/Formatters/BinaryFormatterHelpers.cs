@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -70,6 +71,33 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     Assert.Equal(getter(expected), getter(actual));
                 }
             }
+        }
+
+        public static void AssertExceptionDeserializationFails<T>() where T : Exception
+        {
+            // .NET Core throws a PlatformNotSupportedException for deserializing many exceptions.
+            if (!PlatformDetection.IsNetCore)
+            {
+                return;
+            }
+
+            var info = new SerializationInfo(typeof(T), new FormatterConverter());
+            info.AddValue("ClassName", "ClassName");
+            info.AddValue("Message", "Message");
+            info.AddValue("InnerException", null);
+            info.AddValue("HelpURL", null);
+            info.AddValue("StackTraceString", null);
+            info.AddValue("RemoteStackTraceString", null);
+            info.AddValue("RemoteStackIndex", 5);
+            info.AddValue("HResult", 5);
+            info.AddValue("Source", null);
+            info.AddValue("ExceptionMethod", null);
+
+            ConstructorInfo constructor = typeof(T).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }, null);
+            Assert.NotNull(constructor);
+
+            Exception ex = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] { info, new StreamingContext() }));
+            Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
         }
     }
 }
