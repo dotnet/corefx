@@ -474,6 +474,15 @@ namespace System.Runtime.CompilerServices
                 void* r3 = Unsafe.Add<int>(r2, -3);
                 Assert.Equal(0x123, *(int*)r3);
             }
+
+            fixed (void* ptr = &a[1])
+            {
+                void* r0 = Unsafe.Add<int>(ptr, -1);
+                Assert.Equal(0x123, *(int*)r0);
+
+                void* r3 = Unsafe.Add<int>(ptr, 2);
+                Assert.Equal(0x456, *(int*)r3);
+            }
         }
 
         [Fact]
@@ -536,6 +545,15 @@ namespace System.Runtime.CompilerServices
 
                 void* r3 = Unsafe.Subtract<int>(r2, 3);
                 Assert.Equal(0x123, *(int*)r3);
+            }
+
+            fixed (void* ptr = &a[1])
+            {
+                void* r0 = Unsafe.Subtract<int>(ptr, 1);
+                Assert.Equal(0x123, *(int*)r0);
+
+                void* r3 = Unsafe.Subtract<int>(ptr, -2);
+                Assert.Equal(0x456, *(int*)r3);
             }
         }
 
