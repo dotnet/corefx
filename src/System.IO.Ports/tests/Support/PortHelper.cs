@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Legacy.Support
@@ -68,7 +69,7 @@ namespace Legacy.Support
             {
                 foreach (string str in retval)
                 {
-                    if (str.StartsWith("COM"))
+                    if (str.Length > 3 && str.Length < 7 && str.StartsWith("COM") && str.Substring(3).All(c => char.IsDigit(c)))
                     {
                         ports.Add(str);
                         Debug.WriteLine("Installed serial ports :" + str);
