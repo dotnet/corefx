@@ -637,7 +637,7 @@ namespace SerializationTestTypes
         public List<string> listData = new List<string>();
         public ListContainer()
         {
-            listData.Add(new DateTime().ToShortDateString());
+            listData.Add("TestData");
         }
     }
 
@@ -649,7 +649,7 @@ namespace SerializationTestTypes
         public ArrayList listData = new ArrayList();
         public ArrayContainer(bool init)
         {
-            listData.Add(new DateTime().ToShortDateString());
+            listData.Add("TestData");
             listData.Add("Test");
             listData.Add(new Guid("c0a7310f-f369-481e-a990-39b121eae513"));
         }

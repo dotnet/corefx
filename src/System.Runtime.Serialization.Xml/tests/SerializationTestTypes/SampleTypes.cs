@@ -118,7 +118,7 @@ namespace SerializationTestTypes
 
         public KT1Derived()
         {
-            this.DData = DateTimeOffset.MinValue.ToString();
+            this.DData = "TestData";
         }
 
         public override bool Equals(object obj)
@@ -229,7 +229,7 @@ namespace SerializationTestTypes
 
         public KT3DerivedPrivate()
         {
-            this.DData = DateTimeOffset.MinValue.ToString();
+            this.DData = "TestData";
         }
 
         public override bool Equals(object obj)
@@ -254,7 +254,7 @@ namespace SerializationTestTypes
 
         public KT2Derived()
         {
-            this.DData = DateTimeOffset.MinValue.ToString();
+            this.DData = "TestData";
         }
 
         public override bool Equals(object obj)
@@ -5264,7 +5264,7 @@ namespace SerializationTestTypes
     public class DC
     {
         [DataMember]
-        public string Data = new DateTime().ToLongDateString();
+        public string Data = "TestData";
 
         [DataMember]
         public DC Next;
