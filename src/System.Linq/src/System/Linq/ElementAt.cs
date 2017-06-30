@@ -57,8 +57,7 @@ namespace System.Linq
                     throw Error.ArgumentNull(nameof(source));
 
                 case IPartition<TSource> partition:
-                    bool found;
-                    return partition.TryGetElementAt(index, out found);
+                    return partition.TryGetElementAt(index, out bool _);
                 case IList<TSource> list:
                     if (index >= 0 && index < list.Count)
                     {

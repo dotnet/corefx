@@ -31,10 +31,10 @@ namespace System.Linq
         }
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source) =>
-            source.TryGetLast(out bool found);
+            source.TryGetLast(out bool _);
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
-            source.TryGetLast(predicate, out bool found);
+            source.TryGetLast(predicate, out bool _);
 
         internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
         {

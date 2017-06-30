@@ -112,7 +112,7 @@ namespace System.Linq
                             return listProv.GetCount(onlyIfCheap: true);
 
                         case ICollection<TSource> _:
-                        case ICollection _:
+                        case ICollection __:
                             break;
 
                         default:
