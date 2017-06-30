@@ -20,7 +20,7 @@ namespace BasicEventSourceTests
     {
         private static void AsserExceptionStringsEqual(Func<string> expectedStrFunc, Exception ex)
         {
-            if(!PlatformDetection.IsNetNative)
+            if (!PlatformDetection.IsNetNative)
             {
                 string expectedStr = expectedStrFunc();
                 Assert.Equal(ex.Message, expectedStr);
