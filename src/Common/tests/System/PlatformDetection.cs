@@ -47,8 +47,6 @@ namespace System
 
         public static int WindowsVersion => GetWindowsVersion();
 
-        public static int WindowsBuildNumber => GetWindowsBuildNumber();
-
         public static bool IsNetfx462OrNewer()
         {
             if (!IsFullFramework)
