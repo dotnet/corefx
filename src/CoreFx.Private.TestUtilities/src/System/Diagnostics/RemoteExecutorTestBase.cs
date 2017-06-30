@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -168,7 +169,10 @@ namespace System.Diagnostics
 
                         if (Options.CheckExitCode)
                         {
-                            Assert.Equal(Options.ExpectedExitCode, Process.ExitCode);
+                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                Assert.Equal(Options.ExpectedExitCode, Process.ExitCode);
+                            else
+                                Assert.Equal(unchecked((sbyte)Options.ExpectedExitCode), unchecked((sbyte)Process.ExitCode));
                         }
                     }
                     finally

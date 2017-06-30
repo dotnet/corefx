@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -25,8 +24,7 @@ namespace System.Tests
         [MemberData(nameof(ExitCodeValues))]
         public static void CheckExitCode(int expectedExitCode)
         {
-            var options = new RemoteInvokeOptions { ExpectedExitCode = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? expectedExitCode : (int)(sbyte)expectedExitCode };
-            RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString(), options).Dispose();
+            RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString(), new RemoteInvokeOptions { ExpectedExitCode = expectedExitCode }).Dispose();
         }
 
         [Theory]
