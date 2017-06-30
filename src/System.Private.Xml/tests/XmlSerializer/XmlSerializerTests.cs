@@ -4380,6 +4380,184 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(deserializedValue.IsFirstRun, value.IsFirstRun);
     }
 
+    [Fact]
+    public static void Xml_DefaultNamespaceChange_SimpleArray_ObjectAsRoot()
+    {
+        SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
+#if uap
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object)); };
+#else
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(SimpleType[]) }); };
+#endif
+
+        SimpleType[] y = SerializeAndDeserialize(x,
+@"<?xml version=""1.0""?>
+<anyType d1p1:type=""ArrayOfSimpleType"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"" >
+  <SimpleType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+    <P1>abc</P1>
+    <P2>11</P2>
+  </SimpleType>
+  <SimpleType>
+    <P1>def</P1>
+    <P2>12</P2>
+  </SimpleType>
+</anyType>", serializerFactory);
+
+        Utils.Equal(x, y, (a, b) => { return SimpleType.AreEqual(a, b); });
+    }
+
+    [Fact]
+    public static void Xml_ValidateExceptionOnUnspecifiedRootSerializationType()
+    {
+        var value = new UnspecifiedRootSerializationType();
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<UnspecifiedRootSerializationType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <MyIntProperty>0</MyIntProperty>\r\n</UnspecifiedRootSerializationType>", () => { return new XmlSerializer(Type.GetType(typeof(UnspecifiedRootSerializationType).FullName)); });
+        Assert.StrictEqual(value.MyIntProperty, actual.MyIntProperty);
+        Assert.StrictEqual(value.MyStringProperty, actual.MyStringProperty);     
+    }
+
+    [Fact]
+    public static void Xml_VerifyCompilationIssueOnly()
+    {
+        MemoryStream ms = new MemoryStream();
+        try
+        {
+            var serializer = new XmlSerializer(typeof(TypeWithEnumerableMembers));
+            var value = new TypeWithEnumerableMembers();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("There was an error reflecting type 'SerializationTypes.TypeWithEnumerableMembers'.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(TypeWithoutPublicSetter));
+            var value = new TypeWithoutPublicSetter();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("Cannot deserialize type 'TypeWithoutPublicSetter' because it contains property 'Name' which has no public setter.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(TypeWithCompilerGeneratedAttributeButWithoutPublicSetter));
+            var value = new TypeWithCompilerGeneratedAttributeButWithoutPublicSetter();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("Cannot deserialize type 'TypeWithCompilerGeneratedAttributeButWithoutPublicSetter' because it contains property 'Name' which has no public setter.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(InvalidDerivedClass));
+            var value = new InvalidDerivedClass();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("There was an error reflecting type 'SerializationTypes.InvalidDerivedClass'.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(AnotherInvalidDerivedClass));
+            var value = new AnotherInvalidDerivedClass();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("There was an error reflecting type 'SerializationTypes.AnotherInvalidDerivedClass'.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(InternalTypeWithNestedPublicType.LevelData));
+            var value = new InternalTypeWithNestedPublicType.LevelData();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
+#endif
+        }
+
+        try
+        {
+            var serializer = new XmlSerializer(typeof(InternalTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData));
+            var value = new InternalTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData();
+            serializer.Serialize(ms, value);
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
+#if uap
+            Assert.Equal("There was an error generating the XML document.", ex.Message);
+#else
+            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicTypeWithNestedPublicType+NestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
+#endif
+        }
+
+        var value1 = new DuplicateTypeNamesTest.ns1.ClassA();
+        var actual = SerializeAndDeserialize(value1, "<?xml version=\"1.0\"?>\r\n<ClassA xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />");
+        Assert.Equal(value1.Name, actual.Name);
+
+        var value2 = new DuplicateTypeNamesTest.ns2.ClassA();
+        var actual2 = SerializeAndDeserialize(value2, "<?xml version=\"1.0\"?>\r\n<ClassA xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />");
+        Assert.Equal(value2.Nombre, actual2.Nombre);
+    }
+
+    [Fact]
+    public static void Xml_DefaultNamespaceChange_ObjectAsRoot()
+    {
+        object value = ItemChoiceType.DecimalNumber;
+#if uap
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object)); };
+#else
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(ItemChoiceType[]) }); };
+#endif
+
+        var actual = SerializeAndDeserialize(value,
+            @"<?xml version=""1.0""?>
+<anyType p1:type=""ItemChoiceType"" xmlns:p1=""http://www.w3.org/2001/XMLSchema-instance"">DecimalNumber</anyType>", 
+            serializerFactory);
+
+        Assert.StrictEqual(value, actual);
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
