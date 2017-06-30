@@ -11,7 +11,6 @@ namespace System.Linq
         public static TSource First<TSource>(this IEnumerable<TSource> source)
         {
             TSource first = source.TryGetFirst(out bool found);
-
             if (!found)
             {
                 throw Error.NoElements();
@@ -23,7 +22,6 @@ namespace System.Linq
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             TSource first = source.TryGetFirst(predicate, out bool found);
-
             if (!found)
             {
                 throw Error.NoMatch();
@@ -38,36 +36,35 @@ namespace System.Linq
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
             source.TryGetFirst(predicate, out bool found);
 
-        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
+        private static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
         {
-            if (source == null)
+            switch (source)
             {
-                throw Error.ArgumentNull(nameof(source));
-            }
+                case null:
+                    throw Error.ArgumentNull(nameof(source));
 
-            if (source is IPartition<TSource> partition)
-            {
-                return partition.TryGetFirst(out found);
-            }
+                case IPartition<TSource> partition:
+                    return partition.TryGetFirst(out found);
 
-            if (source is IList<TSource> list)
-            {
-                if (list.Count > 0)
-                {
-                    found = true;
-                    return list[0];
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    if (e.MoveNext())
+                case IList<TSource> list:
+                    if (list.Count > 0)
                     {
                         found = true;
-                        return e.Current;
+                        return list[0];
                     }
-                }
+
+                    break;
+                default:
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    {
+                        if (e.MoveNext())
+                        {
+                            found = true;
+                            return e.Current;
+                        }
+                    }
+
+                    break;
             }
 
             found = false;

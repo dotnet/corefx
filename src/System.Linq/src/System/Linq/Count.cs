@@ -11,39 +11,35 @@ namespace System.Linq
     {
         public static int Count<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
+            switch (source)
             {
-                throw Error.ArgumentNull(nameof(source));
-            }
+                case null:
+                    throw Error.ArgumentNull(nameof(source));
 
-            if (source is ICollection<TSource> collectionoft)
-            {
-                return collectionoft.Count;
-            }
+                case ICollection<TSource> collectionoft:
+                    return collectionoft.Count;
 
-            if (source is IIListProvider<TSource> listProv)
-            {
-                return listProv.GetCount(onlyIfCheap: false);
-            }
+                case IIListProvider<TSource> listProv:
+                    return listProv.GetCount(onlyIfCheap: false);
 
-            if (source is ICollection collection)
-            {
-                return collection.Count;
-            }
+                case ICollection collection:
+                    return collection.Count;
 
-            int count = 0;
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                checked
-                {
-                    while (e.MoveNext())
+                default:
+                    int count = 0;
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
                     {
-                        count++;
+                        checked
+                        {
+                            while (e.MoveNext())
+                            {
+                                count++;
+                            }
+                        }
                     }
-                }
-            }
 
-            return count;
+                    return count;
+            }
         }
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

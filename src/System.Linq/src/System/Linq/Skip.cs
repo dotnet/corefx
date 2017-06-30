@@ -11,11 +11,6 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
             if (count <= 0)
             {
                 // Return source if not actually skipping, but only if it's a type from here, to avoid
@@ -27,17 +22,21 @@ namespace System.Linq
 
                 count = 0;
             }
-            else if (source is IPartition<TSource> partition)
-            {
-                return partition.Skip(count);
-            }
 
-            if (source is IList<TSource> sourceList)
+            switch (source)
             {
-                return new ListPartition<TSource>(sourceList, count, int.MaxValue);
-            }
+                case null:
+                    throw Error.ArgumentNull(nameof(source));
 
-            return new EnumerablePartition<TSource>(source, count, -1);
+                case IPartition<TSource> partition:
+                    return partition.Skip(count);
+
+                case IList<TSource> sourceList:
+                    return new ListPartition<TSource>(sourceList, count, int.MaxValue);
+
+                default:
+                    return new EnumerablePartition<TSource>(source, count, -1);
+            }
         }
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

@@ -106,14 +106,17 @@ namespace System.Linq
             {
                 if (onlyIfCheap)
                 {
-                    if (_source is IIListProvider<TSource> listProv)
+                    switch (_source)
                     {
-                        return listProv.GetCount(onlyIfCheap: true);
-                    }
+                        case IIListProvider<TSource> listProv:
+                            return listProv.GetCount(onlyIfCheap: true);
 
-                    if (!(_source is ICollection<TSource>) && !(_source is ICollection))
-                    {
-                        return -1;
+                        case ICollection<TSource> _:
+                        case ICollection _:
+                            break;
+
+                        default:
+                            return -1;
                     }
                 }
 

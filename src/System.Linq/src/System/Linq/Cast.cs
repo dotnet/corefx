@@ -32,17 +32,17 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
         {
-            if (source is IEnumerable<TResult> typedSource)
+            switch (source)
             {
-                return typedSource;
-            }
+                case IEnumerable<TResult> typedSource:
+                    return typedSource;
 
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+                case null:
+                    throw Error.ArgumentNull(nameof(source));
 
-            return CastIterator<TResult>(source);
+                default:
+                    return CastIterator<TResult>(source);
+            }
         }
 
         private static IEnumerable<TResult> CastIterator<TResult>(IEnumerable source)

@@ -10,7 +10,8 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
-        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        public static IEnumerable<TResult> Select<TSource, TResult>(
+            this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         {
             if (source == null)
             {
@@ -22,34 +23,34 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            if (source is Iterator<TSource> iterator)
+            switch (source)
             {
-                return iterator.Select(selector);
+                case Iterator<TSource> iterator:
+                    return iterator.Select(selector);
+
+                case IList<TSource> ilist:
+                    switch (source)
+                    {
+                        case TSource[] array:
+                            return array.Length == 0
+                                ? EmptyPartition<TResult>.Instance
+                                : new SelectArrayIterator<TSource, TResult>(array, selector);
+
+                        case List<TSource> list:
+                            return new SelectListIterator<TSource, TResult>(list, selector);
+
+                        default:
+                            return new SelectIListIterator<TSource, TResult>(ilist, selector);
+                    }
+
+                case IPartition<TSource> partition:
+                    return partition is EmptyPartition<TSource>
+                        ? EmptyPartition<TResult>.Instance
+                        : new SelectIPartitionIterator<TSource, TResult>(partition, selector);
+
+                default:
+                    return new SelectEnumerableIterator<TSource, TResult>(source, selector);
             }
-
-            if (source is IList<TSource> ilist)
-            {
-                if (source is TSource[] array)
-                {
-                    return array.Length == 0 ?
-                        EmptyPartition<TResult>.Instance :
-                        new SelectArrayIterator<TSource, TResult>(array, selector);
-                }
-
-                if (source is List<TSource> list)
-                {
-                    return new SelectListIterator<TSource, TResult>(list, selector);
-                }
-
-                return new SelectIListIterator<TSource, TResult>(ilist, selector);
-            }
-
-            if (source is IPartition<TSource> partition)
-            {
-                return new SelectIPartitionIterator<TSource, TResult>(partition, selector);
-            }
-
-            return new SelectEnumerableIterator<TSource, TResult>(source, selector);
         }
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)

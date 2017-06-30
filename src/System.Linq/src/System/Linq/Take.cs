@@ -21,17 +21,18 @@ namespace System.Linq
                 return EmptyPartition<TSource>.Instance;
             }
 
-            if (source is IPartition<TSource> partition)
+            switch (source)
             {
-                return partition.Take(count);
-            }
 
-            if (source is IList<TSource> sourceList)
-            {
-                return new ListPartition<TSource>(sourceList, 0, count - 1);
-            }
+                case IPartition<TSource> partition:
+                    return partition.Take(count);
 
-            return new EnumerablePartition<TSource>(source, 0, count - 1);
+                case IList<TSource> sourceList:
+                    return new ListPartition<TSource>(sourceList, 0, count - 1);
+
+                default:
+                    return new EnumerablePartition<TSource>(source, 0, count - 1);
+            }
         }
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

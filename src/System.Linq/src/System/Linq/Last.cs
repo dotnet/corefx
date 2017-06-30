@@ -10,9 +10,7 @@ namespace System.Linq
     {
         public static TSource Last<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            TSource last = source.TryGetLast(out found);
-            
+            TSource last = source.TryGetLast(out bool found);
             if (!found)
             {
                 throw Error.NoElements();
@@ -23,9 +21,7 @@ namespace System.Linq
 
         public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            TSource last = source.TryGetLast(predicate, out found);
-
+            TSource last = source.TryGetLast(predicate, out bool found);
             if (!found)
             {
                 throw Error.NoMatch();
@@ -34,56 +30,48 @@ namespace System.Linq
             return last;
         }
 
-        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source)
-        {
-            bool found;
-            return source.TryGetLast(out found);
-        }
+        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source) =>
+            source.TryGetLast(out bool found);
 
-        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-            bool found;
-            return source.TryGetLast(predicate, out found);
-        }
+        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
+            source.TryGetLast(predicate, out bool found);
 
         internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
         {
-            if (source == null)
+            switch (source)
             {
-                throw Error.ArgumentNull(nameof(source));
-            }
+                case null:
+                    throw Error.ArgumentNull(nameof(source));
 
-            if (source is IPartition<TSource> partition)
-            {
-                return partition.TryGetLast(out found);
-            }
+                case IPartition<TSource> partition:
+                    return partition.TryGetLast(out found);
 
-            if (source is IList<TSource> list)
-            {
-                int count = list.Count;
-                if (count > 0)
-                {
-                    found = true;
-                    return list[count - 1];
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    if (e.MoveNext())
+                case IList<TSource> list:
+                    int count = list.Count;
+                    if (count > 0)
                     {
-                        TSource result;
-                        do
-                        {
-                            result = e.Current;
-                        }
-                        while (e.MoveNext());
-
                         found = true;
-                        return result;
+                        return list[count - 1];
                     }
-                }
+
+                    break;
+                default:
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    {
+                        if (e.MoveNext())
+                        {
+                            TSource result;
+                            do
+                            {
+                                result = e.Current;
+                            } while (e.MoveNext());
+
+                            found = true;
+                            return result;
+                        }
+                    }
+
+                    break;
             }
 
             found = false;
@@ -102,46 +90,48 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            if (source is OrderedEnumerable<TSource> ordered)
+            switch (source)
             {
-                return ordered.TryGetLast(predicate, out found);
-            }
+                case OrderedEnumerable<TSource> ordered:
+                    return ordered.TryGetLast(predicate, out found);
 
-            if (source is IList<TSource> list)
-            {
-                for (int i = list.Count - 1; i >= 0; --i)
-                {
-                    TSource result = list[i];
-                    if (predicate(result))
+                case IList<TSource> list:
+                    for (int i = list.Count - 1; i >= 0; --i)
                     {
-                        found = true;
-                        return result;
-                    }
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    while (e.MoveNext())
-                    {
-                        TSource result = e.Current;
+                        TSource result = list[i];
                         if (predicate(result))
                         {
-                            while (e.MoveNext())
-                            {
-                                TSource element = e.Current;
-                                if (predicate(element))
-                                {
-                                    result = element;
-                                }
-                            }
-
                             found = true;
                             return result;
                         }
                     }
-                }
+
+                    break;
+
+                default:
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    {
+                        while (e.MoveNext())
+                        {
+                            TSource result = e.Current;
+                            if (predicate(result))
+                            {
+                                while (e.MoveNext())
+                                {
+                                    TSource element = e.Current;
+                                    if (predicate(element))
+                                    {
+                                        result = element;
+                                    }
+                                }
+
+                                found = true;
+                                return result;
+                            }
+                        }
+                    }
+
+                    break;
             }
 
             found = false;

@@ -22,24 +22,22 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            if (source is Iterator<TSource> iterator)
+            switch (source)
             {
-                return iterator.Where(predicate);
-            }
+                case Iterator<TSource> iterator:
+                    return iterator.Where(predicate);
 
-            if (source is TSource[] array)
-            {
-                return array.Length == 0 ?
-                    (IEnumerable<TSource>)EmptyPartition<TSource>.Instance :
-                    new WhereArrayIterator<TSource>(array, predicate);
-            }
+                case TSource[] array:
+                    return array.Length == 0
+                        ? (IEnumerable<TSource>)EmptyPartition<TSource>.Instance
+                        : new WhereArrayIterator<TSource>(array, predicate);
 
-            if (source is List<TSource> list)
-            {
-                return new WhereListIterator<TSource>(list, predicate);
-            }
+                case List<TSource> list:
+                    return new WhereListIterator<TSource>(list, predicate);
 
-            return new WhereEnumerableIterator<TSource>(source, predicate);
+                default:
+                    return new WhereEnumerableIterator<TSource>(source, predicate);
+            }
         }
 
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
