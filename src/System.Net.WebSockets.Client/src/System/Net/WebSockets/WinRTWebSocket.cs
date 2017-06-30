@@ -37,6 +37,7 @@ namespace System.Net.WebSockets
         private static bool MessageWebSocketClientCertificateSupported => s_MessageWebSocketClientCertificateSupported.Value;
         private static readonly Lazy<bool> s_MessageWebSocketReceiveModeSupported =
             new Lazy<bool>(InitMessageWebSocketReceiveModeSupported);
+        private static bool MessageWebSocketReceiveModeSupported => s_MessageWebSocketReceiveModeSupported.Value;
 
         private WebSocketCloseStatus? _closeStatus = null;
         private string _closeStatusDescription = null;
@@ -88,14 +89,6 @@ namespace System.Net.WebSockets
             get
             {
                 return _subProtocol;
-            }
-        }
-
-        private bool MessageWebSocketReceiveModeSupported
-        {
-            get
-            {
-                return s_MessageWebSocketReceiveModeSupported.Value;
             }
         }
         #endregion
@@ -154,7 +147,11 @@ namespace System.Net.WebSockets
             // If the MessageWebSocketControl.ReceiveMode API surface is not available, the MessageWebSocket.MessageReceived
             // event will only get triggered when an entire WebSocket message has been received. This results in large memory
             // footprint and prevents "streaming" scenarios (e.g., WCF) from working properly.
-            InitMessageWebSocketReceiveMode(_messageWebSocket);
+            if (MessageWebSocketReceiveModeSupported)
+            {
+                // Always enable partial message receive mode if the WinRT API supports it.
+                _messageWebSocket.Control.ReceiveMode = MessageWebSocketReceiveMode.PartialMessage;
+            }
 
             try
             {
@@ -350,8 +347,6 @@ namespace System.Net.WebSockets
 
         private void OnMessageReceived(MessageWebSocket sender, MessageWebSocketMessageReceivedEventArgs args)
         {
-            bool isPartialMessageEvent = IsPartialMessageEvent(args);
-
             // GetDataReader() throws an exception when either:
             // (1) The underlying TCP connection is closed prematurely (e.g., FIN/RST received without sending/receiving a WebSocket Close frame).
             // (2) The server sends invalid data (e.g., corrupt HTTP headers or a message exceeding the MaxMessageSize).
@@ -391,9 +386,9 @@ namespace System.Net.WebSockets
                         var dataBuffer = reader.ReadBuffer(readCount);
                         // Safe to cast readCount to int as the maximum value that readCount can be is buffer.Count.
                         dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
-                        if (!isPartialMessageEvent && dataAvailable == readCount)
+                        if (dataAvailable == readCount)
                         {
-                            endOfMessage = true;
+                            endOfMessage = !IsPartialMessageEvent(args);
                         }
 
                         WebSocketReceiveResult recvResult = new WebSocketReceiveResult((int) readCount, messageType,
@@ -660,15 +655,6 @@ namespace System.Net.WebSockets
             return ApiInformation.IsPropertyPresent(
                 "Windows.Networking.Sockets.MessageWebSocketControl",
                 "ReceiveMode");
-        }
-
-        private void InitMessageWebSocketReceiveMode(MessageWebSocket socket)
-        {
-            // Always enable partial message receive mode if the WinRT API supports it.
-            if (MessageWebSocketReceiveModeSupported)
-            {
-                socket.Control.ReceiveMode = MessageWebSocketReceiveMode.PartialMessage;
-            }
         }
 
         private bool IsPartialMessageEvent(MessageWebSocketMessageReceivedEventArgs eventArgs)
