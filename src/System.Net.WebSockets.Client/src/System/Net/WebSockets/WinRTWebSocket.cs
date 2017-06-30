@@ -659,8 +659,6 @@ namespace System.Net.WebSockets
 
         private bool IsPartialMessageEvent(MessageWebSocketMessageReceivedEventArgs eventArgs)
         {
-            // The MessageWebSocketMessageReceivedEventArgs.IsMessageComplete property was introduced in the same
-            // Windows SDK flight as MessageWebSocketControl.ReceiveMode.
             if (MessageWebSocketReceiveModeSupported)
             {
                 return !eventArgs.IsMessageComplete;

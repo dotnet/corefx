@@ -16,6 +16,12 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class SendReceiveTest : ClientWebSocketTestBase
     {
+        // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
+        // ClientWebSocket.ReceiveAsync to consume partial message data as it arrives, without having to wait
+        // for "end of message" to be signaled.
+        public static bool PartialMessagesSupported =>
+            !PlatformDetection.IsUap || PlatformDetection.IsWindows10InsiderPreviewBuild16215OrGreater;
+
         public SendReceiveTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop] // TODO: Issue #11345
@@ -55,18 +61,9 @@ namespace System.Net.WebSockets.Client.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
+        [ConditionalTheory(nameof(WebSocketsSupported), nameof(PartialMessagesSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessageBeforeCompleteMessageArrives_Success(Uri server)
         {
-            if (PlatformDetection.IsUap && !PlatformDetection.IsWindows10InsiderPreviewBuild16215OrGreater)
-            {
-                // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
-                // ClientWebSocket.ReceiveAsync to consume partial message data as it arrives, without having to wait
-                // for "end of message" to be signaled.
-                _output.WriteLine("Skipping UAP test due to OS version prior to Windows 10 Insider Preview Build 16215.");
-                return;
-            }
-
             var rand = new Random();
             var sendBuffer = new byte[ushort.MaxValue + 1];
             rand.NextBytes(sendBuffer);
