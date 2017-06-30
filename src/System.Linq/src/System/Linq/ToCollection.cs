@@ -26,8 +26,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            IIListProvider<TSource> listProvider = source as IIListProvider<TSource>;
-            return listProvider != null ? listProvider.ToList() : new List<TSource>(source);
+            return source is IIListProvider<TSource> listProvider ? listProvider.ToList() : new List<TSource>(source);
         }
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
@@ -48,8 +47,7 @@ namespace System.Linq
             }
 
             int capacity = 0;
-            ICollection<TSource> collection = source as ICollection<TSource>;
-            if (collection != null)
+            if (source is ICollection<TSource> collection)
             {
                 capacity = collection.Count;
                 if (capacity == 0)
@@ -57,14 +55,12 @@ namespace System.Linq
                     return new Dictionary<TKey, TSource>(comparer);
                 }
 
-                TSource[] array = collection as TSource[];
-                if (array != null)
+                if (collection is TSource[] array)
                 {
                     return ToDictionary(array, keySelector, comparer);
                 }
 
-                List<TSource> list = collection as List<TSource>;
-                if (list != null)
+                if (collection is List<TSource> list)
                 {
                     return ToDictionary(list, keySelector, comparer);
                 }
@@ -124,8 +120,7 @@ namespace System.Linq
             }
 
             int capacity = 0;
-            ICollection<TSource> collection = source as ICollection<TSource>;
-            if (collection != null)
+            if (source is ICollection<TSource> collection)
             {
                 capacity = collection.Count;
                 if (capacity == 0)
@@ -133,14 +128,12 @@ namespace System.Linq
                     return new Dictionary<TKey, TElement>(comparer);
                 }
 
-                TSource[] array = collection as TSource[];
-                if (array != null)
+                if (collection is TSource[] array)
                 {
                     return ToDictionary(array, keySelector, elementSelector, comparer);
                 }
 
-                List<TSource> list = collection as List<TSource>;
-                if (list != null)
+                if (collection is List<TSource> list)
                 {
                     return ToDictionary(list, keySelector, elementSelector, comparer);
                 }

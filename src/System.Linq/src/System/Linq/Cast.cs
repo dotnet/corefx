@@ -32,8 +32,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
         {
-            IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
-            if (typedSource != null)
+            if (source is IEnumerable<TResult> typedSource)
             {
                 return typedSource;
             }

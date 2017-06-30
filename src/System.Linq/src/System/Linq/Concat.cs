@@ -21,10 +21,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            var firstConcat = first as ConcatIterator<TSource>;
-            return firstConcat != null ?
-                firstConcat.Concat(second) :
-                new Concat2Iterator<TSource>(first, second);
+            return first is ConcatIterator<TSource> firstConcat
+                ? firstConcat.Concat(second)
+                : new Concat2Iterator<TSource>(first, second);
         }
 
         /// <summary>

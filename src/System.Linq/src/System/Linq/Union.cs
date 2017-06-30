@@ -24,8 +24,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            UnionIterator<TSource> union = first as UnionIterator<TSource>;
-            return union != null && AreEqualityComparersEqual(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);
+            return first is UnionIterator<TSource> union && AreEqualityComparersEqual(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);
         }
 
         /// <summary>

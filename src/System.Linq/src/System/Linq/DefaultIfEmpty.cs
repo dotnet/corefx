@@ -112,8 +112,7 @@ namespace System.Linq
                 }
                 else
                 {
-                    IIListProvider<TSource> listProv = _source as IIListProvider<TSource>;
-                    count = listProv == null ? -1 : listProv.GetCount(onlyIfCheap: true);
+                    count = _source is IIListProvider<TSource> listProv ? listProv.GetCount(onlyIfCheap: true) : -1;
                 }
 
                 return count == 0 ? 1 : count;

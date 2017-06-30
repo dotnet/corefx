@@ -53,14 +53,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 return partition.TryGetFirst(out found);
             }
-            
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+
+            if (source is IList<TSource> list)
             {
                 if (list.Count > 0)
                 {
@@ -96,8 +94,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
-            if (ordered != null)
+            if (source is OrderedEnumerable<TSource> ordered)
             {
                 return ordered.TryGetFirst(predicate, out found);
             }

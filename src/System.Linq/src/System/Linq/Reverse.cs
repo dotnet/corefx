@@ -106,8 +106,7 @@ namespace System.Linq
             {
                 if (onlyIfCheap)
                 {
-                    IIListProvider<TSource> listProv = _source as IIListProvider<TSource>;
-                    if (listProv != null)
+                    if (_source is IIListProvider<TSource> listProv)
                     {
                         return listProv.GetCount(onlyIfCheap: true);
                     }

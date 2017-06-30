@@ -22,22 +22,19 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            Iterator<TSource> iterator = source as Iterator<TSource>;
-            if (iterator != null)
+            if (source is Iterator<TSource> iterator)
             {
                 return iterator.Where(predicate);
             }
 
-            TSource[] array = source as TSource[];
-            if (array != null)
+            if (source is TSource[] array)
             {
                 return array.Length == 0 ?
                     (IEnumerable<TSource>)EmptyPartition<TSource>.Instance :
                     new WhereArrayIterator<TSource>(array, predicate);
             }
 
-            List<TSource> list = source as List<TSource>;
-            if (list != null)
+            if (source is List<TSource> list)
             {
                 return new WhereListIterator<TSource>(list, predicate);
             }

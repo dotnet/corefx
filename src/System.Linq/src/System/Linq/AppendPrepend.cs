@@ -16,8 +16,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            AppendPrependIterator<TSource> appendable = source as AppendPrependIterator<TSource>;
-            if (appendable != null)
+            if (source is AppendPrependIterator<TSource> appendable)
             {
                 return appendable.Append(element);
             }
@@ -32,8 +31,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            AppendPrependIterator<TSource> appendable = source as AppendPrependIterator<TSource>;
-            if (appendable != null)
+            if (source is AppendPrependIterator<TSource> appendable)
             {
                 return appendable.Prepend(element);
             }
@@ -245,8 +243,7 @@ namespace System.Linq
 
             public override int GetCount(bool onlyIfCheap)
             {
-                IIListProvider<TSource> listProv = _source as IIListProvider<TSource>;
-                if (listProv != null)
+                if (_source is IIListProvider<TSource> listProv)
                 {
                     int count = listProv.GetCount(onlyIfCheap);
                     return count == -1 ? -1 : count + 1;
@@ -389,8 +386,7 @@ namespace System.Linq
                     ++index;
                 }
 
-                ICollection<TSource> sourceCollection = _source as ICollection<TSource>;
-                if (sourceCollection != null)
+                if (_source is ICollection<TSource> sourceCollection)
                 {
                     sourceCollection.CopyTo(array, index);
                 }
@@ -437,8 +433,7 @@ namespace System.Linq
 
             public override int GetCount(bool onlyIfCheap)
             {
-                IIListProvider<TSource> listProv = _source as IIListProvider<TSource>;
-                if (listProv != null)
+                if (_source is IIListProvider<TSource> listProv)
                 {
                     int count = listProv.GetCount(onlyIfCheap);
                     return count == -1 ? -1 : count + _appendCount + _prependCount;

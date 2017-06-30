@@ -53,14 +53,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 return partition.TryGetLast(out found);
             }
-            
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+
+            if (source is IList<TSource> list)
             {
                 int count = list.Count;
                 if (count > 0)
@@ -87,7 +85,7 @@ namespace System.Linq
                     }
                 }
             }
-            
+
             found = false;
             return default(TSource);
         }
@@ -104,14 +102,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
-            if (ordered != null)
+            if (source is OrderedEnumerable<TSource> ordered)
             {
                 return ordered.TryGetLast(predicate, out found);
             }
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (source is IList<TSource> list)
             {
                 for (int i = list.Count - 1; i >= 0; --i)
                 {

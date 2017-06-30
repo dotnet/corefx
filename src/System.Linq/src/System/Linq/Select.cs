@@ -22,25 +22,21 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            Iterator<TSource> iterator = source as Iterator<TSource>;
-            if (iterator != null)
+            if (source is Iterator<TSource> iterator)
             {
                 return iterator.Select(selector);
             }
 
-            IList<TSource> ilist = source as IList<TSource>;
-            if (ilist != null)
+            if (source is IList<TSource> ilist)
             {
-                TSource[] array = source as TSource[];
-                if (array != null)
+                if (source is TSource[] array)
                 {
                     return array.Length == 0 ?
                         EmptyPartition<TResult>.Instance :
                         new SelectArrayIterator<TSource, TResult>(array, selector);
                 }
 
-                List<TSource> list = source as List<TSource>;
-                if (list != null)
+                if (source is List<TSource> list)
                 {
                     return new SelectListIterator<TSource, TResult>(list, selector);
                 }
@@ -48,8 +44,7 @@ namespace System.Linq
                 return new SelectIListIterator<TSource, TResult>(ilist, selector);
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 return new SelectIPartitionIterator<TSource, TResult>(partition, selector);
             }

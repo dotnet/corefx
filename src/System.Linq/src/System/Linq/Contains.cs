@@ -10,8 +10,7 @@ namespace System.Linq
     {
         public static bool Contains<TSource>(this IEnumerable<TSource> source, TSource value)
         {
-            ICollection<TSource> collection = source as ICollection<TSource>;
-            if (collection != null)
+            if (source is ICollection<TSource> collection)
             {
                 return collection.Contains(value);
             }

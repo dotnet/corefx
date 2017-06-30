@@ -15,8 +15,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 bool found;
                 TSource element = partition.TryGetElementAt(index, out found);
@@ -27,8 +26,7 @@ namespace System.Linq
             }
             else
             {
-                IList<TSource> list = source as IList<TSource>;
-                if (list != null)
+                if (source is IList<TSource> list)
                 {
                     return list[index];
                 }
@@ -60,8 +58,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 bool found;
                 return partition.TryGetElementAt(index, out found);
@@ -69,8 +66,7 @@ namespace System.Linq
 
             if (index >= 0)
             {
-                IList<TSource> list = source as IList<TSource>;
-                if (list != null)
+                if (source is IList<TSource> list)
                 {
                     if (index < list.Count)
                     {
