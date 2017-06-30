@@ -29,6 +29,9 @@
     <Compile Include="$(CommonPath)\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
     </Compile>
+    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
+      <Link>CommonTest\System\Threading\ThreadTestHelpers.cs</Link>
+    </Compile>
     <Compile Include="System\TheoryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +50,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Reference Include="Windows" />
     <Reference Include="mscorlib" />
+    <Reference Include="System.Threading" />
     <Reference Include="System.Runtime.WindowsRuntime" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">

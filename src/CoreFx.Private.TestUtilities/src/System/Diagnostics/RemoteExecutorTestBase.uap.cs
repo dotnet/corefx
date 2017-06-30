@@ -5,8 +5,11 @@
 using Xunit;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tests;
 using Windows.ApplicationModel;
+using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.ApplicationModel.AppService;
 
@@ -37,7 +40,9 @@ namespace System.Diagnostics
             Type t = method.DeclaringType;
             Assembly a = t.GetTypeInfo().Assembly;
 
-            using (AppServiceConnection remoteExecutionService = new AppServiceConnection())
+            IAsyncOperation<AppServiceResponse> asyncOperation = null;
+            AppServiceConnection remoteExecutionService = new AppServiceConnection();
+            try
             {
                 // Here, we use the app service name defined in the app service provider's Package.appxmanifest file in the <Extension> section.
                 remoteExecutionService.AppServiceName = "com.microsoft.corefxuaptests";
@@ -62,15 +67,60 @@ namespace System.Diagnostics
                     i++;
                 }
 
-                AppServiceResponse response = remoteExecutionService.SendMessageAsync(message).GetAwaiter().GetResult();
-
-                Assert.True(response.Status == AppServiceResponseStatus.Success, $"response.Status = {response.Status}");
-                int res = (int)response.Message["Results"];
-                Assert.True(res == options.ExpectedExitCode, (string)response.Message["Log"] + Environment.NewLine + $"Returned Error code: {res}");
+                asyncOperation = remoteExecutionService.SendMessageAsync(message);
+            }
+            finally
+            {
+                if (asyncOperation == null)
+                {
+                    remoteExecutionService.Dispose();
+                }
             }
 
-            // RemoteInvokeHandle is not really needed in the UAP scenario but we use it just to have consistent interface as non UAP
-            return new RemoteInvokeHandle(null, options);
+            // Wait synchronously in a background thread so as not to block the test
+            Action waitForRemoteWaitThread;
+            Thread remoteWaitThread = ThreadTestHelpers.CreateGuardedThread(out waitForRemoteWaitThread, () =>
+            {
+                using (remoteExecutionService)
+                {
+                    AppServiceResponse response = remoteExecutionService.SendMessageAsync(message).GetAwaiter().GetResult();
+
+                    Assert.True(response.Status == AppServiceResponseStatus.Success, $"response.Status = {response.Status}");
+                    int res = (int)response.Message["Results"];
+                    Assert.True(res == options.ExpectedExitCode, (string)response.Message["Log"] + Environment.NewLine + $"Returned Error code: {res}");
+                }
+            });
+            remoteWaitThread.IsBackground = true;
+            remoteWaitThread.Start();
+
+            return new RemoteInvokeHandle(remoteWaitThread, waitForRemoteWaitThread, options);
+        }
+
+        /// <summary>A cleanup handle to the Process created for the remote invocation.</summary>
+        public sealed class RemoteInvokeHandle : IDisposable
+        {
+            public RemoteInvokeHandle(Thread remoteWaitThread, Action waitForRemoteWaitThread, RemoteInvokeOptions options)
+            {
+                RemoteWaitThread = remoteWaitThread;
+                WaitForRemoteWaitThread = waitForRemoteWaitThread;
+                Options = options;
+            }
+
+            private Thread RemoteWaitThread { get; set; }
+            private Action WaitForRemoteWaitThread { get; set; }
+            public RemoteInvokeOptions Options { get; private set; }
+
+            public void Dispose()
+            {
+                // Wait for the background thread to complete the synchronous invocation. We don't use WaitForRemoteWaitThread()
+                // directly so that the timeout can be controlled.
+                RemoteWaitThread.Join(Options.TimeOut);
+
+                // Throw if there was a remote exception.
+                // A bit unorthodox to do throwing operations in a Dispose, but by doing it here we avoid
+                // needing to do this in every derived test and keep each test much simpler.
+                WaitForRemoteWaitThread();
+            }
         }
     }
 }
