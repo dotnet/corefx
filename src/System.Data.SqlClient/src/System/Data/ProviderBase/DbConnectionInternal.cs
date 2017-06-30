@@ -433,6 +433,8 @@ namespace System.Data.ProviderBase
 
                         DbConnectionPool connectionPool = Pool;
 
+                        // Detach from enlisted transactions that are no longer active on close
+                        DetachCurrentTransactionIfEnded();
 
                         // The singleton closed classes won't have owners and
                         // connection pools, and we won't want to put them back
@@ -457,7 +459,14 @@ namespace System.Data.ProviderBase
                             // certain.
                             _owningObject.Target = null;
 
-                            Dispose();
+                            if (IsTransactionRoot)
+                            {
+                                SetInStasis();
+                            }
+                            else
+                            {
+                                Dispose();
+                            }
                         }
                     }
                     finally
@@ -467,6 +476,28 @@ namespace System.Data.ProviderBase
                         // this and this will be orphaned, not reclaimed by object pool until outer connection goes out of scope.
                         connectionFactory.SetInnerConnectionEvent(owningObject, DbConnectionClosedPreviouslyOpened.SingletonInstance);
                     }
+                }
+            }
+        }
+
+        internal void DetachCurrentTransactionIfEnded()
+        {
+            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
+            if (enlistedTransaction != null)
+            {
+                bool transactionIsDead;
+                try
+                {
+                    transactionIsDead = (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status);
+                }
+                catch (SysTx.TransactionException)
+                {
+                    // If the transaction is being processed (i.e. is part way through a rollback\commit\etc then TransactionInformation.Status will throw an exception)
+                    transactionIsDead = true;
+                }
+                if (transactionIsDead)
+                {
+                    DetachTransaction(enlistedTransaction, true);
                 }
             }
         }

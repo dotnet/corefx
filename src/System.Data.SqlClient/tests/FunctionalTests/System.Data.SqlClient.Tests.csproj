@@ -11,8 +11,12 @@
   <ItemGroup>
     <Compile Include="CloneTests.cs" />
     <Compile Include="BaseProviderAsyncTest\BaseProviderAsyncTest.cs" />
-    <Compile Include="BaseProviderAsyncTest\MockCommand.cs" />
-    <Compile Include="BaseProviderAsyncTest\MockConnection.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="BaseProviderAsyncTest\MockConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="BaseProviderAsyncTest\MockDataReader.cs" />
     <Compile Include="DiagnosticTest.cs" />
     <Compile Include="AmbientTransactionFailureTest.cs" />

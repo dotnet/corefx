@@ -67,11 +67,11 @@ namespace System.Data.SqlClient.Tests
         public static void Test8()
         {
             Console.WriteLine("Test8");
-            string connString = "Server=tcp:GELEE-VM-WIN10B,1433;User ID=testuser;Password=test1234;Connect Timeout=600;pooling=true;Enlist=true";
+            string connString = "Server=tcp:GELEE-VM-WIN10B,1433;User ID=testuser;Password=test1234;pooling=false;Enlist=true";
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connString);
             string connectionString = builder.ConnectionString;
 
-            using (TransactionScope txScope = new TransactionScope())
+            using (TransactionScope txScope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.MaxValue))
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -91,6 +91,7 @@ namespace System.Data.SqlClient.Tests
                         command.CommandText = "create table mytable (col1 text, col2 text)";
                         command.ExecuteNonQuery();
                     }
+                    
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = "INSERT INTO mytable VALUES ('11', '22')";
@@ -99,9 +100,16 @@ namespace System.Data.SqlClient.Tests
                     */
                     using (SqlCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO mytable VALUES ('33', '44')";
+                        command.CommandText = "INSERT INTO mytable VALUES ('31', '44')";
                         command.ExecuteNonQuery();
                     }
+                    /*
+                    using (SqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT @@SPID";
+                        Console.WriteLine(command.ExecuteScalar());
+                    }
+                    */
                 }
                 txScope.Complete();
             }
