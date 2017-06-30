@@ -83,7 +83,7 @@ namespace System.Diagnostics
             {
                 using (remoteExecutionService)
                 {
-                    AppServiceResponse response = remoteExecutionService.SendMessageAsync(message).GetAwaiter().GetResult();
+                    AppServiceResponse response = asyncOperation.GetAwaiter().GetResult();
 
                     Assert.True(response.Status == AppServiceResponseStatus.Success, $"response.Status = {response.Status}");
                     int res = (int)response.Message["Results"];
