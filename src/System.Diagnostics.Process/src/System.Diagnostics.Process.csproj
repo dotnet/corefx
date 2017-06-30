@@ -388,9 +388,6 @@
     <Compile Include="System\Diagnostics\ProcessStartInfo.Win32.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.QueryFullProcessImageName.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.QueryFullProcessImageName.cs</Link>
-    </Compile>
     <Compile Include="System\Diagnostics\Process.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.Uap.cs" />

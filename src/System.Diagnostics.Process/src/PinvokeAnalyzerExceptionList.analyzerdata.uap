@@ -2,5 +2,4 @@ advapi32.dll!OpenProcessToken
 kernel32.dll!GetProcessAffinityMask
 kernel32.dll!SetProcessAffinityMask
 kernel32.dll!SetThreadAffinityMask
-kernel32.dll!QueryFullProcessImageName
 ntdll.dll!NtQuerySystemInformation

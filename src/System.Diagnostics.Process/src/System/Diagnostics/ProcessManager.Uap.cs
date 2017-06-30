@@ -29,22 +29,23 @@ namespace System.Diagnostics
             try
             {
                 // Get the path to the executable
-                Process process = Process.GetProcessById(processId);
-                StringBuilder sb = new StringBuilder(1024);
-                int capacity = 1024;
-                Interop.Kernel32.QueryFullProcessImageName(process.Handle, 0, sb, ref capacity);
-                string exePath = sb.ToString();
-
-                if (!string.IsNullOrEmpty(exePath))
+                using (Process process = Process.GetProcessById(processId))
                 {
-                    return new ProcessModuleCollection(1)
+                    char[] chars = new char[1024];
+                    int length = Interop.Kernel32.GetModuleFileNameEx(process.SafeHandle, IntPtr.Zero, chars, chars.Length);
+                    string exePath = new string(chars, 0, length);
+
+                    if (!string.IsNullOrEmpty(exePath))
                     {
-                        new ProcessModule()
+                        return new ProcessModuleCollection(1)
                         {
-                            FileName = exePath,
-                            ModuleName = Path.GetFileName(exePath)
-                        }
-                    };
+                            new ProcessModule()
+                            {
+                                FileName = exePath,
+                                ModuleName = Path.GetFileName(exePath)
+                            }
+                        };
+                    }
                 }
             }
             catch { } // eat all errors

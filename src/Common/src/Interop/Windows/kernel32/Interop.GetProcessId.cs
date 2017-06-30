@@ -9,7 +9,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        [DllImport("kernel32.dll")]
+        [DllImport(Libraries.Kernel32)]
         public static extern int GetProcessId(SafeProcessHandle nativeHandle);
     }
 }
