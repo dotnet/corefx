@@ -85,7 +85,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
         }
     }
 
-    [Fact] 
+    [Fact]
     [PlatformSpecific(PlatformID.AnyUnix)]
     [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] //CI system makes it difficult to run things in a non-redirected environments.
     public static void NonRedirectedCursorVisible()

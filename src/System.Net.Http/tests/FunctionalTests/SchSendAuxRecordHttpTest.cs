@@ -14,7 +14,7 @@ namespace System.Net.Http.Functional.Tests
     public class SchSendAuxRecordHttpTest
     {
         readonly ITestOutputHelper _output;
-        
+
         public SchSendAuxRecordHttpTest(ITestOutputHelper output)
         {
             _output = output;

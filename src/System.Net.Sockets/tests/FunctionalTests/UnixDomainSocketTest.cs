@@ -201,7 +201,7 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)] 
+        [PlatformSpecific(PlatformID.AnyUnix)]
         public void ConcurrentSendReceive()
         {
             using (Socket server = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))

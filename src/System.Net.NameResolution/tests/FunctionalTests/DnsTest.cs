@@ -23,7 +23,7 @@ namespace System.Net.NameResolution.Tests
         {
             TestGetHostAddressesAsync(() => Dns.GetHostAddressesAsync(TestSettings.LocalIPString));
         }
-        
+
         private static void TestGetHostAddressesAsync(Func<Task<IPAddress[]>> getHostAddressesFunc)
         {
             Task<IPAddress[]> hostEntryTask1 = getHostAddressesFunc();
@@ -113,19 +113,19 @@ namespace System.Net.NameResolution.Tests
             string longHostName = new string('a', maxHostName);
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => Dns.GetHostAddressesAsync(longHostName));
         }
-        
+
         [Fact]
         public async Task Dns_GetHostAddressesAsync_NullHost_Fail()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostAddressesAsync(null));
         }
-        
+
         [Fact]
         public async Task Dns_GetHostEntryAsync_NullStringHost_Fail()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((string)null));
         }
-        
+
         [Fact]
         public async Task Dns_GetHostEntryAsync_NullIPAddressHost_Fail()
         {

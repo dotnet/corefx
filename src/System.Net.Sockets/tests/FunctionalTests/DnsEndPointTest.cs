@@ -407,6 +407,6 @@ namespace System.Net.Sockets.Tests
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion 
+        #endregion
     }
 }

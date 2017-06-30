@@ -47,7 +47,7 @@ namespace System.Diagnostics.Tests
             environment.Clear();
             Assert.Equal(0, environment.Count);
 
-            //ContainsKey 
+            //ContainsKey
             environment.Add("NewKey", "NewValue");
             environment.Add("NewKey2", "NewValue2");
             Assert.True(environment.ContainsKey("NewKey"));
@@ -215,7 +215,7 @@ namespace System.Diagnostics.Tests
                         Environment.NewLine,
                         string.Join(", ", actualEnv.Except(startInfoEnv))));
 
-                // Validate against current process. (Profilers / code coverage tools can add own environment variables 
+                // Validate against current process. (Profilers / code coverage tools can add own environment variables
                 // but we start child process without them. Thus the set of variables from the child process could
                 // be a subset of variables from current process.)
                 var envEnv = new HashSet<string>(Environment.GetEnvironmentVariables().Cast<DictionaryEntry>().Select(e => e.Key + "=" + e.Value));
@@ -326,6 +326,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingDirectoryProperty()
         {
+            CreateDefaultProcess();
+            
             // check defaults
             Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
 

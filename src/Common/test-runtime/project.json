@@ -11,10 +11,7 @@
     "coveralls.io": "1.4",
     "OpenCover": "4.6.519",
     "ReportGenerator": "2.4.3",
-    "Microsoft.DotNet.xunit.performance.analysis": "1.0.0-alpha-build0040",
-    "Microsoft.DotNet.xunit.performance.analysis.cli": "1.0.0-alpha-build0040",
-    "Microsoft.DotNet.xunit.performance.runner.cli": "1.0.0-alpha-build0040",
-    "Microsoft.DotNet.xunit.performance.runner.Windows": "1.0.0-alpha-build0040",
+    "xunit.performance.core": "1.0.0-beta-build0007",
     "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-01005-01",
     "xunit.console.netcore": "1.0.3-prerelease-00607-01"
   },

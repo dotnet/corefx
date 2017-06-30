@@ -4,16 +4,17 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using Xunit;
 
 namespace System.Diagnostics.Tests
 {
     public class ProcessTestBase : RemoteExecutorTestBase
     {
         protected const int WaitInMS = 600 * 1000;
-        protected readonly Process _process;
+        protected Process _process;
         protected readonly List<Process> _processes = new List<Process>();
 
-        public ProcessTestBase()
+        protected void CreateDefaultProcess()
         {
             _process = CreateProcessLong();
             _process.Start();

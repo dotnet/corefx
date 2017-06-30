@@ -411,7 +411,7 @@ namespace System.Net.Sockets.Tests
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
+        // that used Sockets.
         [Fact]
         public void TestFinalizers()
         {
@@ -422,7 +422,7 @@ namespace System.Net.Sockets.Tests
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion 
+        #endregion
 
         #region Helpers
 

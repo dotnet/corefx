@@ -51,7 +51,7 @@ namespace System.Tests
                 // The address of a fixed byte[] should always be even
                 Debug.Assert((int)pBytes % 2 == 0);
                 char* pCh = (char*)(pBytes + 1);
-                
+
                 // This should handle the odd address when trying to get
                 // the length of the string to allocate
                 string actual = new string(pCh);
@@ -1237,7 +1237,7 @@ namespace System.Tests
             string target = "ddzs";
             Helpers.PerformActionWithCulture(new CultureInfo("hu-HU"), () =>
             {
-            /* 
+            /*
              There are differences between Windows and ICU regarding contractions.
              Windows has equal contraction collation weights, including case (target="Ddzs" same behavior as "ddzs").
              ICU has different contraction collation weights, depending on locale collation rules.

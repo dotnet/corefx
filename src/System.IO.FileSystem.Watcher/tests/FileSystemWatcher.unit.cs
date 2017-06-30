@@ -233,7 +233,7 @@ namespace System.IO.Tests
                 RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // expect no change for OrdinalIgnoreCase-equal strings
-                // it's unclear why desktop does this but preserve it for compat        
+                // it's unclear why desktop does this but preserve it for compat
                 watcher.Filter = "ABC.DLL";
                 Assert.Equal("abc.dll", watcher.Filter);
             }
@@ -580,7 +580,7 @@ namespace System.IO.Tests
         [Fact]
         public void FileSystemWatcher_StopCalledOnBackgroundThreadDoesNotDeadlock()
         {
-            // Check the case where Stop or Dispose (they do the same thing) is called from 
+            // Check the case where Stop or Dispose (they do the same thing) is called from
             // a FSW event callback and make sure we don't Thread.Join to deadlock
             using (var dir = new TempDirectory(GetTestFilePath()))
             {

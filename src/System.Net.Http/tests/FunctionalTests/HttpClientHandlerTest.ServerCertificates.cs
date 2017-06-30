@@ -149,7 +149,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        public readonly static object[][] CertificateValidationServers = 
+        public readonly static object[][] CertificateValidationServers =
         {
             new object[] { Configuration.Http.ExpiredCertRemoteServer },
             new object[] { Configuration.Http.SelfSignedCertRemoteServer },

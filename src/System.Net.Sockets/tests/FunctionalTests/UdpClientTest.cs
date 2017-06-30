@@ -68,7 +68,7 @@ namespace System.Net.Sockets.Tests
                 Assert.Same(client, c.Client);
             }
         }
-        
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         [ActiveIssue(9189, PlatformID.AnyUnix)]

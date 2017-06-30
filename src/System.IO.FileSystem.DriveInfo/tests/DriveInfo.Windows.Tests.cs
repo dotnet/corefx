@@ -199,7 +199,7 @@ namespace System.IO.FileSystem.DriveInfoTests
                 {
                     Exception e = Assert.ThrowsAny<Exception>(() => { adrive.VolumeLabel = null; });
                     Assert.True(
-                        e is UnauthorizedAccessException || 
+                        e is UnauthorizedAccessException ||
                         e is IOException ||
                         e is SecurityException);
                 }

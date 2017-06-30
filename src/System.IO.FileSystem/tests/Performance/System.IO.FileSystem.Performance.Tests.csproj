@@ -36,6 +36,7 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
     <Compile Include="..\PortedCommon\ReparsePointUtilities.cs" />
+    <Compile Include="..\TestData.cs" />
     <Compile Include="..\FileSystemTest.cs" />
     <Compile Include="Perf.Directory.cs" />
     <Compile Include="Perf.File.cs" />
@@ -43,6 +44,9 @@
     <Compile Include="Perf.FileStream.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
+      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
       <Link>Common\System\IO\FileCleanupTestBase.cs</Link>

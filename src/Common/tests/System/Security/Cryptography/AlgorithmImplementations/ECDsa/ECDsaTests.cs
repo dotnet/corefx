@@ -404,7 +404,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
 
         public static IEnumerable<object[]> RealImplementations()
         {
-            return new[] { 
+            return new[] {
                 new ECDsa[] { ECDsaFactory.Create() },
             };
         }
@@ -476,7 +476,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             Assert.Throws<CryptographicException>(
                 () => ecdsa.VerifyData(new MemoryStream(), new byte[0], new HashAlgorithmName("NOT_A_REAL_HASH_ALGORITHM")));
         }
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Theory, MemberData(nameof(RealImplementations))]
@@ -495,7 +495,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             // Explicitly larger than Array.Empty
             byte[] data = new byte[10];
             byte[] signature = ecdsa.SignData(Array.Empty<byte>(), HashAlgorithmName.SHA256);
-            
+
             Assert.True(ecdsa.VerifyData(data, data.Length, 0, signature, HashAlgorithmName.SHA256));
         }
 
@@ -535,8 +535,8 @@ namespace System.Security.Cryptography.EcDsa.Tests
 
         public static IEnumerable<object[]> InteroperableSignatureConfigurations()
         {
-            foreach (HashAlgorithmName hashAlgorithm in new[] { 
-                HashAlgorithmName.MD5, 
+            foreach (HashAlgorithmName hashAlgorithm in new[] {
+                HashAlgorithmName.MD5,
                 HashAlgorithmName.SHA1,
                 HashAlgorithmName.SHA256,
                 HashAlgorithmName.SHA384,

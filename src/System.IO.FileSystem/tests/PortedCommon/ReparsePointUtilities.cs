@@ -21,12 +21,12 @@ using System.Threading;
 using System.Threading.Tasks;
 public static class MountHelper
 {
-    [DllImport("api-ms-win-core-file-l1-2-0.dll", EntryPoint = "GetVolumeNameForVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
+    [DllImport("kernel32.dll", EntryPoint = "GetVolumeNameForVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
     private static extern bool GetVolumeNameForVolumeMountPoint(String volumeName, StringBuilder uniqueVolumeName, int uniqueNameBufferCapacity);
     // unique volume name must be "\\?\Volume{GUID}\"
-    [DllImport("api-ms-win-core-kernel32-legacy-l1-1-1.dll", EntryPoint = "SetVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
+    [DllImport("kernel32.dll", EntryPoint = "SetVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
     private static extern bool SetVolumeMountPoint(String mountPoint, String uniqueVolumeName);
-    [DllImport("api-ms-win-core-file-l1-1-0.dll", EntryPoint = "DeleteVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
+    [DllImport("kernel32.dll", EntryPoint = "DeleteVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
     private static extern bool DeleteVolumeMountPoint(String mountPoint);
 
     /// <summary>Creates a symbolic link using command line tools</summary>
@@ -45,6 +45,7 @@ public static class MountHelper
             symLinkProcess.StartInfo.FileName = "/bin/ln";
             symLinkProcess.StartInfo.Arguments = string.Format("-s \"{0}\" \"{1}\"", targetPath, linkPath);
         }
+        symLinkProcess.StartInfo.UseShellExecute = false;
         symLinkProcess.StartInfo.RedirectStandardOutput = true;
         symLinkProcess.Start();
 

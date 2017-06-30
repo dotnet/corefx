@@ -15,6 +15,8 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SerializationTypes
 {
@@ -433,6 +435,23 @@ namespace SerializationTypes
             get
             {
                 return _ro2;
+            }
+        }
+    }
+
+    public class TypeWithMyCollectionField
+    {
+        public MyCollection<string> Collection;
+    }
+
+    public class TypeWithReadOnlyMyCollectionProperty
+    {
+        private MyCollection<string> _ro = new MyCollection<string>();
+        public MyCollection<string> Collection
+        {
+            get
+            {
+                return _ro;
             }
         }
     }
@@ -1724,36 +1743,36 @@ namespace SerializationTypes
             public static bool WriteXmlInvoked = false;
             public static bool ReadXmlInvoked = false;
 
-        public string StringValue { get; set; }
-        private T GenericValue { get; set; }
+            public string StringValue { get; set; }
+            private T GenericValue { get; set; }
 
-        public NestedGenericClassImplementingIXmlSerialiable()
-        {
-            GenericValue = default(T);
-        }
+            public NestedGenericClassImplementingIXmlSerialiable()
+            {
+                GenericValue = default(T);
+            }
 
-        public T GetPrivateMember()
-        {
-            return GenericValue;
-        }
+            public T GetPrivateMember()
+            {
+                return GenericValue;
+            }
 
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
-            return null;
-        }
+            public System.Xml.Schema.XmlSchema GetSchema()
+            {
+                return null;
+            }
 
-        public void ReadXml(System.Xml.XmlReader reader)
-        {
-            ReadXmlInvoked = true;
-            reader.MoveToContent();
-            StringValue = reader.GetAttribute("StringValue");
-        }
+            public void ReadXml(System.Xml.XmlReader reader)
+            {
+                ReadXmlInvoked = true;
+                reader.MoveToContent();
+                StringValue = reader.GetAttribute("StringValue");
+            }
 
-        public void WriteXml(System.Xml.XmlWriter writer)
-        {
-            WriteXmlInvoked = true;
-            writer.WriteAttributeString("StringValue", StringValue);
-        }
+            public void WriteXml(System.Xml.XmlWriter writer)
+            {
+                WriteXmlInvoked = true;
+                writer.WriteAttributeString("StringValue", StringValue);
+            }
         }
     }
 
@@ -2805,6 +2824,22 @@ namespace SerializationTypes
         Amount
     }
 
+    public class TypeWithPropertyHavingChoice
+    {
+        // The ManyChoices field can contain an array
+        // of choices. Each choice must be matched to
+        // an array item in the ChoiceArray field.
+        [XmlChoiceIdentifier("ChoiceArray")]
+        [XmlElement("Item", typeof(string))]
+        [XmlElement("Amount", typeof(int))]
+        public object[] ManyChoices { get; set; }
+
+        // TheChoiceArray field contains the enumeration
+        // values, one for each item in the ManyChoices array.
+        [XmlIgnore]
+        public MoreChoices[] ChoiceArray;
+    }
+
     public class TypeWithFieldsOrdered
     {
         [XmlElement(Order = 0)]
@@ -2815,6 +2850,126 @@ namespace SerializationTypes
         public string StringField1;
         [XmlElement(Order = 2)]
         public string StringField2;
+    }
+
+    internal class MyFileStreamSurrogateProvider : ISerializationSurrogateProvider
+    {
+        static MyFileStreamSurrogateProvider()
+        {
+            Singleton = new MyFileStreamSurrogateProvider();
+        }
+
+        internal static MyFileStreamSurrogateProvider Singleton { get; private set; }
+
+        public Type GetSurrogateType(Type type)
+        {
+            if (type == typeof(MyFileStream))
+            {
+                return typeof(MyFileStreamReference);
+            }
+
+            return type;
+        }
+
+        public object GetObjectToSerialize(object obj, Type targetType)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            MyFileStream myFileStream = obj as MyFileStream;
+            if (null != myFileStream)
+            {
+                if (targetType != typeof(MyFileStreamReference))
+                {
+                    throw new ArgumentException("Target type for serialization must be MyFileStream");
+                }
+                return MyFileStreamReference.Create(myFileStream);
+            }
+
+            return obj;
+        }
+
+        public object GetDeserializedObject(object obj, Type targetType)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            MyFileStreamReference myFileStreamRef = obj as MyFileStreamReference;
+            if (null != myFileStreamRef)
+            {
+                if (targetType != typeof(MyFileStream))
+                {
+                    throw new ArgumentException("Target type for deserialization must be MyFileStream");
+                }
+                return myFileStreamRef.ToMyFileStream();
+            }
+            return obj;
+        }
+    }
+
+    public class MyPersonSurrogateProvider : ISerializationSurrogateProvider
+    {
+        public Type GetSurrogateType(Type type)
+        {
+            if (type == typeof(NonSerializablePerson))
+            {
+                return typeof(NonSerializablePersonSurrogate);
+            }
+            else if (type == typeof(NonSerializablePersonForStress))
+            {
+                return typeof(NonSerializablePersonForStressSurrogate);
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        public object GetDeserializedObject(object obj, Type targetType)
+        {
+            if (obj is NonSerializablePersonSurrogate)
+            {
+                NonSerializablePersonSurrogate person = (NonSerializablePersonSurrogate)obj;
+                return new NonSerializablePerson(person.Name, person.Age);
+            }
+            else if (obj is NonSerializablePersonForStressSurrogate)
+            {
+                NonSerializablePersonForStressSurrogate person = (NonSerializablePersonForStressSurrogate)obj;
+                return new NonSerializablePersonForStress(person.Name, person.Age);
+            }
+
+            return obj;
+        }
+
+        public object GetObjectToSerialize(object obj, Type targetType)
+        {
+            if (obj is NonSerializablePerson)
+            {
+                NonSerializablePerson nsp = (NonSerializablePerson)obj;
+                NonSerializablePersonSurrogate serializablePerson = new NonSerializablePersonSurrogate
+                {
+                    Name = nsp.Name,
+                    Age = nsp.Age,
+                };
+
+                return serializablePerson;
+            }
+            else if (obj is NonSerializablePersonForStress)
+            {
+                NonSerializablePersonForStress nsp = (NonSerializablePersonForStress)obj;
+                NonSerializablePersonForStressSurrogate serializablePerson = new NonSerializablePersonForStressSurrogate
+                {
+                    Name = nsp.Name,
+                    Age = nsp.Age,
+                };
+
+                return serializablePerson;
+            }
+
+            return obj;
+        }
     }
 }
 
@@ -2920,6 +3075,28 @@ public class TestableDerivedException : System.Exception
     public string TestProperty { get; set; }
 }
 
+namespace DirectRef
+{
+    public class TypeWithIndirectRef
+    {
+        public static implicit operator Task<object>(TypeWithIndirectRef v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Name { get; set; }
+    }
+}
+
+
+public class LocalReadingPosition
+{
+    public string Ean { get; set; }
+    public DateTime LastReadTime { get; set; }
+    public int PageCount { get; set; }
+    public string PageNumber { get; set; }
+    public string PlatformOffset { get; set; }
+}
 
 public class TypeWithXmlElementProperty
 {
@@ -3041,69 +3218,6 @@ public class NonSerializablePersonForStressSurrogate
     public int Age { get; set; }
 }
 
-public class MyPersonSurrogateProvider : ISerializationSurrogateProvider
-{
-    public Type GetSurrogateType(Type type)
-    {
-        if (type == typeof(NonSerializablePerson))
-        {
-            return typeof(NonSerializablePersonSurrogate);
-        }
-        else if (type == typeof(NonSerializablePersonForStress))
-        {
-            return typeof(NonSerializablePersonForStressSurrogate);
-        }
-        else
-        {
-            return type;
-        }
-    }
-
-    public object GetDeserializedObject(object obj, Type targetType)
-    {
-        if (obj is NonSerializablePersonSurrogate)
-        {
-            NonSerializablePersonSurrogate person = (NonSerializablePersonSurrogate)obj;
-            return new NonSerializablePerson(person.Name, person.Age);
-        }
-        else if (obj is NonSerializablePersonForStressSurrogate)
-        {
-            NonSerializablePersonForStressSurrogate person = (NonSerializablePersonForStressSurrogate)obj;
-            return new NonSerializablePersonForStress(person.Name, person.Age);
-        }
-
-        return obj;
-    }
-
-    public object GetObjectToSerialize(object obj, Type targetType)
-    {
-        if (obj is NonSerializablePerson)
-        {
-            NonSerializablePerson nsp = (NonSerializablePerson)obj;
-            NonSerializablePersonSurrogate serializablePerson = new NonSerializablePersonSurrogate
-            {
-                Name = nsp.Name,
-                Age = nsp.Age,
-            };
-
-            return serializablePerson;
-        }
-        else if (obj is NonSerializablePersonForStress)
-        {
-            NonSerializablePersonForStress nsp = (NonSerializablePersonForStress)obj;
-            NonSerializablePersonForStressSurrogate serializablePerson = new NonSerializablePersonForStressSurrogate
-            {
-                Name = nsp.Name,
-                Age = nsp.Age,
-            };
-
-            return serializablePerson;
-        }
-
-        return obj;
-    }
-}
-
 [DataContract]
 class MyFileStream : IDisposable
 {
@@ -3167,63 +3281,6 @@ class MyFileStreamReference
     internal MyFileStream ToMyFileStream()
     {
         return new MyFileStream(fileStreamName);
-    }
-}
-
-internal class MyFileStreamSurrogateProvider : ISerializationSurrogateProvider
-{
-    static MyFileStreamSurrogateProvider()
-    {
-        Singleton = new MyFileStreamSurrogateProvider();
-    }
-
-    internal static MyFileStreamSurrogateProvider Singleton { get; private set; }
-
-    public Type GetSurrogateType(Type type)
-    {
-        if (type == typeof (MyFileStream))
-        {
-            return typeof (MyFileStreamReference);
-        }
-
-        return type;
-    }
-
-    public object GetObjectToSerialize(object obj, Type targetType)
-    {
-        if (obj == null)
-        {
-            return null;
-        }
-        MyFileStream myFileStream = obj as MyFileStream;
-        if (null != myFileStream)
-        {
-            if (targetType != typeof (MyFileStreamReference))
-            {
-                throw new ArgumentException("Target type for serialization must be MyFileStream");
-            }
-            return MyFileStreamReference.Create(myFileStream);
-        }
-
-        return obj;
-    }
-
-    public object GetDeserializedObject(object obj, Type targetType)
-    {
-        if (obj == null)
-        {
-            return null;
-        }
-        MyFileStreamReference myFileStreamRef = obj as MyFileStreamReference;
-        if (null != myFileStreamRef)
-        {
-            if (targetType != typeof (MyFileStream))
-            {
-                throw new ArgumentException("Target type for deserialization must be MyFileStream");
-            }
-            return myFileStreamRef.ToMyFileStream();
-        }
-        return obj;
     }
 }
 

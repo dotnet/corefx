@@ -216,7 +216,7 @@ namespace System.IO.Tests
                     testDir.CreateSubdirectory(valid);
 
                 string[] results = GetEntries(testDir.FullName);
-                Assert.All(WindowsInvalidUnixValid, valid => 
+                Assert.All(WindowsInvalidUnixValid, valid =>
                     Assert.Contains(Path.Combine(testDir.FullName, valid), results));
             }
         }

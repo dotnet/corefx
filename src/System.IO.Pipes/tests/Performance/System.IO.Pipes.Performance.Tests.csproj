@@ -25,6 +25,9 @@
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Automatically added by VS -->
   <ItemGroup>

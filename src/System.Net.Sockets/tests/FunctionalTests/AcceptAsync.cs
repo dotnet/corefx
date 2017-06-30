@@ -162,7 +162,7 @@ namespace System.Net.Sockets.Tests
                     acceptBufferDataSize, acceptArgs.BytesTransferred);
 
                 Assert.Equal(
-                    new ArraySegment<byte>(sendBuffer), 
+                    new ArraySegment<byte>(sendBuffer),
                     new ArraySegment<byte>(acceptArgs.Buffer, 0, acceptArgs.BytesTransferred));
             }
         }
@@ -196,7 +196,7 @@ namespace System.Net.Sockets.Tests
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
+        // that used Sockets.
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void TestFinalizers()
@@ -208,6 +208,6 @@ namespace System.Net.Sockets.Tests
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion 
+        #endregion
     }
 }
