@@ -303,4 +303,10 @@
   <data name="UseShellExecuteNotSupported" xml:space="preserve">
     <value>UseShellExecute is not supported on this platform.</value>
   </data>
+  <data name="ConsoleEncodingNotDetected" xml:space="preserve">
+    <value>Console encoding could not be detected.</value>
+  </data>
+  <data name="ConsoleEncodingNotSupported" xml:space="preserve">
+    <value>Console encoding detection is not supported on this platform.</value>
+  </data>
 </root>

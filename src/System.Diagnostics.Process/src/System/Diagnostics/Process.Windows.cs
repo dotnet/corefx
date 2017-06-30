@@ -602,18 +602,18 @@ namespace System.Diagnostics
 
             if (startInfo.RedirectStandardInput)
             {
-                Encoding enc = GetEncoding((int)Interop.Kernel32.GetConsoleCP());
+                Encoding enc = GetConsoleEncodingOrThrow(ConsoleStreamDirection.Input);
                 _standardInput = new StreamWriter(new FileStream(standardInputWritePipeHandle, FileAccess.Write, 4096, false), enc, 4096);
                 _standardInput.AutoFlush = true;
             }
             if (startInfo.RedirectStandardOutput)
             {
-                Encoding enc = startInfo.StandardOutputEncoding ?? GetEncoding((int)Interop.Kernel32.GetConsoleOutputCP());
+                Encoding enc = startInfo.StandardOutputEncoding ?? GetConsoleEncodingOrThrow(ConsoleStreamDirection.Output);
                 _standardOutput = new StreamReader(new FileStream(standardOutputReadPipeHandle, FileAccess.Read, 4096, false), enc, true, 4096);
             }
             if (startInfo.RedirectStandardError)
             {
-                Encoding enc = startInfo.StandardErrorEncoding ?? GetEncoding((int)Interop.Kernel32.GetConsoleOutputCP());
+                Encoding enc = startInfo.StandardErrorEncoding ?? GetConsoleEncodingOrThrow(ConsoleStreamDirection.Output);
                 _standardError = new StreamReader(new FileStream(standardErrorReadPipeHandle, FileAccess.Read, 4096, false), enc, true, 4096);
             }
 
@@ -629,8 +629,27 @@ namespace System.Diagnostics
             return ret;
         }
 
-        private static Encoding GetEncoding(int codePage)
+        private static Encoding GetConsoleEncodingOrThrow(ConsoleStreamDirection encodingType)
         {
+            int codePage = (encodingType == ConsoleStreamDirection.Input) ?
+                    (int)Interop.Kernel32.GetConsoleCP() :
+                    (int)Interop.Kernel32.GetConsoleOutputCP();
+
+            int error = Marshal.GetLastWin32Error();
+            if (error == Interop.Errors.ERROR_INVALID_HANDLE)
+            {
+                throw new PlatformNotSupportedException(SR.ConsoleEncodingNotSupported);
+            }
+            else if (error != 0)
+            {
+                string api = encodingType == ConsoleStreamDirection.Input ?
+                    "Kernel32!GetConsoleCP" :
+                    "Kernel32!GetConsoleOutputCP";
+                Debug.Fail(
+                    "Console encoding could not be detected.",
+                    $"{api} has set last error to {error} ({new Win32Exception(error).Message}).");
+            }
+
             Encoding enc = EncodingHelper.GetSupportedConsoleEncoding(codePage);
             return new ConsoleEncoding(enc); // ensure encoding doesn't output a preamble
         }
@@ -898,6 +917,12 @@ namespace System.Diagnostics
             stringBuff.Append('\0');
             envBlock = Encoding.Unicode.GetBytes(stringBuff.ToString());
             return envBlock;
+        }
+
+        private enum ConsoleStreamDirection
+        {
+            Input,
+            Output
         }
     }
 }
