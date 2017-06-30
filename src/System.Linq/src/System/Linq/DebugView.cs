@@ -24,7 +24,7 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable<T> enumerable)
         {
-            _enumerable = enumerable ?? throw new ArgumentNullException(nameof(enumerable));
+            _enumerable = enumerable ?? throw Error.ArgumentNull(nameof(enumerable));
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -55,7 +55,7 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable enumerable)
         {
-            _enumerable = enumerable ?? throw new ArgumentNullException(nameof(enumerable));
+            _enumerable = enumerable ?? throw Error.ArgumentNull(nameof(enumerable));
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]

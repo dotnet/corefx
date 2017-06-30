@@ -183,7 +183,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
             }
 
             // Don't pre-allocate based on knowledge of size, as potentially many elements will be dropped.
