@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Include="System\IO\FileCleanupTestBase.cs" />
     <Compile Include="System\Diagnostics\RemoteExecutorTestBase.cs" />
+    <Compile Include="System\Threading\ThreadTestHelpers.cs" />
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp'" Include="System\Diagnostics\RemoteExecutorTestBase.netcore.cs" />
     <Compile Condition="'$(TargetGroup)' == 'netfx'" Include="System\Diagnostics\RemoteExecutorTestBase.netfx.cs" />
     <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\RemoteExecutorTestBase.Process.cs" />
@@ -29,15 +30,13 @@
     <Compile Include="$(CommonPath)\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
     </Compile>
-    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
-      <Link>CommonTest\System\Threading\ThreadTestHelpers.cs</Link>
-    </Compile>
     <Compile Include="System\TheoryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Linq" />
+    <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Diagnostics.Process" />
@@ -50,7 +49,6 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Reference Include="Windows" />
     <Reference Include="mscorlib" />
-    <Reference Include="System.Threading" />
     <Reference Include="System.Runtime.WindowsRuntime" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
