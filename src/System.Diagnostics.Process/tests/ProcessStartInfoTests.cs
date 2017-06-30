@@ -317,6 +317,8 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(PlatformID.AnyUnix)]
         public void TestUserCredentialsPropertiesOnUnix()
         {
+            CreateDefaultProcess();
+
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.Domain);
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.UserName);
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.PasswordInClearText);
@@ -327,7 +329,7 @@ namespace System.Diagnostics.Tests
         public void TestWorkingDirectoryProperty()
         {
             CreateDefaultProcess();
-            
+
             // check defaults
             Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
 
