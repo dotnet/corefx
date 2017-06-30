@@ -47,6 +47,9 @@
     <Compile Include="System\Collections\Specialized\StringDictionaryWrapper.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.EnumProcessModules.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\user32\Interop.EnumWindows.cs">
       <Link>Common\Interop\Windows\user32\Interop.EnumWindows.cs</Link>
     </Compile>
@@ -114,9 +117,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.OpenProcess.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.OpenProcess.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.EnumProcessModules.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcesses.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.EnumProcesses.cs</Link>
@@ -388,6 +388,9 @@
     <Compile Include="System\Diagnostics\ProcessStartInfo.Win32.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.QueryFullProcessImageName.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.QueryFullProcessImageName.cs</Link>
+    </Compile>
     <Compile Include="System\Diagnostics\Process.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.Uap.cs" />
