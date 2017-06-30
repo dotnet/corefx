@@ -195,31 +195,11 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
-
-            _source = source;
-            _keySelector = keySelector;
-            _elementSelector = elementSelector;
+            _source = source ?? throw Error.ArgumentNull(nameof(source));
+            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
             _comparer = comparer;
-            _resultSelector = resultSelector;
+            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
         }
 
         public IEnumerator<TResult> GetEnumerator()
@@ -258,24 +238,9 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
-
-            _source = source;
-            _keySelector = keySelector;
-            _resultSelector = resultSelector;
+            _source = source ?? throw Error.ArgumentNull(nameof(source));
+            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
             _comparer = comparer;
         }
 
@@ -315,24 +280,9 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
-
-            _source = source;
-            _keySelector = keySelector;
-            _elementSelector = elementSelector;
+            _source = source ?? throw Error.ArgumentNull(nameof(source));
+            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
             _comparer = comparer;
         }
 
@@ -372,18 +322,8 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            _source = source;
-            _keySelector = keySelector;
+            _source = source ?? throw Error.ArgumentNull(nameof(source));
+            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
             _comparer = comparer;
         }
 
