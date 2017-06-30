@@ -89,7 +89,7 @@ namespace System.Net.Mail.Tests
         public void InvalidHostTest()
         {
             Assert.Throws<ArgumentNullException>(() => Smtp.Host = null);
-            Assert.Throws<ArgumentException>(() => Smtp.Host = "");
+            AssertExtensions.Throws<ArgumentException>("value", () => Smtp.Host = "");
         }
 
         [Fact]
@@ -297,7 +297,6 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
         public async Task TestMailDeliveryAsync()
         {
             SmtpServer server = new SmtpServer();
@@ -323,7 +322,6 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
         public async Task TestCredentialsCopyInAsyncContext()
         {
             SmtpServer server = new SmtpServer();

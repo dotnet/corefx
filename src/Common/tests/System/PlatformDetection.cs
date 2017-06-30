@@ -25,6 +25,7 @@ namespace System
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => IsWindows && GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
+        public static bool IsNotWindows8x => !IsWindows8x;
         public static bool IsOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         public static bool IsNetBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD"));
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
@@ -35,6 +36,8 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
+        public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
+        public static bool IsNotArmProcess => !IsArmProcess;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
@@ -151,6 +154,10 @@ namespace System
                 return s_isWinRT == 1;
             }
         }
+
+        public static bool IsNotWinRT => !IsWinRT;
+        public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
+        public static bool IsNotWinRTSupported => !IsWinRTSupported;
 
         private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
 
@@ -428,7 +435,7 @@ namespace System
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
-        public static bool IsXmlDsigXsltTransformSupported => PlatformDetection.IsReflectionEmitSupported;
+        public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;
 
         public static Range[] FrameworkRanges => new Range[]{
           new Range(new Version(4, 7, 2500, 0), null, new Version(4, 7, 1)),

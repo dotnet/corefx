@@ -12,7 +12,6 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.NetFramework, "uap: dotnet/corefx #20010, netfx: dotnet/corefx #16805")]
     public class HttpClientHandler_DefaultProxyCredentials_Test : RemoteExecutorTestBase
     {
         [Fact]
@@ -30,6 +29,10 @@ namespace System.Net.Http.Functional.Tests
             using (var handler = new HttpClientHandler())
             {
                 var creds = new NetworkCredential("username", "password", "domain");
+
+                handler.DefaultProxyCredentials = null;
+                Assert.Null(handler.DefaultProxyCredentials);
+
                 handler.DefaultProxyCredentials = creds;
                 Assert.Same(creds, handler.DefaultProxyCredentials);
 
@@ -38,6 +41,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ProxyExplicitlyProvided_DefaultCredentials_Ignored()
@@ -109,5 +113,23 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal($"{ExpectedUsername}:{ExpectedPassword}", proxyTask.Result.AuthenticationHeaderValue);
         }
 
+        // The purpose of this test is mainly to validate the .NET Framework OOB System.Net.Http implementation
+        // since it has an underlying dependency to WebRequest. While .NET Core implementations of System.Net.Http
+        // are not using any WebRequest code, the test is still useful to validate correctness.
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task ProxyNotExplicitlyProvided_DefaultCredentialsSet_DefaultWebProxySetToNull_Success()
+        {
+            WebRequest.DefaultWebProxy = null;
+
+            using (var handler = new HttpClientHandler())
+            using (var client = new HttpClient(handler))
+            {
+                handler.DefaultProxyCredentials = new NetworkCredential("UsernameNotUsed", "PasswordNotUsed");
+                HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
+
+                Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+            }
+        }
     }
 }

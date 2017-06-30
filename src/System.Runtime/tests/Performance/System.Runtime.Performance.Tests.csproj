@@ -25,10 +25,12 @@
     <Compile Include="Perf.Int32.cs" />
     <Compile Include="Perf.IntPtr.cs" />
     <Compile Include="Perf.StringBuilder.cs" />
-    <Compile Include="..\Helpers.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="Perf.String.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">

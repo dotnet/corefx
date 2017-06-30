@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
@@ -218,6 +217,26 @@ namespace System
 
             if (actual.CompareTo(greaterThanOrEqualTo) < 0)
                 throw new XunitException(AddOptionalUserMessage($"Expected: {actual} to be greater than or equal to {greaterThanOrEqualTo}", userMessage));
+        }
+
+        /// <summary>
+        /// Validates that the actual byte array is equal to the expected byte array. XUnit only displays the first 5 values
+        /// of each collection if the test fails. This doesn't display at what point or how the equality assertion failed.
+        /// </summary>
+        /// <param name="expected">The byte array that <paramref name="actual"/> should be equal to.</param>
+        /// <param name="actual"></param>
+        public static void Equal(byte[] expected, byte[] actual)
+        {
+            try
+            {
+                Assert.Equal(expected, actual);
+            }
+            catch (AssertActualExpectedException)
+            {
+                string expectedString = string.Join(", ", expected);
+                string actualString = string.Join(", ", actual);
+                throw new AssertActualExpectedException(expectedString, actualString, null);
+            }
         }
     }
 }
