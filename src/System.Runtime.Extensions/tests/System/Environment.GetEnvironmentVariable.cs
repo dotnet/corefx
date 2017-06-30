@@ -27,7 +27,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.GetEnvironmentVariable("test", (EnvironmentVariableTarget)42));
             AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.SetEnvironmentVariable("test", "test", (EnvironmentVariableTarget)(-1)));
             AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("target", null, () => Environment.GetEnvironmentVariables((EnvironmentVariableTarget)(3)));
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && System.Tests.SetEnvironmentVariable.IsSupportedTarget(EnvironmentVariableTarget.User))
             {
                 AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable(new string('s', 256), "value", EnvironmentVariableTarget.User));
             }
@@ -219,7 +219,11 @@ namespace System.Tests
         [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void EnumerateEnvironmentVariables(EnvironmentVariableTarget target)
         {
-            bool lookForSetValue = (target == EnvironmentVariableTarget.Process) || PlatformDetection.IsWindowsAndElevated;
+            bool lookForSetValue = (target == EnvironmentVariableTarget.Process) ||
+                                    // On the Project N corelib, it doesn't attempt to set machine/user environment variables;
+                                    // it just returns silently. So don't try.
+                                    (PlatformDetection.IsWindowsAndElevated && !PlatformDetection.IsNetNative);
+
 
             string key = $"EnumerateEnvironmentVariables ({target})";
             string value = Path.GetRandomFileName();

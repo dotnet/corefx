@@ -58,8 +58,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [MemberData(nameof(GetUninitializedObject_NotSupportedType_TestData))]
         public void GetUninitializedObject_NotSupportedType_ThrowsArgumentException(Type type)
         {
-            Assert.Throws<ArgumentException>(null, () => FormatterServices.GetUninitializedObject(type));
-            Assert.Throws<ArgumentException>(null, () => FormatterServices.GetSafeUninitializedObject(type));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.GetUninitializedObject(type));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.GetSafeUninitializedObject(type));
         }
 
         [Theory]
@@ -284,7 +284,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             AssertExtensions.Throws<ArgumentNullException>("obj", () => FormatterServices.PopulateObjectMembers(null, new MemberInfo[0], new object[0]));
             AssertExtensions.Throws<ArgumentNullException>("members", () => FormatterServices.PopulateObjectMembers(new object(), null, new object[0]));
             AssertExtensions.Throws<ArgumentNullException>("data", () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[0], null));
-            Assert.Throws<ArgumentException>(() => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[2]));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[2]));
             AssertExtensions.Throws<ArgumentNullException>("members", () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[1]));
             Assert.Throws<SerializationException>(() => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[] { typeof(object).GetMethod("GetHashCode") }, new object[] { new object() }));
         }

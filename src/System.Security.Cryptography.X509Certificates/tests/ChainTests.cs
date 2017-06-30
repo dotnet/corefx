@@ -165,6 +165,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        // Crashing on macOS 10.13 Beta
+        [ActiveIssue(21436, TestPlatforms.OSX)]
         public static void TestResetMethod()
         {
             using (var sampleCert = new X509Certificate2(TestData.DssCer))
@@ -574,7 +576,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Thread.Sleep(1000); // For network flakiness
                 }
 
-                Assert.True(valid, $"Online Chain Built Validly within {RetryLimit} tries");
+                if (TestEnvironmentConfiguration.RunManualTests)
+                {
+                    Assert.True(valid, $"Online Chain Built Validly within {RetryLimit} tries");
+                }
+                else if (!valid)
+                {
+                    Console.WriteLine($"SKIP [{nameof(VerifyWithRevocation)}]: Chain failed to build within {RetryLimit} tries.");
+                }
 
                 // Since the network was enabled, we should get the whole chain.
                 Assert.Equal(3, onlineChain.ChainElements.Count);

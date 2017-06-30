@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Diagnostics;
+using System.Globalization;
+
 namespace System.Drawing
 {
-    using System.Collections;
-    using System.Diagnostics;
-    using System.Globalization;
-
     // Miscellaneous utilities
     internal static class ClientUtils
     {
@@ -91,10 +91,6 @@ namespace System.Drawing
             return valid;
         }
 
-
-
-
-
         // Useful for cases where you have discontiguous members of the enum.
         // Valid example: AutoComplete source.
         // if (!ClientUtils.IsEnumValid(value, AutoCompleteSource.None, 
@@ -125,14 +121,14 @@ namespace System.Drawing
 #if DEBUG      
         [ThreadStatic]
         private static Hashtable t_enumValueInfo;
-        public const int MAXCACHE = 300;  // we think we're going to get O(100) of these, put in a tripwire if it gets larger.
+        public const int MaxCache = 300;  // we think we're going to get O(100) of these, put in a tripwire if it gets larger.
 
         private class SequentialEnumInfo
         {
             public SequentialEnumInfo(Type t)
             {
-                int actualMinimum = Int32.MaxValue;
-                int actualMaximum = Int32.MinValue;
+                int actualMinimum = int.MaxValue;
+                int actualMaximum = int.MinValue;
                 int countEnumVals = 0;
 
                 foreach (int iVal in Enum.GetValues(t))
@@ -142,10 +138,7 @@ namespace System.Drawing
                     countEnumVals++;
                 }
 
-                if (countEnumVals - 1 != (actualMaximum - actualMinimum))
-                {
-                    Debug.Fail("this enum cannot be sequential.");
-                }
+                Debug.Assert(countEnumVals - 1 == actualMaximum - actualMinimum);
                 MinValue = actualMinimum;
                 MaxValue = actualMaximum;
             }
@@ -153,10 +146,9 @@ namespace System.Drawing
             public int MaxValue;
         }
 
-
-        private static void Debug_SequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal)
+        private static void Debug_SequentialEnumIsDefinedCheck(Enum value, int minVal, int maxVal)
         {
-            Type t = value.GetType();
+            Type enumType = value.GetType();
 
             if (t_enumValueInfo == null)
             {
@@ -165,56 +157,40 @@ namespace System.Drawing
 
             SequentialEnumInfo sequentialEnumInfo = null;
 
-            if (t_enumValueInfo.ContainsKey(t))
+            if (t_enumValueInfo.ContainsKey(enumType))
             {
-                sequentialEnumInfo = t_enumValueInfo[t] as SequentialEnumInfo;
+                sequentialEnumInfo = t_enumValueInfo[enumType] as SequentialEnumInfo;
             }
             if (sequentialEnumInfo == null)
             {
-                sequentialEnumInfo = new SequentialEnumInfo(t);
-
-                if (t_enumValueInfo.Count > MAXCACHE)
-                {
-                    // see comment next to MAXCACHE declaration.
-                    Debug.Fail("cache is too bloated, clearing out, we need to revisit this.");
-                    t_enumValueInfo.Clear();
-                }
-                t_enumValueInfo[t] = sequentialEnumInfo;
+                sequentialEnumInfo = new SequentialEnumInfo(enumType);
+                Debug.Assert(t_enumValueInfo.Count <= MaxCache);
+                t_enumValueInfo[enumType] = sequentialEnumInfo;
             }
-            if (minVal != sequentialEnumInfo.MinValue)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
-            }
-            if (maxVal != sequentialEnumInfo.MaxValue)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                Debug.Fail("Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
-            }
+            Debug.Assert(minVal == sequentialEnumInfo.MinValue, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(maxVal == sequentialEnumInfo.MaxValue, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
         }
 
-
-
-        private static void Debug_ValidateMask(System.Enum value, UInt32 mask)
+        private static void Debug_ValidateMask(Enum value, uint mask)
         {
-            Type t = value.GetType();
-            UInt32 newmask = 0;
-            foreach (int iVal in Enum.GetValues(t))
+            Type enumType = value.GetType();
+            uint newMask = 0;
+            foreach (int iVal in Enum.GetValues(enumType))
             {
-                newmask = newmask | (UInt32)iVal;
+                newMask = newMask | (uint)iVal;
             }
-            System.Diagnostics.Debug.Assert(newmask == mask, "Mask not valid in IsEnumValid!");
+            Debug.Assert(newMask == mask, "Mask not valid in IsEnumValid!");
         }
 
-        private static void Debug_NonSequentialEnumIsDefinedCheck(System.Enum value, int minVal, int maxVal, int maxBitsOn, bool isValid)
+        private static void Debug_NonSequentialEnumIsDefinedCheck(Enum value, int minVal, int maxVal, int maxBitsOn, bool isValid)
         {
-            Type t = value.GetType();
-            int actualMinimum = Int32.MaxValue;
-            int actualMaximum = Int32.MinValue;
+            Type enumType = value.GetType();
+            int actualMinimum = int.MaxValue;
+            int actualMaximum = int.MinValue;
             int checkedValue = Convert.ToInt32(value, CultureInfo.InvariantCulture);
             int maxBitsFound = 0;
             bool foundValue = false;
-            foreach (int iVal in Enum.GetValues(t))
+            foreach (int iVal in Enum.GetValues(enumType))
             {
                 actualMinimum = Math.Min(actualMinimum, iVal);
                 actualMaximum = Math.Max(actualMaximum, iVal);
@@ -224,44 +200,30 @@ namespace System.Drawing
                     foundValue = true;
                 }
             }
-            if (minVal != actualMinimum)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
-            }
-            if (maxVal != actualMaximum)
-            {
-                // put string allocation in the IF block so the common case doesnt build up the string.
-                System.Diagnostics.Debug.Fail("Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
-            }
 
-            if (maxBitsFound != maxBitsOn)
-            {
-                System.Diagnostics.Debug.Fail("Incorrect usage of IsEnumValid function. The bits set to 1 in this enum was found to be: " + maxBitsFound.ToString(CultureInfo.InvariantCulture) + "this does not match what's passed in: " + maxBitsOn.ToString(CultureInfo.InvariantCulture));
-            }
-            if (foundValue != isValid)
-            {
-                System.Diagnostics.Debug.Fail(String.Format(CultureInfo.InvariantCulture, "Returning {0} but we actually {1} found the value in the enum! Consider using a different overload to IsValidEnum.", isValid, ((foundValue) ? "have" : "have not")));
-            }
+            Debug.Assert(minVal == actualMinimum, "Minimum passed in is not the actual minimum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(minVal == actualMinimum, "Maximum passed in is not the actual maximum for the enum.  Consider changing the parameters or using a different function.");
+            Debug.Assert(maxBitsFound == maxBitsOn, "Incorrect usage of IsEnumValid function. The bits set to 1 in this enum was found to be: " + maxBitsFound.ToString(CultureInfo.InvariantCulture) + "this does not match what's passed in: " + maxBitsOn.ToString(CultureInfo.InvariantCulture));
+            Debug.Assert(foundValue == isValid, string.Format(CultureInfo.InvariantCulture, "Returning {0} but we actually {1} found the value in the enum! Consider using a different overload to IsValidEnum.", isValid, ((foundValue) ? "have" : "have not")));
         }
 #endif
 
-        /// <devdoc>
-        ///   WeakRefCollection - a collection that holds onto weak references
+        /// <summary>
+        /// WeakRefCollection - a collection that holds onto weak references
         ///
-        ///   Essentially you pass in the object as it is, and under the covers
-        ///   we only hold a weak reference to the object.
+        /// Essentially you pass in the object as it is, and under the covers
+        /// we only hold a weak reference to the object.
         ///
-        ///   -----------------------------------------------------------------
-        ///   !!!IMPORTANT USAGE NOTE!!!        
-        ///   Users of this class should set the RefCheckThreshold property 
-        ///   explicitly or call ScavengeReferences every once in a while to 
-        ///   remove dead references.
-        ///   Also avoid calling Remove(item).  Instead call RemoveByHashCode(item)
-        ///   to make sure dead refs are removed.
-        ///   -----------------------------------------------------------------
+        /// -----------------------------------------------------------------
+        /// !!!IMPORTANT USAGE NOTE!!!        
+        /// Users of this class should set the RefCheckThreshold property 
+        /// explicitly or call ScavengeReferences every once in a while to 
+        /// remove dead references.
+        /// Also avoid calling Remove(item).  Instead call RemoveByHashCode(item)
+        /// to make sure dead refs are removed.
+        /// -----------------------------------------------------------------
         ///
-        /// </devdoc>        
+        /// </summary>        
         internal class WeakRefCollection : IList
         {
             private int _refCheckThreshold = Int32.MaxValue; // this means this is disabled by default.
@@ -283,11 +245,10 @@ namespace System.Drawing
             }
 
             /// <summary>
-            ///     Indicates the value where the collection should check its items to remove dead weakref left over.
-            ///     Note: When GC collects weak refs from this collection the WeakRefObject identity changes since its 
-            ///           Target becomes null.  This makes the item unrecognizable by the collection and cannot be
-            ///           removed - Remove(item) and Contains(item) will not find it anymore.
-            ///           
+            /// Indicates the value where the collection should check its items to remove dead weakref left over.
+            /// Note: When GC collects weak refs from this collection the WeakRefObject identity changes since its 
+            ///       Target becomes null.  This makes the item unrecognizable by the collection and cannot be
+            ///       removed - Remove(item) and Contains(item) will not find it anymore.
             /// </summary>
             public int RefCheckThreshold
             {
@@ -405,10 +366,10 @@ namespace System.Drawing
             }
 
             /// <summary>
-            ///     Removes the value using its hash code as its identity.  
-            ///     This is needed because the underlying item in the collection may have already been collected
-            ///     changing the identity of the WeakRefObject making it impossible for the collection to identify
-            ///     it.  See WeakRefObject for more info.
+            /// Removes the value using its hash code as its identity.  
+            /// This is needed because the underlying item in the collection may have already been collected changing
+            /// the identity of the WeakRefObject making it impossible for the collection to identify it.
+            /// See WeakRefObject for more info.
             /// </summary>
             public void RemoveByHashCode(object value)
             {
@@ -448,7 +409,6 @@ namespace System.Drawing
             #endregion
 
             #region ICollection Members
-            /// <include file='doc\ArrangedElementCollection.uex' path='docs/doc[@for="ArrangedElementCollection.Count"]/*' />
             public int Count { get { return InnerList.Count; } }
             object ICollection.SyncRoot { get { return InnerList.SyncRoot; } }
             public bool IsReadOnly { get { return InnerList.IsReadOnly; } }
@@ -464,11 +424,11 @@ namespace System.Drawing
             #endregion
 
             /// <summary>
-            ///     Wraps a weak ref object.
-            ///     WARNING: Use this class carefully!  
-            ///     When the weak ref is collected, this object looses its identity. This is bad when the object
-            ///     has been added to a collection since Contains(WeakRef(item)) and Remove(WeakRef(item)) would 
-            ///     not be able to identify the item.
+            /// Wraps a weak ref object.
+            /// WARNING: Use this class carefully!  
+            /// When the weak ref is collected, this object looses its identity. This is bad when the object has been
+            /// added to a collection since Contains(WeakRef(item)) and Remove(WeakRef(item)) would not be able to
+            /// identify the item.
             /// </summary>
             internal class WeakRefObject
             {

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public partial class StringTests
+    public partial class StringTests : RemoteExecutorTestBase
     {
         private const string SoftHyphen = "\u00AD";
 
@@ -266,7 +266,7 @@ namespace System.Tests
                 {
                     // We return string.Empty by reference as an optimization
                     // in .NET core if there is no work to do.
-                    if (PlatformDetection.IsFullFramework)
+                    if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
                     {
                         Assert.Equal(string.Empty, result);
                     }
@@ -651,7 +651,77 @@ namespace System.Tests
         [Fact]
         public static void Compare_LongString()
         {
-            int result = string.Compare("{Policy_PS_Nothing}", 0, "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everything\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.ReflectionPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence, ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.SocketPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCounterPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlClientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.DataProtectionPermission, System.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVerification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>", 4380, 19, StringComparison.Ordinal);
+            string veryLongString =
+                "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionS" +
+                "et\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust" +
+                "\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022" +
+                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everyth" +
+                "ing\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022" +
+                "System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VE" +
+                "RSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissi" +
+                "ons.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicK" +
+                "eyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+                "/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib" +
+                ", Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022versi" +
+                "on=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.S" +
+                "ecurity.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=n" +
+                "eutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=" +
+                "\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.Reflection" +
+                "Permission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission " +
+                "class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={V" +
+                "ERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence" +
+                ", ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, " +
+                "ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/" +
+                "><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Ver" +
+                "sion={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+                "1\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.Socke" +
+                "tPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c56" +
+                "1934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission " +
+                "class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral" +
+                ", PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022" +
+                "true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={" +
+                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permiss" +
+                "ions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, Publi" +
+                "cKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+                "/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorl" +
+                "ib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022ver" +
+                "sion=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022Syste" +
+                "m.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Cultur" +
+                "e=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestrict" +
+                "ed=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermiss" +
+                "ion, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089" +
+                "\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022" +
+                "System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=" +
+                "neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricte" +
+                "d=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCount" +
+                "erPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission" +
+                " class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, " +
+                "Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unr" +
+                "estricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlCl" +
+                "ientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=" +
+                "b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPe" +
+                "rmission class=\u0022System.Security.Permissions.DataProtectionPermission, Syste" +
+                "m.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022" +
+                " version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><Permissio" +
+                "nSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 N" +
+                "ame=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><Permission" +
+                "Set class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Na" +
+                "me=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permissi" +
+                "on class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version" +
+                "={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+                "1\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022" +
+                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVer" +
+                "ification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission" +
+                " class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={" +
+                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
+
+            int result = string.Compare("{Policy_PS_Nothing}", 0, veryLongString, 4380, 19, StringComparison.Ordinal);
             Assert.True(result < 0);
         }
 
@@ -1291,38 +1361,31 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/21541", TargetFrameworkMonikers.Uap)]
         public static void IndexOf_TurkishI()
         {
-            string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
-                string value = "\u0130";
-                Assert.Equal(19, s.IndexOf(value));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
 
-                value = "\u0131";
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                string value = "\u0130";
-                Assert.Equal(19, s.IndexOf(value));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
-                value = "\u0131";
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
-                string value = "\u0130";
+                 string value = "\u0130";
+                 Assert.Equal(19, s.IndexOf(value));
+                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                 Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
+                 Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+
+                 value = "\u0131";
+                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
+                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                value = "\u0130";
                 Assert.Equal(19, s.IndexOf(value));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1330,22 +1393,37 @@ namespace System.Tests
                 value = "\u0131";
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                value = "\u0130";
+                Assert.Equal(19, s.IndexOf(value));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                value = "\u0131";
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_HungarianDoubleCompression()
         {
-            string source = "dzsdzs";
-            string target = "ddzs";
-            Helpers.PerformActionWithCulture(new CultureInfo("hu-HU"), () =>
+            RemoteInvoke(() =>
             {
-                /* 
+                string source = "dzsdzs";
+                string target = "ddzs";
+
+                CultureInfo.CurrentCulture = new CultureInfo("hu-HU");
+                /*
                  There are differences between Windows and ICU regarding contractions.
                  Windows has equal contraction collation weights, including case (target="Ddzs" same behavior as "ddzs").
                  ICU has different contraction collation weights, depending on locale collation rules.
                  If CurrentCultureIgnoreCase is specified, ICU will use 'secondary' collation rules
-                  which ignore the contraction collation weights (defined as 'tertiary' rules)
+                 which ignore the contraction collation weights (defined as 'tertiary' rules)
                 */
                 Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, source.IndexOf(target));
                 Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, source.IndexOf(target, StringComparison.CurrentCulture));
@@ -1353,87 +1431,90 @@ namespace System.Tests
                 Assert.Equal(0, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.Ordinal));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(-1, source.IndexOf(target));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCulture));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics()
         {
-            string s = "Exhibit a\u0300\u00C0";
-            string value = "\u00C0";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            RemoteInvoke(() =>
             {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
 
-            value = "a\u0300"; // this diacritic combines with preceding character
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                value = "a\u0300"; // this diacritic combines with preceding character
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(8, s.IndexOf(value));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(8, s.IndexOf(value));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE()
         {
-            string s = "Foo\u0400Bar";
-            string value = "\u0400";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            RemoteInvoke(() =>
             {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
 
-            value = "bar";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                value = "bar";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
@@ -1825,9 +1906,12 @@ namespace System.Tests
         [Fact]
         public static void LastIndexOf_TurkishI()
         {
-            string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
                 string value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
@@ -1840,10 +1924,10 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                string value = "\u0130";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1851,10 +1935,10 @@ namespace System.Tests
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
-                string value = "\u0130";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1862,7 +1946,9 @@ namespace System.Tests
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Theory]
@@ -2248,12 +2334,23 @@ namespace System.Tests
             yield return new object[] { "H\u0131 World", "h\u0131 world", CultureInfo.InvariantCulture };
         }
 
-        [Theory]
-        [MemberData(nameof(ToLower_Culture_TestData))]
-        public static void ToLower_Culture(string actual, string expected, CultureInfo culture)
+        [Fact]
+        public static void Test_ToLower_Culture()
         {
-            Helpers.PerformActionWithCulture(culture, () =>
-                Assert.True(actual.ToLower().Equals(expected, StringComparison.Ordinal)));
+            RemoteInvoke(() =>
+            {
+                foreach (var testdata in ToLower_Culture_TestData())
+                {
+                    ToLower_Culture((string)testdata[0], (string)testdata[1], (CultureInfo)testdata[2]);
+                }
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        private static void ToLower_Culture(string actual, string expected, CultureInfo culture)
+        {
+            CultureInfo.CurrentCulture = culture;
+            Assert.True(actual.ToLower().Equals(expected, StringComparison.Ordinal));
         }
 
         [Theory]
@@ -2285,26 +2382,27 @@ namespace System.Tests
         [Fact]
         public static void ToUpper_TurkishI()
         {
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
-            });
 
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
-            });
 
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0131 WORLD", StringComparison.Ordinal));
-            });
+
+
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Theory]
@@ -2638,10 +2736,8 @@ namespace System.Tests
         public static void InternalTestAotSubset()
         {
             string emptyFromField = string.Empty;
-            string emptyFromLiteral = "";
             string emptyFromInternTable = string.IsInterned(emptyFromField);
             Assert.Same(emptyFromInternTable, emptyFromField);
-            Assert.Same(emptyFromInternTable, emptyFromLiteral);
 
             string sTemplate = new string('A', 5);
             string sInterned1 = string.Intern(sTemplate);
