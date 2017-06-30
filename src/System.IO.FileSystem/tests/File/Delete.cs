@@ -144,7 +144,7 @@ namespace System.IO.Tests
             ReadOnly_FileSystemHelper(readOnlyDirectory =>
             {
                 Assert.Throws<IOException>(() => Delete(Path.Combine(readOnlyDirectory, "subdir")));
-            });
+            }, subDirectoryName: "subdir");
         }
 
         [Fact]
@@ -162,7 +162,6 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Deleting already-open file allowed
         public void Unix_File_Already_Open_Allowed()
         {
-            // DeleteOpenFile_Allowed_Unix
             string path = GetTestFilePath();
             using (File.Create(path))
             {
