@@ -48,13 +48,7 @@ namespace System.Linq
 
     internal sealed class SystemCore_EnumerableDebugViewEmptyException : Exception
     {
-        public string Empty
-        {
-            get
-            {
-                return SR.EmptyEnumerable;
-            }
-        }
+        public string Empty => SR.EmptyEnumerable;
     }
 
     internal sealed class SystemCore_EnumerableDebugView

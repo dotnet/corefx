@@ -124,10 +124,7 @@ namespace System.Linq
             _groupings = new Grouping<TKey, TElement>[7];
         }
 
-        public int Count
-        {
-            get { return _count; }
-        }
+        public int Count => _count;
 
         public IEnumerable<TElement> this[TKey key]
         {

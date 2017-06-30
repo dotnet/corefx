@@ -37,12 +37,12 @@ namespace System.Linq
             private IEnumerator<TSource> _enumerator;
             private Set<TSource> _set;
 
-            public UnionIterator(IEqualityComparer<TSource> comparer)
+            protected UnionIterator(IEqualityComparer<TSource> comparer)
             {
                 _comparer = comparer;
             }
 
-            public override sealed void Dispose()
+            public sealed override void Dispose()
             {
                 if (_enumerator != null)
                 {
