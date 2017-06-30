@@ -1208,19 +1208,6 @@ namespace System.Net.Http
             }
         }
 
-        private void SetWinHttpOption(SafeWinHttpHandle handle, uint option, string optionData)
-        {
-            Debug.Assert(handle != null);
-            if (!Interop.WinHttp.WinHttpSetOption(
-                handle,
-                option,
-                optionData,
-                (uint)optionData.Length))
-            {
-                WinHttpException.ThrowExceptionUsingLastError();
-            }
-        }
-
         private static void SetWinHttpOption(
             SafeWinHttpHandle handle,
             uint option,

@@ -201,18 +201,18 @@ namespace System.Net.Http.Headers
 
         #endregion
 
+	internal string GetHeaderStringWithoutSpecial()
+        {
+	    if (!IsSpecialValueSet)
+	    {
+		return ToString();
+	    }
+	    return _store.GetHeaderString(_headerName, _specialValue);
+	}
+
         public override string ToString()
         {
             return _store.GetHeaderString(_headerName);
-        }
-
-        internal string GetHeaderStringWithoutSpecial()
-        {
-            if (!IsSpecialValueSet)
-            {
-                return ToString();
-            }
-            return _store.GetHeaderString(_headerName, _specialValue);
         }
 
         internal void SetSpecialValue()

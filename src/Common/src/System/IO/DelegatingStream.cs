@@ -17,11 +17,6 @@ namespace System.Net.Http
 
         #region Properties
 
-        protected Stream BaseStream
-        {
-            get { return _innerStream; }
-        }
-
         public override bool CanRead
         {
             get { return _innerStream.CanRead; }

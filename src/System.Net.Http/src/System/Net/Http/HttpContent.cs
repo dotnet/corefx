@@ -707,8 +707,6 @@ namespace System.Net.Http
                 _maxSize = maxSize;
             }
 
-            public int MaxSize => _maxSize;
-
             public byte[] GetSizedBuffer()
             {
                 ArraySegment<byte> buffer;
