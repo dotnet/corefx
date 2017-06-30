@@ -11,10 +11,8 @@ namespace System.Net.Http
 {
     internal static class WinHttpCertificateHelper
     {
-		private const OidGroup CRYPT_OID_DISABLE_SEARCH_DS_FLAG = (OidGroup)(unchecked((int)0x80000000));
-        private const OidGroup LocalEku = CRYPT_OID_DISABLE_SEARCH_DS_FLAG | OidGroup.EnhancedKeyUsage;
-        private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
-        private static readonly Oid s_serverAuthOid = Oid.FromOidValue("1.3.6.1.5.5.7.3.1", LocalEku);
+		private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
+        private static readonly Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.1");
         
         // TODO: Issue #2165. Merge with similar code used in System.Net.Security move to Common/src//System/Net.
         public static void BuildChain(
