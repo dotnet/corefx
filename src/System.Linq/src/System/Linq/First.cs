@@ -10,9 +10,8 @@ namespace System.Linq
     {
         public static TSource First<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            TSource first = source.TryGetFirst(out found);
-            
+            TSource first = source.TryGetFirst(out bool found);
+
             if (!found)
             {
                 throw Error.NoElements();
@@ -23,8 +22,7 @@ namespace System.Linq
 
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            TSource first = source.TryGetFirst(predicate, out found);
+            TSource first = source.TryGetFirst(predicate, out bool found);
 
             if (!found)
             {
@@ -34,17 +32,11 @@ namespace System.Linq
             return first;
         }
 
-        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
-        {
-            bool found;
-            return source.TryGetFirst(out found);
-        }
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source) =>
+            source.TryGetFirst(out bool found);
 
-        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-            bool found;
-            return source.TryGetFirst(predicate, out found);
-        }
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
+            source.TryGetFirst(predicate, out bool found);
 
         internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
         {
