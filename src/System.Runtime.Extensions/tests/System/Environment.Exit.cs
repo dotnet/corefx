@@ -23,30 +23,10 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ExitCodeValues))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "RemoteExecutor behaves different in UAP.")]
         public static void CheckExitCode(int expectedExitCode)
         {
-            using (Process p = RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString()).Process)
-            {
-                Assert.True(p.WaitForExit(30 * 1000));
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Assert.Equal(expectedExitCode, p.ExitCode);
-                }
-                else
-                {
-                    Assert.Equal(unchecked((sbyte)expectedExitCode), unchecked((sbyte)p.ExitCode));
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(ExitCodeValues))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.UapNotUapAot, "RemoteExecutor behaves different in UAP.")]
-        public static void CheckExitCode_Uap(int expectedExitCode)
-        {
-            // Shouldn't fail as RemoteExecutor verifies that the exit code is the same as Options.ExpectedExitCode
-            RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString(), new RemoteInvokeOptions { ExpectedExitCode = expectedExitCode });
+            var options = new RemoteInvokeOptions { ExpectedExitCode = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? expectedExitCode : (int)(sbyte)expectedExitCode };
+            RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString(), options).Dispose();
         }
 
         [Theory]
