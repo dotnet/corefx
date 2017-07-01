@@ -91,6 +91,7 @@ namespace System.Diagnostics
                 Options = options;
             }
 
+            public Process Process { get { throw null; } } // it's in the contract :(
             private Thread RemoteInvokeThread { get; set; }
             private Action WaitForRemoteInvokeThread { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
