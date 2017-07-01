@@ -77,7 +77,7 @@ namespace System.Diagnostics
                 Options = options;
             }
 
-            public Process Process { get; set; }
+            public Process Process { get; private set; }
             public RemoteInvokeOptions Options { get; private set; }
 
             public void Dispose()
