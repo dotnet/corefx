@@ -249,23 +249,29 @@ namespace System.Net.Http
 
             private static int VerifyCertChain(IntPtr storeCtxPtr, IntPtr curlPtr)
             {
+                const int SuccessResult = 1, FailureResult = 0;
+
                 EasyRequest easy;
                 if (!TryGetEasyRequest(curlPtr, out easy))
                 {
                     EventSourceTrace("Could not find associated easy request: {0}", curlPtr);
-                    return 0;
+                    return FailureResult;
                 }
 
-                using (var storeCtx = new SafeX509StoreCtxHandle(storeCtxPtr, ownsHandle: false))
+                var storeCtx = new SafeX509StoreCtxHandle(storeCtxPtr, ownsHandle: false);
+                try
                 {
                     IntPtr leafCertPtr = Interop.Crypto.X509StoreCtxGetTargetCert(storeCtx);
                     if (IntPtr.Zero == leafCertPtr)
                     {
                         EventSourceTrace("Invalid certificate pointer", easy: easy);
-                        return 0;
+                        return FailureResult;
                     }
 
-                    using (X509Certificate2 leafCert = new X509Certificate2(leafCertPtr))
+                    X509Certificate2[] otherCerts = null;
+                    int otherCertsCount = 0;
+                    var leafCert = new X509Certificate2(leafCertPtr);
+                    try
                     {
                         // We need to respect the user's server validation callback if there is one.  If there isn't one,
                         // we can start by first trying to use OpenSSL's verification, though only if CRL checking is disabled,
@@ -280,7 +286,7 @@ namespace System.Net.Http
                             int sslResult = Interop.Crypto.X509VerifyCert(storeCtx);
                             if (sslResult == 1)
                             {
-                                return 1;
+                                return SuccessResult;
                             }
 
                             // X509_verify_cert can return < 0 in the case of programmer error
@@ -290,9 +296,6 @@ namespace System.Net.Http
                         // Either OpenSSL verification failed, or there was a server validation callback.
                         // Either way, fall back to manual and more expensive verification that includes 
                         // checking the user's certs (not just the system store ones as OpenSSL does).
-                        X509Certificate2[] otherCerts;
-                        int otherCertsCount = 0;
-                        bool success;
                         using (X509Chain chain = new X509Chain())
                         {
                             chain.ChainPolicy.RevocationMode = easy._handler.CheckCertificateRevocationList ? X509RevocationMode.Online : X509RevocationMode.NoCheck;
@@ -322,6 +325,7 @@ namespace System.Net.Http
                                 }
                             }
 
+                            bool success;
                             var serverCallback = easy._handler._serverCertificateValidationCallback;
                             if (serverCallback == null)
                             {
@@ -336,26 +340,30 @@ namespace System.Net.Http
 
                                 SslPolicyErrors errors = CertificateValidation.BuildChainAndVerifyProperties(chain, leafCert,
                                     checkCertName: true, hostName: easy._requestMessage.RequestUri.Host); // we disabled automatic host verification, so we do it here
-                                try
-                                {
-                                    success = serverCallback(easy._requestMessage, leafCert, chain, errors);
-                                }
-                                catch (Exception exc)
-                                {
-                                    EventSourceTrace("Server validation callback threw exception: {0}", exc, easy: easy);
-                                    easy.FailRequest(exc);
-                                    success = false;
-                                }
+                                success = serverCallback(easy._requestMessage, leafCert, chain, errors);
                             }
-                        }
 
+                            return success ? SuccessResult : FailureResult;
+                        }
+                    }
+                    finally
+                    {
                         for (int i = 0; i < otherCertsCount; i++)
                         {
                             otherCerts[i].Dispose();
                         }
-
-                        return success ? 1 : 0;
+                        leafCert.Dispose();
                     }
+                }
+                catch (Exception exc)
+                {
+                    EventSourceTrace("Unexpected exception: {0}", exc, easy: easy);
+                    easy.FailRequest(exc);
+                    return FailureResult;
+                }
+                finally
+                {
+                    storeCtx.Dispose();
                 }
             }
         }
