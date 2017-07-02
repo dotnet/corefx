@@ -170,28 +170,13 @@ namespace System.Linq.Expressions.Compiler
                     _ilg.Emit(OpCodes.Add);
                     break;
                 case ExpressionType.AddChecked:
-                    if (leftType.IsFloatingPoint())
-                    {
-                        _ilg.Emit(OpCodes.Add);
-                    }
-                    else if (leftType.IsUnsigned())
-                    {
-                        _ilg.Emit(OpCodes.Add_Ovf_Un);
-                    }
-                    else
-                    {
-                        _ilg.Emit(OpCodes.Add_Ovf);
-                    }
+                    _ilg.Emit(leftType.IsFloatingPoint() ? OpCodes.Add : (leftType.IsUnsigned() ? OpCodes.Add_Ovf_Un : OpCodes.Add_Ovf));
                     break;
                 case ExpressionType.Subtract:
                     _ilg.Emit(OpCodes.Sub);
                     break;
                 case ExpressionType.SubtractChecked:
-                    if (leftType.IsFloatingPoint())
-                    {
-                        _ilg.Emit(OpCodes.Sub);
-                    }
-                    else if (leftType.IsUnsigned())
+                    if (leftType.IsUnsigned())
                     {
                         _ilg.Emit(OpCodes.Sub_Ovf_Un);
                         // Guaranteed to fit within result type: no conversion
@@ -199,25 +184,14 @@ namespace System.Linq.Expressions.Compiler
                     }
                     else
                     {
-                        _ilg.Emit(OpCodes.Sub_Ovf);
+                        _ilg.Emit(leftType.IsFloatingPoint() ? OpCodes.Sub : OpCodes.Sub_Ovf);
                     }
                     break;
                 case ExpressionType.Multiply:
                     _ilg.Emit(OpCodes.Mul);
                     break;
                 case ExpressionType.MultiplyChecked:
-                    if (leftType.IsFloatingPoint())
-                    {
-                        _ilg.Emit(OpCodes.Mul);
-                    }
-                    else if (leftType.IsUnsigned())
-                    {
-                        _ilg.Emit(OpCodes.Mul_Ovf_Un);
-                    }
-                    else
-                    {
-                        _ilg.Emit(OpCodes.Mul_Ovf);
-                    }
+                    _ilg.Emit(leftType.IsFloatingPoint() ? OpCodes.Mul : (leftType.IsUnsigned() ? OpCodes.Mul_Ovf_Un : OpCodes.Mul_Ovf));
                     break;
                 case ExpressionType.Divide:
                     _ilg.Emit(leftType.IsUnsigned() ? OpCodes.Div_Un : OpCodes.Div);
