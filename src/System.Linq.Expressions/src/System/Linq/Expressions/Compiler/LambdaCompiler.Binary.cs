@@ -150,17 +150,22 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(!leftType.IsNullableType());
             Debug.Assert(!rightType.IsNullableType());
-
-            if (op == ExpressionType.Equal || op == ExpressionType.NotEqual)
-            {
-                EmitUnliftedEquality(op, leftType);
-                return;
-            }
-
-            Debug.Assert(leftType.IsPrimitive);
+            Debug.Assert(leftType.IsPrimitive || (op == ExpressionType.Equal || op == ExpressionType.NotEqual) && (!leftType.IsValueType || leftType.IsEnum));
 
             switch (op)
             {
+                case ExpressionType.NotEqual:
+                    if (leftType.GetTypeCode() == TypeCode.Boolean)
+                    {
+                        goto case ExpressionType.ExclusiveOr;
+                    }
+
+                    _ilg.Emit(OpCodes.Ceq);
+                    _ilg.Emit(OpCodes.Ldc_I4_0);
+                    goto case ExpressionType.Equal;
+                case ExpressionType.Equal:
+                    _ilg.Emit(OpCodes.Ceq);
+                    return;
                 case ExpressionType.Add:
                     _ilg.Emit(OpCodes.Add);
                     break;
@@ -305,19 +310,6 @@ namespace System.Linq.Expressions.Compiler
                     break;
             }
         }
-
-        private void EmitUnliftedEquality(ExpressionType op, Type type)
-        {
-            Debug.Assert(op == ExpressionType.Equal || op == ExpressionType.NotEqual);
-            Debug.Assert(type.IsPrimitive || !type.IsValueType || type.IsEnum);
-            _ilg.Emit(OpCodes.Ceq);
-            if (op == ExpressionType.NotEqual)
-            {
-                _ilg.Emit(OpCodes.Ldc_I4_0);
-                _ilg.Emit(OpCodes.Ceq);
-            }
-        }
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void EmitLiftedBinaryOp(ExpressionType op, Type leftType, Type rightType, Type resultType, bool liftedToNull)
