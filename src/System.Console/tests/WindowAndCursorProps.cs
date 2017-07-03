@@ -142,9 +142,12 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
     [InlineData(0)]
     [InlineData(1)]
+    [InlineData(10)]
     [InlineData(255)]
     [InlineData(256)]
+    [InlineData(257)]
     [InlineData(1024)]
+    [InlineData(24_000)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows(int lengthOfTitle)

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -20,53 +21,69 @@ internal partial class Interop
         // throw.
         private const int MaxAllowedBufferSizeInChars = 24500;
 
-        // GetConsoleTitle sometimes interprets the second parameter (nSize) as number of bytes and sometimes as the number of chars.
-        // Instead of doing complicated and dangerous logic to determine if this may or may not occur,
-        // we simply assume the worst and reserve a bigger buffer. This way we may use a bit more memory,
-        // but we will always be safe.
-        private static int CharCountToByteCount(int numChars)
-        {
-            return numChars * 2;
-        }
-
         // 1. We first try to call the GetConsoleTitle with an InitialBufferSizeInChars of 256.
         // 2. Then based on the return value either increase the capacity or return failure.
         internal static int GetConsoleTitle(out string title, out int titleLength)
         {
             int lastError = 0;
-            StringBuilder sb = new StringBuilder(CharCountToByteCount(InitialBufferSizeInChars + 1));
-            int len = GetConsoleTitle(sb, sb.Capacity);
 
-            if (len <= 0)
+            // See note below for why we're pessimistically setting the capacity as if it was bytes, even though it's in chars.
+            StringBuilder sb = new StringBuilder(InitialBufferSizeInChars * sizeof(char));
+
+            while (true)
             {
-                lastError = Marshal.GetLastWin32Error();
-            }
-            else if (len > MaxAllowedBufferSizeInChars)
-            {
-                // Title is greater than the allowed buffer so we do not read the title and only pass the length to the caller.
-                title = string.Empty;
-                titleLength = len;
-                return 0;
-            }
-            else
-            {
-                if (len > InitialBufferSizeInChars)
+                // If capacity is insufficient, sometimes this function returns length,
+                // and sometimes (Windows 10 RS2) it returns 0 with either ERROR_INSUFFICIENT_BUFFER or ERROR_SUCCESS.
+                // In either of those latter cases, try again hopefully with a larger buffer.
+                //
+                // In some cases (Windows 7, perhaps depending on codepage) it interprets the second parameter as bytes. 
+                // Give it characters, pssimistically, but make sure that the number of characters we offer is twice what it claims it needs.
+                //
+                // In some cases (Windows 10 RS2), the returned length includes null, in others (Windows 7) it does not. 
+                // Pessimistically assume it does not.
+                int len = GetConsoleTitle(sb, sb.Capacity);
+
+                if (len <= 0)
                 {
-                    // We need to increase the sb capacity and retry.
-                    sb.Capacity = CharCountToByteCount(len + 1);
-                    len = GetConsoleTitle(sb, sb.Capacity);
-                    if (len <= 0)
+                    lastError = Marshal.GetLastWin32Error();
+
+                    if (len < 0 || (lastError != Errors.ERROR_INSUFFICIENT_BUFFER && lastError != Errors.ERROR_SUCCESS))
                     {
-                        lastError = Marshal.GetLastWin32Error();
+                        title = string.Empty;
+                        titleLength = title.Length;
+                        return lastError;
                     }
                 }
-            }
+                else if (sb.Capacity >= (len + 1) * sizeof(char))
+                {
+                    // Success
+                    title = sb.ToString();
+                    titleLength = title.Length;
+                    return 0;
+                }
 
-            // If the call succeeds the size must be less than or equal to sb capacity as retrieved from the first call.
-            Debug.Assert(lastError != 0 || len + 1 <= sb.Capacity);
-            title = len > 0 ? sb.ToString() : string.Empty;
-            titleLength = title.Length;
-            return lastError;
+                // We need to increase the sb capacity and retry.
+                if (sb.Capacity >= MaxAllowedBufferSizeInChars * sizeof(char))
+                {
+                    // No more room to grow.
+                    // Title is greater than the allowed buffer so we do not read the title and only pass the length to the caller.
+                    title = string.Empty;
+                    titleLength = len;
+                    return 0;
+                }
+
+                if (len > 0)
+                {
+                    // Add one for the null terminator in case length doesn't include it
+                    // Double the length requested, in case it will interpret sb.Capacity as bytes
+                    sb.Capacity = Math.Min((len + 1) * sizeof(char), MaxAllowedBufferSizeInChars * sizeof(char));
+                }
+                else
+                {
+                    // Don't know what length is needed: just double
+                    sb.Capacity = Math.Min(sb.Capacity * 2, MaxAllowedBufferSizeInChars * sizeof(char));
+                }
+            }
         }
     }
 }
