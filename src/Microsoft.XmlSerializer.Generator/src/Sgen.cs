@@ -17,8 +17,7 @@ namespace Microsoft.XmlSerializer.Generator
         public static int Main(string[] args)
         {
             Sgen sgen = new Sgen();
-            sgen.Run(args);
-            return 0;
+            return sgen.Run(args);
         }
 
         private int Run(string[] args)
@@ -112,6 +111,7 @@ namespace Microsoft.XmlSerializer.Generator
                     return 0;
                 }
 
+                Console.Out.WriteLine("Generate serializer file for " + assembly);
                 GenerateFile(types, assembly, proxyOnly, force, codePath);
             }
             catch (Exception e)
@@ -121,6 +121,7 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
+                Console.Out.WriteLine(string.Format("Got Exception {0}, Stack Trace {1}", e.Message, e.StackTrace));
                 return 1;
             }
 
@@ -130,6 +131,7 @@ namespace Microsoft.XmlSerializer.Generator
         private void GenerateFile(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string outputDirectory)
         {
             Assembly assembly = LoadAssembly(assemblyName, true);
+            Console.Out.WriteLine(string.Format("Assembly {0} was loaded", assembly.FullName));
             Type[] types;
 
             if (typeNames == null || typeNames.Count == 0)
@@ -137,6 +139,7 @@ namespace Microsoft.XmlSerializer.Generator
                 try
                 {
                     types = assembly.GetTypes();
+                    Console.Out.WriteLine(string.Format("{0} types loaded", types.Count()));
                 }
                 catch (ReflectionTypeLoadException typeException)
                 {
@@ -201,6 +204,7 @@ namespace Microsoft.XmlSerializer.Generator
                 }
             }
 
+            Console.Out.WriteLine(string.Format("{0} serializable types", importedTypes.Count));
             if (importedTypes.Count > 0)
             {
                 var serializableTypes = (Type[])importedTypes.ToArray(typeof(Type));
@@ -210,6 +214,7 @@ namespace Microsoft.XmlSerializer.Generator
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
                 string serializerName = XmlSerializer.GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
+                Console.Out.WriteLine(string.Format("The code path is {0}", codePath));
 
                 if (!force)
                 {
@@ -239,6 +244,7 @@ namespace Microsoft.XmlSerializer.Generator
                     using (FileStream fs = File.Create(codePath))
                     {
                         success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
+                        Console.Out.WriteLine("Generating code stream complete");
                     }
                 }
                 catch (UnauthorizedAccessException)

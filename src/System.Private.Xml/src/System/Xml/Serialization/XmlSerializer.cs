@@ -842,6 +842,7 @@ namespace System.Xml.Serialization
                 }
             }
 
+            Console.Out.WriteLine("Start generating code stream");
             return TempAssembly.GenerateSerializerToStream(mappings, types, null, assembly, new Hashtable(), stream);
         }
 #endif

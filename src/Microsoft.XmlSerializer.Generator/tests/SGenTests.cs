@@ -17,7 +17,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         [Fact]
         public static void BasicTest()
         {
-            int n = Sgen.Main(null);
+            int n = Sgen.Main(new string[0]);
             Assert.Equal(0, n);
         }
 
@@ -49,6 +49,14 @@ namespace Microsoft.XmlSerializer.Generator.Tests
                 throw new FileNotFoundException(string.Format("Missing baseline file {0}.", basefile));
             }
 
+            List<string> allbaseclasses = GetAllClassdNames(basefile);
+            List<string> allclasses = GetAllClassdNames(codefile);
+            CompareList(allbaseclasses, allclasses);
+
+
+            List<string> allbasemethods = GetAllMethodNames(basefile);
+            List<string> allmethods = GetAllMethodNames(codefile);
+
             List<string> allbaselines = GetAllLines(basefile);
             List<string> alllines = GetAllLines(codefile);
             CompareList(allbaselines, alllines);
@@ -61,7 +69,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             var newalllines = new List<string>();
             foreach (var line in alllines)
             {
-                if (line == String.Empty || line.Contains("#pragma"))
+                if (line == String.Empty)
                 {
                     continue;
                 }
@@ -70,6 +78,48 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             }
 
             return newalllines;
+        }
+
+        public static List<string> GetAllMethodNames(string strFileName)
+        {
+            List<string> methodNames = new List<string>();
+            var strMethodLines = GetAllLines(strFileName)
+            .Where(a => (a.Contains("protected") ||
+            a.Contains("private") ||
+            a.Contains("public")) &&
+            !a.Contains("class"));
+            foreach (var item in strMethodLines)
+            {
+                if (item.IndexOf("(") != -1)
+                {
+                    string strTemp = String.Join("", item.Substring(0, item.IndexOf("(")).Reverse());
+                    methodNames.Add(String.Join("", strTemp.Substring(0, strTemp.IndexOf(" ")).Reverse()));
+                }
+            }
+
+            methodNames.Sort();
+            return methodNames;
+        }
+
+        public static List<string> GetAllClassdNames(string strFileName)
+        {
+            List<string> classdNames = new List<string>();
+            var strMethodLines = GetAllLines(strFileName)
+            .Where(a => (a.Contains("protected") ||
+            a.Contains("private") ||
+            a.Contains("public")) &&
+            a.Contains("class"));
+            foreach (var item in strMethodLines)
+            {
+                if (item.IndexOf("class") != -1)
+                {
+                    string strTemp = String.Join("", item.Substring(0, item.IndexOf(":")).Reverse());
+                    classdNames.Add(String.Join("", strTemp.Substring(0, strTemp.IndexOf("ssalc")).Reverse()));
+                }
+            }
+
+            classdNames.Sort();
+            return classdNames;
         }
 
         private static void CompareList(List<string> expectedlist, List<string> actuallist)
