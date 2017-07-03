@@ -308,6 +308,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
+            Console.Out.WriteLine("Load assembly from " + path);
             assembly = Assembly.LoadFile(path);
             if(assembly == null)
             {

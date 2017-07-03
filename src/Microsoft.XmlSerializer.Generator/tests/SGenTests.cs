@@ -31,10 +31,20 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             }
 
             //int n = Sgen.Main(new string[] { @"..\..\System.Xml.XmlSerializer.Sgen.Tests\netstandard\System.Xml.XmlSerializer.Sgen.Tests.dll", "/force", "/out:..\\..\\Microsoft.XmlSerializer.Generator.Tests\\netstandard\\" });
-            if(!File.Exists("System.Xml.XmlSerializer.Sgen.Data.dll"))
+            if (!File.Exists("System.Xml.XmlSerializer.Sgen.Data.dll"))
             {
                 throw new FileNotFoundException(string.Format("Cannot find file {0}.", "System.Xml.XmlSerializer.Sgen.Data.dll"));
             }
+
+            string path = Path.GetFullPath("System.Xml.XmlSerializer.Sgen.Data.dll");
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException(string.Format("cannot find file under {0}, the current directory is ", path, Directory.GetCurrentDirectory()));
+            }
+
+            Console.WriteLine("The file exist " + path);
+
+           
 
             int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force"});
             Assert.Equal(0, n);
