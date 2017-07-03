@@ -19,6 +19,8 @@
     <Compile Include="GraphicsTests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IconTests.cs" />
+    <Compile Include="ImageTests.cs" />
+    <Compile Include="PenTests.cs" />
     <Compile Include="PensTests.cs" />
     <Compile Include="Imaging\BitmapDataTests.cs" />
     <Compile Include="Imaging\ColorMapTests.cs" />
@@ -34,8 +36,9 @@
     <Compile Include="StringFormatTests.cs" />
     <Compile Include="SystemBrushesTests.cs" />
     <Compile Include="SystemIconsTests.cs" />
-    <Compile Include="TextureBrushTests.cs" />
     <Compile Include="SystemPensTest.cs" />
+    <Compile Include="TextureBrushTests.cs" />
+    <Compile Include="ToolboxBitmapAttributeTests.cs" />
     <Compile Include="Design\CategoryNameCollectionTests.cs" />
     <Compile Include="Drawing2D\BlendTests.cs" />
     <Compile Include="Drawing2D\ColorBlendTests.cs" />
@@ -47,14 +50,14 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
       <Link>Common\System\ThreadCultureChange.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
