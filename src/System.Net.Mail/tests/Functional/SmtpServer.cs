@@ -132,7 +132,6 @@ namespace System.Net.Mail.Tests
             }
 
             WriteNS(ns, "250 OK\r\n");
-            //throw new Exception(s);
             return retval;
         }
 
