@@ -256,6 +256,10 @@ namespace Microsoft.XmlSerializer.Generator
                     Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
                 }
             }
+            else
+            {
+                Console.Out.WriteLine(FormatMessage(true, SR.Format(SR.InfoNoSerializableTypes, assembly.Location)));
+            }
         }
 
         // assumes all same case.        
@@ -299,6 +303,13 @@ namespace Microsoft.XmlSerializer.Generator
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
             assembly = Assembly.LoadFile(path);
+            if(assembly == null)
+            {
+                if (throwOnFail)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.ErrLoadAssembly, assemblyName));
+                }
+            }
             return assembly;
         }
 
