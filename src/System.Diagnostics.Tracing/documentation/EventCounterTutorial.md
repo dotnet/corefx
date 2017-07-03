@@ -47,9 +47,7 @@ So, with that, we logged the metric to the `EventCounter`, but unless we can act
 
 There is an extra keyword that you will need to specify the turn on the EventCounters.
 
-```
-PerfView /onlyProviders=*Samples-EventCounterDemos-Minimal:**EventCounterIntervalSec=1** collect
-```
+<code>PerfView /onlyProviders=*Samples-EventCounterDemos-Minimal:**EventCounterIntervalSec=1** collect</code>
 
 Note the bold part about `EventCounterIntervalSec`, that indicate the frequency of the sampling.
 
@@ -69,10 +67,8 @@ Notice that, this command also log the events, so we will get both the events an
 
 <img src="PerfViewCapture_Events.png" alt="PerfView Capture of Event Traces" title="PerfView Capture of Event Traces" />
 
-As we mentioned, to avoid overhead, sometimes we will want just the counters. This command can be used to log <em>only</em> the counters:
+As we mentioned, to avoid overhead, sometimes we will want just the counters. This command can be used to log *only* the counters:
 
-```
-PerfView /onlyProviders=*Samples-EventCounterDemos-Minimal:*:Critical:EventCounterIntervalSec=1 collect
-```
+<code>PerfView /onlyProviders=*Samples-EventCounterDemos-Minimal:*:Critical:EventCounterIntervalSec=1 collect</code>
 
 Notice the `Critical` keyword in the command line, that is used to filter out the other events with lower priorities.
