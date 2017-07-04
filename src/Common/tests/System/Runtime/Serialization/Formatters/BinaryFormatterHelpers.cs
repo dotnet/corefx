@@ -81,6 +81,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 return;
             }
 
+            // Construct a valid serialization payload.
             var info = new SerializationInfo(typeof(T), new FormatterConverter());
             info.AddValue("ClassName", "ClassName");
             info.AddValue("Message", "Message");
@@ -93,7 +94,16 @@ namespace System.Runtime.Serialization.Formatters.Tests
             info.AddValue("Source", null);
             info.AddValue("ExceptionMethod", null);
 
-            ConstructorInfo constructor = typeof(T).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }, null);
+            ConstructorInfo constructor = null;
+            foreach (ConstructorInfo c in typeof(T).GetTypeInfo().DeclaredConstructors)
+            {
+                ParameterInfo[] parameters = c.GetParameters();
+                if (parameters.Length == 2 && parameters[0].ParameterType == typeof(SerializationInfo) && parameters[1].ParameterType == typeof(StreamingContext))
+                {
+                    constructor = c;
+                    break;
+                }
+            };
             Assert.NotNull(constructor);
 
             Exception ex = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] { info, new StreamingContext() }));
