@@ -4567,7 +4567,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         var actual = SerializeAndDeserialize(value,
             @"<?xml version=""1.0""?>
-<anyType p1:type=""ItemChoiceType"" xmlns:p1=""http://www.w3.org/2001/XMLSchema-instance"">DecimalNumber</anyType>", 
+<anyType d1p1:type=""ItemChoiceType"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">DecimalNumber</anyType>", 
             serializerFactory);
 
         Assert.StrictEqual(value, actual);
