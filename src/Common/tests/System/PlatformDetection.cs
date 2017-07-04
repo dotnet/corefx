@@ -36,6 +36,8 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
+        public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
+        public static bool IsNotArmProcess => !IsArmProcess;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
@@ -153,6 +155,7 @@ namespace System
             }
         }
 
+        public static bool IsNotWinRT => !IsWinRT;
         public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
         public static bool IsNotWinRTSupported => !IsWinRTSupported;
 

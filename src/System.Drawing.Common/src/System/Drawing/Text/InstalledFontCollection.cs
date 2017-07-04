@@ -4,28 +4,18 @@
 
 namespace System.Drawing.Text
 {
-    /// <include file='doc\InstalledFontCollection.uex' path='docs/doc[@for="InstalledFontCollection"]/*' />
-    /// <devdoc>
-    ///    <para>
-    ///       Represents the fonts installed on the
-    ///       system.
-    ///    </para>
-    /// </devdoc>
+    /// <summary>
+    /// Represents the fonts installed on the system.
+    /// </summary>
     public sealed class InstalledFontCollection : FontCollection
     {
-        /// <include file='doc\InstalledFontCollection.uex' path='docs/doc[@for="InstalledFontCollection.InstalledFontCollection"]/*' />
-        /// <devdoc>
-        ///    Initializes a new instance of the <see cref='System.Drawing.Text.InstalledFontCollection'/> class.
-        /// </devdoc>
-        public InstalledFontCollection()
+        /// <summary>
+        /// Initializes a new instance of the <see cref='System.Drawing.Text.InstalledFontCollection'/> class.
+        /// </summary>
+        public InstalledFontCollection() : base()
         {
-            nativeFontCollection = IntPtr.Zero;
-
-            int status = SafeNativeMethods.Gdip.GdipNewInstalledFontCollection(out nativeFontCollection);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            int status = SafeNativeMethods.Gdip.GdipNewInstalledFontCollection(out _nativeFontCollection);
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
     }
 }
-

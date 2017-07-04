@@ -129,7 +129,7 @@ namespace System.Net.Tests
         {
             using (var listener = new HttpListener())
             {
-                Assert.Throws<ArgumentNullException>("asyncResult", () => listener.EndGetContext(null));
+                AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => listener.EndGetContext(null));
             }
         }
 
@@ -144,8 +144,8 @@ namespace System.Net.Tests
                 listener2.Start();
 
                 IAsyncResult beginGetContextResult = listener1.BeginGetContext(null, null);
-                Assert.Throws<ArgumentException>("asyncResult", () => listener2.EndGetContext(new CustomAsyncResult()));
-                Assert.Throws<ArgumentException>("asyncResult", () => listener2.EndGetContext(beginGetContextResult));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => listener2.EndGetContext(new CustomAsyncResult()));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => listener2.EndGetContext(beginGetContextResult));
             }
         }
 

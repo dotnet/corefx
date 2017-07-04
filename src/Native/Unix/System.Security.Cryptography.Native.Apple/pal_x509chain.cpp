@@ -65,7 +65,10 @@ extern "C" int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
     SecTrustResultType trustResult;
     *pOSStatus = SecTrustEvaluate(chain, &trustResult);
 
-    if (*pOSStatus != noErr)
+    // If any error is reported from the function or the trust result value indicates that
+    // otherwise was a failed chain build (vs an untrusted chain, etc) return failure and
+    // we'll throw in the managed layer.  (but if we hit the "or" the message is "No error")
+    if (*pOSStatus != noErr || trustResult == kSecTrustResultInvalid)
     {
         return 0;
     }
@@ -174,7 +177,12 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         // (On Windows CERT_CHAIN_PARA.pStrongSignPara is NULL, so "strongness" checks
         // are not performed).
     }
-
+    else if (CFEqual(keyString, CFSTR("StatusCodes")))
+    {
+        // 10.13 added a StatusCodes value which may be a numeric rehashing of the string data.
+        // It doesn't represent a new error code, and we're still getting the old ones, so
+        // just ignore it for now.
+    }
     else
     {
 #ifdef DEBUGGING_UNKNOWN_VALUE

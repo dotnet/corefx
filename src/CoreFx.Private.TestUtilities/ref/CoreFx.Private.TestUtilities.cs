@@ -5,7 +5,44 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using Xunit;
 
+namespace System
+{
+    public static class AssertExtensions
+    {
+        public static void Throws<T>(System.Action action, string message) where T : System.Exception { }
+        public static void Throws<T>(string netCoreParamName, string netFxParamName, Action action) where T : System.ArgumentException { }
+        public static T Throws<T>(string paramName, System.Action action) where T : System.ArgumentException { throw null; }
+        public static T Throws<T>(string paramName, Func<object> testCode) where T : System.ArgumentException { throw null; }
+        public static System.Threading.Tasks.Task<T> ThrowsAsync<T>(string paramName, System.Func<Task> testCode) where T : System.ArgumentException { throw null; }
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, System.Action action)
+                where TNetCoreExceptionType : System.ArgumentException
+                where TNetFxExceptionType : System.ArgumentException
+        { }
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string netCoreParamName, string netFxParamName, System.Action action)
+            where TNetCoreExceptionType : System.ArgumentException
+            where TNetFxExceptionType : System.ArgumentException
+        { }
+        public static void ThrowsAny(System.Type firstExceptionType, System.Type secondExceptionType, System.Action action) { }
+        public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType>(System.Action action)
+            where TFirstExceptionType : System.Exception
+            where TSecondExceptionType : System.Exception
+        { }
+        public static void ThrowsIf<T>(bool condition, System.Action action) where T : System.Exception { }
+        public static void GreaterThan<T>(T actual, T greaterThan, string userMessage = null) where T : System.IComparable { }
+        public static void LessThan<T>(T actual, T lessThan, string userMessage = null) where T : System.IComparable { }
+        public static void LessThanOrEqualTo<T>(T actual, T lessThanOrEqualTo, string userMessage = null) where T : System.IComparable { }
+        public static void GreaterThanOrEqualTo<T>(T actual, T greaterThanOrEqualTo, string userMessage = null) where T : System.IComparable { }
+        public static void Equal(byte[] expected, byte[] actual) { }
+    }
+    public static class TheoryExtensions
+    {
+        [CLSCompliant(false)]
+        public static TheoryData ToTheoryData<T>(this IEnumerable<T> data) { throw null; }
+    }
+}
 namespace System.Diagnostics
 {
     public abstract partial class RemoteExecutorTestBase : System.IO.FileCleanupTestBase
@@ -37,6 +74,7 @@ namespace System.Diagnostics
         public RemoteInvokeOptions() { }
         public bool CheckExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool EnableProfiling { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int ExpectedExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool Start { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Diagnostics.ProcessStartInfo StartInfo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public int TimeOut { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }

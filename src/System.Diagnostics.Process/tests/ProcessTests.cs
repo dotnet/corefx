@@ -771,7 +771,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void GetProcesses_EmptyMachineName_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Process.GetProcesses(""));
+            AssertExtensions.Throws<ArgumentException>(null, () => Process.GetProcesses(""));
         }
 
         [Fact]
@@ -843,7 +843,7 @@ namespace System.Diagnostics.Tests
         public void GetProcessesByName_EmptyMachineName_ThrowsArgumentException()
         {
             Process currentProcess = Process.GetCurrentProcess();
-            Assert.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
+            AssertExtensions.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
         }
 
         [Fact]
@@ -966,9 +966,12 @@ namespace System.Diagnostics.Tests
         [InlineData("b d \\\"\\\"a\\\"\\\"", "b,d,\"\"a\"\"")]
         public void TestArgumentParsing(string inputArguments, string expectedArgv)
         {
-            using (var handle = RemoteInvokeRaw((Func<string, string, string, int>)ConcatThreeArguments,
-                inputArguments,
-                new RemoteInvokeOptions { Start = true, StartInfo = new ProcessStartInfo { RedirectStandardOutput = true } }))
+            var options = new RemoteInvokeOptions
+            {
+                Start = true,
+                StartInfo = new ProcessStartInfo { RedirectStandardOutput = true }
+            };
+            using (RemoteInvokeHandle handle = RemoteInvokeRaw((Func<string, string, string, int>)ConcatThreeArguments, inputArguments, options))
             {
                 Assert.Equal(expectedArgv, handle.Process.StandardOutput.ReadToEnd());
             }
@@ -1459,7 +1462,7 @@ namespace System.Diagnostics.Tests
             };
 
             var process = new Process() { StartInfo = startInfo };
-            Assert.Throws<ArgumentException>(null, () => process.Start());
+            AssertExtensions.Throws<ArgumentException>(null, () => process.Start());
         }
 
         private string GetCurrentProcessName()

@@ -70,11 +70,8 @@ namespace System.Threading.Tests
             }
         }
 
-        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(
-            TargetFrameworkMonikers.Uap,
-            "Impersonation APIs are not available and creating global sync objects is not allowed in UWP apps.")]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWinRT))] // Can't create global objects in appcontainer
         [SkipOnTargetFramework(
             TargetFrameworkMonikers.NetFramework,
             "The fix necessary for this test (PR https://github.com/dotnet/coreclr/pull/12381) is not in the .NET Framework.")]
@@ -93,7 +90,7 @@ namespace System.Threading.Tests
             });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsUap))]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWinRT))] // Can't create global objects in appcontainer
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Ctor_TryCreateGlobalMutexTest_Uwp()
         {
@@ -248,7 +245,7 @@ namespace System.Threading.Tests
                 };
 
                 using (var mutex = new Mutex(false, mutexName))
-                using (var remote = RemoteInvoke(otherProcess, mutexName, $"\"{fileName}\""))
+                using (var remote = RemoteInvoke(otherProcess, mutexName, fileName))
                 {
                     SpinWait.SpinUntil(() => File.Exists(fileName));
 
