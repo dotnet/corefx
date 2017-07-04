@@ -278,7 +278,7 @@ namespace System.Net.Mail.Tests
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             client.Credentials = new NetworkCredential("user", "password");
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
-            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName;
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             try
             {
@@ -305,7 +305,7 @@ namespace System.Net.Mail.Tests
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
-            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName;
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             try
             {
@@ -332,7 +332,7 @@ namespace System.Net.Mail.Tests
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
-            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName;
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             CredentialCache cache = new CredentialCache();
             cache.Add("localhost", server.EndPoint.Port, "NTLM", CredentialCache.DefaultNetworkCredentials);
