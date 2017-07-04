@@ -39,10 +39,10 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Access to path is denied when in App container")]
-        public void GetDomainController_InvalidIPV6_ThrowsInvalidCastException()
+        public void GetDomainController_InvalidIPV6_ThrowsActiveDirectoryObjectNotFoundException()
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, "[::1]:port");
-            Assert.Throws<InvalidCastException>(() => DomainController.GetDomainController(context));
+            Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
         }
 
         [Fact]
