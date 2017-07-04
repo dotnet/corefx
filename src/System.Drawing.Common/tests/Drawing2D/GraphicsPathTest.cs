@@ -41,7 +41,7 @@ namespace Drawing2D
         {
             public RunIfFontFamilyGenericMonospaceNotNull()
             {
-                if (true)
+                if (FontFamily.GenericMonospace != null && PlatformDetection.IsNotWindowsNanoServer)
                 {
                     Skip = "GenericMonospace FontFamily couldn't be found";
                 }
@@ -51,7 +51,7 @@ namespace Drawing2D
         private const float Pi4 = (float)(Math.PI / 4);
         private const float Delta = 0.0003f;
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -61,7 +61,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(FillMode.Alternate, FillMode.Winding)]
         public void Ctor_FillMode_Succses(FillMode alternate, FillMode winding)
         {
@@ -75,7 +75,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_SamePoints_Succses()
         {
             byte[] types = new byte[6] { 0, 1, 1, 1, 1, 1 };
@@ -106,13 +106,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath((Point[])null, new byte[1]));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_PointsTypesLengthMismatch_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => new GraphicsPath(new Point[1], new byte[2]));
@@ -121,7 +121,7 @@ namespace Drawing2D
             Assert.Throws<ArgumentException>(() => new GraphicsPath(new PointF[2], new byte[1]));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Clone_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -132,7 +132,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reset_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -144,7 +144,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GraphicsPath_FillModeChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -154,13 +154,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GraphicsPath_InvalidFillMode_ThrowsInvalidEnumArgumentException()
         {
             Assert.Throws<InvalidEnumArgumentException>(() => new GraphicsPath().FillMode = ((FillMode)int.MaxValue));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathData_ReturnsExpected()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -170,7 +170,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathData_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -185,7 +185,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathPoints_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -200,13 +200,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathPoints_EmptyPath_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => Assert.Null(new GraphicsPath().PathPoints));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathTypes_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -219,13 +219,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PathTypes_EmptyPath_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => Assert.Null(new GraphicsPath().PathTypes));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetLastPoint_Success()
         {
             byte[] types = new byte[3] { 0, 1, 1 };
@@ -240,7 +240,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddLine_Success(int x1, int y1, int x2, int y2)
         {
@@ -263,7 +263,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(49, 157, 75, 196, 102, 209)]
         public void AddLine_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
         {
@@ -301,7 +301,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddLines_Success(int x1, int y1, int x2, int y2)
         {
@@ -316,7 +316,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1)]
         public void AddLines_SinglePoint_Success(int x1, int y1)
         {
@@ -331,7 +331,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(49, 157)]
         public void AddLines_SamePoint_Success(int x1, int y1)
         {
@@ -390,21 +390,21 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddLines_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddLines((Point[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddLines((PointF[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddLines_ZeroPoints_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => new GraphicsPath().AddLines(new Point[0]));
             Assert.Throws<ArgumentException>(() => new GraphicsPath().AddLines(new PointF[0]));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddArc_Values_Success(int x, int y, int width, int height)
         {
@@ -419,7 +419,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddArc_Rectangle_Success(int x, int y, int width, int height)
         {
@@ -434,7 +434,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, 0, 0, 0)]
         [InlineData(0, 0, 1, 0)]
         [InlineData(0, 0, 0, 1)]
@@ -444,7 +444,7 @@ namespace Drawing2D
             Assert.Throws<ArgumentException>(() => new GraphicsPath().AddArc((float)x, (float)y, (float)width, (float)height, Pi4, Pi4));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
         public void AddBezier_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
@@ -460,7 +460,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0, 0, 0, 0, 0, 0, 0, 0)]
         public void AddBezier_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
@@ -505,7 +505,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
         public void AddBezier_Values_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
@@ -520,7 +520,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
         public void AddBeziers_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
@@ -537,14 +537,14 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddBeziers_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddBeziers((PointF[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddBeziers((Point[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddBeziers_ThreePoints_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => new GraphicsPath()
@@ -555,7 +555,7 @@ namespace Drawing2D
         }
 
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddCurve_TwoPoints_Success(int x1, int y1, int x2, int y2)
         {
@@ -580,7 +580,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 0.5f)]
         public void AddCurve_TwoPointsWithTension_Success(int x1, int y1, int x2, int y2, float tension)
         {
@@ -605,7 +605,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 1, 1)]
         public void AddCurve_SamePoints_Success(int x1, int y1, int x2, int y2)
         {
@@ -634,7 +634,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, float.MaxValue)]
         public void AddCurve_LargeTension_Success(int x1, int y1, int x2, int y2, float tension)
         {
@@ -661,7 +661,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddCurve_Success()
         {
             PointF[] points = new PointF[] {
@@ -724,14 +724,14 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddCurve_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddCurve((PointF[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddCurve((Point[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddCurve_BadValues_ThrowsArgumentException()
         {
             // zero points
@@ -774,7 +774,7 @@ namespace Drawing2D
 
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3)]
         public void AddClosedCurve_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3)
         {
@@ -791,7 +791,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 1, 1, 1, 1)]
         public void AddClosedCurve_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
         {
@@ -814,7 +814,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3, 0.5f)]
         public void AddClosedCurve_Tension_Success(int x1, int y1, int x2, int y2, int x3, int y3, float tension)
         {
@@ -833,14 +833,14 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddClosedCurve_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddClosedCurve((PointF[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddClosedCurve((Point[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddClosedCurve_LessThenThreePoints_ThrowsArgumentException()
         {
             // zero points
@@ -864,7 +864,7 @@ namespace Drawing2D
                 new Point[2] { new Point(1, 1), new Point(2, 2) }));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddRectangle_Success(int x, int y, int width, int height)
         {
@@ -879,7 +879,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 1, 1)]
         public void AddRectangle_SameRectangles_Success(int x, int y, int width, int height)
         {
@@ -922,7 +922,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 2, 0, 0)]
         [InlineData(1, 2, 3, 0)]
         [InlineData(1, 2, 0, 4)]
@@ -939,7 +939,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
         public void AddRectangles_Success(int x, int y, int width, int height, int x1, int y1, int width1, int height1)
         {
@@ -970,7 +970,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddRectangles_SamePoints_Success(int x, int y, int width, int height)
         {
@@ -1004,14 +1004,14 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddRectangles_RectangleNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddRectangles((RectangleF[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddRectangles((Rectangle[])null));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddEllipse_Rectangl_Success(int x, int y, int width, int height)
         {
@@ -1026,7 +1026,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddEllipse_Values_Success(int x, int y, int width, int height)
         {
@@ -1041,7 +1041,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 0, 0)]
         [InlineData(1, 1, 2, 0)]
         [InlineData(1, 1, 0, 2)]
@@ -1058,7 +1058,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddPie_Rectangl_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
@@ -1068,7 +1068,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, Pi4, Pi4)]
         public void AddPie_Values_Success(int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
@@ -1083,7 +1083,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 0, 0, Pi4, Pi4)]
         [InlineData(1, 1, 2, 0, Pi4, Pi4)]
         [InlineData(1, 1, 0, 2, Pi4, Pi4)]
@@ -1094,7 +1094,7 @@ namespace Drawing2D
             Assert.Throws<ArgumentException>(() => new GraphicsPath().AddPie(new Rectangle(x, y, height, width), Pi4, Pi4));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3)]
         public void AddPolygon_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3)
         {
@@ -1109,7 +1109,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2, 3, 3)]
         public void AddPolygon_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
         {
@@ -1174,14 +1174,14 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddPolygon_PointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddPolygon((Point[])null));
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddPolygon((PointF[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddPolygon_LessThenThreePoints_ThrowsArgumentException()
         {
             // zero points
@@ -1205,7 +1205,7 @@ namespace Drawing2D
                 new Point[2] { new Point(1, 1), new Point(2, 2) }));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(1, 1, 2, 2)]
         public void AddPath_Success(int x, int y, int width, int height)
         {
@@ -1218,7 +1218,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddPath_PathNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().AddPath(null, false));
@@ -1330,14 +1330,14 @@ namespace Drawing2D
                 new GraphicsPath().AddString(null, ff, 0, 10, new RectangleF(10f, 10f, 10f, 10f), StringFormat.GenericDefault));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddString_FontFamilyNull_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
                 new GraphicsPath().AddString("mono", null, 0, 10, new Point(10, 10), StringFormat.GenericDefault));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1369,7 +1369,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_PathEmpty_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1381,13 +1381,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_MatrixNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().Transform(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetBounds_PathEmpty_ReturnsExpected()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1401,7 +1401,7 @@ namespace Drawing2D
             yield return new object[] { new RectangleF(1f, 1f, 2f, 2f) };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(GetBounds_TestData))]
         public void GetBounds_Rectangle_ReturnsExpected(RectangleF testRectangle)
         {
@@ -1459,7 +1459,7 @@ namespace Drawing2D
             yield return new object[] { new Rectangle(10, 10, 100, 100), 30, 45, 60f, 60f, 43.3f, 48.3f };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(GetBounds_Pie_TestData))]
         public void GetBounds_Pie_ReturnsExpected(
             Rectangle testRectangle, int startAngle, int sweepAngle, float expectedX, float expectedY, float expectedWidth, float expectedHeight)
@@ -1475,7 +1475,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Empty_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1486,7 +1486,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_MatrixNull_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1497,7 +1497,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_MatrixNullFloat_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1508,7 +1508,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Arc_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1520,7 +1520,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Bezier_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1532,7 +1532,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_ClosedCurve_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1549,7 +1549,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Curve_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1566,7 +1566,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Ellipse_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1578,7 +1578,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Line_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1590,7 +1590,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Pie_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1602,7 +1602,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Polygon_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1619,7 +1619,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Flatten_Rectangle_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1631,13 +1631,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Warp_DestinationPointsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().Warp(null, new RectangleF()));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Warp_DestinationPointsZero_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() => new GraphicsPath().Warp(new PointF[0], new RectangleF()));
@@ -1653,7 +1653,7 @@ namespace Drawing2D
             };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Warp_TestData))]
         public void Warp_PathEmpty_Success(PointF[] destPoints, Point[] points, RectangleF srcRectangle)
         {
@@ -1666,7 +1666,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Warp_TestData))]
         public void Warp_WarpModeInvalid_Success(PointF[] destPoints, Point[] points, RectangleF srcRectangle)
         {
@@ -1760,7 +1760,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Warp_TestData))]
         public void Warp_RectangleEmpty_Success(PointF[] destPoints, Point[] points, RectangleF srcRectangle)
         {
@@ -1828,7 +1828,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetMarkers_EmptyPath_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1837,7 +1837,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetMarkers_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1849,7 +1849,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ClearMarkers_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1863,7 +1863,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ClearMarkers_EmptyPath_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1872,7 +1872,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CloseFigure_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1884,7 +1884,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CloseFigure_EmptyPath_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1893,7 +1893,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CloseAllFigures_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1909,7 +1909,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CloseAllFigures_EmptyPath_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1918,7 +1918,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddArc()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1936,7 +1936,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddBezier()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1954,7 +1954,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddBeziers()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1978,7 +1978,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddClosedCurve()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -1997,7 +1997,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddCurve()
         {
             GraphicsPath path = new GraphicsPath();
@@ -2013,7 +2013,7 @@ namespace Drawing2D
             Assert.Equal(1, types[path.PointCount - 1]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddEllipse()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2032,7 +2032,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddLine()
         {
             GraphicsPath path = new GraphicsPath();
@@ -2048,7 +2048,7 @@ namespace Drawing2D
             Assert.Equal(1, types[path.PointCount - 1]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddLines()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2066,7 +2066,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddPath_Connect()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2086,7 +2086,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddPath_NoConnect()
         {
             GraphicsPath inner = new GraphicsPath();
@@ -2104,7 +2104,7 @@ namespace Drawing2D
             Assert.Equal(1, types[path.PointCount - 1]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddPie()
         {
             GraphicsPath path = new GraphicsPath();
@@ -2122,7 +2122,7 @@ namespace Drawing2D
             Assert.Equal(1, types[path.PointCount - 1]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddPolygon()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2141,7 +2141,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddRectangle()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2160,7 +2160,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddRectangles()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2184,7 +2184,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void StartClose_AddString()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2203,7 +2203,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         //[Fact(Skip = "Not Working.")]
         public void Widen_Pen_Success()
         {
@@ -2254,7 +2254,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Widen_EmptyPath_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2279,7 +2279,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Widen_PenNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().Widen(null));
@@ -2292,7 +2292,7 @@ namespace Drawing2D
             yield return new object[] { new Point[3] { new Point(5, 5), new Point(15, 5), new Point(10, 15) } };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         //[Theory(Skip = "Not Working.")]
         [MemberData(nameof(Widen_TestData))]
         public void Widen_MatrixNull_Succses(Point[] points)
@@ -2307,7 +2307,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         //[Theory(Skip = "Not Working.")]
         [MemberData(nameof(Widen_TestData))]
         public void Widen_MatrixEmpty_Succses(Point[] points)
@@ -2345,7 +2345,7 @@ namespace Drawing2D
             yield return new object[] { new Rectangle(1, 1, 2, 2), 1.1f, 0.45f, 0.45f, 3.10f, 3.10f };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         //[Theory(Skip = "Not Working.")]
         [MemberData(nameof(Widen_PenSmallWidth_TestData))]
         public void Widen_Pen_SmallWidth_Succes(
@@ -2364,7 +2364,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_PenNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().IsOutlineVisible(1, 1, null));
@@ -2373,13 +2373,13 @@ namespace Drawing2D
             Assert.Throws<ArgumentNullException>(() => new GraphicsPath().IsOutlineVisible(new PointF(), null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineWithoutGraphics_ReturnsExpected()
         {
             AssertIsOutlineVisibleLine(null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineInsideGraphics_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(20, 20))
@@ -2389,7 +2389,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineOutsideGraphics_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(5, 5))
@@ -2403,7 +2403,7 @@ namespace Drawing2D
         // Docs ways the point is in world coordinates and that the graphics transform 
         // should be applied.
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineWithGraphicsTransform_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(20, 20))
@@ -2416,7 +2416,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineWithGraphicsPageUnit_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(20, 20))
@@ -2428,7 +2428,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_LineWithGraphicsPageScale_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(20, 20))
@@ -2486,19 +2486,19 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsOutlineVisible_RectangleWithoutGraphics_ReturnsExpected()
         {
             AssertIsOutlineVisibleRectangle(null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsVisible_RectangleWithoutGraphics_ReturnsExpected()
         {
             AssertIsVisibleRectangle(null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsVisible_RectangleWithGraphics_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(40, 40))
@@ -2508,13 +2508,13 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsVisible_EllipseWithoutGraphics_ReturnsExpected()
         {
             AssertIsVisibleEllipse(null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void IsVisible_EllipseWithGraphics_ReturnsExpected()
         {
             using (Bitmap bitmap = new Bitmap(40, 40))
@@ -2524,7 +2524,7 @@ namespace Drawing2D
             }
         }        
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Arc_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2534,7 +2534,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Bezier_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2556,7 +2556,7 @@ namespace Drawing2D
             };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Reverse_TestData))]
         public void Reverse_Beziers_Succes(Point[] points)
         {
@@ -2567,7 +2567,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Reverse_TestData))]
         public void Reverse_ClosedCurve_Succes(Point[] points)
         {
@@ -2578,7 +2578,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Reverse_TestData))]
         public void Reverse_Curve_Succes(Point[] points)
         {
@@ -2589,7 +2589,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Ellipse_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2599,7 +2599,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Line_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2609,7 +2609,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_LineClosed_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2620,7 +2620,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Reverse_TestData))]
         public void Reverse_Lines_Succes(Point[] points)
         {
@@ -2631,7 +2631,7 @@ namespace Drawing2D
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Reverse_TestData))]
         public void Reverse_Polygon_Succes(Point[] points)
         {
@@ -2642,7 +2642,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Rectangle_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2652,7 +2652,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Rectangles_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2663,7 +2663,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         //[Category("NotWorking")] // the output differs from GDI+ and libgdiplus
         public void Reverse_Pie_Succes()
         {
@@ -2675,7 +2675,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_ArcLineInnerPath_Succes()
         {
             using (GraphicsPath inner = new GraphicsPath())
@@ -2689,7 +2689,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_EllipseRectangle_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2732,7 +2732,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_Marker_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2744,7 +2744,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Reverse_SubpathMarker_Succes()
         {
             using (GraphicsPath gp = new GraphicsPath())
@@ -2770,7 +2770,7 @@ namespace Drawing2D
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void bug413461()
         {
             int dX = 520;
