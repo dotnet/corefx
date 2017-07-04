@@ -19,7 +19,8 @@ namespace System.DirectoryServices.AccountManagement.Tests
             Assert.Null(context.Container);
             Assert.Null(context.UserName);
             Assert.Equal(ContextOptions.Negotiate, context.Options);
-            Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+            Assert.NotNull(context.ConnectedServer);
+            Assert.Equal(Environment.MachineName, context.ConnectedServer);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -42,7 +43,8 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
@@ -66,7 +68,8 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
@@ -86,11 +89,12 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
             if (name != null)
             {
-                Assert.Throws<COMException>(() => context.ConnectedServer);
+                var comException = Assert.Throws<COMException>(() => context.ConnectedServer);
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
@@ -114,7 +118,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.Throws<Exception>(() => context.ConnectedServer);
             }
         }
 
@@ -138,7 +142,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.Throws<Exception>(() => context.ConnectedServer);
             }
         }
 
