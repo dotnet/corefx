@@ -308,7 +308,14 @@ namespace Microsoft.XmlSerializer.Generator
         {
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
-            Console.Out.WriteLine("Load assembly from " + path);
+            Console.Out.WriteLine("check file exist at " + path);
+            if (!File.Exists(path))
+            {
+                Console.Out.WriteLine("File doesn't exist at " + path);
+                throw new FileNotFoundException(string.Format("cannot find file under {0}, the current directory is ", path, Directory.GetCurrentDirectory()));
+            }
+
+            Console.Out.WriteLine("Loading assembly from " + path);
             assembly = Assembly.LoadFile(path);
             if(assembly == null)
             {
