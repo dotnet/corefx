@@ -48,6 +48,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(DirectoryContextType.ApplicationPartition)]
         [InlineData(DirectoryContextType.DirectoryServer)]
         [InlineData(DirectoryContextType.Domain)]

@@ -74,6 +74,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null, ContextOptions.Negotiate)]
         [InlineData(ContextType.Machine, "", null, ContextOptions.Negotiate)]
         [InlineData(ContextType.Machine, "\0", null, ContextOptions.Negotiate)]
@@ -99,6 +100,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, "userName", "password")]
         [InlineData(ContextType.Machine, "", "", "")]
         [InlineData(ContextType.Machine, "\0", "userName", "")]
@@ -123,6 +125,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null, "userName", "password")]
         [InlineData(ContextType.Machine, "", null, "", "")]
         [InlineData(ContextType.Machine, "\0", null, "userName", "")]
@@ -288,6 +291,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         public void ValidateCredentials_InvalidUserName_ThrowsException()
         {
             var context = new PrincipalContext(ContextType.Machine);
@@ -295,6 +299,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         public void ValidateCredentials_IncorrectUserNamePassword_ThrowsException()
         {
             var context = new PrincipalContext(ContextType.Machine);

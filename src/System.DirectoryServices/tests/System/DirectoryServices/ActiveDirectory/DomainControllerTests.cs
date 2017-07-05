@@ -27,6 +27,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData("\0")]
         [InlineData("server:port")]
         [InlineData("[")]
