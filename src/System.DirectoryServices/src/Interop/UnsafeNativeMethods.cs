@@ -491,9 +491,9 @@ namespace System.DirectoryServices.Interop
         }
 
         // for boolean type, the default marshaller does not work, so need to have specific marshaller. For other types, use the
-        // default marshaller which is more efficient        
-
-        // not in ActiveDS typelib 
+        // default marshaller which is more efficient. There is no such interface on the type library this is the same as IAdsObjectOptions
+        // with a different signature.
+        [ComImport, Guid("46F14FDA-232B-11D1-A808-00C04FD8D5A8")]
         public interface IAdsObjectOptions2
         {
             [SuppressUnmanagedCodeSecurityAttribute()]

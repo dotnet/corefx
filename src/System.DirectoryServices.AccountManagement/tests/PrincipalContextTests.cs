@@ -24,6 +24,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null)]
         [InlineData(ContextType.Machine, "")]
         [InlineData(ContextType.Machine, "\0")]
@@ -49,6 +50,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null)]
         [InlineData(ContextType.Machine, "", null)]
         [InlineData(ContextType.Machine, "\0", null)]
