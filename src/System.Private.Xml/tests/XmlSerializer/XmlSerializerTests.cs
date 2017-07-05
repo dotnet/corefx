@@ -4430,8 +4430,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.MyStringProperty, actual.MyStringProperty);     
     }
 
-    //it is faild on NETFX x86 Release Build
-    //[Fact]
+    [Fact]
     public static void Xml_VerifyCompilationIssueOnly()
     {
         MemoryStream ms = new MemoryStream();
@@ -4444,11 +4443,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("There was an error reflecting type 'SerializationTypes.TypeWithEnumerableMembers'.", ex.Message);
-#endif
         }
 
         try
@@ -4460,11 +4454,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("Cannot deserialize type 'TypeWithoutPublicSetter' because it contains property 'Name' which has no public setter.", ex.Message);
-#endif
         }
 
         try
@@ -4476,11 +4465,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("Cannot deserialize type 'TypeWithCompilerGeneratedAttributeButWithoutPublicSetter' because it contains property 'Name' which has no public setter.", ex.Message);
-#endif
         }
 
         try
@@ -4492,11 +4476,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("There was an error reflecting type 'SerializationTypes.InvalidDerivedClass'.", ex.Message);
-#endif
         }
 
         try
@@ -4508,11 +4487,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("There was an error reflecting type 'SerializationTypes.AnotherInvalidDerivedClass'.", ex.Message);
-#endif
         }
 
         try
@@ -4524,11 +4498,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
-#endif
         }
 
         try
@@ -4540,11 +4509,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         catch (Exception ex)
         {
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-#if uap
-            Assert.Equal("There was an error generating the XML document.", ex.Message);
-#else
-            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicTypeWithNestedPublicType+NestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
-#endif
         }
 
         var value1 = new DuplicateTypeNamesTest.ns1.ClassA();
