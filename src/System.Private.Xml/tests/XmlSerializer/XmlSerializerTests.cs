@@ -4525,6 +4525,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
 #if uap
             Assert.Equal("There was an error generating the XML document.", ex.Message);
+#elif netfx
+            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicType is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
 #else
             Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
 #endif
@@ -4541,6 +4543,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
 #if uap
             Assert.Equal("There was an error generating the XML document.", ex.Message);
+#elif netfx
+            Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicTypeWithNestedPublicType is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
 #else
             Assert.Equal("SerializationTypes.InternalTypeWithNestedPublicTypeWithNestedPublicType+NestedPublicType+LevelData is inaccessible due to its protection level. Only public types can be processed.", ex.Message);
 #endif
