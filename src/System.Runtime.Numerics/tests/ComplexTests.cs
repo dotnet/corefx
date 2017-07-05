@@ -13,7 +13,7 @@ namespace System.Numerics.Tests
     public partial class ComplexTests
     {
         private static Random s_random = new Random(-55);
-
+        
         public static readonly double[] s_validDoubleValues = new double[]
         {
             double.MinValue,
@@ -198,7 +198,7 @@ namespace System.Numerics.Tests
             var complex = new Complex(real, imaginary);
             VerifyRealImaginaryProperties(complex, real, imaginary);
         }
-
+        
         [Theory]
         [MemberData(nameof(Primitives_2_TestData))]
         [MemberData(nameof(Random_2_TestData))]
@@ -421,7 +421,7 @@ namespace System.Numerics.Tests
             Complex result = Complex.Atan(complex);
             VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
         }
-
+        
         [Theory]
         [MemberData(nameof(Primitives_2_TestData))]
         [MemberData(nameof(Boundaries_2_TestData))]
@@ -499,7 +499,7 @@ namespace System.Numerics.Tests
         [MemberData(nameof(SmallRandom_2_TestData))]
         public static void Cosh_Basic(double real, double imaginary)
         {
-            // The product formula: cosh (x+iy) = cosh(x)*cos(y) + isinh(x)*sin(y)
+            // The product formula: cosh (x+iy) = cosh(x)*cos(y) + isinh(x)*sin(y) 
             // The verification formula: Cosh (z) = (Exp(z) + Exp(-z))/2
             // The verification formula is used not for the boundary values
             var complex = new Complex(real, imaginary);
@@ -785,7 +785,7 @@ namespace System.Numerics.Tests
                     yield return new object[] { magnitude, phase };
                 }
             }
-
+            
             yield return new object[] { RandomPositiveDouble(), RandomPositivePhase() }; // First quadrant
             yield return new object[] { RandomNegativeDouble(), RandomPositivePhase() }; // Second quadrant
             yield return new object[] { RandomNegativeDouble(), RandomNegativePhase() }; // Third quadrant
@@ -972,7 +972,7 @@ namespace System.Numerics.Tests
             result = Complex.Multiply(left, right);
             VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
         }
-
+        
         [Theory]
         [MemberData(nameof(Valid_2_TestData))]
         [MemberData(nameof(Random_2_TestData))]
@@ -987,7 +987,7 @@ namespace System.Numerics.Tests
             result = Complex.Negate(complex);
             VerifyRealImaginaryProperties(result, -complex.Real, -complex.Imaginary);
         }
-
+        
         [Theory]
         [MemberData(nameof(Boundaries_2_TestData))]
         [MemberData(nameof(Primitives_2_TestData))]
@@ -1040,7 +1040,7 @@ namespace System.Numerics.Tests
             VerifyPow_Complex_Complex(real, imaginary, 1, 0);
             VerifyPow_Complex_Complex(real, imaginary, 0, 1);
             VerifyPow_Complex_Complex(real, imaginary, 0, -1);
-
+            
             VerifyPow_Complex_Complex(real, imaginary, SmallRandomPositiveDouble(), SmallRandomPositiveDouble()); // First quadrant
             VerifyPow_Complex_Complex(real, imaginary, SmallRandomNegativeDouble(), SmallRandomPositiveDouble()); // Second quadrant
             VerifyPow_Complex_Complex(real, imaginary, SmallRandomNegativeDouble(), SmallRandomNegativeDouble()); // Third quadrant
@@ -1068,7 +1068,7 @@ namespace System.Numerics.Tests
             }
             VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
         }
-
+        
         [Theory]
         [MemberData(nameof(Boundaries_2_TestData))]
         [MemberData(nameof(Primitives_2_TestData))]
@@ -1396,7 +1396,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(short.MinValue)]
         [InlineData(-1)]
@@ -1408,7 +1408,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(int.MinValue)]
         [InlineData(-1)]
@@ -1432,7 +1432,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(byte.MinValue)]
         [InlineData(1)]
@@ -1452,7 +1452,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(uint.MinValue)]
         [InlineData(1)]
@@ -1462,7 +1462,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(ulong.MinValue)]
         [InlineData(1)]
@@ -1484,7 +1484,7 @@ namespace System.Numerics.Tests
             Complex complex = value;
             VerifyRealImaginaryProperties(complex, value, 0);
         }
-
+        
         [Theory]
         [InlineData(double.MinValue)]
         [InlineData(-1.234)]
@@ -1540,7 +1540,7 @@ namespace System.Numerics.Tests
             Complex complex = (Complex)value;
             VerifyRealImaginaryProperties(complex, (double)value, 0);
         }
-
+        
         private static double SmallRandomPositiveDouble()
         {
             return RandomPositiveValue(1);
@@ -1577,7 +1577,7 @@ namespace System.Numerics.Tests
             randomDouble %= mult;
             return randomDouble;
         }
-
+        
         private static void VerifyRealImaginaryProperties(Complex complex, double real, double imaginary, [CallerLineNumber] int lineNumber = 0)
         {
             Assert.True(real.Equals(complex.Real) || IsDiffTolerable(complex.Real, real),
@@ -1636,3 +1636,4 @@ namespace System.Numerics.Tests
         }
     }
 }
+    

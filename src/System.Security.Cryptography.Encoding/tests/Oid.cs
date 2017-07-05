@@ -152,7 +152,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             Assert.Equal(SHA256_Name, oid.FriendlyName);
             Assert.Equal(SHA256_Oid, oid.Value);
         }
-
+        
         [Theory]
         [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         public static void LookupOidByValue_Method_HashAlgorithm(string oidValue, string friendlyName)
@@ -259,7 +259,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             // This needs to be an OID not in the static lookup table.  The purpose is to verify the
             // NativeOidToFriendlyName fallback for Unix.  For Windows this is accomplished by
             // using FromOidValue with an OidGroup other than OidGroup.All.
-
+            
             Oid oid = Oid.FromOidValue(ObsoleteSmime3desWrap_Oid, OidGroup.All);
 
             Assert.Equal(ObsoleteSmime3desWrap_Oid, oid.Value);

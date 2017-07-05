@@ -476,7 +476,7 @@ namespace System.IO.Tests
             try
             {
                 // If this test is inherited then it's possible this call will fail due to the "C:" directory
-                // being deleted in that other test before this call. What we care about testing (proper path
+                // being deleted in that other test before this call. What we care about testing (proper path 
                 // handling) is unaffected by this race condition.
                 Directory.Delete("C:");
             }

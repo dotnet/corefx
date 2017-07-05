@@ -82,7 +82,7 @@ namespace System.IO.Tests
             {
                 string[] strArr = GetEntries(testDir.FullName, "Test1*");
                 if (TestFiles)
-                {
+                { 
                     Assert.Contains(Path.Combine(testDir.FullName, "Test1File2"), strArr);
                     Assert.Contains(Path.Combine(testDir.FullName, "Test1Dir2"), strArr);
                 }
@@ -341,7 +341,7 @@ namespace System.IO.Tests
 
             File.Create(Path.Combine(testDir.FullName, testBase + "AAAA")).Dispose();
             File.Create(Path.Combine(testDir.FullName, testBase + "aAAa")).Dispose();
-
+            
             if (TestDirectories)
             {
                 Assert.Equal(2, GetEntries(testDir.FullName, "*BB*").Length);

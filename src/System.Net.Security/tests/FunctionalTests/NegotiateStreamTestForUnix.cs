@@ -494,7 +494,7 @@ namespace System.Net.Security.Tests
 
         public static IEnumerable<object[]> ValidNtlmCredentials()
         {
-
+         
                 yield return new object[]{new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Domain)};
                 yield return new object[] {new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword)};
                 yield return new object[]
@@ -568,7 +568,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-
+     
         [Fact, OuterLoop]
         [ActiveIssue(7825)]
         [PlatformSpecific(PlatformID.Linux)]

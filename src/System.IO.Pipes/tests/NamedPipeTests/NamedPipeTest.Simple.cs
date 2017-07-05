@@ -411,7 +411,7 @@ namespace System.IO.Pipes.Tests
                     Assert.Throws<InvalidOperationException>(() => { server.ReadAsync(buffer, 0, buffer.Length); });
                 }
 
-                Assert.Throws<InvalidOperationException>(() => server.Disconnect());    // disconnect when not connected
+                Assert.Throws<InvalidOperationException>(() => server.Disconnect());    // disconnect when not connected 
                 Assert.Throws<InvalidOperationException>(() => server.IsMessageComplete);
             }
         }
@@ -545,7 +545,7 @@ namespace System.IO.Pipes.Tests
                     Assert.True(server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
 
-                if (server.CanWrite)
+                if (server.CanWrite) 
                 {
                     var ctx1 = new CancellationTokenSource();
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // On Unix WriteAsync's aren't cancelable once initiated
@@ -829,5 +829,5 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+      
 }

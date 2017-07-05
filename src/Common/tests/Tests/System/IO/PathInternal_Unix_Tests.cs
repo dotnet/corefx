@@ -39,7 +39,7 @@ public class PathInternal_Unix_Tests
         if (string.Equals(path, expected, StringComparison.Ordinal))
             Assert.Same(path, result);
     }
-
+    
     [Theory]
     [InlineData(@"\", 0)]
     [InlineData("", 0)]

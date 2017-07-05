@@ -496,7 +496,7 @@ namespace System.Net.Tests
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
             request.ContentType = "application/json";
-
+            
             HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync();
             Stream responseStream = response.GetResponseStream();
             String responseBody;

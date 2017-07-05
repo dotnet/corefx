@@ -108,7 +108,7 @@ namespace System.Net.Http.Functional.Tests
                 Assert.True(handler.UseCookies);
                 Assert.False(handler.UseDefaultCredentials);
                 Assert.True(handler.UseProxy);
-
+                
                 // Changes from .NET Framework (Desktop).
                 Assert.Equal(DecompressionMethods.GZip | DecompressionMethods.Deflate, handler.AutomaticDecompression);
                 Assert.Equal(0, handler.MaxRequestContentBufferSize);
@@ -185,12 +185,12 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(remoteServer))
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
+                    _output.WriteLine(responseContent);                    
                     TestHelper.VerifyResponseBody(
                         responseContent,
                         response.Content.Headers.ContentMD5,
                         false,
-                        null);
+                        null);                    
                 }
             }
         }
@@ -238,7 +238,7 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
-
+        
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ResponseContentAfterClientAndHandlerDispose_Success()
@@ -251,12 +251,12 @@ namespace System.Net.Http.Functional.Tests
             }
             Assert.NotNull(response);
             string responseContent = await response.Content.ReadAsStringAsync();
-            _output.WriteLine(responseContent);
+            _output.WriteLine(responseContent);                    
             TestHelper.VerifyResponseBody(
                 responseContent,
                 response.Content.Headers.ContentMD5,
                 false,
-                null);
+                null);                    
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -731,7 +731,7 @@ namespace System.Net.Http.Functional.Tests
                     _output.WriteLine(responseText);
                     Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, cookieName, cookieValue));
                 }
-            }
+            }            
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -847,12 +847,12 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpResponseMessage response = await responseTasks[i])
                     {
                         string responseContent = await response.Content.ReadAsStringAsync();
-                        _output.WriteLine(responseContent);
+                        _output.WriteLine(responseContent);                    
                         TestHelper.VerifyResponseBody(
                             responseContent,
                             response.Content.Headers.ContentMD5,
                             false,
-                            null);
+                            null);                    
                    }
                 }
             }
@@ -868,12 +868,12 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
+                    _output.WriteLine(responseContent);                    
                     TestHelper.VerifyResponseBody(
                         responseContent,
                         response.Content.Headers.ContentMD5,
                         false,
-                        null);
+                        null);                    
                 }
             }
         }
@@ -908,7 +908,7 @@ namespace System.Net.Http.Functional.Tests
                                 Assert.True(bytesRead < buffer.Length, "bytesRead should be less than buffer.Length");
                             }
                         }
-
+                        
                         return null;
                     });
                 }
@@ -1063,7 +1063,7 @@ namespace System.Net.Http.Functional.Tests
                 string data = "\ub4f1\uffc7\u4e82\u67ab4\uc6d4\ud1a0\uc694\uc77c\uffda3\u3155\uc218\uffdb";
                 var content = new StringContent(data, Encoding.UTF8);
                 content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(data);
-
+                
                 using (HttpResponseMessage response = await client.PostAsync(remoteServer, content))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -1221,14 +1221,14 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.PostAsync(remoteServer, null))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
+                    
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
+                    _output.WriteLine(responseContent);                    
                     TestHelper.VerifyResponseBody(
                         responseContent,
                         response.Content.Headers.ContentMD5,
                         false,
-                        string.Empty);
+                        string.Empty);                    
                 }
             }
         }
@@ -1243,14 +1243,14 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.PostAsync(remoteServer, content))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
+                    
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
+                    _output.WriteLine(responseContent);                    
                     TestHelper.VerifyResponseBody(
                         responseContent,
                         response.Content.Headers.ContentMD5,
                         false,
-                        string.Empty);
+                        string.Empty);                  
                 }
             }
         }
@@ -1349,7 +1349,7 @@ namespace System.Net.Http.Functional.Tests
                             Assert.True(contentDisposed, "Expected request content to be disposed");
                             Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
                         }
-
+                        
                         return null;
                     });
                 });
@@ -1413,7 +1413,7 @@ namespace System.Net.Http.Functional.Tests
                             Assert.True(contentDisposed, "Expected request content to be disposed");
                             Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
                         }
-
+                        
                         return null;
                     });
                 });
@@ -1502,14 +1502,14 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
-                    new HttpMethod(method),
+                    new HttpMethod(method), 
                     secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer);
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     TestHelper.VerifyRequestMethod(response, method);
                 }
-            }
+            }        
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -1521,7 +1521,7 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
-                    new HttpMethod(method),
+                    new HttpMethod(method), 
                     secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer);
                 request.Content = new StringContent(ExpectedContent);
                 using (HttpResponseMessage response = await client.SendAsync(request))
@@ -1536,9 +1536,9 @@ namespace System.Net.Http.Functional.Tests
                         responseContent,
                         response.Content.Headers.ContentMD5,
                         false,
-                        ExpectedContent);
+                        ExpectedContent);                    
                 }
-            }
+            }        
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -1651,7 +1651,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 // It is generally expected that the test hosts will be trusted, so we don't register a validation
                 // callback in the usual case.
-                //
+                // 
                 // However, on our Debian 8 test machines, a combination of a server side TLS chain,
                 // the client chain processor, and the distribution's CA bundle results in an incomplete/untrusted
                 // certificate chain. See https://github.com/dotnet/corefx/issues/9244 for more details.
@@ -1734,14 +1734,14 @@ namespace System.Net.Http.Functional.Tests
                     {
                         Assert.True(false, "Invalid HTTP request version");
                     }
-
+                    
                 }
             });
-
+            
             return receivedRequestVersion;
         }
         #endregion
-
+        
         #region Proxy tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
@@ -1818,7 +1818,7 @@ namespace System.Net.Http.Functional.Tests
 
                 Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
             }
-        }
+        }        
 
         private static IEnumerable<object[]> BypassedProxies()
         {

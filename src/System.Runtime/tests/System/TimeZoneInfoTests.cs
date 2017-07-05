@@ -139,7 +139,7 @@ namespace System.Tests
             VerifyConvertException<ArgumentNullException>(time1, null);
 
             //
-            // We catch Exception here instead of TimeZoneNotFoundException because TimeZoneNotFoundException is not exposed
+            // We catch Exception here instead of TimeZoneNotFoundException because TimeZoneNotFoundException is not exposed 
             // in .NET Core
             //
 
@@ -1830,7 +1830,7 @@ namespace System.Tests
         }
 
         /// <summary>
-        /// Ensure Africa/Johannesburg transitions from +3 to +2 at
+        /// Ensure Africa/Johannesburg transitions from +3 to +2 at 
         /// 1943-02-20T23:00:00Z, and not a tick before that.
         /// See https://github.com/dotnet/coreclr/issues/2185
         /// </summary>
@@ -1844,7 +1844,7 @@ namespace System.Tests
             Assert.Equal(TimeSpan.FromHours(3), s_johannesburgTz.GetUtcOffset(transition.AddTicks(-1)));
             Assert.Equal(TimeSpan.FromHours(2), s_johannesburgTz.GetUtcOffset(transition));
         }
-
+        
         public static IEnumerable<object[]> Equals_TestData()
         {
             yield return new object[] { s_casablancaTz, s_casablancaTz, true };
@@ -1989,10 +1989,10 @@ namespace System.Tests
         /// </summary>
         /// <remarks>
         /// Windows uses the current daylight savings rules for early times.
-        ///
+        /// 
         /// OSX has V1 tzfiles, which means for early times it uses the first standard offset in the tzfile.
         /// For Pacific Standard Time it is UTC-8.  For Sydney, it is UTC+10.
-        ///
+        /// 
         /// Other Unix distros use V2 tzfiles, which use local mean time (LMT), which is based on the solar time.
         /// The Pacific Standard Time LMT is UTC-07:53.  For Sydney, LMT is UTC+10:04.
         /// </remarks>

@@ -161,7 +161,7 @@ public class PathInternal_Windows_Tests
         if (string.Equals(path, expected, StringComparison.Ordinal))
             Assert.Same(path, result);
     }
-
+    
     [Theory]
     [InlineData(@"\", 1)]
     [InlineData("", 0)]

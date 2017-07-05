@@ -149,7 +149,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpContent content = CustomContent.Create(ExpectedContent, false);
             var credential = new NetworkCredential(UserName, Password);
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<InvalidOperationException>(() => 
                 PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: false));
         }
 
@@ -161,7 +161,7 @@ namespace System.Net.Http.Functional.Tests
             var credential = new NetworkCredential(UserName, Password);
             await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: true);
         }
-
+        
         private async Task PostHelper(
             Uri serverUri,
             string requestBody,
@@ -175,7 +175,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     requestContent.Headers.ContentLength = null;
                 }
-
+                
                 if (useChunkedEncodingUpload)
                 {
                     client.DefaultRequestHeaders.TransferEncodingChunked = true;
@@ -198,7 +198,7 @@ namespace System.Net.Http.Functional.Tests
                         useChunkedEncodingUpload,
                         requestBody);
                 }
-            }
+            }          
         }
 
         private async Task PostUsingAuthHelper(
