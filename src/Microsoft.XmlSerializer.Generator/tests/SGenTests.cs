@@ -41,6 +41,10 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             {
                 throw new FileNotFoundException(string.Format("cannot find file under {0}, the current directory is ", path, Directory.GetCurrentDirectory()));
             }
+            else
+            {
+                Console.Out.WriteLine("**The file exist at " + path);
+            }
 
             Console.WriteLine("The file exist " + path);
 
