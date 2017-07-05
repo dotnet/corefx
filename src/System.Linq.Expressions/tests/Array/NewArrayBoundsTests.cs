@@ -287,6 +287,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Some exception messages stripped")]
         public static void SingleNegativeBoundErrorMessage(bool useInterpreter)
         {
             string localizedMessage = null;
