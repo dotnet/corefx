@@ -2009,6 +2009,7 @@ namespace System
         public static string Concat(params string[] values) { throw null; }
         public static string Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public bool Contains(string value) { throw null; }
+        public bool Contains(string value, StringComparison comparisonType) { throw null; }
         public static System.String Copy(System.String str) { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public bool EndsWith(char value) { throw null; }
@@ -5667,6 +5668,7 @@ namespace System.Reflection
         public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
         public abstract bool IsDefined(Type attributeType, bool inherit);
         public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
+        public virtual bool HasSameMetadataDefinitionAs(System.Reflection.MemberInfo other) { throw null; }
     }
     [Flags]
     public enum MemberTypes

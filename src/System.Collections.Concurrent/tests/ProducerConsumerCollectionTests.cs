@@ -41,6 +41,8 @@ namespace System.Collections.Concurrent.Tests
             1.0;
 #endif
 
+        protected virtual string CopyToNoLengthParamName => "destinationArray";
+
         [Fact]
         public void Ctor_InvalidArgs_Throws()
         {
@@ -461,10 +463,10 @@ namespace System.Collections.Concurrent.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length - 2));
 
-            Assert.Throws<ArgumentException>(() => c.CopyTo(new int[7, 7], 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new int[7, 7], 0));
         }
 
         [Fact]
@@ -475,8 +477,8 @@ namespace System.Collections.Concurrent.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length - 2));
         }
 
         [Theory]
@@ -879,7 +881,6 @@ namespace System.Collections.Concurrent.Tests
 
         [Theory]
         [InlineData(ConcurrencyTestSeconds)]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20474", TargetFrameworkMonikers.UapAot)]
         public void ManyConcurrentAddsTakes_ForceContentionWithToArray(double seconds)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();

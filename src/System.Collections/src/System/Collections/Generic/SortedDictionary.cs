@@ -11,6 +11,7 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
         [NonSerialized]
@@ -18,7 +19,7 @@ namespace System.Collections.Generic
         [NonSerialized]
         private ValueCollection _values;
 
-        private TreeSet<KeyValuePair<TKey, TValue>> _set;
+        private TreeSet<KeyValuePair<TKey, TValue>> _set; // Do not rename (binary serialization)
 
         public SortedDictionary() : this((IComparer<TKey>)null)
         {
@@ -923,7 +924,7 @@ namespace System.Collections.Generic
         [Serializable]
         public sealed class KeyValuePairComparer : Comparer<KeyValuePair<TKey, TValue>>
         {
-            internal IComparer<TKey> keyComparer;
+            internal IComparer<TKey> keyComparer; // Do not rename (binary serialization)
 
             public KeyValuePairComparer(IComparer<TKey> keyComparer)
             {
@@ -955,6 +956,7 @@ namespace System.Collections.Generic
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class TreeSet<T> : SortedSet<T>
     {
         public TreeSet()

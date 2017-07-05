@@ -50,6 +50,7 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SortedList<TKey, TValue> :
         IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
@@ -1042,7 +1043,7 @@ namespace System.Collections.Generic
         [Serializable]
         public sealed class KeyList : IList<TKey>, ICollection
         {
-            private SortedList<TKey, TValue> _dict;
+            private SortedList<TKey, TValue> _dict; // Do not rename (binary serialization)
 
             internal KeyList(SortedList<TKey, TValue> dictionary)
             {
@@ -1161,7 +1162,7 @@ namespace System.Collections.Generic
         [Serializable]
         public sealed class ValueList : IList<TValue>, ICollection
         {
-            private SortedList<TKey, TValue> _dict;
+            private SortedList<TKey, TValue> _dict; // Do not rename (binary serialization)
 
             internal ValueList(SortedList<TKey, TValue> dictionary)
             {

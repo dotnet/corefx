@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class ArrayTests
+    public partial class ArrayTests
     {
         [Fact]
         public static void IList_GetSetItem()
@@ -631,14 +631,57 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => Array.Clear(new int[10], 6, 0x7fffffff));
         }
 
-        [Theory]
-        [InlineData(new int[0])]
-        [InlineData(new char[] { '1', '2', '3' })]
-        public static void Clone(Array array)
+        public static IEnumerable<object[]> Clone_TestData()
         {
-            Array clone = (Array)array.Clone();
-            Assert.Equal(clone, array);
-            Assert.NotSame(clone, array);
+            yield return new object[] { new int[0] };
+            yield return new object[] { new char[] { '1', '2', '3' } };
+            yield return new object[] { new int[0, 0] };
+            yield return new object[] { new int[0, 1] };
+            yield return new object[] { new int[1, 1] };
+            yield return new object[] { new int[2, 3, 4, 5] };
+
+            if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
+            {
+                yield return new object[] { Array.CreateInstance(typeof(int), new int[] { 1 }, new int[] { -100 }) };
+                yield return new object[] { Array.CreateInstance(typeof(int), new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4, 5 }) };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Clone_TestData))]
+        public void Clone_Array_ReturnsExpected(Array array)
+        {
+            Array clone = Assert.IsAssignableFrom<Array>(array.Clone());
+            Assert.NotSame(array, clone);
+            Assert.Equal(array, clone);
+
+            Assert.Equal(array.Rank, clone.Rank);
+            Assert.Equal(array.GetType().GetElementType(), clone.GetType().GetElementType());
+            for (int i = 0; i < clone.Rank; i++)
+            {
+                Assert.Equal(array.GetLength(i), clone.GetLength(i));
+                Assert.Equal(array.GetLowerBound(i), clone.GetLowerBound(i));
+            }
+        }
+
+        [Fact]
+        public void Clone_SingleDimensionalArray_ModifyingOriginalDoesNotAffectClone()
+        {
+            var array = new int[] { 1, 2, 3 };
+            int[] clone = Assert.IsType<int[]>(array.Clone());
+
+            array[0] = 10;
+            Assert.Equal(1, clone[0]);
+        }
+
+        [Fact]
+        public void Clone_MultiDimensionalArray_ModifyingOriginalDoesNotAffectClone()
+        {
+            var array = new int[1, 1];
+            int[,] clone = Assert.IsType<int[,]>(array.Clone());
+
+            array[0, 0] = 10;
+            Assert.Equal(0, clone[0, 0]);
         }
 
         public static IEnumerable<object[]> Copy_Array_Reliable_TestData()
@@ -1191,7 +1234,6 @@ namespace System.Tests
             Assert.Throws<ArrayTypeMismatchException>(() => sourceArray.CopyTo(destinationArray, destinationArray.GetLowerBound(0)));
         }
 
-#if !uapaot //Issue https://github.com/dotnet/corefx/issues/17480
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug and incorrectly allows copying between void* and object")]
         public static void Copy_SourceAndDestinationPointers_ThrowsArrayTypeMismatchException()
@@ -1202,7 +1244,6 @@ namespace System.Tests
                 Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new object[1], new void*[1], 0));
             }
         }
-#endif
 
         public static IEnumerable<object[]> Copy_UnreliableCoversion_CantPerform_TestData()
         {
@@ -2868,12 +2909,12 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], 0, -1));
 
             // Index + length > list.Count
-            Assert.Throws<ArgumentException>(() => Array.Sort((Array)new int[10], 11, 0));
-            Assert.Throws<ArgumentException>(() => Array.Sort(new int[10], 11, 0));
-            Assert.Throws<ArgumentException>(() => Array.Sort((Array)new int[10], 10, 1));
-            Assert.Throws<ArgumentException>(() => Array.Sort(new int[10], 10, 1));
-            Assert.Throws<ArgumentException>(() => Array.Sort((Array)new int[10], 9, 2));
-            Assert.Throws<ArgumentException>(() => Array.Sort(new int[10], 9, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], 11, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort(new int[10], 11, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], 10, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort(new int[10], 10, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], 9, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Sort(new int[10], 9, 2));
         }
 
         [Fact]
@@ -2955,7 +2996,6 @@ namespace System.Tests
         [Theory]
         [MemberData(nameof(Sort_Array_Array_NonGeneric_TestData))]
         [MemberData(nameof(Sort_Array_Array_Generic_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/17450")]
         public static void Sort_Array_Array_NonGeneric(Array keys, Array items, int index, int length, IComparer comparer, Array expectedKeys, Array expectedItems)
         {
             Array sortedKeysArray = null;
@@ -3318,7 +3358,6 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => iList.CopyTo(new int[7], 8)); // Index > destinationArray.Length
         }
 
-#if !uapaot //Issue https://github.com/dotnet/corefx/issues/17480
         [Fact]
         public static unsafe void GetValue_ArrayOfPointers_ThrowsNotSupportedException()
         {
@@ -3369,7 +3408,6 @@ namespace System.Tests
             Array.Reverse((Array)new int*[0]);
             Array.Reverse((Array)new int*[1]);
         }
-#endif
 
         private static void VerifyArray(Array array, Type elementType, int[] lengths, int[] lowerBounds, object repeatedValue)
         {

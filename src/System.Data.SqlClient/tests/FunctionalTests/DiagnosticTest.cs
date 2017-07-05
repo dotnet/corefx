@@ -21,9 +21,9 @@ namespace System.Data.SqlClient.Tests
     public class DiagnosticTest : RemoteExecutorTestBase
     {
         private const string BadConnectionString = "data source = bad; initial catalog = bad; uid = bad; password = bad; connection timeout = 1;";
-        private static readonly string s_tcpConnStr = $"\"{Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR")}\"";
+        private static readonly string s_tcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR") ?? string.Empty;
         
-        public static bool IsConnectionStringConfigured() => s_tcpConnStr != "\"\"";
+        public static bool IsConnectionStringConfigured() => s_tcpConnStr != string.Empty;
 
         [Fact]
         [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
@@ -697,7 +697,7 @@ namespace System.Data.SqlClient.Tests
             {
 
                 Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
-                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging))
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging, methodName: methodName))
                 {
                     Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
                     sqlOperation(server.ConnectionString);
@@ -886,7 +886,7 @@ namespace System.Data.SqlClient.Tests
             using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
             {
                 Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
-                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine()))
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), methodName: methodName))
                 {
                     Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
 

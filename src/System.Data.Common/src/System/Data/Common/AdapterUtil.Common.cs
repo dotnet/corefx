@@ -38,12 +38,6 @@ namespace System.Data.Common
             TraceException("<comm.ADP.TraceException|ERR|CATCH> '{0}'", e);
         }
 
-        internal static void TraceExceptionWithoutRethrow(Exception e)
-        {
-            Debug.Assert(IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '{0}'", e);
-        }
-
         internal static DataException Data(string message)
         {
             DataException e = new DataException(message);
@@ -69,11 +63,6 @@ namespace System.Data.Common
         }
 
         // Invalid Enumeration
-
-        internal static ArgumentOutOfRangeException NotSupportedEnumerationValue(Type type, string value, string method)
-        {
-            return ArgumentOutOfRange(SR.Format(SR.ADP_NotSupportedEnumerationValue, type.Name, value, method), type.Name);
-        }
 
         internal static ArgumentOutOfRangeException InvalidAcceptRejectRule(AcceptRejectRule value)
         {
@@ -716,9 +705,6 @@ namespace System.Data.Common
         internal const string SourceColumn = "SourceColumn";
         internal const string SourceTable = "SourceTable";
 
-        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst) =>
-            0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase);
-
         internal static DataRow[] SelectAdapterRows(DataTable dataTable, bool sorted)
         {
             const DataRowState rowStates = DataRowState.Added | DataRowState.Deleted | DataRowState.Modified;
@@ -853,7 +839,5 @@ namespace System.Data.Common
         }
 
         internal static int SrcCompare(string strA, string strB) => strA == strB ? 0 : 1;
-
-        internal static bool IsEmptyArray(string[] array) => (null == array) || (0 == array.Length);
     }
 }

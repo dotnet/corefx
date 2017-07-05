@@ -1737,7 +1737,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlElements.Remove(item2);
         Assert.False(attrs.XmlElements.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlElements.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlElements.Remove(item2); });
     }
 
     [Fact]
@@ -1769,7 +1769,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlArrayItems.Remove(item2);
         Assert.False(attrs.XmlArrayItems.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlArrayItems.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlArrayItems.Remove(item2); });
     }
 
     [Fact]
@@ -1801,7 +1801,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlAnyElements.Remove(item2);
         Assert.False(attrs.XmlAnyElements.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlAnyElements.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlAnyElements.Remove(item2); });
     }
 
     [Fact]
@@ -1817,7 +1817,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #19897", TargetFrameworkMonikers.UapAot)]
     public static void Xml_TypeWithTwoDimensionalArrayProperty1()
     {
         SimpleType[][] simpleType2D = GetObjectwith2DArrayOfSimpleType();
@@ -4380,6 +4379,21 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(deserializedValue.CurrentPaymentType, value.CurrentPaymentType);
         Assert.StrictEqual(deserializedValue.IsFirstRun, value.IsFirstRun);
     }
+
+#if !ReflectionOnly
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
+    public static void DerivedTypeWithDifferentOverrides()
+    {
+        DerivedTypeWithDifferentOverrides value = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
+        DerivedTypeWithDifferentOverrides actual = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(value, @"<?xml version=""1.0""?><DerivedTypeWithDifferentOverrides xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Name1>Name1</Name1><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
+        Assert.StrictEqual(value.Name1, actual.Name1);
+        Assert.StrictEqual(value.Name2, actual.Name2);
+        Assert.StrictEqual(value.Name3, actual.Name3);
+        Assert.Null(actual.Name4);
+        Assert.StrictEqual(value.Name5, actual.Name5);
+    }
+#endif
 
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)

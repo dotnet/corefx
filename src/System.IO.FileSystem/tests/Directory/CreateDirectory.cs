@@ -36,7 +36,7 @@ namespace System.IO.Tests
         public void PathWithInvalidCharactersAsPath_ThrowsArgumentException(string invalidPath)
         {
             if (invalidPath.Equals(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
-                Assert.Throws<IOException>(() => Create(invalidPath));
+                AssertExtensions.ThrowsAny<IOException, UnauthorizedAccessException>(() => Create(invalidPath));
             else if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
                 Assert.Throws<DirectoryNotFoundException>(() => Create(invalidPath));
             else
@@ -110,20 +110,16 @@ namespace System.IO.Tests
             Assert.Equal(IOServices.AddTrailingSlashIfNeeded(TestDirectory), result.FullName);
         }
 
-        [Fact]
-        public void ValidPathWithTrailingSlash()
+        [Theory, MemberData(nameof(ValidPathComponentNames))]
+        public void ValidPathWithTrailingSlash(string component)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
-            var components = IOInputs.GetValidPathComponentNames();
-            Assert.All(components, (component) =>
-            {
-                string path = IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
-                DirectoryInfo result = Create(path);
+            string path = IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
+            DirectoryInfo result = Create(path);
 
-                Assert.Equal(path, result.FullName);
-                Assert.True(result.Exists);
-            });
+            Assert.Equal(path, result.FullName);
+            Assert.True(result.Exists);
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]

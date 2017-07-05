@@ -10,9 +10,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
     <!-- Common Collections tests -->
     <Compile Include="$(CommonTestPath)\System\Collections\CollectionAsserts.cs">
       <Link>Common\System\Collections\CollectionAsserts.cs</Link>
@@ -81,7 +78,7 @@
       <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
     <!-- Generic tests -->
-    <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs"  Condition="'$(TargetGroup)' == 'netcoreapp'"/>
+    <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="Generic\SortedSet\SortedSet.TreeSubSet.Tests.cs" />
     <Compile Include="StructuralComparisonsTests.cs" />
     <Compile Include="BitArray\BitArray_CtorTests.cs" />
@@ -165,6 +162,9 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.Generic.Serialization.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.Generic.Serialization.Tests.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ILCConfigurations.rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

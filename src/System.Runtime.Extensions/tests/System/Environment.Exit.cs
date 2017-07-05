@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -23,21 +22,9 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ExitCodeValues))]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909 - RemoteInvoke returns a null Process on UapAot.", TargetFrameworkMonikers.UapAot)]
         public static void CheckExitCode(int expectedExitCode)
         {
-            using (Process p = RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString()).Process)
-            {
-                Assert.True(p.WaitForExit(30 * 1000));
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Assert.Equal(expectedExitCode, p.ExitCode);
-                }
-                else
-                {
-                    Assert.Equal(unchecked((sbyte)expectedExitCode), unchecked((sbyte)p.ExitCode));
-                }
-            }
+            RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString(), new RemoteInvokeOptions { ExpectedExitCode = expectedExitCode }).Dispose();
         }
 
         [Theory]
@@ -54,14 +41,14 @@ namespace System.Tests
         [InlineData(1)] // setting ExitCode and exiting Main
         [InlineData(2)] // setting ExitCode both from Main and from an Unloading event handler.
         [InlineData(3)] // using Exit(exitCode)
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/21415", TargetFrameworkMonikers.UapNotUapAot)]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/20387 - ILC test pipeline does not accomodate tests in child processes built into custom assemblies.", TargetFrameworkMonikers.UapAot)]
         public static void ExitCode_VoidMainAppReturnsSetValue(int mode)
         {
             int expectedExitCode = 123;
-
             const string AppName = "VoidMainWithExitCodeApp.exe";
             var psi = new ProcessStartInfo();
-            if (IsFullFramework || IsNetNative)
+            if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
             {
                 psi.FileName = AppName;
                 psi.Arguments = $"{expectedExitCode} {mode}";
