@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -26,13 +27,24 @@ namespace System.Diagnostics
             // but we can at least get the path to the executable file for the process, and
             // other than for debugging tools, that's the main reason consumers of Modules care about it,
             // and why MainModule exists.
+            char[] chars = null;
+            int capacity = 64, length = 0;
             try
             {
                 // Get the path to the executable
                 using (Process process = Process.GetProcessById(processId))
                 {
-                    char[] chars = new char[1024];
-                    int length = Interop.Kernel32.GetModuleFileNameEx(process.SafeHandle, IntPtr.Zero, chars, chars.Length);
+                    do
+                    {
+                        if(chars != null)
+                        {
+                            ArrayPool<char>.Shared.Return(chars);
+                        }
+                        capacity *= 2;
+                        chars = ArrayPool<char>.Shared.Rent(capacity);
+                        length = Interop.Kernel32.GetModuleFileNameEx(process.SafeHandle, IntPtr.Zero, chars, chars.Length);
+                    } while (length == chars.Length - 1 && capacity < 1024 * 32);
+
                     string exePath = new string(chars, 0, length);
 
                     if (!string.IsNullOrEmpty(exePath))
@@ -49,6 +61,13 @@ namespace System.Diagnostics
                 }
             }
             catch { } // eat all errors
+            finally
+            {
+                if (chars != null)
+                {
+                    ArrayPool<char>.Shared.Return(chars);
+                }
+            }
 
             return new ProcessModuleCollection(0);
         }
