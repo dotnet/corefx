@@ -50,7 +50,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
 
             Console.WriteLine("The file exist " + path);
 
-           
+
 
             int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force"});
             Assert.Equal(0, n);

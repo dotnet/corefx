@@ -48,7 +48,11 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    arg = arg.ToLower(CultureInfo.InvariantCulture);
+                    if(!arg.EndsWith(".dll") && !arg.EndsWith(".exe"))
+                    {
+                        arg = arg.ToLower(CultureInfo.InvariantCulture);
+                    }
+                    
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
                         WriteHeader();
