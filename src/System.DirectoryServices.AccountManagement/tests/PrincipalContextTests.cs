@@ -89,7 +89,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
             if (name != null)
             {
-                var comException = Assert.Throws<COMException>(() => context.ConnectedServer);
+                Assert.Throws<COMException>(() => context.ConnectedServer);
             }
             else
             {
