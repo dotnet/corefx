@@ -563,7 +563,6 @@ namespace System.Net.WebSockets
         // (i.e., "MY" store) due to other WinRT-specific private key limitations. With that in mind, approach (2) is the
         // most appropriate for our needs, as it guarantees that WinRT WebSockets will be able to handle the resulting
         // WinRT Certificate during ConnectAsync.
-
         private static RTCertificate ConvertDotNetClientCertToWinRtClientCert(X509Certificate dotNetCertificate)
         {
             var query = new RTCertificateQuery
