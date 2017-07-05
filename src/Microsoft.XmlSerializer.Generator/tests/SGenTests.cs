@@ -14,8 +14,8 @@ namespace Microsoft.XmlSerializer.Generator.Tests
 {
     public static class SgenTests
     {
-#if !uap
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public static void BasicTest()
         {
             int n = Sgen.Main(new string[0]);
@@ -23,6 +23,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public static void GeneralBaselineTest()
         {
             string codefile = "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs";
@@ -76,8 +77,6 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             List<string> alllines = GetAllLines(codefile);
             CompareList(allbaselines, alllines);
         }
-
-#endif
 
         private static List<String> GetAllLines(string strFileName)
         {
