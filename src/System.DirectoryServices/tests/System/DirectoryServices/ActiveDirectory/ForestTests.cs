@@ -25,6 +25,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         }
 
         [Fact]
+        [OuterLoop]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void GetForest_NullNameAndNotRootedDomain_ThrowsActiveDirectoryOperationException()
         {
