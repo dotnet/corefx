@@ -17,8 +17,9 @@ namespace System
         {
             var stringBuilder = new StringBuilder();
 
-            foreach (string argument in arguments)
+            foreach (string constantArgument in arguments)
             {
+                string argument = constantArgument;
                 if (pasteFirstArgumentUsingArgV0Rules)
                 {
                     pasteFirstArgumentUsingArgV0Rules = false;
@@ -29,18 +30,35 @@ namespace System
                     //   - Parsing ends at first whitespace outside quoted region.
                     //   - No way to get a literal quote past the parser.
 
+                    bool hasQuote = false;
                     bool hasWhitespace = false;
                     foreach (char c in argument)
                     {
                         if (c == Quote)
                         {
-                            throw new ApplicationException("The argv[0] argument cannot include a double quote.");
+                            hasQuote = true;
                         }
                         if (char.IsWhiteSpace(c))
                         {
                             hasWhitespace = true;
                         }
                     }
+
+                    if (hasQuote)
+                    {
+                        // If the argv[0] contains a double-quote, we're in a pickle because there is no string that would generate such an argv[0] 
+                        // under our parsing rules.
+                        //
+                        // Right now, the only user of this method that asks for arv[0] parsing is Environment.CommandLine. Since it's passing us an arg array that came from
+                        // framework itself as a result of tokenizing a command line under these same rules, this situation should never come up. But if it ever does,
+                        // throwing an exception for this seems extreme given that it's likely that the command line is just being retrieved for logging purposes
+                        // or to re-tokenize to a child process (who is unlikely to care about argv[0].)
+                        //
+                        // With no really good solution, our policy is to replace the quote with a back-quote which at least generates a tokenizable string and will
+                        // allow human readers to still get the gist of the original command line.
+                        argument = argument.Replace(Quote, '`');
+                    }
+
                     if (argument.Length == 0 || hasWhitespace)
                     {
                         stringBuilder.Append(Quote);

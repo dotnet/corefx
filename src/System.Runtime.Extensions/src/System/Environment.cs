@@ -61,41 +61,7 @@ namespace System
             EnvironmentAugments.SetEnvironmentVariable(variable, value, target);
         }
 
-        public static string CommandLine
-        {
-            get
-            {
-                StringBuilder sb = StringBuilderCache.Acquire();
-
-                foreach (string arg in GetCommandLineArgs())
-                {
-                    bool containsQuotes = false, containsWhitespace = false;
-                    foreach (char c in arg)
-                    {
-                        if (char.IsWhiteSpace(c))
-                        {
-                            containsWhitespace = true;
-                        }
-                        else if (c == '"')
-                        {
-                            containsQuotes = true;
-                        }
-                    }
-
-                    string quote = containsWhitespace ? "\"" : "";
-                    string formattedArg = containsQuotes && containsWhitespace ? arg.Replace("\"", "\\\"") : arg;
-
-                    sb.Append(quote).Append(formattedArg).Append(quote).Append(' ');
-                }
-
-                if (sb.Length > 0)
-                {
-                    sb.Length--;
-                }
-
-                return StringBuilderCache.GetStringAndRelease(sb);
-            }
-        }
+        public static string CommandLine => PasteArguments.Paste(GetCommandLineArgs(), pasteFirstArgumentUsingArgV0Rules: true);
 
         public static string CurrentDirectory
         {
