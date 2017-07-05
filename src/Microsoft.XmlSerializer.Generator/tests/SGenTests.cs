@@ -14,6 +14,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
 {
     public static class SgenTests
     {
+#if !uap
         [Fact]
         public static void BasicTest()
         {
@@ -57,8 +58,8 @@ namespace Microsoft.XmlSerializer.Generator.Tests
                 throw new FileNotFoundException(string.Format("Fail to generate {0}.", codefile));
             }
 
-            string basefile = @"baseline\" + codefile;
-            if(!File.Exists(basefile))
+            string basefile = Path.Combine(Directory.GetCurrentDirectory(), "baseline", "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs");
+            if (!File.Exists(basefile))
             {
                 throw new FileNotFoundException(string.Format("Missing baseline file {0}.", basefile));
             }
@@ -75,6 +76,8 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             List<string> alllines = GetAllLines(codefile);
             CompareList(allbaselines, alllines);
         }
+
+#endif
 
         private static List<String> GetAllLines(string strFileName)
         {
