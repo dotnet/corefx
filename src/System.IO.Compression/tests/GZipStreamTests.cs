@@ -177,12 +177,12 @@ namespace System.IO.Compression.Tests
         {
             var ms = new MemoryStream();
             ms.Dispose();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("stream", () =>
             {
                 var deflate = new GZipStream(ms, CompressionMode.Decompress);
             });
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("stream", () =>
             {
                 var deflate = new GZipStream(ms, CompressionMode.Compress);
             });
@@ -194,7 +194,7 @@ namespace System.IO.Compression.Tests
             var ms = new LocalMemoryStream();
             ms.SetCanWrite(false);
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("stream", () =>
             {
                 var gzip = new GZipStream(ms, CompressionMode.Compress);
             });
@@ -206,7 +206,7 @@ namespace System.IO.Compression.Tests
             var ms = new LocalMemoryStream();
             ms.SetCanRead(false);
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("stream", () =>
             {
                 var gzip = new GZipStream(ms, CompressionMode.Decompress);
             });
@@ -217,8 +217,8 @@ namespace System.IO.Compression.Tests
         {
             using (GZipStream gs = new GZipStream(new MemoryStream(), CompressionMode.Decompress))
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { gs.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { gs.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { gs.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { gs.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { gs.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 gs.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { gs.CopyToAsync(new MemoryStream()); });

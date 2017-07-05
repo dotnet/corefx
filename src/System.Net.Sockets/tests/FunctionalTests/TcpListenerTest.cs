@@ -14,13 +14,13 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Ctor_InvalidArguments_Throws()
         {
-            Assert.Throws<ArgumentNullException>("localEP", () => new TcpListener(null));
-            Assert.Throws<ArgumentNullException>("localaddr", () => new TcpListener(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("port", () => new TcpListener(IPAddress.Loopback, -1));
+            AssertExtensions.Throws<ArgumentNullException>("localEP", () => new TcpListener(null));
+            AssertExtensions.Throws<ArgumentNullException>("localaddr", () => new TcpListener(null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => new TcpListener(IPAddress.Loopback, -1));
 #pragma warning disable 0618 // ctor is obsolete
-            Assert.Throws<ArgumentOutOfRangeException>("port", () => new TcpListener(66000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => new TcpListener(66000));
 #pragma warning restore 0618
-            Assert.Throws<ArgumentOutOfRangeException>("port", () => TcpListener.Create(66000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => TcpListener.Create(66000));
         }
 
         [Theory]
@@ -91,8 +91,8 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentNullException>(() => listener.EndAcceptSocket(null));
             Assert.Throws<ArgumentNullException>(() => listener.EndAcceptTcpClient(null));
 
-            Assert.Throws<ArgumentException>(() => listener.EndAcceptSocket(Task.CompletedTask));
-            Assert.Throws<ArgumentException>(() => listener.EndAcceptTcpClient(Task.CompletedTask));
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () => listener.EndAcceptSocket(Task.CompletedTask));
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () => listener.EndAcceptTcpClient(Task.CompletedTask));
         }
 
         [Fact]

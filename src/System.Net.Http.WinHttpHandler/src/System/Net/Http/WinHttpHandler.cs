@@ -1182,21 +1182,17 @@ namespace System.Net.Http
         private void SetRequestHandleHttp2Options(SafeWinHttpHandle requestHandle, Version requestVersion)
         {
             Debug.Assert(requestHandle != null);
-            if (requestVersion == HttpVersion20)
+            uint optionData = (requestVersion == HttpVersion20) ? Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2 : 0;
+            if (Interop.WinHttp.WinHttpSetOption(
+                requestHandle,
+                Interop.WinHttp.WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
+                ref optionData))
             {
-                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: setting HTTP/2 option");
-                uint optionData = Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2;
-                if (Interop.WinHttp.WinHttpSetOption(
-                    requestHandle,
-                    Interop.WinHttp.WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
-                    ref optionData))
-                {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option supported");
-                }
-                else
-                {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option not supported");
-                }
+                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option supported, setting to {0}", optionData);
+            }
+            else
+            {
+                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option not supported");
             }
         }
 
@@ -1249,7 +1245,7 @@ namespace System.Net.Http
                 // If the exception was due to the cancellation token being canceled, throw cancellation exception.
                 state.Tcs.TrySetCanceled(state.CancellationToken);
             }
-            else if (ex is WinHttpException || ex is IOException)
+            else if (ex is WinHttpException || ex is IOException || ex is InvalidOperationException)
             {
                 // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during
                 // execution. All other exception types, including ArgumentExceptions and ProtocolViolationExceptions
@@ -1337,11 +1333,16 @@ namespace System.Net.Http
                     0,
                     state.ToIntPtr()))
                 {
+                    int lastError = Marshal.GetLastWin32Error();
+                    Debug.Assert((unchecked((int)lastError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
+                        unchecked((int)lastError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
+                        $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)lastError)}");
+
                     // Dispose (which will unpin) the state object. Since this failed, WinHTTP won't associate
                     // our context value (state object) to the request handle. And thus we won't get HANDLE_CLOSING
                     // notifications which would normally cause the state object to be unpinned and disposed.
                     state.Dispose();
-                    WinHttpException.ThrowExceptionUsingLastError();
+                    throw WinHttpException.CreateExceptionUsingError(lastError);
                 }
             }
 

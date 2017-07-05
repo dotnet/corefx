@@ -21,11 +21,12 @@ namespace System.Data.SqlClient.Tests
     public class DiagnosticTest : RemoteExecutorTestBase
     {
         private const string BadConnectionString = "data source = bad; initial catalog = bad; uid = bad; password = bad; connection timeout = 1;";
-        private static readonly string s_tcpConnStr = $"\"{Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR")}\"";
+        private static readonly string s_tcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR") ?? string.Empty;
         
-        public static bool IsConnectionStringConfigured() => s_tcpConnStr != "\"\"";
+        public static bool IsConnectionStringConfigured() => s_tcpConnStr != string.Empty;
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteScalarTest()
         {
             RemoteInvoke(() =>
@@ -47,6 +48,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteScalarErrorTest()
         {
             RemoteInvoke(() =>
@@ -70,6 +72,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteNonQueryTest()
         {
             RemoteInvoke(() =>
@@ -91,6 +94,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteNonQueryErrorTest()
         {
             RemoteInvoke(() =>
@@ -128,6 +132,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteReaderTest()
         {
             RemoteInvoke(() =>
@@ -150,6 +155,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteReaderErrorTest()
         {
             RemoteInvoke(() =>
@@ -175,6 +181,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteReaderWithCommandBehaviorTest()
         {
             RemoteInvoke(() =>
@@ -219,6 +226,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteXmlReaderErrorTest()
         {
             RemoteInvoke(() =>
@@ -244,6 +252,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteScalarAsyncTest()
         {
             RemoteInvoke(() =>
@@ -265,6 +274,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteScalarAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -288,6 +298,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteNonQueryAsyncTest()
         {
             RemoteInvoke(() =>
@@ -309,6 +320,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteNonQueryAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -331,6 +343,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteReaderAsyncTest()
         {
             RemoteInvoke(() =>
@@ -353,6 +366,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ExecuteReaderAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -425,6 +439,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ConnectionOpenTest()
         {
             RemoteInvoke(() =>
@@ -445,6 +460,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ConnectionOpenErrorTest()
         {
             RemoteInvoke(() =>
@@ -461,6 +477,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ConnectionOpenAsyncTest()
         {
             RemoteInvoke(() =>
@@ -477,6 +494,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #17925", TargetFrameworkMonikers.NetFramework)]
         public void ConnectionOpenAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -679,7 +697,7 @@ namespace System.Data.SqlClient.Tests
             {
 
                 Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
-                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging))
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging, methodName: methodName))
                 {
                     Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
                     sqlOperation(server.ConnectionString);
@@ -868,7 +886,7 @@ namespace System.Data.SqlClient.Tests
             using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
             {
                 Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
-                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine()))
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), methodName: methodName))
                 {
                     Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
 

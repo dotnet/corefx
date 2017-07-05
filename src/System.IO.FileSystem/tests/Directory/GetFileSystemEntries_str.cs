@@ -20,6 +20,17 @@ namespace System.IO.Tests
             return Directory.GetFileSystemEntries(dirName);
         }
 
+        /// <summary>
+        /// Create a file at the given path or directory if GetEntries doesn't return files
+        /// </summary>
+        protected void CreateItem(string path)
+        {
+            if (TestFiles)
+                File.WriteAllText(path, path);
+            else
+                Directory.CreateDirectory(path);
+        }
+
         #endregion
 
         #region UniversalTests
@@ -137,10 +148,18 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        public void NonexistentPath()
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsDirectoryNotFound(char trailingChar)
         {
-            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(GetTestFilePath()));
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(path));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(path));
         }
 
         [Fact]
@@ -268,7 +287,7 @@ namespace System.IO.Tests
                 Assert.NotEmpty(Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*", SearchOption.TopDirectoryOnly));
 
                 return SuccessExitCode;
-            }, $"\"{testDir}\"").Dispose();
+            }, testDir).Dispose();
         }
     }
 }

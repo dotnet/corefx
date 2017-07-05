@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using Xunit;
@@ -44,7 +45,10 @@ namespace System.Security.Cryptography.Xml.Tests
         public void KeySize_SetNegativeValue_ThrowsArgumentOutOfRangeException(int value)
         {
             EncryptionMethod method = new EncryptionMethod();
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
+            if (PlatformDetection.IsFullFramework)
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("The key size should be a non negative integer.", () => method.KeySize = value);
+            else
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
         }
 
         [Theory]
@@ -146,7 +150,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void LoadXml_NullValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => new EncryptionMethod().LoadXml(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => new EncryptionMethod().LoadXml(null));
         }
 
         [Theory]

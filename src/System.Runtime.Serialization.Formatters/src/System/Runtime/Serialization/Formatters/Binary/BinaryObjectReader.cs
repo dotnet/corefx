@@ -942,12 +942,36 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
             if (entry == null || entry.AssemblyName != assemblyName)
             {
+                // Check early to avoid throwing unnecessary exceptions
+                if (assemblyName == null)
+                {
+                    return null;
+                }
+
                 Assembly assm = null;
+                AssemblyName assmName = null;
+
                 try
                 {
-                    assm = Assembly.Load(new AssemblyName(assemblyName));
+                    assmName = new AssemblyName(assemblyName);
                 }
-                catch { }
+                catch
+                {
+                    return null;
+                }
+
+                if (_isSimpleAssembly)
+                {
+                    assm = ResolveSimpleAssemblyName(assmName);
+                }
+                else
+                {
+                    try
+                    {
+                        assm = Assembly.Load(assmName);
+                    }
+                    catch { }
+                }
 
                 if (assm == null)
                 {
@@ -979,6 +1003,26 @@ namespace System.Runtime.Serialization.Formatters.Binary
             return entry.Type;
         }
 
+        private static Assembly ResolveSimpleAssemblyName(AssemblyName assemblyName)
+        {
+            try
+            {
+                return Assembly.Load(assemblyName);
+            }
+            catch { }
+
+            if (assemblyName != null)
+            {
+                try
+                {
+                    return Assembly.Load(assemblyName.Name);
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
         private static void GetSimplyNamedTypeFromAssembly(Assembly assm, string typeName, ref Type type)
         {
             // Catching any exceptions that could be thrown from a failure on assembly load
@@ -991,6 +1035,11 @@ namespace System.Runtime.Serialization.Formatters.Binary
             catch (FileNotFoundException) { }
             catch (FileLoadException) { }
             catch (BadImageFormatException) { }
+
+            if (type == null)
+            {
+                type = Type.GetType(typeName, ResolveSimpleAssemblyName, new TopLevelAssemblyTypeResolver(assm).ResolveType, throwOnError: false);
+            }
         }
 
         private string _previousAssemblyString;
@@ -1050,8 +1099,15 @@ namespace System.Runtime.Serialization.Formatters.Binary
                 _topLevelAssembly = topLevelAssembly;
             }
 
-            public Type ResolveType(Assembly assembly, string simpleTypeName, bool ignoreCase) =>
-                (assembly ?? _topLevelAssembly).GetType(simpleTypeName, false, ignoreCase);
+            public Type ResolveType(Assembly assembly, string simpleTypeName, bool ignoreCase)
+            {
+                if (assembly == null)
+                {
+                    assembly = _topLevelAssembly;
+                }
+
+                return assembly.GetType(simpleTypeName, throwOnError: false, ignoreCase: ignoreCase);
+            }
         }
     }
 }

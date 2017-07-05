@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Globalization;
 using Xunit;
@@ -30,6 +31,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyName.CodeBase and EscapedCodeBase not supported on UapAot")]
         public static void Verify_EscapedCodeBase()
         {
             AssemblyName n = new AssemblyName("MyAssemblyName");
@@ -75,11 +77,17 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
         public static void GetAssemblyName()
         {
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
-            Assert.Throws<ArgumentException>(() => AssemblyName.GetAssemblyName(string.Empty));
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => AssemblyName.GetAssemblyName(string.Empty));
             Assert.Throws<System.IO.FileNotFoundException>(() => AssemblyName.GetAssemblyName("IDontExist"));
+
+            using (var tempFile = new TempFile(Path.GetTempFileName(), 42))
+            {
+                Assert.Throws<System.BadImageFormatException>(() => AssemblyName.GetAssemblyName(tempFile.Path));
+            }
 
             Assembly a = typeof(AssemblyNameTests).Assembly;
             Assert.Equal(new AssemblyName(a.FullName).ToString(), AssemblyName.GetAssemblyName(a.Location).ToString());

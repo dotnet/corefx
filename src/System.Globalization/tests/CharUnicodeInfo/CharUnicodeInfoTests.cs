@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -59,10 +59,10 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetUnicodeCategory_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetUnicodeCategory(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", 3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("", 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetUnicodeCategory(null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", 3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("", 0));
         }
 
         [Fact]
@@ -89,13 +89,7 @@ namespace System.Globalization.Tests
         }
 
         [Theory]
-        [InlineData("aA1!", new double[] { -1, -1, 1, -1 })]
-        // Numeric surrogate (CUNEIFORM NUMERIC SIGN FIVE BAN2 VARIANT FORM)
-        [InlineData("\uD809\uDC55", new double[] { 5, -1 })]
-        [InlineData("a\uD809\uDC55a", new double[] { -1, 5, -1 , -1 })]
-        // Non-numeric surrogate (CUNEIFORM SIGN ZU5 TIMES A)
-        [InlineData("\uD808\uDF6C", new double[] { -1, -1 })]
-        [InlineData("a\uD808\uDF6Ca", new double[] { -1, -1, -1, -1 })]
+        [MemberData(nameof(s_GetNumericValueData))]
         public void GetNumericValue(string s, double[] expected)
         {
             for (int i = 0; i < expected.Length; i++)
@@ -104,13 +98,24 @@ namespace System.Globalization.Tests
             }
         }
 
+        public static readonly object[][] s_GetNumericValueData =
+        {
+            new object[] {"aA1!", new double[] { -1, -1, 1, -1 }},
+            // Numeric surrogate (CUNEIFORM NUMERIC SIGN FIVE BAN2 VARIANT FORM)
+            new object[] {"\uD809\uDC55", new double[] { 5, -1 }},
+            new object[] {"a\uD809\uDC55a", new double[] { -1, 5, -1 , -1 }},
+            // Numeric surrogate (CUNEIFORM NUMERIC SIGN FIVE BAN2 VARIANT FORM)
+            new object[] {"\uD808\uDF6C", new double[] { -1, -1 }},
+            new object[] {"a\uD808\uDF6Ca", new double[] { -1, -1, -1, -1 }},
+        };
+
         [Fact]
         public void GetNumericValue_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetNumericValue(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", 3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("", 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetNumericValue(null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", 3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("", 0));
         }
 
         private static string ErrorMessage(char ch, object expected, object actual)

@@ -13,7 +13,6 @@ namespace System.Security.Cryptography.Xml
     /// hash. ComputeHash can throw different kind of exceptions.
     /// This unique exception helps catch the recursion limit issue.
     /// </summary>
-    [Serializable]
     internal class CryptoSignedXmlRecursionException : XmlException
     {
         public CryptoSignedXmlRecursionException() : base() { }
@@ -23,6 +22,8 @@ namespace System.Security.Cryptography.Xml
         // exception propagates from a remoting server to the client.  
         protected CryptoSignedXmlRecursionException(System.Runtime.Serialization.SerializationInfo info,
         System.Runtime.Serialization.StreamingContext context)
-        { }
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 }

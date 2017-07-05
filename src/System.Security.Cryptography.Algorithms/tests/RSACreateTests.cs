@@ -75,7 +75,10 @@ namespace System.Security.Cryptography.Algorithms.Tests
             RSAParameters parameters = TestData.RSA1032Parameters;
             parameters.Exponent = null;
 
-            Assert.Throws<CryptographicException>(() => RSA.Create(parameters));
+            if (RSA.Create() is RSACng && PlatformDetection.IsFullFramework)
+                AssertExtensions.Throws<ArgumentException>(null, () => RSA.Create(parameters));
+            else
+                Assert.Throws<CryptographicException>(() => RSA.Create(parameters));
         }
     }
 }

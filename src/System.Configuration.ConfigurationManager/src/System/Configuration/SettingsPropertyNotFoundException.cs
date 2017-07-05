@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.Configuration
 {
-    [Serializable]
     public class SettingsPropertyNotFoundException : Exception
     {
         public SettingsPropertyNotFoundException(String message)
@@ -22,6 +21,7 @@ namespace System.Configuration
         protected SettingsPropertyNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
 
         public SettingsPropertyNotFoundException()

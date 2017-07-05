@@ -27,8 +27,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void NumberDecimalSeparator_Set_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("NumberDecimalSeparator", () => new NumberFormatInfo().NumberDecimalSeparator = null);
-            Assert.Throws<ArgumentException>(() => new NumberFormatInfo().NumberDecimalSeparator = "");
+            AssertExtensions.Throws<ArgumentNullException>("NumberDecimalSeparator", () => new NumberFormatInfo().NumberDecimalSeparator = null);
+            AssertExtensions.Throws<ArgumentException>(null, () => new NumberFormatInfo().NumberDecimalSeparator = "");
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.NumberDecimalSeparator = "string");
         }
     }

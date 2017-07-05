@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public partial class StringTests
+    public partial class StringTests : RemoteExecutorTestBase
     {
         private const string SoftHyphen = "\u00AD";
 
@@ -88,17 +88,17 @@ namespace System.Tests
         {
             var valueArray = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' };
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () =>
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () =>
             {
                 fixed (char* value = valueArray) { new string(value, -1, 8); } // Start index < 0
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () =>
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () =>
             {
                 fixed (char* value = valueArray) { new string(value, 0, -1); } // Length < 0
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>("ptr", () => new string((char*)null, 0, 1)); // null ptr with non-zero length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ptr", () => new string((char*)null, 0, 1)); // null ptr with non-zero length
         }
 
         [Theory]
@@ -122,7 +122,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Char_Int_Negative_Count_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => new string('a', -1)); // Count < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => new string('a', -1)); // Count < 0
         }
 
         [Theory]
@@ -154,12 +154,12 @@ namespace System.Tests
         {
             var value = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
 
-            Assert.Throws<ArgumentNullException>("value", () => new string((char[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => new string((char[])null, 0, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 0, 9)); // Length > array length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new string(value, 5, -1)); // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, -1, 1)); // Start Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 6, 5)); // Walks off array
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 0, 9)); // Length > array length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new string(value, 5, -1)); // Length < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, -1, 1)); // Start Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 6, 5)); // Walks off array
         }
 
         [Theory]
@@ -266,7 +266,7 @@ namespace System.Tests
                 {
                     // We return string.Empty by reference as an optimization
                     // in .NET core if there is no work to do.
-                    if (PlatformDetection.IsFullFramework)
+                    if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
                     {
                         Assert.Equal(string.Empty, result);
                     }
@@ -402,13 +402,13 @@ namespace System.Tests
         [Fact]
         public static void Concat_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
 
-            Assert.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>(null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<object>(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<string>(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<object>(null)); // Values is null
         }
 
         [Theory]
@@ -431,19 +431,19 @@ namespace System.Tests
             string s = "Hello";
             char[] dst = new char[10];
 
-            Assert.Throws<ArgumentNullException>("destination", () => s.CopyTo(0, null, 0, 0)); // Dst is null
+            AssertExtensions.Throws<ArgumentNullException>("destination", () => s.CopyTo(0, null, 0, 0)); // Dst is null
 
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(-1, dst, 0, 0)); // Source index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, -1, 0)); // Destination index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(-1, dst, 0, 0)); // Source index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, -1, 0)); // Destination index < 0
 
-            Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, dst.Length, 1)); // Destination index > dst.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, dst.Length, 1)); // Destination index > dst.Length
 
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.CopyTo(0, dst, 0, -1)); // Count < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.CopyTo(0, dst, 0, -1)); // Count < 0
 
             // Source index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length, dst, 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length - 1, dst, 0, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(0, dst, 0, 6));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length, dst, 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length - 1, dst, 0, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(0, dst, 0, 6));
         }
 
         [Theory]
@@ -651,7 +651,77 @@ namespace System.Tests
         [Fact]
         public static void Compare_LongString()
         {
-            int result = string.Compare("{Policy_PS_Nothing}", 0, "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everything\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.ReflectionPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence, ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.SocketPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCounterPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlClientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permissions.DataProtectionPermission, System.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVerification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>", 4380, 19, StringComparison.Ordinal);
+            string veryLongString =
+                "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionS" +
+                "et\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust" +
+                "\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022" +
+                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everyth" +
+                "ing\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022" +
+                "System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VE" +
+                "RSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissi" +
+                "ons.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicK" +
+                "eyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+                "/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib" +
+                ", Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022versi" +
+                "on=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.S" +
+                "ecurity.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=n" +
+                "eutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=" +
+                "\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.Reflection" +
+                "Permission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission " +
+                "class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={V" +
+                "ERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence" +
+                ", ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, " +
+                "ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/" +
+                "><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Ver" +
+                "sion={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+                "1\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.Socke" +
+                "tPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c56" +
+                "1934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission " +
+                "class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral" +
+                ", PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022" +
+                "true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={" +
+                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permiss" +
+                "ions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, Publi" +
+                "cKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+                "/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorl" +
+                "ib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022ver" +
+                "sion=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022Syste" +
+                "m.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Cultur" +
+                "e=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestrict" +
+                "ed=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermiss" +
+                "ion, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089" +
+                "\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022" +
+                "System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=" +
+                "neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricte" +
+                "d=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCount" +
+                "erPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission" +
+                " class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, " +
+                "Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unr" +
+                "estricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlCl" +
+                "ientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=" +
+                "b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPe" +
+                "rmission class=\u0022System.Security.Permissions.DataProtectionPermission, Syste" +
+                "m.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022" +
+                " version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><Permissio" +
+                "nSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 N" +
+                "ame=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><Permission" +
+                "Set class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Na" +
+                "me=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permissi" +
+                "on class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version" +
+                "={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+                "1\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022" +
+                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVer" +
+                "ification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission" +
+                " class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={" +
+                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+                " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
+
+            int result = string.Compare("{Policy_PS_Nothing}", 0, veryLongString, 4380, 19, StringComparison.Ordinal);
             Assert.True(result < 0);
         }
 
@@ -659,30 +729,30 @@ namespace System.Tests
         public static void Compare_Invalid()
         {
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.OrdinalIgnoreCase + 1));
 
             // IndexA < 0
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a", -1, "bb", 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", -1, "bb", 0, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a", -1, "bb", 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", -1, "bb", 0, 1, StringComparison.CurrentCulture));
 
             // IndexA > stringA.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 2, "bb", 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", 2, "bb", 0, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 2, "bb", 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", 2, "bb", 0, 1, StringComparison.CurrentCulture));
 
             // IndexB < 0
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare("a", 0, "bb", -1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", -1, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare("a", 0, "bb", -1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", -1, 1, StringComparison.CurrentCulture));
 
             // IndexB > stringB.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare("a", 0, "bb", 3, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", 3, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare("a", 0, "bb", 3, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", 3, 0, StringComparison.CurrentCulture));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 0, "bb", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 0, "bb", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
 
             // There is a subtle behavior difference between the string.Compare that accepts a StringComparison parameter,
             // and the one that does not. The former includes short-circuiting logic for nulls BEFORE the length/
@@ -695,38 +765,38 @@ namespace System.Tests
             // These tests ensure that the argument validation stays in order.
 
             // Compare accepting StringComparison
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
             // Tests to ensure null is short-circuited before validating the arguments are in the Compare() theory
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("foo", 0, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("foo", 0, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexB
             // Then the optimization where we short-circuit if strA == strB && indexA == indexB, or length == 0, is tested in the Compare() theory.
 
             // Compare not accepting StringComparison
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare(null, -1, null, -1, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare(null, 0, "bar", 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare(null, -1, null, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare(null, 0, null, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("string1", () => string.Compare(null, 1, null, 1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("string2", () => string.Compare("bar", 1, null, 1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare(null, -1, null, -1, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare(null, 0, "bar", 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare(null, -1, null, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare(null, 0, null, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("string1", () => string.Compare(null, 1, null, 1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("string2", () => string.Compare("bar", 1, null, 1, 1));
         }
 
         [Fact]
         public static void CompareOrdinal_Invalid()
         {
             // IndexA < 0 or IndexA > strA.Length
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", -1, "bb", 0, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", 6, "bb", 0, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", -1, "bb", 0, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", 6, "bb", 0, 0));
 
             // IndexB < 0 or IndexB > strB.Length
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", -1, 0)); // IndexB < 0
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", 3, 0)); // IndexB > strB.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", -1, 0)); // IndexB < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", 3, 0)); // IndexB > strB.Length
 
             // We must validate arguments before any short-circuiting is done (besides for nulls)
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", -1, "foo", -1, 0)); // then indexA
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", -1, "foo", -1, 0)); // then indexA
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
         }
 
         [Fact]
@@ -757,7 +827,7 @@ namespace System.Tests
         [Fact]
         public static void Contains_NullValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "foo".Contains(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".Contains(null));
         }
 
         [Theory]
@@ -848,12 +918,12 @@ namespace System.Tests
         public static void EndsWith_Invalid()
         {
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.OrdinalIgnoreCase + 1));
         }
 
 
@@ -1075,8 +1145,8 @@ namespace System.Tests
         public static void Equals_InvalidComparisonType_ThrowsArgumentOutOfRangeException(StringComparison comparisonType)
         {
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Equals("a", "b", comparisonType));
-            Assert.Throws<ArgumentException>("comparisonType", () => "a".Equals("a", comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Equals("a", "b", comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "a".Equals("a", comparisonType));
         }
 
         [Fact]
@@ -1100,22 +1170,22 @@ namespace System.Tests
             var obj4 = new object();
 
             // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3, obj4));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3, obj4));
 
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2, obj3));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2, obj3));
 
             // Args is null
-            Assert.Throws<ArgumentNullException>("args", () => string.Format("", null));
-            Assert.Throws<ArgumentNullException>("args", () => string.Format(formatter, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Format("", null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Format(formatter, "", null));
 
             // Args and format are null
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, (object[])null));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, null));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, (object[])null));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, null));
 
             // Format has value < 0
             Assert.Throws<FormatException>(() => string.Format("{-1}", obj1));
@@ -1291,11 +1361,13 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void IndexOf_TurkishI()
+        public static void IndexOf_TurkishI_TurkishCulture()
         {
-            string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 string value = "\u0130";
                 Assert.Equal(19, s.IndexOf(value));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1308,44 +1380,71 @@ namespace System.Tests
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                string value = "\u0130";
-                Assert.Equal(19, s.IndexOf(value));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                value = "\u0131";
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
-                string value = "\u0130";
-                Assert.Equal(19, s.IndexOf(value));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-
-                value = "\u0131";
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
-        public static void IndexOf_HungarianDoubleCompression()
+        public static void IndexOf_TurkishI_InvariantCulture()
         {
-            string source = "dzsdzs";
-            string target = "ddzs";
-            Helpers.PerformActionWithCulture(new CultureInfo("hu-HU"), () =>
+            RemoteInvoke(() =>
             {
-                /* 
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+                string value = "\u0130";
+                
+                Assert.Equal(19, s.IndexOf(value));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                value = "\u0131";
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_TurkishI_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+                string value = "\u0130";
+
+                value = "\u0130";
+                Assert.Equal(19, s.IndexOf(value));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                value = "\u0131";
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_HungarianDoubleCompression_HungarianCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string source = "dzsdzs";
+                string target = "ddzs";
+
+                CultureInfo.CurrentCulture = new CultureInfo("hu-HU");
+                /*
                  There are differences between Windows and ICU regarding contractions.
                  Windows has equal contraction collation weights, including case (target="Ddzs" same behavior as "ddzs").
                  ICU has different contraction collation weights, depending on locale collation rules.
                  If CurrentCultureIgnoreCase is specified, ICU will use 'secondary' collation rules
-                  which ignore the contraction collation weights (defined as 'tertiary' rules)
+                 which ignore the contraction collation weights (defined as 'tertiary' rules)
                 */
                 Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, source.IndexOf(target));
                 Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, source.IndexOf(target, StringComparison.CurrentCulture));
@@ -1353,132 +1452,167 @@ namespace System.Tests
                 Assert.Equal(0, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.Ordinal));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                Assert.Equal(-1, source.IndexOf(target));
-                Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCulture));
-                Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
-        public static void IndexOf_EquivalentDiacritics()
+        public static void IndexOf_HungarianDoubleCompression_InvariantCulture()
         {
-            string s = "Exhibit a\u0300\u00C0";
-            string value = "\u00C0";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            RemoteInvoke(() =>
             {
+                string source = "dzsdzs";
+                string target = "ddzs";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                Assert.Equal(-1, source.IndexOf(target));
+                Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCulture));
+                Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_EquivalentDiacritics_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                Assert.Equal(10, s.IndexOf(value));
-                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
 
-            value = "a\u0300"; // this diacritic combines with preceding character
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                value = "a\u0300"; // this diacritic combines with preceding character
                 Assert.Equal(8, s.IndexOf(value));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                Assert.Equal(8, s.IndexOf(value));
-                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
-        public static void IndexOf_CyrillicE()
+        public static void IndexOf_EquivalentDiacritics_InvariantCulture()
         {
-            string s = "Foo\u0400Bar";
-            string value = "\u0400";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            RemoteInvoke(() =>
             {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                Assert.Equal(10, s.IndexOf(value));
+                Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                value = "a\u0300"; // this diacritic combines with preceding character
+                Assert.Equal(8, s.IndexOf(value));
+                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_CyrillicE_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
-            {
-                Assert.Equal(3, s.IndexOf(value));
-                Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
 
-            value = "bar";
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                value = "bar";
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_CyrillicE_InvariantCulture()
+        {
+            RemoteInvoke(() =>
             {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                Assert.Equal(3, s.IndexOf(value));
+                Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
+                Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+
+                value = "bar";
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_Invalid()
         {
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0, StringComparison.CurrentCulture));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1, StringComparison.CurrentCulture));
 
             // Count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Theory]
@@ -1526,7 +1660,7 @@ namespace System.Tests
         [InlineData(2, 2)]
         public static void IndexOfAny_InvalidCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOfAny(new char[] { 'o' }, startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOfAny(new char[] { 'o' }, startIndex, count));
         }
 
         [Theory]
@@ -1546,10 +1680,10 @@ namespace System.Tests
         [Fact]
         public static void Insert_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "Hello".Insert(0, null)); // Value is null
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "Hello".Insert(0, null)); // Value is null
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(-1, "!")); // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(6, "!")); // Start index > string.length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(-1, "!")); // Start index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(6, "!")); // Start index > string.length
         }
 
         [Theory]
@@ -1625,16 +1759,16 @@ namespace System.Tests
         [Fact]
         public static void Join_String_NullValues_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
-            Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
         }
 
         [Fact]
         public static void Join_String_NegativeCount_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1));
         }
 
         [Theory]
@@ -1646,7 +1780,7 @@ namespace System.Tests
         [InlineData(-1, 0)]
         public static void Join_String_InvalidStartIndexCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, startIndex, count));
         }
 
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
@@ -1676,7 +1810,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void Join_ObjectArray_WithNullIssue(string separator, object[] values, string expected)
         {
             string enumerableExpected = expected;
@@ -1689,8 +1823,8 @@ namespace System.Tests
         [Fact]
         public static void Join_ObjectArray_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
         }
 
         [Theory]
@@ -1781,54 +1915,57 @@ namespace System.Tests
             string s = "foo";
 
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0, StringComparison.CurrentCulture));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0, StringComparison.CurrentCulture));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1, StringComparison.CurrentCulture));
 
             // Start index - count + 1 < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, s.Length + 2));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, s.Length + 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Fact]
-        public static void LastIndexOf_TurkishI()
+        public static void LastIndexOf_TurkishI_TurkishCulture()
         {
-            string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 string value = "\u0130";
+
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1840,10 +1977,21 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+                
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void LastIndexOf_TurkishI_InvariantCulture()
+        {
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 string value = "\u0130";
+
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1851,10 +1999,21 @@ namespace System.Tests
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void LastIndexOf_TurkishI_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 string value = "\u0130";
+
                 Assert.Equal(19, s.LastIndexOf(value));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -1862,7 +2021,9 @@ namespace System.Tests
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Theory]
@@ -1904,19 +2065,19 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>(() => "foo".LastIndexOfAny(null, 0, 0));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1, 0));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4, 0));
 
             // Count < 0 or count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, 4));
 
             // Start index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 3, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 3, 1));
         }
 
         [Theory]
@@ -1936,7 +2097,7 @@ namespace System.Tests
         [Fact]
         public static void PadLeft_NegativeTotalWidth_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadLeft(-1, '.'));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadLeft(-1, '.'));
         }
 
         [Theory]
@@ -1956,7 +2117,7 @@ namespace System.Tests
         [Fact]
         public static void PadRight_NegativeTotalWidth_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadRight(-1, '.'));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadRight(-1, '.'));
         }
 
         [Theory]
@@ -1981,19 +2142,19 @@ namespace System.Tests
             string s = "Hello";
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1, 0));
 
             // Start index >= string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(s.Length));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(s.Length));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, -1));
 
             // Start index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length, 1));
         }
 
         [Theory]
@@ -2043,13 +2204,13 @@ namespace System.Tests
         [Fact]
         public void Replace_NullOldValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("oldValue", () => "Hello".Replace(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => "Hello".Replace(null, ""));
         }
 
         [Fact]
         public void Replace_EmptyOldValue_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>("oldValue", () => "Hello".Replace("", "l"));
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => "Hello".Replace("", "l"));
         }
 
         [Theory]
@@ -2148,15 +2309,15 @@ namespace System.Tests
             string s = "Hello";
 
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null));
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.CurrentCultureIgnoreCase));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.CurrentCultureIgnoreCase));
 
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.Ordinal));
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.OrdinalIgnoreCase));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.Ordinal));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.OrdinalIgnoreCase));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Theory]
@@ -2178,20 +2339,20 @@ namespace System.Tests
         public static void Substring_Invalid()
         {
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1, 0));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4, 0));
 
             // Length < 0 or length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, 4));
 
             // Start index + length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(3, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(2, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(3, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(2, 2));
         }
 
         [Theory]
@@ -2212,16 +2373,16 @@ namespace System.Tests
         public static void ToCharArray_Invalid()
         {
             // StartIndex < 0 or startIndex > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(-1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(4, 0)); // Start index > string.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(4, 0)); // Start index > string.Length
 
             // Length < 0 or length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".ToCharArray(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".ToCharArray(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(0, 4));
 
             // StartIndex + length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(3, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(2, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(3, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(2, 2));
         }
 
         [Theory]
@@ -2233,29 +2394,38 @@ namespace System.Tests
             Assert.Equal(expected, s.ToLower());
         }
 
-        [Fact]
-        public static void ToLower_TurkishI()
+        private static IEnumerable<object[]> ToLower_Culture_TestData()
         {
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
-            {
-                Assert.True("H\u0049 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
-                Assert.True("H\u0130 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
-                Assert.True("H\u0131 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
-            });
+            yield return new object[] { "H\u0049 World", "h\u0131 world", new CultureInfo("tr-TR") };
+            yield return new object[] { "H\u0130 World", "h\u0069 world", new CultureInfo("tr-TR") };
+            yield return new object[] { "H\u0131 World", "h\u0131 world", new CultureInfo("tr-TR") };
 
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
-                Assert.True("H\u0049 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
-                Assert.True("H\u0130 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
-                Assert.True("H\u0131 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
-            });
+            yield return new object[] { "H\u0049 World", "h\u0069 world", new CultureInfo("en-US") };
+            yield return new object[] { "H\u0130 World", "h\u0069 world", new CultureInfo("en-US") };
+            yield return new object[] { "H\u0131 World", "h\u0131 world", new CultureInfo("en-US") };
 
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            yield return new object[] { "H\u0049 World", "h\u0069 world", CultureInfo.InvariantCulture };
+            yield return new object[] { "H\u0130 World", "h\u0130 world", CultureInfo.InvariantCulture };
+            yield return new object[] { "H\u0131 World", "h\u0131 world", CultureInfo.InvariantCulture };
+        }
+
+        [Fact]
+        public static void Test_ToLower_Culture()
+        {
+            RemoteInvoke(() =>
             {
-                Assert.True("H\u0049 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
-                Assert.True("H\u0130 World".ToLower().Equals("h\u0130 world", StringComparison.Ordinal));
-                Assert.True("H\u0131 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
-            });
+                foreach (var testdata in ToLower_Culture_TestData())
+                {
+                    ToLower_Culture((string)testdata[0], (string)testdata[1], (CultureInfo)testdata[2]);
+                }
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        private static void ToLower_Culture(string actual, string expected, CultureInfo culture)
+        {
+            CultureInfo.CurrentCulture = culture;
+            Assert.True(actual.ToLower().Equals(expected, StringComparison.Ordinal));
         }
 
         [Theory]
@@ -2285,28 +2455,45 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void ToUpper_TurkishI()
+        public static void ToUpper_TurkishI_TurkishCulture()
         {
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
-            });
 
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void ToUpper_TurkishI_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
-            });
 
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void ToUpper_TurkishI_InvariantCulture()
+        {
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0131 WORLD", StringComparison.Ordinal));
-            });
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Theory]
@@ -2508,44 +2695,50 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Compare_TestData))]
-        public static void CompareTest(string s1, string s2, string cultureName, bool ignoreCase, int expected)
+        public static void CompareTest(string aS1, string aS2, string aCultureName, bool aIgnoreCase, int aExpected)
         {
-            CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
-            CompareOptions ignoreCaseOption = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
+            const string nullPlaceholder = "<null>";
+            RemoteInvoke((string s1, string s2, string cultureName, string bIgnoreCase, string iExpected) => {
+                if (s1 == nullPlaceholder)
+                    s1 = null;
 
-            Assert.Equal(expected, String.Compare(s1, s2, ignoreCase, ci));
-            Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ignoreCase, ci));
-            Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ci, ignoreCaseOption));
+                if (s2 == nullPlaceholder)
+                    s2 = null;
 
-            Assert.Equal(expected, String.Compare(s1, s2, ci, ignoreCaseOption));
-            Assert.Equal(String.Compare(s1, s2, StringComparison.Ordinal), String.Compare(s1, s2, ci, CompareOptions.Ordinal));
-            Assert.Equal(String.Compare(s1, s2, StringComparison.OrdinalIgnoreCase), String.Compare(s1, s2, ci, CompareOptions.OrdinalIgnoreCase));
+                bool ignoreCase = bool.Parse(bIgnoreCase);
+                int expected = int.Parse(iExpected);
 
-            CultureInfo currentCulture = CultureInfo.CurrentCulture; 
-            try 
-            {
+                CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+                CompareOptions ignoreCaseOption = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
+
+                Assert.Equal(expected, String.Compare(s1, s2, ignoreCase, ci));
+                Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ignoreCase, ci));
+                Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ci, ignoreCaseOption));
+
+                Assert.Equal(expected, String.Compare(s1, s2, ci, ignoreCaseOption));
+                Assert.Equal(String.Compare(s1, s2, StringComparison.Ordinal), String.Compare(s1, s2, ci, CompareOptions.Ordinal));
+                Assert.Equal(String.Compare(s1, s2, StringComparison.OrdinalIgnoreCase), String.Compare(s1, s2, ci, CompareOptions.OrdinalIgnoreCase));
+
                 CultureInfo.CurrentCulture = ci;
                 Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ignoreCase));
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = currentCulture;
-            }
+
+                return SuccessExitCode;
+            }, aS1 ?? nullPlaceholder, aS2 ?? nullPlaceholder, aCultureName, aIgnoreCase.ToString(), aExpected.ToString()).Dispose();
         }
 
         [Fact]
         public static void CompareNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", false, null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", false, null));
 
-            Assert.Throws<ArgumentException>("options", () => String.Compare("a", "b", CultureInfo.InvariantCulture, (CompareOptions) 7891));
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", null, CompareOptions.None));
+            AssertExtensions.Throws<ArgumentException>("options", () => String.Compare("a", "b", CultureInfo.InvariantCulture, (CompareOptions) 7891));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", null, CompareOptions.None));
 
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", 0, "b", 0, 1, false, null));
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => String.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => String.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => String.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => String.Compare("a", 1, "b",-1 ,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", 0, "b", 0, 1, false, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => String.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => String.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => String.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => String.Compare("a", 1, "b",-1 ,1, false, CultureInfo.InvariantCulture));
         }
 
         [Theory]
@@ -2560,8 +2753,8 @@ namespace System.Tests
         [Fact]
         public static void CasingNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("culture", () => "".ToLower(null));
-            Assert.Throws<ArgumentNullException>("culture", () => "".ToUpper(null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToLower(null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToUpper(null));
         }
 
         [Theory]
@@ -2576,8 +2769,8 @@ namespace System.Tests
         [Fact]
         public static void StartEndNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "".StartsWith(null, true, null));
-            Assert.Throws<ArgumentNullException>("value", () => "".EndsWith(null, true, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "".StartsWith(null, true, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "".EndsWith(null, true, null));
         }
 
         [Fact]
@@ -2621,6 +2814,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, ".NetNative limits interning of literals to the empty string.")]
         public static unsafe void InternTest()
         {
             String s1 = "MyTest";
@@ -2633,6 +2827,22 @@ namespace System.Tests
 
             Assert.True(String.IsInterned(s1).Equals(s1), "Expected to the literal string interned");
             Assert.True(String.IsInterned(s2).Equals(s1), "Expected to the interned string to be in the string pool now");
+        }
+
+        [Fact]
+        public static void InternalTestAotSubset()
+        {
+            string emptyFromField = string.Empty;
+            string emptyFromInternTable = string.IsInterned(emptyFromField);
+            Assert.Same(emptyFromInternTable, emptyFromField);
+
+            string sTemplate = new string('A', 5);
+            string sInterned1 = string.Intern(sTemplate);
+            string sInterned2 = string.IsInterned(sInterned1);
+            Assert.Equal(sTemplate, sInterned1);
+            Assert.Same(sInterned1, sInterned2);
+            string sNew = string.Copy(sInterned1);
+            Assert.NotSame(sInterned1, sNew);
         }
 
         [Fact]

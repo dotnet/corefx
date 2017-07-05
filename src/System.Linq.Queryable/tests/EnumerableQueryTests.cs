@@ -20,7 +20,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16916")] //This test hangs forever in query.GetEnumerator()
+        [ActiveIssue("dotnet/corefx #16916", TargetFrameworkMonikers.NetFramework)] //This test hangs forever in query.GetEnumerator()
         public void NullEnumerableConstantNullExpression()
         {
             IQueryable<int> query = new EnumerableQuery<int>((IEnumerable<int>)null);
@@ -34,7 +34,7 @@ namespace System.Linq.Tests
         {
             IQueryable<int> query = new EnumerableQuery<int>(Expression.Constant(Math.PI));
             Assert.NotNull(query.Expression);
-            Assert.Throws<ArgumentException>(() => query.GetEnumerator());
+            AssertExtensions.Throws<ArgumentException>(null, () => query.GetEnumerator());
         }
 
         [Fact]
@@ -136,14 +136,14 @@ namespace System.Linq.Tests
         public void CreateQueryNull()
         {
             IQueryProvider provider = Enumerable.Empty<int>().AsQueryable().Provider;
-            Assert.Throws<ArgumentNullException>("expression", () => provider.CreateQuery<int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => provider.CreateQuery<int>(null));
         }
 
         [Fact]
         public void CreateQueryNullNonGeneric()
         {
             IQueryProvider provider = Enumerable.Empty<int>().AsQueryable().Provider;
-            Assert.Throws<ArgumentNullException>("expression", () => provider.CreateQuery(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => provider.CreateQuery(null));
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace System.Linq.Tests
         {
             var exp = Expression.Constant(Math.PI);
             IQueryProvider provider = Enumerable.Empty<string>().AsQueryable().Provider;
-            Assert.Throws<ArgumentException>(() => provider.CreateQuery<int>(exp));
+            AssertExtensions.Throws<ArgumentException>(null, () => provider.CreateQuery<int>(exp));
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace System.Linq.Tests
         {
             var exp = Expression.Constant(Math.PI);
             IQueryProvider provider = Enumerable.Empty<string>().AsQueryable().Provider;
-            Assert.Throws<ArgumentException>(() => provider.CreateQuery(exp));
+            AssertExtensions.Throws<ArgumentException>(null, () => provider.CreateQuery(exp));
         }
 
         [Fact]
@@ -190,14 +190,14 @@ namespace System.Linq.Tests
         public void ExecuteNull()
         {
             IQueryProvider provider = Enumerable.Empty<string>().AsQueryable().Provider;
-            Assert.Throws<ArgumentNullException>("expression", () => provider.Execute<int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => provider.Execute<int>(null));
         }
 
         [Fact]
         public void ExecuteNullNonGeneric()
         {
             IQueryProvider provider = Enumerable.Empty<string>().AsQueryable().Provider;
-            Assert.Throws<ArgumentNullException>("expression", () => provider.Execute(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => provider.Execute(null));
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace System.Linq.Tests
         {
             var exp = Expression.Constant(Math.PI);
             IQueryProvider provider = Enumerable.Empty<string>().AsQueryable().Provider;
-            Assert.Throws<ArgumentException>(() => provider.Execute<IEnumerable<int>>(exp));
+            AssertExtensions.Throws<ArgumentException>(null, () => provider.Execute<IEnumerable<int>>(exp));
         }
 
         [Fact]

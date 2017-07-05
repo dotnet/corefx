@@ -201,7 +201,7 @@ namespace System.Linq.Expressions.Tests
         public void VisitChildrenThrowsAsNotReducible()
         {
             var exp = new IncompleteExpressionOverride();
-            Assert.Throws<ArgumentException>(null, () => exp.VisitChildren());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.VisitChildren());
         }
 
         [Fact]
@@ -221,42 +221,42 @@ namespace System.Linq.Expressions.Tests
         public void ReduceAndCheckThrowsByDefault()
         {
             var exp = new IncompleteExpressionOverride();
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public void ReduceExtensionsThrowsByDefault()
         {
             var exp = new IncompleteExpressionOverride();
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public void IfClaimCanReduceMustReduce()
         {
             var exp = new ClaimedReducibleOverride();
-            Assert.Throws<ArgumentException>(null, () => exp.Reduce());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.Reduce());
         }
 
         [Fact]
         public void ReduceAndCheckThrowOnReduceToSame()
         {
             var exp = new ReducesToSame();
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public void ReduceAndCheckThrowOnReduceToNull()
         {
             var exp = new ReducesToNull();
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public void ReduceAndCheckThrowOnReducedTypeNotAssignable()
         {
             var exp = new ReducesToLongTyped();
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
 #pragma warning disable 0169, 0414 // Accessed through reflection.
@@ -345,24 +345,24 @@ namespace System.Linq.Expressions.Tests
         public void ConfirmCannotRead(Expression unreadableExpression)
         {
             if (unreadableExpression == null)
-                Assert.Throws<ArgumentNullException>("expression", () => Expression.Increment(unreadableExpression));
+                AssertExtensions.Throws<ArgumentNullException>("expression", () => Expression.Increment(unreadableExpression));
             else
-                Assert.Throws<ArgumentException>("expression", () => Expression.Increment(unreadableExpression));
+                AssertExtensions.Throws<ArgumentException>("expression", () => Expression.Increment(unreadableExpression));
         }
 
         [Fact]
         public void ConfirmCannotReadSequence()
         {
-            Assert.Throws<ArgumentException>("expressions[0]", () => Expression.Block(typeof(void), UnreadableExpressions));
+            AssertExtensions.Throws<ArgumentException>("expressions[0]", () => Expression.Block(typeof(void), UnreadableExpressions));
         }
 
         [Theory, MemberData(nameof(UnwritableExpressionData))]
         public void ConfirmCannotWrite(Expression unwritableExpression)
         {
             if (unwritableExpression == null)
-                Assert.Throws<ArgumentNullException>("left", () => Expression.Assign(unwritableExpression, Expression.Constant(0)));
+                AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.Assign(unwritableExpression, Expression.Constant(0)));
             else
-                Assert.Throws<ArgumentException>("left", () => Expression.Assign(unwritableExpression, Expression.Constant(0)));
+                AssertExtensions.Throws<ArgumentException>("left", () => Expression.Assign(unwritableExpression, Expression.Constant(0)));
         }
 
         [Theory, MemberData(nameof(WritableExpressionData))]
@@ -375,14 +375,14 @@ namespace System.Linq.Expressions.Tests
         public void CompileIrreduciebleExtension(bool useInterpreter)
         {
             Expression<Action> exp = Expression.Lambda<Action>(new IrreducibleWithTypeAndNodeType());
-            Assert.Throws<ArgumentException>(null, () => exp.Compile(useInterpreter));
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.Compile(useInterpreter));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
         public void CompileIrreduciebleStrangeNodeTypeExtension(bool useInterpreter)
         {
             Expression<Action> exp = Expression.Lambda<Action>(new IrreduceibleWithTypeAndStrangeNodeType());
-            Assert.Throws<ArgumentException>(null, () => exp.Compile(useInterpreter));
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.Compile(useInterpreter));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]

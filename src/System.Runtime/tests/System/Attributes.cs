@@ -204,6 +204,7 @@ namespace System.Tests
     {
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void customAttributeCount()
         {
             List<CustomAttributeData> customAttributes =  typeof(GetCustomAttribute).Module.CustomAttributes.ToList();
@@ -250,7 +251,7 @@ namespace System.Tests
             element = typeof(AttributeGetCustomAttributes).Assembly; ;
             Assert.Throws<ArgumentNullException>(() => Attribute.GetCustomAttribute(element, attributeType));
             attributeType = typeof(myClass);
-            Assert.Throws<ArgumentException>(() => Attribute.GetCustomAttribute(element, attributeType));
+            AssertExtensions.Throws<ArgumentException>(null, () => Attribute.GetCustomAttribute(element, attributeType));
             attributeType = typeof(Attribute);
             Assert.Throws<AmbiguousMatchException>(() => Attribute.GetCustomAttribute(element, attributeType));
 
@@ -292,7 +293,7 @@ namespace System.Tests
             element = typeof(AttributeGetCustomAttributes).Assembly; ;
             Assert.Throws<ArgumentNullException>(() => Attribute.GetCustomAttribute(element, attributeType, false));
             attributeType = typeof(myClass);
-            Assert.Throws<ArgumentException>(() => Attribute.GetCustomAttribute(element, attributeType, true));
+            AssertExtensions.Throws<ArgumentException>(null, () => Attribute.GetCustomAttribute(element, attributeType, true));
             attributeType = typeof(Attribute);
             Assert.Throws<AmbiguousMatchException>(() => Attribute.GetCustomAttribute(element, attributeType, true));
 
@@ -329,7 +330,7 @@ namespace System.Tests
             element = typeof(TestClass).GetMethod("method1");
             Assert.Throws<ArgumentNullException>(() => (ObsoleteAttribute)Attribute.GetCustomAttribute(element, attributeType));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => Attribute.GetCustomAttribute(element, attributeType));
+            AssertExtensions.Throws<ArgumentException>(null, () => Attribute.GetCustomAttribute(element, attributeType));
 
             Assert.Throws<AmbiguousMatchException>(() => Attribute.GetCustomAttribute(typeof(Attribute).GetMethod("GetCustomAttribute"), typeof(Attribute)));
 
@@ -366,13 +367,14 @@ namespace System.Tests
             element = typeof(TestClass).GetMethod("method1");
             Assert.Throws<ArgumentNullException>(() => (ObsoleteAttribute)Attribute.GetCustomAttribute(element, attributeType, false));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => Attribute.GetCustomAttribute(element, attributeType, false));
+            AssertExtensions.Throws<ArgumentException>(null, () => Attribute.GetCustomAttribute(element, attributeType, false));
 
             Assert.Throws<AmbiguousMatchException>(() => Attribute.GetCustomAttribute(typeof(Attribute).GetMethod("GetCustomAttribute"), typeof(Attribute), false));
 
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void PositiveTest5()
         {
             Type clsType = typeof(GetCustomAttribute);
@@ -401,10 +403,11 @@ namespace System.Tests
             attributeType = null;
             Assert.Throws<ArgumentNullException>(() => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType));
+            AssertExtensions.Throws<ArgumentException>(null, () => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType));
 
         }
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void PositiveTest6()
         {
             Type clsType = typeof(GetCustomAttribute);
@@ -433,7 +436,7 @@ namespace System.Tests
             attributeType = null;
             Assert.Throws<ArgumentNullException>(() => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType, false));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType, false));
+            AssertExtensions.Throws<ArgumentException>(null, () => (DebuggableAttribute)Attribute.GetCustomAttribute(clsType.Module, attributeType, false));
 
         }
         [Fact]
@@ -470,7 +473,7 @@ namespace System.Tests
             attributeType = null;
             Assert.Throws<ArgumentNullException>(() => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType));
+            AssertExtensions.Throws<ArgumentException>(null, () => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType));
 
         }
         [Fact]
@@ -509,7 +512,7 @@ namespace System.Tests
             attributeType = null;
             Assert.Throws<ArgumentNullException>(() => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType, false));
             attributeType = typeof(object);
-            Assert.Throws<ArgumentException>(() => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType, false));
+            AssertExtensions.Throws<ArgumentException>(null, () => (ArgumentUsageAttribute)Attribute.GetCustomAttribute(paramInfos[0], attributeType, false));
 
         }
     }

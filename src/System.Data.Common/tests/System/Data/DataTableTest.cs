@@ -32,6 +32,7 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using System.Xml;
 
 
@@ -1893,12 +1894,6 @@ Assert.False(true);
         [Fact]
         public void Serialize()
         {
-            MemoryStream fs = new MemoryStream();
-
-            // Construct a BinaryFormatter and use it 
-            // to serialize the data to the stream.
-            BinaryFormatter formatter = new BinaryFormatter();
-
             // Create an array with multiple elements refering to 
             // the one Singleton object.
             DataTable dt = new DataTable();
@@ -1919,13 +1914,7 @@ Assert.False(true);
             dt.Rows.Add(loRowToAdd);
 
             DataTable[] dtarr = new DataTable[] { dt };
-
-            // Serialize the array elements.
-            formatter.Serialize(fs, dtarr);
-
-            // Deserialize the array elements.
-            fs.Position = 0;
-            DataTable[] a2 = (DataTable[])formatter.Deserialize(fs);
+            DataTable[] a2 = BinaryFormatterHelpers.Clone(dtarr);
 
             var ds = new DataSet();
             ds.Tables.Add(a2[0]);
@@ -2069,7 +2058,7 @@ Assert.False(true);
         [Fact]
         public void ColumnObjectTypeTest()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataTable dt = new DataTable();
                 dt.Columns.Add("Series Label", typeof(SqlInt32));
@@ -4023,7 +4012,7 @@ Assert.False(true);
 				  <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/BAD' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'>
 				  </xs:schema>
 				</CustomElement>";
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 using (var s = new StringReader(xml))
                 {

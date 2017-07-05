@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.Sql;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
@@ -34,15 +35,6 @@ namespace System.Data.SqlClient
     // and surfacing objects to the user.
     internal sealed partial class TdsParser
     {
-        static TdsParser()
-        {
-            // For CoreCLR, we need to register the ANSI Code Page encoding provider before attempting to get an Encoding from a CodePage
-            // For a default installation of SqlServer the encoding exchanged during Login is 1252. This encoding is not loaded by default
-            // See Remarks at https://msdn.microsoft.com/en-us/library/system.text.encodingprovider(v=vs.110).aspx 
-            // SqlClient needs to register the encoding providers to make sure that even basic scenarios work with Sql Server.
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        }
-
         // Default state object for parser
         internal TdsParserStateObject _physicalStateObj = null; // Default stateObj and connection for Dbnetlib and non-MARS SNI.
 
@@ -1845,9 +1837,6 @@ namespace System.Data.SqlClient
                                             _statisticsIsInTransaction = true;
                                             break;
                                         case TdsEnums.ENV_COMMITTRAN:
-                                            // SQLHOT 483
-                                            //  Must clear the retain id if the server-side transaction ends by anything other
-                                            //  than rollback.
                                             goto case TdsEnums.ENV_ROLLBACKTRAN;
                                         case TdsEnums.ENV_ROLLBACKTRAN:
                                             // When we get notification of a completed transaction
@@ -1868,9 +1857,6 @@ namespace System.Data.SqlClient
                                                 }
                                                 else if (TdsEnums.ENV_ROLLBACKTRAN == env[ii].type)
                                                 {
-                                                    //  Hold onto transaction id if distributed tran is rolled back.  This must
-                                                    //  be sent to the server on subsequent executions even though the transaction
-                                                    //  is considered to be rolled back.
                                                     _currentTransaction.Completed(TransactionState.Aborted);
                                                 }
                                                 else
@@ -1884,7 +1870,7 @@ namespace System.Data.SqlClient
                                         case TdsEnums.ENV_ENLISTDTC:
                                         case TdsEnums.ENV_DEFECTDTC:
                                         case TdsEnums.ENV_TRANSACTIONENDED:
-                                            Debug.Assert(false, "Should have thrown if DTC token encountered");
+                                            Debug.Fail("Should have thrown if DTC token encountered");
                                             break;
                                         default:
                                             _connHandler.OnEnvChange(env[ii]);
@@ -2040,6 +2026,16 @@ namespace System.Data.SqlClient
                         }
                     case TdsEnums.SQLTABNAME:
                         {
+                            if (null != dataStream)
+                            {
+                                MultiPartTableName[] tableNames;
+                                if (!TryProcessTableName(tokenLength, stateObj, out tableNames))
+                                {
+                                    return false;
+                                }
+                                dataStream.TableNames = tableNames;
+                            }
+                            else
                             {
                                 if (!stateObj.TrySkipBytes(tokenLength))
                                 {
@@ -3546,6 +3542,7 @@ namespace System.Data.SqlClient
                 return false;
             }
 
+            col.isColumnSet = (TdsEnums.IsColumnSet == (flags & TdsEnums.IsColumnSet));
 
             byte tdsType;
             if (!stateObj.TryReadByte(out tdsType))
@@ -3733,6 +3730,37 @@ namespace System.Data.SqlClient
             return true;
         }
 
+        internal bool TryProcessTableName(int length, TdsParserStateObject stateObj, out MultiPartTableName[] multiPartTableNames)
+        {
+            int tablesAdded = 0;
+
+            MultiPartTableName[] tables = new MultiPartTableName[1];
+            MultiPartTableName mpt;
+            while (length > 0)
+            {
+                if (!TryProcessOneTable(stateObj, ref length, out mpt))
+                {
+                    multiPartTableNames = null;
+                    return false;
+                }
+                if (tablesAdded == 0)
+                {
+                    tables[tablesAdded] = mpt;
+                }
+                else
+                {
+                    MultiPartTableName[] newTables = new MultiPartTableName[tables.Length + 1];
+                    Array.Copy(tables, 0, newTables, 0, tables.Length);
+                    newTables[tables.Length] = mpt;
+                    tables = newTables;
+                }
+
+                tablesAdded++;
+            }
+
+            multiPartTableNames = tables;
+            return true;
+        }
 
         private bool TryProcessOneTable(TdsParserStateObject stateObj, ref int length, out MultiPartTableName multiPartTableName)
         {
@@ -3833,8 +3861,8 @@ namespace System.Data.SqlClient
                 { // colnum, ignore
                     return false;
                 }
-                if (!stateObj.TryReadByte(out ignored))
-                { // tablenum, ignore
+                if (!stateObj.TryReadByte(out col.tableNum))
+                {
                     return false;
                 }
 
@@ -3851,7 +3879,7 @@ namespace System.Data.SqlClient
                 col.isHidden = (TdsEnums.SQLHidden == (status & TdsEnums.SQLHidden));
 
                 // read off the base table name if it is different than the select list column name
-                if (TdsEnums.SQLDifferentName == (status & TdsEnums.SQLDifferentName))
+                if (col.isDifferentName)
                 {
                     byte len;
                     if (!stateObj.TryReadByte(out len))
@@ -3864,8 +3892,16 @@ namespace System.Data.SqlClient
                     }
                 }
 
+                // Fixup column name - only if result of a table - that is if it was not the result of
+                // an expression.
+                if ((reader.TableNames != null) && (col.tableNum > 0))
+                {
+                    Debug.Assert(reader.TableNames.Length >= col.tableNum, "invalid tableNames array!");
+                    col.multiPartTableName = reader.TableNames[col.tableNum - 1];
+                }
 
-                if (TdsEnums.SQLExpression == (status & TdsEnums.SQLExpression))
+                // Expressions are readonly
+                if (col.isExpression)
                 {
                     col.updatability = 0;
                 }
@@ -5884,7 +5920,7 @@ namespace System.Data.SqlClient
 
             {
                 userName = rec.userName;
-                encryptedPassword = TdsParserStaticMethods.EncryptPassword(rec.password);
+                encryptedPassword = TdsParserStaticMethods.ObfuscatePassword(rec.password);
                 encryptedPasswordLengthInBytes = encryptedPassword.Length;  // password in clear text is already encrypted and its length is in byte
             }
 
@@ -6467,7 +6503,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Task TdsExecuteSQLBatch(string text, int timeout, TdsParserStateObject stateObj, bool sync, bool callerHasConnectionLock = false)
+        internal Task TdsExecuteSQLBatch(string text, int timeout, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool sync, bool callerHasConnectionLock = false)
         {
             if (TdsParserState.Broken == State || TdsParserState.Closed == State)
             {
@@ -6517,7 +6553,7 @@ namespace System.Data.SqlClient
                 stateObj.SetTimeoutSeconds(timeout);
                 stateObj.SniContext = SniContext.Snix_Execute;
 
-                WriteRPCBatchHeaders(stateObj);
+                WriteRPCBatchHeaders(stateObj, notificationRequest);
 
                 stateObj._outputMessageType = TdsEnums.MT_SQL;
 
@@ -6583,7 +6619,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Task TdsExecuteRPC(_SqlRPC[] rpcArray, int timeout, bool inSchema, TdsParserStateObject stateObj, bool isCommandProc, bool sync = true,
+        internal Task TdsExecuteRPC(_SqlRPC[] rpcArray, int timeout, bool inSchema, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool isCommandProc, bool sync = true,
           TaskCompletionSource<object> completion = null, int startRpc = 0, int startParam = 0)
         {
             bool firstCall = (completion == null);
@@ -6632,7 +6668,7 @@ namespace System.Data.SqlClient
                         stateObj.SetTimeoutSeconds(timeout);
                         stateObj.SniContext = SniContext.Snix_Execute;
 
-                        WriteRPCBatchHeaders(stateObj);
+                        WriteRPCBatchHeaders(stateObj, notificationRequest);
 
                         stateObj._outputMessageType = TdsEnums.MT_RPC;
                     }
@@ -6989,7 +7025,7 @@ namespace System.Data.SqlClient
                                     }
 
                                     AsyncHelper.ContinueTask(writeParamTask, completion,
-                                      () => TdsExecuteRPC(rpcArray, timeout, inSchema, stateObj, isCommandProc, sync, completion,
+                                      () => TdsExecuteRPC(rpcArray, timeout, inSchema, notificationRequest, stateObj, isCommandProc, sync, completion,
                                                             startRpc: ii, startParam: i + 1),
                                         connectionToDoom: _connHandler,
                                         onFailure: exc => TdsExecuteRPC_OnFailure(exc, stateObj));
@@ -7861,7 +7897,89 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void WriteRPCBatchHeaders(TdsParserStateObject stateObj)
+        private int GetNotificationHeaderSize(SqlNotificationRequest notificationRequest)
+        {
+            if (null != notificationRequest)
+            {
+                string callbackId = notificationRequest.UserData;
+                string service = notificationRequest.Options;
+                int timeout = notificationRequest.Timeout;
+
+                if (null == callbackId)
+                {
+                    throw ADP.ArgumentNull(nameof(callbackId));
+                }
+                else if (ushort.MaxValue < callbackId.Length)
+                {
+                    throw ADP.ArgumentOutOfRange(nameof(callbackId));
+                }
+
+                if (null == service)
+                {
+                    throw ADP.ArgumentNull(nameof(service));
+                }
+                else if (ushort.MaxValue < service.Length)
+                {
+                    throw ADP.ArgumentOutOfRange(nameof(service));
+                }
+
+                if (-1 > timeout)
+                {
+                    throw ADP.ArgumentOutOfRange(nameof(timeout));
+                }
+
+                // Header Length (uint) (included in size) (already written to output buffer)
+                // Header Type (ushort)
+                // NotifyID Length (ushort)
+                // NotifyID UnicodeStream (unicode text)
+                // SSBDeployment Length (ushort)
+                // SSBDeployment UnicodeStream (unicode text)
+                // Timeout (uint) -- optional
+                // Don't send timeout value if it is 0
+
+                int headerLength = 4 + 2 + 2 + (callbackId.Length * 2) + 2 + (service.Length * 2);
+                if (timeout > 0)
+                    headerLength += 4;
+                return headerLength;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        // Write query notificaiton header data, not including the notificaiton header length
+        private void WriteQueryNotificationHeaderData(SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj)
+        {
+            Debug.Assert(_isYukon, "WriteQueryNotificationHeaderData called on a non-Yukon server");
+
+            // We may need to update the notification header length if the header is changed in the future
+
+            Debug.Assert(null != notificationRequest, "notificaitonRequest is null");
+
+            string callbackId = notificationRequest.UserData;
+            string service = notificationRequest.Options;
+            int timeout = notificationRequest.Timeout;
+
+            // we did verification in GetNotificationHeaderSize, so just assert here.
+            Debug.Assert(null != callbackId, "CallbackId is null");
+            Debug.Assert(ushort.MaxValue >= callbackId.Length, "CallbackId length is out of range");
+            Debug.Assert(null != service, "Service is null");
+            Debug.Assert(ushort.MaxValue >= service.Length, "Service length is out of range");
+            Debug.Assert(-1 <= timeout, "Timeout");
+
+            WriteShort(TdsEnums.HEADERTYPE_QNOTIFICATION, stateObj);      // Query notifications Type
+
+            WriteShort(callbackId.Length * 2, stateObj); // Length in bytes
+            WriteString(callbackId, stateObj);
+
+            WriteShort(service.Length * 2, stateObj); // Length in bytes
+            WriteString(service, stateObj);
+            if (timeout > 0)
+                WriteInt(timeout, stateObj);
+        }
+
+        private void WriteRPCBatchHeaders(TdsParserStateObject stateObj, SqlNotificationRequest notificationRequest)
         {
             /* Header:
                TotalLength  - DWORD  - including all headers and lengths, including itself
@@ -7873,10 +7991,11 @@ namespace System.Data.SqlClient
                }
             */
 
+            int notificationHeaderSize = GetNotificationHeaderSize(notificationRequest);
 
             const int marsHeaderSize = 18; // 4 + 2 + 8 + 4
 
-            int totalHeaderLength = 4 + marsHeaderSize;
+            int totalHeaderLength = 4 + marsHeaderSize + notificationHeaderSize;
             Debug.Assert(stateObj._outBytesUsed == stateObj._outputHeaderLen, "Output bytes written before total header length");
             // Write total header length
             WriteInt(totalHeaderLength, stateObj);
@@ -7885,6 +8004,14 @@ namespace System.Data.SqlClient
             WriteInt(marsHeaderSize, stateObj);
             // Write Mars header data
             WriteMarsHeaderData(stateObj, CurrentTransaction);
+
+            if (0 != notificationHeaderSize)
+            {
+                // Write Notification header length
+                WriteInt(notificationHeaderSize, stateObj);
+                // Write notificaiton header data
+                WriteQueryNotificationHeaderData(notificationRequest, stateObj);
+            }
         }
 
 

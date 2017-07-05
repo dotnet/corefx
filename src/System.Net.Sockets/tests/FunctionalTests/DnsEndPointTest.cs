@@ -10,18 +10,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
-    public class DnsEndPointTest
+    public class DnsEndPointTest : DualModeBase
     {
-        // Port 8 is unassigned as per https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
-        private const int UnusedPort = 8;
-
-        private readonly ITestOutputHelper _log;
-
-        public DnsEndPointTest(ITestOutputHelper output)
-        {
-            _log = TestLogging.GetInstance();
-        }
-
         private void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
         {
             ManualResetEvent complete = (ManualResetEvent)args.UserToken;
@@ -92,7 +82,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     sock.SendTo(new byte[10], new DnsEndPoint("localhost", UnusedPort));
                 });
@@ -108,7 +98,7 @@ namespace System.Net.Sockets.Tests
                 int port = sock.BindToAnonymousPort(IPAddress.Loopback);
                 EndPoint endpoint = new DnsEndPoint("localhost", port);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     sock.ReceiveFrom(new byte[10], ref endpoint);
                 });
@@ -184,7 +174,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     sock.BeginSendTo(new byte[10], 0, 0, SocketFlags.None, new DnsEndPoint("localhost", UnusedPort), null, null);
                 });
@@ -312,12 +302,11 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
+        [ConditionalTheory(nameof(LocalhostIsBothIPv4AndIPv6))]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
         [Trait("IPv4", "true")]
         [Trait("IPv6", "true")]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void Socket_StaticConnectAsync_Success(SocketImplementationType type)
         {
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());

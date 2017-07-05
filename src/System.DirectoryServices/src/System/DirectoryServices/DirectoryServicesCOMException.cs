@@ -12,7 +12,6 @@ namespace System.DirectoryServices
     using System.Security.Permissions;
     using System.Globalization;
 
-    [Serializable]
     public class DirectoryServicesCOMException : COMException, ISerializable
     {
         private int _extendederror = 0;
@@ -21,7 +20,10 @@ namespace System.DirectoryServices
         public DirectoryServicesCOMException() { }
         public DirectoryServicesCOMException(string message) : base(message) { }
         public DirectoryServicesCOMException(string message, Exception inner) : base(message, inner) { }
-        protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         internal DirectoryServicesCOMException(string extendedMessage, int extendedError, COMException e) : base(e.Message, e.ErrorCode)
         {
@@ -44,8 +46,7 @@ namespace System.DirectoryServices
                 return _extendedmessage;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);

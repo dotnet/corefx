@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Internal.Cryptography.Pal
 {
@@ -136,14 +137,23 @@ namespace Internal.Cryptography.Pal
 
         public static IStorePal FromSystemStore(string storeName, StoreLocation storeLocation, OpenFlags openFlags)
         {
-            if (storeLocation != StoreLocation.LocalMachine)
+            if (storeLocation == StoreLocation.CurrentUser)
             {
+                if (X509Store.DisallowedStoreName.Equals(storeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new DirectoryBasedStoreProvider.UnsupportedDisallowedStore(openFlags);
+                }
+
                 return new DirectoryBasedStoreProvider(storeName, openFlags);
             }
 
+            Debug.Assert(storeLocation == StoreLocation.LocalMachine);
+            
             if ((openFlags & OpenFlags.ReadWrite) == OpenFlags.ReadWrite)
             {
-                throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresReadOnly);
+                throw new CryptographicException(
+                    SR.Cryptography_Unix_X509_MachineStoresReadOnly,
+                    new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresReadOnly));
             }
 
             // The static store approach here is making an optimization based on not
@@ -160,17 +170,19 @@ namespace Internal.Cryptography.Pal
                 }
             }
 
-            if (StringComparer.Ordinal.Equals("Root", storeName))
+            if (X509Store.RootStoreName.Equals(storeName, StringComparison.OrdinalIgnoreCase))
             {
                 return s_machineRootStore;
             }
 
-            if (StringComparer.Ordinal.Equals("CA", storeName))
+            if (X509Store.IntermediateCAStoreName.Equals(storeName, StringComparison.OrdinalIgnoreCase))
             {
                 return s_machineIntermediateStore;
             }
 
-            throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresRootOnly);
+            throw new CryptographicException(
+                SR.Cryptography_Unix_X509_MachineStoresRootOnly,
+                new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresRootOnly));
         }
 
         private static ILoaderPal SingleCertToLoaderPal(ICertificatePal singleCert)

@@ -64,7 +64,7 @@ namespace System.Xml.Tests
             XmlAttribute anotherOwnerElementAttr = anotherElement.SetAttributeNode("anotherOwnerElementAttr", string.Empty);
 
             XmlAttributeCollection target = element.Attributes;
-            Assert.Throws<ArgumentException>(() => target.InsertAfter(newAttr, anotherOwnerElementAttr));
+            AssertExtensions.Throws<ArgumentException>(null, () => target.InsertAfter(newAttr, anotherOwnerElementAttr));
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace System.Xml.Tests
             XmlAttribute anotherOwnerDocumentAttr = new XmlDocument().CreateAttribute("anotherOwnerDocumentAttr");
 
             XmlAttributeCollection target = element.Attributes;
-            Assert.Throws<ArgumentException>(() => target.InsertAfter(anotherOwnerDocumentAttr, existingAttr));
+            AssertExtensions.Throws<ArgumentException>(null, () => target.InsertAfter(anotherOwnerDocumentAttr, existingAttr));
         }
 
         [Fact]
@@ -231,7 +231,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] //Fix for this edge case was only made in NetCore
         public void InsertAfterThrowsArgumentOutOfRangeExceptionForDupRefAttrAtTheEnd_OldBehavior()
         {
             const string attributeName = "existingAttr";
@@ -276,7 +276,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] //Fix for this edge case was only made in NetCore
         public void InsertAfterDoesNotReplaceDupRefAttr_OldBehavior()
         {
             const string attributeName = "existingAttr";

@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.WebSockets.Client.Tests
 {
+    [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
     public class CloseTest : ClientWebSocketTestBase
     {
         public CloseTest(ITestOutputHelper output) : base(output) { }
@@ -114,7 +115,7 @@ namespace System.Net.WebSockets.Client.Tests
                 var expectedException = new ArgumentException(expectedInnerMessage, "statusDescription");
                 string expectedMessage = expectedException.Message;
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("statusDescription", () =>
                     { Task t = cws.CloseAsync(WebSocketCloseStatus.NormalClosure, closeDescription, cts.Token); });
 
                 Assert.Equal(WebSocketState.Open, cws.State);
@@ -256,6 +257,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(20362, TargetFrameworkMonikers.NetFramework)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_DuringConcurrentReceiveAsync_ExpectedStates(Uri server)

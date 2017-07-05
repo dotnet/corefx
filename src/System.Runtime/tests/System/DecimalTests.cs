@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Xunit;
 
 namespace System.Tests
 {
-    public static partial class DecimalTests
+    public partial class DecimalTests : RemoteExecutorTestBase
     {
         [Fact]
         public static void MaxValue()
@@ -77,9 +78,9 @@ namespace System.Tests
         [Fact]
         public static void Ctor_IntArray_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("bits", () => new decimal(null)); // Bits is null
-            Assert.Throws<ArgumentException>(null, () => new decimal(new int[3])); // Bits.Length is not 4
-            Assert.Throws<ArgumentException>(null, () => new decimal(new int[5])); // Bits.Length is not 4
+            AssertExtensions.Throws<ArgumentNullException>("bits", () => new decimal(null)); // Bits is null
+            AssertExtensions.Throws<ArgumentException>(null, () => new decimal(new int[3])); // Bits.Length is not 4
+            AssertExtensions.Throws<ArgumentException>(null, () => new decimal(new int[5])); // Bits.Length is not 4
         }
 
         [Fact]
@@ -225,8 +226,8 @@ namespace System.Tests
         public static void CompareTo_ObjectNotDecimal_ThrowsArgumentException()
         {
             IComparable comparable = 248m;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("248")); // Obj is not a decimal
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo(248)); // Obj is not a decimal
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("248")); // Obj is not a decimal
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(248)); // Obj is not a decimal
         }
 
         public static IEnumerable<object[]> Divide_Valid_TestData()
@@ -1017,32 +1018,42 @@ namespace System.Tests
             yield return new object[] { (decimal)-2468, "N", customFormat3, "(2*468.00)" };
         }
 
-        [Theory]
-        [MemberData(nameof(ToString_TestData))]
-        public static void ToString(decimal f, string format, IFormatProvider provider, string expected)
+        [Fact]
+        public static void Test_ToString()
         {
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            RemoteInvoke(() =>
             {
-                bool isDefaultProvider = provider == null;
-                if (string.IsNullOrEmpty(format) || format.ToUpperInvariant() == "G")
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                foreach (var testdata in ToString_TestData())
                 {
-                    if (isDefaultProvider)
-                    {
-                        Assert.Equal(expected, f.ToString());
-                        Assert.Equal(expected, f.ToString((IFormatProvider)null));
-                    }
-                    Assert.Equal(expected, f.ToString(provider));
+                    ToString((decimal)testdata[0], (string)testdata[1], (IFormatProvider)testdata[2], (string)testdata[3]);
                 }
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        private static void ToString(decimal f, string format, IFormatProvider provider, string expected)
+        {
+            bool isDefaultProvider = provider == null;
+            if (string.IsNullOrEmpty(format) || format.ToUpperInvariant() == "G")
+            {
                 if (isDefaultProvider)
                 {
-                    Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant())); // If format is upper case, then exponents are printed in upper case
-                    Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant())); // If format is lower case, then exponents are printed in lower case
-                    Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), null));
-                    Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), null));
+                    Assert.Equal(expected, f.ToString());
+                    Assert.Equal(expected, f.ToString((IFormatProvider)null));
                 }
-                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), provider));
-                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), provider));
-            });
+                Assert.Equal(expected, f.ToString(provider));
+            }
+            if (isDefaultProvider)
+            {
+                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant())); // If format is upper case, then exponents are printed in upper case
+                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant())); // If format is lower case, then exponents are printed in lower case
+                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), null));
+                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), null));
+            }
+            Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), provider));
+            Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), provider));
         }
 
         [Fact]

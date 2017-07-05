@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -29,7 +30,7 @@ namespace System.Net.WebSockets
                         // Ordering is important to maintain .NET 4.5 WebSocket implementation exception behavior.
                         if (isDisposed)
                         {
-                            throw new ObjectDisposedException(nameof(ClientWebSocket));
+                            throw new ObjectDisposedException(nameof(WebSocket));
                         }
 
                         return;
@@ -123,9 +124,19 @@ namespace System.Net.WebSockets
 
         internal static void ValidateArraySegment(ArraySegment<byte> arraySegment, string parameterName)
         {
+            Debug.Assert(!string.IsNullOrEmpty(parameterName), "'parameterName' MUST NOT be NULL or string.Empty");
+
             if (arraySegment.Array == null)
             {
-                throw new ArgumentNullException(parameterName + ".Array");
+                throw new ArgumentNullException(parameterName + "." + nameof(arraySegment.Array));
+            }
+            if (arraySegment.Offset < 0 || arraySegment.Offset > arraySegment.Array.Length)
+            {
+                throw new ArgumentOutOfRangeException(parameterName + "." + nameof(arraySegment.Offset));
+            }
+            if (arraySegment.Count < 0 || arraySegment.Count > (arraySegment.Array.Length - arraySegment.Offset))
+            {
+                throw new ArgumentOutOfRangeException(parameterName + "." + nameof(arraySegment.Count));
             }
         }
 

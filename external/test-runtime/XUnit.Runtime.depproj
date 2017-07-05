@@ -3,9 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <!-- Given that xunit packages bring with them part of the framework, we need to specify a runtime in order to get the assets
-         This RID value doesn't really matter, since the assets we are copying are not RID specific, so defaulting to Windows here
-    -->
-    <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
+         The only asset that we copy which is RID-specific is sni.dll which is only used in windows, which is why we default to Windows as the RID -->
+    <NugetRuntimeIdentifier>win10-$(ArchGroup)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
     <OutputPath>$(RuntimePath)</OutputPath>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' != 'netfx'">xunit.console.netcore</XUnitRunnerPackageId>
@@ -40,6 +39,10 @@
     <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent">
       <Version>$(TraceEventPackageVersion)</Version>
     </PackageReference>
+    <!-- for callstack line numbers -->
+    <PackageReference Include="Microsoft.DiaSymReader.Native">
+      <Version>1.5.0</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.3rdpartytools.MarkdownLog">
       <Version>0.10.0-alpha-experimental</Version>
     </PackageReference>
@@ -59,7 +62,7 @@
       <Version>2.5.0</Version>
     </PackageReference>
     <PackageReference Include="System.IO.Compression.TestData">
-      <Version>1.0.4-prerelease</Version>
+      <Version>1.0.5-prerelease</Version>
     </PackageReference>
     <PackageReference Include="System.IO.Packaging.TestData">
       <Version>1.0.0-prerelease</Version>
@@ -69,6 +72,9 @@
     </PackageReference>
     <PackageReference Include="System.Net.TestData">
       <Version>1.0.0-prerelease</Version>
+    </PackageReference>
+    <PackageReference Include="System.Drawing.Common.TestData">
+      <Version>1.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
@@ -85,6 +91,26 @@
     <PackageToInclude Include="Microsoft.xunit.netcore.extensions"/>
     <PackageToInclude Include="Newtonsoft.Json"/>
     <PackageToInclude Include="$(XUnitRunnerPackageId)" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
+    <UAPToolsPackageVersion>1.0.12</UAPToolsPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <PackageReference Include="Microsoft.DotNet.UAP.TestTools">
+      <Version>$(UAPToolsPackageVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- System.Data.SqlClient tests require sni.dll in the test folder -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
+    <PackageReference Include="runtime.native.System.Data.SqlClient.sni">
+      <Version>$(PackageVersion)-$(CoreFxExpectedPrerelease)</Version>
+    </PackageReference>
+    <PackageToInclude Include="runtime.win-arm64.runtime.native.System.Data.SqlClient.sni"/>
+    <PackageToInclude Include="runtime.win-x64.runtime.native.System.Data.SqlClient.sni"/>
+    <PackageToInclude Include="runtime.win-x86.runtime.native.System.Data.SqlClient.sni"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
@@ -105,15 +131,14 @@
           Condition="'$(TargetGroup)'=='uap'" >
 
     <PropertyGroup>
-      <UAPToolsPackageVersion>1.0.2</UAPToolsPackageVersion>
       <UAPToolsPackageName>microsoft.dotnet.uap.testtools</UAPToolsPackageName>
 
-      <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools</UAPToolsFolder>
+      <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools\$(ArchGroup)</UAPToolsFolder>
       <UAPToolsFolder>$(UAPToolsFolder.Replace('/', '\'))</UAPToolsFolder>
     </PropertyGroup>
 
     <!-- Give a warning that the UAPToolsFolder is not set and that tests won't run -->
-    <Warning Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run sync." Condition="'$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')" />
+    <Warning Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run sync." Condition="('$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
 
     <ItemGroup Condition="'$(UAPToolsFolder)'!=''">
       <RunnerFolderContents Include="$(UAPToolsFolder)\Runner\**\*" />
@@ -140,12 +165,15 @@
           AfterTargets="RestorePackages"
           Condition="'$(TargetGroup)' == 'uapaot'">
     <PropertyGroup>
-      <TestILCToolsPackageName>TestILCNugetPackageForCoreFX</TestILCToolsPackageName>
+      <TestILCToolsPackageName>TestILC</TestILCToolsPackageName>
+      <TestILCToolsPackageName Condition="'$(ArchGroup)' == 'x64'">$(TestILCToolsPackageName).amd64ret</TestILCToolsPackageName>
+      <TestILCToolsPackageName Condition="'$(ArchGroup)' == 'x86'">$(TestILCToolsPackageName).x86ret</TestILCToolsPackageName>
+      <TestILCToolsPackageName Condition="'$(ArchGroup)' == 'arm'">$(TestILCToolsPackageName).armret</TestILCToolsPackageName>
       <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\$(ProjectNTfsTestILCPackageVersion)\TestILC</TestILCFolder>
       <TestILCFolder>$(TestILCFolder.Replace('/', '\'))</TestILCFolder>
     </PropertyGroup>
 
-    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="'$(TestILCFolder)' == '' or !Exists('$(TestILCFolder)')" />
+    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="('$(TestILCFolder)' == '' or !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
 
     <ItemGroup Condition="'$(TestILCFolder)'!=''">
       <TestILCFolderContents Include="$(TestILCFolder)\**\*" />

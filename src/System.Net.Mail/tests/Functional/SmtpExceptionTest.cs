@@ -9,7 +9,6 @@
 // (C) 2008 Gert Driesen
 //
 
-
 using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
@@ -86,30 +85,6 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public void TestConstructorWithSerialization()
-        {
-            string msg = "MESSAGE";
-            Exception inner = new ArgumentException("whatever");
-            SerializationInfo si = new SerializationInfo(typeof(SmtpException), new FormatterConverter());
-
-            new Exception(msg, inner).GetObjectData(si, new StreamingContext());
-            si.AddValue("Status", (int)SmtpStatusCode.ServiceReady);
-
-            SmtpException se = new MySmtpException(si, new StreamingContext());
-            Assert.NotNull(se.Data);
-            Assert.Equal(0, se.Data.Keys.Count);
-            Assert.Same(inner, se.InnerException);
-            Assert.Same(msg, se.Message);
-            Assert.Equal(SmtpStatusCode.ServiceReady, se.StatusCode);
-        }
-
-        [Fact]
-        public void TestConstructorThrowsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new MySmtpException((SerializationInfo)null, new StreamingContext()));
-        }
-
-        [Fact]
         public void TestConstructorWithStatusCodeAndStringArgument()
         {
             string msg;
@@ -179,13 +154,4 @@ namespace System.Net.Mail.Tests
             Assert.Equal(SmtpStatusCode.GeneralFailure, se.StatusCode);
         }
     }
-
-    class MySmtpException : SmtpException
-    {
-        public MySmtpException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-    }
 }
-

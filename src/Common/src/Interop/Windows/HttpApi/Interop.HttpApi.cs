@@ -605,17 +605,6 @@ internal static partial class Interop
         [DllImport(Libraries.HttpApi, SetLastError = true)]
         internal static extern unsafe uint HttpReceiveClientCertificate(SafeHandle requestQueueHandle, ulong connectionId, uint flags, byte* pSslClientCertInfo, uint sslClientCertInfoSize, uint* pBytesReceived, NativeOverlapped* pOverlapped);
 
-        [Flags]
-        internal enum FileCompletionNotificationModes : byte
-        {
-            None = 0,
-            SkipCompletionPortOnSuccess = 1,
-            SkipSetEventOnHandle = 2
-        }
-
-        [DllImport(Libraries.Kernel32, SetLastError = true)]
-        internal static extern unsafe bool SetFileCompletionNotificationModes(SafeHandle handle, FileCompletionNotificationModes modes);
-
         internal static readonly string[] HttpVerbs = new string[]
         {
             null,
@@ -774,14 +763,6 @@ internal static partial class Interop
         internal static unsafe string GetKnownHeader(HTTP_REQUEST* request, int headerIndex)
         {
             return GetKnownHeader(request, 0, headerIndex);
-        }
-
-        internal static unsafe string GetKnownHeader(byte[] memoryBlob, IntPtr originalAddress, int headerIndex)
-        {
-            fixed (byte* pMemoryBlob = memoryBlob)
-            {
-                return GetKnownHeader((HTTP_REQUEST*)pMemoryBlob, pMemoryBlob - (byte*)originalAddress, headerIndex);
-            }
         }
 
         private static unsafe string GetVerb(HTTP_REQUEST* request, long fixup)

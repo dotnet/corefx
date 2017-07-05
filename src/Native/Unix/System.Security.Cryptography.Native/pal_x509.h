@@ -26,6 +26,7 @@ enum X509VerifyStatusCode : int32_t
     PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT = 2,
     PAL_X509_V_ERR_UNABLE_TO_GET_CRL = 3,
     PAL_X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE = 5,
+    PAL_X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY = 6,
     PAL_X509_V_ERR_CERT_SIGNATURE_FAILURE = 7,
     PAL_X509_V_ERR_CRL_SIGNATURE_FAILURE = 8,
     PAL_X509_V_ERR_CERT_NOT_YET_VALID = 9,
@@ -219,7 +220,7 @@ extern "C" void CryptoNative_X509StoreCtxDestroy(X509_STORE_CTX* v);
 /*
 Shims the X509_STORE_CTX_init method.
 */
-extern "C" int32_t CryptoNative_X509StoreCtxInit(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509);
+extern "C" int32_t CryptoNative_X509StoreCtxInit(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509, X509Stack* extraStore);
 
 /*
 Shims the X509_verify_cert method.

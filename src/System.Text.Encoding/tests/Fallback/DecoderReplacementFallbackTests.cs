@@ -34,15 +34,15 @@ namespace System.Text.Tests
         [Fact]
         public void Ctor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("replacement", () => new DecoderReplacementFallback(null));
+            AssertExtensions.Throws<ArgumentNullException>("replacement", () => new DecoderReplacementFallback(null));
 
             // Invalid surrogate pair
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("\uD800"));
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("\uD800a"));
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("\uDC00"));
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("a\uDC00"));
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("\uDC00\uDC00"));
-            Assert.Throws<ArgumentException>(() => new DecoderReplacementFallback("\uD800\uD800"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("\uD800"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("\uD800a"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("a\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("\uDC00\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new DecoderReplacementFallback("\uD800\uD800"));
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -92,7 +92,7 @@ namespace System.Text.Tests
             DecoderFallbackBuffer buffer = new DecoderReplacementFallback(replacement).CreateFallbackBuffer();
             buffer.Fallback(new byte[] { 1 }, 0);
 
-            Assert.Throws<ArgumentException>("bytesUnknown", () => buffer.Fallback(new byte[] { 1 }, 0));
+            AssertExtensions.Throws<ArgumentException>("bytesUnknown", () => buffer.Fallback(new byte[] { 1 }, 0));
         }
     }
 }

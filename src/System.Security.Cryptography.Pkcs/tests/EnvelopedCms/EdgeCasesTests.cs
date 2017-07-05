@@ -21,7 +21,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class EdgeCasesTests
     {
-        [Fact]
+        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer());
+
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCase()
         {
@@ -54,7 +56,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCaseSki()
         {
@@ -92,6 +94,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop rejects zero length content: corefx#18724")]
         public static void ZeroLengthContent_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(Array.Empty<byte>());
@@ -99,19 +102,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
             {
                 CmsRecipient cmsRecipient = new CmsRecipient(cert);
-                try
-                {
-                    ecms.Encrypt(cmsRecipient);
-                }
-                catch (CryptographicException) when (PlatformDetection.IsFullFramework) // Expected on full FX
-                {
-                }
+                ecms.Encrypt(cmsRecipient);
             }
             byte[] encodedMessage = ecms.Encode();
             ValidateZeroLengthContent(encodedMessage);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ZeroLengthContent_FixedValue()
         {
@@ -127,6 +124,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "RC4 isn't available via CNG, and CNG is the only library available to UWP")]
         public static void Rc4AndCngWrappersDontMixTest()
         {
             //

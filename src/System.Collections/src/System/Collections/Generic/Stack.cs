@@ -22,13 +22,14 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(StackDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Stack<T> : IEnumerable<T>,
         System.Collections.ICollection,
         IReadOnlyCollection<T>
     {
-        private T[] _array;     // Storage for stack elements
-        private int _size;           // Number of items in the stack.
-        private int _version;        // Used to keep enumerator in sync w/ collection.
+        private T[] _array; // Storage for stack elements. Do not rename (binary serialization)
+        private int _size; // Number of items in the stack. Do not rename (binary serialization)
+        private int _version; // Used to keep enumerator in sync w/ collection. Do not rename (binary serialization)
         [NonSerialized]
         private object _syncRoot;
 
@@ -289,7 +290,6 @@ namespace System.Collections.Generic
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
         {
             private readonly Stack<T> _stack;

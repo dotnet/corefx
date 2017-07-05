@@ -65,6 +65,8 @@ namespace System.Runtime.Serialization.Json
                 if (canWriteSimpleDictionary && useSimpleDictionaryFormat)
                 {
                     ReflectionWriteObjectAttribute(jsonWriter);
+                    Type[] itemTypeGenericArguments = collectionContract.ItemType.GetGenericArguments();
+                    Type dictionaryValueType = itemTypeGenericArguments.Length == 2 ? itemTypeGenericArguments[1] : null;
 
                     while (enumerator.MoveNext())
                     {
@@ -72,7 +74,7 @@ namespace System.Runtime.Serialization.Json
                         object key = ((IKeyValue)current).Key;
                         object value = ((IKeyValue)current).Value;
                         _reflectionClassWriter.ReflectionWriteStartElement(jsonWriter, key.ToString());
-                        _reflectionClassWriter.ReflectionWriteValue(jsonWriter, context, value.GetType(), value, false, primitiveContractForParamType: null);
+                        _reflectionClassWriter.ReflectionWriteValue(jsonWriter, context, dictionaryValueType ?? value.GetType(), value, false, primitiveContractForParamType: null);
                         _reflectionClassWriter.ReflectionWriteEndElement(jsonWriter);
                     }
                 }
@@ -242,6 +244,11 @@ namespace System.Runtime.Serialization.Json
 
                         ReflectionWriteValue(xmlWriter, context, memberType, memberValue, false/*writeXsiType*/, primitiveContractForParamType: null);
                         ReflectionWriteEndElement(xmlWriter);
+                    }
+
+                    if(classContract.HasExtensionData)
+                    {
+                        context.WriteExtensionData(xmlWriter, ((IExtensibleDataObject)obj).ExtensionData, memberCount);
                     }
                 }
             }

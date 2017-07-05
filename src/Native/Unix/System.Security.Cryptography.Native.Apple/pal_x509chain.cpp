@@ -19,7 +19,7 @@ extern "C" SecPolicyRef AppleCryptoNative_X509ChainCreateDefaultPolicy()
 
 extern "C" SecPolicyRef AppleCryptoNative_X509ChainCreateRevocationPolicy()
 {
-    return SecPolicyCreateRevocation(kSecRevocationUseAnyAvailableMethod);
+    return SecPolicyCreateRevocation(kSecRevocationUseAnyAvailableMethod | kSecRevocationRequirePositiveResponse);
 }
 
 extern "C" int32_t
@@ -65,7 +65,10 @@ extern "C" int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
     SecTrustResultType trustResult;
     *pOSStatus = SecTrustEvaluate(chain, &trustResult);
 
-    if (*pOSStatus != noErr)
+    // If any error is reported from the function or the trust result value indicates that
+    // otherwise was a failed chain build (vs an untrusted chain, etc) return failure and
+    // we'll throw in the managed layer.  (but if we hit the "or" the message is "No error")
+    if (*pOSStatus != noErr || trustResult == kSecTrustResultInvalid)
     {
         return 0;
     }
@@ -163,6 +166,8 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         *pStatus |= PAL_X509ChainInvalidBasicConstraints;
     else if (CFEqual(keyString, CFSTR("UsageConstraints")))
         *pStatus |= PAL_X509ChainExplicitDistrust;
+    else if (CFEqual(keyString, CFSTR("RevocationResponseRequired")))
+        *pStatus |= PAL_X509ChainRevocationStatusUnknown;
     else if (CFEqual(keyString, CFSTR("WeakLeaf")) || CFEqual(keyString, CFSTR("WeakIntermediates")) ||
              CFEqual(keyString, CFSTR("WeakRoot")))
     {
@@ -172,9 +177,17 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         // (On Windows CERT_CHAIN_PARA.pStrongSignPara is NULL, so "strongness" checks
         // are not performed).
     }
-
+    else if (CFEqual(keyString, CFSTR("StatusCodes")))
+    {
+        // 10.13 added a StatusCodes value which may be a numeric rehashing of the string data.
+        // It doesn't represent a new error code, and we're still getting the old ones, so
+        // just ignore it for now.
+    }
     else
     {
+#ifdef DEBUGGING_UNKNOWN_VALUE
+        printf("%s\n", CFStringGetCStringPtr(keyString, CFStringGetSystemEncoding()));
+#endif
         *pStatus |= PAL_X509ChainErrorUnknownValue;
     }
 }
@@ -233,6 +246,8 @@ extern "C" int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStat
             return errSecCreateChainFailed;
         case PAL_X509ChainExplicitDistrust:
             return errSecTrustSettingDeny;
+        case PAL_X509ChainRevocationStatusUnknown:
+            return errSecIncompleteCertRevocationCheck;
         default:
             return errSecCoreFoundationUnknown;
     }

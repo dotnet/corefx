@@ -7,6 +7,7 @@
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -90,7 +91,7 @@
   <!-- WINDOWS: Shared CoreCLR and .NET Native -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\Environment.Windows.cs" />
-    <Compile Include="System\Environment.Win32.cs" />
+    <Compile Include="System\Environment.Win32.cs"  Condition="'$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'uap'" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Windows.cs" />
     <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
@@ -138,12 +139,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetSystemInfo.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetSystemInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetTempFileNameW.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetTempFileNameW.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetTempPathW.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetTempPathW.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetVersionExW.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetVersionExW.cs</Link>
     </Compile>
@@ -165,7 +160,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SYSTEM_INFO.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.SYSTEM_INFO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\secur32\Interop.GetUserNameExW.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\secur32\Interop.GetUserNameExW.cs" Condition="'$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'uap'" >
       <Link>Common\Interop\Windows\secur32\Interop.GetUserNameExW.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\shell32\Interop.SHGetKnownFolderPath.cs">

@@ -266,7 +266,7 @@ namespace System.Security.Cryptography
         public override string SignatureAlgorithm { get { throw null; } }
         protected override void Dispose(bool disposing) { }
         public override System.Security.Cryptography.DSAParameters ExportParameters(bool includePrivateParameters) { throw null; }
-#if FEATURE_HASHDATA // types missing from netfx targeting pack and netstandard
+#if FEATURE_HASHDATA // uap and netcoreapp specific
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
 #endif
@@ -278,25 +278,41 @@ namespace System.Security.Cryptography
         public ECDsaCng() { }
         public ECDsaCng(int keySize) { }
         public ECDsaCng(System.Security.Cryptography.CngKey key) { }
-#if !netfx // types missing from netfx targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public ECDsaCng(System.Security.Cryptography.ECCurve curve) { }
 #endif
+        public CngAlgorithm HashAlgorithm { get { throw null; } set { } }
         public System.Security.Cryptography.CngKey Key { get { throw null; } }
         public override int KeySize { get { throw null; } set { } }
         public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
         protected override void Dispose(bool disposing) { }
-#if !netfx // types missing from netfx targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public override System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
         public override System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
         public override void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
 #endif
+        public void FromXmlString(string xml, ECKeyXmlFormat format) { throw null; }
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
-#if !netfx // types missing from netfx targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public override void ImportParameters(System.Security.Cryptography.ECParameters parameters) { }
 #endif
+        public byte[] SignData(byte[] data) { throw null; }
+        public byte[] SignData(byte[] data, int offset, int count) { throw null; }
+        public byte[] SignData(System.IO.Stream data) { throw null; }
         public override byte[] SignHash(byte[] hash) { throw null; }
+        public string ToXmlString(ECKeyXmlFormat format) { throw null; }
+        public bool VerifyData(byte[] data, byte[] signature) { throw null; }
+        public bool VerifyData(byte[] data, int offset, int count, byte[] signature) { throw null; }
+        public bool VerifyData(System.IO.Stream data, byte[] signature) { throw null; }
         public override bool VerifyHash(byte[] hash, byte[] signature) { throw null; }
+    }
+    public enum ECKeyXmlFormat
+    {
+        /// <summary>
+        ///     Use the format described in RFC 4050
+        /// </summary>
+        Rfc4050
     }
     public sealed partial class RSACng : System.Security.Cryptography.RSA
     {
@@ -323,7 +339,6 @@ namespace System.Security.Cryptography
         public TripleDESCng(string keyName, System.Security.Cryptography.CngProvider provider, System.Security.Cryptography.CngKeyOpenOptions openOptions) { }
         public override byte[] Key { get { throw null; } set { } }
         public override int KeySize { get { throw null; } set { } }
-        public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
         public override System.Security.Cryptography.ICryptoTransform CreateDecryptor() { throw null; }
         public override System.Security.Cryptography.ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV) { throw null; }
         public override System.Security.Cryptography.ICryptoTransform CreateEncryptor() { throw null; }

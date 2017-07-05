@@ -78,7 +78,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void IEnumerableConstructorTest_Negative()
         {
-            Assert.Throws<ArgumentNullException>("collection", () => new ObservableCollection<string>((IEnumerable<string>)null));
+            AssertExtensions.Throws<ArgumentNullException>("collection", () => new ObservableCollection<string>((IEnumerable<string>)null));
         }
 
         /// <summary>
@@ -119,7 +119,8 @@ namespace System.Collections.ObjectModel.Tests
 
         [Fact]
         // skip the test on desktop as "new ObservableCollection<int>()" returns 0 length collection
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        // skip the test on UapAot as the requires Reflection on internal framework types.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttributeTests()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ObservableCollection<int>());
@@ -139,7 +140,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void ListConstructorTest_Negative()
         {
-            Assert.Throws<ArgumentNullException>("list", () => new ObservableCollection<string>((List<string>)null));
+            AssertExtensions.Throws<ArgumentNullException>("list", () => new ObservableCollection<string>((List<string>)null));
         }
 
         [Fact]

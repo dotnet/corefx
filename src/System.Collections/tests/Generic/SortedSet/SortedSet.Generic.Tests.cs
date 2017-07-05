@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -57,7 +57,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16790")] 
+        [ActiveIssue("dotnet/corefx #16790", TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer_Netcoreapp(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
@@ -67,7 +67,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16790")]
+        [ActiveIssue("dotnet/corefx #16790", ~TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer_Netfx(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
@@ -77,7 +77,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16790")]
+        [ActiveIssue("dotnet/corefx #16790", TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer_Netcoreapp(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
@@ -160,7 +160,7 @@ namespace System.Collections.Tests
                 T firstElement = set.ElementAt(0);
                 T lastElement = set.ElementAt(setLength - 1);
                 if (comparer.Compare(firstElement, lastElement) < 0)
-                    Assert.Throws<ArgumentException>(() => set.GetViewBetween(lastElement, firstElement));
+                    AssertExtensions.Throws<ArgumentException>("lowerValue", null, () => set.GetViewBetween(lastElement, firstElement));
             }
         }
 
@@ -238,7 +238,7 @@ namespace System.Collections.Tests
         public void SortedSet_Generic_RemoveWhere_NullPredicate_ThrowsArgumentNullException()
         {
             SortedSet<T> set = (SortedSet<T>)GenericISetFactory();
-            Assert.Throws<ArgumentNullException>("match", () => set.RemoveWhere(null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => set.RemoveWhere(null));
         }
 
 #endregion

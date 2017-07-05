@@ -8,6 +8,48 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    public class HttpListenerTimeoutManagerTests
+    {
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(-1)]
+        [InlineData((long)uint.MaxValue + 1)]
+        public void MinSendBytesPerSecond_NotUInt_ThrowsArgumentOutOfRangeException(long value)
+        {
+            using (var listener = new HttpListener())
+            {
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.MinSendBytesPerSecond = value);
+            }
+        }
+
+        [Theory]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(-1)]
+        [InlineData((uint)ushort.MaxValue + 1)]
+        public void TimeoutValue_NotUShort_ThrowsArgumentOutOfRangeException(long totalSeconds)
+        {
+            using (var listener = new HttpListener())
+            {
+                TimeSpan timeSpan = TimeSpan.FromSeconds(totalSeconds);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.EntityBody = timeSpan);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.DrainEntityBody = timeSpan);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.RequestQueue = timeSpan);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.IdleConnection = timeSpan);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => listener.TimeoutManager.HeaderWait = timeSpan);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void Get_Disposed_ThrowsObjectDisposedException()
+        {
+            var listener = new HttpListener();
+            listener.Close();
+
+            Assert.Throws<ObjectDisposedException>(() => listener.TimeoutManager);
+        }
+    }
+
     [PlatformSpecific(TestPlatforms.Windows)]
     public class HttpListenerTimeoutManagerWindowsTests : IDisposable
     {
@@ -84,7 +126,8 @@ namespace System.Net.Tests
 
         public void Dispose() => _listener.Close();
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void TimeoutManager_AccessNoStart_Success()
         {
             // Access the TimeoutManager without calling Start and make sure it is initialized.
@@ -95,7 +138,8 @@ namespace System.Net.Tests
             Assert.Equal(rate, timeoutManager.MinSendBytesPerSecond);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void TimeoutManager_AccessAfterStart_Success()
         {
             // Access the TimeoutManager after calling Start and make sure it is initialized.
@@ -107,7 +151,8 @@ namespace System.Net.Tests
             Assert.Equal(rate, timeoutManager.MinSendBytesPerSecond);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void TimeoutManager_AccessAfterClose_GetObjectDisposedException()
         {
             // Access the TimeoutManager after calling Close and make sure it is not accessible.
@@ -116,7 +161,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => _listener.TimeoutManager);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void TimeoutManager_AccessBeforeAndAfterClose_GetObjectDisposedException()
         {
             // Access the TimeoutManager after calling Close and make sure it is not accessible.
@@ -127,7 +173,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => timeoutManager.MinSendBytesPerSecond = 10);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void TimeoutManager_AccessAfterStop_Success()
         {
             // Access the TimeoutManager after calling Stop and make sure it is accessible.
@@ -141,7 +188,8 @@ namespace System.Net.Tests
             Assert.Equal(rate, timeoutManager.MinSendBytesPerSecond);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void DrainEntityBody_SetTimeoutNoStart_GetReturnsNewValue()
         {
             // Set the DrainEntityBody timeout without calling Start and make sure that native layer return new value.
@@ -151,7 +199,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.DrainEntityBody.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void DrainEntityBody_SetTimeoutAfterStart_GetReturnsNewValue()
         {
             // Set the DrainEntityBody timeout after calling Start and make sure that native layer return new value.
@@ -162,7 +211,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.DrainEntityBody.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void EntityBody_SetTimeoutNoStart_GetReturnsNewValue()
         {
             // Set the DrainEntityBody timeout without calling Start and make sure that native layer return new value.
@@ -172,7 +222,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.EntityBody.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void EntityBody_SetTimeoutAfterStart_GetReturnsNewValue()
         {
             // Set the EntityBody timeout after calling Start and make sure that native layer return new value.
@@ -183,7 +234,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.EntityBody.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void HeaderWait_SetTimeoutNoStart_GetReturnsNewValue()
         {
             // Set the HeaderWait timeout without calling Start and make sure that native layer return new value.
@@ -193,7 +245,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.HeaderWait.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void HeaderWait_SetTimeoutAfterStart_GetReturnsNewValue()
         {
             // Set the HeaderWait timeout after calling Start and make sure that native layer return new value.
@@ -204,7 +257,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.HeaderWait.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void RequestQueue_SetTimeoutNoStart_GetReturnsNewValue()
         {
             // Set the DrainEntityBody timeout without calling Start and make sure that native layer return new value.
@@ -214,7 +268,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.RequestQueue.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void RequestQueue_SetTimeoutAfterStart_GetReturnsNewValue()
         {
             // Set the RequestQueue timeout after calling Start and make sure that native layer return new value.
@@ -225,7 +280,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.RequestQueue.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void IdleConnection_SetTimeoutNoStart_GetReturnsNewValue()
         {
             // Set the IdleConnection timeout without calling Start and make sure that native layer return new value.
@@ -235,7 +291,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.IdleConnection.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void IdleConnection_SetTimeoutAfterStart_GetReturnsNewValue()
         {
             // Set the IdleConnection timeout after calling Start and make sure that native layer return new value.
@@ -246,7 +303,8 @@ namespace System.Net.Tests
             Assert.Equal(seconds, _listener.TimeoutManager.IdleConnection.TotalSeconds);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void MinSendBytesPerSecond_SetNoStart_GetReturnsNewValue()
         {
             // Set the MinSendBytesPerSecond timeout without calling Start and make sure that native layer 
@@ -257,7 +315,8 @@ namespace System.Net.Tests
             Assert.Equal(rate, _listener.TimeoutManager.MinSendBytesPerSecond);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void MinSendBytesPerSecond_SetAfterStart_GetReturnsNewValue()
         {
             // Set the MinSendBytesPerSecond timeout after calling Start and make sure that native 
@@ -269,7 +328,8 @@ namespace System.Net.Tests
             Assert.Equal(rate, _listener.TimeoutManager.MinSendBytesPerSecond);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void MinSendBytesPerSecond_SetAfterClose_GetObjectDisposedException()
         {
             // Set the MinSendBytesPerSecond timeout after calling Close and make sure that we get the exception.
@@ -278,7 +338,8 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => _listener.TimeoutManager.MinSendBytesPerSecond = 10 * 1024 * 1024);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public void MinSendBytesPerSecond_SetAfterStop_GetReturnsNewValue()
         {
             // Set the MinSendBytesPerSecond timeout after calling Stop and make sure that native 
@@ -297,7 +358,8 @@ namespace System.Net.Tests
             uint[] timeouts = new uint[6];
 
             // We need url group id which is private so we get it using reflection.
-            FieldInfo info = typeof(HttpListener).GetField("_urlGroupId", BindingFlags.Instance | BindingFlags.NonPublic);
+            string urlGroupIdName = PlatformDetection.IsFullFramework ? "m_UrlGroupId" : "_urlGroupId";
+            FieldInfo info = typeof(HttpListener).GetField(urlGroupIdName, BindingFlags.Instance | BindingFlags.NonPublic);
             ulong urlGroupId = (ulong)info.GetValue(_listener);
 
             HTTP_TIMEOUT_LIMIT_INFO timeoutinfo = new HTTP_TIMEOUT_LIMIT_INFO();
@@ -336,24 +398,84 @@ namespace System.Net.Tests
                 throw new Exception("HttpQueryUrlGroupProperty failed with " + (int)statusCode);
             }
         }
+
+
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        [InlineData(1.3, 1)]
+        [InlineData(1.6, 2)]
+        public void TimeoutValue_Double_Truncates(double seconds, int expected)
+        {
+            using (var listener = new HttpListener())
+            {
+                TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
+                listener.TimeoutManager.EntityBody = timeSpan;
+                Assert.Equal(expected, listener.TimeoutManager.EntityBody.TotalSeconds);
+            }
+        }
     }
 
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public class HttpListenerTimeoutManagerUnixTests : IDisposable
+    public class HttpListenerTimeoutManagerUnixTests
     {
-        private HttpListener _listener;
-
-        public HttpListenerTimeoutManagerUnixTests()
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsManagedImplementation))] // [PlatformSpecific(TestPlatforms.AnyUnix)] // managed implementation doesn't support all members
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void Properties_DefaultValues()
         {
-            _listener = new HttpListener();
+            using (var listener = new HttpListener())
+            {
+                HttpListenerTimeoutManager m = listener.TimeoutManager;
+                Assert.NotNull(m);
+                Assert.Equal(TimeSpan.Zero, m.DrainEntityBody);
+                Assert.Equal(TimeSpan.Zero, m.EntityBody);
+                Assert.Equal(TimeSpan.Zero, m.HeaderWait);
+                Assert.Equal(TimeSpan.Zero, m.IdleConnection);
+                Assert.Equal(0, m.MinSendBytesPerSecond);
+                Assert.Equal(TimeSpan.Zero, m.RequestQueue);
+            }
         }
 
-        public void Dispose() => _listener.Close();
-
-        [Fact]
-        public void TimeoutManager_ThrowsPNSE_OnUnix()
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsManagedImplementation))] // [PlatformSpecific(TestPlatforms.AnyUnix)] // managed implementation doesn't support all members
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void UnsupportedProperties_Throw()
         {
-            Assert.Throws<PlatformNotSupportedException>(() => _listener.TimeoutManager);
+            using (var listener = new HttpListener())
+            {
+                HttpListenerTimeoutManager m = listener.TimeoutManager;
+                Assert.Throws<PlatformNotSupportedException>(() => m.EntityBody = TimeSpan.Zero);
+                Assert.Throws<PlatformNotSupportedException>(() => m.HeaderWait = TimeSpan.Zero);
+                Assert.Throws<PlatformNotSupportedException>(() => m.MinSendBytesPerSecond = 0);
+                Assert.Throws<PlatformNotSupportedException>(() => m.RequestQueue = TimeSpan.Zero);
+            }
+        }
+
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsManagedImplementation))] // [PlatformSpecific(TestPlatforms.AnyUnix)] // managed implementation doesn't support all members
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void DrainEntityBody_Roundtrips()
+        {
+            using (var listener = new HttpListener())
+            {
+                HttpListenerTimeoutManager m = listener.TimeoutManager;
+                Assert.Equal(TimeSpan.Zero, m.DrainEntityBody);
+
+                TimeSpan value = TimeSpan.FromSeconds(123);
+                m.DrainEntityBody = value;
+                Assert.Equal(value, m.DrainEntityBody);
+            }
+        }
+
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsManagedImplementation))] // [PlatformSpecific(TestPlatforms.AnyUnix)] // managed implementation doesn't support all members
+        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
+        public void IdleConnection_Roundtrips()
+        {
+            using (var listener = new HttpListener())
+            {
+                HttpListenerTimeoutManager m = listener.TimeoutManager;
+                Assert.Equal(TimeSpan.Zero, m.IdleConnection);
+
+                TimeSpan value = TimeSpan.FromSeconds(123);
+                m.IdleConnection = value;
+                Assert.Equal(value, m.IdleConnection);
+            }
         }
     }
 }

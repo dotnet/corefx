@@ -536,6 +536,7 @@ namespace System.Data.SqlClient
             else if (sqlType == typeof(SqlXml)) return SqlXml.Null;
             else if (sqlType == typeof(object)) return DBNull.Value;
             else if (sqlType == typeof(IEnumerable<DbDataRecord>)) return DBNull.Value;
+            else if (sqlType == typeof(DataTable)) return DBNull.Value;
             else if (sqlType == typeof(DateTime)) return DBNull.Value;
             else if (sqlType == typeof(TimeSpan)) return DBNull.Value;
             else if (sqlType == typeof(DateTimeOffset)) return DBNull.Value;
@@ -652,6 +653,11 @@ namespace System.Data.SqlClient
             return sqlVal;
         }
 
+        internal static SqlDbType GetSqlDbTypeFromOleDbType(short dbType, string typeName)
+        {
+            // OleDbTypes not supported
+            return SqlDbType.Variant;
+        }
 
         internal static MetaType GetSqlDataType(int tdsType, UInt32 userType, int length)
         {

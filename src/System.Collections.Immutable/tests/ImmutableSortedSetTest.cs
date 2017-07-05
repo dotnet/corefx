@@ -77,6 +77,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [ActiveIssue("Sporadic failure, needs a port of https://github.com/dotnet/coreclr/pull/4340", TargetFrameworkMonikers.NetFramework)]
         public void EmptyTest()
         {
             this.EmptyTestHelper(Empty<int>(), 5, null);
@@ -185,6 +186,11 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(~5, set.IndexOf(55));
             Assert.Equal(~9, set.IndexOf(95));
             Assert.Equal(~10, set.IndexOf(105));
+
+            var nullableSet = ImmutableSortedSet<int?>.Empty;
+            Assert.Equal(~0, nullableSet.IndexOf(null));
+            nullableSet = nullableSet.Add(null).Add(0);
+            Assert.Equal(0, nullableSet.IndexOf(null));
         }
 
         [Fact]
@@ -199,8 +205,8 @@ namespace System.Collections.Immutable.Tests
                 AssertAreSame(item, set[i++]);
             }
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => set[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => set[set.Count]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => set[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => set[set.Count]);
         }
 
         [Fact]
@@ -305,6 +311,12 @@ namespace System.Collections.Immutable.Tests
             set = ImmutableSortedSet.CreateRange(comparer, (IEnumerable<string>)new[] { "a", "b" });
             Assert.Equal(2, set.Count);
             Assert.Same(comparer, set.KeyComparer);
+
+            set = ImmutableSortedSet.Create(default(string));
+            Assert.Equal(1, set.Count);
+
+            set = ImmutableSortedSet.CreateRange(new[] { null, "a", null, "b" });
+            Assert.Equal(3, set.Count);
         }
 
         [Fact]
@@ -358,6 +370,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedSet.Create<int>());

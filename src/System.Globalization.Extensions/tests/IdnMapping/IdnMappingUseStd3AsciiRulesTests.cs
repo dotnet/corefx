@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -54,16 +55,14 @@ namespace System.Globalization.Tests
             if (containsInvalidHyphen && !s_isWindows)
             {
                 // ICU always fails on leading/trailing hyphens regardless of the Std3 rules option.
-                Assert.Throws<ArgumentException>("unicode", () => idnStd3False.GetAscii(unicode));
+                AssertExtensions.Throws<ArgumentException>("unicode", () => idnStd3False.GetAscii(unicode));
             }
             else
             {
                 Assert.Equal(unicode, idnStd3False.GetAscii(unicode));
             }
 
-            ArgumentException ae = Assert.Throws<ArgumentException>(() => idnStd3True.GetAscii(unicode));
-            // sometimes the desktop returns "Unicode" instead of "unicode" for the parameter name.
-            Assert.Equal("unicode", ae.ParamName, ignoreCase: true);
+            AssertExtensions.Throws<ArgumentException>("unicode", () => idnStd3True.GetAscii(unicode));
         }
 
         [Fact]

@@ -184,6 +184,17 @@ namespace Microsoft.SqlServer.Server
         public static Microsoft.SqlServer.Server.SqlMetaData InferFromValue(object value, string name) { throw null; }
     }
 }
+namespace System.Data.Sql
+{
+    public sealed partial class SqlNotificationRequest
+    {
+        public SqlNotificationRequest() { }
+        public SqlNotificationRequest(string userData, string options, int timeout) { }
+        public string Options { get { throw null; } set { } }
+        public int Timeout { get { throw null; } set { } }
+        public string UserData { get { throw null; } set { } }
+    }
+}
 namespace System.Data.SqlClient
 {
     public enum ApplicationIntent
@@ -271,9 +282,27 @@ namespace System.Data.SqlClient
         internal SqlClientFactory() { }
         public static readonly System.Data.SqlClient.SqlClientFactory Instance;
         public override System.Data.Common.DbCommand CreateCommand() { throw null; }
+        public override System.Data.Common.DbCommandBuilder CreateCommandBuilder() { throw null; }
         public override System.Data.Common.DbConnection CreateConnection() { throw null; }
         public override System.Data.Common.DbConnectionStringBuilder CreateConnectionStringBuilder() { throw null; }
+        public override System.Data.Common.DbDataAdapter CreateDataAdapter() { throw null; }
         public override System.Data.Common.DbParameter CreateParameter() { throw null; }
+    }
+    public static partial class SqlClientMetaDataCollectionNames
+    {
+        public static readonly string Columns;
+        public static readonly string Databases;
+        public static readonly string ForeignKeys;
+        public static readonly string IndexColumns;
+        public static readonly string Indexes;
+        public static readonly string Parameters;
+        public static readonly string ProcedureColumns;
+        public static readonly string Procedures;
+        public static readonly string Tables;
+        public static readonly string UserDefinedTypes;
+        public static readonly string Users;
+        public static readonly string ViewColumns;
+        public static readonly string Views;
     }
     public sealed partial class SqlCommand : System.Data.Common.DbCommand, System.ICloneable
     {
@@ -314,6 +343,34 @@ namespace System.Data.SqlClient
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync() { throw null; }
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override void Prepare() { }
+        public System.Data.Sql.SqlNotificationRequest Notification { get { throw null; } set { } }
+    }
+    public sealed class SqlCommandBuilder : System.Data.Common.DbCommandBuilder
+    {
+        public SqlCommandBuilder() { }
+        public SqlCommandBuilder(SqlDataAdapter adapter) { }
+        public override System.Data.Common.CatalogLocation CatalogLocation { get { throw null; } set { } }
+        public override string CatalogSeparator { get { throw null; } set { } }
+        new public SqlDataAdapter DataAdapter { get { throw null; } set { } }
+        public override string QuotePrefix { get { throw null; } set { } }
+        public override string QuoteSuffix { get { throw null; } set { } }
+        public override string SchemaSeparator { get { throw null; } set { } }
+        new public SqlCommand GetInsertCommand() { throw null; }
+        new public SqlCommand GetInsertCommand(bool useColumnsForParameterNames) { throw null; }
+        new public SqlCommand GetUpdateCommand() { throw null; }
+        new public SqlCommand GetUpdateCommand(bool useColumnsForParameterNames) { throw null; }
+        new public SqlCommand GetDeleteCommand() { throw null; }
+        new public SqlCommand GetDeleteCommand(bool useColumnsForParameterNames) { throw null; }
+        protected override void ApplyParameterInfo(System.Data.Common.DbParameter parameter, System.Data.DataRow datarow, System.Data.StatementType statementType, bool whereClause) { }
+        protected override string GetParameterName(int parameterOrdinal) { throw null; }
+        protected override string GetParameterName(string parameterName) { throw null; }
+        protected override string GetParameterPlaceholder(int parameterOrdinal) { throw null; }
+        public static void DeriveParameters(SqlCommand command) { }
+        protected override DataTable GetSchemaTable(System.Data.Common.DbCommand srcCommand) { throw null; }
+        protected override System.Data.Common.DbCommand InitializeCommand(System.Data.Common.DbCommand command) { throw null; }
+        public override string QuoteIdentifier(string unquotedIdentifier) { throw null; }
+        protected override void SetRowUpdatingHandler(System.Data.Common.DbDataAdapter adapter) { }
+        public override string UnquoteIdentifier(string quotedIdentifier) { throw null; }
     }
     public sealed partial class SqlConnection : System.Data.Common.DbConnection, System.ICloneable
     {
@@ -408,6 +465,70 @@ namespace System.Data.SqlClient
         protected override void OnRowUpdated(System.Data.Common.RowUpdatedEventArgs value) { }
         protected override void OnRowUpdating(System.Data.Common.RowUpdatingEventArgs value) { }
         object System.ICloneable.Clone() { throw null; }
+    }
+    public sealed partial class SqlDependency
+    {
+        public SqlDependency() { }
+        public SqlDependency(SqlCommand command) { }
+        public SqlDependency(SqlCommand command, string options, int timeout) { }
+        public bool HasChanges { get { throw null; } }
+        public string Id { get { throw null; } }
+        public event OnChangeEventHandler OnChange { add { } remove { } }
+        public void AddCommandDependency(SqlCommand command) { }
+        public static bool Start(string connectionString) { throw null; }
+        public static bool Start(string connectionString, string queue) { throw null; }
+        public static bool Stop(string connectionString) { throw null; }
+        public static bool Stop(string connectionString, string queue) { throw null; }
+    }
+    public delegate void OnChangeEventHandler(object sender, SqlNotificationEventArgs e);
+    public partial class SqlNotificationEventArgs : System.EventArgs
+    {
+        public SqlNotificationEventArgs(SqlNotificationType type, SqlNotificationInfo info, SqlNotificationSource source) { }
+        public SqlNotificationType Type { get { throw null; } }
+        public SqlNotificationInfo Info { get { throw null; } }
+        public SqlNotificationSource Source { get { throw null; } }
+    }
+    public enum SqlNotificationInfo
+    {
+        Truncate = 0,
+        Insert = 1,
+        Update = 2,
+        Delete = 3,
+        Drop = 4,
+        Alter = 5,
+        Restart = 6,
+        Error = 7,
+        Query = 8,
+        Invalid = 9,
+        Options = 10,
+        Isolation = 11,
+        Expired = 12,
+        Resource = 13,
+        PreviousFire = 14,
+        TemplateLimit = 15,
+        Merge = 16,
+        Unknown = -1,
+        AlreadyChanged = -2
+    }
+    public enum SqlNotificationSource
+    {
+        Data = 0,
+        Timeout = 1,
+        Object = 2,
+        Database = 3,
+        System = 4,
+        Statement = 5,
+        Environment = 6,
+        Execution = 7,
+        Owner = 8,
+        Unknown = -1,
+        Client = -2
+    }
+    public enum SqlNotificationType
+    {
+        Change = 0,
+        Subscribe = 1,
+        Unknown = -1
     }
     public sealed partial class SqlRowUpdatedEventArgs : System.Data.Common.RowUpdatedEventArgs
     {
@@ -549,6 +670,7 @@ namespace System.Data.SqlClient
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size) { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size, string sourceColumn) { }
         public SqlParameter(string parameterName, object value) { }
+        public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size, System.Data.ParameterDirection direction, byte precision, byte scale, string sourceColumn, System.Data.DataRowVersion sourceVersion, bool sourceColumnNullMapping, object value, string xmlSchemaCollectionDatabase, string xmlSchemaCollectionOwningSchema, string xmlSchemaCollectionName) { }
         object ICloneable.Clone() { throw null; }
         public System.Data.SqlTypes.SqlCompareOptions CompareInfo { get { throw null; } set { } }
         public override System.Data.DbType DbType { get { throw null; } set { } }

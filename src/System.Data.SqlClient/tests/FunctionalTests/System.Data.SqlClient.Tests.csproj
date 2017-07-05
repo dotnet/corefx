@@ -10,20 +10,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CloneTests.cs" />
+    <Compile Include="BaseProviderAsyncTest\BaseProviderAsyncTest.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockCommand.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockConnection.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockDataReader.cs" />
     <Compile Include="DiagnosticTest.cs" />
+    <Compile Include="AmbientTransactionFailureTest.cs" />
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FakeDiagnosticListenerObserver.cs" />
     <Compile Include="SqlBulkCopyColumnMappingCollectionTest.cs" />
+    <Compile Include="SqlDataRecordTest.cs" />
+    <Compile Include="SqlParameterTest.cs" />
+    <Compile Include="SqlClientFactoryTest.cs" />
     <Compile Include="SqlConnectionTest.RetrieveStatistics.cs" />
     <Compile Include="SqlErrorCollectionTest.cs" />
     <Compile Include="TcpDefaultForAzureTest.cs" />
     <Compile Include="SqlConnectionTest.cs" />
     <Compile Include="TestTdsServer.cs" />
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
+    <Compile Include="..\ManualTests\DataCommon\DataTestUtility.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

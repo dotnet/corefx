@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 
-#if !uapaot
+#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     using System;
@@ -3015,7 +3015,7 @@ namespace System.Xml.Serialization
                     ilg.Else();
                     doEndIf = true;
                 }
-                if (element.Default != null && !Globals.IsDBNullValue(element.Default) && element.Mapping.TypeDesc.IsValueType)
+                if (element.Default != null && element.Default != DBNull.Value && element.Mapping.TypeDesc.IsValueType)
                 {
                     MethodInfo XmlSerializationReader_get_Reader = typeof(XmlSerializationReader).GetMethod(
                         "get_Reader",

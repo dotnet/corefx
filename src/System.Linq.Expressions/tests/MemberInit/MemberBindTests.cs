@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -46,10 +46,10 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullMethodOrMemberInfo()
         {
-            Assert.Throws<ArgumentNullException>("member", () => Expression.MemberBind(default(MemberInfo)));
-            Assert.Throws<ArgumentNullException>("member", () => Expression.MemberBind(default(MemberInfo), Enumerable.Empty<MemberBinding>()));
-            Assert.Throws<ArgumentNullException>("propertyAccessor", () => Expression.MemberBind(default(MethodInfo)));
-            Assert.Throws<ArgumentNullException>("propertyAccessor", () => Expression.MemberBind(default(MethodInfo), Enumerable.Empty<MemberBinding>()));
+            AssertExtensions.Throws<ArgumentNullException>("member", () => Expression.MemberBind(default(MemberInfo)));
+            AssertExtensions.Throws<ArgumentNullException>("member", () => Expression.MemberBind(default(MemberInfo), Enumerable.Empty<MemberBinding>()));
+            AssertExtensions.Throws<ArgumentNullException>("propertyAccessor", () => Expression.MemberBind(default(MethodInfo)));
+            AssertExtensions.Throws<ArgumentNullException>("propertyAccessor", () => Expression.MemberBind(default(MethodInfo), Enumerable.Empty<MemberBinding>()));
         }
 
         [Fact]
@@ -57,10 +57,10 @@ namespace System.Linq.Expressions.Tests
         {
             PropertyInfo mem = typeof(PropertyAndFields).GetProperty(nameof(PropertyAndFields.StringProperty));
             MethodInfo meth = mem.GetGetMethod();
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(MemberBinding[])));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(IEnumerable<MemberBinding>)));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(MemberBinding[])));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(IEnumerable<MemberBinding>)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(MemberBinding[])));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(IEnumerable<MemberBinding>)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(MemberBinding[])));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(IEnumerable<MemberBinding>)));
         }
 
         [Fact]
@@ -68,10 +68,10 @@ namespace System.Linq.Expressions.Tests
         {
             PropertyInfo mem = typeof(PropertyAndFields).GetProperty(nameof(PropertyAndFields.StringProperty));
             MethodInfo meth = mem.GetGetMethod();
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(MemberBinding)));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, Enumerable.Repeat<MemberBinding>(null, 1)));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(MemberBinding)));
-            Assert.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, Enumerable.Repeat<MemberBinding>(null, 1)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, default(MemberBinding)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(mem, Enumerable.Repeat<MemberBinding>(null, 1)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, default(MemberBinding)));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => Expression.MemberBind(meth, Enumerable.Repeat<MemberBinding>(null, 1)));
         }
 
         [Fact]
@@ -79,10 +79,10 @@ namespace System.Linq.Expressions.Tests
         {
             MemberInfo toString = typeof(object).GetMember(nameof(ToString))[0];
             MethodInfo toStringMeth = typeof(object).GetMethod(nameof(ToString));
-            Assert.Throws<ArgumentException>("member", () => Expression.MemberBind(toString));
-            Assert.Throws<ArgumentException>("member", () => Expression.MemberBind(toString, Enumerable.Empty<MemberBinding>()));
-            Assert.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(toStringMeth));
-            Assert.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(toStringMeth, Enumerable.Empty<MemberBinding>()));
+            AssertExtensions.Throws<ArgumentException>("member", () => Expression.MemberBind(toString));
+            AssertExtensions.Throws<ArgumentException>("member", () => Expression.MemberBind(toString, Enumerable.Empty<MemberBinding>()));
+            AssertExtensions.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(toStringMeth));
+            AssertExtensions.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(toStringMeth, Enumerable.Empty<MemberBinding>()));
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Bind(typeof(Inner).GetProperty(nameof(Inner.Value)), Expression.Constant(3))
                 );
             NewExpression newExp = Expression.New(typeof(PropertyAndFields));
-            Assert.Throws<ArgumentException>(() => Expression.MemberInit(newExp, bind));
+            AssertExtensions.Throws<ArgumentException>("bindings[0]", () => Expression.MemberInit(newExp, bind));
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace System.Linq.Expressions.Tests
         {
             MemberAssignment bind = Expression.Bind(typeof(Inner).GetProperty(nameof(Inner.Value)), Expression.Constant(3));
             MemberMemberBinding memberBind = Expression.MemberBind(typeof(Outer).GetProperty(nameof(Outer.InnerProperty)), bind);
-            Assert.Throws<ArgumentNullException>("bindings", () => memberBind.Update(null));
+            AssertExtensions.Throws<ArgumentNullException>("bindings", () => memberBind.Update(null));
         }
 
         [Fact]
@@ -263,7 +263,7 @@ namespace System.Linq.Expressions.Tests
             globalMethod.GetILGenerator().Emit(OpCodes.Ret);
             module.CreateGlobalFunctions();
             MethodInfo globalMethodInfo = module.GetMethod(globalMethod.Name);
-            Assert.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(globalMethodInfo));
+            AssertExtensions.Throws<ArgumentException>("propertyAccessor", () => Expression.MemberBind(globalMethodInfo));
         }
 #endif
 
@@ -271,14 +271,14 @@ namespace System.Linq.Expressions.Tests
         {
             MemberAssignment bind = Expression.Bind(typeof(Inner).GetProperty(nameof(Inner.Value)), Expression.Constant(0));
             PropertyInfo property = typeof(Outer).GetProperty(nameof(Outer.WriteonlyInnerProperty));
-            Assert.Throws<ArgumentException>(() => Expression.MemberBind(property, bind));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.MemberBind(property, bind));
         }
 
         public void StaticWriteOnlyInnerProperty()
         {
             MemberAssignment bind = Expression.Bind(typeof(Inner).GetProperty(nameof(Inner.Value)), Expression.Constant(0));
             PropertyInfo property = typeof(Outer).GetProperty(nameof(Outer.StaticWriteonlyInnerProperty));
-            Assert.Throws<ArgumentException>(() => Expression.MemberBind(property, bind));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.MemberBind(property, bind));
         }
     }
 }

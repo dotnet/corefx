@@ -69,10 +69,10 @@ namespace System.IO.Tests
             
             var readOnlyStream = new MemoryStream(new byte[1], writable: false);
             
-            await Assert.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null));
-            await Assert.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null, -123)); // Should check if destination == null first
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, 0)); // 0 shouldn't be a valid buffer size
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, -123));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null, -123)); // Should check if destination == null first
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, 0)); // 0 shouldn't be a valid buffer size
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, -123));
             await Assert.ThrowsAsync<ObjectDisposedException>(() => Stream.Null.CopyToAsync(disposedStream));
             await Assert.ThrowsAsync<NotSupportedException>(() => Stream.Null.CopyToAsync(readOnlyStream));
         }

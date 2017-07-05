@@ -10,7 +10,6 @@ namespace System.ComponentModel
     /// <devdoc>
     ///    <para>The exception that is thrown for a Win32 error code.</para>
     /// </devdoc>
-    [Serializable]
     public partial class Win32Exception : ExternalException, ISerializable
     {
         /// <devdoc>
@@ -64,17 +63,11 @@ namespace System.ComponentModel
 
         protected Win32Exception(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            nativeErrorCode = info.GetInt32(nameof(NativeErrorCode));
+            throw new PlatformNotSupportedException();
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            info.AddValue(nameof(NativeErrorCode), nativeErrorCode);
             base.GetObjectData(info, context);
         }
 

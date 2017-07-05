@@ -310,7 +310,7 @@ namespace System.Numerics.Tests
             Assert.Throws<NullReferenceException>(() => vector.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => vector.CopyTo(array, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => vector.CopyTo(array, array.Length));
-            Assert.Throws<ArgumentException>(() => vector.CopyTo(array, array.Length - 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => vector.CopyTo(array, array.Length - 1));
 
             vector.CopyTo(array);
             for (int g = 0; g < array.Length; g++)
@@ -807,17 +807,17 @@ namespace System.Numerics.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionByte() { TestDivisionByZeroException<Byte>(); }
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionSByte() { TestDivisionByZeroException<SByte>(); }
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionUInt16() { TestDivisionByZeroException<UInt16>(); }
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionInt16() { TestDivisionByZeroException<Int16>(); }
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionInt32() { TestDivisionByZeroException<Int32>(); }
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public void DivisionByZeroExceptionInt64() { TestDivisionByZeroException<Int64>(); }
         private void TestDivisionByZeroException<T>() where T : struct
         {

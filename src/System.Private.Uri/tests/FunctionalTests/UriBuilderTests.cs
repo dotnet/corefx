@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 
 using Xunit;
@@ -76,14 +77,14 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void Ctor_String_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("uriString", () => new UriBuilder((string)null)); // UriString is null
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => new UriBuilder((string)null)); // UriString is null
             Assert.Throws<UriFormatException>(() => new UriBuilder(@"http://host\")); // UriString is invalid
         }
 
         [Fact]
         public void Ctor_Uri_Null()
         {
-            Assert.Throws<ArgumentNullException>("uri", () => new UriBuilder((Uri)null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => new UriBuilder((Uri)null)); // Uri is null
         }
 
         [Theory]
@@ -166,7 +167,7 @@ namespace System.PrivateUri.Tests
         [InlineData("fragment?fragment")]
         public void Ctor_InvalidExtraValue_ThrowsArgumentException(string extraValue)
         {
-            Assert.Throws<ArgumentException>(() => new UriBuilder("scheme", "host", 80, "path", extraValue));
+            AssertExtensions.Throws<ArgumentException>("extraValue", null, () => new UriBuilder("scheme", "host", 80, "path", extraValue));
         }
 
         [Theory]
@@ -186,12 +187,12 @@ namespace System.PrivateUri.Tests
         [InlineData("-")]
         public void InvalidScheme_ThrowsArgumentException(string schemeName)
         {
-            Assert.Throws<ArgumentException>(() => new UriBuilder(schemeName, "host"));
-            Assert.Throws<ArgumentException>(() => new UriBuilder(schemeName, "host", 80));
-            Assert.Throws<ArgumentException>(() => new UriBuilder(schemeName, "host", 80, "path"));
-            Assert.Throws<ArgumentException>(() => new UriBuilder(schemeName, "host", 80, "?query#fragment"));
+            AssertExtensions.Throws<ArgumentException>("value", null, () => new UriBuilder(schemeName, "host"));
+            AssertExtensions.Throws<ArgumentException>("value", null, () => new UriBuilder(schemeName, "host", 80));
+            AssertExtensions.Throws<ArgumentException>("value", null, () => new UriBuilder(schemeName, "host", 80, "path"));
+            AssertExtensions.Throws<ArgumentException>("value", null, () => new UriBuilder(schemeName, "host", 80, "?query#fragment"));
 
-            Assert.Throws<ArgumentException>(() => new UriBuilder().Scheme = schemeName);
+            AssertExtensions.Throws<ArgumentException>("value", null, () => new UriBuilder().Scheme = schemeName);
         }
 
         [Theory]

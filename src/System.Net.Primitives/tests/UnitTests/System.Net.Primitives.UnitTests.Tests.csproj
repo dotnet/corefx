@@ -7,7 +7,6 @@
     <NoWarn>169,649</NoWarn>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
@@ -25,8 +24,7 @@
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.Primitives" />
   </ItemGroup>
-
-  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp' ">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' ">
     <Compile Include="CookieInternalTest.cs" />
     <Compile Include="CookieContainerTest.cs" />
     <Compile Include="..\..\src\System\Net\CookieCollection.cs">
@@ -50,6 +48,15 @@
     <Compile Include="..\..\src\System\Net\Sockets\AddressFamily.cs">
       <Link>ProductionCode\System\Net\Sockets\AddressFamily.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieComparer.cs">
+      <Link>ProductionCode\System\Net\CookieComparer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieFields.cs">
+      <Link>Common\System\Net\CookieFields.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\CookieParser.cs">
+      <Link>ProductionCode\System\Net\CookieParser.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
       <Link>ProductionCode\System\Net\SocketAddress.cs</Link>
     </Compile>
@@ -63,12 +70,12 @@
       <Link>ProductionCode\System\Net\IPAddressParser.cs</Link>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="CookieCollectionTest.cs" />
-    <Compile Include="Fakes\HostInformation.cs" />
-    <Compile Include="Fakes\IPAddressPal.cs" />
     <Compile Include="Fakes\CookieException.cs" />
+    <Compile Include="Fakes\HostInformation.cs" />
+    <Compile Include="Fakes\IPv4AddressHelper.cs" />
+    <Compile Include="Fakes\IPv6AddressHelper.cs" />
     <Compile Include="Fakes\Serialization.cs" Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>

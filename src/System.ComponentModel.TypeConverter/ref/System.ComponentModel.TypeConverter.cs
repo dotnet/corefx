@@ -7,6 +7,8 @@
 
 using System.Runtime.Serialization;
 
+// These types were moved down to System.Primitives
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.InvalidEnumArgumentException))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.Component))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
 
@@ -783,6 +785,7 @@ namespace System.Drawing
         public override bool GetPropertiesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
     }
 }
+
 namespace System.Security.Authentication.ExtendedProtection
 {
     public partial class ExtendedProtectionPolicyTypeConverter : System.ComponentModel.TypeConverter

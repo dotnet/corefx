@@ -160,19 +160,22 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Throws<ArgumentNullException>(() => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(a, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(a, 3));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(a, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(a, 1));
 
             ICollection ic = c;
             Assert.Throws<ArgumentNullException>(() => ic.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => ic.CopyTo(a, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => ic.CopyTo(a, 3));
-            Assert.Throws<ArgumentException>(() => ic.CopyTo(a, 1));
-            Assert.Throws<ArgumentException>(() => ic.CopyTo(new CmsRecipient[2, 2], 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => ic.CopyTo(a, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => ic.CopyTo(new CmsRecipient[2, 2], 1));
             Assert.Throws<InvalidCastException>(() => ic.CopyTo(new int[10], 1));
 
-            // Array has non-zero lower bound
-            Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
-            Assert.Throws<IndexOutOfRangeException>(() => ic.CopyTo(array, 0));
+            if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
+            {
+                // Array has non-zero lower bound
+                Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+                Assert.Throws<IndexOutOfRangeException>(() => ic.CopyTo(array, 0));
+            }
         }
 
 

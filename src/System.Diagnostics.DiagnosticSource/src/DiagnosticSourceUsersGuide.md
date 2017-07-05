@@ -36,8 +36,8 @@ to allow in-process tools to get at very rich data.   Because the consumer is as
 within the same process, non-serializable types (e.g. HttpResponseMessage or HttpContext)
 can be passed, which gives the consumer a lot of potential data to work with.    
 
-As explained in [Bridge to EventSource](bridge-to-eventSource), there is a bridge that
-pipes information from DiagnosticSource's to an EventSource.   Thus EventSource
+As explained in [DiagnosticSourceEventSource.cs](System/Diagnostics/DiagnosticSourceEventSource.cs),
+there is a bridge that pipes information from DiagnosticSource's to an EventSource.   Thus EventSource
 consumers can get at all DiagnosticSource events.    While the data payloads from 
 DiagnosticSource can't in general be passed through to the EventSource (because they are 
 not serializable), there is a mechanism in the bridge that enables consumers to specify which fields
@@ -344,7 +344,8 @@ Then we could replace the listener.Subscribe call above with the following code,
 Note that using reflection is relatively expensive.  However using reflection is your only
 option if the payloads was generated using anonymous types.   You can reduce this overhead by 
 making fast, specialized property fetchers  either using PropertyInfo.CreateDelegate or 
-ReflectEmit, but that is beyond the scope of this document.  
+ReflectEmit, but that is beyond the scope of this document.  (see the [PropertySpec](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/DiagnosticSourceEventSource.cs#L784) class used in the DiagnosticSourceEventSource for an example of a fast, delegate-based
+property fetcher).  
 
 #### Filtering 
  

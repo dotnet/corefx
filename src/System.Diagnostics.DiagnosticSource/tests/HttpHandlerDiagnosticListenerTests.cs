@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    public class HttpHandlerDiagnosticListenerTests
+    using Configuration = System.Net.Test.Common.Configuration;
+
+    public class HttpHandlerDiagnosticListenerTests : RemoteExecutorTestBase
     {
         /// <summary>
         /// A simple test to make sure the Http Diagnostic Source is added into the list of DiagnosticListeners.
@@ -19,15 +21,17 @@ namespace System.Diagnostics.Tests
         public void TestHttpDiagnosticListenerIsRegistered()
         {
             bool listenerFound = false;
-            DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
-            {
-                if (diagnosticListener.Name == "System.Net.Http.Desktop")
+            using (DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
                 {
-                    listenerFound = true;
-                }
-            }));
+                    if (diagnosticListener.Name == "System.Net.Http.Desktop")
+                    {
+                        listenerFound = true;
+                    }
+                })))
+            {
 
-            Assert.True(listenerFound, "The Http Diagnostic Listener didn't get added to the AllListeners list.");
+                Assert.True(listenerFound, "The Http Diagnostic Listener didn't get added to the AllListeners list.");
+            }
         }
 
         /// <summary>
@@ -37,14 +41,39 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestReflectInitializationViaSubscription1()
         {
-            EventObserverAndRecorder eventRecords = CreateEventRecorder();
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                // Send a random Http request to generate some events
+                using (var client = new HttpClient())
+                {
+                    client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                }
 
-            // Send a random Http request to generate some events
-            HttpResponseMessage message = new HttpClient().GetAsync("http://www.bing.com").Result;
+                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // We should have exactly one Start and one Stop event
+                Assert.Equal(2, eventRecords.Records.Count);
+            }
+        }
 
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= 2, "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
+        /// <summary>
+        /// A simple test to make sure the Http Diagnostic Source is initialized properly after we subscribed to it, using
+        /// the subscribe overload with just the observer argument and the more complicating enable filter function.
+        /// </summary>
+        [Fact]
+        public void TestReflectInitializationViaSubscription2()
+        {
+            using (var eventRecords = new EventObserverAndRecorder(eventName => true))
+            {
+                // Send a random Http request to generate some events
+                using (var client = new HttpClient())
+                {
+                    client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                }
+
+                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // We should have exactly one Start and one Stop event
+                Assert.Equal(2, eventRecords.Records.Count);
+            }
         }
 
         /// <summary>
@@ -52,131 +81,229 @@ namespace System.Diagnostics.Tests
         /// the subscribe overload with the observer argument and the simple predicate argument.
         /// </summary>
         [Fact]
-        public void TestReflectInitializationViaSubscription2()
-        {
-            EventObserverAndRecorder eventRecords = new EventObserverAndRecorder();
-            DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
-            {
-                if (diagnosticListener.Name == "System.Net.Http.Desktop")
-                {
-                    diagnosticListener.Subscribe(eventRecords, (eventName) => { return true; });
-                }
-            }));
-
-            // Send a random Http request to generate some events
-            HttpResponseMessage message = new HttpClient().GetAsync("http://www.bing.com").Result;
-
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= 2, "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
-        }
-
-        /// <summary>
-        /// A simple test to make sure the Http Diagnostic Source is initialized properly after we subscribed to it, using
-        /// the subscribe overload with just the observer argument and the more compolicating enable filter function.
-        /// </summary>
-        [Fact]
         public void TestReflectInitializationViaSubscription3()
         {
-            EventObserverAndRecorder eventRecords = new EventObserverAndRecorder();
-            DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
+            using (var eventRecords = new EventObserverAndRecorder((eventName, arg1, arg2) => true))
             {
-                if (diagnosticListener.Name == "System.Net.Http.Desktop")
+                // Send a random Http request to generate some events
+                using (var client = new HttpClient())
                 {
-                    diagnosticListener.Subscribe(eventRecords, (eventName, obj1, obj2) => { return true; });
+                    client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                 }
-            }));
 
-            // Send a random Http request to generate some events
-            HttpResponseMessage message = new HttpClient().GetAsync("http://www.bing.com").Result;
-
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= 2, "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
+                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // We should have exactly one Start and one Stop event
+                Assert.Equal(2, eventRecords.Records.Count);
+            }
         }
 
         /// <summary>
         /// Test to make sure we get both request and response events.
         /// </summary>
         [Fact]
-        public void TestBasicReceiveAndResponseEvents()
+        public async Task TestBasicReceiveAndResponseEvents()
         {
-            EventObserverAndRecorder eventRecords = CreateEventRecorder();
-
-            // Send a random Http request to generate some events
-            HttpResponseMessage message = new HttpClient().GetAsync("http://www.bing.com").Result;
-
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= 2, "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
-
-            // I can't use the HttpWebRequest type here since it doesn't exist in .net core, so just use "object"
-            WebRequest firstRequest = null;
-
-            // Check to make sure: The first record must be a request, the last record must be a response. Records in
-            // the middle can be anything since it depends on # of redirections
-            for (int i = 0; i < eventRecords.Records.Count; i++)
+            using (var eventRecords = new EventObserverAndRecorder())
             {
-                var pair = eventRecords.Records[i];
-                object eventFields = pair.Value;
-                WebRequest thisRequest = ReadPublicProperty<WebRequest>(eventFields, "Request");
+                // Send a random Http request to generate some events
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
 
-                if (i == 0)
-                {
-                    Assert.Equal("System.Net.Http.Request", pair.Key);
-                    firstRequest = thisRequest;
-                }
-                else if (i == eventRecords.Records.Count - 1)
-                {
-                    Assert.Equal("System.Net.Http.Response", pair.Key);
-                    Assert.Equal(firstRequest, thisRequest);
-                }
-                else
-                {
-                    Assert.True(pair.Key == "System.Net.Http.Response" || pair.Key == "System.Net.Http.Request", "An unexpected event of name " + pair.Key + "was received");
-                    Assert.Equal(firstRequest, thisRequest);
-                }
+                // We should have exactly one Start and one Stop event
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+                Assert.Equal(2, eventRecords.Records.Count);
+
+                // Check to make sure: The first record must be a request, the next record must be a response. 
+                KeyValuePair<string, object> startEvent;
+                Assert.True(eventRecords.Records.TryDequeue(out startEvent));
+                Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
+                HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
+                Assert.NotNull(startRequest);
+                Assert.NotNull(startRequest.Headers["Request-Id"]);
+
+                KeyValuePair<string, object> stopEvent;
+                Assert.True(eventRecords.Records.TryDequeue(out stopEvent));
+                Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Stop", stopEvent.Key);
+                HttpWebRequest stopRequest = ReadPublicProperty<HttpWebRequest>(stopEvent.Value, "Request");
+                Assert.Equal(startRequest, stopRequest);
+                HttpWebResponse response = ReadPublicProperty<HttpWebResponse>(stopEvent.Value, "Response");
+                Assert.NotNull(response);
             }
         }
 
         /// <summary>
-        /// Test to make sure every event record has the right dynamic properties.
+        /// Test that if request is redirected, it gets only one Start and one Stop event
         /// </summary>
         [Fact]
-        public void TestDynamicPropertiesOnReceiveAndResponseEvents()
+        public async Task TestRedirectedRequest()
         {
-            EventObserverAndRecorder eventRecords = CreateEventRecorder();
-            long beginTimestamp = Stopwatch.GetTimestamp();
-
-            // Send a random Http request to generate some events
-            HttpResponseMessage message = new HttpClient().GetAsync("http://www.bing.com").Result;
-
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= 2, "Didn't get two or more events from Http Diagnostic Listener. Something is wrong.");
-
-            // Check to make sure: The first record must be a request, the last record must be a response. Records in
-            // the middle can be anything since it depends on # of redirections
-            for (int i = 0; i < eventRecords.Records.Count; i++)
+            using (var eventRecords = new EventObserverAndRecorder())
             {
-                var pair = eventRecords.Records[i];
-                object eventFields = pair.Value;
-
-                Assert.True(pair.Key == "System.Net.Http.Response" || pair.Key == "System.Net.Http.Request", "An unexpected event of name " + pair.Key + "was received");
-
-                WebRequest request = ReadPublicProperty<WebRequest>(eventFields, "Request");
-                long timestamp = ReadPublicProperty<long>(eventFields, "Timestamp");
-
-                Assert.Equal(request.GetType().Name, "HttpWebRequest");
-
-                // Just compare the timestamp to make sure it's reasonable. In an poorman experiment, we
-                // found that 10 secs is roughly 30,000,000 ticks
-                Assert.True(timestamp - beginTimestamp > 0 && timestamp - beginTimestamp < 30 * 1000 * 1000, $"The timestamp sent with the event doesn't look correct. Begin {beginTimestamp} End {timestamp} Diff {timestamp - beginTimestamp} Expected < {30 * 1000 * 1000}");
-
-                if (pair.Key == "System.Net.Http.Response")
+                using (var client = new HttpClient())
                 {
-                    object response = ReadPublicProperty<WebResponse>(eventFields, "Response");
-                    Assert.Equal(response.GetType().Name, "HttpWebResponse");
+                    Uri uriWithRedirect =
+                        Configuration.Http.RedirectUriForDestinationUri(true, 302, Configuration.Http.RemoteEchoServer, 10);
+                    (await client.GetAsync(uriWithRedirect)).Dispose();
+                }
+
+                // We should have exactly one Start and one Stop event
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+            }
+        }
+
+        /// <summary>
+        /// Test exception in request processing: exception should have expected type/status and now be swallowed by reflection hook
+        /// </summary>
+        [Fact]
+        public async Task TestRequestWithException()
+        {
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                var ex =
+                    await Assert.ThrowsAsync<HttpRequestException>(
+                        () => new HttpClient().GetAsync($"http://{Guid.NewGuid()}.com"));
+
+                // check that request failed because of the wrong domain name and not because of reflection
+                var webException = (WebException)ex.InnerException;
+                Assert.NotNull(webException);
+                Assert.True(webException.Status == WebExceptionStatus.NameResolutionFailure);
+
+                // We should have one Start event and no stop event
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(0, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+            }
+        }
+
+        /// <summary>
+        /// Test request cancellation: reflection hook does not throw
+        /// </summary>
+        [Fact]
+        public async Task TestCanceledRequest()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using (var eventRecords = new EventObserverAndRecorder( _ => { cts.Cancel();}))
+            {
+                using (var client = new HttpClient())
+                {
+                    var ex = await Assert.ThrowsAnyAsync<Exception>(() => client.GetAsync(Configuration.Http.RemoteEchoServer, cts.Token));
+                    Assert.True(ex is TaskCanceledException || ex is WebException);
+                }
+
+                // We should have one Start event and no stop event
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(0, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+            }
+        }
+
+        /// <summary>
+        /// Test Request-Id and Correlation-Context headers injection
+        /// </summary>
+        [Fact]
+        public async Task TestActivityIsCreated()
+        {
+            var parentActivity = new Activity("parent").AddBaggage("k1", "v1").AddBaggage("k2", "v2").Start();
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
+
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+
+                WebRequest thisRequest = ReadPublicProperty<WebRequest>(eventRecords.Records.First().Value, "Request");
+                var requestId = thisRequest.Headers["Request-Id"];
+                var correlationContext = thisRequest.Headers["Correlation-Context"];
+
+                Assert.NotNull(requestId);
+                Assert.True(requestId.StartsWith(parentActivity.Id));
+
+                Assert.NotNull(correlationContext);
+                Assert.True(correlationContext == "k1=v1,k2=v2" || correlationContext == "k2=v2,k1=v1");
+            }
+            parentActivity.Stop();
+        }
+
+        /// <summary>
+        /// Tests IsEnabled order and parameters
+        /// </summary>
+        [Fact]
+        public async Task TestIsEnabled()
+        {
+            int eventNumber = 0;
+
+            bool IsEnabled(string evnt, object arg1, object arg2)
+            {
+                if (eventNumber == 0)
+                {
+                    Assert.True(evnt == "System.Net.Http.Desktop.HttpRequestOut");
+                    Assert.True(arg1 is WebRequest);
+                }
+                else if (eventNumber == 1)
+                {
+                    Assert.True(evnt == "System.Net.Http.Desktop.HttpRequestOut.Start");
+                }
+
+                eventNumber++;
+                return true;
+            }
+
+            using (new EventObserverAndRecorder(IsEnabled))
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
+                Assert.Equal(2, eventNumber);
+            }
+        }
+        
+        /// <summary>
+        /// Tests that nothing happens if IsEnabled returns false
+        /// </summary>
+        [Fact]
+        public async Task TestIsEnabledAllOff()
+        {
+            using (var eventRecords = new EventObserverAndRecorder((evnt, arg1, arg2) => false))
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
+
+                Assert.Equal(0, eventRecords.Records.Count);
+            }
+        }
+
+        /// <summary>
+        /// Tests that if IsEnabled for request  is false, request is not instrumented
+        /// </summary>
+        [Fact]
+        public async Task TestIsEnabledRequestOff()
+        {
+            bool IsEnabled(string evnt, object arg1, object arg2)
+            {
+                if (evnt == "System.Net.Http.Desktop.HttpRequestOut")
+                {
+                    return (arg1 as WebRequest).RequestUri.Scheme == "https";
+                }
+                return true;
+            }
+
+            using (var eventRecords = new EventObserverAndRecorder(IsEnabled))
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                    Assert.Equal(0, eventRecords.Records.Count);
+
+                    (await client.GetAsync(Configuration.Http.SecureRemoteEchoServer)).Dispose();
+                    Assert.Equal(2, eventRecords.Records.Count);
                 }
             }
         }
@@ -187,111 +314,118 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMultipleConcurrentRequests()
         {
-            EventObserverAndRecorder eventRecords = CreateEventRecorder();
-            long beginTimestamp = Stopwatch.GetTimestamp();
-
-            Dictionary<string, Tuple<WebRequest, WebResponse>> requestData = new Dictionary<string, Tuple<WebRequest, WebResponse>>();
-            requestData.Add("http://www.microsoft.com", null);
-            requestData.Add("http://www.bing.com", null);
-            requestData.Add("http://www.xbox.com", null);
-            requestData.Add("http://www.office.com", null);
-            requestData.Add("http://www.microsoftstore.com", null);
-            requestData.Add("http://www.msn.com", null);
-            requestData.Add("http://outlook.live.com", null);
-            requestData.Add("http://build.microsoft.com", null);
-            requestData.Add("http://azure.microsoft.com", null);
-            requestData.Add("http://www.nuget.org", null);
-            requestData.Add("http://support.microsoft.com", null);
-            requestData.Add("http://www.visualstudio.com", null);
-            requestData.Add("http://msdn.microsoft.com", null);
-            requestData.Add("http://onedrive.live.com", null);
-            requestData.Add("http://community.dynamics.com", null);
-            requestData.Add("http://login.live.com", null);
-            requestData.Add("http://www.skype.com", null);
-            requestData.Add("http://channel9.msdn.com", null);
-
-            // Issue all requests simultaneously
-            HttpClient httpClient = new HttpClient();
-            List<Task<HttpResponseMessage>> tasks = new List<Task<HttpResponseMessage>>();
-            foreach (string url in requestData.Keys)
+            ServicePointManager.DefaultConnectionLimit = Int32.MaxValue;
+            var parentActivity = new Activity("parent").Start();
+            using (var eventRecords = new EventObserverAndRecorder())
             {
-                tasks.Add(httpClient.GetAsync(url));
-            }
-
-            Task.WaitAll(tasks.ToArray());
-
-            // Examine the result. Make sure we got them all.
-
-            // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
-            // at least two events, one for request send, and one for response receive
-            Assert.True(eventRecords.Records.Count >= requestData.Count * 2, "Didn't get two or more events on average from each request. Something is wrong.");
-
-            // Check to make sure: We have a WebRequest and a WebResponse for each URL
-            for (int i = 0; i < eventRecords.Records.Count; i++)
-            {
-                var pair = eventRecords.Records[i];
-                object eventFields = pair.Value;                
-
-                Assert.True(pair.Key == "System.Net.Http.Response" || pair.Key == "System.Net.Http.Request", "An unexpected event of name " + pair.Key + "was received");
-
-                WebRequest request = ReadPublicProperty<WebRequest>(eventFields, "Request");
-                long timestamp = ReadPublicProperty<long>(eventFields, "Timestamp");
-
-                Assert.Equal(request.GetType().Name, "HttpWebRequest");
-
-                // Just compare the timestamp to make sure it's reasonable. In an poorman experiment, we
-                // found that 10 secs is roughly 30,000,000 ticks
-                Assert.True(timestamp - beginTimestamp > 0 && timestamp - beginTimestamp < 30 * 1000 * 1000, $"The timestamp sent with the event doesn't look correct. Begin {beginTimestamp} End {timestamp} Diff {timestamp - beginTimestamp} Expected < {30 * 1000 * 1000}");
-
-                if (pair.Key == "System.Net.Http.Request")
+                Dictionary<Uri, Tuple<WebRequest, WebResponse>> requestData =
+                    new Dictionary<Uri, Tuple<WebRequest, WebResponse>>();
+                for (int i = 0; i < 10; i++)
                 {
-                    // Make sure this is an URL that we recognize. If not, just skip
-                    Tuple<WebRequest, WebResponse> tuple = null;
-                    if (!requestData.TryGetValue(request.RequestUri.OriginalString, out tuple))
-                    {
-                        continue;
-                    }
+                    Uri uriWithRedirect =
+                        Configuration.Http.RedirectUriForDestinationUri(true, 302, new Uri($"{Configuration.Http.RemoteEchoServer}?q={i}"), 3);
 
-                    WebRequest previousSeenRequest = tuple?.Item1;
-                    WebResponse previousSeenResponse = tuple?.Item2;
-
-                    // We see have seen an HttpWebRequest before for this URL/host, make sure it's the same one,
-                    // Then update the tuple with the request object, if we didn't have one
-                    Assert.True(previousSeenRequest == null || previousSeenRequest == request, "Didn't expect to see a different WebRequest object going to the same url host for: " + request.RequestUri.OriginalString);
-                    requestData[request.RequestUri.OriginalString] = new Tuple<WebRequest, WebResponse>(previousSeenRequest ?? request, previousSeenResponse);
+                    requestData[uriWithRedirect] = null;
                 }
-                else
-                {
-                    // This must be the response.
-                    WebResponse response = ReadPublicProperty<WebResponse>(eventFields, "Response");
-                    Assert.Equal(response.GetType().Name, "HttpWebResponse");
 
-                    // By the time we see the response, the request object may already have been redirected with a different
-                    // url. Hence, it's not reliable to just look up requestData by the URL/hostname. Instead, we have to look
-                    // through each one and match by object reference on the request object.
-                    Tuple<WebRequest, WebResponse> tuple = null;
-                    foreach (Tuple<WebRequest, WebResponse> currentTuple in requestData.Values)
+                // Issue all requests simultaneously
+                HttpClient httpClient = new HttpClient();
+                Dictionary<Uri, Task<HttpResponseMessage>> tasks = new Dictionary<Uri, Task<HttpResponseMessage>>();
+
+                CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                foreach (var url in requestData.Keys)
+                {
+                    tasks.Add(url, httpClient.GetAsync(url, cts.Token));
+                }
+
+                // wait up to 10 sec for all requests and suppress exceptions
+                Task.WhenAll(tasks.Select(t => t.Value).ToArray()).ContinueWith(tt =>
+                {
+                    foreach (var task in tasks)
                     {
-                        if (currentTuple != null && currentTuple.Item1 == request)
+                        task.Value.Result?.Dispose();
+                    }
+                }).Wait();
+
+                // Examine the result. Make sure we got all successful requests.
+
+                // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
+                // exactly 1 Start event per request and exaclty 1 Stop event per response (if request succeeded)
+                var successfulTasks = tasks.Where(t => t.Value.Status == TaskStatus.RanToCompletion);
+
+                Assert.Equal(tasks.Count, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(successfulTasks.Count(), eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+
+                // Check to make sure: We have a WebRequest and a WebResponse for each successful request
+                foreach (var pair in eventRecords.Records)
+                {
+                    object eventFields = pair.Value;
+
+                    Assert.True(
+                        pair.Key == "System.Net.Http.Desktop.HttpRequestOut.Start" ||
+                        pair.Key == "System.Net.Http.Desktop.HttpRequestOut.Stop",
+                        "An unexpected event of name " + pair.Key + "was received");
+
+                    WebRequest request = ReadPublicProperty<WebRequest>(eventFields, "Request");
+                    Assert.Equal(request.GetType().Name, "HttpWebRequest");
+
+                    if (pair.Key == "System.Net.Http.Desktop.HttpRequestOut.Start")
+                    {
+                        // Make sure this is an URL that we recognize. If not, just skip
+                        Tuple<WebRequest, WebResponse> tuple = null;
+                        if (!requestData.TryGetValue(request.RequestUri, out tuple))
                         {
-                            // Found it!
-                            tuple = currentTuple;
-                            break;
+                            continue;
                         }
+
+                        // all requests have Request-Id with proper parent Id
+                        var requestId = request.Headers["Request-Id"];
+                        Assert.True(requestId.StartsWith(parentActivity.Id));
+                        // all request activities are siblings:
+                        var childSuffix = requestId.Substring(0, parentActivity.Id.Length);
+                        Assert.True(childSuffix.IndexOf('.') == childSuffix.Length - 1);
+
+                        Assert.Null(requestData[request.RequestUri]);
+                        requestData[request.RequestUri] =
+                            new Tuple<WebRequest, WebResponse>(request, null);
                     }
+                    else
+                    {
+                        // This must be the response.
+                        WebResponse response = ReadPublicProperty<WebResponse>(eventFields, "Response");
+                        Assert.Equal(response.GetType().Name, "HttpWebResponse");
 
-                    // Update the tuple with the response object
-                    Assert.NotNull(tuple);
-                    requestData[request.RequestUri.OriginalString] = new Tuple<WebRequest, WebResponse>(request, response);
+                        // By the time we see the response, the request object may already have been redirected with a different
+                        // url. Hence, it's not reliable to just look up requestData by the URL/hostname. Instead, we have to look
+                        // through each one and match by object reference on the request object.
+                        Tuple<WebRequest, WebResponse> tuple = null;
+                        foreach (Tuple<WebRequest, WebResponse> currentTuple in requestData.Values)
+                        {
+                            if (currentTuple != null && currentTuple.Item1 == request)
+                            {
+                                // Found it!
+                                tuple = currentTuple;
+                                break;
+                            }
+                        }
+
+                        // Update the tuple with the response object
+                        Assert.NotNull(tuple);
+                        requestData[request.RequestUri] =
+                            new Tuple<WebRequest, WebResponse>(request, response);
+                    }
                 }
-            }
 
-            // Finally, make sure we have request and response objects for every entry
-            foreach (KeyValuePair<string, Tuple<WebRequest, WebResponse>> pair in requestData)
-            {
-                Assert.NotNull(pair.Value);
-                Assert.NotNull(pair.Value.Item1);
-                Assert.NotNull(pair.Value.Item2);
+                // Finally, make sure we have request and response objects for every successful request
+                foreach (KeyValuePair<Uri, Tuple<WebRequest, WebResponse>> pair in requestData)
+                {
+                    if (successfulTasks.Any(t => t.Key == pair.Key))
+                    {
+                        Assert.NotNull(pair.Value);
+                        Assert.NotNull(pair.Value.Item1);
+                        Assert.NotNull(pair.Value.Item2);
+                    }
+                }
             }
         }
 
@@ -300,19 +434,6 @@ namespace System.Diagnostics.Tests
             Type type = obj.GetType();
             PropertyInfo property = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
             return (T)property.GetValue(obj);
-        }
-
-        private EventObserverAndRecorder CreateEventRecorder()
-        {
-            EventObserverAndRecorder eventRecords = new EventObserverAndRecorder();
-            DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
-            {
-                if (diagnosticListener.Name == "System.Net.Http.Desktop")
-                {
-                    diagnosticListener.Subscribe(eventRecords);
-                }
-            }));
-            return eventRecords;
         }
 
         /// <summary>
@@ -335,13 +456,64 @@ namespace System.Diagnostics.Tests
         /// EventObserverAndRecorder is an observer that watches all Http diagnosticlistener events flowing
         /// through, and record all of them
         /// </summary>
-        private class EventObserverAndRecorder : IObserver<KeyValuePair<string, object>>
+        private class EventObserverAndRecorder : IObserver<KeyValuePair<string, object>>, IDisposable
         {
-            public List<KeyValuePair<string, object>> Records { get; } = new List<KeyValuePair<string, object>>();
+            private readonly Action<KeyValuePair<string, object>> onEvent;
+
+            public EventObserverAndRecorder(Action<KeyValuePair<string, object>> onEvent = null)
+            {
+                listSubscription = DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
+                {
+                    if (diagnosticListener.Name == "System.Net.Http.Desktop")
+                    {
+                        httpSubscription = diagnosticListener.Subscribe(this);
+                    }
+                }));
+
+                this.onEvent = onEvent;
+            }
+
+            public EventObserverAndRecorder(Predicate<string> isEnabled)
+            {
+                listSubscription = DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
+                {
+                    if (diagnosticListener.Name == "System.Net.Http.Desktop")
+                    {
+                        httpSubscription = diagnosticListener.Subscribe(this, isEnabled);
+                    }
+                }));
+            }
+
+            public EventObserverAndRecorder(Func<string, object, object, bool> isEnabled)
+            {
+                listSubscription = DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(diagnosticListener =>
+                {
+                    if (diagnosticListener.Name == "System.Net.Http.Desktop")
+                    {
+                        httpSubscription = diagnosticListener.Subscribe(this, isEnabled);
+                    }
+                }));
+            }
+
+            public void Dispose()
+            {
+                listSubscription.Dispose();
+                httpSubscription.Dispose();
+            }
+
+            public ConcurrentQueue<KeyValuePair<string, object>> Records { get; } = new ConcurrentQueue<KeyValuePair<string, object>>();
 
             public void OnCompleted() { }
             public void OnError(Exception error) { }
-            public void OnNext(KeyValuePair<string, object> record) { Records.Add(record);  }
+
+            public void OnNext(KeyValuePair<string, object> record)
+            {
+                Records.Enqueue(record);
+                onEvent?.Invoke(record);
+            }
+
+            private readonly IDisposable listSubscription;
+            private IDisposable httpSubscription;
         }
     }
 }

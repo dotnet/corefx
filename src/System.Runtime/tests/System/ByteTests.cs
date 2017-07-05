@@ -59,8 +59,8 @@ namespace System.Tests
         public static void CompareTo_ObjectNotByte_ThrowsArgumentException()
         {
             IComparable comparable = (byte)234;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a byte
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a byte
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a byte
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a byte
         }
 
         [Theory]
@@ -269,16 +269,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             byte result = 0;
-            Assert.Throws<ArgumentException>(() => byte.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.TryParse("1", style, null, out result));
             Assert.Equal(default(byte), result);
 
-            Assert.Throws<ArgumentException>(() => byte.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => byte.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.Parse("1", style, null));
         }
     }
 }

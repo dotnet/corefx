@@ -33,8 +33,8 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Long_InvalidTicks_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MinValue.Ticks - 1)); // Ticks < DateTime.MinValue.Ticks
-            Assert.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MaxValue.Ticks + 1)); // Ticks > DateTime.MaxValue.Ticks
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MinValue.Ticks - 1)); // Ticks < DateTime.MinValue.Ticks
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MaxValue.Ticks + 1)); // Ticks > DateTime.MaxValue.Ticks
         }
 
         [Fact]
@@ -46,11 +46,11 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Long_DateTimeKind_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MinValue.Ticks - 1, DateTimeKind.Utc)); // Ticks < DateTime.MinValue.Ticks
-            Assert.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MaxValue.Ticks + 1, DateTimeKind.Utc)); // Ticks > DateTime.MaxValue.Ticks
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MinValue.Ticks - 1, DateTimeKind.Utc)); // Ticks < DateTime.MinValue.Ticks
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ticks", () => new DateTime(DateTime.MaxValue.Ticks + 1, DateTimeKind.Utc)); // Ticks > DateTime.MaxValue.Ticks
 
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(0, DateTimeKind.Unspecified - 1)); // Invalid date time kind
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(0, DateTimeKind.Local + 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(0, DateTimeKind.Unspecified - 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(0, DateTimeKind.Local + 1)); // Invalid date time kind
         }
 
         [Fact]
@@ -63,14 +63,14 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1)); // Year < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1)); // Year > 9999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1)); // Year < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1)); // Year > 9999
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1)); // Month < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1)); // Month > 12
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1)); // Month < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1)); // Month > 12
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0)); // Day < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32)); // Day > days in month
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0)); // Day < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32)); // Day > days in month
         }
 
         [Fact]
@@ -83,23 +83,23 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1)); // Year < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1)); // Year > 9999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1)); // Year < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1)); // Year > 9999
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1)); // Month < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1)); // Month > 12
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1)); // Month < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1)); // Month > 12
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1)); // Day < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1)); // Day > days in month
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1)); // Day < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1)); // Day > days in month
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1)); // Hour < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1)); // Hour > 23
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1)); // Hour < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1)); // Hour > 23
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1)); // Minute < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1)); // Minute > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1)); // Minute < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1)); // Minute > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1)); // Second < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60)); // Second > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1)); // Second < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60)); // Second > 59
         }
 
         [Fact]
@@ -112,26 +112,26 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Int_Int_Int_DateTimeKind_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year > 9999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year > 9999
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, DateTimeKind.Utc)); // Month < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, DateTimeKind.Utc)); // Month > 12
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, DateTimeKind.Utc)); // Month < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, DateTimeKind.Utc)); // Month > 12
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, DateTimeKind.Utc)); // Day < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, DateTimeKind.Utc)); // Day > days in month
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, DateTimeKind.Utc)); // Day < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, DateTimeKind.Utc)); // Day > days in month
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, DateTimeKind.Utc)); // Hour < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, DateTimeKind.Utc)); // Hour > 23
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, DateTimeKind.Utc)); // Hour < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, DateTimeKind.Utc)); // Hour > 23
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, DateTimeKind.Utc)); // Minute < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, DateTimeKind.Utc)); // Minute > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, DateTimeKind.Utc)); // Minute < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, DateTimeKind.Utc)); // Minute > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, DateTimeKind.Utc)); // Second < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, DateTimeKind.Utc)); // Second > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, DateTimeKind.Utc)); // Second < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, DateTimeKind.Utc)); // Second > 59
 
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, DateTimeKind.Unspecified - 1)); // Invalid date time kind
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, DateTimeKind.Local + 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, DateTimeKind.Unspecified - 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, DateTimeKind.Local + 1)); // Invalid date time kind
         }
 
         [Fact]
@@ -144,26 +144,26 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Int_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, 1)); // Year < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, 1)); // Year > 9999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, 1)); // Year < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, 1)); // Year > 9999
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, 1)); // Month < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, 1)); // Month > 12
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, 1)); // Month < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, 1)); // Month > 12
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, 1)); // Day < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, 1)); // Day > days in month
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, 1)); // Day < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, 1)); // Day > days in month
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, 1)); // Hour < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, 1)); // Hour > 23
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, 1)); // Hour < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, 1)); // Hour > 23
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, 1)); // Minute < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, 1)); // Minute > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, 1)); // Minute < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, 1)); // Minute > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, 1)); // Second < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, 1)); // Second > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, 1)); // Second < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, 1)); // Second > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, -1)); // Milisecond < 0
-            Assert.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, 1000)); // Millisecond > 999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, -1)); // Milisecond < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, 1000)); // Millisecond > 999
         }
 
         [Fact]
@@ -176,29 +176,29 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Int_Int_Int_Int_DateTimeKind_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year < 1
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year > 9999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(0, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(10000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Year > 9999
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Month < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Month > 12
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 0, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Month < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 13, 1, 1, 1, 1, 1, DateTimeKind.Utc)); // Month > 12
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, 1, DateTimeKind.Utc)); // Day < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, 1, DateTimeKind.Utc)); // Day > days in month
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 0, 1, 1, 1, 1, DateTimeKind.Utc)); // Day < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 32, 1, 1, 1, 1, DateTimeKind.Utc)); // Day > days in month
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, 1, DateTimeKind.Utc)); // Hour < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, 1, DateTimeKind.Utc)); // Hour > 23
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, -1, 1, 1, 1, DateTimeKind.Utc)); // Hour < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 24, 1, 1, 1, DateTimeKind.Utc)); // Hour > 23
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, 1, DateTimeKind.Utc)); // Minute < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, 1, DateTimeKind.Utc)); // Minute > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, -1, 1, 1, DateTimeKind.Utc)); // Minute < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 60, 1, 1, DateTimeKind.Utc)); // Minute > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, 1, DateTimeKind.Utc)); // Second < 0
-            Assert.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, 1, DateTimeKind.Utc)); // Second > 59
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, -1, 1, DateTimeKind.Utc)); // Second < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => new DateTime(1, 1, 1, 1, 1, 60, 1, DateTimeKind.Utc)); // Second > 59
 
-            Assert.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, -1, DateTimeKind.Utc)); // Millisecond < 0
-            Assert.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, 1000, DateTimeKind.Utc)); // Millisecond > 999
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, -1, DateTimeKind.Utc)); // Millisecond < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("millisecond", () => new DateTime(1, 1, 1, 1, 1, 1, 1000, DateTimeKind.Utc)); // Millisecond > 999
 
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Unspecified - 1)); // Invalid date time kind
-            Assert.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Local + 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Unspecified - 1)); // Invalid date time kind
+            AssertExtensions.Throws<ArgumentException>("kind", () => new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Local + 1)); // Invalid date time kind
         }
 
         [Theory]
@@ -212,8 +212,8 @@ namespace System.Tests
         [Fact]
         public static void IsLeapYear_InvalidYear_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(0));
-            Assert.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(10000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(10000));
         }
 
         public static IEnumerable<object[]> Add_TimeSpan_TestData()
@@ -233,8 +233,8 @@ namespace System.Tests
         [Fact]
         public static void Add_TimeSpan_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.Add(TimeSpan.FromTicks(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.Add(TimeSpan.FromTicks(11)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.Add(TimeSpan.FromTicks(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.Add(TimeSpan.FromTicks(11)));
         }
 
         public static IEnumerable<object[]> AddYears_TestData()
@@ -254,11 +254,11 @@ namespace System.Tests
         [Fact]
         public static void AddYears_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("years", () => DateTime.Now.AddYears(10001));
-            Assert.Throws<ArgumentOutOfRangeException>("years", () => DateTime.Now.AddYears(-10001));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("years", () => DateTime.Now.AddYears(10001));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("years", () => DateTime.Now.AddYears(-10001));
 
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MaxValue.AddYears(1));
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MinValue.AddYears(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MaxValue.AddYears(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MinValue.AddYears(-1));
         }
 
         public static IEnumerable<object[]> AddMonths_TestData()
@@ -278,11 +278,11 @@ namespace System.Tests
         [Fact]
         public static void AddMonths_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.Now.AddMonths(120001));
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.Now.AddMonths(-120001));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.Now.AddMonths(120001));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.Now.AddMonths(-120001));
 
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MaxValue.AddMonths(1));
-            Assert.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MinValue.AddMonths(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MaxValue.AddMonths(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("months", () => DateTime.MinValue.AddMonths(-1));
         }
 
         public static IEnumerable<object[]> AddDays_TestData()
@@ -302,8 +302,8 @@ namespace System.Tests
         [Fact]
         public static void AddDays_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddDays(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddDays(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddDays(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddDays(-1));
         }
 
         public static IEnumerable<object[]> AddHours_TestData()
@@ -323,8 +323,8 @@ namespace System.Tests
         [Fact]
         public static void AddHours_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddHours(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddHours(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddHours(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddHours(-1));
         }
 
         public static IEnumerable<object[]> AddMinutes_TestData()
@@ -344,8 +344,8 @@ namespace System.Tests
         [Fact]
         public static void AddMinutes_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddMinutes(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddMinutes(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddMinutes(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddMinutes(-1));
         }
 
         public static IEnumerable<object[]> AddSeconds_TestData()
@@ -365,8 +365,8 @@ namespace System.Tests
         [Fact]
         public static void AddSeconds_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddSeconds(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddSeconds(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddSeconds(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddSeconds(-1));
         }
 
         public static IEnumerable<object[]> AddMilliseconds_TestData()
@@ -386,8 +386,8 @@ namespace System.Tests
         [Fact]
         public static void AddMilliseconds_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddMilliseconds(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddMilliseconds(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddMilliseconds(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddMilliseconds(-1));
         }
 
         public static IEnumerable<object[]> AddTicks_TestData()
@@ -407,8 +407,8 @@ namespace System.Tests
         [Fact]
         public static void AddTicks_NewDateOutOfRange_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddTicks(1));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddTicks(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MaxValue.AddTicks(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.MinValue.AddTicks(-1));
         }
 
         [Fact]
@@ -553,7 +553,7 @@ namespace System.Tests
         [Fact]
         public static void Parse_NullString_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("s", () => DateTime.Parse(null, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.Parse(null, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
         }
 
         [Fact]
@@ -894,7 +894,7 @@ namespace System.Tests
             string[] formats = new string[] { "f" };
             IFormatProvider provider = new CultureInfo("en-US");
             DateTimeStyles style = DateTimeStyles.AssumeLocal | DateTimeStyles.AssumeUniversal;
-            Assert.Throws<ArgumentException>(() => DateTime.ParseExact(strDateTime, formats, provider, style));
+            AssertExtensions.Throws<ArgumentException>("style", () => DateTime.ParseExact(strDateTime, formats, provider, style));
         }
     }
 }

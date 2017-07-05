@@ -196,16 +196,10 @@ namespace System.Security.Claims
         [Fact]
         public void Ctor_ArgumentValidation()
         {
-            Assert.Throws<ArgumentNullException>("identities", () => new ClaimsPrincipal((IEnumerable<ClaimsIdentity>)null));
-            Assert.Throws<ArgumentNullException>("identity", () => new ClaimsPrincipal((IIdentity)null));
-            Assert.Throws<ArgumentNullException>("principal", () => new ClaimsPrincipal((IPrincipal)null));
-            Assert.Throws<ArgumentNullException>("reader", () => new ClaimsPrincipal((BinaryReader)null));
-        }
-
-        [Fact]
-        public void ClaimPrincipal_SerializeDeserialize_Roundtrip()
-        {
-            Assert.NotNull(BinaryFormatterHelpers.Clone(new ClaimsPrincipal()));
+            AssertExtensions.Throws<ArgumentNullException>("identities", () => new ClaimsPrincipal((IEnumerable<ClaimsIdentity>)null));
+            AssertExtensions.Throws<ArgumentNullException>("identity", () => new ClaimsPrincipal((IIdentity)null));
+            AssertExtensions.Throws<ArgumentNullException>("principal", () => new ClaimsPrincipal((IPrincipal)null));
+            AssertExtensions.Throws<ArgumentNullException>("reader", () => new ClaimsPrincipal((BinaryReader)null));
         }
 
         private class NonClaimsPrincipal : IPrincipal

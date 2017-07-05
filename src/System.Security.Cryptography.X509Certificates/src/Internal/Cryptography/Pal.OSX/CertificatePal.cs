@@ -59,7 +59,9 @@ namespace Internal.Cryptography.Pal
         {
             Debug.Assert(cert.Pal != null);
 
-            return FromHandle(cert.Handle);
+            ICertificatePal pal = FromHandle(cert.Handle);
+            GC.KeepAlive(cert); // ensure cert's safe handle isn't finalized while raw handle is in use
+            return pal;
         }
 
         public static ICertificatePal FromBlob(
@@ -358,21 +360,6 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        public AsymmetricAlgorithm GetPrivateKey()
-        {
-            switch (KeyAlgorithm)
-            {
-                case Oids.RsaRsa:
-                    return GetRSAPrivateKey();
-                case Oids.DsaDsa:
-                    return GetDSAPrivateKey();
-                case Oids.Ecc:
-                    return GetECDsaPrivateKey();
-            }
-
-            throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
-        }
-
         public RSA GetRSAPrivateKey()
         {
             if (_identityHandle == null)
@@ -407,6 +394,134 @@ namespace Internal.Cryptography.Pal
             SafeSecKeyRefHandle privateKey = Interop.AppleCrypto.X509GetPrivateKeyFromIdentity(_identityHandle);
 
             return new ECDsaImplementation.ECDsaSecurityTransforms(publicKey, privateKey);
+        }
+
+        public ICertificatePal CopyWithPrivateKey(DSA privateKey)
+        {
+            var typedKey = privateKey as DSAImplementation.DSASecurityTransforms;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+
+            DSAParameters dsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(dsaParameters.X))
+            using (typedKey = new DSAImplementation.DSASecurityTransforms())
+            {
+                typedKey.ImportParameters(dsaParameters);
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(ECDsa privateKey)
+        {
+            var typedKey = privateKey as ECDsaImplementation.ECDsaSecurityTransforms;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+
+            ECParameters ecParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(ecParameters.D))
+            using (typedKey = new ECDsaImplementation.ECDsaSecurityTransforms())
+            {
+                typedKey.ImportParameters(ecParameters);
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(RSA privateKey)
+        {
+            var typedKey = privateKey as RSAImplementation.RSASecurityTransforms;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+
+            RSAParameters rsaParameters = privateKey.ExportParameters(true);
+            
+            using (PinAndClear.Track(rsaParameters.D))
+            using (PinAndClear.Track(rsaParameters.P))
+            using (PinAndClear.Track(rsaParameters.Q))
+            using (PinAndClear.Track(rsaParameters.DP))
+            using (PinAndClear.Track(rsaParameters.DQ))
+            using (PinAndClear.Track(rsaParameters.InverseQ))
+            using (typedKey = new RSAImplementation.RSASecurityTransforms())
+            {
+                typedKey.ImportParameters(rsaParameters);
+                return CopyWithPrivateKey(typedKey.GetKeys());
+            }
+        }
+
+        private ICertificatePal CopyWithPrivateKey(SecKeyPair keyPair)
+        {
+            if (keyPair.PrivateKey == null)
+            {
+                // Both Windows and Linux/OpenSSL are unaware if they bound a public or private key.
+                // Here, we do know.  So throw if we can't do what they asked.
+                throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+            }
+
+            SafeKeychainHandle keychain = Interop.AppleCrypto.SecKeychainItemCopyKeychain(keyPair.PrivateKey);
+
+            // If we're using a key already in a keychain don't add the certificate to that keychain here,
+            // do it in the temporary add/remove in the shim.
+            SafeKeychainHandle cloneKeychain = SafeTemporaryKeychainHandle.InvalidHandle;
+
+            if (keychain.IsInvalid)
+            {
+                keychain = Interop.AppleCrypto.CreateTemporaryKeychain();
+                cloneKeychain = keychain;
+            }
+
+            // Because SecIdentityRef only has private constructors we need to have the cert and the key
+            // in the same keychain.  That almost certainly means we're going to need to add this cert to a
+            // keychain, and when a cert that isn't part of a keychain gets added to a keychain then the
+            // interior pointer of "what keychain did I come from?" used by SecKeychainItemCopyKeychain gets
+            // set. That makes this function have side effects, which is not desired.
+            //
+            // It also makes reference tracking on temporary keychains broken, since the cert can
+            // DangerousRelease a handle it didn't DangerousAddRef on.  And so CopyWithPrivateKey makes
+            // a temporary keychain, then deletes it before anyone has a chance to (e.g.) export the
+            // new identity as a PKCS#12 blob.
+            //
+            // Solution: Clone the cert, like we do in Windows.
+            SafeSecCertificateHandle tempHandle;
+
+            {
+                byte[] export = RawData;
+                const bool exportable = false;
+                SafeSecIdentityHandle identityHandle;
+                tempHandle = Interop.AppleCrypto.X509ImportCertificate(
+                    export,
+                    X509ContentType.Cert,
+                    SafePasswordHandle.InvalidHandle,
+                    cloneKeychain,
+                    exportable,
+                    out identityHandle);
+
+                Debug.Assert(identityHandle.IsInvalid, "identityHandle should be IsInvalid");
+                identityHandle.Dispose();
+
+                Debug.Assert(!tempHandle.IsInvalid, "tempHandle should not be IsInvalid");
+            }
+
+            using (keychain)
+            using (tempHandle)
+            {
+                SafeSecIdentityHandle identityHandle = Interop.AppleCrypto.X509CopyWithPrivateKey(
+                    tempHandle,
+                    keyPair.PrivateKey,
+                    keychain);
+
+                AppleCertificatePal newPal = new AppleCertificatePal(identityHandle);
+                return newPal;
+            }
         }
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)

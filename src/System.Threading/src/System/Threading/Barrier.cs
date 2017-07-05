@@ -20,7 +20,6 @@ namespace System.Threading
     /// <summary>
     /// The exception that is thrown when the post-phase action of a <see cref="Barrier"/> fails.
     /// </summary>
-    [Serializable]
     public class BarrierPostPhaseException : Exception
     {
         /// <summary>
@@ -67,6 +66,7 @@ namespace System.Threading
         protected BarrierPostPhaseException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
     }
 

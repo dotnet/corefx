@@ -39,7 +39,16 @@ public class WindowsIdentityTests
             string authenticationType = "WindowsAuthentication";
             WindowsIdentity windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType);
             Assert.NotNull(windowsIdentity2);
-            Assert.True(windowsIdentity2.IsAuthenticated);
+
+            if (PlatformDetection.IsWinRT)
+            {
+                Assert.False(windowsIdentity2.IsAuthenticated);
+            }
+            else
+            {
+                Assert.True(windowsIdentity2.IsAuthenticated);
+            }
+
             Assert.Equal(authenticationType, windowsIdentity2.AuthenticationType);
             CheckDispose(windowsIdentity2);
         }
@@ -51,9 +60,7 @@ public class WindowsIdentityTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public static void CloneAndProperties(bool cloneViaSerialization)
+    public static void CloneAndProperties()
     {
         SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
         bool gotRef = false;
@@ -63,9 +70,7 @@ public class WindowsIdentityTests
             IntPtr logonToken = token.DangerousGetHandle();
             WindowsIdentity winId = new WindowsIdentity(logonToken);
 
-            WindowsIdentity cloneWinId = cloneViaSerialization ?
-                BinaryFormatterHelpers.Clone(winId) :
-                winId.Clone() as WindowsIdentity;
+            WindowsIdentity cloneWinId = winId.Clone() as WindowsIdentity;
             Assert.NotNull(cloneWinId);
 
             Assert.Equal(winId.IsSystem, cloneWinId.IsSystem);

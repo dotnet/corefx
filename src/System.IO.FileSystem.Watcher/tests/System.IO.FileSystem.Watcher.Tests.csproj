@@ -37,9 +37,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Utility\FileSystemWatcherTest.cs" />
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>

@@ -62,8 +62,8 @@ namespace System.Tests
         public static void CompareTo_ObjectNotInt_ThrowsArgumentException()
         {
             IComparable comparable = 234;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not an int
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo((long)234)); // Obj is not an int
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not an int
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo((long)234)); // Obj is not an int
         }
 
         [Theory]
@@ -475,16 +475,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             int result = 0;
-            Assert.Throws<ArgumentException>(() => int.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.TryParse("1", style, null, out result));
             Assert.Equal(default(int), result);
 
-            Assert.Throws<ArgumentException>(() => int.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => int.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.Parse("1", style, null));
         }
     }
 }

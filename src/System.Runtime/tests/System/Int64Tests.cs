@@ -63,8 +63,8 @@ namespace System.Tests
         public static void CompareTo_ObjectNotLong_ThrowsArgumentException()
         {
             IComparable comparable = (long)234;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a long
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a long
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a long
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a long
         }
 
         [Theory]
@@ -278,16 +278,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             long result = 0;
-            Assert.Throws<ArgumentException>(() => long.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => long.TryParse("1", style, null, out result));
             Assert.Equal(default(long), result);
 
-            Assert.Throws<ArgumentException>(() => long.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => long.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => long.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => long.Parse("1", style, null));
         }
     }
 }

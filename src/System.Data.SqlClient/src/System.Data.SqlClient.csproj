@@ -7,13 +7,29 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Although we have a NS configuration, we know we use API that's not currently whitelisted: just validate against OneCore -->
     <UWPCompatible>false</UWPCompatible>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS'">SR.PlatformNotSupported_DataSqlClient</GeneratePlatformNotSupportedAssemblyMessage>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.2'">4.0.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.3'">4.1.0.0</AssemblyVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.2-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.2-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'uap' ">
     <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="Microsoft\SqlServer\Server\ITypedGetters.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedGettersV3.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedSetters.cs" />
@@ -38,8 +54,15 @@
     <Compile Include="System\Data\OperationAbortedException.cs" />
     <Compile Include="System\Data\SqlClient\SqlDbColumn.cs" />
     <Compile Include="System\Data\Common\ActivityCorrelator.cs" />
-    <Compile Include="System\Data\Common\AdapterUtil.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
+      <Link>System\Data\Common\AdapterUtil.cs</Link>
+    </Compile>
+    <Compile Include="System\Data\Common\AdapterUtil.SqlClient.cs" />
+    <Compile Include="System\Data\Common\SR.cs" />
     <Compile Include="System\Data\Common\DbConnectionOptions.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionOptions.Common.cs">
+      <Link>System\Data\Common\DbConnectionOptions.Common.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionPoolKey.cs">
       <Link>System\Data\Common\DbConnectionPoolKey.cs</Link>
     </Compile>
@@ -65,9 +88,11 @@
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
+    <Compile Include="System\Data\ProviderBase\DbMetaDataFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbReferenceCollection.cs" />
     <Compile Include="System\Data\ProviderBase\TimeoutTimer.cs" />
     <Compile Include="System\Data\Sql\SqlMetaData.cs" />
+    <Compile Include="System\Data\Sql\SqlNotificationRequest.cs" />
     <Compile Include="System\Data\SqlClient\ApplicationIntent.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.cs" />
     <Compile Include="System\Data\SqlClient\ParameterPeekAheadValue.cs" />
@@ -82,7 +107,10 @@
     <Compile Include="System\Data\SqlClient\SqlCachedBuffer.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientDiagnosticListenerExtensions.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientFactory.cs" />
+    <Compile Include="System\Data\SqlClient\SqlClientMetaDataCollectionNames.cs" />
     <Compile Include="System\Data\SqlClient\SqlCommand.cs" />
+    <Compile Include="System\Data\SqlClient\SqlCommandBuilder.cs" />
+    <Compile Include="System\Data\SqlClient\SqlCommandSet.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnection.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionFactory.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionHelper.cs" />
@@ -94,6 +122,9 @@
     <Compile Include="System\Data\SqlClient\SqlConnectionTimeoutErrorInternal.cs" />
     <Compile Include="System\Data\SqlClient\SqlDataAdapter.cs" />
     <Compile Include="System\Data\SqlClient\SqlDataReader.cs" />
+    <Compile Include="System\Data\SqlClient\SqlDependency.cs" />
+    <Compile Include="System\Data\SqlClient\SqlDependencyListener.cs" />
+    <Compile Include="System\Data\SqlClient\SqlDependencyUtils.cs" />
     <Compile Include="System\Data\SqlClient\SqlEnums.cs" />
     <Compile Include="System\Data\SqlClient\SqlError.cs" />
     <Compile Include="System\Data\SqlClient\SqlErrorCollection.cs" />
@@ -103,6 +134,12 @@
     <Compile Include="System\Data\SqlClient\SqlInternalConnection.cs" />
     <Compile Include="System\Data\SqlClient\SqlInternalConnectionTds.cs" />
     <Compile Include="System\Data\SqlClient\sqlinternaltransaction.cs" />
+    <Compile Include="System\Data\SqlClient\SqlMetadataFactory.cs" />
+    <Compile Include="System\Data\SqlClient\SqlNotificationEventArgs.cs" />
+    <Compile Include="System\Data\SqlClient\SqlNotificationInfo.cs" />
+    <Compile Include="System\Data\SqlClient\SqlNotificationSource.cs" />
+    <Compile Include="System\Data\SqlClient\SqlNotificationType.cs" />
+    <Compile Include="System\Data\SqlClient\OnChangedEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameter.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollection.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollectionHelper.cs" />
@@ -121,6 +158,7 @@
     <Compile Include="System\Data\SqlClient\TdsEnums.cs" />
     <Compile Include="System\Data\SqlClient\TdsParameterSetter.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.cs" />
+    <Compile Include="System\Data\SqlClient\TdsParser.RegisterEncoding.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserHelperClasses.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserSessionPool.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObject.cs" />
@@ -152,12 +190,18 @@
     <Compile Include="System\Data\SqlClient\SNI\SSRP.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectManaged.cs" />
   </ItemGroup>
+  <!-- Manage the SNI toggle for Windows netstandard and UWP -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' == 'true'">
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Managed.cs" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Windows.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserSafeHandles.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectNative.cs" />
-    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.Windows.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.Windows.cs" />
     <Compile Include="System\Data\SqlClient\SNI\LocalDB.Windows.cs" />
@@ -268,7 +312,7 @@
     </Compile>
   </ItemGroup>
   <!-- Common (Windows and Unix) dependencies for MANAGED_SNI build -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsPal.cs">
       <Link>Common\System\Net\ContextFlagsPal.cs</Link>
     </Compile>
@@ -300,7 +344,7 @@
       <Link>Common\System\Net\NegotiationInfoClass.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Unix.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Unix.cs">
@@ -336,7 +380,7 @@
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsAdapterPal.Unix.cs">
       <Link>Common\System\Net\ContextFlagsAdapterPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Unix.cs" />
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Managed.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.Unix.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.Unix.cs" />
     <Compile Include="System\Data\SqlClient\SNI\LocalDB.Unix.cs" />
@@ -344,19 +388,26 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Reference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+    <Reference Condition="'$(TargetGroup)' != 'netstandard'" Include="System.Data.Common" />
+    <Reference Include="System.Globalization" />
+    <Reference Include="System.IO" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Xml.ReaderWriter" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
+    <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.ComponentModel.TypeConverter" />
-    <Reference Include="System.Data.Common" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Linq" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
@@ -367,11 +418,9 @@
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Threading.Timer" />
-    <Reference Include="System.Xml.ReaderWriter" />
     <Reference Include="System.IO.Pipes" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Net.Sockets" />
@@ -379,6 +428,19 @@
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.NameResolution" />
     <Reference Include="System.Diagnostics.Tracing" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(OSGroup)' != 'AnyOS' AND '$(TargetGroup)' == 'uap'">
+    <Reference Include="System.Transactions.Local" /> 
+    <Reference Include="System.Collections.NonGeneric" /> 
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\System.Data.SqlClient.SqlMetaData.xml">
+      <LogicalName>System.Data.SqlClient.SqlMetaData.xml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <Import Project=".\GenerateThisAssemblyCs.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />

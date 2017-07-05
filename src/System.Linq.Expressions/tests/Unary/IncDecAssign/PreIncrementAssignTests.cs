@@ -178,7 +178,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(string));
             MethodInfo method = typeof(object).GetTypeInfo().GetDeclaredMethod("ReferenceEquals");
-            Assert.Throws<ArgumentException>("method", () => Expression.PreIncrementAssign(variable, method));
+            AssertExtensions.Throws<ArgumentException>("method", () => Expression.PreIncrementAssign(variable, method));
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(int));
             MethodInfo method = typeof(IncDecAssignTests).GetTypeInfo().GetDeclaredMethod("GetString");
-            Assert.Throws<ArgumentException>(null, () => Expression.PreIncrementAssign(variable, method));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.PreIncrementAssign(variable, method));
         }
 
         [Theory]
@@ -255,20 +255,20 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullOperand()
         {
-            Assert.Throws<ArgumentNullException>("expression", () => Expression.PreIncrementAssign(null));
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => Expression.PreIncrementAssign(null));
         }
 
         [Fact]
         public void UnwritableOperand()
         {
-            Assert.Throws<ArgumentException>("expression", () => Expression.PreIncrementAssign(Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("expression", () => Expression.PreIncrementAssign(Expression.Constant(1)));
         }
 
         [Fact]
         public void UnreadableOperand()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("expression", () => Expression.PreIncrementAssign(value));
+            AssertExtensions.Throws<ArgumentException>("expression", () => Expression.PreIncrementAssign(value));
         }
 
         [Fact]

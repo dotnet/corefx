@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -55,21 +55,21 @@ namespace System.Reflection.Emit.Tests
         public void DefineGenericParameters_NullNames_ThrowsArgumentNullException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentNullException>("names", () => type.DefineGenericParameters(null));
+            AssertExtensions.Throws<ArgumentNullException>("names", () => type.DefineGenericParameters(null));
         }
 
         [Fact]
         public void DefineGenericParameters_EmptyNames_ThrowsArgumentException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentException>(null, () => type.DefineGenericParameters(new string[0]));
+            AssertExtensions.Throws<ArgumentException>(null, () => type.DefineGenericParameters(new string[0]));
         }
 
         [Fact]
         public void DefineGenericParameters_NullName_ThrowsArgumentNullException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentNullException>("names", () => type.DefineGenericParameters(new string[] { null }));
+            AssertExtensions.Throws<ArgumentNullException>("names", () => type.DefineGenericParameters(new string[] { null }));
         }
 
         [Fact]

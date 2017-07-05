@@ -92,9 +92,11 @@ namespace System
 
         public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
         
-        public static ReadOnlySpan<char> AsSpan(this string text) { throw null; }
+        public static ReadOnlySpan<char> AsReadOnlySpan(this string text) { throw null; }
         public static Span<T> AsSpan<T>(this T[] array) { throw null; }
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment) { throw null; }
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> arraySegment) { throw null; }
 
         public static void CopyTo<T>(this T[] array, Span<T> destination) { throw null; }
 

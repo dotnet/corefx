@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,13 +11,13 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullTypeList()
         {
-            Assert.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(default(Type[])));
+            AssertExtensions.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(default(Type[])));
         }
 
         [Fact]
         public void NullInTypeList()
         {
-            Assert.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(typeof(int), null));
+            AssertExtensions.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(typeof(int), null));
         }
 
         [Theory, MemberData(nameof(ValidTypeArgs), true)]
@@ -66,7 +66,8 @@ namespace System.Linq.Expressions.Tests
         [MemberData(nameof(VoidTypeArgs), true)]
         public void UnsuccessfulGetFuncType(Type[] typeArgs)
         {
-            Assert.Throws<ArgumentException>(() => Expression.GetFuncType(typeArgs));
+            string paramName = typeArgs.Any(t => t == typeof(void)) || typeArgs.Count(t => t.IsPointer) == 1 ? null : "typeArgs";
+            AssertExtensions.Throws<ArgumentException>(paramName, () => Expression.GetFuncType(typeArgs));
         }
 
         [Theory]

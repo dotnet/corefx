@@ -10,6 +10,7 @@ namespace System.ComponentModel.Tests
     public class MemberDescriptorTests
     {
         [Fact]
+        [ActiveIssue("dotnet/corefx #18201", TargetFrameworkMonikers.NetFramework)]
         public void CopiedMemberDescriptorEqualsItsSource()
         {
             string description = "MockCategory";
@@ -35,15 +36,15 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void MemberDescriptorFromName()
         {
-            Assert.Throws<ArgumentException>(() => new MockMemberDescriptor((string)null));
-            Assert.Throws<ArgumentException>(() => new MockMemberDescriptor(""));
+            AssertExtensions.Throws<ArgumentException>(null, () => new MockMemberDescriptor((string)null));
+            AssertExtensions.Throws<ArgumentException>(null, () => new MockMemberDescriptor(""));
         }
 
         [Fact]
         public void MemberDescriptorFromNameAndAttributes()
         {
-            Assert.Throws<ArgumentException>(() => new MockMemberDescriptor((string)null, new Attribute[0]));
-            Assert.Throws<ArgumentException>(() => new MockMemberDescriptor("", new Attribute[0]));
+            AssertExtensions.Throws<ArgumentException>(null, () => new MockMemberDescriptor((string)null, new Attribute[0]));
+            AssertExtensions.Throws<ArgumentException>(null, () => new MockMemberDescriptor("", new Attribute[0]));
 
             var name = nameof(MemberDescriptorFromNameAndAttributes);
             var attributes = new Attribute[] { new MockAttribute1(), new MockAttribute2() };

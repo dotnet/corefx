@@ -23,12 +23,13 @@ namespace System.Collections
     [DebuggerTypeProxy(typeof(System.Collections.Stack.StackDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Stack : ICollection, ICloneable
     {
-        private Object[] _array;     // Storage for stack elements
+        private Object[] _array; // Storage for stack elements. Do not rename (binary serialization)
         [ContractPublicPropertyName("Count")]
-        private int _size;           // Number of items in the stack.
-        private int _version;        // Used to keep enumerator in sync w/ collection.
+        private int _size; // Number of items in the stack. Do not rename (binary serialization)
+        private int _version; // Used to keep enumerator in sync w/ collection. Do not rename (binary serialization)
         [NonSerialized]
         private Object _syncRoot;
 
@@ -241,7 +242,6 @@ namespace System.Collections
             return objArray;
         }
 
-        [Serializable]
         private class SyncStack : Stack
         {
             private Stack _s;
@@ -352,7 +352,6 @@ namespace System.Collections
             }
         }
 
-        [Serializable]
         private class StackEnumerator : IEnumerator, ICloneable
         {
             private Stack _stack;

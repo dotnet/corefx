@@ -1747,7 +1747,10 @@ namespace System.Xml.Tests
             }
             catch (System.Xml.Xsl.XsltCompileException e)
             {
-                CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                if (PlatformDetection.IsFullFramework)
+                    CheckExpectedError(e.InnerException, "system.data.sqlxml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                else
+                    CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
                 return;
             }
             _output.WriteLine("No exception thrown for a loading a closed reader!");
@@ -1847,7 +1850,11 @@ namespace System.Xml.Tests
             }
             catch (System.Xml.Xsl.XsltCompileException e)
             {
-                CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
+
+                if (PlatformDetection.IsFullFramework)
+                    CheckExpectedError(e.InnerException, "system.data.sqlxml", "Xslt_WrongStylesheetElement", new string[] { "" });
+                else
+                    CheckExpectedError(e.InnerException, "system.xml", "Xslt_WrongStylesheetElement", new string[] { "" });
             }
             finally
             {
@@ -2752,7 +2759,7 @@ namespace System.Xml.Tests
             {
                 if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
                 {
-                    CallTransform(xslt, szFullFilename, "out.xml", null);
+                    CallTransform(xslt, szFullFilename, _strOutFile, null);
                     VerifyResult(expected);
                     return;
                 }
@@ -2779,7 +2786,7 @@ namespace System.Xml.Tests
 
             if (LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1)
             {
-                CallTransform(xslt, szFullFilename, "out.xml", null);
+                CallTransform(xslt, szFullFilename, _strOutFile, null);
                 VerifyResult(expected);
                 return;
             }
@@ -2913,7 +2920,7 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
 
             if ((LoadXSL("Bug109644.xsl", inputType, readerType) == 1) && (Transform("foo.xml", transformType, docType) == 1))
             {
-                Assert.Equal(expected, File.ReadAllText("out.xml"));
+                Assert.Equal(expected, File.ReadAllText(_strOutFile));
                 return;
             }
             else

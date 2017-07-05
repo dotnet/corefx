@@ -15,17 +15,17 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void Ctor_NullOrEmptySubType_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new MultipartContent(null));
-            Assert.Throws<ArgumentException>(() => new MultipartContent(""));
-            Assert.Throws<ArgumentException>(() => new MultipartContent(" "));
+            AssertExtensions.Throws<ArgumentException>("subtype", () => new MultipartContent(null));
+            AssertExtensions.Throws<ArgumentException>("subtype", () => new MultipartContent(""));
+            AssertExtensions.Throws<ArgumentException>("subtype", () => new MultipartContent(" "));
         }
 
         [Fact]
         public void Ctor_NullOrEmptyBoundary_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", null));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", ""));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", " "));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", null));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", ""));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", " "));
         }
 
         [Fact]
@@ -38,23 +38,23 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void Ctor_BadBoundary_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "EndsInSpace "));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "EndsInSpace "));
 
             // Invalid chars CTLs HT < > @ ; \ " [ ] { } ! # $ % & ^ ~ `
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "a\t"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "<"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "@"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "["));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "{"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "!"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "#"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "$"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "%"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "&"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "^"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "~"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "`"));
-            Assert.Throws<ArgumentException>(() => new MultipartContent("Some", "\"quoted\""));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "a\t"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "<"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "@"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "["));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "{"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "!"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "#"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "$"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "%"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "&"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "^"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "~"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "`"));
+            AssertExtensions.Throws<ArgumentException>("boundary", () => new MultipartContent("Some", "\"quoted\""));
         }
 
         [Fact]
@@ -304,19 +304,19 @@ namespace System.Net.Http.Functional.Tests
                 Assert.False(s.CanWrite);
                 Assert.True(s.CanSeek);
 
-                Assert.Throws<ArgumentNullException>("buffer", () => s.Read(null, 0, 0));
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => s.Read(new byte[1], -1, 0));
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Read(new byte[1], 0, -1));
-                Assert.Throws<ArgumentException>("buffer", () => s.Read(new byte[1], 1, 1));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => s.Read(null, 0, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => s.Read(new byte[1], -1, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Read(new byte[1], 0, -1));
+                AssertExtensions.Throws<ArgumentException>("buffer", () => s.Read(new byte[1], 1, 1));
 
-                Assert.Throws<ArgumentNullException>("buffer", () => { s.ReadAsync(null, 0, 0); });
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => { s.ReadAsync(new byte[1], -1, 0); });
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => { s.ReadAsync(new byte[1], 0, -1); });
-                Assert.Throws<ArgumentException>("buffer", () => { s.ReadAsync(new byte[1], 1, 1); });
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => { s.ReadAsync(null, 0, 0); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { s.ReadAsync(new byte[1], -1, 0); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => { s.ReadAsync(new byte[1], 0, -1); });
+                AssertExtensions.Throws<ArgumentException>("buffer", () => { s.ReadAsync(new byte[1], 1, 1); });
 
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => s.Position = -1);
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => s.Seek(-1, SeekOrigin.Begin));
-                Assert.Throws<ArgumentOutOfRangeException>("origin", () => s.Seek(0, (SeekOrigin)42));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => s.Position = -1);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => s.Seek(-1, SeekOrigin.Begin));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("origin", () => s.Seek(0, (SeekOrigin)42));
 
                 Assert.Throws<NotSupportedException>(() => s.Write(new byte[1], 0, 0));
                 Assert.Throws<NotSupportedException>(() => { s.WriteAsync(new byte[1], 0, 0); });

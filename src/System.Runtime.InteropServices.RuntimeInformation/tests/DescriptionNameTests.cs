@@ -10,7 +10,23 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
     public class DescriptionNameTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap)]
+        public void DumpRuntimeInformationToConsole()
+        {
+            // Not really a test, but useful to dump to the log to
+            // sanity check that the test run or CI job
+            // was actually run on the OS that it claims to be on
+            string dvs = PlatformDetection.GetDistroVersionString();
+            string osd = RuntimeInformation.OSDescription.Trim();
+            string osv = Environment.OSVersion.ToString();
+            string osa = RuntimeInformation.OSArchitecture.ToString();
+            string pra = RuntimeInformation.ProcessArchitecture.ToString();
+            string frd = RuntimeInformation.FrameworkDescription.Trim();
+
+            Console.WriteLine($@"{dvs} OS={osd} OSVer={osv} OSArch={osa} Arch={pra} Framework={frd}");
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp)]
         public void VerifyRuntimeDebugNameOnNetCoreApp()
         {
             AssemblyFileVersionAttribute attr = (AssemblyFileVersionAttribute)(typeof(object).GetTypeInfo().Assembly.GetCustomAttribute(typeof(AssemblyFileVersionAttribute)));
@@ -20,7 +36,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void VerifyRuntimeDebugNameOnNetFramework()
         {
             AssemblyFileVersionAttribute attr = (AssemblyFileVersionAttribute)(typeof(object).GetTypeInfo().Assembly.GetCustomAttribute(typeof(AssemblyFileVersionAttribute)));
@@ -34,7 +50,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         public void VerifyRuntimeDebugNameOnNetCoreUwp()
         {
             AssemblyFileVersionAttribute attr = (AssemblyFileVersionAttribute)(typeof(object).GetTypeInfo().Assembly.GetCustomAttribute(typeof(AssemblyFileVersionAttribute)));
-            string expected = string.Format(".NET Native {0}", attr.Version);
+            string expected = string.Format(PlatformDetection.IsNetNative ? ".NET Native {0}" : ".NET Core {0}", attr.Version);
             Assert.Equal(expected, RuntimeInformation.FrameworkDescription);
             Assert.Same(RuntimeInformation.FrameworkDescription, RuntimeInformation.FrameworkDescription);
         }

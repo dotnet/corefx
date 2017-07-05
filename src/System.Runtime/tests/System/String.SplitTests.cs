@@ -15,13 +15,13 @@ namespace System.Tests
             const int count = -1;
             const StringSplitOptions options = StringSplitOptions.None;
 
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(',', count));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(',', count, options));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { ',' }, count));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { ',' }, count, options));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(",", count));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(",", count, options));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { "," }, count, options));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(',', count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(',', count, options));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { ',' }, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { ',' }, count, options));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(",", count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(",", count, options));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => value.Split(new[] { "," }, count, options));
         }
 
         [Fact]
@@ -32,22 +32,22 @@ namespace System.Tests
             const StringSplitOptions optionsTooLow = StringSplitOptions.None - 1;
             const StringSplitOptions optionsTooHigh = StringSplitOptions.RemoveEmptyEntries + 1;
 
-            Assert.Throws<ArgumentException>(() => value.Split(',', optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(',', optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(',', count, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(',', count, optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { ',' }, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { ',' }, optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { ',' }, count, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { ',' }, count, optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(",", optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(",", optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(",", count, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(",", count, optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { "," }, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { "," }, optionsTooHigh));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { "," }, count, optionsTooLow));
-            Assert.Throws<ArgumentException>(() => value.Split(new[] { "," }, count, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(',', optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(',', optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(',', count, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(',', count, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { ',' }, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { ',' }, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { ',' }, count, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { ',' }, count, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(",", optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(",", optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(",", count, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(",", count, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { "," }, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { "," }, optionsTooHigh));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { "," }, count, optionsTooLow));
+            AssertExtensions.Throws<ArgumentException>(null, () => value.Split(new[] { "," }, count, optionsTooHigh));
         }
 
         [Fact]

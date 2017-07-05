@@ -629,17 +629,18 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [ActiveIssue("TFS 444333 - Should ExceptionMiniaturizer exempt CultureNotFoundException.InvalidCultureName from being optimized away?", TargetFrameworkMonikers.UapAot)]
         public void CultureNotFoundExceptionTest()
         {
-            Assert.Throws<CultureNotFoundException>("name", () => new CultureInfo("!@#$%^&*()"));
-            Assert.Throws<CultureNotFoundException>("name", () => new CultureInfo("This is invalid culture"));
-            Assert.Throws<CultureNotFoundException>("name", () => new CultureInfo("longCulture" + new string('a', 100)));
-            Assert.Throws<CultureNotFoundException>("culture", () => new CultureInfo(0x1000));
+            AssertExtensions.Throws<CultureNotFoundException>("name", () => new CultureInfo("!@#$%^&*()"));
+            AssertExtensions.Throws<CultureNotFoundException>("name", () => new CultureInfo("This is invalid culture"));
+            AssertExtensions.Throws<CultureNotFoundException>("name", () => new CultureInfo("longCulture" + new string('a', 100)));
+            AssertExtensions.Throws<CultureNotFoundException>("culture", () => new CultureInfo(0x1000));
 
-            CultureNotFoundException e = Assert.Throws<CultureNotFoundException>("name", () => new CultureInfo("This is invalid culture"));
+            CultureNotFoundException e = AssertExtensions.Throws<CultureNotFoundException>("name", () => new CultureInfo("This is invalid culture"));
             Assert.Equal("This is invalid culture", e.InvalidCultureName);
 
-            e = Assert.Throws<CultureNotFoundException>("culture", () => new CultureInfo(0x1000));
+            e = AssertExtensions.Throws<CultureNotFoundException>("culture", () => new CultureInfo(0x1000));
             Assert.Equal(0x1000, e.InvalidCultureId);
         }
     }

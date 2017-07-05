@@ -40,7 +40,7 @@ namespace System.Diagnostics.Tests
                 FileName = linkPath,
                 FilePrivatePart = 1,
                 FileVersion = "4.3.2.1",
-                InternalName = Path.GetFileName(linkPath),
+                InternalName = OriginalTestAssemblyFileName,
                 IsDebug = false,
                 IsPatched = false,
                 IsPrivateBuild = false,
@@ -50,7 +50,7 @@ namespace System.Diagnostics.Tests
                 Language2 = null,
                 LegalCopyright = "Copyright, you betcha!",
                 LegalTrademarks = "TM",
-                OriginalFilename = Path.GetFileName(linkPath),
+                OriginalFilename = OriginalTestAssemblyFileName,
                 PrivateBuild = "",
                 ProductBuildPart = 3,
                 ProductMajorPart = 1,
@@ -66,7 +66,9 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Symlink_InvalidFile_Throws()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), TestAssemblyFileName);
+            string sourcePath = Path.Combine(Directory.GetCurrentDirectory(), TestAssemblyFileName);
+            string filePath = GetTestFilePath();
+            File.Copy(sourcePath, filePath);
             string linkPath = GetTestFilePath();
             Assert.Equal(0, symlink(filePath, linkPath));
             File.Delete(filePath);

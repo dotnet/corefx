@@ -66,7 +66,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Gets the return type of the lambda expression.
         /// </summary>
-        public Type ReturnType => Type.GetMethod("Invoke").ReturnType;
+        public Type ReturnType => Type.GetInvokeMethod().ReturnType;
 
         /// <summary>
         /// Gets the value that indicates if the lambda expression will be compiled with
@@ -891,13 +891,13 @@ namespace System.Linq.Expressions
                 throw Error.LambdaTypeMustBeDerivedFromSystemDelegate(paramName);
             }
 
-            TypeUtils.ValidateType(delegateType, nameof(delegateType));
+            TypeUtils.ValidateType(delegateType, nameof(delegateType), allowByRef: true, allowPointer: true);
 
             MethodInfo mi;
             CacheDict<Type, MethodInfo> ldc = s_lambdaDelegateCache;
             if (!ldc.TryGetValue(delegateType, out mi))
             {
-                mi = delegateType.GetMethod("Invoke");
+                mi = delegateType.GetInvokeMethod();
                 if (delegateType.CanCache())
                 {
                     ldc[delegateType] = mi;

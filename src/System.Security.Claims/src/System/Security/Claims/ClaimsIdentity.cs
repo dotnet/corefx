@@ -13,7 +13,6 @@ namespace System.Security.Claims
     /// <summary>
     /// An Identity that is represented by a set of claims.
     /// </summary>
-    [Serializable]
     public class ClaimsIdentity : IIdentity
     {
         private const string PreFix = "System.Security.ClaimsIdentity.";
@@ -173,7 +172,7 @@ namespace System.Security.Claims
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
 
-            _authenticationType = !string.IsNullOrWhiteSpace(authenticationType) ? authenticationType : (identity != null ? identity.AuthenticationType : null);
+            _authenticationType = (identity != null && string.IsNullOrEmpty(authenticationType)) ? identity.AuthenticationType : authenticationType;
             _nameClaimType = !string.IsNullOrEmpty(nameType) ? nameType : (claimsIdentity != null ? claimsIdentity._nameClaimType : DefaultNameClaimType);
             _roleClaimType = !string.IsNullOrEmpty(roleType) ? roleType : (claimsIdentity != null ? claimsIdentity._roleClaimType : DefaultRoleClaimType);
 
@@ -259,12 +258,7 @@ namespace System.Security.Claims
 
         protected ClaimsIdentity(SerializationInfo info, StreamingContext context)
         {
-            if (null == info)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            Deserialize(info, context, true);
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -1058,31 +1052,7 @@ namespace System.Security.Claims
         /// <exception cref="ArgumentNullException">Thrown if the info parameter is null.</exception>
         protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (null == info)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            const string Version = "1.0";
-            info.AddValue(VersionKey, Version);
-            if (!string.IsNullOrEmpty(_authenticationType))
-            {
-                info.AddValue(AuthenticationTypeKey, _authenticationType);
-            }
-
-            info.AddValue(NameClaimTypeKey, _nameClaimType);
-            info.AddValue(RoleClaimTypeKey, _roleClaimType);
-
-            if (!string.IsNullOrEmpty(_label))
-            {
-                info.AddValue(LabelKey, _label);
-            }
-
-            // actor
-            if (_actor != null || _bootstrapContext != null || (_instanceClaims != null && _instanceClaims.Count > 0))
-            {
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_Serialization); // BinaryFormatter needed
-            }
+            throw new PlatformNotSupportedException();
         }
 
         private void Deserialize(SerializationInfo info, StreamingContext context, bool useContext)

@@ -59,8 +59,8 @@ namespace System.Tests
         public static void CompareTo_ObjectNotUInt_ThrowsArgumentException()
         {
             IComparable comparable = (uint)234;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a uint
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a uint
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a uint
+            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a uint
         }
 
         [Theory]
@@ -268,16 +268,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             uint result = 0;
-            Assert.Throws<ArgumentException>(() => uint.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => uint.TryParse("1", style, null, out result));
             Assert.Equal(default(uint), result);
 
-            Assert.Throws<ArgumentException>(() => uint.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => uint.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => uint.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => uint.Parse("1", style, null));
         }
     }
 }

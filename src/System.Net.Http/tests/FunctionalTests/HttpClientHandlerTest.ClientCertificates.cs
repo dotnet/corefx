@@ -14,6 +14,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
     public class HttpClientHandler_ClientCertificates_Test
     {
         [Fact]
@@ -32,7 +33,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var handler = new HttpClientHandler())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => handler.ClientCertificateOptions = option);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.ClientCertificateOptions = option);
             }
         }
 

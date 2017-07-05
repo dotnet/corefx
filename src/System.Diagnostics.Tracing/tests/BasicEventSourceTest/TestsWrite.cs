@@ -39,6 +39,8 @@ namespace BasicEventSourceTests
         /// Tests the EventListener code path
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #19455", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20744, TargetFrameworkMonikers.UapAot)]
         public void Test_Write_T_EventListener()
         {
             using (var listener = new EventListenerListener())
@@ -52,6 +54,8 @@ namespace BasicEventSourceTests
         /// Tests the EventListener code path using events instead of virtual callbacks.
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #19455", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20744, TargetFrameworkMonikers.UapAot)]
         public void Test_Write_T_EventListener_UseEvents()
         {
             Test_Write_T(new EventListenerListener(true));
@@ -407,6 +411,8 @@ namespace BasicEventSourceTests
         /// events MUST use SelfDescribing serialization.  
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20744, TargetFrameworkMonikers.UapAot)]
         public void Test_Write_T_In_Manifest_Serialization()
         {
             using (var eventListener = new EventListenerListener())

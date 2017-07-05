@@ -132,16 +132,16 @@ namespace System.Collections.ObjectModel.Tests
             foreach (var index in iArrLargeValues)
             {
                 string[] aCopy = new string[anArray.Length];
-                Assert.Throws<ArgumentException>(() => readOnlyCol.CopyTo(aCopy, index));
+                AssertExtensions.Throws<ArgumentException>("destinationArray", null, () => readOnlyCol.CopyTo(aCopy, index));
             }
 
             Assert.Throws<ArgumentNullException>(() => readOnlyCol.CopyTo(null, 1));
 
             string[] copy = new string[anArray.Length - 1];
-            Assert.Throws<ArgumentException>(() => readOnlyCol.CopyTo(copy, 0));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => readOnlyCol.CopyTo(copy, 0));
 
             copy = new string[0];
-            Assert.Throws<ArgumentException>(() => readOnlyCol.CopyTo(copy, 0));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => readOnlyCol.CopyTo(copy, 0));
         }
 
         /// <summary>
@@ -198,7 +198,8 @@ namespace System.Collections.ObjectModel.Tests
 
         [Fact]
         // skip the test on desktop as "new ObservableCollection<int>()" returns 0 length collection
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        // skip the test on UapAot as the requires Reflection on internal framework types.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttribute_Tests()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyObservableCollection<int>(new ObservableCollection<int>()));

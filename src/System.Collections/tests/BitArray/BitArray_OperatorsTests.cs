@@ -156,10 +156,10 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.And(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.And(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.And(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.And(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.And(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.And(null));
         }
 
         [Fact]
@@ -169,10 +169,10 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.Or(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.Or(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.Or(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.Or(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Or(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.Or(null));
         }
 
         [Fact]
@@ -182,10 +182,10 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.Xor(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.Xor(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.Xor(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.Xor(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Xor(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.Xor(null));
         }
     }
 }

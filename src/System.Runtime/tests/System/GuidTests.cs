@@ -38,7 +38,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_NullByteArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("b", () => new Guid((byte[])null));
+            AssertExtensions.Throws<ArgumentNullException>("b", () => new Guid((byte[])null));
         }
 
         [Theory]
@@ -82,7 +82,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Short_Short_ByteArray_NullByteArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Guid(0, 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Guid(0, 0, 0, null));
         }
 
         [Fact]
@@ -161,7 +161,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "The coreclr fixed a bug where Guid.TryParse throws a format or overflow exception (https://github.com/dotnet/corefx/issues/6316)")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where Guid.TryParse throws a format or overflow exception (https://github.com/dotnet/corefx/issues/6316)")]
         [MemberData(nameof(GuidStrings_TryParseThrows_TestData))]
         public static void Parse_Invalid_Netfx(string input, Type exceptionType)
         {

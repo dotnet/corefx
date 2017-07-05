@@ -30,6 +30,7 @@ using System.IO;
 
 using System.Xml;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using System.Globalization;
 
 namespace System.Data.Tests
@@ -2857,7 +2858,7 @@ namespace System.Data.Tests
             Assert.Equal(2, ds.Relations.Count);
 
             // Checking Relations - get by name case sensetive,ArgumentException
-            Assert.Throws<ArgumentException>(() => ds.Relations["PARENT-CHILD"]);
+            AssertExtensions.Throws<ArgumentException>(null, () => ds.Relations["PARENT-CHILD"]);
         }
 
         [Fact]
@@ -2961,7 +2962,7 @@ namespace System.Data.Tests
             Assert.Equal(dt4, ds.Tables[dt4.TableName]);
 
             // Checking get table by name with diferent case, ArgumentException
-            Assert.Throws<ArgumentException>(() => ds.Tables[dt4.TableName.ToLower()]);
+            AssertExtensions.Throws<ArgumentException>(null, () => ds.Tables[dt4.TableName.ToLower()]);
         }
 
         [Fact]
@@ -3607,11 +3608,7 @@ namespace System.Data.Tests
 
             AssertDataTableValues(dt);
 
-            MemoryStream mstm = new MemoryStream();
-            BinaryFormatter bfmt = new BinaryFormatter();
-            bfmt.Serialize(mstm, dt);
-            MemoryStream mstm2 = new MemoryStream(mstm.ToArray());
-            DataTable vdt = (DataTable)bfmt.Deserialize(mstm2);
+            DataTable vdt = BinaryFormatterHelpers.Clone(dt);
             AssertDataTableValues(vdt);
         }
     }

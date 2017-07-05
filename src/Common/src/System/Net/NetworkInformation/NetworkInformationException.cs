@@ -14,7 +14,6 @@ namespace System.Net.NetworkInformation
     ///       Provides NetworkInformation exceptions to the application.
     ///    </para>
     /// </devdoc>
-    [Serializable]
     public class NetworkInformationException : Win32Exception
     {
         /// <devdoc>
@@ -37,6 +36,7 @@ namespace System.Net.NetworkInformation
 
         protected NetworkInformationException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
         internal NetworkInformationException(SocketError socketError) : base((int)socketError)

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Xunit;
 
 namespace System.Transactions.Tests
@@ -13,8 +14,8 @@ namespace System.Transactions.Tests
         [Fact]
         public void TransactionScopeWithInvalidTimeSpanThrows()
         {
-            Assert.Throws<ArgumentNullException>("transactionToUse", () => new TransactionScope(null, TimeSpan.FromSeconds(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("scopeTimeout", () => new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(-1)));
+            AssertExtensions.Throws<ArgumentNullException>("transactionToUse", () => new TransactionScope(null, TimeSpan.FromSeconds(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeTimeout", () => new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(-1)));
         }
 
         [Fact]
@@ -998,7 +999,7 @@ namespace System.Transactions.Tests
         [Fact]
         public void ExplicitTransaction12()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () =>
             {
                 CommittableTransaction ct = new CommittableTransaction();
 

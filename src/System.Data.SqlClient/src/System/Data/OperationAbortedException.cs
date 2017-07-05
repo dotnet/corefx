@@ -5,16 +5,11 @@ using System.Runtime.Serialization;
 
 namespace System.Data
 {
-    [Serializable]
     public sealed class OperationAbortedException : SystemException
     {
         private OperationAbortedException(string message, Exception innerException) : base(message, innerException)
         {
             HResult = unchecked((int)0x80131936);
-        }
-
-        private OperationAbortedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
         }
 
         internal static OperationAbortedException Aborted(Exception inner)

@@ -75,7 +75,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryObjectNotFoundException : Exception, ISerializable
     {
         private Type _objectType;
@@ -93,7 +92,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectoryObjectNotFoundException() : base() { }
 
-        protected ActiveDirectoryObjectNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ActiveDirectoryObjectNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public Type Type
         {
@@ -118,7 +120,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryOperationException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -139,7 +140,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectoryOperationException() : base(SR.DSUnknownFailure) { }
 
-        protected ActiveDirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ActiveDirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public int ErrorCode
         {
@@ -148,15 +152,13 @@ namespace System.DirectoryServices.ActiveDirectory
                 return _errorCode;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryServerDownException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -180,7 +182,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectoryServerDownException() : base() { }
 
-        protected ActiveDirectoryServerDownException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ActiveDirectoryServerDownException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public int ErrorCode
         {
@@ -210,15 +215,13 @@ namespace System.DirectoryServices.ActiveDirectory
                     return s;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
-    [Serializable]
     public class ActiveDirectoryObjectExistsException : Exception
     {
         public ActiveDirectoryObjectExistsException(string message, Exception inner) : base(message, inner) { }
@@ -227,10 +230,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectoryObjectExistsException() : base() { }
 
-        protected ActiveDirectoryObjectExistsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ActiveDirectoryObjectExistsException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 
-    [Serializable]
     public class SyncFromAllServersOperationException : ActiveDirectoryOperationException, ISerializable
     {
         private SyncFromAllServersErrorInformation[] _errors = null;
@@ -246,7 +251,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public SyncFromAllServersOperationException() : base(SR.DSSyncAllFailure) { }
 
-        protected SyncFromAllServersOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected SyncFromAllServersOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public SyncFromAllServersErrorInformation[] ErrorInformation
         {
@@ -262,15 +270,13 @@ namespace System.DirectoryServices.ActiveDirectory
                 return tempError;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
-    [Serializable]
     public class ForestTrustCollisionException : ActiveDirectoryOperationException, ISerializable
     {
         private ForestTrustRelationshipCollisionCollection _collisions = new ForestTrustRelationshipCollisionCollection();
@@ -286,7 +292,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ForestTrustCollisionException() : base(SR.ForestTrustCollision) { }
 
-        protected ForestTrustCollisionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ForestTrustCollisionException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public ForestTrustRelationshipCollisionCollection Collisions
         {
@@ -295,8 +304,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 return _collisions;
             }
         }
-
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
+        
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);

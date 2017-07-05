@@ -1571,14 +1571,14 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void NullArray()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Expression.ArrayLength(null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Expression.ArrayLength(null));
         }
 
         [Fact]
         public static void IsNotArray()
         {
             Expression notArray = Expression.Constant(8);
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayLength(notArray));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(notArray));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
@@ -1595,24 +1595,28 @@ namespace System.Linq.Expressions.Tests
         {
             Array arr = new[] { 1, 2, 3 };
             Expression arrayExpression = Expression.Constant(arr, typeof(Array));
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayLength(arrayExpression));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(arrayExpression));
         }
 
         [Fact]
         public static void ArrayTypeArrayNotAllowedIfNotSZArray()
         {
             Array arr = new[,] { { 1, 2, 3 }, { 1, 2, 2 } };
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
+        }
 
-            arr = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        public static void ArrayTypeArrayNotAllowedIfNonZeroBoundArray()
+        {
+            Array arr = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
         }
 
         [Fact]
         public static void UnreadableArray()
         {
             Expression array = Expression.Property(null, typeof(Unreadable<int[]>), nameof(Unreadable<int>.WriteOnly));
-            Assert.Throws<ArgumentException>(() => Expression.ArrayLength(array));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(array));
         }
 
         private static IEnumerable<object[]> TestArrays()

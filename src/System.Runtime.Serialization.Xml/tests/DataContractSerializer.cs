@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using SerializationTestTypes;
 using SerializationTypes;
 using System;
 using System.Collections;
@@ -817,8 +818,8 @@ public static partial class DataContractSerializerTests
             Name = "foo",
         };
 
-        TypeWithPrivateFieldAndPrivateGetPublicSetProperty y = SerializeAndDeserialize<TypeWithPrivateFieldAndPrivateGetPublicSetProperty>(x, @"<TypeWithPrivateFieldAndPrivateGetPublicSetProperty xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>foo</Name></TypeWithPrivateFieldAndPrivateGetPublicSetProperty>");
-        Assert.Equal(x.GetName(), y.GetName());
+        TypeWithPrivateFieldAndPrivateGetPublicSetProperty y = SerializeAndDeserialize<TypeWithPrivateFieldAndPrivateGetPublicSetProperty>(x, @"<TypeWithPrivateFieldAndPrivateGetPublicSetProperty xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""></TypeWithPrivateFieldAndPrivateGetPublicSetProperty>");
+        Assert.Null(y.GetName());
     }
 
     [Fact]
@@ -1311,7 +1312,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(deserializedValue.GetPrivatePropertyValue(), value.GetPrivatePropertyValue());
     }
 
-    #region private type has to be in with in the class
+#region private type has to be in with in the class
     [DataContract]
     private class PrivateType
     {
@@ -1337,7 +1338,7 @@ public static partial class DataContractSerializerTests
             return PrivateProperty;
         }
     }
-    #endregion
+#endregion
 
     [Fact]
     public static void DCS_RootNameAndNamespaceThroughConstructorAsString()
@@ -1435,13 +1436,13 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionObject()
     {
-        var value = new ArgumentException("Test Exception");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:nil=""true"" xmlns=""""/></ArgumentException>");
+        var value = new Exception("Test Exception");
+        var actual = SerializeAndDeserialize<Exception>(value, @"<Exception xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.Exception</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/></Exception>");
 
         Assert.StrictEqual(value.Message, actual.Message);
-        Assert.StrictEqual(value.ParamName, actual.ParamName);
         Assert.StrictEqual(value.Source, actual.Source);
         Assert.StrictEqual(value.StackTrace, actual.StackTrace);
         Assert.StrictEqual(value.HResult, actual.HResult);
@@ -1449,10 +1450,11 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArgumentExceptionObject()
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
+    public static void DCS_MyArgumentExceptionObject()
     {
-        var value = new ArgumentException("Test Exception", "paramName");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:type=""x:string"" xmlns="""">paramName</ParamName></ArgumentException>");
+        var value = new MyArgumentException("Test Exception", "paramName");
+        var actual = SerializeAndDeserialize<MyArgumentException>(value, @"<MyArgumentException xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">MyArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:type=""x:string"" xmlns="""">paramName</ParamName></MyArgumentException>");
 
         Assert.StrictEqual(value.Message, actual.Message);
         Assert.StrictEqual(value.ParamName, actual.ParamName);
@@ -1463,13 +1465,13 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionMessageWithSpecialChars()
     {
-        var value = new ArgumentException("Test Exception<>&'\"");
-        var actual = SerializeAndDeserialize<ArgumentException>(value, @"<ArgumentException xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.ArgumentException</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception&lt;&gt;&amp;'""</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2147024809</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/><ParamName i:nil=""true"" xmlns=""""/></ArgumentException>");
+        var value = new Exception("Test Exception<>&'\"");
+        var actual = SerializeAndDeserialize<Exception>(value, @"<Exception xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:x=""http://www.w3.org/2001/XMLSchema""><ClassName i:type=""x:string"" xmlns="""">System.Exception</ClassName><Message i:type=""x:string"" xmlns="""">Test Exception&lt;&gt;&amp;'""</Message><Data i:nil=""true"" xmlns=""""/><InnerException i:nil=""true"" xmlns=""""/><HelpURL i:nil=""true"" xmlns=""""/><StackTraceString i:nil=""true"" xmlns=""""/><RemoteStackTraceString i:nil=""true"" xmlns=""""/><RemoteStackIndex i:type=""x:int"" xmlns="""">0</RemoteStackIndex><ExceptionMethod i:nil=""true"" xmlns=""""/><HResult i:type=""x:int"" xmlns="""">-2146233088</HResult><Source i:nil=""true"" xmlns=""""/><WatsonBuckets i:nil=""true"" xmlns=""""/></Exception>");
 
         Assert.StrictEqual(value.Message, actual.Message);
-        Assert.StrictEqual(value.ParamName, actual.ParamName);
         Assert.StrictEqual(value.Source, actual.Source);
         Assert.StrictEqual(value.StackTrace, actual.StackTrace);
         Assert.StrictEqual(value.HResult, actual.HResult);
@@ -1477,6 +1479,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_InnerExceptionMessageWithSpecialChars()
     {
         var value = new Exception("", new Exception("Test Exception<>&'\""));
@@ -1683,7 +1686,6 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual<TypeWithCommonTypeProperties>(value, deserializedValue);
     }
 
-#if uapaot
     [Fact]
     public static void DCS_TypeWithTypeProperty()
     {
@@ -1693,7 +1695,6 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.Name, deserializedValue.Name);
         Assert.StrictEqual(value.Type, deserializedValue.Type);
     }
-#endif
 
     [Fact]
     public static void DCS_TypeWithExplicitIEnumerableImplementation()
@@ -1888,7 +1889,7 @@ public static partial class DataContractSerializerTests
         dict["Foo"] = 1;
         dict["Bar"] = 2;
         ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
-        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></_dictionary></ReadOnlyDictionaryOfstringint>");
+        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><m_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></m_dictionary></ReadOnlyDictionaryOfstringint>");
 
         Assert.StrictEqual(value.Count, deserializedValue.Count);
         Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
@@ -2611,9 +2612,6 @@ public static partial class DataContractSerializerTests
         Assert.Equal(DateTimeOffset.MaxValue, ((DTOContainer)deserialized.Data).nDTO);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(13699)]
-#endif
     [Fact]
     public static void DCS_ExtensionDataObjectTest()
     {
@@ -2773,6 +2771,405 @@ public static partial class DataContractSerializerTests
         Assert.NotNull(actual);
         Assert.Null(actual.DelegateProperty);
         Assert.Equal(value.IntProperty, actual.IntProperty);
+    }
+
+#region DesktopTest
+
+    [Fact]
+    public static void DCS_ResolveNameReturnsEmptyNamespace()
+    {
+        SerializationTestTypes.EmptyNsContainer instance = new SerializationTestTypes.EmptyNsContainer(new SerializationTestTypes.EmptyNSAddress());
+        var settings = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        string baseline1 = @"<EmptyNsContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>P1</Name><address i:type=""EmptyNSAddress"" xmlns=""""><street>downing street</street></address></EmptyNsContainer>";
+        var result = SerializeAndDeserialize(instance, baseline1, settings);
+        Assert.True(result.address == null, "Address not null");
+
+        settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.EmptyNamespaceResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        result = SerializeAndDeserialize(instance, baseline1, settings);
+        Assert.True(result.address == null, "Address not null");
+
+        instance = new SerializationTestTypes.EmptyNsContainer(new SerializationTestTypes.UknownEmptyNSAddress());        
+        string baseline2 = @"<EmptyNsContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>P1</Name><address i:type=""AddressFoo"" xmlns=""""><street>downing street</street></address></EmptyNsContainer>";
+        result = SerializeAndDeserialize(instance, baseline2, settings);
+        Assert.True(result.address == null, "Address not null");       
+    }
+
+    [Fact]
+    public static void DCS_ResolveDatacontractBaseType()
+    {
+        SerializationTestTypes.Customer customerInstance = new SerializationTestTypes.PreferredCustomerProxy();
+        Type customerBaseType = customerInstance.GetType().BaseType;
+        var settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.ProxyDataContractResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        string baseline1 = @"<Customer z:Id=""1"" i:type=""PreferredCustomer"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Name i:nil=""true""/><VipInfo i:nil=""true""/></Customer>";
+        object result = SerializeAndDeserialize(customerInstance, baseline1, settings);
+        Assert.Equal(customerBaseType, result.GetType());
+
+        settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.ProxyDataContractResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        string baseline2 = @"<Customer z:Id=""i1"" i:type=""PreferredCustomer"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Name i:nil=""true""/><VipInfo i:nil=""true""/></Customer>";
+        result = SerializeAndDeserialize(customerInstance, baseline2, settings);
+        Assert.Equal(customerBaseType, result.GetType());
+    }
+
+    /// <summary>
+    /// Roundtrips a Datacontract type  which contains Primitive types assigned to member of type object. 
+    /// Resolver is plugged in and resolves the primitive types. Verify resolver called during ser and deser
+    /// </summary>
+    [Fact]
+    public static void DCS_BasicRoundTripResolvePrimitiveTypes()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.PrimitiveTypeResolver(),
+            IgnoreExtensionDataObject = false,
+            KnownTypes = null,
+            MaxItemsInObjectGraph = int.MaxValue,
+            PreserveObjectReferences = false
+        };
+
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data><_data2 i:type=""a:PrimitiveContainer_foo"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""a:DateTime_foo"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DateTimeOffset_foo""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""a:UInt32_foo"">0</z97><z98 i:type=""a:UInt32_foo"">4294967295</z98><z99 i:type=""a:UInt32_foo"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></_data2></ObjectContainer>";
+        var value = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.PrimitiveContainer());
+
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
+        // Throw Exception when verification failed
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
+    }
+
+    /// <summary>
+    /// Roundtrip Datacontract types  which contains members of type enum and struct.
+    /// Some enums are resolved by Resolver and others by the KT attribute.
+    /// Enum and struct members are of base enum type and ValueTyperespecitively
+    /// </summary>
+    [Fact]
+    public static void DCS_BasicRoundTripResolveEnumStructTypes()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.PrimitiveTypeResolver(),
+            IgnoreExtensionDataObject = false,
+            KnownTypes = null,
+            MaxItemsInObjectGraph = int.MaxValue,
+            PreserveObjectReferences = false
+        };
+
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:EnumStructContainer"" xmlns:a=""http://www.default.com""><enumArrayData xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><b:anyType i:type=""a:1munemy"">red</b:anyType><b:anyType i:type=""a:1munemy"">black</b:anyType><b:anyType i:type=""a:1munemy"">blue</b:anyType><b:anyType i:type=""a:1"">Autumn</b:anyType><b:anyType i:type=""a:2"">Spring</b:anyType></enumArrayData><p1 i:type=""a:VT_foo""><b>10</b></p1><p2 i:type=""a:NotSer_foo""><a>0</a></p2><p3 i:type=""a:MyStruct_foo""><globName i:nil=""true""/><value>0</value></p3></_data><_data2 i:type=""a:EnumStructContainer"" xmlns:a=""http://www.default.com""><enumArrayData xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><b:anyType i:type=""a:1munemy"">red</b:anyType><b:anyType i:type=""a:1munemy"">black</b:anyType><b:anyType i:type=""a:1munemy"">blue</b:anyType><b:anyType i:type=""a:1"">Autumn</b:anyType><b:anyType i:type=""a:2"">Spring</b:anyType></enumArrayData><p1 i:type=""a:VT_foo""><b>10</b></p1><p2 i:type=""a:NotSer_foo""><a>0</a></p2><p3 i:type=""a:MyStruct_foo""><globName i:nil=""true""/><value>0</value></p3></_data2></ObjectContainer>";
+        var value = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.EnumStructContainer());
+
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation1()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var setting1 = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.SimpleResolver_Ser(),            
+            PreserveObjectReferences = true
+        };
+        var setting2 = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.SimpleResolver_DeSer(),            
+            PreserveObjectReferences = true
+        };
+        var dcs1 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting1);
+        var dcs2 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting2);
+        string baseline = @"<CustomClass z:Id=""1"" i:type=""a:SerializationTestTypes.DCRVariations"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC""><Data i:nil=""true""/></unknownType2></CustomClass>";
+
+        MemoryStream ms = new MemoryStream();
+        dcs1.WriteObject(ms, dcrVariationsGoing);
+        CompareBaseline(baseline, ms);
+        ms.Position = 0;
+        var dcrVariationsReturning = dcs2.ReadObject(ms);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation2()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();                
+        var setting = new DataContractSerializerSettings()
+        {
+            PreserveObjectReferences = true
+        };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        xmlWriter.Flush();
+        CompareBaseline(baseline, ms);        
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false, dcr2);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation3()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
+        var setting = new DataContractSerializerSettings()
+        {
+            DataContractResolver = dcr2,
+            PreserveObjectReferences = true
+        };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        xmlWriter.Flush();
+        CompareBaseline(baseline, ms);        
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation4()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
+        var setting = new DataContractSerializerSettings()
+        {
+            DataContractResolver = dcr1,
+            PreserveObjectReferences = true
+        };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing);
+        xmlWriter.Flush();
+        CompareBaseline(baseline, ms);        
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false, dcr2);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    private static void CompareBaseline(string baseline, MemoryStream ms)
+    {
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+        var result = Utils.Compare(baseline, actualOutput);
+        Assert.True(result.Equal, string.Format("{1}{0}Test failed.{0}Expected: {2}{0}Actual: {3}",
+                Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundTripPOCOWithIgnoreDM()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.POCOTypeResolver(),
+            IgnoreExtensionDataObject = false,
+            KnownTypes = null,
+            MaxItemsInObjectGraph = int.MaxValue,
+            PreserveObjectReferences = false
+        };
+
+        string baseline = @"<POCOObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Data i:type=""a:EmptyDCType"" xmlns:a=""http://www.Default.com""/></POCOObjectContainer>";
+        var value = new SerializationTestTypes.POCOObjectContainer();
+        value.NonSerializedData = new SerializationTestTypes.Person();
+        
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
+
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVerifyWireformatScenarios()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.WireFormatVerificationResolver(),
+            IgnoreExtensionDataObject = false,
+            KnownTypes = null,
+            MaxItemsInObjectGraph = int.MaxValue,
+            PreserveObjectReferences = true
+        };
+        string typeName = typeof(SerializationTestTypes.Employee).FullName;
+        string typeNamespace = typeof(SerializationTestTypes.Employee).Assembly.FullName;
+
+        string baseline1 = $@"<Wireformat1 z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><alpha z:Id=""2""><person z:Id=""3""><Age>0</Age><Name i:nil=""true""/></person></alpha><beta z:Id=""4""><unknown1 z:Id=""5"" i:type=""CharClass""><c>0</c><c1>65535</c1><c2>0</c2><c3>99</c3></unknown1></beta><charlie z:Id=""6""><unknown2 z:Id=""7"" i:type=""a:{typeName}***"" xmlns:a=""{typeNamespace}***""><dateHired xmlns=""NonExistNamespace"">0001-01-01T00:00:00</dateHired><individual i:nil=""true"" xmlns=""NonExistNamespace"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes""/><salary xmlns=""NonExistNamespace"">0</salary></unknown2></charlie></Wireformat1>";
+        var value1 = new SerializationTestTypes.Wireformat1();
+        var actual1 = SerializeAndDeserialize(value1, baseline1, dataContractSerializerSettings);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value1, actual1);
+
+        string baseline2 = $@"<Wireformat2 z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><beta1 z:Id=""2""><unknown1 z:Id=""3"" i:type=""CharClass""><c>0</c><c1>65535</c1><c2>0</c2><c3>99</c3></unknown1></beta1><beta2 z:Id=""4""><unknown1 z:Id=""5"" i:type=""CharClass""><c>0</c><c1>65535</c1><c2>0</c2><c3>99</c3></unknown1></beta2><charlie z:Id=""6""><unknown2 z:Id=""7"" i:type=""a:{typeName}***"" xmlns:a=""{typeNamespace}***""><dateHired xmlns=""NonExistNamespace"">0001-01-01T00:00:00</dateHired><individual i:nil=""true"" xmlns=""NonExistNamespace"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes""/><salary xmlns=""NonExistNamespace"">0</salary></unknown2></charlie></Wireformat2>";
+        var value2 = new SerializationTestTypes.Wireformat2();
+        var actual2 = SerializeAndDeserialize(value2, baseline2, dataContractSerializerSettings);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value2, actual2);
+
+        string baseline3 = $@"<Wireformat3 z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><beta z:Id=""2""><unknown1 z:Id=""3"" i:type=""CharClass""><c>0</c><c1>65535</c1><c2>0</c2><c3>99</c3></unknown1></beta><charlie1 z:Id=""4""><unknown2 z:Id=""5"" i:type=""a:{typeName}***"" xmlns:a=""{typeNamespace}***""><dateHired xmlns=""NonExistNamespace"">0001-01-01T00:00:00</dateHired><individual i:nil=""true"" xmlns=""NonExistNamespace"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes""/><salary xmlns=""NonExistNamespace"">0</salary></unknown2></charlie1><charlie2 z:Id=""6""><unknown2 z:Id=""7"" i:type=""a:{typeName}***"" xmlns:a=""{typeNamespace}***""><dateHired xmlns=""NonExistNamespace"">0001-01-01T00:00:00</dateHired><individual i:nil=""true"" xmlns=""NonExistNamespace"" xmlns:b=""http://schemas.datacontract.org/2004/07/SerializationTestTypes""/><salary xmlns=""NonExistNamespace"">0</salary></unknown2></charlie2></Wireformat3>";
+        var value3 = new SerializationTestTypes.Wireformat3();
+        var actual3 = SerializeAndDeserialize(value3, baseline3, dataContractSerializerSettings);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value3, actual3);
+    }
+
+    [Fact]
+    public static void DCS_ResolveNameVariationTest()
+    {
+        SerializationTestTypes.ObjectContainer instance = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.UserTypeContainer());
+        var setting = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.UserTypeToPrimitiveTypeResolver()           
+        };
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:UserType"" xmlns:a=""http://www.default.com""><unknownData i:type=""b:int"" xmlns:b=""http://www.w3.org/2001/XMLSchema""><id>10000</id></unknownData></_data><_data2 i:type=""a:UserType"" xmlns:a=""http://www.default.com""><unknownData i:type=""b:int"" xmlns:b=""http://www.w3.org/2001/XMLSchema""><id>10000</id></unknownData></_data2></ObjectContainer>";
+
+        var result = SerializeAndDeserialize(instance, baseline, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(instance, result);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRDefaultCollections()
+    {
+        var defaultCollections = new SerializationTestTypes.DefaultCollections();
+        var setting = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.ResolverDefaultCollections(),
+            PreserveObjectReferences = true
+        };
+        string baseline = @"<DefaultCollections z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><_arrayList z:Id=""2"" z:Size=""1"" xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:anyType z:Id=""3"" i:type=""b:SerializationTestTypes.Person"" xmlns:b=""http://www.default.com""><Age>0</Age><Name i:nil=""true""/></a:anyType></_arrayList><_dictionary z:Id=""4"" z:Size=""1"" xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfintanyType><a:Key>1</a:Key><a:Value z:Id=""5"" i:type=""b:SerializationTestTypes.CharClass"" xmlns:b=""http://www.default.com""><c>0</c><c1>65535</c1><c2>0</c2><c3>99</c3></a:Value></a:KeyValueOfintanyType></_dictionary><_hashtable z:Id=""6"" z:Size=""1"" xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfanyTypeanyType><a:Key z:Id=""7"" i:type=""b:System.String"" xmlns:b=""http://www.default.com"">one</a:Key><a:Value z:Id=""8"" i:type=""b:SerializationTestTypes.Version1"" xmlns:b=""http://www.default.com""><make z:Id=""9"" i:type=""b:System.String"" xmlns=""TestingVersionTolerance"">Chevrolet</make></a:Value></a:KeyValueOfanyTypeanyType></_hashtable><_singleDimArray z:Id=""10"" z:Size=""1"" xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:anyType z:Id=""11"" i:type=""b:SerializationTestTypes.Employee"" xmlns:b=""http://www.default.com""><dateHired xmlns=""NonExistNamespace"">0001-01-01T00:00:00</dateHired><individual i:nil=""true"" xmlns=""NonExistNamespace"" xmlns:c=""http://schemas.datacontract.org/2004/07/SerializationTestTypes""/><salary xmlns=""NonExistNamespace"">0</salary></a:anyType></_singleDimArray></DefaultCollections>";
+
+        var actual = SerializeAndDeserialize(defaultCollections, baseline, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(defaultCollections, actual);
+    }
+
+#endregion
+
+    [Fact]
+    public static void DCS_TypeWithVirtualGenericProperty()
+    {
+        var value1 = new TypeWithVirtualGenericProperty<int>() { Value = 1 };
+        var actual1 = SerializeAndDeserialize(value1, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual1);
+        Assert.Equal(value1.Value, actual1.Value);
+
+        var value2 = new TypeWithVirtualGenericPropertyDerived<int>() { Value = 2 };
+        var actual2 = SerializeAndDeserialize(value2, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual2);
+        Assert.Equal(value2.Value, actual2.Value);
+    }
+
+    [Fact]
+    public static void DCS_MyPersonSurrogate()
+    {
+        DataContractSerializer dcs = new DataContractSerializer(typeof(Family));
+        dcs.SetSerializationSurrogateProvider(new MyPersonSurrogateProvider());
+        MemoryStream ms = new MemoryStream();
+        Family myFamily = new Family
+        {
+            Members = new NonSerializablePerson[]
+            {
+                new NonSerializablePerson("John", 34),
+                new NonSerializablePerson("Jane", 32),
+                new NonSerializablePerson("Bob", 5),
+            }
+        };
+        dcs.WriteObject(ms, myFamily);
+        ms.Position = 0;
+        var newFamily = (Family)dcs.ReadObject(ms);
+        Assert.StrictEqual(myFamily.Members.Length, newFamily.Members.Length);
+        for (int i = 0; i < myFamily.Members.Length; ++i)
+        {
+            Assert.StrictEqual(myFamily.Members[i].Name, newFamily.Members[i].Name);
+        }
+    }
+
+    [Fact]
+    public static void DCS_FileStreamSurrogate()
+    {
+        using (var testFile = TempFile.Create())
+        {
+            const string TestFileData = "Some data for data contract surrogate test";
+
+            // Create the serializer and specify the surrogate
+            var dcs = new DataContractSerializer(typeof(MyFileStream));
+            dcs.SetSerializationSurrogateProvider(MyFileStreamSurrogateProvider.Singleton);
+
+            // Create and initialize the stream
+            byte[] serializedStream;
+
+            // Serialize the stream
+            using (var stream1 = new MyFileStream(testFile.Path))
+            {
+                stream1.WriteLine(TestFileData);
+                using (var memoryStream = new MemoryStream())
+                {
+                    dcs.WriteObject(memoryStream, stream1);
+                    serializedStream = memoryStream.ToArray();
+                }
+            }
+
+            // Deserialize the stream
+            using (var stream = new MemoryStream(serializedStream))
+            {
+                using (var stream2 = (MyFileStream)dcs.ReadObject(stream))
+                {
+                    string fileData = stream2.ReadLine();
+                    Assert.StrictEqual(TestFileData, fileData);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public static void DCS_KnownTypeMethodName()
+    {
+        var emp1 = new EmployeeC("Steve");
+        var emp2 = new EmployeeC("Lilian");
+        var value = new Manager("Tony")
+        {
+            age = 30,
+            emps = new EmployeeC[] { emp1, emp2 }
+        };
+
+        Manager actual = SerializeAndDeserialize(value, @"<Manager xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>Tony</Name><age>30</age><emps><EmployeeC><Name>Steve</Name></EmployeeC><EmployeeC><Name>Lilian</Name></EmployeeC></emps></Manager>");
+        Assert.NotNull(actual);
+        Assert.Equal(value.age, actual.age);
+        Assert.NotNull(actual.emps);
+        Assert.Equal(value.emps.Count(), actual.emps.Count());
+        Assert.Equal(value.emps[0].Name, actual.emps[0].Name);
+        Assert.Equal(value.emps[1].Name, actual.emps[1].Name);
+    }
+
+    [Fact]
+    public static void DCS_SampleICollectionTExplicitWithoutDC()
+    {
+        var value = new SampleICollectionTExplicitWithoutDC(true);
+        SampleICollectionTExplicitWithoutDC roundtripObject = SerializeAndDeserialize(value, string.Empty, skipStringCompare: true);
+        Assert.NotNull(roundtripObject);
+        ComparisonHelper.CompareRecursively(value, roundtripObject);
+
+        string netcorePayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedNetcoreObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(netcorePayload);
+        Assert.NotNull(deserializedNetcoreObject);
+        ComparisonHelper.CompareRecursively(value, deserializedNetcoreObject);
+
+        string desktopPayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedDesktopObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(desktopPayload);
+        Assert.NotNull(deserializedDesktopObject);
+        ComparisonHelper.CompareRecursively(value, deserializedDesktopObject);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

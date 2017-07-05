@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <!-- ApiCompat-specific build configurations for runtime-only targets -->
+    <BuildConfigurations>
+      uapaot;
+    </BuildConfigurations>
+  </PropertyGroup>
+
   <Import Project="dir.props" />
 
   <PropertyGroup>
@@ -11,10 +18,20 @@
     <ApiCompatImplementationDirs>$(RefPath),$(GenFacadesOutputPath)</ApiCompatImplementationDirs>
     <!-- If we are targeting uap or uapaot run ApiCompat against the implementation assemblies instead since they don't match the reference assemblies -->
     <ApiCompatImplementationDirs Condition="$(TargetGroup.StartsWith('uap'))">$(RuntimePath),$(GenFacadesOutputPath)</ApiCompatImplementationDirs>
+    <!-- Set to true to build this project -->
+    <!-- Separate property otherwise /p:BaselineApiCompat=true would force it to run even for non-UAP -->
+    <BaselineApiCompat Condition="'$(BaselineApiCompat)' == ''">false</BaselineApiCompat>
     <_RunApiCompat>true</_RunApiCompat>
     <!-- Disable running apicompat for uap scenarios because the RuntimePath is not correctly setup in BuildAllConfigurations mode -->
     <_RunApiCompat Condition="'$(BuildAllConfigurations)' == 'true' and $(TargetGroup.StartsWith('uap'))">false</_RunApiCompat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Run API compat against the following 1:1 assemblies but don't include them in the list that is used to generate facades -->
+    <NetFxReference Include="System.DirectoryServices" />
+    <NetFxReference Include="System.DirectoryServices.AccountManagement" />
+    <NetFxReference Include="System.DirectoryServices.Protocols" />
+  </ItemGroup>
 
   <!-- Run ApiCompat -->
   <Target Name="RunApiCompat"
@@ -24,7 +41,7 @@
   >
     <PropertyGroup>
       <ApiCompatArgs>$(ApiCompatArgs) -implDirs:"$(ApiCompatImplementationDirs)"</ApiCompatArgs>
-      <ApiCompatArgs Condition="Exists($(ApiCompatBaselineIgnoreFile))">$(ApiCompatArgs) -baseline:"$(ApiCompatBaselineIgnoreFile)"</ApiCompatArgs>
+      <BaselineApiCompatArgs Condition="Exists($(ApiCompatBaselineIgnoreFile))">-baseline:"$(ApiCompatBaselineIgnoreFile)"</BaselineApiCompatArgs>
       <ApiCompatExitCode>0</ApiCompatExitCode>
 
       <ApiCompatCmd>$(ToolHostCmd) "$(ToolsDir)ApiCompat.exe"</ApiCompatCmd>
@@ -33,8 +50,8 @@
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <WriteLinesToFile File="$(ApiCompatResponseFile)" Lines="$(ApiCompatArgs)" Overwrite="true" />
 
-    <Exec Command="$(ApiCompatCmd) &quot;@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatBaselineFile)"
-          Condition="'$(TargetGroup)'=='netcoreapp'"
+    <Exec Command="$(ApiCompatCmd) &quot;@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')&quot; $(BaselineApiCompatArgs) @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatBaselineFile)"
+          Condition="'$(TargetGroup)'=='netcoreapp' and '$(BaselineApiCompat)' == 'true'"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"
@@ -42,7 +59,13 @@
       <Output TaskParameter="ExitCode" PropertyName="ApiCompatExitCode" />
     </Exec>
 
-    <Exec Command="$(ApiCompatCmd) &quot;$(NetStandardRefPath)&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatNSBaselineFile)"
+    <PropertyGroup>
+      <NETStandard20OnlyRef>$(NetStandardRefPath)/netstandard.dll</NETStandard20OnlyRef>
+      <!-- For netcoreapp also pass in System.Runtime to workaround issue in apicompat tool when it cannot find a core assembly -->
+      <NETStandard20OnlyRef Condition="'$(TargetGroup)' == 'netcoreapp'">$(NETStandard20OnlyRef);$(RefPath)\System.Runtime.dll</NETStandard20OnlyRef>
+    </PropertyGroup>
+
+    <Exec Command="$(ApiCompatCmd) &quot;$(NETStandard20OnlyRef)&quot; @&quot;$(ApiCompatResponseFile)&quot; -baseline:$(ApiCompatNSOnlyBaselineFile)"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"
@@ -50,7 +73,7 @@
       <Output TaskParameter="ExitCode" PropertyName="ApiCompatExitCode" />
     </Exec>
 
-    <Exec Command="$(ApiCompatCmd) &quot;$(NetStandardRefPath)/netstandard.dll&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatNSOnlyBaselineFile)"
+    <Exec Command="$(ApiCompatCmd) &quot;$(NetStandardRefPath)&quot; @&quot;$(ApiCompatResponseFile)&quot; -baseline:$(ApiCompatNSBaselineFile)"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"

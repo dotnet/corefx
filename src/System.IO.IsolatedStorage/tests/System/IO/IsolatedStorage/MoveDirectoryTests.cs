@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class MoveDirectoryTests : IsoStorageTest
     {
         [Fact]
@@ -13,8 +14,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentNullException>("sourceDirectoryName", () => isf.MoveDirectory(null, "bar"));
-                Assert.Throws<ArgumentNullException>("destinationDirectoryName", () => isf.MoveDirectory("foo", null));
+                AssertExtensions.Throws<ArgumentNullException>("sourceDirectoryName", () => isf.MoveDirectory(null, "bar"));
+                AssertExtensions.Throws<ArgumentNullException>("destinationDirectoryName", () => isf.MoveDirectory("foo", null));
             }
         }
 
@@ -23,8 +24,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>("sourceDirectoryName", () => isf.MoveDirectory(string.Empty, "bar"));
-                Assert.Throws<ArgumentException>("destinationDirectoryName", () => isf.MoveDirectory("foo", string.Empty));
+                AssertExtensions.Throws<ArgumentException>("sourceDirectoryName", () => isf.MoveDirectory(string.Empty, "bar"));
+                AssertExtensions.Throws<ArgumentException>("destinationDirectoryName", () => isf.MoveDirectory("foo", string.Empty));
             }
         }
 
@@ -40,17 +41,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void MoveDirectory_ThrowsIsolatedStorageException()
+        public void MoveDirectory_Removed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.MoveDirectory("foo", "bar"));
+                Assert.Throws<InvalidOperationException>(() => isf.MoveDirectory("foo", "bar"));
             }
         }
 
         [Fact]
-        public void MoveDirectory_ThrowsInvalidOperationException()
+        public void MoveDirectory_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -64,8 +65,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.MoveDirectory("\0bad", "bar"));
-                Assert.Throws<ArgumentException>(() => isf.MoveDirectory("foo", "\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("\0bad", "bar"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("foo", "\0bad"));
             }
         }
 
@@ -79,8 +80,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
-        // Unix doesn't throw for this, which it should- there is a bug in Directory.Move
-        [ActiveIssue(12396, TestPlatforms.AnyUnix)]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_MoveOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -94,6 +94,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_MovesDirectory(PresetScopes scope)
         {
             TestHelper.WipeStores();

@@ -21,8 +21,8 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { fs.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 fs.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
@@ -242,6 +242,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(false, 10, 1024)]
         [InlineData(true, 10, 1024)]
+        [ActiveIssue(21392, TargetFrameworkMonikers.Uap)]
         public async Task NamedPipeViaFileStream_AllDataCopied(bool useAsync, int writeSize, int numWrites)
         {
             long totalLength = writeSize * numWrites;

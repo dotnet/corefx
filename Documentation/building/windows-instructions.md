@@ -23,6 +23,8 @@ For Visual Studio 2017:
     * VC++ 2017 v141 Toolset (x86, x64)
     * Windows 8.1 SDK and UCRT SDK
     * VC++ 2015.3 v140 Toolset (x86, x64)
+  * .NET Core cross-platform development
+    * All Required Components
 * When doing an 'Individual Components' based install, the following are the minimum requirements:
   * C# and Visual Basic Roslyn Compilers
   * Static Analysis Tools
@@ -75,6 +77,18 @@ For more details, or to test an individual project, see the [developer guide top
 3. Right click test project and select 'Set as startup project'
 4. Set breakpoint appropriately
 5. F5 (Debug)
+
+### Debugging NETFX tests in Visual Studio
+
+Once you've built the source code for netfx from the root (`build.cmd -framework:netfx`) follow these steps:
+
+1. Build test project with the following parameters `msbuild /t:buildandtest /p:targetgroup=netfx /p:testdebugger=devenv.exe`. This will open Visual Studio with the runner as startup project and its corresponding arguments.
+2. Open project properties and fill in the next information:
+    * Debugger Type -> Managed (v4.6, v4.5, v4.0)
+    * Environment -> you need to add an environment variable as follows:
+         * DEVPATH -> `<corefxpath>\bin\testhost\netfx-Windows_NT-Debug-x64\`
+3. Set breakpoint appropriately
+4. F5 (Debug)
 
 For advanced debugging using WinDBG see [Debugging CoreFX on Windows](https://github.com/dotnet/corefx/blob/master/Documentation/debugging/windows-instructions.md)
 

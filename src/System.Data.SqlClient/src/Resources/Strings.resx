@@ -130,6 +130,15 @@
   <data name="ADP_NonPooledOpenTimeout" xml:space="preserve">
     <value>Timeout attempting to open the connection.  The time period elapsed prior to attempting to open the connection has been exceeded.  This may have occurred because of too many simultaneous non-pooled connection attempts.</value>
   </data>
+  <data name="ADP_SingleValuedProperty" xml:space="preserve">
+    <value>The only acceptable value for the property '{0}' is '{1}'.</value>
+  </data>
+  <data name="ADP_DoubleValuedProperty" xml:space="preserve">
+    <value>The acceptable values for the property '{0}' are '{1}' or '{2}'.</value>
+  </data>
+  <data name="ADP_InvalidPrefixSuffix" xml:space="preserve">
+    <value>Specified QuotePrefix and QuoteSuffix values do not match.</value>
+  </data>
   <data name="Arg_ArrayPlusOffTooSmall" xml:space="preserve">
     <value>Destination array is not long enough to copy all the items in the collection. Check array index and length.</value>
   </data>
@@ -150,6 +159,12 @@
   </data>
   <data name="SQL_WrongType" xml:space="preserve">
     <value>Expecting argument of type {1}, but received type {0}.</value>
+  </data>
+  <data name="ADP_DeriveParametersNotSupported" xml:space="preserve">
+    <value>{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{1}.</value>
+  </data>
+  <data name="ADP_NoStoredProcedureExists" xml:space="preserve">
+    <value>The stored procedure '{0}' doesn't exist.</value>
   </data>
   <data name="ADP_InvalidConnectionOptionValue" xml:space="preserve">
     <value>Invalid value for key '{0}'.</value>
@@ -174,6 +189,12 @@
   </data>
   <data name="ADP_InvalidMultipartNameToManyParts" xml:space="preserve">
     <value>{0} '{1}', the current limit of '{2}' is insufficient.</value>
+  </data>
+  <data name="SQL_SqlCommandCommandText" xml:space="preserve">
+    <value>SqlCommand.DeriveParameters failed because the SqlCommand.CommandText property value is an invalid multipart name</value>
+  </data>
+  <data name="SQL_BatchedUpdatesNotAvailableOnContextConnection" xml:space="preserve">
+    <value>Batching updates is not supported on the context connection.</value>
   </data>
   <data name="SQL_BulkCopyDestinationTableName" xml:space="preserve">
     <value>SqlBulkCopy.WriteToServer failed because the SqlBulkCopy.DestinationTableName is an invalid multipart name</value>
@@ -655,11 +676,44 @@
   <data name="SqlParameter_UnexpectedTypeNameForNonStruct" xml:space="preserve">
     <value>TypeName specified for parameter '{0}'.  TypeName must only be set for Structured parameters.</value>
   </data>
+  <data name="NullSchemaTableDataTypeNotSupported" xml:space="preserve">
+    <value>DateType column for field '{0}' in schema table is null.  DataType must be non-null.</value>
+  </data>
+  <data name="InvalidSchemaTableOrdinals" xml:space="preserve">
+    <value>Invalid column ordinals in schema table.  ColumnOrdinals, if present, must not have duplicates or gaps.</value>
+  </data>
   <data name="SQL_EnumeratedRecordMetaDataChanged" xml:space="preserve">
     <value>Metadata for field '{0}' of record '{1}' did not match the original record's metadata.</value>
   </data>
   <data name="SQL_EnumeratedRecordFieldCountChanged" xml:space="preserve">
     <value>Number of fields in record '{0}' does not match the number in the original record.</value>
+  </data>
+  <data name="SQLNotify_AlreadyHasCommand" xml:space="preserve">
+    <value>This SqlCommand object is already associated with another SqlDependency object.</value>
+  </data>
+  <data name="SqlDependency_DatabaseBrokerDisabled" xml:space="preserve">
+    <value>The SQL Server Service Broker for the current database is not enabled, and as a result query notifications are not supported.  Please enable the Service Broker for this database if you wish to use notifications.</value>
+  </data>
+  <data name="SqlDependency_DefaultOptionsButNoStart" xml:space="preserve">
+    <value>When using SqlDependency without providing an options value, SqlDependency.Start() must be called prior to execution of a command added to the SqlDependency instance.</value>
+  </data>
+  <data name="SqlDependency_NoMatchingServerStart" xml:space="preserve">
+    <value>When using SqlDependency without providing an options value, SqlDependency.Start() must be called for each server that is being executed against.</value>
+  </data>
+  <data name="SqlDependency_NoMatchingServerDatabaseStart" xml:space="preserve">
+    <value>SqlDependency.Start has been called for the server the command is executing against more than once, but there is no matching server/user/database Start() call for current command.</value>
+  </data>
+  <data name="SqlDependency_EventNoDuplicate" xml:space="preserve">
+    <value>SqlDependency.OnChange does not support multiple event registrations for the same delegate.</value>
+  </data>
+  <data name="SqlDependency_IdMismatch" xml:space="preserve">
+    <value>No SqlDependency exists for the key.</value>
+  </data>
+  <data name="SqlDependency_InvalidTimeout" xml:space="preserve">
+    <value>Timeout specified is invalid. Timeout cannot be &lt; 0.</value>
+  </data>
+  <data name="SqlDependency_DuplicateStart" xml:space="preserve">
+    <value>SqlDependency does not support calling Start() with different connection strings having the same server, user, and database in the same app domain.</value>
   </data>
   <data name="SqlMetaData_InvalidSqlDbTypeForConstructorFormat" xml:space="preserve">
     <value>The dbType {0} is invalid for this constructor.</value>
@@ -1041,5 +1095,65 @@
   </data>
   <data name="LocalDBNotSupported" xml:space="preserve">
     <value>LocalDB is not supported on this Platform.</value>
+  </data>
+  <data name="PlatformNotSupported_DataSqlClient" xml:space="preserve">
+    <value>System.Data.SqlClient is not supported on this platform.</value>
+  </data>
+  <data name="SqlParameter_InvalidTableDerivedPrecisionForTvp" xml:space="preserve">
+    <value>Precision '{0}' required to send all values in column '{1}' exceeds the maximum supported precision '{2}'. The values must all fit in a single precision.</value>
+  </data>
+  <data name="SqlProvider_InvalidDataColumnMaxLength" xml:space="preserve">
+    <value>The size of column '{0}' is not supported. The size is {1}.</value>
+  </data>
+  <data name="MDF_InvalidXmlInvalidValue" xml:space="preserve"> 
+	<value>The metadata XML is invalid. The {1} column of the {0} collection must contain a non-empty string.</value>
+  </data>
+  <data name="MDF_CollectionNameISNotUnique" xml:space="preserve"> 
+	<value>There are multiple collections named '{0}'.</value>
+  </data>
+  <data name="MDF_InvalidXmlMissingColumn" xml:space="preserve"> 
+	<value>The metadata XML is invalid. The {0} collection must contain a {1} column and it must be a string column.</value>
+  </data>
+  <data name="MDF_InvalidXml" xml:space="preserve"> 
+	<value>The metadata XML is invalid.</value>
+  </data>
+  <data name="MDF_NoColumns" xml:space="preserve"> 
+	<value>The schema table contains no columns.</value>
+  </data>
+  <data name="MDF_QueryFailed" xml:space="preserve"> 
+	<value>Unable to build the '{0}' collection because execution of the SQL query failed. See the inner exception for details.</value>
+  </data>
+  <data name="MDF_TooManyRestrictions" xml:space="preserve"> 
+	<value>More restrictions were provided than the requested schema ('{0}') supports.</value>
+  </data>
+  <data name="MDF_DataTableDoesNotExist" xml:space="preserve"> 
+	<value>The collection '{0}' is missing from the metadata XML.</value>
+  </data>
+  <data name="MDF_UndefinedCollection" xml:space="preserve"> 
+    <value>The requested collection ({0}) is not defined.</value> 
+  </data>
+  <data name="MDF_UnsupportedVersion" xml:space="preserve">
+    <value> requested collection ({0}) is not supported by this version of the provider.</value>
+  </data>
+  <data name="MDF_MissingRestrictionColumn" xml:space="preserve">
+    <value>One or more of the required columns of the restrictions collection is missing.</value>
+  </data>
+  <data name="MDF_MissingRestrictionRow" xml:space="preserve">
+    <value>A restriction exists for which there is no matching row in the restrictions collection.</value>
+  </data>
+  <data name="MDF_IncorrectNumberOfDataSourceInformationRows" xml:space="preserve">
+    <value>The DataSourceInformation table must contain exactly one row.</value>
+  </data>
+  <data name="MDF_MissingDataSourceInformationColumn" xml:space="preserve">
+    <value>One of the required DataSourceInformation tables columns is missing.</value>
+  </data>
+  <data name="MDF_AmbigousCollectionName" xml:space="preserve">
+    <value>The collection name '{0}' matches at least two collections with the same name but with different case, but does not match any of them exactly.</value>
+  </data>
+  <data name="MDF_UnableToBuildCollection" xml:space="preserve">
+    <value>Unable to build schema collection '{0}';</value>
+  </data>
+  <data name="AmbientTransactionsNotSupported" xml:space="preserve">
+    <value>Enlisting in Ambient transactions is not supported.</value>
   </data>
 </root>

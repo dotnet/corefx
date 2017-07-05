@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class OpenFileTests : IsoStorageTest
     {
         [Fact]
@@ -13,21 +14,21 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create));
-                Assert.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create, FileAccess.ReadWrite));
-                Assert.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+                AssertExtensions.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create));
+                AssertExtensions.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create, FileAccess.ReadWrite));
+                AssertExtensions.Throws<ArgumentNullException>("path", () => isf.OpenFile(null, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 
         [Fact]
-        public void OpenFile_ThrowsIsolatedStorageException()
+        public void OpenFile_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("foo", FileMode.Create));
-                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("foo", FileMode.Create, FileAccess.ReadWrite));
-                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("foo", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+                Assert.Throws<InvalidOperationException>(() => isf.OpenFile("foo", FileMode.Create));
+                Assert.Throws<InvalidOperationException>(() => isf.OpenFile("foo", FileMode.Create, FileAccess.ReadWrite));
+                Assert.Throws<InvalidOperationException>(() => isf.OpenFile("foo", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 
@@ -45,7 +46,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void OpenFile_ThrowsInvalidOperationException()
+        public void OpenFile_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -61,13 +62,14 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.OpenFile("\0bad", FileMode.Create));
-                Assert.Throws<ArgumentException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
-                Assert.Throws<ArgumentException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_PassesFileShare()
         {
             TestHelper.WipeStores();
@@ -90,6 +92,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_PassesFileAccess()
         {
             TestHelper.WipeStores();
@@ -112,6 +115,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_PassesFileMode()
         {
             TestHelper.WipeStores();
@@ -128,6 +132,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_Existence(PresetScopes scope)
         {
             TestHelper.WipeStores();

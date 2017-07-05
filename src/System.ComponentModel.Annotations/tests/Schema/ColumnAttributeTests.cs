@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Schema.Tests
@@ -33,7 +34,7 @@ namespace System.ComponentModel.DataAnnotations.Schema.Tests
         [InlineData(" \t\r\n")]
         public static void Ctor_String_NullOrWhitespaceName_ThrowsArgumentException(string name)
         {
-            Assert.Throws<ArgumentException>(null, () => new ColumnAttribute(name));
+            AssertExtensions.Throws<ArgumentException>(null, () => new ColumnAttribute(name));
         }
 
         [Theory]
@@ -49,7 +50,7 @@ namespace System.ComponentModel.DataAnnotations.Schema.Tests
         public static void Order_Set_NegativeValue_ThrowsArgumentOutOfRangeException()
         {
             ColumnAttribute attribute = new ColumnAttribute();
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => attribute.Order = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => attribute.Order = -1);
         }
 
         [Theory]
@@ -67,7 +68,7 @@ namespace System.ComponentModel.DataAnnotations.Schema.Tests
         public static void TypeName_Set_NullOrWhitespaceValue_ThrowsArgumentException(string value)
         {
             ColumnAttribute attribute = new ColumnAttribute();
-            Assert.Throws<ArgumentException>(null, () => attribute.TypeName = value);
+            AssertExtensions.Throws<ArgumentException>(null, () => attribute.TypeName = value);
         }
     }
 }

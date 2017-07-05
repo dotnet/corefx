@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Test.Common;
 using System.Security.Principal;
@@ -20,6 +21,7 @@ namespace System.Net.Security.Tests
         protected abstract Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName);
         protected abstract Task AuthenticateAsServerAsync(NegotiateStream server);
 
+        [ActiveIssue(18760, TargetFrameworkMonikers.UapAot)] // In order to properly test this, we need UWP-AOT to run within an App Container.
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_Success()
         {
@@ -66,11 +68,21 @@ namespace System.Net.Security.Tests
                 IIdentity clientIdentity = server.RemoteIdentity;
                 Assert.Equal("NTLM", clientIdentity.AuthenticationType);
 
-                Assert.Equal(true, clientIdentity.IsAuthenticated);
+                if (PlatformDetection.IsUap)
+                {
+                    // TODO #21282: UWP AppContainer issue - clientIdentity.IsAuthenticated == false.
+                    Assert.Equal(false, clientIdentity.IsAuthenticated);
+                }
+                else
+                {
+                    Assert.Equal(true, clientIdentity.IsAuthenticated);
+                }
+
                 IdentityValidator.AssertIsCurrentIdentity(clientIdentity);
             }
         }
 
+        [ActiveIssue(18760, TargetFrameworkMonikers.UapAot)] // In order to properly test this, we need UWP-AOT to run within an App Container.
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
@@ -120,12 +132,22 @@ namespace System.Net.Security.Tests
                 IIdentity clientIdentity = server.RemoteIdentity;
                 Assert.Equal("NTLM", clientIdentity.AuthenticationType);
 
-                Assert.Equal(true, clientIdentity.IsAuthenticated);
+                if (PlatformDetection.IsUap)
+                {
+                    // TODO #21282: UWP issue - clientIdentity.IsAuthenticated == false.
+                    Assert.Equal(false, clientIdentity.IsAuthenticated);
+                }
+                else
+                {
+                    Assert.Equal(true, clientIdentity.IsAuthenticated);
+                }
+
                 IdentityValidator.AssertIsCurrentIdentity(clientIdentity);
             }
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core difference in behavior: https://github.com/dotnet/corefx/issues/5241")]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
             string targetName = "testTargetName";
@@ -272,6 +294,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
         public void NegotiateStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();

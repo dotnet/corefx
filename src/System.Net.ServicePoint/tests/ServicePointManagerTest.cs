@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -113,6 +114,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop default SecurityProtocol to Ssl3; explicitly changed to SystemDefault for core.")]
         public static void SecurityProtocol_Roundtrips()
         {
             var orig = (SecurityProtocolType)0; // SystemDefault.
@@ -155,31 +157,41 @@ namespace System.Net.Tests
         {
             const int ssl2Client = 0x00000008;
             const int ssl2Server = 0x00000004;
+            const SecurityProtocolType ssl2 = (SecurityProtocolType)(ssl2Client | ssl2Server);
+            Assert.Throws<NotSupportedException>(() => ServicePointManager.SecurityProtocol = ssl2);
 
-            SecurityProtocolType ssl2 = (SecurityProtocolType)(ssl2Client | ssl2Server);
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => ServicePointManager.FindServicePoint((string)null, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.MaxServicePoints = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.DefaultConnectionLimit = 0);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.MaxServicePointIdleTime = -2);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("keepAliveTime", () => ServicePointManager.SetTcpKeepAlive(true, -1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("keepAliveInterval", () => ServicePointManager.SetTcpKeepAlive(true, 1, -1));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => ServicePointManager.FindServicePoint(null));
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => ServicePointManager.FindServicePoint((string)null, null));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => ServicePointManager.FindServicePoint((Uri)null, null));
+            Assert.Throws<NotSupportedException>(() => ServicePointManager.FindServicePoint("http://anything", new FixedWebProxy("https://anything")));
+
+            ServicePoint sp = ServicePointManager.FindServicePoint("http://" + Guid.NewGuid().ToString("N"), null);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sp.ConnectionLeaseTimeout = -2);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sp.ConnectionLimit = 0);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sp.MaxIdleTime = -2);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sp.ReceiveBufferSize = -2);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("keepAliveTime", () => sp.SetTcpKeepAlive(true, -1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("keepAliveInterval", () => sp.SetTcpKeepAlive(true, 1, -1));
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Ssl3 is supported by desktop but explicitly not by core")]
+        [Fact]
+        public static void SecurityProtocol_Ssl3_NotSupported()
+        {
+            const int ssl2Client = 0x00000008;
+            const int ssl2Server = 0x00000004;
+            const SecurityProtocolType ssl2 = (SecurityProtocolType)(ssl2Client | ssl2Server);
+
 #pragma warning disable 0618 // Ssl2, Ssl3 are deprecated.
             Assert.Throws<NotSupportedException>(() => ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3);
             Assert.Throws<NotSupportedException>(() => ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | ssl2);
 #pragma warning restore
-            Assert.Throws<NotSupportedException>(() => ServicePointManager.SecurityProtocol = ssl2);
-            Assert.Throws<ArgumentNullException>("uriString", () => ServicePointManager.FindServicePoint((string)null, null));
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.MaxServicePoints = -1);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.DefaultConnectionLimit = 0);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => ServicePointManager.MaxServicePointIdleTime = -2);
-            Assert.Throws<ArgumentOutOfRangeException>("keepAliveTime", () => ServicePointManager.SetTcpKeepAlive(true, -1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("keepAliveInterval", () => ServicePointManager.SetTcpKeepAlive(true, 1, -1));
-            Assert.Throws<ArgumentNullException>("address", () => ServicePointManager.FindServicePoint(null));
-            Assert.Throws<ArgumentNullException>("uriString", () => ServicePointManager.FindServicePoint((string)null, null));
-            Assert.Throws<ArgumentNullException>("address", () => ServicePointManager.FindServicePoint((Uri)null, null));
-            Assert.Throws<NotSupportedException>(() => ServicePointManager.FindServicePoint("http://anything", new FixedWebProxy("https://anything")));
-
-            ServicePoint sp = ServicePointManager.FindServicePoint("http://" + Guid.NewGuid().ToString("N"), null);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => sp.ConnectionLeaseTimeout = -2);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => sp.ConnectionLimit = 0);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => sp.MaxIdleTime = -2);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => sp.ReceiveBufferSize = -2);
-            Assert.Throws<ArgumentOutOfRangeException>("keepAliveTime", () => sp.SetTcpKeepAlive(true, -1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("keepAliveInterval", () => sp.SetTcpKeepAlive(true, 1, -1));
         }
 
         [Fact]
@@ -216,6 +228,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop ServicePoint lifetime is slightly longer due to implementation details of real implementation")]
         public static void FindServicePoint_Collectible()
         {
             string address = "http://" + Guid.NewGuid().ToString("N");

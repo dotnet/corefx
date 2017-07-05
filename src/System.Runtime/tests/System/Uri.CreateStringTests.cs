@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -549,8 +549,20 @@ namespace System.Tests
             // File with host
             yield return new object[] { "file://path1/path2", "/path2", "", "" };
             yield return new object[] { "file:///path1/path2", "/path1/path2", "", "" };
-            yield return new object[] { @"file:///path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
-            yield return new object[] { @"file:///path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+            if (s_isWindowsSystem)
+            {
+                yield return new object[] { @"file:///path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
+                yield return new object[] { @"file:///path1\path2/path3%5Cpath4\", "/path1/path2/path3/path4/", "", "" };
+                yield return new object[] { @"file://localhost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+                yield return new object[] { @"file://localhost/path1%5Cpath2", "/path1/path2", "", ""};
+            }
+            else // Unix paths preserve backslash
+            {
+                yield return new object[] { @"file:///path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                yield return new object[] { @"file:///path1%5Cpath2\path3", @"/path1%5Cpath2%5Cpath3", "", ""};
+                yield return new object[] { @"file://localhost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                yield return new object[] { @"file://localhost/path1%5Cpath2\path3", @"/path1%5Cpath2%5Cpath3", "", ""};
+            }
             // Implicit file with empty path
             yield return new object[] { "C:/", "C:/", "", "" };
             yield return new object[] { "C|/", "C:/", "", "" };
@@ -643,16 +655,6 @@ namespace System.Tests
             yield return new object[] { "file:////unchost/path1/path2?query#fragment", "/path1/path2", "?query", "#fragment" };
             yield return new object[] { @"file:///\unchost/path1/path2?query#fragment", "/path1/path2", "?query", "#fragment" };
             yield return new object[] { @"file://\/unchost/path1/path2?query#fragment", "/path1/path2", "?query", "#fragment" };
-            // Explicit UNC with backslash in path
-            yield return new object[] { @"file://\\unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
-            yield return new object[] { @"file:////unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
-            yield return new object[] { @"file:///\unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
-            yield return new object[] { @"file://\/unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
-            // Explicit UNC ending with backslash
-            yield return new object[] { @"file://\\unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
-            yield return new object[] { @"file:////unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
-            yield return new object[] { @"file:///\unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
-            yield return new object[] { @"file://\/unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
             // Explicit UNC with a windows drive as host
             yield return new object[] { @"file://\\C:/path1/path2", "C:/path1/path2", "", "" };
             yield return new object[] { "file:////C:/path1/path2", "C:/path1/path2", "", "" };
@@ -662,8 +664,20 @@ namespace System.Tests
             yield return new object[] { "C|/path|path/path2", "C:/path%7Cpath/path2", "", "" };
             yield return new object[] { "file://host/path?query#fragment", "/path", "?query", "#fragment" };
 
-            // Unix path
-            if (!s_isWindowsSystem)
+            if (s_isWindowsSystem)
+            {
+                // Explicit UNC with backslash in path
+                yield return new object[] { @"file://\\unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
+                yield return new object[] { @"file:////unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
+                yield return new object[] { @"file:///\unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
+                yield return new object[] { @"file://\/unchost/path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
+                // Explicit UNC ending with backslash
+                yield return new object[] { @"file://\\unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+                yield return new object[] { @"file:////unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+                yield return new object[] { @"file:///\unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+                yield return new object[] { @"file://\/unchost/path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
+            }
+            else
             {
                 // Implicit file with path
                 yield return new object[] { "/", "/", "", "" };
@@ -672,6 +686,16 @@ namespace System.Tests
                 yield return new object[] { @"/path1\path2/path3\path4", "/path1%5Cpath2/path3%5Cpath4", "", "" };
                 // Implicit file ending with backlash
                 yield return new object[] { @"/path1\path2/path3\path4\", "/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                // Explicit UNC with backslash in path
+                yield return new object[] { @"file://\\unchost/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                yield return new object[] { @"file:////unchost/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                yield return new object[] { @"file:///\unchost/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                yield return new object[] { @"file://\/unchost/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                // Explicit UNC ending with backslash
+                yield return new object[] { @"file://\\unchost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                yield return new object[] { @"file:////unchost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                yield return new object[] { @"file:///\unchost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                yield return new object[] { @"file://\/unchost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
             }
 
             // Mailto
@@ -796,6 +820,8 @@ namespace System.Tests
                     {
                         localPath = @"\\" + uri.Host + path;
                         localPath = localPath.Replace('/', '\\');
+                        // Unescape '\\'
+                        localPath = localPath.Replace("%5C", "\\");
                         if (path == "/")
                         {
                             localPath = localPath.Substring(0, localPath.Length - 1);
@@ -978,8 +1004,8 @@ namespace System.Tests
         [Fact]
         public void Create_String_Null_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("uriString", () => new Uri(null));
-            Assert.Throws<ArgumentNullException>("uriString", () => new Uri(null, UriKind.Absolute));
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => new Uri(null));
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => new Uri(null, UriKind.Absolute));
 
             Uri uri;
             Assert.False(Uri.TryCreate(null, UriKind.Absolute, out uri));
@@ -989,13 +1015,13 @@ namespace System.Tests
         [Fact]
         public void Create_String_InvalidUriKind_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new Uri("http://host", UriKind.RelativeOrAbsolute - 1));
-            Assert.Throws<ArgumentException>(() => new Uri("http://host", UriKind.Relative + 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => new Uri("http://host", UriKind.RelativeOrAbsolute - 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => new Uri("http://host", UriKind.Relative + 1));
 
             Uri uri = null;
-            Assert.Throws<ArgumentException>(() => Uri.TryCreate("http://host", UriKind.RelativeOrAbsolute - 1, out uri));
+            AssertExtensions.Throws<ArgumentException>(null, () => Uri.TryCreate("http://host", UriKind.RelativeOrAbsolute - 1, out uri));
             Assert.Null(uri);
-            Assert.Throws<ArgumentException>(() => Uri.TryCreate("http://host", UriKind.Relative + 1, out uri));
+            AssertExtensions.Throws<ArgumentException>(null, () => Uri.TryCreate("http://host", UriKind.Relative + 1, out uri));
             Assert.Null(uri);
         }
 

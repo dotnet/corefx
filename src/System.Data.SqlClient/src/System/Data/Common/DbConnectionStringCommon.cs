@@ -224,7 +224,7 @@ namespace System.Data.Common
         }
     }
 
-    internal static class DbConnectionStringDefaults
+    internal static partial class DbConnectionStringDefaults
     {
         // all
         //        internal const string NamedConnection           = "";
@@ -238,6 +238,7 @@ namespace System.Data.Common
         internal const string CurrentLanguage = "";
         internal const string DataSource = "";
         internal const bool Encrypt = false;
+        internal const bool Enlist = true;
         internal const string FailoverPartner = "";
         internal const string InitialCatalog = "";
         internal const bool IntegratedSecurity = false;
@@ -262,7 +263,7 @@ namespace System.Data.Common
     }
 
 
-    internal static class DbConnectionStringKeywords
+    internal static partial class DbConnectionStringKeywords
     {
         // all
         //        internal const string NamedConnection           = "Named Connection";
@@ -297,6 +298,7 @@ namespace System.Data.Common
         internal const string DataSource = "Data Source";
         internal const string IntegratedSecurity = "Integrated Security";
         internal const string Password = "Password";
+        internal const string Driver = "Driver";
         internal const string PersistSecurityInfo = "Persist Security Info";
         internal const string UserID = "User ID";
 

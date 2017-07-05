@@ -15,6 +15,7 @@ using Xunit;
 using System.Text;
 using System.ComponentModel;
 using System.Security;
+using System.Threading;
 
 namespace System.Diagnostics.Tests
 {
@@ -32,19 +33,19 @@ namespace System.Diagnostics.Tests
 
             IDictionary<string, string> environment = psi.Environment;
 
-            Assert.NotEqual(environment.Count, 0);
+            Assert.NotEqual(0, environment.Count);
 
-            int CountItems = environment.Count;
+            int countItems = environment.Count;
 
             environment.Add("NewKey", "NewValue");
             environment.Add("NewKey2", "NewValue2");
 
-            Assert.Equal(CountItems + 2, environment.Count);
+            Assert.Equal(countItems + 2, environment.Count);
             environment.Remove("NewKey");
-            Assert.Equal(CountItems + 1, environment.Count);
+            Assert.Equal(countItems + 1, environment.Count);
 
-            //Exception not thrown with invalid key
-            Assert.Throws<ArgumentException>(() => { environment.Add("NewKey2", "NewValue2"); });
+            environment.Add("NewKey2", "NewValue2Overridden");
+            Assert.Equal("NewValue2Overridden", environment["NewKey2"]);
 
             //Clear
             environment.Clear();
@@ -61,7 +62,7 @@ namespace System.Diagnostics.Tests
             //Iterating
             string result = null;
             int index = 0;
-            foreach (string e1 in environment.Values)
+            foreach (string e1 in environment.Values.OrderBy(p => p))
             {
                 index++;
                 result += e1;
@@ -71,7 +72,7 @@ namespace System.Diagnostics.Tests
 
             result = null;
             index = 0;
-            foreach (string e1 in environment.Keys)
+            foreach (string e1 in environment.Keys.OrderBy(p => p))
             {
                 index++;
                 result += e1;
@@ -81,7 +82,7 @@ namespace System.Diagnostics.Tests
 
             result = null;
             index = 0;
-            foreach (KeyValuePair<string, string> e1 in environment)
+            foreach (KeyValuePair<string, string> e1 in environment.OrderBy(p => p.Key))
             {
                 index++;
                 result += e1.Key;
@@ -128,8 +129,8 @@ namespace System.Diagnostics.Tests
             //Exception not thrown with invalid key
             Assert.Throws<ArgumentNullException>(() => environment.Add(null, "NewValue2"));
 
-            //Invalid Key to add
-            Assert.Throws<ArgumentException>(() => environment.Add("NewKey2", "NewValue2"));
+            environment.Add("NewKey2", "NewValue2OverriddenAgain");
+            Assert.Equal("NewValue2OverriddenAgain", environment["NewKey2"]);
 
             //Remove Item
             environment.Remove("NewKey98");
@@ -141,20 +142,21 @@ namespace System.Diagnostics.Tests
             //"Exception not thrown with null key"
             Assert.Throws<KeyNotFoundException>(() => environment["1bB"]);
 
-            Assert.True(environment.Contains(new KeyValuePair<string, string>("NewKey2", "NewValue2")));
-            Assert.Equal(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), environment.Contains(new KeyValuePair<string, string>("NEWKeY2", "NewValue2")));
+            Assert.True(environment.Contains(new KeyValuePair<string, string>("NewKey2", "NewValue2OverriddenAgain")));
+            Assert.Equal(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), environment.Contains(new KeyValuePair<string, string>("NEWKeY2", "NewValue2OverriddenAgain")));
 
-            Assert.False(environment.Contains(new KeyValuePair<string, string>("NewKey2", "newvalue2")));
-            Assert.False(environment.Contains(new KeyValuePair<string, string>("newkey2", "newvalue2")));
+            Assert.False(environment.Contains(new KeyValuePair<string, string>("NewKey2", "newvalue2Overriddenagain")));
+            Assert.False(environment.Contains(new KeyValuePair<string, string>("newkey2", "newvalue2Overriddenagain")));
 
             //Use KeyValuePair Enumerator
+            string[] results = new string[2];
             var x = environment.GetEnumerator();
             x.MoveNext();
-            var y1 = x.Current;
-            Assert.Equal("NewKey NewValue", y1.Key + " " + y1.Value);
+            results[0] = x.Current.Key + " " + x.Current.Value;
             x.MoveNext();
-            y1 = x.Current;
-            Assert.Equal("NewKey2 NewValue2", y1.Key + " " + y1.Value);
+            results[1] = x.Current.Key + " " + x.Current.Value;
+
+            Assert.Equal(new string[] { "NewKey NewValue", "NewKey2 NewValue2OverriddenAgain" }, results.OrderBy(s => s));
 
             //IsReadonly
             Assert.False(environment.IsReadOnly);
@@ -163,20 +165,27 @@ namespace System.Diagnostics.Tests
             environment.Add(new KeyValuePair<string, string>("NewKey4", "NewValue4"));
 
 
-            //CopyTo
+            //CopyTo - the order is undefined.
             KeyValuePair<string, string>[] kvpa = new KeyValuePair<string, string>[10];
             environment.CopyTo(kvpa, 0);
-            Assert.Equal("NewKey", kvpa[0].Key);
-            Assert.Equal("NewKey3", kvpa[2].Key);
+
+            KeyValuePair<string, string>[] kvpaOrdered = kvpa.OrderByDescending(k => k.Value).ToArray();
+            Assert.Equal("NewKey4", kvpaOrdered[0].Key);
+            Assert.Equal("NewKey2", kvpaOrdered[2].Key);
 
             environment.CopyTo(kvpa, 6);
-            Assert.Equal("NewKey", kvpa[6].Key);
+            Assert.Equal(default(KeyValuePair<string, string>), kvpa[5]);
+            Assert.StartsWith("NewKey", kvpa[6].Key);
+            Assert.NotEqual(kvpa[6].Key, kvpa[7].Key);
+            Assert.StartsWith("NewKey", kvpa[7].Key);
+            Assert.NotEqual(kvpa[7].Key, kvpa[8].Key);
+            Assert.StartsWith("NewKey", kvpa[8].Key);
 
             //Exception not thrown with null key
             Assert.Throws<ArgumentOutOfRangeException>(() => { environment.CopyTo(kvpa, -1); });
 
             //Exception not thrown with null key
-            Assert.Throws<ArgumentException>(() => { environment.CopyTo(kvpa, 9); });
+            AssertExtensions.Throws<ArgumentException>(null, () => { environment.CopyTo(kvpa, 9); });
 
             //Exception not thrown with null key
             Assert.Throws<ArgumentNullException>(() =>
@@ -234,10 +243,10 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // UseShellExecute currently not supported on Windows on .NET Core
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
-        public void UseShellExecute_GetSetWindows_Success_Netcore()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap, "Only UAP blocks setting ShellExecute to true")]
+        public void UseShellExecute_GetSetWindows_Success_Uap()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
             Assert.False(psi.UseShellExecute);
@@ -252,7 +261,7 @@ namespace System.Diagnostics.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default")]
         public void UseShellExecute_GetSetWindows_Success_Netfx()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -265,9 +274,9 @@ namespace System.Diagnostics.Tests
             Assert.True(psi.UseShellExecute);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // UseShellExecute currently not supported on Windows
         [Fact]
-        public void TestUseShellExecuteProperty_SetAndGet_Unix()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.NetFramework)]
+        public void TestUseShellExecuteProperty_SetAndGet_NotUapOrNetFX()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
             Assert.False(psi.UseShellExecute);
@@ -279,11 +288,11 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.UseShellExecute);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // UseShellExecute currently not supported on Windows
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestUseShellExecuteProperty_Redirects_NotSupported(int std)
         {
             Process p = CreateProcessLong();
@@ -335,6 +344,8 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingDirectoryProperty()
         {
+            CreateDefaultProcess();
+            
             // check defaults
             Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
 
@@ -460,10 +471,11 @@ namespace System.Diagnostics.Tests
             Assert.Equal(2, psi.EnvironmentVariables.Count);
             Assert.Equal(psi.Environment.Count, psi.EnvironmentVariables.Count);
 
-            Assert.Throws<ArgumentException>(() => { psi.EnvironmentVariables.Add("NewKey2", "NewValue2"); });
+            AssertExtensions.Throws<ArgumentException>(null, () => psi.EnvironmentVariables.Add("NewKey2", "NewValue2"));
             psi.EnvironmentVariables.Add("NewKey3", "NewValue3");
 
-            Assert.Throws<ArgumentException>(() => { psi.Environment.Add("NewKey3", "NewValue3"); });
+            psi.Environment.Add("NewKey3", "NewValue3Overridden");
+            Assert.Equal("NewValue3Overridden", psi.Environment["NewKey3"]);
 
             psi.EnvironmentVariables.Clear();
             Assert.Equal(0, psi.Environment.Count);
@@ -471,36 +483,21 @@ namespace System.Diagnostics.Tests
             psi.EnvironmentVariables.Add("NewKey", "NewValue");
             psi.EnvironmentVariables.Add("NewKey2", "NewValue2");
 
-            string environmentResultKey = "";
-            string environmentResultValue = "";
-            foreach(var entry in psi.Environment)
-            {
-                environmentResultKey += entry.Key;
-                environmentResultValue += entry.Value;
-            }
-
-            Assert.Equal("NewKeyNewKey2", environmentResultKey);
-            Assert.Equal("NewValueNewValue2", environmentResultValue);
-
-            string envVarResultKey = "";
-            string envVarResultValue = "";
-            foreach(KeyValuePair<string, string> entry in psi.EnvironmentVariables)
-            {
-                envVarResultKey += entry.Key;
-                envVarResultValue += entry.Value;
-            }
-
-            Assert.Equal(environmentResultKey, envVarResultKey);
-            Assert.Equal(environmentResultValue, envVarResultValue);
+            // Environment and EnvironmentVariables should be equal, but have different enumeration types.
+            IEnumerable<KeyValuePair<string, string>> allEnvironment = psi.Environment.OrderBy(k => k.Key);
+            IEnumerable<DictionaryEntry> allDictionary = psi.EnvironmentVariables.Cast<DictionaryEntry>().OrderBy(k => k.Key);
+            Assert.Equal(allEnvironment.Select(k => new DictionaryEntry(k.Key, k.Value)), allDictionary);
 
             psi.EnvironmentVariables.Add("NewKey3", "NewValue3");
             KeyValuePair<string, string>[] kvpa = new KeyValuePair<string, string>[5];
             psi.Environment.CopyTo(kvpa, 0);
-            Assert.Equal("NewKey3", kvpa[2].Key);
-            Assert.Equal("NewValue3", kvpa[2].Value);
+
+            KeyValuePair<string, string>[] kvpaOrdered = kvpa.OrderByDescending(k => k.Key).ToArray();
+            Assert.Equal("NewKey", kvpaOrdered[2].Key);
+            Assert.Equal("NewValue", kvpaOrdered[2].Value);
 
             psi.EnvironmentVariables.Remove("NewKey3");
-            Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));            
+            Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
@@ -508,6 +505,13 @@ namespace System.Diagnostics.Tests
         public void Verbs_GetWithExeExtension_ReturnsExpected()
         {
             var psi = new ProcessStartInfo { FileName = $"{Process.GetCurrentProcess().ProcessName}.exe" };
+
+            if (PlatformDetection.IsNetNative)
+            {
+                // UapAot doesn't have RegistryKey apis available so ProcessStartInfo.Verbs returns Array<string>.Empty().
+                Assert.Equal(0, psi.Verbs.Length);
+                return;
+            }
 
             Assert.Contains("open", psi.Verbs, StringComparer.OrdinalIgnoreCase);
             if (PlatformDetection.IsNotWindowsNanoServer)
@@ -688,7 +692,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(CountItems + 1, environmentVariables.Count);
 
             //Exception not thrown with invalid key
-            Assert.Throws<ArgumentException>(() => { environmentVariables.Add("NewKey2", "NewValue2"); });
+            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.Add("NewKey2", "NewValue2"); });
             Assert.False(environmentVariables.ContainsKey("NewKey"));
 
             environmentVariables.Add("newkey2", "newvalue2");
@@ -727,7 +731,7 @@ namespace System.Diagnostics.Tests
 
             result = null;
             index = 0;
-            foreach (KeyValuePair<string, string> e1 in environmentVariables)
+            foreach (DictionaryEntry e1 in environmentVariables)
             {
                 index++;
                 result += e1.Key;
@@ -750,16 +754,15 @@ namespace System.Diagnostics.Tests
             //Exception not thrown with invalid key
             Assert.Throws<ArgumentNullException>(() => environmentVariables.Add(null, "NewValue2"));
 
-            //Invalid Key to add
-            Assert.Throws<ArgumentException>(() => environmentVariables.Add("newkey2", "NewValue2"));
+            AssertExtensions.Throws<ArgumentException>(null, () => environmentVariables.Add("newkey2", "NewValue2"));
 
-            //Use KeyValuePair Enumerator
-            var x = environmentVariables.GetEnumerator() as IEnumerator<KeyValuePair<string, string>>;
+            //Use DictionaryEntry Enumerator
+            var x = environmentVariables.GetEnumerator() as IEnumerator;
             x.MoveNext();
-            var y1 = x.Current;
+            var y1 = (DictionaryEntry)x.Current;
             Assert.Equal("NewKey newvalue", y1.Key + " " + y1.Value);
             x.MoveNext();
-            y1 = x.Current;
+            y1 = (DictionaryEntry)x.Current;
             Assert.Equal("newkey2 NewValue2", y1.Key + " " + y1.Value);
 
             environmentVariables.Add("newkey3", "newvalue3");
@@ -771,14 +774,14 @@ namespace System.Diagnostics.Tests
             Assert.Equal("newvalue3", kvpa[2].Value);
 
             string[] kvp = new string[10];
-            Assert.Throws<ArgumentException>(() => { environmentVariables.CopyTo(kvp, 6); });
+            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.CopyTo(kvp, 6); });
             environmentVariables.CopyTo(kvpa, 6);
             Assert.Equal("NewKey", kvpa[6].Key);
             Assert.Equal("newvalue", kvpa[6].Value);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => { environmentVariables.CopyTo(kvpa, -1); });
 
-            Assert.Throws<ArgumentException>(() => { environmentVariables.CopyTo(kvpa, 9); });
+            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.CopyTo(kvpa, 9); });
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -935,6 +938,224 @@ namespace System.Diagnostics.Tests
         {
             var info = new ProcessStartInfo { WorkingDirectory = workingDirectory };
             Assert.Equal(workingDirectory ?? string.Empty, info.WorkingDirectory);
+        }
+
+        [Fact(Skip = "Manual test")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void StartInfo_WebPage()
+        {
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = @"http://www.microsoft.com"
+            };
+
+            Process.Start(info); // Returns null after navigating browser
+        }
+
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
+        [MemberData(nameof(UseShellExecute))]
+        [OuterLoop("Launches notepad")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartInfo_NotepadWithContent(bool useShellExecute)
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.WriteAllText(tempFile, $"StartInfo_NotepadWithContent({useShellExecute})");
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = @"notepad.exe",
+                Arguments = tempFile,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            using (var process = Process.Start(info))
+            {
+                Assert.True(process != null, $"Could not start {info.FileName} {info.Arguments} UseShellExecute={info.UseShellExecute}");
+
+                try
+                {
+                    process.WaitForInputIdle(); // Give the file a chance to load
+                    Assert.Equal("notepad", process.ProcessName);
+
+                    if (PlatformDetection.IsUap)
+                    {
+                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
+                    }
+                    else
+                    {
+                        // On some Windows versions, the file extension is not included in the title
+                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    }
+                }
+                finally
+                {
+                    if (process != null && !process.HasExited)
+                        process.Kill();
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer),  // Nano does not support UseShellExecute
+                         nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindows8x))]   // https://github.com/dotnet/corefx/issues/20388
+        [OuterLoop("Launches notepad")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        // Re-enabling with extra diagnostic info
+        // [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
+        // We don't have the ability yet for UseShellExecute in UAP
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20204", TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        public void StartInfo_TextFile_ShellExecute()
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.WriteAllText(tempFile, $"StartInfo_TextFile_ShellExecute");
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = tempFile,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            using (var process = Process.Start(info))
+            {
+                Assert.True(process != null, $"Could not start {info.FileName} UseShellExecute={info.UseShellExecute}\r\n{GetAssociationDetails()}");
+
+                try
+                {
+                    process.WaitForInputIdle(); // Give the file a chance to load
+                    Assert.Equal("notepad", process.ProcessName);
+
+                    if (PlatformDetection.IsUap)
+                    {
+                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
+                    }
+                    else
+                    {
+                        // On some Windows versions, the file extension is not included in the title
+                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                    }
+                }
+                finally
+                {
+                    if (process != null && !process.HasExited)
+                        process.Kill();
+                }
+            }
+        }
+
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        private unsafe static extern int AssocQueryStringW(
+            int flags,
+            int str,
+            string pszAssoc,
+            string pszExtra,
+            char* pszOut,
+            ref uint pcchOut);
+
+        private unsafe static string GetAssociationString(int flags, int str, string pszAssoc, string pszExtra)
+        {
+            uint count = 0;
+            int result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, null, ref count);
+            if (result != 1)
+                return $"Didn't get expected HRESULT (1) when getting char count. HRESULT was 0x{result:x8}";
+
+            string value = new string((char)0, (int)count - 1);
+            fixed(char* s = value)
+            {
+                result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, s, ref count);
+            }
+
+            if (result != 0)
+                return $"Didn't get expected HRESULT (0), when getting char count. HRESULT was 0x{result:x8}";
+
+            return value;
+        }
+
+        private static string GetAssociationDetails()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Association details for '.txt'");
+            sb.AppendLine("------------------------------");
+
+            string open = GetAssociationString(0, 1 /* ASSOCSTR_COMMAND */, ".txt", "open");
+            sb.AppendFormat("Open command: {0}", open);
+            sb.AppendLine();
+
+            string progId = GetAssociationString(0, 20 /* ASSOCSTR_PROGID */, ".txt", null);
+            sb.AppendFormat("ProgID: {0}", progId);
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
+        public void ShellExecute_Nano_Fails_Start()
+        {
+            string tempFile = GetTestFilePath() + ".txt";
+            File.Create(tempFile).Dispose();
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = tempFile
+            };
+
+            Assert.Throws<PlatformNotSupportedException>(() => Process.Start(info));
+        }
+
+        public static TheoryData<bool> UseShellExecute
+        {
+            get
+            {
+                TheoryData<bool> data = new TheoryData<bool> { false };
+
+                if (   !PlatformDetection.IsUap // https://github.com/dotnet/corefx/issues/20204
+                    && !PlatformDetection.IsWindowsNanoServer) // By design
+                    data.Add(true);
+                return data;
+            }
+        }
+
+        private const int ERROR_SUCCESS = 0x0;
+        private const int ERROR_FILE_NOT_FOUND = 0x2;
+        private const int ERROR_BAD_EXE_FORMAT = 0xC1;
+
+        [MemberData(nameof(UseShellExecute))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartInfo_BadVerb(bool useShellExecute)
+        {
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = @"foo.txt",
+                Verb = "Zlorp"
+            };
+
+            Assert.Equal(ERROR_FILE_NOT_FOUND, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
+        }
+
+        [MemberData(nameof(UseShellExecute))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartInfo_BadExe(bool useShellExecute)
+        {
+            string tempFile = GetTestFilePath() + ".exe";
+            File.Create(tempFile).Dispose();
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = tempFile
+            };
+
+            int expected = ERROR_BAD_EXE_FORMAT;
+
+            // Windows Nano bug see #10290
+            if (PlatformDetection.IsWindowsNanoServer)
+                expected = ERROR_SUCCESS;
+
+            Assert.Equal(expected, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
         }
     }
 }

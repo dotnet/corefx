@@ -21,14 +21,15 @@ namespace System.Collections
     [DebuggerTypeProxy(typeof(System.Collections.Queue.QueueDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Queue : ICollection, ICloneable
     {
-        private Object[] _array;
-        private int _head;       // First valid element in the queue
-        private int _tail;       // Last valid element in the queue
-        private int _size;       // Number of elements.
-        private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0
-        private int _version;
+        private Object[] _array; // Do not rename (binary serialization)
+        private int _head; // First valid element in the queue. Do not rename (binary serialization)
+        private int _tail; // Last valid element in the queue. Do not rename (binary serialization)
+        private int _size; // Number of elements. Do not rename (binary serialization)
+        private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0. Do not rename (binary serialization)
+        private int _version; // Do not rename (binary serialization)
         [NonSerialized]
         private Object _syncRoot;
 
@@ -321,7 +322,6 @@ namespace System.Collections
 
 
         // Implements a synchronization wrapper around a queue.
-        [Serializable]
         private class SynchronizedQueue : Queue
         {
             private Queue _q;
@@ -444,7 +444,6 @@ namespace System.Collections
         // Implements an enumerator for a Queue.  The enumerator uses the
         // internal version number of the list to ensure that no modifications are
         // made to the list while an enumeration is in progress.
-        [Serializable]
         private class QueueEnumerator : IEnumerator, ICloneable
         {
             private Queue _q;

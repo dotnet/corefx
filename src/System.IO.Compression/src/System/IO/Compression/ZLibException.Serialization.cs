@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.IO.Compression
 {
-    [Serializable]
     internal partial class ZLibException : IOException, ISerializable
     {
         /// <summary>
@@ -16,17 +15,12 @@ namespace System.IO.Compression
         /// <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
         protected ZLibException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            _zlibErrorContext = info.GetString("zlibErrorContext");
-            _zlibErrorCode = (ZLibNative.ErrorCode)info.GetInt32("zlibErrorCode");
-            _zlibErrorMessage = info.GetString("zlibErrorMessage");
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
-            si.AddValue("zlibErrorContext", _zlibErrorContext);
-            si.AddValue("zlibErrorCode", (int)_zlibErrorCode);
-            si.AddValue("zlibErrorMessage", _zlibErrorMessage);
         }
     }
 }

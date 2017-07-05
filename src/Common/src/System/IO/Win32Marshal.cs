@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace System.IO
@@ -19,7 +17,7 @@ namespace System.IO
         internal static Exception GetExceptionForLastWin32Error()
         {
             int errorCode = Marshal.GetLastWin32Error();
-            return GetExceptionForWin32Error(errorCode, String.Empty);
+            return GetExceptionForWin32Error(errorCode, string.Empty);
         }
 
         /// <summary>
@@ -99,11 +97,13 @@ namespace System.IO
         }
 
         /// <summary>
-        ///     Returns a HRESULT for the specified Win32 error code.
+        /// If not already an HRESULT, returns an HRESULT for the specified Win32 error code.
         /// </summary>
         internal static int MakeHRFromErrorCode(int errorCode)
         {
-            Debug.Assert((0xFFFF0000 & errorCode) == 0, "This is an HRESULT, not an error code!");
+            // Don't convert it if it is already an HRESULT
+            if ((0xFFFF0000 & errorCode) != 0)
+                return errorCode;
 
             return unchecked(((int)0x80070000) | errorCode);
         }

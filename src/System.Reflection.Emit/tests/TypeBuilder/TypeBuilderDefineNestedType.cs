@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -119,12 +120,12 @@ namespace System.Reflection.Emit.Tests
         public void DefineNestedType_NullName_ThrowsArgumentNullException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null));
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public));
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType()));
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), 2048));
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), PackingSize.Size8));
-            Assert.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), new Type[0]));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType()));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), 2048));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), PackingSize.Size8));
+            AssertExtensions.Throws<ArgumentNullException>("fullname", () => type.DefineNestedType(null, TypeAttributes.Public, type.GetType(), new Type[0]));
         }
 
         [Theory]
@@ -134,19 +135,19 @@ namespace System.Reflection.Emit.Tests
         public void DefineNestedType_EmptyName_ThrowsArgumentException(string fullname)
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname));
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public));
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType()));
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), 2048));
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), PackingSize.Size8));
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), new Type[0]));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType()));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), 2048));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), PackingSize.Size8));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(fullname, TypeAttributes.Public, type.GetType(), new Type[0]));
         }
 
         [Fact]
         public void DefineNestedType_LongName_ThrowsArgumentException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
-            Assert.Throws<ArgumentException>("fullname", () => type.DefineNestedType(new string('a', 1024)));
+            AssertExtensions.Throws<ArgumentException>("fullname", () => type.DefineNestedType(new string('a', 1024)));
         }
         
         [Theory]
@@ -161,15 +162,15 @@ namespace System.Reflection.Emit.Tests
         public void DefineNestedType_InvalidAttributes_ThrowsArgumentException(TypeAttributes attributes, string paramName)
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentException>(paramName, () => type.DefineNestedType("Name", attributes));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => type.DefineNestedType("Name", attributes));
         }
         
         [Fact]
         public void DefineNestedType_InvalidParent_ThrowsArgumentException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentException>("attr", () => type.DefineNestedType("Name", TypeAttributes.Public, typeof(int).MakeByRefType()));
-            Assert.Throws<ArgumentException>("attr", () => type.DefineNestedType("Name", TypeAttributes.Public, typeof(EmptyNonGenericInterface1)));
+            AssertExtensions.Throws<ArgumentException>("attr", () => type.DefineNestedType("Name", TypeAttributes.Public, typeof(int).MakeByRefType()));
+            AssertExtensions.Throws<ArgumentException>("attr", () => type.DefineNestedType("Name", TypeAttributes.Public, typeof(EmptyNonGenericInterface1)));
         }
         
         [Theory]
@@ -203,14 +204,14 @@ namespace System.Reflection.Emit.Tests
         public void DefineNestedType_NullInterface_ThrowsArgumentNullException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentNullException>("interfaces", () => type.DefineNestedType("Name", TypeAttributes.NestedPublic, typeof(object), new Type[] { null }));
+            AssertExtensions.Throws<ArgumentNullException>("interfaces", () => type.DefineNestedType("Name", TypeAttributes.NestedPublic, typeof(object), new Type[] { null }));
         }
 
         [Fact]
         public void DefineNestedType_ByRefInterfaceType_ThrowsArgumentException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
-            Assert.Throws<ArgumentException>(null, () => type.DefineNestedType("Name", TypeAttributes.NestedPublic, typeof(object), new Type[] { typeof(int).MakeByRefType() }));
+            AssertExtensions.Throws<ArgumentException>(null, () => type.DefineNestedType("Name", TypeAttributes.NestedPublic, typeof(object), new Type[] { typeof(int).MakeByRefType() }));
         }
 
         public static IEnumerable<object[]> InvalidInterfaceType_TestData()

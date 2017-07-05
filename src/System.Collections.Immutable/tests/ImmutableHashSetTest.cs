@@ -71,6 +71,13 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void EnumeratorWithHashCollisionsTest_RefType()
+        {
+            var emptySet = this.EmptyTyped<string>().WithComparer(new BadHasher<string>());
+            this.EnumeratorTestHelper(emptySet, null, "c", "a", "e");
+        }
+
+        [Fact]
         public void EnumeratorRecyclingMisuse()
         {
             var collection = ImmutableHashSet.Create<int>().Add(5);
@@ -133,6 +140,12 @@ namespace System.Collections.Immutable.Tests
             set = ImmutableHashSet.CreateRange(comparer, (IEnumerable<string>)new[] { "a", "b" });
             Assert.Equal(2, set.Count);
             Assert.Same(comparer, set.KeyComparer);
+
+            set = ImmutableHashSet.Create(default(string));
+            Assert.Equal(1, set.Count);
+
+            set = ImmutableHashSet.CreateRange(new[] { null, "a", null, "b" });
+            Assert.Equal(3, set.Count);
         }
 
         /// <summary>
@@ -150,6 +163,21 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new[] { 6 }, setAfterRemovingFive);
         }
 
+        /// <summary>
+        /// Verifies the non-removal of an item that does not belong to the set,
+        /// but which happens to have a colliding hash code with another value
+        /// that *is* in the set.
+        /// </summary>
+        [Fact]
+        public void RemoveValuesFromCollidedHashCode_RefType()
+        {
+            var set = ImmutableHashSet.Create<string>(new BadHasher<string>(), "a", "b");
+            Assert.Same(set, set.Remove("c"));
+            var setAfterRemovingA = set.Remove("a");
+            Assert.Equal(1, setAfterRemovingA.Count);
+            Assert.Equal(new[] { "b" }, setAfterRemovingA);
+        }
+
         [Fact]
         public void TryGetValueTest()
         {
@@ -157,6 +185,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableHashSet.Create<string>());
@@ -167,7 +196,7 @@ namespace System.Collections.Immutable.Tests
         public void SymmetricExceptWithComparerTests()
         {
             var set = ImmutableHashSet.Create<string>("a").WithComparer(StringComparer.OrdinalIgnoreCase);
-            var otherCollection = new[] {"A"};
+            var otherCollection = new[] { "A" };
 
             var expectedSet = new HashSet<string>(set, set.KeyComparer);
             expectedSet.SymmetricExceptWith(otherCollection);

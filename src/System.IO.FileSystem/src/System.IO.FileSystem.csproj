@@ -15,7 +15,6 @@
   <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
     <NoWarn>$(NoWarn);414</NoWarn>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
@@ -64,6 +63,7 @@
   </ItemGroup>
   <!-- Windows -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="System\IO\DisableMediaInsertionPrompt.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\DirectoryInfo.Windows.cs" />
     <Compile Include="System\IO\FileInfo.Windows.cs" />
@@ -214,8 +214,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteVolumeMountPoint.cs">
       <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetErrorMode.cs">
-      <Link>Common\Interop\Windows\Interop.SetErrorMode.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
+      <Link>Common\Interop\Windows\Interop.SetThreadErrorMode.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
@@ -229,16 +229,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteVolumeMountPoint.Uap.cs">
       <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.Uap.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetErrorMode.Uap.cs">
-      <Link>Common\Interop\Windows\Interop.SetErrorMode.Uap.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetThreadErrorMode.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.SetThreadErrorMode.Uap.cs</Link>
     </Compile>
     <Compile Include="System\IO\FileSystem.Current.MuxWin32WinRT.cs" />
     <Compile Include="System\IO\FileSystemInfo.WinRT.cs" />
     <Compile Include="System\IO\MultiplexingWin32WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTIOExtensions.cs" />
-    <Compile Include="System\IO\WinRTFileStream.cs" />
     <Compile Include="System\IO\WinRTFileSystem.cs" />
-    <Compile Include="System\IO\WinRTFileSystemObject.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CopyFile2.cs">
       <Link>Common\Interop\Windows\Interop.CopyFile2.cs</Link>
     </Compile>

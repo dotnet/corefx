@@ -1,11 +1,13 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class MoveFileTests : IsoStorageTest
     {
         [Fact]
@@ -13,8 +15,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentNullException>("sourceFileName", () => isf.MoveFile(null, "bar"));
-                Assert.Throws<ArgumentNullException>("destinationFileName", () => isf.MoveFile("foo", null));
+                AssertExtensions.Throws<ArgumentNullException>("sourceFileName", () => isf.MoveFile(null, "bar"));
+                AssertExtensions.Throws<ArgumentNullException>("destinationFileName", () => isf.MoveFile("foo", null));
             }
         }
 
@@ -23,8 +25,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>("sourceFileName", () => isf.MoveFile(string.Empty, "bar"));
-                Assert.Throws<ArgumentException>("destinationFileName", () => isf.MoveFile("foo", string.Empty));
+                AssertExtensions.Throws<ArgumentException>("sourceFileName", () => isf.MoveFile(string.Empty, "bar"));
+                AssertExtensions.Throws<ArgumentException>("destinationFileName", () => isf.MoveFile("foo", string.Empty));
             }
         }
 
@@ -40,17 +42,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void MoveFile_ThrowsIsolatedStorageException()
+        public void MoveFile_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("foo", "bar"));
+                Assert.Throws<InvalidOperationException>(() => isf.MoveFile("foo", "bar"));
             }
         }
 
         [Fact]
-        public void MoveFile_ThrowsInvalidOperationException()
+        public void MoveFile_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -64,8 +66,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.MoveFile("\0bad", "bar"));
-                Assert.Throws<ArgumentException>(() => isf.MoveFile("foo", "\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveFile("\0bad", "bar"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveFile("foo", "\0bad"));
             }
         }
 
@@ -79,6 +81,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveFile_MoveOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -92,6 +95,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveFile_MovesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

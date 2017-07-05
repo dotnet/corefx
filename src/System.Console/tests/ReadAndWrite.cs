@@ -261,6 +261,7 @@ public class ReadAndWrite
     [Fact]
     // On the full framework it is not guaranteed to eat the preamble bytes
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
     public static unsafe void OutputEncodingPreamble()
     {
         Encoding curEncoding = Console.OutputEncoding;
@@ -283,6 +284,7 @@ public class ReadAndWrite
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
     public static unsafe void OutputEncoding()
     {
         Encoding curEncoding = Console.OutputEncoding;
@@ -385,18 +387,18 @@ public class ReadAndWrite
     [Fact]
     public static void OpenStandardInput_NegativeBufferSize_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardInput(-1));
+        AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardInput(-1));
     }
 
     [Fact]
     public static void OpenStandardOutput_NegativeBufferSize_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardOutput(-1));
+        AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardOutput(-1));
     }
 
     [Fact]
     public static void OpenStandardError_NegativeBufferSize_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardError(-1));
+        AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => Console.OpenStandardError(-1));
     }
 }
