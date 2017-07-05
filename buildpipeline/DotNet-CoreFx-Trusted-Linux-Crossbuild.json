@@ -72,25 +72,6 @@
     },
     {
       "enabled": true,
-      "continueOnError": true,
-      "alwaysRun": false,
-      "displayName": "Display contents of init-tools.log",
-      "timeoutInMinutes": 0,
-      "condition": "failed()",
-      "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "filename": "cat",
-        "arguments": "$(Build.SourcesDirectory)/corefx/init-tools.log",
-        "workingFolder": "",
-        "failOnStandardError": "false"
-      }
-    },
-    {
-      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Initialize Docker",
