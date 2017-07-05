@@ -15,7 +15,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
     public static class SgenTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void BasicTest()
         {
             int n = Sgen.Main(new string[0]);
@@ -23,7 +23,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void GeneralBaselineTest()
         {
             string codefile = "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs";
