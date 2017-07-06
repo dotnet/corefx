@@ -748,10 +748,7 @@ namespace System.Linq
                 _keys[i] = _keySelector(elements[i]);
             }
 
-            if (_next != null)
-            {
-                _next.ComputeKeys(elements, count);
-            }
+            _next?.ComputeKeys(elements, count);
         }
 
         internal override int CompareAnyKeys(int index1, int index2)

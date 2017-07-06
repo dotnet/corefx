@@ -60,10 +60,7 @@ namespace System.Linq
 
             private void SetEnumerator(IEnumerator<TSource> enumerator)
             {
-                if (_enumerator != null)
-                {
-                    _enumerator.Dispose();
-                }
+                _enumerator?.Dispose();
 
                 _enumerator = enumerator;
             }
