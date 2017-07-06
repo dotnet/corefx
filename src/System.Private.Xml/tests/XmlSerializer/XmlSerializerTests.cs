@@ -34,7 +34,7 @@ public static partial class XmlSerializerTests
 
     private static bool IsTimeSpanSerializationAvailable => !PlatformDetection.IsFullFramework || (AppContext.TryGetSwitch("Switch.System.Xml.EnableTimeSpanSerialization", out bool result) && result);
 
-    [fact]
+    [Fact]
     public static void Xml_BoolAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<bool>(true,
@@ -45,7 +45,7 @@ public static partial class XmlSerializerTests
 <boolean>false</boolean>"), false);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ByteArrayAsRoot()
     {
         Assert.Null(SerializeAndDeserialize<byte[]>(null,
@@ -58,7 +58,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(x, y);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_CharAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<char>(char.MinValue,
@@ -78,7 +78,7 @@ public static partial class XmlSerializerTests
 <char>28450</char>"), '漢');
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ByteAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<byte>(10,
@@ -92,7 +92,7 @@ public static partial class XmlSerializerTests
 <unsignedByte>255</unsignedByte>"), byte.MaxValue);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DateTimeAsRoot()
     {
         // Assume that UTC offset doesn't change more often than once in the day 2013-01-02
@@ -118,7 +118,7 @@ public static partial class XmlSerializerTests
 <dateTime>9999-12-31T23:59:59.9999999Z</dateTime>"), DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithDateTimePropertyAsXmlTime()
     {
         DateTime localTime = new DateTime(549269870000L, DateTimeKind.Local);
@@ -151,7 +151,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DecimalAsRoot()
     {
         foreach (decimal value in new decimal[] { (decimal)-1.2, (decimal)0, (decimal)2.3, decimal.MinValue, decimal.MaxValue })
@@ -161,7 +161,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DoubleAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<double>(-1.2,
@@ -181,7 +181,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <double>1.7976931348623157E+308</double>"), double.MaxValue);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_FloatAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2,
@@ -201,7 +201,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <float>3.40282347E+38</float>"), float.MaxValue);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_GuidAsRoot()
     {
         Xml_GuidAsRoot(new XmlSerializer(typeof(Guid)));
@@ -216,7 +216,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_IntAsRoot()
     {
         foreach (int value in new int[] { -1, 0, 2, int.MinValue, int.MaxValue })
@@ -226,7 +226,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_LongAsRoot()
     {
         foreach (long value in new long[] { (long)-1, (long)0, (long)2, long.MinValue, long.MaxValue })
@@ -236,7 +236,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ObjectAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<object>(1,
@@ -252,7 +252,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 @"<?xml version=""1.0""?><anyType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:nil=""true"" />"), null);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlQualifiedNameAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<XmlQualifiedName>(new XmlQualifiedName("abc", "def"),
@@ -262,7 +262,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 @"<?xml version=""1.0""?><QName xmlns="""" />"), XmlQualifiedName.Empty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ShortAsRoot()
     {
         foreach (short value in new short[] { (short)-1.2, (short)0, (short)2.3, short.MinValue, short.MaxValue })
@@ -272,7 +272,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_SbyteAsRoot()
     {
         foreach (sbyte value in new sbyte[] { (sbyte)3, (sbyte)0, sbyte.MinValue, sbyte.MaxValue })
@@ -282,7 +282,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_StringAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<string>("abc",
@@ -305,7 +305,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <string>Hello World! 漢 ñ</string>"), "Hello World! 漢 ñ");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_UintAsRoot()
     {
         foreach (uint value in new uint[] { (uint)3, (uint)0, uint.MinValue, uint.MaxValue })
@@ -315,7 +315,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_UlongAsRoot()
     {
         foreach (ulong value in new ulong[] { (ulong)3, (ulong)0, ulong.MinValue, ulong.MaxValue })
@@ -325,7 +325,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_UshortAsRoot()
     {
         foreach (ushort value in new ushort[] { (ushort)3, (ushort)0, ushort.MinValue, ushort.MaxValue })
@@ -335,7 +335,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ArrayAsRoot()
     {
         SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
@@ -355,7 +355,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Utils.Equal(x, y, (a, b) => { return SimpleType.AreEqual(a, b); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ArrayAsGetSet()
     {
         TypeWithGetSetArrayMembers x = new TypeWithGetSetArrayMembers
@@ -405,7 +405,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(x.P2, y.P2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ArrayAsGetOnly()
     {
         TypeWithGetOnlyArrayProperties x = new TypeWithGetOnlyArrayProperties();
@@ -423,7 +423,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         // However, it does not serialize the property. So for this test case, I'll use it to verify there are no complaints about missing public setter
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ListGenericRoot()
     {
         Xml_ListGenericRoot(new XmlSerializer(typeof(List<string>)));
@@ -448,7 +448,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(y[1] == "one");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_CollectionGenericRoot()
     {
         MyCollection<string> x = new MyCollection<string>("a1", "a2");
@@ -467,7 +467,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ListRoot()
     {
         MyList x = new MyList("a1", "a2");
@@ -484,7 +484,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual((string)x[1], (string)y[1]);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_EnumerableGenericRoot()
     {
         MyEnumerable<string> x = new MyEnumerable<string>("a1", "a2");
@@ -502,7 +502,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual("a1a2", itemsInY);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_CollectionRoot()
     {
         MyCollection x = new MyCollection('a', 45);
@@ -519,7 +519,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True((int)y[1] == 45);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_EnumerableRoot()
     {
         MyEnumerable x = new MyEnumerable("abc", 3);
@@ -536,7 +536,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True((int)y[1] == 3);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_EnumAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<MyEnum>(MyEnum.Two,
@@ -565,7 +565,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <ULongEnum>Option1</ULongEnum>"), ULongEnum.Option1);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_EnumAsMember()
     {
         TypeWithEnumMembers x = new TypeWithEnumMembers { F1 = MyEnum.Three, P1 = MyEnum.Two };
@@ -581,7 +581,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(x.P1, y.P1);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DCClassWithEnumAndStruct()
     {
         DCClassWithEnumAndStruct value = new DCClassWithEnumAndStruct(true);
@@ -598,7 +598,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.MyStruct.Data, actual.MyStruct.Data);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_BuiltInTypes()
     {
         BuiltInTypes x = new BuiltInTypes
@@ -615,7 +615,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(x.ByteArray, y.ByteArray);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_GenericBase()
     {
         SerializeAndDeserialize<GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>>(new GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>(true),
@@ -632,7 +632,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </GenericBase2OfSimpleBaseDerivedSimpleBaseDerived2>");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypesWithArrayOfOtherTypes()
     {
         SerializeAndDeserialize<TypeHasArrayOfASerializedAsB>(new TypeHasArrayOfASerializedAsB(true),
@@ -649,7 +649,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </TypeHasArrayOfASerializedAsB>");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XElementAsRoot()
     {
         var original = new XElement("ElementName1");
@@ -662,7 +662,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         VerifyXElementObject(original, actual);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_WithXElement()
     {
         var original = new WithXElement(true);
@@ -688,7 +688,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -706,7 +706,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         VerifyXElementObject((XElement)original.e1.FirstNode, (XElement)actual.e1.FirstNode);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -732,7 +732,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         VerifyXElementObject(original.a[2], actual.a[2], checkFirstAttribute: false);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);
@@ -758,7 +758,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         VerifyXElementObject(original.list[2], actual.list[2], checkFirstAttribute: false);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeNamesWithSpecialCharacters()
     {
         SerializeAndDeserialize<__TypeNameWithSpecialCharacters漢ñ>(new __TypeNameWithSpecialCharacters漢ñ() { PropertyNameWithSpecialCharacters漢ñ = "Test" },
@@ -768,7 +768,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </__TypeNameWithSpecialCharacters漢ñ>");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_JaggedArrayAsRoot()
     {
         int[][] jaggedIntegerArray = new int[][] { new int[] { 1, 3, 5, 7, 9 }, new int[] { 0, 2, 4, 6 }, new int[] { 11, 22 } };
@@ -873,7 +873,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(actualJaggedIntegerArray2[2][0].Length == 0);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DefaultNamespaceChangeTest()
     {
         Assert.StrictEqual(
@@ -884,7 +884,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         "Teststring");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DefaultNamespaceChange_SimpleTypeAsRoot()
     {
         var value = new SimpleType { P1 = "abc", P2 = 11 };
@@ -899,7 +899,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.P2, o.P2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DefaultNamespaceChange_SimpleTypeAsRoot_WithXmlSerializerNamespaces()
     {
         var value = new SimpleType { P1 = "abc", P2 = 11 };
@@ -916,7 +916,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.P2, o.P2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DefaultNamespaceChange_ArrayAsRoot()
     {
         SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
@@ -937,7 +937,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Utils.Equal(x, y, (a, b) => { return SimpleType.AreEqual(a, b); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_KnownTypesThroughConstructor()
     {
         KnownTypesThroughConstructor value = new KnownTypesThroughConstructor() { EnumValue = MyEnum.One, SimpleTypeValue = new SimpleKnownTypeValue() { StrProperty = "PropertyValue" } };
@@ -955,7 +955,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(((SimpleKnownTypeValue)value.SimpleTypeValue).StrProperty, ((SimpleKnownTypeValue)actual.SimpleTypeValue).StrProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_BaseClassAndDerivedClassWithSameProperty()
     {
         DerivedClassWithSameProperty value = new DerivedClassWithSameProperty() { DateTimeProperty = new DateTime(100), IntProperty = 5, StringProperty = "TestString", ListProperty = new List<string>() };
@@ -980,7 +980,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.ListProperty.ToArray(), actual.ListProperty.ToArray());
     }
 
-    [fact]
+    [Fact]
     public static void XML_EnumerableCollection()
     {
         EnumerableCollection original = new EnumerableCollection();
@@ -993,7 +993,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(actual, original);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_SimpleCollectionDataContract()
     {
         var value = new SimpleCDC(true);
@@ -1013,7 +1013,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_EnumFlags()
     {
         EnumFlags value1 = EnumFlags.One | EnumFlags.Four;
@@ -1023,7 +1023,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value1, value2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_SerializeClassThatImplementsInteface()
     {
         ClassImplementsInterface value = new ClassImplementsInterface() { ClassID = "ClassID", DisplayName = "DisplayName", Id = "Id", IsLoaded = true };
@@ -1043,7 +1043,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributesTest()
     {
         var value = new XmlSerializerAttributes();
@@ -1073,7 +1073,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(actual.XmlTextProperty, value.XmlTextProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAnyAttributeTest()
     {
         var serializer = new XmlSerializer(typeof (TypeWithAnyAttribute));
@@ -1098,7 +1098,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_Struct()
     {
         var value = new WithStruct { Some = new SomeStruct { A = 1, B = 2 } };
@@ -1116,7 +1116,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(result.Some.B, value.Some.B);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_Enums()
     {
         var item = new WithEnums() { Int = IntEnum.Option1, Short = ShortEnum.Option2 };
@@ -1130,7 +1130,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(item.Int, actual.Int);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_Nullables()
     {
         var item = new WithNullables() { Optional = IntEnum.Option1, OptionalInt = 42, Struct1 = new SomeStruct { A = 1, B = 2 } };
@@ -1156,7 +1156,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(item.Struct1.Value.B, actual.Struct1.Value.B);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ClassImplementingIXmlSerialiable()
     {
         var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
@@ -1169,7 +1169,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(ClassImplementingIXmlSerialiable.WriteXmlInvoked);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithFieldNameEndBySpecified()
     {
         var value = new TypeWithPropertyNameSpecified() { MyField = "MyField", MyFieldIgnored = 99, MyFieldSpecified = true, MyFieldIgnoredSpecified = false };
@@ -1179,7 +1179,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(actual.MyFieldIgnored, 0);
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithXmlSchemaFormAttribute()
     {
         var value = new TypeWithXmlSchemaFormAttribute() { NoneSchemaFormListProperty = new List<string> { "abc" }, QualifiedSchemaFormListProperty = new List<bool> { true }, UnqualifiedSchemaFormListProperty = new List<int> { 1 } };
@@ -1194,7 +1194,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.QualifiedSchemaFormListProperty[0], acutal.QualifiedSchemaFormListProperty[0]);
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithTypeNameInXmlTypeAttribute()
     {
         var value = new TypeWithTypeNameInXmlTypeAttribute();
@@ -1203,7 +1203,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 @"<?xml version=""1.0""?><MyXmlType xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithMemberWithXmlNamespaceDeclarationsAttribute()
     {
         var original = new TypeWithMemberWithXmlNamespaceDeclarationsAttribute() { header = "foo", body = "bar" };
@@ -1218,7 +1218,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(original.body, actual.body);
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithXmlTextAttributeOnArray()
     {
         var original = new TypeWithXmlTextAttributeOnArray() { Text = new string[] { "val1", "val2" } };
@@ -1231,7 +1231,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual("val1val2", actual.Text[0]);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithSchemaFormInXmlAttribute()
     {
         var value = new TypeWithSchemaFormInXmlAttribute() { TestProperty = "hello" };
@@ -1240,7 +1240,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.TestProperty, actual.TestProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlElementAsRoot()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -1253,7 +1253,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(expected.InnerText, actual.InnerText);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithXmlElementProperty()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -1272,7 +1272,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlDocumentAsRoot()
     {
         XmlDocument expected = new XmlDocument();
@@ -1283,7 +1283,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(expected.OuterXml, actual.OuterXml);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithXmlDocumentProperty()
     {
         XmlDocument xmlDoc = new XmlDocument();
@@ -1296,7 +1296,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(expected.Document.OuterXml, actual.Document.OuterXml);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithNonPublicDefaultConstructor()
     {
         System.Reflection.TypeInfo ti = System.Reflection.IntrospectionExtensions.GetTypeInfo(typeof(TypeWithNonPublicDefaultConstructor));
@@ -1323,7 +1323,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         return null;
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TestIgnoreWhitespaceForDeserialization()
     {
         string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -1341,7 +1341,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(@" http://wxdata.weather.com/wxdata/", value.DS2Root);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TestTypeWithListPropertiesWithoutPublicSetters()
     {
         var value = new TypeWithListPropertiesWithoutPublicSetters();
@@ -1387,7 +1387,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.PublicIntListFieldWithXmlElementAttribute[0], actual.PublicIntListFieldWithXmlElementAttribute[0]);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_HighScoreManager()
     {
         List<HighScores.BridgeGameHighScore> value = new List<HighScores.BridgeGameHighScore>();
@@ -1406,7 +1406,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value[0].Name, actual[0].Name);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
     {
         var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
@@ -1415,7 +1415,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.IntValue, actual.IntValue);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithNestedPublicType()
     {
         var value = new List<TypeWithNestedPublicType.LevelData>();
@@ -1436,7 +1436,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value[1].Name, actual[1].Name);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_PublicTypeWithNestedPublicTypeWithNestedPublicType()
     {
         var value = new List<PublicTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData>();
@@ -1457,7 +1457,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value[1].Name, actual[1].Name);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TestDeserializingUnknownNode()
     {
         string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8"" ?>
@@ -1499,14 +1499,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(actual[0].EventData, actual[1].EventData);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithNonParameterlessConstructor()
     {
         var obj = new TypeWithNonParameterlessConstructor("string value");
         Assert.Throws<InvalidOperationException>(() => { SerializeAndDeserialize(obj, string.Empty); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithBinaryProperty()
     {
         var obj = new TypeWithBinaryProperty();
@@ -1519,7 +1519,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(true, Enumerable.SequenceEqual(obj.BinaryHexContent, actual.BinaryHexContent));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_FromTypes()
     {
         var serializers = XmlSerializer.FromTypes(new Type[] { typeof(Guid), typeof(List<string>) });
@@ -1530,7 +1530,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(0, serializers.Length);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ConstructorWithXmlRootAttr()
     {
         var serializer = new XmlSerializer(typeof (List<string>), new XmlRootAttribute()
@@ -1545,7 +1545,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(expected.SequenceEqual(actual));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ConstructorWithXmlAttributeOverrides()
     {
         var expected = new Music.Orchestra()
@@ -1583,7 +1583,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DifferentSerializeDeserializeOverloads()
     {
         var expected = new SimpleType() { P1 = "p1 value", P2 = 123 };
@@ -1675,7 +1675,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(obj.TimeSpanProperty2, deserializedObj.TimeSpanProperty2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithByteProperty()
     {
         var obj = new TypeWithByteProperty() {ByteProperty = 123};
@@ -1687,7 +1687,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(obj.ByteProperty, deserializedObj.ByteProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DeserializeOutOfRangeByteProperty()
     {
         //Deserialize an instance with out-of-range value for the byte property, expecting exception from deserialization process
@@ -1708,7 +1708,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlElementAttribute()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1721,7 +1721,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False(attrs.XmlElements.Contains(item));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlElementAttribute_ThrowsOnMissingItem()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1740,7 +1740,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlElements.Remove(item2); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlArrayItemAttribute()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1753,7 +1753,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False(attrs.XmlArrayItems.Contains(item));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlArrayItemAttribute_ThrowsOnMissingItem()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1772,7 +1772,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlArrayItems.Remove(item2); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlAnyElementAttribute()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1785,7 +1785,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False(attrs.XmlAnyElements.Contains(item));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlAttributes_RemoveXmlAnyElementAttributeThrowsOnMissingItem()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1804,7 +1804,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlAnyElements.Remove(item2); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_ArrayOfXmlNodeProperty()
     {
         var obj = new TypeWithXmlNodeArrayProperty()
@@ -1816,7 +1816,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(obj.CDATA[0].InnerText, deserializedObj.CDATA[0].InnerText);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithTwoDimensionalArrayProperty1()
     {
         SimpleType[][] simpleType2D = GetObjectwith2DArrayOfSimpleType();
@@ -1835,7 +1835,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(SimpleType.AreEqual(simpleType2D[1][1], actual.TwoDArrayOfSimpleType[1][1]));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithTwoDimensionalArrayProperty2()
     {
         SimpleType[][] simpleType2D = GetObjectwith2DArrayOfSimpleType();
@@ -1877,7 +1877,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.Value, actual.Value));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_SimpleType()
     {
         var serializer = new XmlSerializer(typeof(SimpleType));
@@ -1893,7 +1893,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(obj.P2, deserializedObj.P2);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_BaseClassAndDerivedClass2WithSameProperty()
     {
         var value = new DerivedClassWithSameProperty2() { DateTimeProperty = new DateTime(100, DateTimeKind.Utc), IntProperty = 5, StringProperty = "TestString", ListProperty = new List<string>() };
@@ -1918,7 +1918,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.ListProperty.ToArray(), actual.ListProperty.ToArray());
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithPropertiesHavingDefaultValue_DefaultValue()
     {
         var value = new TypeWithPropertiesHavingDefaultValue()
@@ -1938,7 +1938,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.CharProperty, actual.CharProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithStringPropertyWithDefaultValue_NonDefaultValue()
     {
         var value = new TypeWithPropertiesHavingDefaultValue()
@@ -1955,7 +1955,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.StringProperty, actual.StringProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithEnumPropertyHavingDefaultValue()
     {
         var value = new TypeWithEnumPropertyHavingDefaultValue() { EnumProperty = IntEnum.Option0 };
@@ -1976,7 +1976,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.EnumProperty, actual.EnumProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithEnumFlagPropertyHavingDefaultValue()
     {
         var value = new TypeWithEnumFlagPropertyHavingDefaultValue() { EnumProperty = EnumFlags.Two | EnumFlags.Three };
@@ -1995,7 +1995,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.EnumProperty, actual.EnumProperty);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithEnumFlagPropertyHavingDefaultValue()
     {
@@ -2022,7 +2022,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.EnumProperty, actual.EnumProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithXmlQualifiedName()
     {
         var value = new TypeWithXmlQualifiedName()
@@ -2036,7 +2036,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.Value, actual.Value);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithXmlQualifiedName()
     {
@@ -2057,7 +2057,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.Value, actual.Value);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithShouldSerializeMethod_WithDefaultValue()
     {
         var value = new TypeWithShouldSerializeMethod();
@@ -2068,7 +2068,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.Foo, actual.Foo);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithShouldSerializeMethod_WithNonDefaultValue()
     {
         var value = new TypeWithShouldSerializeMethod() { Foo = "SomeValue" };
@@ -2079,7 +2079,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.Foo, actual.Foo);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_KnownTypesThroughConstructorWithArrayProperties()
     {
         int[] intArray = new int[] { 1, 2, 3 };
@@ -2104,7 +2104,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(stringArray.Length, actualStringArray.Length);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_KnownTypesThroughConstructorWithEnumFlags()
     {
         var enumFlags = EnumFlags.One | EnumFlags.Four;
@@ -2118,7 +2118,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal((EnumFlags)value.Value, (EnumFlags)actual.Value);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_KnownTypesThroughConstructorWithEnumFlagsXmlQualifiedName()
     {
         var value = new KnownTypesThroughConstructorWithValue() { Value = new XmlQualifiedName("foo") };
@@ -2131,7 +2131,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal((XmlQualifiedName)value.Value, (XmlQualifiedName)actual.Value);
     }
 
-    [fact]
+    [Fact]
     static void Xml_TypeWithTypesHavingCustomFormatter()
     {
         var str = "The quick brown fox jumps over the lazy dog.";
@@ -2167,7 +2167,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.HexBinaryContent, actual.HexBinaryContent), "Actual HexBinaryContent was not as expected.");
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithXmlElementsAndUnnamedXmlAny()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -2195,7 +2195,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(expectedElem.InnerText, actualElem.InnerText);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithMultiXmlAnyElement()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -2234,7 +2234,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithMultiNamedXmlAnyElementAndOtherFields()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -2265,7 +2265,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(expectedElem.InnerText, actualElem.InnerText);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithArrayPropertyHavingChoice()
     {
         object[] choices = new object[] { "Food", 5 };
@@ -2284,7 +2284,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.ManyChoices, actual.ManyChoices));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithTypeNameInXmlTypeAttribute_WithValue()
     {
         var value = new TypeWithTypeNameInXmlTypeAttribute() { XmlAttributeForm = "SomeValue" };
@@ -2297,7 +2297,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.XmlAttributeForm, actual.XmlAttributeForm);
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithArrayLikeXmlAttribute()
     {
         var value = new TypeWithStringArrayAsXmlAttribute() { XmlAttributeForms = new string[] { "SomeValue1", "SomeValue2" } };
@@ -2309,7 +2309,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.XmlAttributeForms, actual.XmlAttributeForms));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithArrayLikeXmlAttributeWithFields()
     {
         var value = new TypeWithArrayLikeXmlAttributeWithFields() { XmlAttributeForms = new string[] { "SomeValue1", "SomeValue2" }, StringField = "foo", IntField = 123 };
@@ -2323,7 +2323,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.XmlAttributeForms, actual.XmlAttributeForms));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithByteArrayAsXmlAttribute()
     {
         var value = new TypeWithByteArrayAsXmlAttribute() { XmlAttributeForms = new byte[] { 0, 1, 2 } };
@@ -2335,7 +2335,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.XmlAttributeForms, actual.XmlAttributeForms));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithByteArrayArrayAsXmlAttribute()
     {
         var value = new TypeWithByteArrayArrayAsXmlAttribute() { XmlAttributeForms = new byte[][] { new byte[] { 1 }, new byte[] { 2 } } };
@@ -2348,7 +2348,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.XmlAttributeForms[1][0], actual.XmlAttributeForms[1][0]);
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithQNameArrayAsXmlAttribute()
     {
         var value = new TypeWithQNameArrayAsXmlAttribute() { XmlAttributeForms = new XmlQualifiedName[] { new XmlQualifiedName("SomeValue1", "ns1"), new XmlQualifiedName("SomeValue2", "ns2") } };
@@ -2360,7 +2360,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.XmlAttributeForms, actual.XmlAttributeForms));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithEnumArrayAsXmlAttribute()
     {
         var value = new TypeWithEnumArrayAsXmlAttribute() { XmlAttributeForms = new IntEnum[] { IntEnum.Option1, IntEnum.Option2 } };
@@ -2372,7 +2372,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(value.XmlAttributeForms, actual.XmlAttributeForms));
     }
 
-    [fact]
+    [Fact]
     public static void XML_TypeWithFieldsOrdered()
     {
         var value = new TypeWithFieldsOrdered()
@@ -2392,7 +2392,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.StringField2, actual.StringField2);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSchemaTest()
     {
         var schemas = new XmlSchemas();
@@ -2426,7 +2426,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(originalmapping.XsdTypeNamespace, newmapping.XsdTypeNamespace);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializerFactoryTest()
     {
         string baseline = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Age>5</Age>\r\n  <Name>Bear</Name>\r\n  <Breed>GermanShepherd</Breed>\r\n</Dog>";
@@ -2439,7 +2439,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(dog1.Breed, dog2.Breed);
     }
 
-    [fact]
+    [Fact]
     public static void XmlUnknownElementAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -2469,7 +2469,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(b);
     }
 
-    [fact]
+    [Fact]
     public static void XmlUnknownNodeAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -2505,7 +2505,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(b);
     }
 
-    [fact]
+    [Fact]
     public static void XmlUnknownAttributeAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -2532,7 +2532,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(b);
     }
 
-    [fact]
+    [Fact]
     public static void XmlDeserializationEventsTest()
     {
         List<string> grouplists = new List<string>();
@@ -2570,7 +2570,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         return stream;
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void  SoapAttributeTests()
     {
@@ -2581,7 +2581,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         soapOverrides.Add(typeof(SoapEncodedTestType2), "Vehicle", soapAttrs);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ComplexField()
     {
@@ -2597,7 +2597,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.TestType3.StringValue, actual.TestType3.StringValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic()
     {
@@ -2623,7 +2623,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithNullableFields()
     {
@@ -2660,7 +2660,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DoubleValue, actual.DoubleValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Nullable()
     {
@@ -2693,7 +2693,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(0, structActual.Value.B);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic_FromMappings()
     {
@@ -2719,7 +2719,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapIgnore()
     {
@@ -2751,7 +2751,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapElement()
     {
@@ -2784,7 +2784,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapType()
     {
@@ -2818,7 +2818,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum()
     {
@@ -2834,7 +2834,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value, actual);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum_With_SoapEnumOverrides()
     {
@@ -2859,7 +2859,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value, actual);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_SoapAttribute()
     {
@@ -2894,7 +2894,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.Today, actual.Today);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_IncludeType()
     {
@@ -2921,7 +2921,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.SecondaryID, actual.SecondaryID);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_CircularLink()
     {
@@ -2937,7 +2937,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.Link.Link.Link.IntValue, deserialized.Link.Link.Link.IntValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Array()
     {
@@ -2960,7 +2960,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_List()
     {
@@ -2984,7 +2984,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_MyCollection()
     {
@@ -3019,7 +3019,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(value.SequenceEqual(actual));
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_WithNullables()
     {
@@ -3039,7 +3039,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual.Struct1); // This behavior doesn't seem right. But this is the behavior on desktop.
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enums()
     {
@@ -3054,14 +3054,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(item.Int, actual.Int);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Dictionary()
     {
         Assert.Throws<NotSupportedException>(() => { new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup3)); });
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_NestedPublicType()
     {
@@ -3076,7 +3076,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.Name, actual.Name);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot()
     {
@@ -3111,7 +3111,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(typeof(object) == nullDeserialized.GetType());
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot_Nullable()
     {
@@ -3127,7 +3127,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual.MyObject);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializationReaderWriterTest()
     {
         string s = "XmlSerializationReaderWriterTest";
@@ -3136,7 +3136,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(original, converted);
     }
 
-    [fact]
+    [Fact]
     public static void XmlReflectionImporterTest()
     {
         string membername = "Action";
@@ -3152,7 +3152,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False(xmp.CheckSpecified);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializerImplementationTest()
     {
         Employee emp = new Employee() { EmployeeName = "Allice" };
@@ -3162,7 +3162,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         SerializeAndDeserialize(emp, expected, serializerfunc);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializerVersionAttributeTest()
     {
         XmlSerializerVersionAttribute attr = new XmlSerializerVersionAttribute();
@@ -3171,7 +3171,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(typeof(Employee), attr2.Type);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializerAssemblyAttributeTest()
     {
         object[] attrs = typeof(AssemblyAttrTestClass).GetCustomAttributes(typeof(XmlSerializerAssemblyAttribute), false);
@@ -3180,7 +3180,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal("AssemblyAttrTestClass", attr.AssemblyName);
     }
 
-    [fact]
+    [Fact]
     public static void CodeIdentifierTest()
     {
         CodeIdentifiers cds = new CodeIdentifiers(true);
@@ -3192,7 +3192,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal("ValidText", CodeIdentifier.MakeValid("Valid  Text!"));
     }
 
-    [fact]
+    [Fact]
     public static void IXmlTextParserTest()
     {
         string xmlFileContent = @"<root><date>2003-01-08T15:00:00-00:00</date></root>";
@@ -3201,7 +3201,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         MyXmlTextParser text = new MyXmlTextParser(reader);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapSchemaMemberTest()
     {
@@ -3220,14 +3220,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(1, mapping.Count);
     }
 
-    [fact]
+    [Fact]
     public static void XmlSerializationGeneratedCodeTest()
     {
         var cg = new MycodeGenerator();
         Assert.NotNull(cg);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_PrimitiveValue()
     {
         string memberName = "value";
@@ -3238,7 +3238,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType()
     {
         string memberName = "GetData";
@@ -3250,7 +3250,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_CompositeType()
     {
         string memberName = "GetDataUsingDataContract";
@@ -3262,7 +3262,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(requestBodyValue.composite.StringValue, requestBodyActual.composite.StringValue);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_HiddenDerivedFieldTest()
     {
         var value = new DerivedClass { value = "on derived" };
@@ -3280,7 +3280,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 #if !uapaot
-    [fact]
+    [Fact]
     public static void Xml_DefaultValueAttributeSetToNaNTest()
     {
         var value = new DefaultValuesSetToNaN();
@@ -3297,7 +3297,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 #endif
 
-    [fact]
+    [Fact]
     public static void Xml_NullRefInXmlSerializerCtorTest()
     {
         string defaultNamespace = "http://www.contoso.com";
@@ -3375,7 +3375,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_AliasedPropertyTest()
     {
         var inputList = new List<string> { "item0", "item1", "item2", "item3", "item4" };
@@ -3402,7 +3402,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DeserializeHiddenMembersTest()
     {
         var xmlSerializer = new XmlSerializer(typeof(DerivedClass1));
@@ -3418,7 +3418,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void Xml_SerializeClassNestedInStaticClassTest()
     {
         var value = new Outer.Person()
@@ -3442,7 +3442,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.LastName, actual.LastName);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_HasWrapperElement()
     {
         string memberName = "GetData";
@@ -3455,7 +3455,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_SpecifiedField_MissingSpecifiedValue()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
@@ -3477,7 +3477,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True((bool)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XSCoverTest()
     {
         var band = new Orchestra();
@@ -3605,7 +3605,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(myPet.Comment2, actual2.Comment2);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_SpecifiedField_True_Wrapper()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
@@ -3627,7 +3627,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True((bool)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_SpecifiedField_True_IgnoreSpecifiedField_Wrapper()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
@@ -3650,7 +3650,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True((bool)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_SpecifiedField_False_Wrapper()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("value");
@@ -3670,7 +3670,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False((bool)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_SimpleType_SpecifiedField_False()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("value");
@@ -3688,7 +3688,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False((bool)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_IntArray()
     {
         string memberName = "IntArray";
@@ -3702,7 +3702,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(requestBodyValue, requestBodyActual));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_IntList()
     {
         string memberName = "IntArray";
@@ -3716,7 +3716,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(requestBodyValue, requestBodyActual));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_TypeHavingIntArray()
     {
         string memberName = "data";
@@ -3731,7 +3731,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(requestBodyValue.IntArray, requestBodyActual.IntArray));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_TypeWithXmlAttributes()
     {
         string memberName = "data";
@@ -3749,7 +3749,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(actual);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Xmlns_True()
     {
         string memberName = "MyXmlNs";
@@ -3787,7 +3787,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Member_With_XmlAnyAttribute()
     {
         string memberName1 = "StringMember";
@@ -3829,7 +3829,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             Environment.NewLine, result.ErrorMessage, deserialized, output, actualOutput));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Member_With_XmlAnyAttribute_Specified_True()
     {
         string memberName1 = "StringMember";
@@ -3874,7 +3874,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             Environment.NewLine, result.ErrorMessage, deserialized, output, actualOutput));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Member_With_XmlAnyAttribute_Specified_False()
     {
         string memberName1 = "StringMember";
@@ -3921,7 +3921,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             Environment.NewLine, result.ErrorMessage, deserialized, expectedOutput, actualOutput));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_With_ChoiceIdentifier()
     {
         string ns = s_defaultNs;
@@ -3952,7 +3952,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(items.SequenceEqual(actualItems));
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_MultipleMembers()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
@@ -3975,7 +3975,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(intValue, (int)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_PrimitiveValue()
     {
         string memberName = "value";
@@ -3986,7 +3986,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SimpleType()
     {
@@ -3999,7 +3999,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_CompositeType()
     {
@@ -4013,7 +4013,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(requestBodyValue.StringValue, requestBodyActual.StringValue);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_PrimitiveValue_HasWrapperElement()
     {
         string memberName = "value";
@@ -4027,7 +4027,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_PrimitiveValue_HasWrapperElement_Validate()
     {
         string memberName = "value";
@@ -4042,7 +4042,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_MemberSpecified_True()
     {
         string memberName1 = "StringMember";
@@ -4065,7 +4065,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value[0], actual[0]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_MemberSpecified_False()
     {
         string memberName1 = "StringMember";
@@ -4088,7 +4088,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual[0]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_MultipleMembers_XmlAnyElement()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
@@ -4131,7 +4131,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_MultipleMembers_IsReturnValue()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData", null);
@@ -4157,7 +4157,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(intValue, (int)actual[1]);
     }
 
-    [fact]
+    [Fact]
     public static void XmlMembersMapping_Soap_MultipleMembers_IsReturnValue()
     {
         var member1 = GetReflectionMember<int>("IntReturnValue", null);
@@ -4184,7 +4184,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithMyCollectionField()
     {
         var value = new TypeWithMyCollectionField();
@@ -4195,7 +4195,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(value.Collection.SequenceEqual(actual.Collection));
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithMyCollectionField()
     {
@@ -4220,7 +4220,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(value.Collection.SequenceEqual(actual.Collection));
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithReadOnlyMyCollectionProperty()
     {
@@ -4235,7 +4235,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(value.Collection.SequenceEqual(actual.Collection));
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexType()
     {
@@ -4265,7 +4265,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(requestBodyValue.StringValue, requestBodyActual.StringValue);
     }
 
-    [fact]
+    [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexTypeWithArray()
     {
@@ -4303,7 +4303,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(requestBodyValue.StringList.SequenceEqual(requestBodyActual.StringList));
     }
 
-    [fact]
+    [Fact]
     public static void Xml_XmlTextAttributeTest()
     {
         var myGroup1 = new Group1WithXmlTextAttr();
@@ -4323,7 +4323,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Throws<InvalidOperationException>(() => { SerializeAndDeserialize(myGroup4, null, null, true); });
     }
 
-    [fact]
+    [Fact]
     public static void Xml_DefaultNamespaceChange_XmlAttributesTestAsRoot()
     {
         var value = new XmlSerializerAttributes();
@@ -4353,7 +4353,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.XmlTextProperty, actual.XmlTextProperty);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_TypeWithIndirectReferencedAssembly()
     {
         // TypeWithIndirectRef class has a dependency on Task, which is in System.Threading.Tasks, an assembly that's indirectly referenced.
@@ -4365,7 +4365,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(value.Name, actual.Name);
     }
 
-    [fact]
+    [Fact]
     public static void Xml_NookTypes()
     {
         NookAppLocalState value = new NookAppLocalState() { ArticleViewCount = 1, CurrentlyReadingProductEAN = "Current", CurrentPaymentType = NookAppLocalState.PaymentType.Microsoft, IsFirstRun = true, PreviousSearchQueries = new List<string>(new string[] { "one", "two" }), TextColor = System.Drawing.Color.FromArgb(3, 4, 5, 6) };
