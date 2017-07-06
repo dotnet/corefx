@@ -53,7 +53,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
 
 
 
-            int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force"});
+            int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force", "/casesensitive"});
             Assert.Equal(0, n);
             if(!File.Exists(codefile))
             {

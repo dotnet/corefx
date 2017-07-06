@@ -28,9 +28,19 @@ namespace Microsoft.XmlSerializer.Generator
             var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
+            bool caseSensitive = false;
 
             try
             {
+                if(args.Length >0)
+                {
+                    if(args.Where(s => s.ToLower().Contains("casesensitive")).Count() > 0)
+                    {
+                        caseSensitive = true;
+                    }
+
+
+                }
                 for (int i = 0; i < args.Length; i++)
                 {
                     bool argument = false;
@@ -48,7 +58,7 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    if(!arg.EndsWith(".dll") && !arg.EndsWith(".exe"))
+                    if(!caseSensitive)
                     {
                         arg = arg.ToLower(CultureInfo.InvariantCulture);
                     }
@@ -89,6 +99,10 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         types.Add(value);
                     }
+                    else if(ArgumentMatch(arg, "casesensitive"))
+                    {
+                        continue;
+                    }
                     else
                     {
                         errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
@@ -126,7 +140,8 @@ namespace Microsoft.XmlSerializer.Generator
                 }
 
                 Console.Out.WriteLine(string.Format("Got Exception {0}, Stack Trace {1}", e.Message, e.StackTrace));
-                return 1;
+                throw;
+                //return 1;
             }
 
             return 0;
