@@ -266,7 +266,7 @@ namespace System.Net.Http
                 catch (Exception exc)
                 {
                     EventSourceTrace("Unexpected exception: {0}", exc, easy: easy);
-                    easy.FailRequest(exc);
+                    easy.FailRequest(CreateHttpRequestException(exc));
                     return FailureResult;
                 }
                 finally
