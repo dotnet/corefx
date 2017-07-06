@@ -23,14 +23,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using Xunit;
 
-namespace Drawing2D
+namespace System.Drawing.Drawing2D.Tests
 {
     public class GraphicsPathTests
     {
