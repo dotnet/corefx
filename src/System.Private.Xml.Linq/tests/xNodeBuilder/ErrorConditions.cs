@@ -28,7 +28,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentNullException e)
                         {
-                            TestLog.Compare(e.ParamName, "ns", "prefix mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "ns" : e.ParamName, "ns", "prefix mismatch"); // ILC optimization sets ParamName always to null. 
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
@@ -37,7 +37,7 @@ namespace CoreXml.Test.XLinq
                             catch (ArgumentNullException ae)
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
-                                TestLog.Compare(ae.ParamName, "ns", "prefix mismatch");
+                                TestLog.Compare(PlatformDetection.IsNetNative ? "ns" : ae.ParamName, "ns", "prefix mismatch"); // ILC optimization sets ParamName always to null.
                                 return;
                             }
                         }
@@ -60,7 +60,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentNullException e)
                         {
-                            TestLog.Compare(e.ParamName, "reader", "mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "reader" : e.ParamName, "reader", "mismatch"); // ILC optimization sets ParamName always to null.
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Start, "Error");
@@ -69,7 +69,7 @@ namespace CoreXml.Test.XLinq
                             catch (ArgumentNullException ae)
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Start, "Error");
-                                TestLog.Compare(ae.ParamName, "reader", "mismatch");
+                                TestLog.Compare(PlatformDetection.IsNetNative ? "reader" : ae.ParamName, "reader", "mismatch"); // ILC optimization sets ParamName always to null.
                                 return;
                             }
                         }
@@ -122,7 +122,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentNullException e)
                         {
-                            TestLog.Compare(e.ParamName, "buffer", "mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "buffer" : e.ParamName, "buffer", "mismatch"); // ILC optimization sets ParamName always to null.
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
@@ -131,7 +131,7 @@ namespace CoreXml.Test.XLinq
                             catch (ArgumentNullException ae)
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
-                                TestLog.Compare(ae.ParamName, "buffer", "mismatch");
+                                TestLog.Compare(PlatformDetection.IsNetNative ? "buffer" : ae.ParamName, "buffer", "mismatch"); // ILC optimization sets ParamName always to null.
                                 return;
                             }
                         }
@@ -154,7 +154,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentNullException e)
                         {
-                            TestLog.Compare(e.ParamName, "buffer", "mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "buffer" : e.ParamName, "buffer", "mismatch"); // ILC optimization sets ParamName always to null.
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
@@ -449,7 +449,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentException e)
                         {
-                            TestLog.Compare(e.ParamName, "name", "mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "name" : e.ParamName, "name", "mismatch"); // ILC optimization sets ParamName always to null.
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Start, "Error");
@@ -458,7 +458,7 @@ namespace CoreXml.Test.XLinq
                             catch (ArgumentException ae)
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Start, "Error");
-                                TestLog.Compare(ae.ParamName, "name", "mismatch");
+                                TestLog.Compare(PlatformDetection.IsNetNative ? "name" : ae.ParamName, "name", "mismatch"); // ILC optimization sets ParamName always to null.
                                 return;
                             }
                         }
@@ -524,10 +524,10 @@ namespace CoreXml.Test.XLinq
                             switch (param1)
                             {
                                 case ("reader"):
-                                    TestLog.Compare(e.ParamName, "reader", "mismatch");
+                                    TestLog.Compare(PlatformDetection.IsNetNative ? "reader" : e.ParamName, "reader", "mismatch"); // ILC optimization sets ParamName always to null.
                                     break;
                                 case ("navigator"):
-                                    TestLog.Compare(e.ParamName, "navigator", "mismatch");
+                                    TestLog.Compare(PlatformDetection.IsNetNative ? "navigator" : e.ParamName, "navigator", "mismatch"); // ILC optimization sets ParamName always to null.
                                     break;
                             }
                             try
@@ -545,7 +545,7 @@ namespace CoreXml.Test.XLinq
                                 switch (param1)
                                 {
                                     case ("reader"):
-                                        TestLog.Compare(e.ParamName, "reader", "mismatch");
+                                        TestLog.Compare(PlatformDetection.IsNetNative ? "reader" : e.ParamName, "reader", "mismatch"); // ILC optimization sets ParamName always to null.
                                         break;
                                 }
                                 return;
@@ -632,7 +632,7 @@ namespace CoreXml.Test.XLinq
                         }
                         catch (ArgumentNullException e)
                         {
-                            TestLog.Compare(e.ParamName, "buffer", "mismatch");
+                            TestLog.Compare(PlatformDetection.IsNetNative ? "buffer" : e.ParamName, "buffer", "mismatch"); // ILC optimization sets ParamName always to null.
                             try
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
@@ -641,7 +641,7 @@ namespace CoreXml.Test.XLinq
                             catch (ArgumentNullException ae)
                             {
                                 TestLog.Compare(w.WriteState, WriteState.Error, "Error");
-                                TestLog.Compare(ae.ParamName, "buffer", "mismatch");
+                                TestLog.Compare(PlatformDetection.IsNetNative ? "buffer" : ae.ParamName, "buffer", "mismatch"); // ILC optimization sets ParamName always to null.
                                 return;
                             }
                         }
