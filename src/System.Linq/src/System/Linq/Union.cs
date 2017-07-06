@@ -150,20 +150,11 @@ namespace System.Linq
                 }
             }
 
-            public TSource[] ToArray()
-            {
-                return FillSet().ToArray();
-            }
+            public TSource[] ToArray() => FillSet().ToArray();
 
-            public List<TSource> ToList()
-            {
-                return FillSet().ToList();
-            }
+            public List<TSource> ToList() => FillSet().ToList();
 
-            public int GetCount(bool onlyIfCheap)
-            {
-                return onlyIfCheap ? -1 : FillSet().Count;
-            }
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : FillSet().Count;
         }
         
         /// <summary>

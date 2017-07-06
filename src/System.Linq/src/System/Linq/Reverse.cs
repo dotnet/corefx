@@ -35,10 +35,7 @@ namespace System.Linq
                 _source = source;
             }
 
-            public override Iterator<TSource> Clone()
-            {
-                return new ReverseIterator<TSource>(_source);
-            }
+            public override Iterator<TSource> Clone() => new ReverseIterator<TSource>(_source);
 
             public override bool MoveNext()
             {
@@ -91,7 +88,7 @@ namespace System.Linq
             public TSource[] ToArray()
             {
                 TSource[] array = _source.ToArray();
-                Array.Reverse<TSource>(array);
+                Array.Reverse(array);
                 return array;
             }
 

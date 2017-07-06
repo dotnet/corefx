@@ -92,10 +92,7 @@ namespace System.Linq
                 _predicate = predicate;
             }
 
-            public override Iterator<TSource> Clone()
-            {
-                return new WhereEnumerableIterator<TSource>(_source, _predicate);
-            }
+            public override Iterator<TSource> Clone() => new WhereEnumerableIterator<TSource>(_source, _predicate);
 
             public override void Dispose()
             {
@@ -157,10 +154,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
-            {
-                return new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, selector);
-            }
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
+                new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, selector);
 
             public TSource[] ToArray()
             {
@@ -192,10 +187,8 @@ namespace System.Linq
                 return list;
             }
 
-            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
-            {
-                return new WhereEnumerableIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
-            }
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new WhereEnumerableIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
         /// <summary>
@@ -215,10 +208,8 @@ namespace System.Linq
                 _predicate = predicate;
             }
 
-            public override Iterator<TSource> Clone()
-            {
-                return new WhereArrayIterator<TSource>(_source, _predicate);
-            }
+            public override Iterator<TSource> Clone() =>
+                new WhereArrayIterator<TSource>(_source, _predicate);
 
             public int GetCount(bool onlyIfCheap)
             {
@@ -263,10 +254,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
-            {
-                return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, selector);
-            }
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
+                new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, selector);
 
             public TSource[] ToArray()
             {
@@ -298,10 +287,8 @@ namespace System.Linq
                 return list;
             }
 
-            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
-            {
-                return new WhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
-            }
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new WhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
         /// <summary>
@@ -322,10 +309,8 @@ namespace System.Linq
                 _predicate = predicate;
             }
 
-            public override Iterator<TSource> Clone()
-            {
-                return new WhereListIterator<TSource>(_source, _predicate);
-            }
+            public override Iterator<TSource> Clone() =>
+                new WhereListIterator<TSource>(_source, _predicate);
 
             public int GetCount(bool onlyIfCheap)
             {
@@ -377,10 +362,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
-            {
-                return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, selector);
-            }
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
+                new WhereSelectListIterator<TSource, TResult>(_source, _predicate, selector);
 
             public TSource[] ToArray()
             {
@@ -414,10 +397,8 @@ namespace System.Linq
                 return list;
             }
 
-            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
-            {
-                return new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
-            }
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
         /// <summary>
@@ -441,10 +422,8 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
-            }
+            public override Iterator<TResult> Clone() =>
+                new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
 
             public int GetCount(bool onlyIfCheap)
             {
@@ -493,10 +472,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -551,10 +528,8 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
-            }
+            public override Iterator<TResult> Clone() =>
+                new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
 
             public int GetCount(bool onlyIfCheap)
             {
@@ -610,10 +585,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -670,10 +643,8 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, _selector);
-            }
+            public override Iterator<TResult> Clone() =>
+                new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, _selector);
 
             public override void Dispose()
             {
@@ -739,10 +710,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new WhereSelectEnumerableIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new WhereSelectEnumerableIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {

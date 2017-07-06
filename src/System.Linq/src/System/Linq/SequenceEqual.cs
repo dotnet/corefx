@@ -8,10 +8,8 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
-        public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
-        {
-            return SequenceEqual(first, second, null);
-        }
+        public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second) =>
+            SequenceEqual(first, second, null);
 
         public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {

@@ -11,15 +11,10 @@ namespace System.Linq
     {
         internal IEnumerable<TElement> _source;
 
-        private int[] SortedMap(Buffer<TElement> buffer)
-        {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count);
-        }
+        private int[] SortedMap(Buffer<TElement> buffer) => GetEnumerableSorter().Sort(buffer._items, buffer._count);
 
-        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx)
-        {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx);
-        }
+        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx) =>
+            GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx);
 
         public IEnumerator<TElement> GetEnumerator()
         {
@@ -186,39 +181,22 @@ namespace System.Linq
             return (count <= maxIdx ? count : maxIdx + 1) - minIdx;
         }
 
-        private EnumerableSorter<TElement> GetEnumerableSorter()
-        {
-            return GetEnumerableSorter(null);
-        }
+        private EnumerableSorter<TElement> GetEnumerableSorter() => GetEnumerableSorter(null);
 
         internal abstract EnumerableSorter<TElement> GetEnumerableSorter(EnumerableSorter<TElement> next);
 
-        private CachingComparer<TElement> GetComparer()
-        {
-            return GetComparer(null);
-        }
+        private CachingComparer<TElement> GetComparer() => GetComparer(null);
 
         internal abstract CachingComparer<TElement> GetComparer(CachingComparer<TElement> childComparer);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        IOrderedEnumerable<TElement> IOrderedEnumerable<TElement>.CreateOrderedEnumerable<TKey>(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending)
-        {
-            return new OrderedEnumerable<TElement, TKey>(_source, keySelector, comparer, descending, this);
-        }
+        IOrderedEnumerable<TElement> IOrderedEnumerable<TElement>.CreateOrderedEnumerable<TKey>(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending) =>
+            new OrderedEnumerable<TElement, TKey>(_source, keySelector, comparer, @descending, this);
 
-        public IPartition<TElement> Skip(int count)
-        {
-            return new OrderedPartition<TElement>(this, count, int.MaxValue);
-        }
+        public IPartition<TElement> Skip(int count) => new OrderedPartition<TElement>(this, count, int.MaxValue);
 
-        public IPartition<TElement> Take(int count)
-        {
-            return new OrderedPartition<TElement>(this, 0, count - 1);
-        }
+        public IPartition<TElement> Take(int count) => new OrderedPartition<TElement>(this, 0, count - 1);
 
         public TElement TryGetElementAt(int index, out bool found)
         {
@@ -541,15 +519,10 @@ namespace System.Linq
             return map;
         }
 
-        internal TElement ElementAt(TElement[] elements, int count, int idx)
-        {
-            return elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
-        }
+        internal TElement ElementAt(TElement[] elements, int count, int idx) =>
+            elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
 
-        private int CompareKeys(int index1, int index2)
-        {
-            return index1 == index2 ? 0 : CompareAnyKeys(index1, index2);
-        }
+        private int CompareKeys(int index1, int index2) => index1 == index2 ? 0 : CompareAnyKeys(index1, index2);
 
         private void QuickSort(int[] map, int left, int right)
         {

@@ -103,10 +103,8 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectEnumerableIterator<TSource, TResult>(_source, _selector);
-            }
+            public override Iterator<TResult> Clone() =>
+                new SelectEnumerableIterator<TSource, TResult>(_source, _selector);
 
             public override void Dispose()
             {
@@ -141,10 +139,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectEnumerableIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectEnumerableIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -214,10 +210,7 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectArrayIterator<TSource, TResult>(_source, _selector);
-            }
+            public override Iterator<TResult> Clone() => new SelectArrayIterator<TSource, TResult>(_source, _selector);
 
             public override bool MoveNext()
             {
@@ -232,10 +225,8 @@ namespace System.Linq
                 return true;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -291,10 +282,8 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count)
-            {
-                return count >= _source.Length ? (IPartition<TResult>)this : new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
-            }
+            public IPartition<TResult> Take(int count) =>
+                count >= _source.Length ? (IPartition<TResult>)this : new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -344,10 +333,7 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectListIterator<TSource, TResult>(_source, _selector);
-            }
+            public override Iterator<TResult> Clone() => new SelectListIterator<TSource, TResult>(_source, _selector);
 
             public override bool MoveNext()
             {
@@ -371,10 +357,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -429,10 +413,8 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count)
-            {
-                return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
-            }
+            public IPartition<TResult> Take(int count) =>
+                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -491,10 +473,7 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectIListIterator<TSource, TResult>(_source, _selector);
-            }
+            public override Iterator<TResult> Clone() => new SelectIListIterator<TSource, TResult>(_source, _selector);
 
             public override bool MoveNext()
             {
@@ -529,10 +508,8 @@ namespace System.Linq
                 base.Dispose();
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
 
             public TResult[] ToArray()
             {
@@ -587,10 +564,8 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count)
-            {
-                return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
-            }
+            public IPartition<TResult> Take(int count) =>
+                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -649,10 +624,8 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectIPartitionIterator<TSource, TResult>(_source, _selector);
-            }
+            public override Iterator<TResult> Clone() =>
+                new SelectIPartitionIterator<TSource, TResult>(_source, _selector);
 
             public override bool MoveNext()
             {
@@ -687,10 +660,8 @@ namespace System.Linq
                 base.Dispose();
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectIPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectIPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
 
             public IPartition<TResult> Skip(int count)
             {
@@ -698,10 +669,8 @@ namespace System.Linq
                 return new SelectIPartitionIterator<TSource, TResult>(_source.Skip(count), _selector);
             }
 
-            public IPartition<TResult> Take(int count)
-            {
-                return new SelectIPartitionIterator<TSource, TResult>(_source.Take(count), _selector);
-            }
+            public IPartition<TResult> Take(int count) =>
+                new SelectIPartitionIterator<TSource, TResult>(_source.Take(count), _selector);
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -834,10 +803,8 @@ namespace System.Linq
                 _maxIndexInclusive = maxIndexInclusive;
             }
 
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, _minIndexInclusive, _maxIndexInclusive);
-            }
+            public override Iterator<TResult> Clone() =>
+                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, _minIndexInclusive, _maxIndexInclusive);
 
             public override bool MoveNext()
             {
@@ -856,10 +823,8 @@ namespace System.Linq
                 return false;
             }
 
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
-            {
-                return new SelectListPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector), _minIndexInclusive, _maxIndexInclusive);
-            }
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new SelectListPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector), _minIndexInclusive, _maxIndexInclusive);
 
             public IPartition<TResult> Skip(int count)
             {
