@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xunit;
 
 namespace System.Net.Tests
@@ -63,17 +62,6 @@ namespace System.Net.Tests
             string serverUrl = string.Format("ftp://www.{0}.com/", Guid.NewGuid().ToString());
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
             WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public void GetResponse_ConnectFailure_ThrowsWebException()
-        {
-            // This is an invalid IP address, so we should fail to connect.
-            string serverUrl = "ftp://192.0.2.1/";
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUrl);
-            WebException ex = Assert.Throws<WebException>(() => request.GetResponse());
-            Assert.Equal(WebExceptionStatus.ConnectFailure, ex.Status);
         }
 
         private static bool LocalServerAvailable => (Environment.GetEnvironmentVariable("USE_LOCAL_FTP_SERVER") != null);
