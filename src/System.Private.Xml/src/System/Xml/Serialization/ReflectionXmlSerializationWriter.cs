@@ -1400,20 +1400,26 @@ namespace System.Xml.Serialization
             MemberInfo[] memberInfos = declaringType.GetMember(memberName);
             if (memberInfos == null || memberInfos.Length == 0)
             {
-                bool readFromBaseType = false;
-                if(declaringType.BaseType != null)
+                bool foundMatchedMember = false;
+                Type currentType = declaringType;
+                while (currentType.BaseType != null)
                 {
-                    memberInfos = declaringType.BaseType.GetMember(memberName);
+                    memberInfos = currentType.BaseType.GetMember(memberName);
                     if (memberInfos != null && memberInfos.Length != 0)
                     {
-                        readFromBaseType = true;
+                        foundMatchedMember = true;
+                        break;
                     }
+
+                    currentType = currentType.BaseType;
                 }
 
-                if (!readFromBaseType)
+                if (!foundMatchedMember)
                 {
                     throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType.ToString()}"));
                 }
+
+                declaringType = currentType;
             }
 
             MemberInfo memberInfo = memberInfos[0];
