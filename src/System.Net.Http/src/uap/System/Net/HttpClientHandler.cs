@@ -23,6 +23,7 @@ using RTHttpBaseProtocolFilter = Windows.Web.Http.Filters.HttpBaseProtocolFilter
 using RTHttpCacheReadBehavior = Windows.Web.Http.Filters.HttpCacheReadBehavior;
 using RTHttpCacheWriteBehavior = Windows.Web.Http.Filters.HttpCacheWriteBehavior;
 using RTHttpCookieUsageBehavior = Windows.Web.Http.Filters.HttpCookieUsageBehavior;
+using RTHttpRequestMessage = Windows.Web.Http.HttpRequestMessage;
 using RTPasswordCredential = Windows.Security.Credentials.PasswordCredential;
 using RTCertificate = Windows.Security.Cryptography.Certificates.Certificate;
 using RTCertificateQuery = Windows.Security.Cryptography.Certificates.CertificateQuery;
@@ -311,6 +312,15 @@ namespace System.Net.Http
             set
             {
                 CheckDisposedOrStarted();
+                if (value != null)
+                {
+                    if (!RTServerCustomValidationRequestedSupported)
+                    {
+                        throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                            SR.net_http_feature_requires_Windows10Version1607));
+                    }
+                }
+
                 _serverCertificateCustomValidationCallback = value;
             }
         }
@@ -659,8 +669,10 @@ namespace System.Net.Http
                 // Since this is the first operation, we set all the necessary WinRT filter properties.
                 SetFilterProxyCredential();
                 SetFilterServerCredential();
-                if (RTServerCustomValidationRequestedSupported && _serverCertificateCustomValidationCallback != null)
+                if (_serverCertificateCustomValidationCallback != null)
                 {
+                    Debug.Assert(RTServerCustomValidationRequestedSupported);
+
                     // The WinRT layer uses a different model for the certificate callback. The callback is
                     // considered "extra" validation. We need to explicitly ignore errors so that the callback
                     // will get called.
@@ -729,14 +741,32 @@ namespace System.Net.Http
 
         private void RTServerCertificateCallback(RTHttpBaseProtocolFilter sender, RTHttpServerCustomValidationRequestedEventArgs args)
         {
+            bool success = RTServerCertificateCallbackHelper(
+                args.RequestMessage,
+                args.ServerCertificate,
+                args.ServerIntermediateCertificates,
+                args.ServerCertificateErrors);
+
+            if (!success)
+            {
+                args.Reject();
+            }
+        }
+
+        private bool RTServerCertificateCallbackHelper(
+            RTHttpRequestMessage requestMessage,
+            RTCertificate cert,
+            IReadOnlyList<RTCertificate> intermediateCerts,
+            IReadOnlyList<RTChainValidationResult> certErrors)
+        {
             // Convert WinRT certificate to .NET certificate.
-            X509Certificate2 serverCert = ConvertPublicKeyCertificate(args.ServerCertificate);
+            X509Certificate2 serverCert = ConvertPublicKeyCertificate(cert);
 
             // Create .NET X509Chain from the WinRT information. We need to rebuild the chain since WinRT only
             // gives us an array of intermediate certificates and not a X509Chain object.
             var serverChain = new X509Chain();
             SslPolicyErrors sslPolicyErrors = SslPolicyErrors.None;
-            foreach (RTCertificate cert in args.ServerIntermediateCertificates)
+            foreach (RTCertificate intermediateCert in intermediateCerts)
             {
                 serverChain.ChainPolicy.ExtraStore.Add(ConvertPublicKeyCertificate(cert));
             }
@@ -751,7 +781,7 @@ namespace System.Net.Http
 
             // Determine name-mismatch error from the existing WinRT information since .NET X509Chain.Build does not
             // return that in the X509Chain.ChainStatus fields.
-            foreach (RTChainValidationResult result in args.ServerCertificateErrors)
+            foreach (RTChainValidationResult result in certErrors)
             {
                 if (result == RTChainValidationResult.InvalidName)
                 {
@@ -761,7 +791,7 @@ namespace System.Net.Http
             }
 
             // Get the .NET HttpRequestMessage we saved in the property bag of the WinRT HttpRequestMessage.
-            HttpRequestMessage request = (HttpRequestMessage)args.RequestMessage.Properties[RequestMessageLookupKey];
+            HttpRequestMessage request = (HttpRequestMessage)requestMessage.Properties[RequestMessageLookupKey];
 
             // Call the .NET callback.
             bool success = false;
@@ -772,7 +802,7 @@ namespace System.Net.Http
             catch (Exception ex)
             {
                 // Save the exception info. We will return it later via the SendAsync response processing.
-                args.RequestMessage.Properties.Add(
+                requestMessage.Properties.Add(
                     SavedExceptionDispatchInfoLookupKey,
                     ExceptionDispatchInfo.Capture(ex));
             }
@@ -782,10 +812,7 @@ namespace System.Net.Http
                 serverCert.Dispose();
             }
 
-            if (!success)
-            {
-                args.Reject();
-            }
+            return success;
         }
 
         private X509Certificate2 ConvertPublicKeyCertificate(RTCertificate cert)
