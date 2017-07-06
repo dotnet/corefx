@@ -1171,6 +1171,34 @@ namespace System.Net.Sockets.Tests
                 Assert.Throws<ArgumentOutOfRangeException>(() => e.BufferList = new List<ArraySegment<byte>> { validBuffer, invalidBuffer });
             }
         }
+
+        [Fact]
+        public async Task Recv_PeerDisconnect_Returns()
+        {
+            using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
+
+                Task<Socket> acceptTask = AcceptAsync(listener);
+                await Task.WhenAll(
+                    acceptTask,
+                    ConnectAsync(client, new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndPoint).Port)));
+
+                using (Socket server = await acceptTask)
+                {
+                    // Have the client do a 0-byte receive.  No data is available, so this should pend.
+                    Task<int> receive = ReceiveAsync(client, new ArraySegment<byte>(Array.Empty<byte>()));
+
+                    // Disconnect the client
+                    server.Close();
+
+                    // The client should now wake up
+                    Assert.Equal(0, await receive);
+                }
+            }
+        }
     }
 
     public abstract class MemberDatas
