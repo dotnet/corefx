@@ -32,7 +32,7 @@ using Xunit;
 
 namespace Drawing2D
 {
-    public class GraphicsPathTest
+    public class GraphicsPathTests
     {
         private const float Pi4 = (float)(Math.PI / 4);
         private const float Delta = 0.0003f;
