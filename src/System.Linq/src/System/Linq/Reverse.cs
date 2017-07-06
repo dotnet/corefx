@@ -111,9 +111,11 @@ namespace System.Linq
                         case IIListProvider<TSource> listProv:
                             return listProv.GetCount(onlyIfCheap: true);
 
-                        case ICollection<TSource> _:
-                        case ICollection __:
-                            break;
+                        case ICollection<TSource> colT:
+                            return colT.Count;
+
+                        case ICollection col:
+                            return col.Count;
 
                         default:
                             return -1;

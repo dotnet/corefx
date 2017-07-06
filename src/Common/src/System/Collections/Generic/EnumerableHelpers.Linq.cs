@@ -23,20 +23,19 @@ namespace System.Collections.Generic
         {
             Debug.Assert(source != null);
 
-            switch (source)
+            if (source is ICollection<T> collection)
             {
-                case ICollection<T> collection:
-                    count = collection.Count;
-                    return true;
-
-                case IIListProvider<T> provider:
-                    count = provider.GetCount(onlyIfCheap: true);
-                    return count >= 0;
-
-                default:
-                    count = -1;
-                    return false;
+                count = collection.Count;
+                return true;
             }
+
+            if (source is IIListProvider<T> provider)
+            {
+                return (count = provider.GetCount(onlyIfCheap: true)) >= 0;
+            }
+
+            count = -1;
+            return false;
         }
     }
 }

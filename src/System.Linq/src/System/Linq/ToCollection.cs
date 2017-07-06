@@ -10,32 +10,24 @@ namespace System.Linq
     {
         public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
-
-                case IIListProvider<TSource> arrayProvider:
-                    return arrayProvider.ToArray();
-
-                default:
-                    return EnumerableHelpers.ToArray(source);
+                throw Error.ArgumentNull(nameof(source));
             }
+
+            return source is IIListProvider<TSource> arrayProvider
+                ? arrayProvider.ToArray()
+                : EnumerableHelpers.ToArray(source);
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
-
-                case IIListProvider<TSource> listProvider:
-                    return listProvider.ToList();
-
-                default:
-                    return new List<TSource>(source);
+                throw Error.ArgumentNull(nameof(source));
             }
+
+            return source is IIListProvider<TSource> listProvider ? listProvider.ToList() : new List<TSource>(source);
         }
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
@@ -64,13 +56,14 @@ namespace System.Linq
                     return new Dictionary<TKey, TSource>(comparer);
                 }
 
-                switch (collection)
+                if (collection is TSource[] array)
                 {
-                    case TSource[] array:
-                        return ToDictionary(array, keySelector, comparer);
+                    return ToDictionary(array, keySelector, comparer);
+                }
 
-                    case List<TSource> list:
-                        return ToDictionary(list, keySelector, comparer);
+                if (collection is List<TSource> list)
+                {
+                    return ToDictionary(list, keySelector, comparer);
                 }
             }
 
@@ -136,13 +129,14 @@ namespace System.Linq
                     return new Dictionary<TKey, TElement>(comparer);
                 }
 
-                switch (collection)
+                if (collection is TSource[] array)
                 {
-                    case TSource[] array:
-                        return ToDictionary(array, keySelector, elementSelector, comparer);
+                    return ToDictionary(array, keySelector, elementSelector, comparer);
+                }
 
-                    case List<TSource> list:
-                        return ToDictionary(list, keySelector, elementSelector, comparer);
+                if (collection is List<TSource> list)
+                {
+                    return ToDictionary(list, keySelector, elementSelector, comparer);
                 }
             }
 

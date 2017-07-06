@@ -10,37 +10,36 @@ namespace System.Linq
     {
         public static TSource Single<TSource>(this IEnumerable<TSource> source)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
+            }
 
-                case IList<TSource> list:
-                    switch (list.Count)
+            if (source is IList<TSource> list)
+            {
+                switch (list.Count)
+                {
+                    case 0:
+                        throw Error.NoElements();
+                    case 1:
+                        return list[0];
+                }
+            }
+            else
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if (!e.MoveNext())
                     {
-                        case 0:
-                            throw Error.NoElements();
-                        case 1:
-                            return list[0];
+                        throw Error.NoElements();
                     }
 
-                    break;
-                default:
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    TSource result = e.Current;
+                    if (!e.MoveNext())
                     {
-                        if (!e.MoveNext())
-                        {
-                            throw Error.NoElements();
-                        }
-
-                        TSource result = e.Current;
-                        if (!e.MoveNext())
-                        {
-                            return result;
-                        }
+                        return result;
                     }
-
-                    break;
+                }
             }
 
             throw Error.MoreThanOneElement();
@@ -83,37 +82,36 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
+            }
 
-                case IList<TSource> list:
-                    switch (list.Count)
+            if (source is IList<TSource> list)
+            {
+                switch (list.Count)
+                {
+                    case 0:
+                        return default(TSource);
+                    case 1:
+                        return list[0];
+                }
+            }
+            else
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if (!e.MoveNext())
                     {
-                        case 0:
-                            return default(TSource);
-                        case 1:
-                            return list[0];
+                        return default(TSource);
                     }
 
-                    break;
-                default:
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    TSource result = e.Current;
+                    if (!e.MoveNext())
                     {
-                        if (!e.MoveNext())
-                        {
-                            return default(TSource);
-                        }
-
-                        TSource result = e.Current;
-                        if (!e.MoveNext())
-                        {
-                            return result;
-                        }
+                        return result;
                     }
-
-                    break;
+                }
             }
 
             throw Error.MoreThanOneElement();

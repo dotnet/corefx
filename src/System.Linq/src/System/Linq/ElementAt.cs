@@ -10,40 +10,41 @@ namespace System.Linq
     {
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
+            }
 
-                case IPartition<TSource> partition:
-                    TSource element = partition.TryGetElementAt(index, out bool found);
-                    if (found)
-                    {
-                        return element;
-                    }
-
-                    break;
-                case IList<TSource> list:
+            if (source is IPartition<TSource> partition)
+            {
+                TSource element = partition.TryGetElementAt(index, out bool found);
+                if (found)
+                {
+                    return element;
+                }
+            }
+            else
+            {
+                if (source is IList<TSource> list)
+                {
                     return list[index];
+                }
 
-                default:
-                    if (index >= 0)
+                if (index >= 0)
+                {
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
                     {
-                        using (IEnumerator<TSource> e = source.GetEnumerator())
+                        while (e.MoveNext())
                         {
-                            while (e.MoveNext())
+                            if (index == 0)
                             {
-                                if (index == 0)
-                                {
-                                    return e.Current;
-                                }
-
-                                index--;
+                                return e.Current;
                             }
+
+                            index--;
                         }
                     }
-
-                    break;
+                }
             }
 
             throw Error.ArgumentOutOfRange(nameof(index));
@@ -51,38 +52,40 @@ namespace System.Linq
 
         public static TSource ElementAtOrDefault<TSource>(this IEnumerable<TSource> source, int index)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
+            }
 
-                case IPartition<TSource> partition:
-                    return partition.TryGetElementAt(index, out bool _);
-                case IList<TSource> list:
-                    if (index >= 0 && index < list.Count)
+            if (source is IPartition<TSource> partition)
+            {
+                return partition.TryGetElementAt(index, out bool _);
+            }
+
+            if (index >= 0)
+            {
+                if (source is IList<TSource> list)
+                {
+                    if (index < list.Count)
                     {
                         return list[index];
                     }
-
-                    break;
-                default:
-                    if (index >= 0)
+                }
+                else
+                {
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
                     {
-                        using (IEnumerator<TSource> e = source.GetEnumerator())
+                        while (e.MoveNext())
                         {
-                            while (e.MoveNext())
+                            if (index == 0)
                             {
-                                if (index == 0)
-                                {
-                                    return e.Current;
-                                }
-
-                                index--;
+                                return e.Current;
                             }
+
+                            index--;
                         }
                     }
-
-                    break;
+                }
             }
 
             return default(TSource);

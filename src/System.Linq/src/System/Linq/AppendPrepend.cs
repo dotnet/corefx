@@ -11,32 +11,26 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Append<TSource>(this IEnumerable<TSource> source, TSource element)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
-
-                case AppendPrependIterator<TSource> appendable:
-                    return appendable.Append(element);
-
-                default:
-                    return new AppendPrepend1Iterator<TSource>(source, element, appending: true);
+                throw Error.ArgumentNull(nameof(source));
             }
+
+            return source is AppendPrependIterator<TSource> appendable
+                ? appendable.Append(element)
+                : new AppendPrepend1Iterator<TSource>(source, element, appending: true);
         }
 
         public static IEnumerable<TSource> Prepend<TSource>(this IEnumerable<TSource> source, TSource element)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
-
-                case AppendPrependIterator<TSource> appendable:
-                    return appendable.Prepend(element);
-
-                default:
-                    return new AppendPrepend1Iterator<TSource>(source, element, appending: false);
+                throw Error.ArgumentNull(nameof(source));
             }
+
+            return source is AppendPrependIterator<TSource> appendable
+                ? appendable.Prepend(element)
+                : new AppendPrepend1Iterator<TSource>(source, element, appending: false);
         }
 
         /// <summary>

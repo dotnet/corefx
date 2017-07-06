@@ -38,33 +38,34 @@ namespace System.Linq
 
         private static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
         {
-            switch (source)
+            if (source == null)
             {
-                case null:
-                    throw Error.ArgumentNull(nameof(source));
+                throw Error.ArgumentNull(nameof(source));
+            }
 
-                case IPartition<TSource> partition:
-                    return partition.TryGetFirst(out found);
+            if (source is IPartition<TSource> partition)
+            {
+                return partition.TryGetFirst(out found);
+            }
 
-                case IList<TSource> list:
-                    if (list.Count > 0)
+            if (source is IList<TSource> list)
+            {
+                if (list.Count > 0)
+                {
+                    found = true;
+                    return list[0];
+                }
+            }
+            else
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if (e.MoveNext())
                     {
                         found = true;
-                        return list[0];
+                        return e.Current;
                     }
-
-                    break;
-                default:
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
-                    {
-                        if (e.MoveNext())
-                        {
-                            found = true;
-                            return e.Current;
-                        }
-                    }
-
-                    break;
+                }
             }
 
             found = false;
