@@ -315,8 +315,8 @@
     <Reference Include="System.Transactions.Local" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'netfx'">
-	<Reference Include="System.Xml.ReaderWriter" />
-	<Reference Include="System.Xml.XmlSerializer" />
+    <Reference Include="System.Xml.ReaderWriter" />
+    <Reference Include="System.Xml.XmlSerializer" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
