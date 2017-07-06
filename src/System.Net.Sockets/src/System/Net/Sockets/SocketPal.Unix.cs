@@ -621,9 +621,14 @@ namespace System.Net.Sockets
                 {
                     // Special case a receive of 0 bytes into a single buffer.  A common pattern is to ReceiveAsync 0 bytes in order
                     // to be asynchronously notified when data is available, without needing to dedicate a buffer.  Some platforms (e.g. macOS),
-                    // however return 0 instead of EAGAIN when data isn't available. As such, we treat 0 specially, and perform a 1-byte peek.
+                    // however complete a 0-byte read successfully when data isn't available, as the request can logically be satisfied
+                    // synchronously. As such, we treat 0 specially, and perform a 1-byte peek.
                     received = Receive(socket, flags | SocketFlags.Peek, s_peekBuffer, 0, s_peekBuffer.Length, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
-                    received = received > 0 ? 0 : received;
+                    if (received > 0)
+                    {
+                        // Peeked for 1-byte, but the actual request was for 0.
+                        received = 0;
+                    }
                 }
                 else
                 {

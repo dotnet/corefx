@@ -699,6 +699,35 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
+        public async Task Receive0ByteReturns_WhenPeerDisconnects()
+        {
+            using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
+
+                Task<Socket> acceptTask = AcceptAsync(listener);
+                await Task.WhenAll(
+                    acceptTask,
+                    ConnectAsync(client, new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndPoint).Port)));
+
+                using (Socket server = await acceptTask)
+                {
+                    // Have the client do a 0-byte receive.  No data is available, so this should pend.
+                    Task<int> receive = ReceiveAsync(client, new ArraySegment<byte>(Array.Empty<byte>()));
+                    Assert.False(receive.IsCompleted, $"Task should not have been completed, was {receive.Status}");
+
+                    // Disconnect the client
+                    server.Close();
+
+                    // The client should now wake up
+                    Assert.Equal(0, await receive);
+                }
+            }
+        }
+
         [Theory]
         [InlineData(false, 1)]
         [InlineData(true, 1)]
@@ -1169,34 +1198,6 @@ namespace System.Net.Sockets.Tests
 
                 ArraySegment<byte> validBuffer = new ArraySegment<byte>(new byte[1]);
                 Assert.Throws<ArgumentOutOfRangeException>(() => e.BufferList = new List<ArraySegment<byte>> { validBuffer, invalidBuffer });
-            }
-        }
-
-        [Fact]
-        public async Task Recv_PeerDisconnect_Returns()
-        {
-            using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-                listener.Listen(1);
-
-                Task<Socket> acceptTask = AcceptAsync(listener);
-                await Task.WhenAll(
-                    acceptTask,
-                    ConnectAsync(client, new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndPoint).Port)));
-
-                using (Socket server = await acceptTask)
-                {
-                    // Have the client do a 0-byte receive.  No data is available, so this should pend.
-                    Task<int> receive = ReceiveAsync(client, new ArraySegment<byte>(Array.Empty<byte>()));
-
-                    // Disconnect the client
-                    server.Close();
-
-                    // The client should now wake up
-                    Assert.Equal(0, await receive);
-                }
             }
         }
     }
