@@ -5409,7 +5409,7 @@ public class Invalid_Class_Derived_With_DataContract : Invalid_Class_Base_Withou
 
 }
 
-// Invalid because it's [KnownType] is an invalid type
+// Invalid because its [KnownType] is an invalid type
 [KnownType(typeof(Invalid_Class_No_Parameterless_Ctor))]
 public class Invalid_Class_KnownType_Invalid_Type
 {

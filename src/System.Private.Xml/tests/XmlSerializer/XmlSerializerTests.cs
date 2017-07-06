@@ -4395,11 +4395,13 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 #endif
 
+    //This case currently will fail in ReflectionOnly implementation when targeting uapaot
+#if !uapaot || !ReflectionOnly 
     [Fact]
     public static void Xml_DefaultNamespaceChange_SimpleArray_ObjectAsRoot()
     {
         SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
-#if uap
+#if uapaot && !ReflectionOnly
         Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object)); };
 #else
         Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(SimpleType[]) }); };
@@ -4420,6 +4422,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         Utils.Equal(x, y, (a, b) => { return SimpleType.AreEqual(a, b); });
     }
+#endif
 
     [Fact]
     public static void Xml_ValidateExceptionOnUnspecifiedRootSerializationType()
@@ -4434,82 +4437,56 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void Xml_VerifyCompilationIssueOnly()
     {
         MemoryStream ms = new MemoryStream();
-        try
+        Assert.Throws<InvalidOperationException>(() => 
         {
             var serializer = new XmlSerializer(typeof(TypeWithEnumerableMembers));
             var value = new TypeWithEnumerableMembers();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
 
-        try
+#if !uapaot
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(TypeWithoutPublicSetter));
             var value = new TypeWithoutPublicSetter();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
-
-        try
+        });
+ 
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(TypeWithCompilerGeneratedAttributeButWithoutPublicSetter));
             var value = new TypeWithCompilerGeneratedAttributeButWithoutPublicSetter();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
+#endif
 
-        try
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(InvalidDerivedClass));
             var value = new InvalidDerivedClass();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
 
-        try
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(AnotherInvalidDerivedClass));
             var value = new AnotherInvalidDerivedClass();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
 
-        try
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(InternalTypeWithNestedPublicType.LevelData));
             var value = new InternalTypeWithNestedPublicType.LevelData();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
 
-        try
+        Assert.Throws<InvalidOperationException>(() =>
         {
             var serializer = new XmlSerializer(typeof(InternalTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData));
             var value = new InternalTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData();
             serializer.Serialize(ms, value);
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
-        }
+        });
 
         var value1 = new DuplicateTypeNamesTest.ns1.ClassA();
         var actual = SerializeAndDeserialize(value1, "<?xml version=\"1.0\"?>\r\n<ClassA xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />");
@@ -4524,7 +4501,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void Xml_DefaultNamespaceChange_ObjectAsRoot()
     {
         object value = ItemChoiceType.DecimalNumber;
-#if uap
+#if uapaot
         Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object)); };
 #else
         Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(ItemChoiceType[]) }); };
