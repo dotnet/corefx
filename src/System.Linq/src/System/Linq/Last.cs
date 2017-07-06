@@ -36,7 +36,7 @@ namespace System.Linq
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
             source.TryGetLast(predicate, out bool _);
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
+        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
         {
             if (source == null)
             {
@@ -80,7 +80,7 @@ namespace System.Linq
             return default(TSource);
         }
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
         {
             if (source == null)
             {

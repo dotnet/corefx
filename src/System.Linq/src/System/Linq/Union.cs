@@ -58,7 +58,7 @@ namespace System.Linq
 
             internal abstract UnionIterator<TSource> Union(IEnumerable<TSource> next);
 
-            protected void SetEnumerator(IEnumerator<TSource> enumerator)
+            private void SetEnumerator(IEnumerator<TSource> enumerator)
             {
                 if (_enumerator != null)
                 {
@@ -68,7 +68,7 @@ namespace System.Linq
                 _enumerator = enumerator;
             }
 
-            protected void StoreFirst()
+            private void StoreFirst()
             {
                 Set<TSource> set = new Set<TSource>(_comparer);
                 TSource element = _enumerator.Current;
@@ -77,7 +77,7 @@ namespace System.Linq
                 _set = set;
             }
 
-            protected bool GetNext()
+            private bool GetNext()
             {
                 Set<TSource> set = _set;
                 Debug.Assert(set != null);

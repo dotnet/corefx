@@ -72,7 +72,7 @@ namespace System.Linq
             return default(TSource);
         }
 
-        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        private static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
         {
             if (source == null)
             {

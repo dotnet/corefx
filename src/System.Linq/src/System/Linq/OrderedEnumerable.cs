@@ -193,7 +193,7 @@ namespace System.Linq
 
         internal abstract EnumerableSorter<TElement> GetEnumerableSorter(EnumerableSorter<TElement> next);
 
-        internal CachingComparer<TElement> GetComparer()
+        private CachingComparer<TElement> GetComparer()
         {
             return GetComparer(null);
         }
@@ -398,10 +398,10 @@ namespace System.Linq
 
     internal sealed class OrderedEnumerable<TElement, TKey> : OrderedEnumerable<TElement>
     {
-        internal readonly OrderedEnumerable<TElement> _parent;
-        internal readonly Func<TElement, TKey> _keySelector;
-        internal readonly IComparer<TKey> _comparer;
-        internal readonly bool _descending;
+        private readonly OrderedEnumerable<TElement> _parent;
+        private readonly Func<TElement, TKey> _keySelector;
+        private readonly IComparer<TKey> _comparer;
+        private readonly bool _descending;
 
         internal OrderedEnumerable(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, OrderedEnumerable<TElement> parent)
         {
@@ -753,11 +753,11 @@ namespace System.Linq
 
     internal sealed class EnumerableSorter<TElement, TKey> : EnumerableSorter<TElement>
     {
-        internal readonly Func<TElement, TKey> _keySelector;
-        internal readonly IComparer<TKey> _comparer;
-        internal readonly bool _descending;
-        internal readonly EnumerableSorter<TElement> _next;
-        internal TKey[] _keys;
+        private readonly Func<TElement, TKey> _keySelector;
+        private readonly IComparer<TKey> _comparer;
+        private readonly bool _descending;
+        private readonly EnumerableSorter<TElement> _next;
+        private TKey[] _keys;
 
         internal EnumerableSorter(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, EnumerableSorter<TElement> next)
         {

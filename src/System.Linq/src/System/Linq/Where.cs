@@ -78,7 +78,7 @@ namespace System.Linq
         /// An iterator that filters each item of an <see cref="IEnumerable{TSource}"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
-        internal sealed class WhereEnumerableIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        private sealed class WhereEnumerableIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -308,7 +308,7 @@ namespace System.Linq
         /// An iterator that filters each item of a <see cref="List{TSource}"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
-        internal sealed class WhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        private sealed class WhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -425,7 +425,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        internal sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        private sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
@@ -534,7 +534,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        internal sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        private sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -653,7 +653,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        internal sealed class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        private sealed class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, bool> _predicate;

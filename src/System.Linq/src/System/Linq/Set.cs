@@ -223,7 +223,7 @@ namespace System.Linq
         /// <summary>
         /// An entry in the hash set.
         /// </summary>
-        internal struct Slot
+        private struct Slot
         {
             /// <summary>
             /// The hash code of the item.

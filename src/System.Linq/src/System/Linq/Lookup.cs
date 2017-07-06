@@ -258,7 +258,7 @@ namespace System.Linq
             return GetEnumerator();
         }
 
-        internal int InternalGetHashCode(TKey key)
+        private int InternalGetHashCode(TKey key)
         {
             // Handle comparer implementations that throw when passed null
             return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
