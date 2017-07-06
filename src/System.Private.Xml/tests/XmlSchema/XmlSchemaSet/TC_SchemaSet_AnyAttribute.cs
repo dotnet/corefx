@@ -51,5 +51,10 @@ namespace System.Xml.Tests
 
             _output.WriteLine(args.Message); // Print the error to the screen.
         }
+
+        [Theory]
+        public void v1()
+        {
+        }
     }
 }
