@@ -129,10 +129,10 @@ namespace System.Net.WebSockets
                 var certsAsX509Certificate2Collection = new X509Certificate2Collection();
                 certsAsX509Certificate2Collection.AddRange(options.ClientCertificates);
 
-                X509Certificate2 dotNetCert = GetEligibleClientCertificate(certsAsX509Certificate2Collection);
-                if (dotNetCert != null)
+                X509Certificate2 dotNetClientCert = GetEligibleClientCertificate(certsAsX509Certificate2Collection);
+                if (dotNetClientCert != null)
                 {
-                    RTCertificate winRtClientCert = ConvertDotNetClientCertToWinRtClientCert(dotNetCert);
+                    RTCertificate winRtClientCert = ConvertDotNetClientCertToWinRtClientCert(dotNetClientCert);
                     Debug.Assert(winRtClientCert != null);
 
                     websocketControl.ClientCertificate = winRtClientCert;
