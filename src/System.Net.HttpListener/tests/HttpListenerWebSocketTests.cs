@@ -35,7 +35,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(IsNotWindows7))]
-        [ActiveIssue(22053, TargetFrameworkMonikers.Uap)]
         [InlineData(WebSocketMessageType.Text, false)]
         [InlineData(WebSocketMessageType.Binary, false)]
         [InlineData(WebSocketMessageType.Text, true)]
@@ -61,26 +60,23 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SendAsync_NoInnerBuffer_ThrowsArgumentNullException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
-            await Assert.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), WebSocketMessageType.Text, false, new CancellationToken()));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), WebSocketMessageType.Text, false, new CancellationToken()));
         }
 
         [ConditionalTheory(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(WebSocketMessageType.Close)]
         [InlineData(WebSocketMessageType.Text - 1)]
         [InlineData(WebSocketMessageType.Binary + 1)]
         public async Task SendAsync_InvalidMessageType_ThrowsArgumentNullException(WebSocketMessageType messageType)
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
-            await Assert.ThrowsAsync<ArgumentException>("messageType", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), messageType, false, new CancellationToken()));
+            await AssertExtensions.ThrowsAsync<ArgumentException>("messageType", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), messageType, false, new CancellationToken()));
         }
 
         [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task SendAsync_Disposed_ThrowsObjectDisposedException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -89,8 +85,8 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ObjectDisposedException>(() => context.WebSocket.SendAsync(new ArraySegment<byte>(new byte[10]), WebSocketMessageType.Text, false, new CancellationToken()));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WebSocket partial send is not supported on UAP. (#22053)")]
         [ConditionalTheory(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(WebSocketMessageType.Text, false)]
         [InlineData(WebSocketMessageType.Binary, false)]
         [InlineData(WebSocketMessageType.Text, true)]
@@ -116,17 +112,15 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ReceiveAsync_NoInnerBuffer_ThrowsArgumentNullException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
             await ClientConnectTask;
 
-            await Assert.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.ReceiveAsync(new ArraySegment<byte>(), new CancellationToken()));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.ReceiveAsync(new ArraySegment<byte>(), new CancellationToken()));
         }
 
         [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task ReceiveAsync_Disposed_ThrowsObjectDisposedException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -145,7 +139,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(CloseStatus_Valid_TestData))]
         public async Task CloseOutputAsync_HandshakeStartedFromClient_Success(WebSocketCloseStatus status, string statusDescription, WebSocketCloseStatus expectedCloseStatus)
         {
@@ -209,7 +202,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(CloseStatus_Valid_TestData))]
         public async Task CloseAsync_HandshakeStartedFromClient_Success(WebSocketCloseStatus status, string statusDescription, WebSocketCloseStatus expectedCloseStatus)
         {
@@ -283,7 +275,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalTheory(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [MemberData(nameof(CloseStatus_Invalid_TestData))]
         public async Task CloseAsync_InvalidCloseStatus_ThrowsArgumentException(WebSocketCloseStatus status, string statusDescription, string paramName)
         {
@@ -294,7 +285,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CloseAsync_AfterDisposed_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -305,7 +295,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CloseAsync_AfterAborted_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -316,7 +305,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20397, TestPlatforms.AnyUnix)]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Dispose_CallAfterDisposed_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -331,7 +319,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(IsNotWindows7))]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Abort_CallAfterAborted_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
