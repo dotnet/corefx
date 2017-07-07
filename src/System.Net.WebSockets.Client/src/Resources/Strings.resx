@@ -121,4 +121,10 @@
   <data name="net_securityprotocolnotsupported" xml:space="preserve">
     <value>The requested security protocol is not supported.</value>
   </data>
+  <data name="net_WebSockets_UWPClientCertSupportRequiresWindows10InsiderPreviewBuild16215OrGreater" xml:space="preserve">
+    <value>Support for client certificates in UWP requires Windows 10 Insider Preview Build 16215 or greater.</value>
+  </data>
+  <data name="net_WebSockets_UWPClientCertSupportRequiresCertInPersonalCertificateStore" xml:space="preserve">
+    <value>Client certificate was not found in the personal (\"MY\") certificate store. In UWP, client certificates are only supported if they have been added to that certificate store.</value>
+  </data>
 </root>

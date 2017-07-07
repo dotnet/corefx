@@ -114,18 +114,19 @@ namespace System.Net.WebSockets
                 websocketControl.SupportedProtocols.Add(subProtocol);
             }
 
-            if (MessageWebSocketClientCertificateSupported)
+            if (options.ClientCertificates.Count > 0)
             {
-                // Use the first app-provided client cert that can be successfully converted into a WinRT client cert (if any).
-                foreach (X509Certificate dotNetClientCert in options.ClientCertificates)
+                if (!MessageWebSocketClientCertificateSupported)
                 {
-                    RTCertificate winRtClientCert = ConvertDotNetClientCertToWinRtClientCert(dotNetClientCert);
-                    if (winRtClientCert != null)
-                    {
-                        websocketControl.ClientCertificate = winRtClientCert;
-                        break;
-                    }
+                    throw new NotSupportedException(string.Format(
+                        CultureInfo.InvariantCulture,
+                        SR.net_WebSockets_UWPClientCertSupportRequiresWindows10InsiderPreviewBuild16215OrGreater));
                 }
+
+                RTCertificate winRtClientCert = ConvertDotNetClientCertToWinRtClientCert(options.ClientCertificates[0]);
+                Debug.Assert(winRtClientCert != null);
+
+                websocketControl.ClientCertificate = winRtClientCert;
             }
 
             try
@@ -578,7 +579,9 @@ namespace System.Net.WebSockets
                 return certificates[0];
             }
 
-            return null;
+            throw new NotSupportedException(string.Format(
+                        CultureInfo.InvariantCulture,
+                        SR.net_WebSockets_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
         }
         #endregion Helpers
 
