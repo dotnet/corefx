@@ -119,10 +119,7 @@ namespace System.Data.SqlTypes
         }
 
 #if uapaot
-        private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate()
-        {
-            return System.Xml.XmlReader.CreateSqlReader;
-        }
+        private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate() => System.Xml.XmlReader.CreateSqlReader;
 #else
         private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate()
         {
