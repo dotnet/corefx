@@ -175,6 +175,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void WorkingSet_Valid()
         {
             Assert.True(Environment.WorkingSet > 0, "Expected positive WorkingSet value");
