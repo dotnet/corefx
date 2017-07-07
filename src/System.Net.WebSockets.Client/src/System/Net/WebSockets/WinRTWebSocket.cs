@@ -121,7 +121,7 @@ namespace System.Net.WebSockets
                 {
                     throw new PlatformNotSupportedException(string.Format(
                         CultureInfo.InvariantCulture,
-                        SR.net_WebSockets_UWPClientCertSupportRequiresWindows10InsiderPreviewBuild16215OrGreater));
+                        SR.net_WebSockets_UWPClientCertSupportRequiresWindows10GreaterThan1703));
                 }
 
                 // options.ClientCertificates is of type X509CertificateCollection. Upgrade it to a X509Certificate2Collection,
@@ -558,16 +558,13 @@ namespace System.Net.WebSockets
                 "ClientCertificate");
         }
 
+        // TODO: Issue #14542. Merge with similar WinHttpCertificateHelper.cs code and move to Common/src//System/Net.
         private static X509Certificate2 GetEligibleClientCertificate(X509Certificate2Collection candidateCerts)
         {
-            Debug.Assert(candidateCerts.Count > 0);
-
-            // Reduce the set of certificates to match the proper 'Client Authentication' criteria.
-            candidateCerts = candidateCerts.Find(X509FindType.FindByKeyUsage, X509KeyUsageFlags.DigitalSignature, false);
-            candidateCerts = candidateCerts.Find(X509FindType.FindByApplicationPolicy, ClientAuthenticationOID, false);
-
             // Build a new collection with certs that have a private key. We need to do this manually because there is
             // no X509FindType to match this criteria.
+            // Find(...) returns a collection of clones instead of a filtered collection, so do this before calling
+            // Find(...) to minimize the number of unnecessary allocations and finalizations.
             var eligibleCerts = new X509Certificate2Collection();
             foreach (X509Certificate2 cert in candidateCerts)
             {
@@ -576,6 +573,22 @@ namespace System.Net.WebSockets
                     eligibleCerts.Add(cert);
                 }
             }
+
+            // Don't call Find(...) if we don't need to.
+            if (eligibleCerts.Count == 0)
+            {
+                return null;
+            }
+            else if (eligibleCerts.Count == 1)
+            {
+                return eligibleCerts[0];
+            }
+
+            // Reduce the set of certificates to match the proper 'Client Authentication' criteria.
+            // Client EKU is probably more rare than the DigitalSignature KU. Filter by ClientAuthOid first to reduce
+            // the candidate space as quickly as possible.
+            eligibleCerts = eligibleCerts.Find(X509FindType.FindByApplicationPolicy, ClientAuthenticationOID, false);
+            eligibleCerts = eligibleCerts.Find(X509FindType.FindByKeyUsage, X509KeyUsageFlags.DigitalSignature, false);
 
             if (eligibleCerts.Count > 0)
             {
@@ -618,7 +631,7 @@ namespace System.Net.WebSockets
                 return certificates[0];
             }
 
-            throw new NotSupportedException(string.Format(
+            throw new PlatformNotSupportedException(string.Format(
                         CultureInfo.InvariantCulture,
                         SR.net_WebSockets_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
         }
