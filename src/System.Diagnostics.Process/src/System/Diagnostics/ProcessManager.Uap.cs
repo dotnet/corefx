@@ -40,10 +40,12 @@ namespace System.Diagnostics
                         {
                             ArrayPool<char>.Shared.Return(chars);
                         }
-                        capacity *= 2;
+                        capacity = Math.Min(capacity * 2, short.MaxValue);
                         chars = ArrayPool<char>.Shared.Rent(capacity);
                         length = Interop.Kernel32.GetModuleFileNameEx(process.SafeHandle, IntPtr.Zero, chars, chars.Length);
-                    } while (length == chars.Length - 1 && capacity < 1024 * 32);
+                        // GetModuleFileNameEx truncates the name if capacity isn't sufficient. If provided buffer is full and smaller
+                        // than the maximum size of a Windows string (see UNICODE_STRING), retry with a bigger buffer.
+                    } while (length == chars.Length - 1 && capacity <= short.MaxValue);
 
                     string exePath = new string(chars, 0, length);
 
