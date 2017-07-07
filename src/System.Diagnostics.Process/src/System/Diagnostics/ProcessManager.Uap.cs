@@ -17,6 +17,14 @@ namespace System.Diagnostics
     internal static partial class ProcessManager
     {
         public static IntPtr GetMainWindowHandle(int processId) => IntPtr.Zero;
+
+        /// <summary>Gets process infos for each process on the specified machine.</summary>
+        /// <param name="machineName">The target machine.</param>
+        /// <returns>An array of process infos, one per found process.</returns>
+        public static ProcessInfo[] GetProcessInfos(string machineName)
+        {
+            return NtProcessManager.GetProcessInfos(machineName, IsRemoteMachine(machineName));
+        }
     }
 
     internal static partial class NtProcessManager
