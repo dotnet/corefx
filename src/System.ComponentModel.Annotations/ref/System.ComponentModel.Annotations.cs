@@ -360,6 +360,7 @@ namespace System.ComponentModel.DataAnnotations.Schema
     public partial class ForeignKeyAttribute : System.Attribute
     {
         public ForeignKeyAttribute(string name) { }
+        public ForeignKeyAttribute(params string[] names) { }
         public string Name { get { throw null; } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(384), AllowMultiple = false)]

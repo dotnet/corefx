@@ -24,5 +24,13 @@ namespace System.ComponentModel.DataAnnotations.Schema.Tests
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new ForeignKeyAttribute(name));
         }
+
+        [Theory]
+        [InlineData("Old", "Mother", "Dismass")]
+        public static void Ctor_Multiple_Strings(string name1, string name2, string name3)
+        {
+            ForeignKeyAttribute attribute = new ForeignKeyAttribute(name1, name2, name3);
+            Assert.Equal(string.Join(",", new[] {name1, name2, name3}), attribute.Name);
+        }
     }
 }
