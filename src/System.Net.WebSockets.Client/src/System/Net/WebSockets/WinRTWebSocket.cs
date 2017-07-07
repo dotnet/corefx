@@ -118,7 +118,7 @@ namespace System.Net.WebSockets
             {
                 if (!MessageWebSocketClientCertificateSupported)
                 {
-                    throw new NotSupportedException(string.Format(
+                    throw new PlatformNotSupportedException(string.Format(
                         CultureInfo.InvariantCulture,
                         SR.net_WebSockets_UWPClientCertSupportRequiresWindows10InsiderPreviewBuild16215OrGreater));
                 }
