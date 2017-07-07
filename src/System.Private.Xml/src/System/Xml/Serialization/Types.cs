@@ -1200,7 +1200,7 @@ namespace System.Xml.Serialization
                                     {
                                         if (propertyInfoToBeReplaced.GetMethod.IsPublic)
                                         {
-                                            return false;
+                                            break;
                                         }
                                     }
                                 }

@@ -1401,10 +1401,10 @@ namespace System.Xml.Serialization
             if (memberInfos == null || memberInfos.Length == 0)
             {
                 bool foundMatchedMember = false;
-                Type currentType = declaringType;
-                while (currentType.BaseType != null)
+                Type currentType = declaringType.BaseType;
+                while (currentType != null)
                 {
-                    memberInfos = currentType.BaseType.GetMember(memberName);
+                    memberInfos = currentType.GetMember(memberName);
                     if (memberInfos != null && memberInfos.Length != 0)
                     {
                         foundMatchedMember = true;
