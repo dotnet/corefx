@@ -163,7 +163,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void PathData_Says_CannotChange()
+        public void PathData_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
             {
@@ -178,7 +178,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void PathPoints_Says_CannotChange()
+        public void PathPoints_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
             {
@@ -202,7 +202,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void PathTypes_Says_CannotChange()
+        public void PathTypes_CannotChange()
         {
             using (GraphicsPath gp = new GraphicsPath())
             {
@@ -238,101 +238,97 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddLine_Success(int x1, int y1, int x2, int y2)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddLine_Success()
         {
             using (GraphicsPath gpInt = new GraphicsPath())
             using (GraphicsPath gpFloat = new GraphicsPath())
             using (GraphicsPath gpPointsInt = new GraphicsPath())
             using (GraphicsPath gpfPointsloat = new GraphicsPath())
             {
-                gpInt.AddLine(x1, y1, x2, y2);
+                gpInt.AddLine(1, 1, 2, 2);
+                // AssertLine() method expects line drawn between points with coordinates 1, 1 and 2, 2, here and below.
                 AssertLine(gpInt);
 
-                gpFloat.AddLine((float)x1, (float)y1, (float)x2, (float)y2);
+                gpFloat.AddLine(1, 1, 2, 2);
                 AssertLine(gpFloat);
 
-                gpPointsInt.AddLine(new Point(x1, y1), new Point(x2, y2));
+                gpPointsInt.AddLine(new Point(1, 1), new Point(2, 2));
                 AssertLine(gpPointsInt);
 
-                gpfPointsloat.AddLine(new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2));
+                gpfPointsloat.AddLine(new PointF(1, 1), new PointF(2, 2));
                 AssertLine(gpfPointsloat);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(49, 157, 75, 196, 102, 209)]
-        public void AddLine_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddLine_SamePoints_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddLine(new Point(x1, y1), new Point(x2, y2));
-                gpi.AddLine(new Point(x2, y2), new Point(x3, y3));
+                gpi.AddLine(new Point(49, 157), new Point(75, 196));
+                gpi.AddLine(new Point(75, 196), new Point(102, 209));
                 Assert.Equal(3, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1 }, gpi.PathTypes);
 
-                gpi.AddLine(new Point(x3, y3), new Point(x2, y2));
+                gpi.AddLine(new Point(102, 209), new Point(75, 196));
                 Assert.Equal(4, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 1 }, gpi.PathTypes);
 
-                gpf.AddLine(new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2));
-                gpf.AddLine(new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3));
+                gpf.AddLine(new PointF(49, 157), new PointF(75, 196));
+                gpf.AddLine(new PointF(75, 196), new PointF(102, 209));
                 Assert.Equal(3, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1 }, gpf.PathTypes);
 
-                gpf.AddLine(new PointF((float)x3, (float)y3), new PointF((float)x2, (float)y2));
+                gpf.AddLine(new PointF(102, 209), new PointF(75, 196));
                 Assert.Equal(4, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 1 }, gpf.PathTypes);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddLines_Success(int x1, int y1, int x2, int y2)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddLines_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddLines(new Point[] { new Point(x1, y1), new Point(x2, y2) });
+                gpi.AddLines(new Point[] { new Point(1, 1), new Point(2, 2) });
                 AssertLine(gpi);
 
-                gpf.AddLines(new PointF[] { new PointF(x1, y1), new PointF(x2, y2) });
+                gpf.AddLines(new PointF[] { new PointF(1, 1), new PointF(2, 2) });
                 AssertLine(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1)]
-        public void AddLines_SinglePoint_Success(int x1, int y1)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddLines_SinglePoint_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddLines(new PointF[] { new PointF(x1, y1) });
+                gpi.AddLines(new PointF[] { new PointF(1, 1) });
                 Assert.Equal(1, gpi.PointCount);
                 Assert.Equal(0, gpi.PathTypes[0]);
 
-                gpf.AddLines(new PointF[] { new PointF(x1, y1) });
+                gpf.AddLines(new PointF[] { new PointF(1, 1) });
                 Assert.Equal(1, gpf.PointCount);
                 Assert.Equal(0, gpf.PathTypes[0]);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(49, 157)]
-        public void AddLines_SamePoint_Success(int x1, int y1)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddLines_SamePoint_Success()
         {
             Point[] intPoints = new Point[]
             {
-                new Point(x1, y1), new Point(x1, y1)
+                new Point(49, 157), new Point(49, 157)
             };
 
-            PointF[] floeatPoints = new PointF[]
+            PointF[] floatPoints = new PointF[]
             {
-                new PointF((float)x1, (float)y1), new PointF((float)x1, (float)y1),
-                new PointF((float)x1, (float)y1), new PointF((float)x1, (float)y1)
+                new PointF(49, 57), new PointF(49, 57),
+                new PointF(49, 57), new PointF(49, 57)
             };
 
             using (GraphicsPath gpi = new GraphicsPath())
@@ -350,11 +346,11 @@ namespace System.Drawing.Drawing2D.Tests
                 Assert.Equal(4, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 1 }, gpi.PathTypes);
 
-                gpf.AddLines(floeatPoints);
+                gpf.AddLines(floatPoints);
                 Assert.Equal(4, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 1 }, gpf.PathTypes);
 
-                gpf.AddLines(floeatPoints);
+                gpf.AddLines(floatPoints);
                 Assert.Equal(7, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 1, 1, 1, 1 }, gpf.PathTypes);
             }
@@ -377,32 +373,32 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new GraphicsPath().AddLines(new PointF[0]));
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddArc_Values_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddArc_Values_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddArc(x, y, width, height, Pi4, Pi4);
+                gpi.AddArc(1, 1, 2, 2, Pi4, Pi4);
+                // AssertArc() method expects added Arc with parameters 
+                // x=1, y=1, width=2, height=2, startAngle=Pi4, seewpAngle=Pi4 here and below.
                 AssertArc(gpi);
 
-                gpf.AddArc((float)x, (float)y, (float)width, (float)height, Pi4, Pi4);
+                gpf.AddArc(1f, 1f, 2f, 2f, Pi4, Pi4);
                 AssertArc(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddArc_Rectangle_Success(int x, int y, int width, int height)
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddArc(new Rectangle(x, y, width, height), Pi4, Pi4);
+                gpi.AddArc(new Rectangle(1, 1, 2, 2), Pi4, Pi4);
                 AssertArc(gpi);
 
-                gpf.AddArc(new RectangleF(x, y, width, height), Pi4, Pi4);
+                gpf.AddArc(new RectangleF(1, 1, 2, 2), Pi4, Pi4);
                 AssertArc(gpf);
             }
         }
@@ -420,74 +416,65 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
-        public void AddBezier_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddBezier_Points_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddBezier(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
+                gpi.AddBezier(new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4));
+                // AssertBezier() method expects added Bezier with points (1, 1), (2, 2), (3, 3), (4, 4), here and below.
                 AssertBezier(gpi);
 
-                gpf.AddBezier(new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-                          new PointF((float)x3, (float)y3), new PointF((float)x4, (float)y4));
+                gpf.AddBezier(new PointF(1, 1), new PointF(2, 2), new PointF(3, 3), new PointF(4, 4));
                 AssertBezier(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(0, 0, 0, 0, 0, 0, 0, 0)]
-        public void AddBezier_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddBezier_SamePoints_Success()
         {
             using (GraphicsPath gp = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gp.AddBezier(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
+                gp.AddBezier(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0));
                 Assert.Equal(4, gp.PointCount);
                 Assert.Equal(new byte[] { 0, 3, 3, 3 }, gp.PathTypes);
 
-                gp.AddBezier(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
+                gp.AddBezier(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0));
                 Assert.Equal(7, gp.PointCount);
                 Assert.Equal(new byte[] { 0, 3, 3, 3, 3, 3, 3 }, gp.PathTypes);
 
-                gpf.AddBezier(new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-                              new PointF((float)x3, (float)y3), new PointF((float)x4, (float)y4));
-
+                gpf.AddBezier(new PointF(0, 0), new PointF(0, 0), new PointF(0, 0), new PointF(0, 0));
                 Assert.Equal(4, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 3, 3, 3 }, gpf.PathTypes);
 
-                gpf.AddBezier(new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-                              new PointF((float)x3, (float)y3), new PointF((float)x4, (float)y4));
-
+                gpf.AddBezier(new PointF(0, 0), new PointF(0, 0), new PointF(0, 0), new PointF(0, 0));
                 Assert.Equal(7, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 3, 3, 3, 3, 3, 3 }, gpf.PathTypes);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
-        public void AddBezier_Values_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddBezier_Values_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddBezier(x1, y1, x2, y2, x3, y3, x4, y4);
+                gpi.AddBezier(1, 1, 2, 2, 3, 3, 4, 4);
                 AssertBezier(gpi);
 
-                gpf.AddBezier((float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3, (float)x4, (float)y4);
+                gpf.AddBezier(1f, 1f, 2f, 2f, 3f, 3f, 4f, 4f);
                 AssertBezier(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
-        public void AddBeziers_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddBeziers_Points_Success()
         {
             PointF[] points = new PointF[]
             {
-                new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-                new PointF((float)x3, (float)y3), new PointF((float)x4, (float)y4)
+                new PointF(1, 1), new PointF(2, 2), new PointF(3, 3), new PointF(4, 4)
             };
 
             using (GraphicsPath gpf = new GraphicsPath())
@@ -526,24 +513,17 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddCurve_TwoPoints_Success(int x1, int y1, int x2, int y2)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddCurve_TwoPoints_Success()
         {
-            Point[] intPoints = new Point[]
-            {
-                new Point(x1, y1), new Point(x2, y2),
-            };
-
-            PointF[] floatPoints = new PointF[]
-            {
-                new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-            };
+            Point[] intPoints = new Point[] { new Point(1, 1), new Point(2, 2) };
+            PointF[] floatPoints = new PointF[] { new PointF(1, 1), new PointF(2, 2) };
 
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
                 gpf.AddCurve(floatPoints);
+                // AssertCurve() method expects added Curve with points (1, 1), (2, 2), here and below.
                 AssertCurve(gpf);
 
                 gpi.AddCurve(intPoints);
@@ -551,44 +531,28 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 0.5f)]
-        public void AddCurve_TwoPointsWithTension_Success(int x1, int y1, int x2, int y2, float tension)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddCurve_TwoPointsWithTension_Success()
         {
-            Point[] intPoints = new Point[]
-            {
-                new Point(x1, y1), new Point(x2, y2),
-            };
-
-            PointF[] floatPoints = new PointF[]
-            {
-                new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-            };
+            Point[] intPoints = new Point[] { new Point(1, 1), new Point(2, 2) };
+            PointF[] floatPoints = new PointF[] { new PointF(1, 1), new PointF(2, 2) };
 
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddCurve(intPoints, tension);
+                gpi.AddCurve(intPoints, 0.5f);
                 AssertCurve(gpi);
 
-                gpf.AddCurve(floatPoints, tension);
+                gpf.AddCurve(floatPoints, 0.5f);
                 AssertCurve(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 1, 1)]
-        public void AddCurve_SamePoints_Success(int x1, int y1, int x2, int y2)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddCurve_SamePoints_Success()
         {
-            Point[] intPoints = new Point[]
-            {
-                new Point(x1, y1), new Point(x2, y2),
-            };
-
-            PointF[] floatPoints = new PointF[]
-            {
-                new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2),
-            };
+            Point[] intPoints = new Point[] { new Point(1, 1), new Point(1, 1) };
+            PointF[] floatPoints = new PointF[] { new PointF(1, 1), new PointF(1, 1) };
 
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
@@ -605,29 +569,19 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, float.MaxValue)]
-        public void AddCurve_LargeTension_Success(int x1, int y1, int x2, int y2, float tension)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddCurve_LargeTension_Success()
         {
-            Point[] intPoints = new Point[]
-            {
-                new Point(x1, y1),
-                new Point(x2, y2),
-            };
-
-            PointF[] floatPoints = new PointF[]
-            {
-                new PointF((float)x1, (float)y1),
-                new PointF((float)x2, (float)y2),
-            };
+            Point[] intPoints = new Point[] { new Point(1, 1), new Point(2, 2) };
+            PointF[] floatPoints = new PointF[] { new PointF(1, 1), new PointF(2, 2) };
 
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddCurve(intPoints, tension);
+                gpi.AddCurve(intPoints, float.MaxValue);
                 Assert.Equal(4, gpi.PointCount);
 
-                gpf.AddCurve(floatPoints, tension);
+                gpf.AddCurve(floatPoints, float.MaxValue);
                 Assert.Equal(4, gpf.PointCount);
             }
         }
@@ -753,61 +707,49 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3)]
-        public void AddClosedCurve_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddClosedCurve_Points_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddClosedCurve(
-                new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddClosedCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
+                // AssertClosedCurve() method expects added ClosedCurve with points (1, 1), (2, 2), (3, 3), here and below.
                 AssertClosedCurve(gpi);
 
-                gpf.AddClosedCurve(
-                    new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddClosedCurve(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 AssertClosedCurve(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 1, 1, 1, 1)]
-        public void AddClosedCurve_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddClosedCurve_SamePoints_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddClosedCurve(
-                    new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddClosedCurve(new Point[3] { new Point(1, 1), new Point(1, 1), new Point(1, 1) });
                 Assert.Equal(10, gpi.PointCount);
-                gpi.AddClosedCurve(
-                    new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddClosedCurve(new Point[3] { new Point(1, 1), new Point(1, 1), new Point(1, 1) });
                 Assert.Equal(20, gpi.PointCount);
 
-                gpf.AddClosedCurve(
-                    new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddClosedCurve(new PointF[3] { new PointF(1, 1), new PointF(1, 1), new PointF(1, 1) });
                 Assert.Equal(10, gpf.PointCount);
-                gpf.AddClosedCurve(
-                    new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddClosedCurve(new PointF[3] { new PointF(1, 1), new PointF(1, 1), new PointF(1, 1) });
                 Assert.Equal(20, gpf.PointCount);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3, 0.5f)]
-        public void AddClosedCurve_Tension_Success(int x1, int y1, int x2, int y2, int x3, int y3, float tension)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddClosedCurve_Tension_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddClosedCurve(
-                    new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) },
-                    tension);
+                gpi.AddClosedCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) }, 0.5f);
                 AssertClosedCurve(gpi);
 
-                gpf.AddClosedCurve(
-                    new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) },
-                    tension);
+                gpf.AddClosedCurve(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) }, 0.5f);
                 AssertClosedCurve(gpf);
             }
         }
@@ -856,46 +798,45 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddRectangle_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddRectangle_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddRectangle(new Rectangle(x, y, width, height));
+                gpi.AddRectangle(new Rectangle(1, 1, 2, 2));
+                // AssertRectangle() method expects added Rectangle with parameters x=1, y=1, width=2, height=2, here and below.
                 AssertRectangle(gpi);
 
-                gpf.AddRectangle(new RectangleF((float)x, (float)y, (float)width, (float)height));
+                gpf.AddRectangle(new RectangleF(1, 1, 2, 2));
                 AssertRectangle(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 1, 1)]
-        public void AddRectangle_SameRectangles_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddRectangle_SameRectangles_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddRectangle(new Rectangle(x, y, width, height));
+                gpi.AddRectangle(new Rectangle(1, 1, 1, 1));
                 Assert.Equal(4, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 129 }, gpi.PathTypes);
 
                 PointF endI = gpi.PathPoints[3];
 
-                gpi.AddRectangle(new Rectangle((int)endI.X, (int)endI.Y, width, height));
+                gpi.AddRectangle(new Rectangle((int)endI.X, (int)endI.Y, 1, 1));
                 Assert.Equal(8, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 129, 0, 1, 1, 129 }, gpi.PathTypes);
 
-                gpf.AddRectangle(new RectangleF((float)x, (float)y, (float)width, (float)height));
+                gpf.AddRectangle(new RectangleF(1, 1, 1, 1));
                 Assert.Equal(4, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 129 }, gpf.PathTypes);
                 Assert.Equal(129, gpf.PathTypes[3]);
 
                 PointF endF = gpf.PathPoints[3];
 
-                gpf.AddRectangle(new RectangleF(endF.X, endF.Y, (float)width, (float)height));
+                gpf.AddRectangle(new RectangleF(endF.X, endF.Y, 1, 1));
                 Assert.Equal(8, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 1, 129, 0, 1, 1, 129 }, gpf.PathTypes);
             }
@@ -918,21 +859,11 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3, 4, 4)]
-        public void AddRectangles_Success(int x, int y, int width, int height, int x1, int y1, int width1, int height1)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddRectangles_Success()
         {
-            Rectangle[] rectInt = new Rectangle[]
-            {
-                new Rectangle(x, y, width, height),
-                new Rectangle(x1, y1, width1, height1)
-            };
-
-            RectangleF[] rectFloat = new RectangleF[]
-            {
-                new RectangleF((float)x, (float)y, (float)width, (float)height),
-                new RectangleF((float)x1, (float)y1, (float)width1, (float)height1)
-            };
+            Rectangle[] rectInt = new Rectangle[] { new Rectangle(1, 1, 2, 2), new Rectangle(3, 3, 4, 4) };
+            RectangleF[] rectFloat = new RectangleF[] { new RectangleF(1, 1, 2, 2), new RectangleF(3, 3, 4, 4) };
 
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
@@ -949,22 +880,21 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddRectangles_SamePoints_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddRectangles_SamePoints_Success()
         {
             Rectangle[] rectInt = new Rectangle[]
             {
-                new Rectangle(x, y, 0, 0),
-                new Rectangle(x, y, width, height),
-                new Rectangle(x, y, width, height)
+                new Rectangle(1, 1, 0, 0),
+                new Rectangle(1, 1, 2, 2),
+                new Rectangle(1, 1, 2, 2)
             };
 
             RectangleF[] rectFloat = new RectangleF[]
             {
-                new RectangleF((float)x, (float)y, 0f, 0f),
-                new RectangleF((float)x, (float)y, (float)width, (float)height),
-                new RectangleF((float)x, (float)y, (float)width, (float)height)
+                new RectangleF(1, 1, 0f, 0f),
+                new RectangleF(1, 1, 2, 2),
+                new RectangleF(1, 1, 2, 2)
             };
 
             using (GraphicsPath gpi = new GraphicsPath())
@@ -992,32 +922,31 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddEllipse_Rectangl_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddEllipse_Rectangle_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddEllipse(new Rectangle(x, y, width, height));
+                gpi.AddEllipse(new Rectangle(1, 1, 2, 2));
+                // AssertEllipse() method expects added Ellipse with parameters x=1, y=1, width=2, height=2, here and below.
                 AssertEllipse(gpi);
 
-                gpf.AddEllipse(new RectangleF((float)x, (float)y, (float)width, (float)height));
+                gpf.AddEllipse(new RectangleF(1, 1, 2, 2));
                 AssertEllipse(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddEllipse_Values_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddEllipse_Values_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddEllipse(x, y, width, height);
+                gpi.AddEllipse(1, 1, 2, 2);
                 AssertEllipse(gpi);
 
-                gpf.AddEllipse((float)x, (float)y, (float)width, (float)height);
+                gpf.AddEllipse(1f, 1f, 2f, 2f);
                 AssertEllipse(gpf);
             }
         }
@@ -1040,26 +969,27 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void AddPie_Rectangl_Success()
+        public void AddPie_Rectangle_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             {
                 gpi.AddPie(new Rectangle(1, 1, 2, 2), Pi4, Pi4);
+                // AssertPie() method expects added Pie with parameters 
+                // x=1, y=1, width=2, height=2, startAngle=Pi4, seewpAngle=Pi4 here and below.
                 AssertPie(gpi);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, Pi4, Pi4)]
-        public void AddPie_Values_Success(int x, int y, int width, int height, float startAngle, float sweepAngle)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddPie_Values_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddPie(x, y, height, width, Pi4, Pi4);
+                gpi.AddPie(1, 1, 2, 2, Pi4, Pi4);
                 AssertPie(gpi);
 
-                gpf.AddPie((float)x, (float)y, height, width, Pi4, Pi4);
+                gpf.AddPie(1f, 1f, 2f, 2f, Pi4, Pi4);
                 AssertPie(gpf);
             }
         }
@@ -1078,57 +1008,56 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3)]
-        public void AddPolygon_Points_Success(int x1, int y1, int x2, int y2, int x3, int y3)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddPolygon_Points_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddPolygon(new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddPolygon(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
+                // AssertPolygon() method expects added Polygon with points (1, 1), (2, 2), (3, 3), here and below.
                 AssertPolygon(gpi);
 
-                gpf.AddPolygon(new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddPolygon(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 AssertPolygon(gpf);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2, 3, 3)]
-        public void AddPolygon_SamePoints_Success(int x1, int y1, int x2, int y2, int x3, int y3)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddPolygon_SamePoints_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddPolygon(new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddPolygon(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
                 Assert.Equal(3, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129 }, gpi.PathTypes);
 
-                gpi.AddPolygon(new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddPolygon(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
                 Assert.Equal(6, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129 }, gpi.PathTypes);
 
-                gpi.AddPolygon(new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddPolygon(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
                 Assert.Equal(9, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129, 0, 1, 129 }, gpi.PathTypes);
 
-                gpi.AddPolygon(new Point[3] { new Point(x1, y1), new Point(x2, y2), new Point(x3, y3) });
+                gpi.AddPolygon(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
                 Assert.Equal(12, gpi.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129, 0, 1, 129, 0, 1, 129 }, gpi.PathTypes);
 
-                gpf.AddPolygon(new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddPolygon(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 Assert.Equal(3, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129 }, gpf.PathTypes);
 
-                gpf.AddPolygon(new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddPolygon(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 Assert.Equal(6, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129 }, gpf.PathTypes);
 
-                gpf.AddPolygon(new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddPolygon(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 Assert.Equal(9, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129, 0, 1, 129 }, gpf.PathTypes);
 
-                gpf.AddPolygon(new PointF[3] { new PointF((float)x1, (float)y1), new PointF((float)x2, (float)y2), new PointF((float)x3, (float)y3) });
+                gpf.AddPolygon(new PointF[3] { new PointF(1, 1), new PointF(2, 2), new PointF(3, 3) });
                 Assert.Equal(12, gpf.PointCount);
                 Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 129, 0, 1, 129, 0, 1, 129 }, gpf.PathTypes);
             }
@@ -1178,14 +1107,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(1, 1, 2, 2)]
-        public void AddPath_Success(int x, int y, int width, int height)
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void AddPath_Success()
         {
             using (GraphicsPath inner = new GraphicsPath())
             using (GraphicsPath gp = new GraphicsPath())
             {
-                inner.AddRectangle(new Rectangle(x, y, width, height));
+                inner.AddRectangle(new Rectangle(1, 1, 2, 2));
                 gp.AddPath(inner, true);
                 AssertRectangle(gp);
             }
@@ -1228,25 +1156,24 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData(-10)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void AddString_NegativeSize_Success(int size)
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
-                gpi.AddString("mono", FontFamily.GenericMonospace, 0, size, new Point(10, 10), StringFormat.GenericDefault);
+                gpi.AddString("mono", FontFamily.GenericMonospace, 0, -10, new Point(10, 10), StringFormat.GenericDefault);
                 AssertExtensions.GreaterThan(gpi.PointCount, 0);
 
                 int gpiLenghtOld = gpi.PathPoints.Length;
-                gpi.AddString("mono", FontFamily.GenericMonospace, 0, size, new Rectangle(10, 10, 10, 10), StringFormat.GenericDefault);
+                gpi.AddString("mono", FontFamily.GenericMonospace, 0, -10, new Rectangle(10, 10, 10, 10), StringFormat.GenericDefault);
                 AssertExtensions.GreaterThan(gpi.PointCount, gpiLenghtOld);
 
-                gpf.AddString("mono", FontFamily.GenericMonospace, 0, size, new PointF(10f, 10f), StringFormat.GenericDefault);
+                gpf.AddString("mono", FontFamily.GenericMonospace, 0, -10, new PointF(10f, 10f), StringFormat.GenericDefault);
                 AssertExtensions.GreaterThan(gpf.PointCount, 0);
 
                 int pgfLenghtOld = gpf.PathPoints.Length;
-                gpf.AddString("mono", FontFamily.GenericMonospace, 0, 10, new RectangleF(10f, 10f, 10f, 10f), StringFormat.GenericDefault);
+                gpf.AddString("mono", FontFamily.GenericMonospace, 0, -10, new RectangleF(10f, 10f, 10f, 10f), StringFormat.GenericDefault);
                 AssertExtensions.GreaterThan(gpf.PointCount, pgfLenghtOld);
             }
         }
@@ -1696,7 +1623,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddArc(10, 10, 100, 100, 90, 180);
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(1, types[2]);
                 Assert.Equal(3, types[gp.PointCount - 3]);
@@ -1713,7 +1640,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddBezier(10, 10, 100, 100, 20, 20, 200, 200);
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(1, types[2]);
                 Assert.Equal(3, types[gp.PointCount - 3]);
@@ -1736,7 +1663,7 @@ namespace System.Drawing.Drawing2D.Tests
 
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(1, types[2]);
                 Assert.Equal(3, types[gp.PointCount - 3]);
@@ -1753,7 +1680,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddClosedCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(0, types[2]);
                 Assert.Equal(131, types[gp.PointCount - 3]);
@@ -1770,7 +1697,7 @@ namespace System.Drawing.Drawing2D.Tests
             path.AddCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
             path.AddLine(10, 10, 20, 20);
             byte[] types = path.PathTypes;
-            
+
             Assert.Equal(0, types[0]);
             Assert.Equal(1, types[2]);
             Assert.Equal(3, types[path.PointCount - 3]);
@@ -1786,7 +1713,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddEllipse(10, 10, 100, 100);
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(0, types[2]);
                 Assert.Equal(131, types[gp.PointCount - 3]);
@@ -1803,7 +1730,7 @@ namespace System.Drawing.Drawing2D.Tests
             path.AddLine(5, 5, 10, 10);
             path.AddLine(10, 10, 20, 20);
             byte[] types = path.PathTypes;
-            
+
             Assert.Equal(0, types[0]);
             Assert.Equal(1, types[2]);
             Assert.Equal(1, types[path.PointCount - 3]);
@@ -1819,7 +1746,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddLines(new Point[4] { new Point(10, 10), new Point(20, 10), new Point(20, 20), new Point(30, 20) });
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(1, types[2]);
                 Assert.Equal(1, types[gp.PointCount - 3]);
@@ -1838,7 +1765,7 @@ namespace System.Drawing.Drawing2D.Tests
                 gp.AddPath(inner, true);
                 gp.AddLine(10, 10, 20, 20);
                 byte[] types = gp.PathTypes;
-                
+
                 Assert.Equal(0, types[0]);
                 Assert.Equal(1, types[2]);
                 Assert.Equal(3, types[gp.PointCount - 3]);
@@ -2002,7 +1929,7 @@ namespace System.Drawing.Drawing2D.Tests
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.Widen(null));
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.Widen(null, new Matrix()));
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.Widen(null, new Matrix(), 0.67f));
-            }            
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -2067,7 +1994,7 @@ namespace System.Drawing.Drawing2D.Tests
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.IsOutlineVisible(1.0f, 1.0f, null));
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.IsOutlineVisible(new Point(), null));
                 AssertExtensions.Throws<ArgumentNullException>("pen", () => gp.IsOutlineVisible(new PointF(), null));
-            }            
+            }
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -2419,11 +2346,11 @@ namespace System.Drawing.Drawing2D.Tests
             Point[] expectedPoints = new Point[]
             {
                 new Point(dX-64, dY-24), new Point(dX-59, dY-34), new Point(dX-52, dY-54),
-				new Point(dX-18, dY-66), new Point(dX-34, dY-47), new Point(dX-43, dY-27),  
-				new Point(dX-44, dY-8),
-			};
+                new Point(dX-18, dY-66), new Point(dX-34, dY-47), new Point(dX-43, dY-27),
+                new Point(dX-44, dY-8),
+            };
 
-            byte[] expectedTypes = new byte[] 
+            byte[] expectedTypes = new byte[]
             {
                 (byte)PathPointType.Start, (byte)PathPointType.Bezier, (byte)PathPointType.Bezier,
                 (byte)PathPointType.Bezier, (byte)PathPointType.Bezier, (byte)PathPointType.Bezier,
@@ -2545,7 +2472,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(13, path.PathTypes.Length);
             Assert.Equal(13, path.PathData.Points.Length);
             Assert.Equal(new RectangleF(1f, 1f, 2f, 2f), path.GetBounds());
-            Assert.Equal(new byte[] { 0, 3, 3, 3, 3, 3, 3, 3, 3, 3 , 3, 3, 131}, path.PathTypes);
+            Assert.Equal(new byte[] { 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 131 }, path.PathTypes);
         }
 
         private void AssertPie(GraphicsPath path)
@@ -2613,11 +2540,11 @@ namespace System.Drawing.Drawing2D.Tests
                 new PointF(10.0f, 16.1f), new PointF(10.4f, 14.8f),
                 new PointF(9.6f, 14.8f), new PointF(14.6f, 4.8f),
                 new PointF(15.0f, 5.5f), new PointF(5.0f, 5.5f),
-                new PointF(5.4f, 4.8f)                
+                new PointF(5.4f, 4.8f)
             };
-            
+
             AssertPointsSequenceEqual(expectedPoints, path.PathPoints, 0.25f);
-            Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 1, 1, 1, 129 }, path.PathTypes);            
+            Assert.Equal(new byte[] { 0, 1, 129, 0, 1, 1, 1, 1, 129 }, path.PathTypes);
         }
 
         private void AssertIsOutlineVisibleLine(Graphics graphics)
@@ -2695,7 +2622,7 @@ namespace System.Drawing.Drawing2D.Tests
                 Assert.False(gp.IsVisible(9.4f, 9.4f, graphics));
                 Assert.True(gp.IsVisible(9.5f, 9.5f, graphics));
                 Assert.True(gp.IsVisible(10f, 10f, graphics));
-                Assert.True(gp.IsVisible(20f, 20f, graphics));                
+                Assert.True(gp.IsVisible(20f, 20f, graphics));
                 Assert.True(gp.IsVisible(29.4f, 29.4f, graphics));
                 Assert.False(gp.IsVisible(29.5f, 29.5f, graphics));
                 Assert.False(gp.IsVisible(29.5f, 29.4f, graphics));
@@ -2741,7 +2668,7 @@ namespace System.Drawing.Drawing2D.Tests
             {
                 AssertExtensions.LessThanOrEqualTo(Math.Abs(expected[i].X - actual[i].X), tolerance);
                 AssertExtensions.LessThanOrEqualTo(Math.Abs(expected[i].Y - actual[i].Y), tolerance);
-            }            
+            }
         }
 
         private void AssertRectangleEqual(RectangleF expected, RectangleF actual, float tolerance)
