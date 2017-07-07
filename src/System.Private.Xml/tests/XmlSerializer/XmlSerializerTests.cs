@@ -4413,9 +4413,9 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual.Name5);
         Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)value).Name5, ((DerivedTypeWithDifferentOverrides)actual).Name5);
         Assert.Null(((SerializationTypes.BaseType)actual).Name5);
-        //Assert.Null(actual.Name6);
-        //Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
-        //Assert.StrictEqual(((SerializationTypes.BaseType)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+        Assert.Null(actual.Name6);
+        Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+        Assert.StrictEqual(((SerializationTypes.BaseType)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";
