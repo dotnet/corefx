@@ -327,7 +327,7 @@ namespace System.Net.Http.Functional.Tests
             if (PlatformDetection.IsUap)
             {
                 // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
-                // the same process as the other tests. Each test needs to be isolated to  own process.
+                // the same process as the other tests. Each test needs to be isolated to its own process.
                 // See dicussion: https://github.com/dotnet/corefx/issues/21945
                 RemoteInvoke((remoteUrl, remoteExpectedErrors) =>
                 {
