@@ -1016,7 +1016,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr newIndex = it.Current();
                 if (newIndex.Type != intType)
                 {
-                    ExprClass exprType = expressionFactory.CreateClass(intType, null);
+                    ExprClass exprType = expressionFactory.CreateClass(intType);
                     newIndex = expressionFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, exprType, newIndex);
                     newIndex.Flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
                 }
@@ -1044,7 +1044,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 flags = EXPRFLAG.EXF_BOX;
             }
 
-            ExprClass objectType = GetExprFactory().MakeClass(pObject);
+            ExprClass objectType = GetExprFactory().CreateClass(pObject);
             ExprCast cast = GetExprFactory().CreateCast(flags, objectType, expr);
             ExprTypeOf pTypeOf2 = CreateTypeOf(expr.Type);
 

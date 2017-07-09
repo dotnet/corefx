@@ -395,11 +395,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (allowExplicit)
             {
-                return mustCastCore(op2, GetExprFactory().MakeClass(op1.Type), 0);
+                return mustCastCore(op2, GetExprFactory().CreateClass(op1.Type), 0);
             }
             else
             {
-                return mustConvertCore(op2, GetExprFactory().MakeClass(op1.Type));
+                return mustConvertCore(op2, GetExprFactory().CreateClass(op1.Type));
             }
         }
 
@@ -472,7 +472,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Expr pTemp = mustConvert(x, pDestType);
                     if (pDestType == pIntType)
                         return pTemp;
-                    ExprClass exprType = GetExprFactory().MakeClass(pDestType);
+                    ExprClass exprType = GetExprFactory().CreateClass(pDestType);
                     return GetExprFactory().CreateCast(EXPRFLAG.EXF_INDEXEXPR, exprType, pTemp);
                 });
 
@@ -866,7 +866,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (pOtherType != null)
                     {
-                        return GetExprFactory().MakeClass(pOtherType);
+                        return GetExprFactory().CreateClass(pOtherType);
                     }
                     ErrorContext.ErrorRef(ErrorCode.ERR_PropertyLacksGet, pwt);
                 }
@@ -875,7 +875,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // if the get exists, but is abstract, forbid the call as well...
                     if (pOtherType != null)
                     {
-                        return GetExprFactory().MakeClass(pOtherType);
+                        return GetExprFactory().CreateClass(pOtherType);
                     }
                     ErrorContext.Error(ErrorCode.ERR_AbstractBaseCall, pwt);
                 }
@@ -893,7 +893,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // if the get exists, but is not accessible, give an error.
                         if (pOtherType != null)
                         {
-                            return GetExprFactory().MakeClass(pOtherType);
+                            return GetExprFactory().CreateClass(pOtherType);
                         }
 
                         if (error == ACCESSERROR.ACCESSERROR_NOACCESSTHRU)

@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprCast CreateCast(EXPRFLAG nFlags, CType pType, Expr pArg)
         {
-            return CreateCast(nFlags, CreateClass(pType, null), pArg);
+            return CreateCast(nFlags, CreateClass(pType), pArg);
         }
 
         public ExprCast CreateCast(EXPRFLAG nFlags, ExprClass pType, Expr pArg)
@@ -186,7 +186,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public ExprTypeOf CreateTypeOf(CType pSourceType)
         {
-            return CreateTypeOf(MakeClass(pSourceType));
+            return CreateTypeOf(CreateClass(pSourceType));
         }
 
         public ExprUserLogicalOp CreateUserLogOp(CType pType, Expr pCallTF, ExprCall pCallOp)
@@ -239,7 +239,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Expr CreateZeroInit(CType pType)
         {
-            return CreateZeroInit(MakeClass(pType), null, false);
+            return CreateZeroInit(CreateClass(pType), null, false);
         }
 
         private Expr CreateZeroInit(ExprClass pTypeExpr, Expr pOptionalOriginalConstructorCall, bool isConstructor)
@@ -501,16 +501,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprTypeArguments(pOptionalElements);
         }
 
-        public ExprClass CreateClass(CType pType, ExprTypeArguments pOptionalTypeArguments)
+        public ExprClass CreateClass(CType pType)
         {
             Debug.Assert(pType != null);
             return new ExprClass(pType);
-        }
-
-        public ExprClass MakeClass(CType pType)
-        {
-            Debug.Assert(pType != null);
-            return CreateClass(pType, null/* type arguments */);
         }
     }
 }
