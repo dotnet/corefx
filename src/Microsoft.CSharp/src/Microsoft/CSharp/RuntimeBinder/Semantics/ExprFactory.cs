@@ -21,47 +21,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private BSYMMGR GlobalSymbols => _globalSymbolContext.GetGlobalSymbols();
 
-        public ExprCall CreateCall(EXPRFLAG nFlags, CType pType, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, MethWithInst MWI)
-        {
-            return new ExprCall(pType, nFlags, pOptionalArguments, pMemberGroup, MWI);
-        }
+        public ExprCall CreateCall(EXPRFLAG nFlags, CType pType, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, MethWithInst MWI) => 
+            new ExprCall(pType, nFlags, pOptionalArguments, pMemberGroup, MWI);
 
-        public ExprField CreateField(CType pType, Expr pOptionalObject, FieldWithType FWT, bool isLValue)
-        {
-            return new ExprField(pType, pOptionalObject, FWT, isLValue);
-        }
+        public ExprField CreateField(CType pType, Expr pOptionalObject, FieldWithType FWT, bool isLValue) => 
+            new ExprField(pType, pOptionalObject, FWT, isLValue);
 
-        public ExprFuncPtr CreateFunctionPointer(EXPRFLAG nFlags, CType pType, Expr pObject, MethWithInst MWI)
-        {
-            return new ExprFuncPtr(pType, nFlags, pObject, MWI);
-        }
+        public ExprFuncPtr CreateFunctionPointer(EXPRFLAG nFlags, CType pType, Expr pObject, MethWithInst MWI) => 
+            new ExprFuncPtr(pType, nFlags, pObject, MWI);
 
-        public ExprArrayInit CreateArrayInit(CType pType, Expr pOptionalArguments, Expr pOptionalArgumentDimensions, int[] pDimSizes, int dimSize)
-        {
-            return new ExprArrayInit(pType, pOptionalArguments, pOptionalArgumentDimensions, pDimSizes, dimSize);
-        }
+        public ExprArrayInit CreateArrayInit(CType pType, Expr pOptionalArguments, Expr pOptionalArgumentDimensions, int[] pDimSizes, int dimSize) => 
+            new ExprArrayInit(pType, pOptionalArguments, pOptionalArgumentDimensions, pDimSizes, dimSize);
 
-        public ExprProperty CreateProperty(CType pType, Expr pOptionalObject)
-        {
-            MethPropWithInst mwi = new MethPropWithInst();
-            ExprMemberGroup pMemGroup = CreateMemGroup(pOptionalObject, mwi);
-            return CreateProperty(pType, null, null, pMemGroup, null, null);
-        }
+        public ExprProperty CreateProperty(CType pType, Expr pOptionalObject) => 
+            CreateProperty(pType, null, null, CreateMemGroup(pOptionalObject, new MethPropWithInst()), null, null);
 
-        public ExprProperty CreateProperty(CType pType, Expr pOptionalObjectThrough, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, PropWithType pwtSlot, MethWithType mwtSet)
-        {
-            return new ExprProperty(pType, pOptionalObjectThrough, pOptionalArguments, pMemberGroup, pwtSlot, mwtSet);
-        }
+        public ExprProperty CreateProperty(CType pType, Expr pOptionalObjectThrough, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, PropWithType pwtSlot, MethWithType mwtSet) => 
+            new ExprProperty(pType, pOptionalObjectThrough, pOptionalArguments, pMemberGroup, pwtSlot, mwtSet);
 
-        public ExprEvent CreateEvent(CType pType, Expr pOptionalObject, EventWithType EWT)
-        {
-            return new ExprEvent(pType, pOptionalObject, EWT);
-        }
+        public ExprEvent CreateEvent(CType pType, Expr pOptionalObject, EventWithType EWT) => 
+            new ExprEvent(pType, pOptionalObject, EWT);
 
-        public ExprMemberGroup CreateMemGroup(EXPRFLAG nFlags, Name pName, TypeArray pTypeArgs, SYMKIND symKind, CType pTypePar, MethodOrPropertySymbol pMPS, Expr pObject, CMemberLookupResults memberLookupResults)
-        {
-            return new ExprMemberGroup(Types.GetMethGrpType(), nFlags, pName, pTypeArgs, symKind, pTypePar, pMPS, pObject, memberLookupResults);
-        }
+        public ExprMemberGroup CreateMemGroup(EXPRFLAG nFlags, Name pName, TypeArray pTypeArgs, SYMKIND symKind, CType pTypePar, MethodOrPropertySymbol pMPS, Expr pObject, CMemberLookupResults memberLookupResults) => 
+            new ExprMemberGroup(Types.GetMethGrpType(), nFlags, pName, pTypeArgs, symKind, pTypePar, pMPS, pObject, memberLookupResults);
 
         public ExprMemberGroup CreateMemGroup(
                 Expr pObject,
@@ -75,45 +57,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return CreateMemGroup(0, pName, mwi.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GlobalSymbols.AllocParams(1, new CType[] { pType }), pName));
         }
 
-        public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst mwi)
-        {
-            return new ExprUserDefinedConversion(arg, call, mwi);
-        }
+        public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst mwi) => 
+            new ExprUserDefinedConversion(arg, call, mwi);
 
-        public ExprCast CreateCast(CType pType, Expr pArg)
-        {
-            return CreateCast(0, CreateClass(pType), pArg);
-        }
+        public ExprCast CreateCast(CType pType, Expr pArg) => CreateCast(0, CreateClass(pType), pArg);
 
-        public ExprCast CreateCast(EXPRFLAG nFlags, ExprClass pType, Expr pArg)
-        {
-            return new ExprCast(nFlags, pType, pArg);
-        }
+        public ExprCast CreateCast(EXPRFLAG nFlags, ExprClass pType, Expr pArg) => new ExprCast(nFlags, pType, pArg);
 
-        public ExprReturn CreateReturn(Expr pOptionalObject)
-        {
-            return new ExprReturn(pOptionalObject);
-        }
+        public ExprReturn CreateReturn(Expr pOptionalObject) => new ExprReturn(pOptionalObject);
 
-        public ExprLocal CreateLocal(LocalVariableSymbol pLocal)
-        {
-            return new ExprLocal(pLocal);
-        }
+        public ExprLocal CreateLocal(LocalVariableSymbol pLocal) => new ExprLocal(pLocal);
 
-        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope)
-        {
-            return new ExprBoundLambda(delegateType, argumentScope);
-        }
+        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope) => 
+            new ExprBoundLambda(delegateType, argumentScope);
 
-        public ExprHoistedLocalExpr CreateHoistedLocalInExpression()
-        {
-            return new ExprHoistedLocalExpr(Types.GetOptPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
-        }
+        public ExprHoistedLocalExpr CreateHoistedLocalInExpression() => 
+            new ExprHoistedLocalExpr(Types.GetOptPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
 
-        public ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi)
-        {
-            return CreateMethodInfo(mwi.Meth(), mwi.GetType(), mwi.TypeArgs);
-        }
+        public ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi) => 
+            CreateMethodInfo(mwi.Meth(), mwi.GetType(), mwi.TypeArgs);
 
         public ExprMethodInfo CreateMethodInfo(MethodSymbol method, AggregateType methodType, TypeArray methodParameters)
         {
@@ -122,30 +84,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 method, methodType, methodParameters);
         }
 
-        public ExprPropertyInfo CreatePropertyInfo(PropertySymbol prop, AggregateType propertyType)
-        {
-            return new ExprPropertyInfo(
-                Types.GetOptPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
-        }
+        public ExprPropertyInfo CreatePropertyInfo(PropertySymbol prop, AggregateType propertyType) => 
+            new ExprPropertyInfo(Types.GetOptPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
 
-        public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType)
-        {
-            return new ExprFieldInfo(field, fieldType, Types.GetOptPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
-        }
+        public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType) => 
+            new ExprFieldInfo(field, fieldType, Types.GetOptPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
 
-        private ExprTypeOf CreateTypeOf(ExprClass pSourceType)
-        {
-            return new ExprTypeOf(Types.GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), pSourceType);
-        }
-        public ExprTypeOf CreateTypeOf(CType pSourceType)
-        {
-            return CreateTypeOf(CreateClass(pSourceType));
-        }
+        private ExprTypeOf CreateTypeOf(ExprClass pSourceType) => 
+            new ExprTypeOf(Types.GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), pSourceType);
 
-        public ExprUserLogicalOp CreateUserLogOp(CType pType, Expr pCallTF, ExprCall pCallOp)
-        {
-            return new ExprUserLogicalOp(pType, pCallTF, pCallOp);
-        }
+        public ExprTypeOf CreateTypeOf(CType pSourceType) => CreateTypeOf(CreateClass(pSourceType));
+
+        public ExprUserLogicalOp CreateUserLogOp(CType pType, Expr pCallTF, ExprCall pCallOp) => 
+            new ExprUserLogicalOp(pType, pCallTF, pCallOp);
 
         public ExprUserLogicalOp CreateUserLogOpError(CType pType, Expr pCallTF, ExprCall pCallOp)
         {
@@ -154,25 +105,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return rval;
         }
 
-        public ExprConcat CreateConcat(Expr op1, Expr op2)
-        {
-            return new ExprConcat(op1, op2);
-        }
+        public ExprConcat CreateConcat(Expr op1, Expr op2) => new ExprConcat(op1, op2);
 
-        public ExprConstant CreateStringConstant(string str)
-        {
-            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
-        }
+        public ExprConstant CreateStringConstant(string str) => 
+            CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
 
-        public ExprMultiGet CreateMultiGet(EXPRFLAG nFlags, CType pType, ExprMulti pOptionalMulti)
-        {
-            return new ExprMultiGet(pType, nFlags, pOptionalMulti);
-        }
+        public ExprMultiGet CreateMultiGet(EXPRFLAG nFlags, CType pType, ExprMulti pOptionalMulti) => 
+            new ExprMultiGet(pType, nFlags, pOptionalMulti);
 
-        public ExprMulti CreateMulti(EXPRFLAG nFlags, CType pType, Expr pLeft, Expr pOp)
-        {
-            return new ExprMulti(pType, nFlags, pLeft, pOp);
-        }
+        public ExprMulti CreateMulti(EXPRFLAG nFlags, CType pType, Expr pLeft, Expr pOp) => 
+            new ExprMulti(pType, nFlags, pLeft, pOp);
 
         ////////////////////////////////////////////////////////////////////////////////
         //
@@ -182,10 +124,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // This returns a null for reference types and an EXPRZEROINIT for all others.
 
-        public Expr CreateZeroInit(CType pType)
-        {
-            return CreateZeroInit(CreateClass(pType), null, false);
-        }
+        public Expr CreateZeroInit(CType pType) => CreateZeroInit(CreateClass(pType), null, false);
 
         private Expr CreateZeroInit(ExprClass pTypeExpr, Expr pOptionalOriginalConstructorCall, bool isConstructor)
         {
@@ -248,10 +187,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprZeroInit(pType, pOptionalOriginalConstructorCall, isConstructor, bIsError);
         }
 
-        public ExprConstant CreateConstant(CType pType, ConstVal constVal)
-        {
-            return new ExprConstant(pType, constVal);
-        }
+        public ExprConstant CreateConstant(CType pType, ConstVal constVal) => new ExprConstant(pType, constVal);
 
         public ExprConstant CreateIntegerConstant(int x)
         {
@@ -262,10 +198,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
         }
 
-        public ExprBlock CreateBlock(ExprStatement pOptionalStatements)
-        {
-            return new ExprBlock(pOptionalStatements);
-        }
+        public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
         public ExprArrayIndex CreateArrayIndex(Expr pArray, Expr pIndex)
         {
@@ -282,15 +215,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprArrayIndex(pType, pArray, pIndex);
         }
 
-        public ExprBinOp CreateBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2)
-        {
-            return new ExprBinOp(exprKind, pType, p1, p2);
-        }
+        public ExprBinOp CreateBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2) => 
+            new ExprBinOp(exprKind, pType, p1, p2);
 
-        public ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType pType, Expr pOperand)
-        {
-            return new ExprUnaryOp(exprKind, pType, pOperand);
-        }
+        public ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType pType, Expr pOperand) => 
+            new ExprUnaryOp(exprKind, pType, pOperand);
 
         public ExprOperator CreateOperator(ExpressionKind exprKind, CType pType, Expr pArg1, Expr pOptionalArg2)
         {
@@ -302,16 +231,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
 
-        public ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2, Expr call, MethPropWithInst pmpwi)
-        {
-            return new ExprBinOp(exprKind, pType, p1, p2, call, pmpwi);
-        }
+        public ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2, Expr call, MethPropWithInst pmpwi) => 
+            new ExprBinOp(exprKind, pType, p1, p2, call, pmpwi);
 
-        public ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType pType, Expr pOperand, ExprCall call, MethPropWithInst pmpwi)
-        {
-            // The call may be lifted, but we do not mark the outer binop as lifted.
-            return new ExprUnaryOp(exprKind, pType, pOperand, call, pmpwi);
-        }
+        // The call may be lifted, but we do not mark the outer binop as lifted.
+        public ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType pType, Expr pOperand, ExprCall call, MethPropWithInst pmpwi) => 
+            new ExprUnaryOp(exprKind, pType, pOperand, call, pmpwi);
 
         public ExprUnaryOp CreateNeg(EXPRFLAG nFlags, Expr pOperand)
         {
@@ -324,34 +249,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the second.
 
-        public ExprBinOp CreateSequence(Expr p1, Expr p2)
-        {
-            Debug.Assert(p1 != null);
-            Debug.Assert(p2 != null);
-            return CreateBinop(ExpressionKind.Sequence, p2.Type, p1, p2);
-        }
+        public ExprBinOp CreateSequence(Expr p1, Expr p2) => CreateBinop(ExpressionKind.Sequence, p2.Type, p1, p2);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the first.
 
-        public ExprBinOp CreateReverseSequence(Expr p1, Expr p2)
-        {
-            Debug.Assert(p1 != null);
-            Debug.Assert(p2 != null);
-            return CreateBinop(ExpressionKind.SequenceReverse, p1.Type, p1, p2);
-        }
+        public ExprBinOp CreateReverseSequence(Expr p1, Expr p2) =>
+            CreateBinop(ExpressionKind.SequenceReverse, p1.Type, p1, p2);
 
-        public ExprAssignment CreateAssignment(Expr pLHS, Expr pRHS)
-        {
-            return new ExprAssignment(pLHS, pRHS);
-        }
+        public ExprAssignment CreateAssignment(Expr pLHS, Expr pRHS) => new ExprAssignment(pLHS, pRHS);
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name pName, Expr pValue)
-        {
-            return new ExprNamedArgumentSpecification(pName, pValue);
-        }
+        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name pName, Expr pValue) =>
+            new ExprNamedArgumentSpecification(pName, pValue);
 
         public ExprWrap CreateWrap(Expr pOptionalExpression) => new ExprWrap(pOptionalExpression);
 
@@ -363,10 +274,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return expr;
         }
 
-        public ExprConstant CreateNull()
-        {
-            return CreateConstant(Types.GetNullType(), default(ConstVal));
-        }
+        public ExprConstant CreateNull() => CreateConstant(Types.GetNullType(), default(ConstVal));
 
         public void AppendItemToList(
             Expr newItem,
@@ -400,23 +308,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             last = list.OptionalNextListNode;
         }
 
-        public ExprList CreateList(Expr op1, Expr op2)
-        {
-            return new ExprList(op1, op2);
-        }
-        public ExprList CreateList(Expr op1, Expr op2, Expr op3)
-        {
-            return CreateList(op1, CreateList(op2, op3));
-        }
-        public ExprList CreateList(Expr op1, Expr op2, Expr op3, Expr op4)
-        {
-            return CreateList(op1, CreateList(op2, CreateList(op3, op4)));
-        }
+        public ExprList CreateList(Expr op1, Expr op2) => new ExprList(op1, op2);
 
-        public ExprClass CreateClass(CType pType)
-        {
-            return new ExprClass(pType);
-        }
+        public ExprList CreateList(Expr op1, Expr op2, Expr op3) => CreateList(op1, CreateList(op2, op3));
+
+        public ExprList CreateList(Expr op1, Expr op2, Expr op3, Expr op4) =>
+            CreateList(op1, CreateList(op2, CreateList(op3, op4)));
+
+        public ExprClass CreateClass(CType pType) => new ExprClass(pType);
     }
 }
 
