@@ -1811,10 +1811,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             CType elemType = arrayType.AsArrayType().GetElementType();
 
                             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
-                            ExprArrayInit arrayInit = GetExprFactory().CreateArrayInit(arrayType, null, null, null);
+                            ExprArrayInit arrayInit = GetExprFactory().CreateArrayInit(arrayType, null, null, new[] { 0 }, 1);
                             arrayInit.GeneratedForParamArray = true;
-                            arrayInit.DimensionSizes = new[] {arrayInit.DimensionSize};
-                            arrayInit.DimensionSize = 1;
                             arrayInit.OptionalArguments = named.Value;
 
                             named.Value = arrayInit;
@@ -1891,9 +1889,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType elementType = substitutedArrayType.AsArrayType().GetElementType();
 
             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
-            ExprArrayInit exprArrayInit = GetExprFactory().CreateArrayInit(substitutedArrayType, null, null, null);
+            ExprArrayInit exprArrayInit = GetExprFactory().CreateArrayInit(substitutedArrayType, null, null, new[] { 0 }, 1);
             exprArrayInit.GeneratedForParamArray = true;
-            exprArrayInit.DimensionSizes = new int[] { exprArrayInit.DimensionSize };
 
             if (it.AtEnd())
             {

@@ -51,9 +51,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprFuncPtr(pType, nFlags, pObject, MWI);
         }
 
-        public ExprArrayInit CreateArrayInit(CType pType, Expr pOptionalArguments, Expr pOptionalArgumentDimensions, int[] pDimSizes)
+        public ExprArrayInit CreateArrayInit(CType pType, Expr pOptionalArguments, Expr pOptionalArgumentDimensions, int[] pDimSizes, int dimSize)
         {
-            return new ExprArrayInit(pType, pOptionalArguments, pOptionalArgumentDimensions, pDimSizes);
+            return new ExprArrayInit(pType, pOptionalArguments, pOptionalArgumentDimensions, pDimSizes, dimSize);
         }
 
         public ExprProperty CreateProperty(CType pType, Expr pOptionalObject)

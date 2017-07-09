@@ -1114,10 +1114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType paramsArrayElementType = GetSymbolLoader().GetOptPredefTypeErr(pt, true);
             ArrayType paramsArrayType = GetSymbolLoader().GetTypeManager().GetArray(paramsArrayElementType, 1, true);
             ExprConstant paramsArrayArg = GetExprFactory().CreateIntegerConstant(parameterCount);
-            ExprArrayInit arrayInit = GetExprFactory().CreateArrayInit(paramsArrayType, args, paramsArrayArg, null);
-            arrayInit.DimensionSize = parameterCount;
-            arrayInit.DimensionSizes = new int[] { arrayInit.DimensionSize }; // CLEANUP: Why isn't this done by the factory?
-            return arrayInit;
+            return GetExprFactory().CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
         }
 
         private void FixLiftedUserDefinedBinaryOperators(ExprBinOp expr, ref Expr pp1, ref Expr pp2)
