@@ -848,7 +848,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pObject != null && !pObject.IsOK)
             {
-                ExprProperty pResult = GetExprFactory().CreateProperty(pReturnType, pObjectThrough, args, pMemGroup, pwt, null, null);
+                ExprProperty pResult = GetExprFactory().CreateProperty(pReturnType, pObjectThrough, args, pMemGroup, pwt, null);
                 if (!bIsMatchingStatic)
                 {
                     pResult.SetMismatchedStaticBit();
@@ -908,7 +908,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            ExprProperty result = GetExprFactory().CreateProperty(pReturnType, pObjectThrough, args, pMemGroup, pwt, mwtGet, mwtSet);
+            ExprProperty result = GetExprFactory().CreateProperty(pReturnType, pObjectThrough, args, pMemGroup, pwt, mwtSet);
             if (!bIsMatchingStatic)
             {
                 result.SetMismatchedStaticBit();

@@ -62,10 +62,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             MethPropWithInst mwi = new MethPropWithInst();
             ExprMemberGroup pMemGroup = CreateMemGroup(pOptionalObject, mwi);
-            return CreateProperty(pType, null, null, pMemGroup, null, null, null);
+            return CreateProperty(pType, null, null, pMemGroup, null, null);
         }
 
-        public ExprProperty CreateProperty(CType pType, Expr pOptionalObjectThrough, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, PropWithType pwtSlot, MethWithType mwtGet, MethWithType mwtSet)
+        public ExprProperty CreateProperty(CType pType, Expr pOptionalObjectThrough, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, PropWithType pwtSlot, MethWithType mwtSet)
         {
             return new ExprProperty(pType, pOptionalObjectThrough, pOptionalArguments, pMemberGroup, pwtSlot, mwtSet);
         }
