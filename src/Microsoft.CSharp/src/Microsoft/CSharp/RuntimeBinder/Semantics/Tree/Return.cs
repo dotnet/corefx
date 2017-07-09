@@ -6,10 +6,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprReturn : ExprStatement, IExprWithObject
     {
-        public ExprReturn(EXPRFLAG flags, Expr optionalObject)
+        public ExprReturn(Expr optionalObject)
             : base(ExpressionKind.Return)
         {
-            Flags = flags;
             OptionalObject = optionalObject;
         }
 

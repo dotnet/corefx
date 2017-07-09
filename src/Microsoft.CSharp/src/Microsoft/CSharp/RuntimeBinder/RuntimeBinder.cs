@@ -486,7 +486,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(_semanticChecker.GetNameManager().Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
             ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
-            ExprReturn returnStatement = _exprFactory.CreateReturn(0, call);
+            ExprReturn returnStatement = _exprFactory.CreateReturn(call);
             ExprBlock block = _exprFactory.CreateBlock(returnStatement);
             boundLambda.OptionalBody = block;
             return boundLambda;
@@ -508,7 +508,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // If we can convert, do that. If not, cast it.
-            ExprLocal exprLocal = _exprFactory.CreateLocal(EXPRFLAG.EXF_LVALUE, local);
+            ExprLocal exprLocal = _exprFactory.CreateLocal(local);
             Expr result = _binder.tryConvert(exprLocal, ctype);
             if (result == null)
             {

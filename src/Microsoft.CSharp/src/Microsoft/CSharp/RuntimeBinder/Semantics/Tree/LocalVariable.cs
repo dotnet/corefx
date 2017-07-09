@@ -8,10 +8,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprLocal : Expr
     {
-        public ExprLocal(EXPRFLAG flags, LocalVariableSymbol local)
+        public ExprLocal(LocalVariableSymbol local)
             : base(ExpressionKind.Local)
         {
-            Flags = flags;
+            Flags = EXPRFLAG.EXF_LVALUE;
             Local = local;
         }
 

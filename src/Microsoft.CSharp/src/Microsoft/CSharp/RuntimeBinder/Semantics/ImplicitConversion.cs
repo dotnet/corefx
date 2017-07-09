@@ -358,7 +358,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
                             else
                             {
-                                _exprDest = GetExprFactory().CreateCast(0x00, _typeDest, _exprSrc);
+                                _exprDest = GetExprFactory().CreateCast(_typeDest, _exprSrc);
                             }
                         }
                         return true;
@@ -467,7 +467,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        _exprDest = GetExprFactory().CreateCast(0x00, _typeDest, _exprSrc);
+                        _exprDest = GetExprFactory().CreateCast(_typeDest, _exprSrc);
                     }
                 }
                 return true;

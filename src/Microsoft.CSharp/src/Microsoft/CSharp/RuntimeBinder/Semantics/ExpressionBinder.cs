@@ -697,7 +697,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType pFieldType = GetTypes().SubstType(fwt.Field().GetType(), fwt.GetType());
             if (pOptionalObject != null && !pOptionalObject.IsOK)
             {
-                ExprField pField = GetExprFactory().CreateField(0, pFieldType, pOptionalObject, fwt);
+                ExprField pField = GetExprFactory().CreateField(pFieldType, pOptionalObject, fwt, false);
                 pField.SetError();
                 return pField;
             }
@@ -738,7 +738,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             ExprField pResult = GetExprFactory()
-                .CreateField(isLValue ? EXPRFLAG.EXF_LVALUE : 0, pFieldType, pOptionalObject, fwt);
+                .CreateField(pFieldType, pOptionalObject, fwt, isLValue);
             if (!bIsMatchingStatic)
             {
                 pResult.SetMismatchedStaticBit();

@@ -39,10 +39,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprCall(pType, nFlags, pOptionalArguments, pMemberGroup, MWI);
         }
 
-        public ExprField CreateField(EXPRFLAG nFlags, CType pType, Expr pOptionalObject, FieldWithType FWT)
+        public ExprField CreateField(CType pType, Expr pOptionalObject, FieldWithType FWT, bool isLValue)
         {
-            Debug.Assert(0 == (nFlags & ~(EXPRFLAG.EXF_MEMBERSET | EXPRFLAG.EXF_MASK_ANY)));
-            return new ExprField(pType, nFlags, pOptionalObject, FWT);
+            return new ExprField(pType, pOptionalObject, FWT, isLValue);
         }
 
         public ExprFuncPtr CreateFunctionPointer(EXPRFLAG nFlags, CType pType, Expr pObject, MethWithInst MWI)
@@ -102,9 +101,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprUserDefinedConversion(arg, call, mwi);
         }
 
-        public ExprCast CreateCast(EXPRFLAG nFlags, CType pType, Expr pArg)
+        public ExprCast CreateCast(CType pType, Expr pArg)
         {
-            return CreateCast(nFlags, CreateClass(pType), pArg);
+            return CreateCast(0, CreateClass(pType), pArg);
         }
 
         public ExprCast CreateCast(EXPRFLAG nFlags, ExprClass pType, Expr pArg)
@@ -115,21 +114,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprCast(nFlags, pType, pArg);
         }
 
-        public ExprReturn CreateReturn(EXPRFLAG nFlags, Expr pOptionalObject)
+        public ExprReturn CreateReturn(Expr pOptionalObject)
         {
-            Debug.Assert(0 == (nFlags &
-                       ~(EXPRFLAG.EXF_ASLEAVE | EXPRFLAG.EXF_FINALLYBLOCKED | EXPRFLAG.EXF_RETURNISYIELD |
-                          EXPRFLAG.EXF_ASFINALLYLEAVE | EXPRFLAG.EXF_GENERATEDSTMT | EXPRFLAG.EXF_MARKING |
-                          EXPRFLAG.EXF_MASK_ANY
-                        )
-                      ));
-            return new ExprReturn(nFlags, pOptionalObject);
+            return new ExprReturn(pOptionalObject);
         }
 
-        public ExprLocal CreateLocal(EXPRFLAG nFlags, LocalVariableSymbol pLocal)
+        public ExprLocal CreateLocal(LocalVariableSymbol pLocal)
         {
-            Debug.Assert(0 == (nFlags & ~EXPRFLAG.EXF_MASK_ANY));
-            return new ExprLocal(nFlags, pLocal);
+            return new ExprLocal(pLocal);
         }
 
         public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope)
