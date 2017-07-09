@@ -498,7 +498,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             boundLambda.ArgumentScope = pScope;
 
             ExprReturn returnStatement = _exprFactory.CreateReturn(0, call);
-            ExprBlock block = _exprFactory.CreateBlock(returnStatement, pScope);
+            ExprBlock block = _exprFactory.CreateBlock(returnStatement);
             boundLambda.OptionalBody = block;
             return boundLambda;
         }

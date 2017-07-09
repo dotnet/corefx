@@ -315,18 +315,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
         }
 
-        public ExprBlock CreateBlock(ExprStatement pOptionalStatements, Scope pOptionalScope)
+        public ExprBlock CreateBlock(ExprStatement pOptionalStatements)
         {
-            return new ExprBlock(pOptionalStatements, pOptionalScope);
+            return new ExprBlock(pOptionalStatements);
         }
 
         public ExprArrayIndex CreateArrayIndex(Expr pArray, Expr pIndex)
         {
             CType pType = pArray.Type;
 
-            if (pType != null && pType.IsArrayType())
+            if (pType is ArrayType arr)
             {
-                pType = pType.AsArrayType().GetElementType();
+                pType = arr.GetElementType();
             }
             else if (pType == null)
             {
