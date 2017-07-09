@@ -6,9 +6,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprCall : ExprWithType, IExprWithArgs
     {
-        public ExprCall(CType type)
+        public ExprCall(CType type, EXPRFLAG flags, Expr arguments, ExprMemberGroup member, MethWithInst method)
             : base(ExpressionKind.Call, type)
         {
+            Flags = flags;
+            OptionalArguments = arguments;
+            MemberGroup = member;
+            NullableCallLiftKind = NullableCallLiftKind.NotLifted;
+            MethWithInst = method;
         }
 
         public Expr OptionalArguments { get; set; }
@@ -17,8 +22,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Expr OptionalObject
         {
-            get { return MemberGroup.OptionalObject; }
-            set { MemberGroup.OptionalObject = value; }
+            get => MemberGroup.OptionalObject;
+            set => MemberGroup.OptionalObject = value;
         }
 
         public MethWithInst MethWithInst { get; set; }

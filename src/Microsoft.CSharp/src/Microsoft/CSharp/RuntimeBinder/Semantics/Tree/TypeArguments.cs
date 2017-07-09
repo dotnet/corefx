@@ -11,11 +11,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ExprTypeArguments : Expr
     {
-        public Expr OptionalElements { get; set; }
-
-        public ExprTypeArguments()
+        public ExprTypeArguments(Expr optionalElements)
             : base(ExpressionKind.TypeArguments)
         {
+            OptionalElements = optionalElements;
         }
+
+        public Expr OptionalElements { get; set; }
     }
 }

@@ -8,16 +8,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprMemberGroup : ExprWithType, IExprWithObject
     {
-        public ExprMemberGroup(CType type)
+        public ExprMemberGroup(CType type, EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol pMPS, Expr optionalObject, CMemberLookupResults memberLookupResults)
             : base(ExpressionKind.MemberGroup, type)
         {
+            Flags = flags;
+            Name = name;
+            TypeArgs = typeArgs ?? BSYMMGR.EmptyTypeArray();
+            SymKind = symKind;
+            ParentType = parentType;
+            OptionalObject = optionalObject;
+            MemberLookupResults = memberLookupResults;
         }
 
-        public Name Name { get; set; }
+        public Name Name { get; }
 
-        public TypeArray TypeArgs { get; set; }
+        public TypeArray TypeArgs { get; }
 
-        public SYMKIND SymKind { get; set; }
+        public SYMKIND SymKind { get; }
         // The type containing the members. This may be a TypeParameterType or an AggregateType.
         // This may be NULL (if types is not NULL).
 
@@ -35,9 +42,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // The owning call of this member group. NEVER visit this thing.
         // The list of the methods that the memgroup is binding to. This list is formulated after binding
         // the name of the method. When we've attempted to bind the arguments, we populate the MethPropWithInst list.
-        public CMemberLookupResults MemberLookupResults { get; set; }
+        public CMemberLookupResults MemberLookupResults { get; }
 
-        public CType ParentType { get; set; }
+        public CType ParentType { get; }
 
         public bool IsDelegate => (Flags & EXPRFLAG.EXF_DELEGATE) != 0;
 

@@ -6,13 +6,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprField : ExprWithType, IExprWithObject
     {
-        public ExprField(CType type)
+        public ExprField(CType type, EXPRFLAG flags, Expr optionalObject, FieldWithType field)
             : base(ExpressionKind.Field, type)
         {
+            Flags = flags;
+            OptionalObject = optionalObject;
+            FieldWithType = field;
         }
 
         public Expr OptionalObject { get; set; }
 
-        public FieldWithType FieldWithType { get; set; }
+        public FieldWithType FieldWithType { get; }
     }
 }

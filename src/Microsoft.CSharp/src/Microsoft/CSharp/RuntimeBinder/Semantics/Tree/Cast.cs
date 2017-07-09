@@ -6,9 +6,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprCast : Expr
     {
-        public ExprCast()
+        public ExprCast(EXPRFLAG flags, ExprClass destinationType, Expr argument)
             : base(ExpressionKind.Cast)
-        {            
+        {
+            Argument = argument;
+            Flags = flags;
+            DestinationType = destinationType;
         }
 
         public Expr Argument { get; set; }

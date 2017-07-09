@@ -6,9 +6,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprMultiGet : ExprWithType
     {
-        public ExprMultiGet(CType type)
+        public ExprMultiGet(CType type, EXPRFLAG flags, ExprMulti multi)
             : base(ExpressionKind.MultiGet, type)
         {
+            Flags = flags;
+            OptionalMulti = multi;
         }
 
         public ExprMulti OptionalMulti { get; set; }
@@ -16,9 +18,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ExprMulti : ExprWithType
     {
-        public ExprMulti(CType type)
+        public ExprMulti(CType type, EXPRFLAG flags, Expr left, Expr op)
             : base(ExpressionKind.Multi, type)
         {
+            Flags = flags;
+            Left = left;
+            Operator = op;
         }
 
         public Expr Left { get; set; }

@@ -8,12 +8,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprLocal : Expr
     {
-        public ExprLocal()
+        public ExprLocal(EXPRFLAG flags, LocalVariableSymbol local)
             : base(ExpressionKind.Local)
         {
+            Flags = flags;
+            Local = local;
         }
 
-        public LocalVariableSymbol Local { get; set; }
+        public LocalVariableSymbol Local { get; }
 
         public override CType Type => Local?.GetType();
     }
