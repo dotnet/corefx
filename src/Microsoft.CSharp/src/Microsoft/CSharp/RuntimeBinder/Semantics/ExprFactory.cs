@@ -17,14 +17,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(globalSymbolContext != null);
             _globalSymbolContext = globalSymbolContext;
         }
-        private TypeManager GetTypes()
-        {
-            return _globalSymbolContext.GetTypes();
-        }
-        private BSYMMGR GetGlobalSymbols()
-        {
-            return _globalSymbolContext.GetGlobalSymbols();
-        }
+        private TypeManager Types => _globalSymbolContext.GetTypes();
+
+        private BSYMMGR GlobalSymbols => _globalSymbolContext.GetGlobalSymbols();
 
         public ExprCall CreateCall(EXPRFLAG nFlags, CType pType, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, MethWithInst MWI)
         {
@@ -79,7 +74,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                            EXPRFLAG.EXF_BASECALL | EXPRFLAG.EXF_DELEGATE | EXPRFLAG.EXF_USERCALLABLE | EXPRFLAG.EXF_MASK_ANY
                        )
                       ));
-            return new ExprMemberGroup(GetTypes().GetMethGrpType(), nFlags, pName, pTypeArgs, symKind, pTypePar, pMPS, pObject, memberLookupResults);
+            return new ExprMemberGroup(Types.GetMethGrpType(), nFlags, pName, pTypeArgs, symKind, pTypePar, pMPS, pObject, memberLookupResults);
         }
 
         public ExprMemberGroup CreateMemGroup(
@@ -89,9 +84,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name pName = mwi.Sym?.name;
             MethodOrPropertySymbol methProp = mwi.MethProp();
 
-            CType pType = mwi.GetType() ?? (CType)GetTypes().GetErrorSym();
+            CType pType = mwi.GetType() ?? (CType)Types.GetErrorSym();
 
-            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GetGlobalSymbols().AllocParams(1, new CType[] { pType }), pName));
+            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GlobalSymbols.AllocParams(1, new CType[] { pType }), pName));
         }
 
         public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst mwi)
@@ -132,7 +127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprHoistedLocalExpr CreateHoistedLocalInExpression()
         {
-            return new ExprHoistedLocalExpr(GetTypes().GetOptPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
+            return new ExprHoistedLocalExpr(Types.GetOptPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
         }
 
         public ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi)
@@ -145,7 +140,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(method != null);
             Debug.Assert(methodType != null);
             return new ExprMethodInfo(
-                GetTypes().GetOptPredefAgg(method.IsConstructor() ? PredefinedType.PT_CONSTRUCTORINFO : PredefinedType.PT_METHODINFO).getThisType(),
+                Types.GetOptPredefAgg(method.IsConstructor() ? PredefinedType.PT_CONSTRUCTORINFO : PredefinedType.PT_METHODINFO).getThisType(),
                 method, methodType, methodParameters);
         }
 
@@ -154,19 +149,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(prop != null);
             Debug.Assert(propertyType != null);
             return new ExprPropertyInfo(
-                GetTypes().GetOptPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
+                Types.GetOptPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
         }
 
         public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType)
         {
             Debug.Assert(field != null);
             Debug.Assert(fieldType != null);
-            return new ExprFieldInfo(field, fieldType, GetTypes().GetOptPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
+            return new ExprFieldInfo(field, fieldType, Types.GetOptPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
         }
 
         private ExprTypeOf CreateTypeOf(ExprClass pSourceType)
         {
-            return new ExprTypeOf(GetTypes().GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), pSourceType);
+            return new ExprTypeOf(Types.GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), pSourceType);
         }
         public ExprTypeOf CreateTypeOf(CType pSourceType)
         {
@@ -197,7 +192,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateStringConstant(string str)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
+            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
         }
 
         public ExprMultiGet CreateMultiGet(EXPRFLAG nFlags, CType pType, ExprMulti pOptionalMulti)
@@ -243,7 +238,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case FUNDTYPE.FT_PTR:
                     {
-                        CType nullType = GetTypes().GetNullType();
+                        CType nullType = Types.GetNullType();
 
                         // It looks like this if is always false ...
                         if (nullType.fundType() == pType.fundType())
@@ -294,11 +289,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateIntegerConstant(int x)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
+            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
         }
         public ExprConstant CreateBoolConstant(bool b)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
+            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
         }
 
         public ExprBlock CreateBlock(ExprStatement pOptionalStatements)
@@ -316,7 +311,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else if (pType == null)
             {
-                pType = GetTypes().GetReqPredefAgg(PredefinedType.PT_INT).getThisType();
+                pType = Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType();
             }
 
             return new ExprArrayIndex(pType, pArray, pIndex);
@@ -414,7 +409,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateNull()
         {
-            return CreateConstant(GetTypes().GetNullType(), default(ConstVal));
+            return CreateConstant(Types.GetNullType(), default(ConstVal));
         }
 
         public void AppendItemToList(
