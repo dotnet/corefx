@@ -15,7 +15,6 @@ namespace System.Xml.Tests
         }
 
         public bool bWarningCallback;
-
         public bool bErrorCallback;
         public int errorCount;
         public int warningCount;
@@ -91,8 +90,7 @@ namespace System.Xml.Tests
                         </xs:complexType>
                         </xs:schema>";
 
-            XmlSchema schema = XmlSchema.Read(new StringReader(xsd), null);
-            return schema;
+            return XmlSchema.Read(new StringReader(xsd), null);
         }
 
         public XmlSchema GetIntersectionSchema(string ns1, string ns2, string attrNs)
@@ -128,8 +126,7 @@ namespace System.Xml.Tests
                         </xs:complexType>
                         </xs:schema>";
 
-            XmlSchema schema = XmlSchema.Read(new StringReader(xsd), null);
-            return schema;
+            return XmlSchema.Read(new StringReader(xsd), null);
         }
 
         //Intersection namespaces
@@ -176,7 +173,7 @@ namespace System.Xml.Tests
 
         [Theory]
         //[Variation(Desc = "basetype Any ns - ##any, derivedType Any ns - ns1, allow ns2 attribute")]
-        [InlineData("##any", "ns1", "ns2",0)]
+        [InlineData("##any", "ns1", "ns2", 0)]
         //[Variation(Desc = "basetype Any ns - ns1, derivedType Any ns - ##any, allow ns2 attribute")]
         [InlineData("ns1", "##any", "ns2", 0)]
         //[Variation(Desc = "basetype Any ns - ns1 ns2, derivedType Any ns - ns2 ns3 , allow ns3 attribute")]
