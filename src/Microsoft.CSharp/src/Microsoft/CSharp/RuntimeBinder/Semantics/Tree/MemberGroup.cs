@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -11,6 +12,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprMemberGroup(CType type, EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol pMPS, Expr optionalObject, CMemberLookupResults memberLookupResults)
             : base(ExpressionKind.MemberGroup, type)
         {
+            Debug.Assert(
+                (flags & ~(EXPRFLAG.EXF_CTOR | EXPRFLAG.EXF_INDEXER | EXPRFLAG.EXF_OPERATOR | EXPRFLAG.EXF_NEWOBJCALL
+                           | EXPRFLAG.EXF_BASECALL | EXPRFLAG.EXF_DELEGATE | EXPRFLAG.EXF_USERCALLABLE
+                           | EXPRFLAG.EXF_MASK_ANY)) == 0);
             Flags = flags;
             Name = name;
             TypeArgs = typeArgs ?? BSYMMGR.EmptyTypeArray();

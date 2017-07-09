@@ -11,6 +11,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprUserLogicalOp(CType type, Expr trueFalseCall, ExprCall operatorCall)
             : base(ExpressionKind.UserLogicalOp, type)
         {
+            Debug.Assert(trueFalseCall != null);
+            Debug.Assert((operatorCall?.OptionalArguments as ExprList)?.OptionalElement != null);
             Flags = EXPRFLAG.EXF_ASSGOP;
             TrueFalseCall = trueFalseCall;
             OperatorCall = operatorCall;

@@ -12,6 +12,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprConcat(Expr first, Expr second)
             : base(ExpressionKind.Concat, TypeFromOperands(first, second))
         {
+            Debug.Assert(first?.Type != null);
+            Debug.Assert(second?.Type != null);
+            Debug.Assert(first.Type.isPredefType(PredefinedType.PT_STRING) || second.Type.isPredefType(PredefinedType.PT_STRING));
             FirstArgument = first;
             SecondArgument = second;
         }

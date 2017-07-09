@@ -12,6 +12,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             : base(kind, type)
         {
             Debug.Assert(kind.IsUnaryOperator());
+            Debug.Assert(operand != null);
             Child = operand;
         }
 
@@ -19,6 +20,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             : base(kind, type, call, userMethod)
         {
             Debug.Assert(kind.IsUnaryOperator());
+            Debug.Assert(operand != null);
+            Debug.Assert(type != null);
+            Debug.Assert(call != null);
+            Debug.Assert(userMethod != null);
             Child = operand;
         }
 

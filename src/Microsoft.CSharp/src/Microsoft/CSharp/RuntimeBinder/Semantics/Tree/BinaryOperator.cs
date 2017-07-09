@@ -12,6 +12,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             : base(kind, type)
         {
             Debug.Assert(kind > ExpressionKind.TypeLimit);
+            Debug.Assert(left != null);
+            Debug.Assert(right != null);
             Flags = EXPRFLAG.EXF_BINOP;
             OptionalLeftChild = left;
             OptionalRightChild = right;
@@ -21,6 +23,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             : base(kind, type, call, userMethod)
         {
             Debug.Assert(kind > ExpressionKind.TypeLimit);
+            Debug.Assert(left != null);
+            Debug.Assert(right != null);
+            Debug.Assert(call != null);
             Flags = EXPRFLAG.EXF_BINOP;
             OptionalLeftChild = left;
             OptionalRightChild = right;
