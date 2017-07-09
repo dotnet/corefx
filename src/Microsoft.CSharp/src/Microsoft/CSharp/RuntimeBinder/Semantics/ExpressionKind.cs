@@ -86,7 +86,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         UserLogicalOp,
         MemberGroup,
         BoundLambda,
-        UnboundLambda,
+        //UnboundLambda,
         //EK_LAMBDAPARAMETER,
         HoistedLocalExpression,
         FieldInfo,

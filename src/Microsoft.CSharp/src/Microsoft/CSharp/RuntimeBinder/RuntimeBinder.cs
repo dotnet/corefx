@@ -488,7 +488,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(_semanticChecker.GetNameManager().Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
             ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
-            ExprUnboundLambda unboundLambda = _exprFactory.CreateLambda();
 
             List<Type> paramTypes = new List<Type>();
             foreach (ArgumentObject o in arguments)

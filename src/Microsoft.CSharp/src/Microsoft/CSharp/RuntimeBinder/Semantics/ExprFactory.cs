@@ -138,11 +138,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprBoundLambda(delegateType, argumentScope);
         }
 
-        public ExprUnboundLambda CreateLambda()
-        {
-            return new ExprUnboundLambda(GetTypes().GetAnonMethType());
-        }
-
         public ExprHoistedLocalExpr CreateHoistedLocalInExpression(ExprLocal localToHoist)
         {
             Debug.Assert(localToHoist != null);

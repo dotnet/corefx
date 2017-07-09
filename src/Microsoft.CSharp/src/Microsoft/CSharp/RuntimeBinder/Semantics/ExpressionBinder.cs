@@ -1394,7 +1394,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case ExpressionKind.BoundLambda:
-                case ExpressionKind.UnboundLambda:
                 case ExpressionKind.Constant:
                     ErrorContext.Error(GetStandardLvalueError(kind));
                     return false;
