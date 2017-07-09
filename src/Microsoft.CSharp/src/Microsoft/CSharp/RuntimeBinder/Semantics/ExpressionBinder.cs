@@ -2347,7 +2347,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprWrap WrapShortLivedExpression(Expr expr)
         {
-            return GetExprFactory().CreateWrap(null, expr);
+            return GetExprFactory().CreateWrap(expr);
         }
 
         private ExprAssignment GenerateOptimizedAssignment(Expr op1, Expr op2)

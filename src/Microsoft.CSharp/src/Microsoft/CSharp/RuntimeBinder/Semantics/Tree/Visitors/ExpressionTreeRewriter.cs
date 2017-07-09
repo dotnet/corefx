@@ -895,7 +895,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 Debug.Assert(anonmeth.OptionalBody != null);
                 Expr create = GenerateParameter(local.name.Text, local.GetType());
-                local.wrap = GetExprFactory().CreateWrapNoAutoFree(anonmeth.OptionalBody.OptionalScopeSymbol, create);
+                local.wrap = GetExprFactory().CreateWrap(create);
                 Expr save = GetExprFactory().CreateSave(local.wrap);
                 if (sequence == null)
                 {
@@ -925,7 +925,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 Debug.Assert(local.wrap != null);
                 Debug.Assert(anonmeth.OptionalBody != null);
-                Expr freeWrap = GetExprFactory().CreateWrap(anonmeth.OptionalBody.OptionalScopeSymbol, local.wrap);
+                Expr freeWrap = GetExprFactory().CreateWrap(local.wrap);
                 sequence = GetExprFactory().CreateReverseSequence(sequence, freeWrap);
             }
             return sequence;

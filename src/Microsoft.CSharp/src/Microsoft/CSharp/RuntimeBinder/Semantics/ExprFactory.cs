@@ -426,18 +426,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprNamedArgumentSpecification(pName, pValue);
         }
 
+        public ExprWrap CreateWrap(Expr pOptionalExpression) => new ExprWrap(pOptionalExpression);
 
-        public ExprWrap CreateWrap(
-            Scope pCurrentScope,
-            Expr pOptionalExpression
-        )
-        {
-            return new ExprWrap(pOptionalExpression);
-        }
-        public ExprWrap CreateWrapNoAutoFree(Scope pCurrentScope, Expr pOptionalWrap)
-        {
-            return CreateWrap(pCurrentScope, pOptionalWrap);
-        }
         public ExprBinOp CreateSave(ExprWrap wrap)
         {
             Debug.Assert(wrap != null);
