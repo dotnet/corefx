@@ -8,18 +8,17 @@ namespace System.Xml.Tests
     public class TC_SchemaSet_AnyAttribute : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
-
-        public TC_SchemaSet_AnyAttribute(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         public bool bWarningCallback;
         public bool bErrorCallback;
         public int errorCount;
         public int warningCount;
         public bool WarningInnerExceptionSet = false;
         public bool ErrorInnerExceptionSet = false;
+
+        public TC_SchemaSet_AnyAttribute(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         public void Initialize()
         {
