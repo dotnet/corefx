@@ -132,10 +132,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprLocal(nFlags, pLocal);
         }
 
-        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType)
+        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope)
         {
             Debug.Assert(delegateType == null || delegateType.isDelegateType());
-            return new ExprBoundLambda(delegateType);
+            return new ExprBoundLambda(delegateType, argumentScope);
         }
 
         public ExprUnboundLambda CreateLambda()

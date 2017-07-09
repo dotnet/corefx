@@ -487,7 +487,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType delegateType = _symbolTable.GetCTypeFromType(typeof(Func<>)).AsAggregateType();
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(_semanticChecker.GetNameManager().Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
-            ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType);
+            ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
             ExprUnboundLambda unboundLambda = _exprFactory.CreateLambda();
 
             List<Type> paramTypes = new List<Type>();
@@ -495,7 +495,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 paramTypes.Add(o.Type);
             }
-            boundLambda.ArgumentScope = pScope;
 
             ExprReturn returnStatement = _exprFactory.CreateReturn(0, call);
             ExprBlock block = _exprFactory.CreateBlock(returnStatement);
