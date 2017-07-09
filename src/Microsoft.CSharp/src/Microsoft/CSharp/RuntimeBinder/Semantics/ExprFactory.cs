@@ -495,11 +495,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return CreateList(op1, CreateList(op2, CreateList(op3, op4)));
         }
-        public ExprTypeArguments CreateTypeArguments(TypeArray pTypeArray, Expr pOptionalElements)
-        {
-            Debug.Assert(pTypeArray != null);
-            return new ExprTypeArguments(pOptionalElements);
-        }
 
         public ExprClass CreateClass(CType pType)
         {

@@ -53,7 +53,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //EK_TYPEORSIMPLENAME,
         // The following exprs are used to represent the results of typebinding.
         // Look in exprnodes.h for a more detailed description.
-        TypeArguments,
+        //TypeArguments,
         //EK_TYPEORNAMESPACE,
         //EK_TYPEORNAMESPACEERROR,
         //EK_ARRAYTYPE,
