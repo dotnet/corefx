@@ -117,7 +117,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprCast(nFlags, pType, pArg);
         }
 
-        public ExprReturn CreateReturn(EXPRFLAG nFlags, Scope pCurrentScope, Expr pOptionalObject)
+        public ExprReturn CreateReturn(EXPRFLAG nFlags, Expr pOptionalObject)
         {
             Debug.Assert(0 == (nFlags &
                        ~(EXPRFLAG.EXF_ASLEAVE | EXPRFLAG.EXF_FINALLYBLOCKED | EXPRFLAG.EXF_RETURNISYIELD |
