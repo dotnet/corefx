@@ -281,19 +281,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_U8:
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
-                    {
-                        ExprConstant expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        ExprConstant exprInOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        exprInOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
-                        return expr;
-                    }
+                    return CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
                 case FUNDTYPE.FT_STRUCT:
                     if (pType.isPredefType(PredefinedType.PT_DECIMAL))
                     {
-                        ExprConstant expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        ExprConstant exprOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        exprOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
-                        return expr;
+                        goto case FUNDTYPE.FT_R8;
                     }
 
                     break;
