@@ -206,7 +206,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Debug.Assert(pResult != null);
 
             deferredBinding = null;
-            Expression e = CreateExpressionTreeFromResult(parameters, arguments, pScope, pResult);
+            Expression e = CreateExpressionTreeFromResult(parameters, pScope, pResult);
             return e;
         }
 
@@ -293,12 +293,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expression CreateExpressionTreeFromResult(
             Expression[] parameters,
-            ArgumentObject[] arguments,
             Scope pScope,
             Expr pResult)
         {
             // (3) - Place the result in a return statement and create the EXPRBOUNDLAMBDA.
-            ExprBoundLambda boundLambda = GenerateBoundLambda(arguments, pScope, pResult);
+            ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
 
             // (4) - Rewrite the EXPRBOUNDLAMBDA into an expression tree.
             Expr exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
@@ -478,7 +477,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
 
         private ExprBoundLambda GenerateBoundLambda(
-            ArgumentObject[] arguments,
             Scope pScope,
             Expr call)
         {
@@ -488,13 +486,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(_semanticChecker.GetNameManager().Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
             ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
-
-            List<Type> paramTypes = new List<Type>();
-            foreach (ArgumentObject o in arguments)
-            {
-                paramTypes.Add(o.Type);
-            }
-
             ExprReturn returnStatement = _exprFactory.CreateReturn(0, call);
             ExprBlock block = _exprFactory.CreateBlock(returnStatement);
             boundLambda.OptionalBody = block;
