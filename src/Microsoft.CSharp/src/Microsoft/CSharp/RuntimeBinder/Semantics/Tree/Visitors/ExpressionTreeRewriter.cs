@@ -146,7 +146,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return local.Local.wrap;
             }
             Debug.Assert(local.Local.fUsedInAnonMeth);
-            return GetExprFactory().CreateHoistedLocalInExpression(local);
+            return GetExprFactory().CreateHoistedLocalInExpression();
         }
         protected override Expr VisitFIELD(ExprField expr)
         {

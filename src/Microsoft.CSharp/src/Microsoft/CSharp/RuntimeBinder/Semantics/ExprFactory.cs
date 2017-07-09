@@ -130,9 +130,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new ExprBoundLambda(delegateType, argumentScope);
         }
 
-        public ExprHoistedLocalExpr CreateHoistedLocalInExpression(ExprLocal localToHoist)
+        public ExprHoistedLocalExpr CreateHoistedLocalInExpression()
         {
-            Debug.Assert(localToHoist != null);
             return new ExprHoistedLocalExpr(GetTypes().GetOptPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
         }
 
