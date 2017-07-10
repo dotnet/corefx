@@ -13,8 +13,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void Test8__()
         {
-            Console.WriteLine("Test8__");
-
             const int inputCol1 = 1;
             const string inputCol2 = "one";
 
@@ -74,18 +72,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     command.CommandText = sql;
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        /*
-                        result = new List<Object[]>();
-                        while(reader.Read())
-                        {
-                            Object[] row = new Object[reader.FieldCount];
-                            for (int j = 0; j < reader.FieldCount; ++j)
-                            {
-                                row[j] = reader.GetValue(j);
-                            }
-                            result.Add(row);
-                        }
-                        */
                         result = new DataTable();
                         result.Load(reader);
                     }
