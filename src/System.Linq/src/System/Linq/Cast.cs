@@ -30,9 +30,21 @@ namespace System.Linq
             }
         }
 
-        public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source) =>
-            source as IEnumerable<TResult> ?? CastIterator<TResult>(source ?? throw Error.ArgumentNull(nameof(source)));
-
+        public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
+        {
+            IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
+            if (typedSource != null)
+            {
+                return typedSource;
+            }
+            
+            if (source == null)
+            {
+                throw Error.ArgumentNull(nameof(source));
+            }
+            
+            return CastIterator<TResult>(source);
+        }
         private static IEnumerable<TResult> CastIterator<TResult>(IEnumerable source)
         {
             foreach (object obj in source)

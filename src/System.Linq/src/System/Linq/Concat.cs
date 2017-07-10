@@ -68,7 +68,8 @@ namespace System.Linq
 
             public override int GetCount(bool onlyIfCheap)
             {
-                if (!EnumerableHelpers.TryGetCount(_first, out int firstCount))
+                int firstCount, secondCount;
+                if (!EnumerableHelpers.TryGetCount(_first, out firstCount))
                 {
                     if (onlyIfCheap)
                     {
@@ -78,7 +79,7 @@ namespace System.Linq
                     firstCount = _first.Count();
                 }
 
-                if (!EnumerableHelpers.TryGetCount(_second, out int secondCount))
+                if (!EnumerableHelpers.TryGetCount(_second, out secondCount))
                 {
                     if (onlyIfCheap)
                     {
