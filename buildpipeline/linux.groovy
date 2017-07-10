@@ -21,9 +21,6 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
             sh './init-tools.sh'
         }
         catch (err) {
-            // On errors for build tools initializations, it's useful to echo the contents of the file
-            // for easy diagnosis.  This could also be copied to the log directory
-            sh 'cat init-tools.log'
             // Ensure the build result is still propagated.
             throw err
         }
