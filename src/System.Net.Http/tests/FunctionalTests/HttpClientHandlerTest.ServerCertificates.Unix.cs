@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Security;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -13,12 +14,17 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientHandler_ServerCertificates_Test
+    public partial class HttpClientHandler_ServerCertificates_Test : RemoteExecutorTestBase
     {
         private static bool ShouldSuppressRevocationException
         {
             get
             {
+                if (ManagedHandlerTestHelpers.IsEnabled)
+                {
+                    return false;
+                }
+
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     return false;
@@ -51,6 +57,11 @@ namespace System.Net.Http.Functional.Tests
         {
             get
             {
+                if (ManagedHandlerTestHelpers.IsEnabled)
+                {
+                    return true;
+                }
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     return false;
