@@ -116,14 +116,14 @@ namespace System.Net.Http
                 }
             }
 
-            Stream stream = await ConnectHelper.ConnectAsync(proxyUri.Host, proxyUri.Port).ConfigureAwait(false);
+            Stream stream = await ConnectHelper.ConnectAsync(proxyUri.IdnHost, proxyUri.Port).ConfigureAwait(false);
 
             if (pool == null)
             {
                 pool = _connectionPoolTable.GetOrAdd(key, _ => new HttpConnectionPool());
             }
 
-            return new HttpConnection(pool, key, stream, null, true);
+            return new HttpConnection(pool, key, null, stream, null, true);
         }
 
         protected override void Dispose(bool disposing)
