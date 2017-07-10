@@ -246,9 +246,8 @@ namespace System.Data.SqlClient
             _trustServerCertificate = ConvertValueToBoolean(KEY.TrustServerCertificate, DEFAULT.TrustServerCertificate);
 
             // Temporary string - this value is stored internally as an enum.
-            string transactionBindingString = ConvertValueToString(KEY.TransactionBinding, null);
-
             string typeSystemVersionString = ConvertValueToString(KEY.Type_System_Version, null);
+            string transactionBindingString = ConvertValueToString(KEY.TransactionBinding, null);
 
             _userID = ConvertValueToString(KEY.User_ID, DEFAULT.User_ID);
             _workstationId = ConvertValueToString(KEY.Workstation_Id, null);
@@ -545,7 +544,7 @@ namespace System.Data.SqlClient
                     { SYNONYM.User, KEY.User_ID },
                     { SYNONYM.WSID, KEY.Workstation_Id }
                 };
-                Debug.Assert(synonyms.Count == count, "incorrect initial ParseSynonyms size");
+                //Debug.Assert(synonyms.Count == count, "incorrect initial ParseSynonyms size");
                 s_sqlClientSynonyms = synonyms;
             }
             return synonyms;

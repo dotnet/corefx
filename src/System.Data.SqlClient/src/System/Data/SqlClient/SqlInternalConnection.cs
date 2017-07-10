@@ -86,6 +86,11 @@ namespace System.Data.SqlClient
             }
         }
 
+        abstract internal SqlInternalTransaction PendingTransaction
+        {
+            get;
+        }
+
         override protected internal bool IsNonPoolableTransactionRoot
         {
             get
@@ -191,7 +196,6 @@ namespace System.Data.SqlClient
             {
                 statistics = SqlStatistics.StartTimer(Connection.Statistics);
 
-
                 ValidateConnectionForExecute(null);
 
                 if (HasLocalTransactionFromAPI)
@@ -228,6 +232,16 @@ namespace System.Data.SqlClient
 
         abstract protected void ChangeDatabaseInternal(string database);
 
+        override protected void CleanupTransactionOnCompletion(SysTx.Transaction transaction)
+        {
+            // Note: unlocked, potentially multi-threaded code, so pull delegate to local to 
+            //  ensure it doesn't change between test and call.
+            SqlDelegatedTransaction delegatedTransaction = DelegatedTransaction;
+            if (null != delegatedTransaction)
+            {
+                delegatedTransaction.TransactionEnded(transaction);
+            }
+        }
 
         override protected DbReferenceCollection CreateReferenceCollection()
         {
@@ -265,6 +279,7 @@ namespace System.Data.SqlClient
 
         override public void Dispose()
         {
+            _whereAbouts = null;
             base.Dispose();
         }
 
@@ -493,11 +508,8 @@ namespace System.Data.SqlClient
             Debug.Assert(null == CurrentTransaction, "unenlisted transaction with non-null current transaction?");   // verify it!
         }
 
-        /*
         override public void EnlistTransaction(SysTx.Transaction transaction)
         {
-            SqlConnection.VerifyExecutePermission();
-
             ValidateConnectionForExecute(null);
 
             // If a connection has a local transaction outstanding and you try
@@ -524,11 +536,8 @@ namespace System.Data.SqlClient
             // enlist in the user specified distributed transaction.  This
             // behavior matches OLEDB and ODBC.
 
-            TdsParser bestEffortCleanupTarget = null;
-            RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
-                bestEffortCleanupTarget = SqlInternalConnection.GetBestEffortCleanupTarget(Connection);
                 Enlist(transaction);
             }
             catch (System.OutOfMemoryException e)
@@ -544,11 +553,9 @@ namespace System.Data.SqlClient
             catch (System.Threading.ThreadAbortException e)
             {
                 Connection.Abort(e);
-                SqlInternalConnection.BestEffortCleanup(bestEffortCleanupTarget);
                 throw;
             }
         }
-        */
 
         abstract internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest);
 

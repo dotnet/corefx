@@ -54,6 +54,10 @@ namespace System.Data.ProviderBase
             throw ADP.ClosedConnectionError();
         }
 
+        override public void EnlistTransaction(SysTx.Transaction transaction)
+        {
+            throw ADP.ClosedConnectionError();
+        }
 
         protected override DbReferenceCollection CreateReferenceCollection()
         {

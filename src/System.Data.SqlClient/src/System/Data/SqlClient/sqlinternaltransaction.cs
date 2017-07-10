@@ -26,6 +26,8 @@ namespace System.Data.SqlClient
         LocalFromTSQL = 1,
         LocalFromAPI = 2,
         Delegated = 3,
+        Distributed = 4,
+        Context = 5,     // only valid in proc.
     };
 
     sealed internal class SqlInternalTransaction
@@ -115,6 +117,15 @@ namespace System.Data.SqlClient
             get
             {
                 bool result = (TransactionType.Delegated == _transactionType);
+                return result;
+            }
+        }
+
+        internal bool IsDistributed
+        {
+            get
+            {
+                bool result = (TransactionType.Distributed == _transactionType);
                 return result;
             }
         }

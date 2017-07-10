@@ -145,6 +145,14 @@ namespace System.Data.SqlClient
             }
         }
 
+        internal SqlConnectionString.TransactionBindingEnum TransactionBinding
+        {
+            get
+            {
+                return ((SqlConnectionString)ConnectionOptions).TransactionBinding;
+            }
+        }
+
         internal SqlConnectionString.TypeSystem TypeSystem
         {
             get
@@ -612,11 +620,6 @@ namespace System.Data.SqlClient
             }
         }
 
-        public override void EnlistTransaction(Transaction transaction)
-        {
-            throw ADP.AmbientTransactionIsNotSupported();
-        }
-
         internal void RegisterWaitingForReconnect(Task waitingTask)
         {
             if (((SqlConnectionString)ConnectionOptions).MARS)
@@ -729,6 +732,7 @@ namespace System.Data.SqlClient
                                 bool callDisconnect = false;
                                 lock (_reconnectLock)
                                 {
+                                    tdsConn.CheckEnlistedTransactionBinding();
                                     runningReconnect = _currentReconnectionTask; // double check after obtaining the lock
                                     if (runningReconnect == null)
                                     {
@@ -834,7 +838,8 @@ namespace System.Data.SqlClient
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
 
-                TaskCompletionSource<DbConnectionInternal> completion = new TaskCompletionSource<DbConnectionInternal>();
+                System.Transactions.Transaction transaction = ADP.GetCurrentTransaction();
+                TaskCompletionSource<DbConnectionInternal> completion = new TaskCompletionSource<DbConnectionInternal>(transaction);
                 TaskCompletionSource<object> result = new TaskCompletionSource<object>();
 
                 if (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterOpenConnection) ||
@@ -1037,36 +1042,27 @@ namespace System.Data.SqlClient
             // does not require GC.KeepAlive(this) because of OnStateChange
 
             var tdsInnerConnection = (SqlInternalConnectionTds)InnerConnection;
-            /*
-            if (tdsInnerConnection == null)
+
+            Debug.Assert(tdsInnerConnection.Parser != null, "Where's the parser?");
+
+            if (!tdsInnerConnection.ConnectionOptions.Pooling)
             {
-                SqlInternalConnectionSmi innerConnection = (InnerConnection as SqlInternalConnectionSmi);
-                innerConnection.AutomaticEnlistment();
+                // For non-pooled connections, we need to make sure that the finalizer does actually run to avoid leaking SNI handles
+                GC.ReRegisterForFinalize(this);
+            }
+
+            // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
+            SqlStatistics statistics = _statistics;
+            if (StatisticsEnabled ||
+                (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
+            {
+                ADP.TimerCurrent(out _statistics._openTimestamp);
+                tdsInnerConnection.Parser.Statistics = _statistics;
             }
             else
-            */
             {
-                Debug.Assert(tdsInnerConnection.Parser != null, "Where's the parser?");
-
-                if (!tdsInnerConnection.ConnectionOptions.Pooling)
-                {
-                    // For non-pooled connections, we need to make sure that the finalizer does actually run to avoid leaking SNI handles
-                    GC.ReRegisterForFinalize(this);
-                }
-
-                // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
-                SqlStatistics statistics = _statistics;
-                if (StatisticsEnabled ||
-                    (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
-                {
-                    ADP.TimerCurrent(out _statistics._openTimestamp);
-                    tdsInnerConnection.Parser.Statistics = _statistics;
-                }
-                else
-                {
-                    tdsInnerConnection.Parser.Statistics = null;
-                    _statistics = null; // in case of previous Open/Close/reset_CollectStats sequence
-                }
+                tdsInnerConnection.Parser.Statistics = null;
+                _statistics = null; // in case of previous Open/Close/reset_CollectStats sequence
             }
 
             return true;

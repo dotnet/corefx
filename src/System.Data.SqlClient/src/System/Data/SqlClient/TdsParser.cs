@@ -57,6 +57,7 @@ namespace System.Data.SqlClient
         private string _server = "";                            // name of server that the parser connects to
 
         internal volatile bool _fResetConnection = false;                 // flag to denote whether we are needing to call sp_reset
+        internal volatile bool _fPreserveTransaction = false;             // flag to denote whether we need to preserve the transaction when reseting
 
         private SqlCollation _defaultCollation;                         // default collation from the server
 
@@ -1274,6 +1275,12 @@ namespace System.Data.SqlClient
 
                         Debug.Assert(!stateObj._fResetConnectionSent, "Unexpected state for sending reset connection");
 
+                        if (_fPreserveTransaction)
+                        {
+                            // if we are reseting, set bit in header by or'ing with other value
+                            stateObj._outBuff[1] = (Byte)(stateObj._outBuff[1] | TdsEnums.ST_RESET_CONNECTION_PRESERVE_TRANSACTION);
+                        }
+                        else
                         {
                             // if we are reseting, set bit in header by or'ing with other value
                             stateObj._outBuff[1] = (Byte)(stateObj._outBuff[1] | TdsEnums.ST_RESET_CONNECTION);
@@ -1282,6 +1289,7 @@ namespace System.Data.SqlClient
                         if (!_fMARS)
                         {
                             _fResetConnection = false; // If not MARS, can turn off flag now.
+                            _fPreserveTransaction = false;
                         }
                         else
                         {
@@ -1463,10 +1471,11 @@ namespace System.Data.SqlClient
             stateObj.WriteByteArray(bytes, bytes.Length, 0);
         }
 
-        internal void PrepareResetConnection()
+        internal void PrepareResetConnection(bool preserveTransaction)
         {
             // Set flag to reset connection upon next use - only for use on shiloh!
             _fResetConnection = true;
+            _fPreserveTransaction = preserveTransaction;
         }
 
 
@@ -1815,6 +1824,7 @@ namespace System.Data.SqlClient
                                     switch (env[ii].type)
                                     {
                                         case TdsEnums.ENV_BEGINTRAN:
+                                        case TdsEnums.ENV_ENLISTDTC:
                                             // When we get notification from the server of a new
                                             // transaction, we move any pending transaction over to
                                             // the current transaction, then we store the token in it.
@@ -1840,7 +1850,8 @@ namespace System.Data.SqlClient
                                             _statisticsIsInTransaction = true;
                                             _retainedTransactionId = SqlInternalTransaction.NullTransactionId;
                                             break;
-
+                                        case TdsEnums.ENV_DEFECTDTC:
+                                        case TdsEnums.ENV_TRANSACTIONENDED:
                                         case TdsEnums.ENV_COMMITTRAN:
                                             // SQLHOT 483
                                             //  Must clear the retain id if the server-side transaction ends by anything other
@@ -1866,6 +1877,13 @@ namespace System.Data.SqlClient
                                                 }
                                                 else if (TdsEnums.ENV_ROLLBACKTRAN == env[ii].type)
                                                 {
+                                                    //  Hold onto transaction id if distributed tran is rolled back.  This must
+                                                    //  be sent to the server on subsequent executions even though the transaction
+                                                    //  is considered to be rolled back.
+                                                    if (_currentTransaction.IsDistributed && _currentTransaction.IsActive)
+                                                    {
+                                                        _retainedTransactionId = env[ii].oldLongValue;
+                                                    }
                                                     _currentTransaction.Completed(TransactionState.Aborted);
                                                 }
                                                 else
@@ -1875,12 +1893,6 @@ namespace System.Data.SqlClient
                                                 _currentTransaction = null;
                                             }
                                             _statisticsIsInTransaction = false;
-                                            break;
-
-                                        case TdsEnums.ENV_ENLISTDTC:
-                                        case TdsEnums.ENV_DEFECTDTC:
-                                        case TdsEnums.ENV_TRANSACTIONENDED:
-                                            Debug.Fail("Should have thrown if DTC token encountered");
                                             break;
 
                                         default:
@@ -2275,6 +2287,9 @@ namespace System.Data.SqlClient
                     case TdsEnums.ENV_BEGINTRAN:
                     case TdsEnums.ENV_COMMITTRAN:
                     case TdsEnums.ENV_ROLLBACKTRAN:
+                    case TdsEnums.ENV_ENLISTDTC:
+                    case TdsEnums.ENV_DEFECTDTC:
+                    case TdsEnums.ENV_TRANSACTIONENDED:
                         if (!stateObj.TryReadByte(out byteLength))
                         {
                             return false;
@@ -2328,6 +2343,29 @@ namespace System.Data.SqlClient
                         }
                         break;
 
+                    case TdsEnums.ENV_PROMOTETRANSACTION:
+                        if (!stateObj.TryReadInt32(out env.newLength))
+                        { // new value has 4 byte length
+                            return false;
+                        }
+                        env.newBinValue = new byte[env.newLength];
+                        if (!stateObj.TryReadByteArray(env.newBinValue, 0, env.newLength))
+                        { // read new value with 4 byte length
+                            return false;
+                        }
+
+                        if (!stateObj.TryReadByte(out byteLength))
+                        {
+                            return false;
+                        }
+                        env.oldLength = byteLength;
+                        Debug.Assert(0 == env.oldLength, "old length should be zero");
+
+                        // env.length includes 1 byte for type token
+                        env.length = 5 + env.newLength;
+                        break;
+
+                    case TdsEnums.ENV_TRANSACTIONMANAGERADDRESS:
                     case TdsEnums.ENV_SPRESETCONNECTIONACK:
                         if (!TryReadTwoBinaryFields(env, stateObj))
                         {
@@ -2381,14 +2419,6 @@ namespace System.Data.SqlClient
                         }
                         env.length = env.newLength + oldLength + 5; // 5=2*sizeof(UInt16)+sizeof(byte) [token+newLength+oldLength]
                         break;
-
-                    // ENVCHANGE tokens not supported by CoreCLR
-                    case TdsEnums.ENV_ENLISTDTC:
-                    case TdsEnums.ENV_DEFECTDTC:
-                    case TdsEnums.ENV_TRANSACTIONENDED:
-                    case TdsEnums.ENV_PROMOTETRANSACTION:
-                    case TdsEnums.ENV_TRANSACTIONMANAGERADDRESS:
-                        throw SQL.UnsupportedFeatureAndToken(_connHandler, ((TdsEnums.EnvChangeType)env.type).ToString());
 
                     default:
                         Debug.Assert(false, "Unknown environment change token: " + env.type);
@@ -5901,6 +5931,20 @@ namespace System.Data.SqlClient
             return len;
         }
 
+        internal int WriteGlobalTransactionsFeatureRequest(bool write /* if false just calculates the length */)
+        {
+            int len = 5; // 1byte = featureID, 4bytes = featureData length
+
+            if (write)
+            {
+                // Write Feature ID
+                _physicalStateObj.WriteByte(TdsEnums.FEATUREEXT_GLOBALTRANSACTIONS);
+                WriteInt(0, _physicalStateObj); // we don't send any data
+            }
+
+            return len;
+        }
+
         internal void TdsLogin(SqlLogin rec, TdsEnums.FeatureExtension requestedFeatures, SessionData recoverySessionData)
         {
             _physicalStateObj.SetTimeoutSeconds(rec.timeout);
@@ -5928,12 +5972,9 @@ namespace System.Data.SqlClient
 
             string userName;
 
-            {
-                userName = rec.userName;
-                encryptedPassword = TdsParserStaticMethods.ObfuscatePassword(rec.password);
-                encryptedPasswordLengthInBytes = encryptedPassword.Length;  // password in clear text is already encrypted and its length is in byte
-            }
-
+            userName = rec.userName;
+            encryptedPassword = TdsParserStaticMethods.ObfuscatePassword(rec.password);
+            encryptedPasswordLengthInBytes = encryptedPassword.Length;  // password in clear text is already encrypted and its length is in byte
 
 
             // set the message type
@@ -6007,7 +6048,11 @@ namespace System.Data.SqlClient
                 if ((requestedFeatures & TdsEnums.FeatureExtension.SessionRecovery) != 0)
                 {
                     length += WriteSessionRecoveryFeatureRequest(recoverySessionData, false);
-                };
+                }
+                if ((requestedFeatures & TdsEnums.FeatureExtension.GlobalTransactions) != 0)
+                {
+                    length += WriteGlobalTransactionsFeatureRequest(false);
+                }
                 length++; // for terminator
             }
 
@@ -6219,7 +6264,11 @@ namespace System.Data.SqlClient
                     if ((requestedFeatures & TdsEnums.FeatureExtension.SessionRecovery) != 0)
                     {
                         length += WriteSessionRecoveryFeatureRequest(recoverySessionData, true);
-                    };
+                    }
+                    if ((requestedFeatures & TdsEnums.FeatureExtension.GlobalTransactions) != 0)
+                    {
+                        WriteGlobalTransactionsFeatureRequest(true);
+                    }
                     _physicalStateObj.WriteByte(0xFF); // terminator
                 }
             }
@@ -6784,6 +6833,7 @@ namespace System.Data.SqlClient
                     {
                         _asyncWrite = !sync;
 
+                        _connHandler.CheckEnlistedTransactionBinding();
 
                         stateObj.SetTimeoutSeconds(timeout);
                         stateObj.SniContext = SniContext.Snix_Execute;

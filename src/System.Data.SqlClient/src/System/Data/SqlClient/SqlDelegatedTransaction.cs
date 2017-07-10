@@ -377,7 +377,6 @@ namespace System.Data.SqlClient
                         enlistment.Committed();
                     }
                 }
-                
             }
             catch (System.OutOfMemoryException e)
             {

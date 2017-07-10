@@ -441,7 +441,13 @@ namespace System.Data.SqlClient
             }
         }
 
-
+        override internal SqlInternalTransaction PendingTransaction
+        {
+            get
+            {
+                return _parser.PendingTransaction;
+            }
+        }
 
         internal DbConnectionPoolIdentity Identity
         {
@@ -467,6 +473,13 @@ namespace System.Data.SqlClient
             }
         }
 
+        override protected internal bool IsNonPoolableTransactionRoot
+        {
+            get
+            {
+                return IsTransactionRoot && (!IsKatmaiOrNewer || null == Pool);
+            }
+        }
 
         override internal bool IsKatmaiOrNewer
         {
@@ -508,6 +521,14 @@ namespace System.Data.SqlClient
             }
         }
 
+        override protected bool ReadyToPrepareTransaction
+        {
+            get
+            {
+                bool result = (null == FindLiveReader(null)); // can't prepare with a live data reader...
+                return result;
+            }
+        }
 
         override public string ServerVersion
         {
@@ -518,6 +539,13 @@ namespace System.Data.SqlClient
             }
         }
 
+        protected override bool UnbindOnTransactionCompletion
+        {
+            get
+            {
+                return false;
+            }
+        }
 
 
         ////////////////////////////////////////////////////////////////////////////////////////
@@ -738,7 +766,7 @@ namespace System.Data.SqlClient
                 // distributed transaction - otherwise don't reset!
                 // Prepare the parser for the connection reset - the next time a trip
                 // to the server is made.
-                _parser.PrepareResetConnection();
+                _parser.PrepareResetConnection(IsTransactionRoot && !IsNonPoolableTransactionRoot);
 
                 // Reset dictionary values, since calling reset will not send us env_changes.
                 CurrentDatabase = _originalDatabase;
@@ -769,6 +797,11 @@ namespace System.Data.SqlClient
             {
                 parser.DisconnectTransaction(internalTransaction);
             }
+        }
+
+        internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso)
+        {
+            ExecuteTransaction(transactionRequest, name, iso, null, false);
         }
 
         override internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest)
@@ -854,6 +887,9 @@ namespace System.Data.SqlClient
                 {
                     case TransactionRequest.Begin:
                         requestType = TdsEnums.TransactionManagerRequestType.Begin;
+                        break;
+                    case TransactionRequest.Promote:
+                        requestType = TdsEnums.TransactionManagerRequestType.Promote;
                         break;
                     case TransactionRequest.Commit:
                         requestType = TdsEnums.TransactionManagerRequestType.Commit;
@@ -942,6 +978,11 @@ namespace System.Data.SqlClient
         ////////////////////////////////////////////////////////////////////////////////////////
         // DISTRIBUTED TRANSACTION METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
+
+        override internal void DelegatedTransactionEnded()
+        {
+            base.DelegatedTransactionEnded();
+        }
 
         override protected byte[] GetDTCAddress()
         {
@@ -1067,6 +1108,8 @@ namespace System.Data.SqlClient
                 _sessionRecoveryRequested = true;
             }
 
+            // The GLOBALTRANSACTIONS feature is implicitly requested
+            requestedFeatures |= TdsEnums.FeatureExtension.GlobalTransactions;
             _parser.TdsLogin(login, requestedFeatures, _recoverySessionData);
         }
 
@@ -1681,6 +1724,8 @@ namespace System.Data.SqlClient
                 case TdsEnums.ENV_BEGINTRAN:
                 case TdsEnums.ENV_COMMITTRAN:
                 case TdsEnums.ENV_ROLLBACKTRAN:
+                case TdsEnums.ENV_ENLISTDTC:
+                case TdsEnums.ENV_DEFECTDTC:
                     // only used on parser
                     break;
 
@@ -1692,6 +1737,16 @@ namespace System.Data.SqlClient
                     _currentFailoverPartner = rec.newValue;
                     break;
 
+                case TdsEnums.ENV_PROMOTETRANSACTION:
+                    PromotedDTCToken = rec.newBinValue;
+                    break;
+
+                case TdsEnums.ENV_TRANSACTIONENDED:
+                    break;
+
+                case TdsEnums.ENV_TRANSACTIONMANAGERADDRESS:
+                    // For now we skip these Yukon only env change notifications
+                    break;
 
                 case TdsEnums.ENV_SPRESETCONNECTIONACK:
                     // connection is being reset 
@@ -1711,17 +1766,6 @@ namespace System.Data.SqlClient
                         throw SQL.ROR_InvalidRoutingInfo(this);
                     }
                     _routingInfo = rec.newRoutingInfo;
-                    break;
-                case TdsEnums.ENV_PROMOTETRANSACTION:
-                    PromotedDTCToken = rec.newBinValue;
-                    break;
-
-                // ENVCHANGE tokens not supported by Project K\CoreCLR
-                case TdsEnums.ENV_ENLISTDTC:
-                case TdsEnums.ENV_DEFECTDTC:
-                case TdsEnums.ENV_TRANSACTIONENDED:
-                case TdsEnums.ENV_TRANSACTIONMANAGERADDRESS:
-                    Debug.Assert(false, "Unsupported tokens were passed to OnEnvChange - TdsParser should have failed these");
                     break;
 
                 default:
@@ -1799,6 +1843,22 @@ namespace System.Data.SqlClient
                         }
                         break;
                     }
+
+                case TdsEnums.FEATUREEXT_GLOBALTRANSACTIONS:
+                    {
+                        if (data.Length < 1)
+                        {
+                            throw SQL.ParsingError();
+                        }
+
+                        IsGlobalTransaction = true;
+                        if (1 == data[0])
+                        {
+                            IsGlobalTransactionsEnabledForServer = true;
+                        }
+                        break;
+                    }
+
                 default:
                     {
                         // Unknown feature ack 

@@ -61,7 +61,6 @@ namespace System.Data.ProviderBase
 
         sealed private class TransactedConnectionPool
         {
-
             Dictionary<SysTx.Transaction, TransactedConnectionList> _transactedCxns;
 
             DbConnectionPool _pool;
@@ -559,7 +558,36 @@ namespace System.Data.ProviderBase
                         Debug.Assert(obj != null, "null connection is not expected");
                         // If we obtained one from the old stack, destroy it.
 
-                        DestroyObject(obj);
+                        // Transaction roots must survive even aging out (TxEnd event will clean them up).
+                        bool shouldDestroy = true;
+                        lock (obj)
+                        {    // Lock to prevent race condition window between IsTransactionRoot and shouldDestroy assignment
+                            if (obj.IsTransactionRoot)
+                            {
+                                shouldDestroy = false;
+                            }
+                        }
+
+                        // !!!!!!!!!! WARNING !!!!!!!!!!!!!
+                        //   ONLY touch obj after lock release if shouldDestroy is false!!!  Otherwise, it may be destroyed
+                        //   by transaction-end thread!
+
+                        // Note that there is a minor race condition between this task and the transaction end event, if the latter runs 
+                        //  between the lock above and the SetInStasis call below. The reslult is that the stasis counter may be
+                        //  incremented without a corresponding decrement (the transaction end task is normally expected
+                        //  to decrement, but will only do so if the stasis flag is set when it runs). I've minimized the size
+                        //  of the window, but we aren't totally eliminating it due to SetInStasis needing to do bid tracing, which
+                        //  we don't want to do under this lock, if possible. It should be possible to eliminate this race condition with
+                        //  more substantial re-architecture of the pool, but we don't have the time to do that work for the current release.
+
+                        if (shouldDestroy)
+                        {
+                            DestroyObject(obj);
+                        }
+                        else
+                        {
+                            obj.SetInStasis();
+                        }
                     }
                     else
                     {
@@ -587,8 +615,6 @@ namespace System.Data.ProviderBase
                         break;
 
                     Debug.Assert(obj != null, "null connection is not expected");
-
-
                     Debug.Assert(!obj.IsEmancipated, "pooled object not in pool");
                     Debug.Assert(obj.CanBePooled, "pooled object is not poolable");
 
@@ -865,18 +891,18 @@ namespace System.Data.ProviderBase
             // we simply leave it alone; when the transaction completes, it will
             // come back through PutObjectFromTransactedPool, which will call us
             // again.
-            bool removed = false;
-            lock (_objectList)
+            if (!obj.IsTxRootWaitingForTxEnd)
             {
-                removed = _objectList.Remove(obj);
-                Debug.Assert(removed, "attempt to DestroyObject not in list");
-                _totalObjects = _objectList.Count;
-            }
+                bool removed = false;
+                lock (_objectList)
+                {
+                    removed = _objectList.Remove(obj);
+                    Debug.Assert(removed, "attempt to DestroyObject not in list");
+                    _totalObjects = _objectList.Count;
+                }
 
-            if (removed)
-            {
+                obj.Dispose();
             }
-            obj.Dispose();
         }
 
         private void ErrorCallback(Object state)
@@ -955,6 +981,7 @@ namespace System.Data.ProviderBase
                         {
                             bool allowCreate = true;
                             bool onlyOneCheckConnection = false;
+                            ADP.SetCurrentTransaction(next.Completion.Task.AsyncState as Transactions.Transaction);
                             timeout = !TryGetConnection(next.Owner, delay, allowCreate, onlyOneCheckConnection, next.UserOptions, out connection);
                         }
                         catch (Exception e)
@@ -1092,7 +1119,6 @@ namespace System.Data.ProviderBase
                                 throw TryCloneCachedException();
 
                             case CREATION_HANDLE:
-
                                 try
                                 {
                                     obj = UserCreateRequest(owningObject, userOptions);
@@ -1510,6 +1536,7 @@ namespace System.Data.ProviderBase
 
                 emancipatedObjectFound = true;
 
+                obj.DetachCurrentTransactionIfEnded();
                 DeactivateObject(obj);
             }
             return emancipatedObjectFound;

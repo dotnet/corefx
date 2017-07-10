@@ -305,6 +305,13 @@ namespace System.Data.ProviderBase
             }
         }
 
+        virtual protected bool ReadyToPrepareTransaction
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         protected internal DbReferenceCollection ReferenceCollection
         {
@@ -480,28 +487,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        internal void DetachCurrentTransactionIfEnded()
-        {
-            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
-            if (enlistedTransaction != null)
-            {
-                bool transactionIsDead;
-                try
-                {
-                    transactionIsDead = (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status);
-                }
-                catch (SysTx.TransactionException)
-                {
-                    // If the transaction is being processed (i.e. is part way through a rollback\commit\etc then TransactionInformation.Status will throw an exception)
-                    transactionIsDead = true;
-                }
-                if (transactionIsDead)
-                {
-                    DetachTransaction(enlistedTransaction, true);
-                }
-            }
-        }
-
         virtual internal void PrepareForReplaceConnection()
         {
             // By default, there is no preparation required
@@ -609,6 +594,16 @@ namespace System.Data.ProviderBase
         {
             _connectionPool = null;
             _connectionIsDoomed = true;
+            _enlistedTransactionOriginal = null; // should not be disposed
+
+            // Dispose of the _enlistedTransaction since it is a clone
+            // of the original reference.
+            // VSDD 780271 - _enlistedTransaction can be changed by another thread (TX end event)
+            SysTx.Transaction enlistedTransaction = Interlocked.Exchange(ref _enlistedTransaction, null);
+            if (enlistedTransaction != null)
+            {
+                enlistedTransaction.Dispose();
+            }
         }
 
         protected internal void DoNotPoolThisConnection()
@@ -621,6 +616,8 @@ namespace System.Data.ProviderBase
         {
             _connectionIsDoomed = true;
         }
+
+        abstract public void EnlistTransaction(SysTx.Transaction transaction);
 
         protected internal virtual DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
         {
@@ -795,6 +792,28 @@ namespace System.Data.ProviderBase
         //  transaction.
         virtual protected void CleanupTransactionOnCompletion(SysTx.Transaction transaction)
         {
+        }
+
+        internal void DetachCurrentTransactionIfEnded()
+        {
+            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
+            if (enlistedTransaction != null)
+            {
+                bool transactionIsDead;
+                try
+                {
+                    transactionIsDead = (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status);
+                }
+                catch (SysTx.TransactionException)
+                {
+                    // If the transaction is being processed (i.e. is part way through a rollback\commit\etc then TransactionInformation.Status will throw an exception)
+                    transactionIsDead = true;
+                }
+                if (transactionIsDead)
+                {
+                    DetachTransaction(enlistedTransaction, true);
+                }
+            }
         }
 
         // Detach transaction from connection.

@@ -115,6 +115,12 @@
 	<data name="ADP_InvalidOffsetValue" xml:space="preserve">
 		<value>Invalid parameter Offset value '{0}'. The value must be greater than or equal to 0.</value>
 	</data>
+	<data name="ADP_TransactionPresent" xml:space="preserve">
+		<value>Connection currently has transaction enlisted.  Finish current transaction and retry.</value>
+	</data>
+	<data name="ADP_LocalTransactionPresent" xml:space="preserve">
+		<value>Cannot enlist in the transaction because a local transaction is in progress on the connection.  Finish local transaction and retry.</value>
+	</data>
 	<data name="ADP_NoConnectionString" xml:space="preserve">
 		<value>The ConnectionString property has not been initialized.</value>
 	</data>

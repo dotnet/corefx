@@ -395,6 +395,14 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_ConnectionAlreadyOpen, ADP.ConnectionStateMsg(state)));
         }
+        internal static Exception TransactionPresent()
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_TransactionPresent));
+        }
+        internal static Exception LocalTransactionPresent()
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_LocalTransactionPresent));
+        }
         internal static Exception OpenConnectionPropertySet(string property, ConnectionState state)
         {
             return InvalidOperation(SR.GetString(SR.ADP_OpenConnectionPropertySet, property, ADP.ConnectionStateMsg(state)));
