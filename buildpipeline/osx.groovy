@@ -16,15 +16,9 @@ simpleNode('OSX10.12','latest') {
     def logFolder = getLogFolder()
 
     stage ('Initialize tools') {
-        try {
-            // Workaround nuget issue https://github.com/NuGet/Home/issues/5085 were we need to set HOME
-            // Init tools
-            sh 'HOME=\$WORKSPACE/tempHome ./init-tools.sh'
-        }
-        catch (err) {
-            // Ensure the build result is still propagated.
-            throw err
-        }
+        // Workaround nuget issue https://github.com/NuGet/Home/issues/5085 were we need to set HOME
+        // Init tools
+        sh 'HOME=\$WORKSPACE/tempHome ./init-tools.sh'
     }
     stage ('Generate version assets') {
         // Generate the version assets.  Do we need to even do this for non-official builds?

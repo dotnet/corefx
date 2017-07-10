@@ -16,14 +16,8 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
     def logFolder = getLogFolder()
 
     stage ('Initialize tools') {
-        try {
-            // Init tools
-            sh './init-tools.sh'
-        }
-        catch (err) {
-            // Ensure the build result is still propagated.
-            throw err
-        }
+        // Init tools
+        sh './init-tools.sh'
     }
     stage ('Generate version assets') {
         // Generate the version assets.  Do we need to even do this for non-official builds?

@@ -28,16 +28,8 @@ simpleNode('Windows_NT','latest') {
     def buildTests = (params.TGroup != 'all')
 
     stage ('Initialize tools') {
-        try {
-            // Init tools
-            bat '.\\init-tools.cmd'
-            // Temporarily always dump the init-tools.log to try and identify why sometimes it takes really long
-            bat 'type init-tools.log'
-        }
-        catch (err) {
-            // Ensure the build result is still propagated.
-            throw err
-        }
+        // Init tools
+        bat '.\\init-tools.cmd'
     }
     stage ('Sync') {
         bat ".\\sync.cmd -p -- /p:ArchGroup=${params.AGroup} /p:RuntimeOS=win10"
