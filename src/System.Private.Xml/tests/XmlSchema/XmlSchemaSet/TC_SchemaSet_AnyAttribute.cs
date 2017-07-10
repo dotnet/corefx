@@ -167,7 +167,7 @@ namespace System.Xml.Tests
             xss.Add(GetIntersectionSchema(ns1, ns2, attrNs));
             xss.Compile();
 
-            Assert.Equal(errorCount, expectedError);
+            Assert.Equal(expectedError, errorCount);
         }
 
         [Theory]
@@ -196,7 +196,7 @@ namespace System.Xml.Tests
             xss.Add(GetUnionSchema(ns1, ns2, attrNs));
             xss.Compile();
 
-            Assert.Equal(errorCount, expectedError);
+            Assert.Equal(expectedError, errorCount);
         }
     }
 }
