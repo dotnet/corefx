@@ -82,8 +82,8 @@ namespace System.Net.Http.Functional.Tests
         public ManagedHandler_HttpClientHandler_ServerCertificates_Test() => ManagedHandlerTestHelpers.SetEnvVar();
         public new void Dispose()
         {
-            ManagedHandlerTestHelpers.RemoveEnvVar();
-            base.Dispose();
+            ManagedHandlerTestHelpers.RemoveEnvVar();
+            base.Dispose();
         }
     }
 

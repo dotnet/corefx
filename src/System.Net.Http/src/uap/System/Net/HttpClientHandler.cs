@@ -489,9 +489,8 @@ namespace System.Net.Http
                     RTCertificate cert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(_clientCertificates[0]);
                     if (cert == null)
                     {
-                        throw new PlatformNotSupportedException(string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    SR.net_http_feature_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
+                        throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                            SR.net_http_feature_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
                     }
 
                     _rtFilter.ClientCertificate = cert;

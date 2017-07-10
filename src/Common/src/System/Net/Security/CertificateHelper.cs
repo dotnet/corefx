@@ -13,19 +13,6 @@ namespace System.Net.Security
     {
         private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
 
-        internal static X509Certificate2 GetEligibleClientCertificate()
-        {
-            // Get initial list of client certificates from the MY store.
-            X509Certificate2Collection candidateCerts;
-            using (var myStore = new X509Store(StoreName.My, StoreLocation.CurrentUser))
-            {
-                myStore.Open(OpenFlags.OpenExistingOnly | OpenFlags.ReadOnly);
-                candidateCerts = myStore.Certificates;
-            }
-            
-            return GetEligibleClientCertificate(candidateCerts);
-        }
-
         internal static X509Certificate2 GetEligibleClientCertificate(X509CertificateCollection candidateCerts)
         {
             if (candidateCerts.Count == 0)
