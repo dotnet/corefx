@@ -390,7 +390,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void AddArc_Rectangle_Success(int x, int y, int width, int height)
+        public void AddArc_Rectangle_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
@@ -1157,7 +1157,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void AddString_NegativeSize_Success(int size)
+        public void AddString_NegativeSize_Success()
         {
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
