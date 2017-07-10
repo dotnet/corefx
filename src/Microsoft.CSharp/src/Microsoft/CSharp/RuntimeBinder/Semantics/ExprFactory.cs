@@ -21,52 +21,52 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private BSYMMGR GlobalSymbols => _globalSymbolContext.GetGlobalSymbols();
 
-        public ExprCall CreateCall(EXPRFLAG nFlags, CType pType, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, MethWithInst MWI) => 
-            new ExprCall(pType, nFlags, pOptionalArguments, pMemberGroup, MWI);
+        public ExprCall CreateCall(EXPRFLAG flags, CType type, Expr arguments, ExprMemberGroup memberGroup, MethWithInst method) => 
+            new ExprCall(type, flags, arguments, memberGroup, method);
 
-        public ExprField CreateField(CType pType, Expr pOptionalObject, FieldWithType FWT, bool isLValue) => 
-            new ExprField(pType, pOptionalObject, FWT, isLValue);
+        public ExprField CreateField(CType type, Expr optionalObject, FieldWithType field, bool isLValue) => 
+            new ExprField(type, optionalObject, field, isLValue);
 
-        public ExprFuncPtr CreateFunctionPointer(EXPRFLAG nFlags, CType pType, Expr pObject, MethWithInst MWI) => 
-            new ExprFuncPtr(pType, nFlags, pObject, MWI);
+        public ExprFuncPtr CreateFunctionPointer(EXPRFLAG flags, CType type, Expr obj, MethWithInst method) => 
+            new ExprFuncPtr(type, flags, obj, method);
 
-        public ExprArrayInit CreateArrayInit(CType pType, Expr pOptionalArguments, Expr pOptionalArgumentDimensions, int[] pDimSizes, int dimSize) => 
-            new ExprArrayInit(pType, pOptionalArguments, pOptionalArgumentDimensions, pDimSizes, dimSize);
+        public ExprArrayInit CreateArrayInit(CType type, Expr arguments, Expr argumentDimensions, int[] dimSizes, int dimSize) => 
+            new ExprArrayInit(type, arguments, argumentDimensions, dimSizes, dimSize);
 
-        public ExprProperty CreateProperty(CType pType, Expr pOptionalObject) => 
-            CreateProperty(pType, null, null, CreateMemGroup(pOptionalObject, new MethPropWithInst()), null, null);
+        public ExprProperty CreateProperty(CType type, Expr optionalObject) => 
+            CreateProperty(type, null, null, CreateMemGroup(optionalObject, new MethPropWithInst()), null, null);
 
-        public ExprProperty CreateProperty(CType pType, Expr pOptionalObjectThrough, Expr pOptionalArguments, ExprMemberGroup pMemberGroup, PropWithType pwtSlot, MethWithType mwtSet) => 
-            new ExprProperty(pType, pOptionalObjectThrough, pOptionalArguments, pMemberGroup, pwtSlot, mwtSet);
+        public ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
+            new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
-        public ExprEvent CreateEvent(CType pType, Expr pOptionalObject, EventWithType EWT) => 
-            new ExprEvent(pType, pOptionalObject, EWT);
+        public ExprEvent CreateEvent(CType type, Expr optionalObject, EventWithType eventWithType) => 
+            new ExprEvent(type, optionalObject, eventWithType);
 
-        public ExprMemberGroup CreateMemGroup(EXPRFLAG nFlags, Name pName, TypeArray pTypeArgs, SYMKIND symKind, CType pTypePar, MethodOrPropertySymbol pMPS, Expr pObject, CMemberLookupResults memberLookupResults) => 
-            new ExprMemberGroup(Types.GetMethGrpType(), nFlags, pName, pTypeArgs, symKind, pTypePar, pMPS, pObject, memberLookupResults);
+        public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) => 
+            new ExprMemberGroup(Types.GetMethGrpType(), flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
 
-        public ExprMemberGroup CreateMemGroup(
-                Expr pObject,
-                MethPropWithInst mwi)
+        public ExprMemberGroup CreateMemGroup(Expr obj, MethPropWithInst method)
         {
-            Name pName = mwi.Sym?.name;
-            MethodOrPropertySymbol methProp = mwi.MethProp();
+            Name name = method.Sym?.name;
+            MethodOrPropertySymbol methProp = method.MethProp();
 
-            CType pType = mwi.GetType() ?? (CType)Types.GetErrorSym();
+            CType type = method.GetType() ?? (CType)Types.GetErrorSym();
 
-            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GlobalSymbols.AllocParams(1, new CType[] { pType }), pName));
+            return CreateMemGroup(
+                0, name, method.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, method.GetType(), methProp,
+                obj, new CMemberLookupResults(GlobalSymbols.AllocParams(1, new[] {type}), name));
         }
 
-        public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst mwi) => 
-            new ExprUserDefinedConversion(arg, call, mwi);
+        public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 
+            new ExprUserDefinedConversion(arg, call, method);
 
-        public ExprCast CreateCast(CType pType, Expr pArg) => CreateCast(0, CreateClass(pType), pArg);
+        public ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, CreateClass(type), argument);
 
-        public ExprCast CreateCast(EXPRFLAG nFlags, ExprClass pType, Expr pArg) => new ExprCast(nFlags, pType, pArg);
+        public ExprCast CreateCast(EXPRFLAG flags, ExprClass type, Expr argument) => new ExprCast(flags, type, argument);
 
-        public ExprReturn CreateReturn(Expr pOptionalObject) => new ExprReturn(pOptionalObject);
+        public ExprReturn CreateReturn(Expr optionalObject) => new ExprReturn(optionalObject);
 
-        public ExprLocal CreateLocal(LocalVariableSymbol pLocal) => new ExprLocal(pLocal);
+        public ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
         public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope) => 
             new ExprBoundLambda(delegateType, argumentScope);
@@ -90,70 +90,70 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType) => 
             new ExprFieldInfo(field, fieldType, Types.GetOptPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
 
-        private ExprTypeOf CreateTypeOf(ExprClass pSourceType) => 
-            new ExprTypeOf(Types.GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), pSourceType);
+        private ExprTypeOf CreateTypeOf(ExprClass sourceType) => 
+            new ExprTypeOf(Types.GetReqPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
 
-        public ExprTypeOf CreateTypeOf(CType pSourceType) => CreateTypeOf(CreateClass(pSourceType));
+        public ExprTypeOf CreateTypeOf(CType sourceType) => CreateTypeOf(CreateClass(sourceType));
 
-        public ExprUserLogicalOp CreateUserLogOp(CType pType, Expr pCallTF, ExprCall pCallOp) => 
-            new ExprUserLogicalOp(pType, pCallTF, pCallOp);
+        public ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
+            new ExprUserLogicalOp(type, trueFalseCall, operatorCall);
 
-        public ExprUserLogicalOp CreateUserLogOpError(CType pType, Expr pCallTF, ExprCall pCallOp)
+        public ExprUserLogicalOp CreateUserLogOpError(CType type, Expr trueFalseCall, ExprCall operatorCall)
         {
-            ExprUserLogicalOp rval = CreateUserLogOp(pType, pCallTF, pCallOp);
+            ExprUserLogicalOp rval = CreateUserLogOp(type, trueFalseCall, operatorCall);
             rval.SetError();
             return rval;
         }
 
-        public ExprConcat CreateConcat(Expr op1, Expr op2) => new ExprConcat(op1, op2);
+        public ExprConcat CreateConcat(Expr first, Expr second) => new ExprConcat(first, second);
 
         public ExprConstant CreateStringConstant(string str) => 
             CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
 
-        public ExprMultiGet CreateMultiGet(EXPRFLAG nFlags, CType pType, ExprMulti pOptionalMulti) => 
-            new ExprMultiGet(pType, nFlags, pOptionalMulti);
+        public ExprMultiGet CreateMultiGet(EXPRFLAG flags, CType type, ExprMulti multi) => 
+            new ExprMultiGet(type, flags, multi);
 
-        public ExprMulti CreateMulti(EXPRFLAG nFlags, CType pType, Expr pLeft, Expr pOp) => 
-            new ExprMulti(pType, nFlags, pLeft, pOp);
+        public ExprMulti CreateMulti(EXPRFLAG flags, CType type, Expr left, Expr op) => 
+            new ExprMulti(type, flags, left, op);
 
         ////////////////////////////////////////////////////////////////////////////////
         //
         // Precondition:
         //
-        // pType - Non-null
+        // type - Non-null
         //
         // This returns a null for reference types and an EXPRZEROINIT for all others.
 
-        public Expr CreateZeroInit(CType pType) => CreateZeroInit(CreateClass(pType), null, false);
+        public Expr CreateZeroInit(CType type) => CreateZeroInit(CreateClass(type), null, false);
 
-        private Expr CreateZeroInit(ExprClass pTypeExpr, Expr pOptionalOriginalConstructorCall, bool isConstructor)
+        private Expr CreateZeroInit(ExprClass typeExpr, Expr originalConstructorCall, bool isConstructor)
         {
-            Debug.Assert(pTypeExpr != null);
-            CType pType = pTypeExpr.Type;
-            bool bIsError = false;
+            Debug.Assert(typeExpr != null);
+            CType type = typeExpr.Type;
+            bool isError = false;
 
-            if (pType.isEnumType())
+            if (type.isEnumType())
             {
                 // For enum types, we create a constant that has the default value
                 // as an object pointer.
-                return CreateConstant(pType, ConstVal.Get(Activator.CreateInstance(pType.AssociatedSystemType)));
+                return CreateConstant(type, ConstVal.Get(Activator.CreateInstance(type.AssociatedSystemType)));
             }
 
-            switch (pType.fundType())
+            switch (type.fundType())
             {
                 case FUNDTYPE.FT_PTR:
                     {
                         CType nullType = Types.GetNullType();
 
                         // It looks like this if is always false ...
-                        if (nullType.fundType() == pType.fundType())
+                        if (nullType.fundType() == type.fundType())
                         {
                             // Create a constant here.
-                            return CreateConstant(pType, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
+                            return CreateConstant(type, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
                         }
 
                         // Just allocate a new node and fill it in.
-                        return CreateCast(0, pTypeExpr, CreateNull());
+                        return CreateCast(0, typeExpr, CreateNull());
                     }
 
                 case FUNDTYPE.FT_REF:
@@ -167,9 +167,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_U8:
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
-                    return CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
+                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
                 case FUNDTYPE.FT_STRUCT:
-                    if (pType.isPredefType(PredefinedType.PT_DECIMAL))
+                    if (type.isPredefType(PredefinedType.PT_DECIMAL))
                     {
                         goto case FUNDTYPE.FT_R8;
                     }
@@ -180,91 +180,89 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 default:
-                    bIsError = true;
+                    isError = true;
                     break;
             }
 
-            return new ExprZeroInit(pType, pOptionalOriginalConstructorCall, isConstructor, bIsError);
+            return new ExprZeroInit(type, originalConstructorCall, isConstructor, isError);
         }
 
-        public ExprConstant CreateConstant(CType pType, ConstVal constVal) => new ExprConstant(pType, constVal);
+        public ExprConstant CreateConstant(CType type, ConstVal constVal) => new ExprConstant(type, constVal);
 
-        public ExprConstant CreateIntegerConstant(int x)
-        {
-            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
-        }
-        public ExprConstant CreateBoolConstant(bool b)
-        {
-            return CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
-        }
+        public ExprConstant CreateIntegerConstant(int x) =>
+            CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
+
+        public ExprConstant CreateBoolConstant(bool b) => 
+            CreateConstant(Types.GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
 
         public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
-        public ExprArrayIndex CreateArrayIndex(Expr pArray, Expr pIndex)
+        public ExprArrayIndex CreateArrayIndex(Expr array, Expr index)
         {
-            CType pType = pArray.Type;
-            if (pType is ArrayType arr)
+            CType type = array.Type;
+            if (type is ArrayType arr)
             {
-                pType = arr.GetElementType();
+                type = arr.GetElementType();
             }
-            else if (pType == null)
+            else if (type == null)
             {
-                pType = Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType();
+                type = Types.GetReqPredefAgg(PredefinedType.PT_INT).getThisType();
             }
 
-            return new ExprArrayIndex(pType, pArray, pIndex);
+            return new ExprArrayIndex(type, array, index);
         }
 
-        public ExprBinOp CreateBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2) => 
-            new ExprBinOp(exprKind, pType, p1, p2);
+        public ExprBinOp CreateBinop(ExpressionKind exprKind, CType type, Expr left, Expr right) => 
+            new ExprBinOp(exprKind, type, left, right);
 
-        public ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType pType, Expr pOperand) => 
-            new ExprUnaryOp(exprKind, pType, pOperand);
+        public ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType type, Expr operand) => 
+            new ExprUnaryOp(exprKind, type, operand);
 
-        public ExprOperator CreateOperator(ExpressionKind exprKind, CType pType, Expr pArg1, Expr pOptionalArg2)
+        public ExprOperator CreateOperator(ExpressionKind exprKind, CType type, Expr arg1, Expr arg2)
         {
-            Debug.Assert(pArg1 != null);
-            Debug.Assert(exprKind.IsUnaryOperator() ? pOptionalArg2 == null : pOptionalArg2 != null);
+            Debug.Assert(arg1 != null);
+            Debug.Assert(exprKind.IsUnaryOperator() == (arg2 == null));
             return exprKind.IsUnaryOperator()
-                ? (ExprOperator)CreateUnaryOp(exprKind, pType, pArg1)
-                : CreateBinop(exprKind, pType, pArg1, pOptionalArg2);
+                ? (ExprOperator)CreateUnaryOp(exprKind, type, arg1)
+                : CreateBinop(exprKind, type, arg1, arg2);
         }
 
 
-        public ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType pType, Expr p1, Expr p2, Expr call, MethPropWithInst pmpwi) => 
-            new ExprBinOp(exprKind, pType, p1, p2, call, pmpwi);
+        public ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType type, Expr left, Expr right, Expr call, MethPropWithInst userMethod) => 
+            new ExprBinOp(exprKind, type, left, right, call, userMethod);
 
         // The call may be lifted, but we do not mark the outer binop as lifted.
-        public ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType pType, Expr pOperand, ExprCall call, MethPropWithInst pmpwi) => 
-            new ExprUnaryOp(exprKind, pType, pOperand, call, pmpwi);
+        public ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType type, Expr operand, ExprCall call, MethPropWithInst userMethod) => 
+            new ExprUnaryOp(exprKind, type, operand, call, userMethod);
 
-        public ExprUnaryOp CreateNeg(EXPRFLAG nFlags, Expr pOperand)
+        public ExprUnaryOp CreateNeg(EXPRFLAG flags, Expr operand)
         {
-            Debug.Assert(pOperand != null);
-            ExprUnaryOp pUnaryOp = CreateUnaryOp(ExpressionKind.Negate, pOperand.Type, pOperand);
-            pUnaryOp.Flags |= nFlags;
-            return pUnaryOp;
+            Debug.Assert(operand != null);
+            ExprUnaryOp unary = CreateUnaryOp(ExpressionKind.Negate, operand.Type, operand);
+            unary.Flags |= flags;
+            return unary;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the second.
 
-        public ExprBinOp CreateSequence(Expr p1, Expr p2) => CreateBinop(ExpressionKind.Sequence, p2.Type, p1, p2);
+        public ExprBinOp CreateSequence(Expr first, Expr second) =>
+            CreateBinop(ExpressionKind.Sequence, second.Type, first, second);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the first.
 
-        public ExprBinOp CreateReverseSequence(Expr p1, Expr p2) =>
-            CreateBinop(ExpressionKind.SequenceReverse, p1.Type, p1, p2);
+        public ExprBinOp CreateReverseSequence(Expr first, Expr second) =>
+            CreateBinop(ExpressionKind.SequenceReverse, first.Type, first, second);
 
-        public ExprAssignment CreateAssignment(Expr pLHS, Expr pRHS) => new ExprAssignment(pLHS, pRHS);
+        public ExprAssignment CreateAssignment(Expr left, Expr right) => new ExprAssignment(left, right);
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name pName, Expr pValue) =>
-            new ExprNamedArgumentSpecification(pName, pValue);
+        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name name, Expr value) =>
+            new ExprNamedArgumentSpecification(name, value);
 
-        public ExprWrap CreateWrap(Expr pOptionalExpression) => new ExprWrap(pOptionalExpression);
+        public ExprWrap CreateWrap(Expr expression) => new ExprWrap(expression);
 
         public ExprBinOp CreateSave(ExprWrap wrap)
         {
@@ -315,7 +313,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprList CreateList(Expr op1, Expr op2, Expr op3, Expr op4) =>
             CreateList(op1, CreateList(op2, CreateList(op3, op4)));
 
-        public ExprClass CreateClass(CType pType) => new ExprClass(pType);
+        public ExprClass CreateClass(CType type) => new ExprClass(type);
     }
 }
 
