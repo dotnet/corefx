@@ -8,7 +8,5 @@
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsUAP>true</IsUAP>
     <IsUAPRef>false</IsUAPRef>
-    <!-- DO NOT ship this as stable for .NET Core 2.0, it already shipped stable with 4.4.0 early -->
-    <BlockStable>true</BlockStable>
   </PropertyGroup>
 </Project>
