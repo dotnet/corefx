@@ -75,13 +75,16 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static void AssertExceptionDeserializationFails<T>() where T : Exception
         {
-            // .NET Core throws a PlatformNotSupportedException for deserializing many exceptions.
-            if (!PlatformDetection.IsNetCore)
+            // .NET Core and .NET Native throw PlatformNotSupportedExceptions when deserializing many exceptions.
+            // The .NET Framework supports full deserialization.
+            if (PlatformDetection.IsFullFramework)
             {
                 return;
             }
 
-            // Construct a valid serialization payload.
+            // Construct a valid serialization payload. This is necessary as most constructors call
+            // the base constructor before throwing a PlatformNotSupportedException, and the base
+            // constructor validates the SerializationInfo passed.
             var info = new SerializationInfo(typeof(T), new FormatterConverter());
             info.AddValue("ClassName", "ClassName");
             info.AddValue("Message", "Message");
@@ -94,6 +97,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             info.AddValue("Source", null);
             info.AddValue("ExceptionMethod", null);
 
+            // Serialization constructors are of the form .ctor(SerializationInfo, StreamingContext).
             ConstructorInfo constructor = null;
             foreach (ConstructorInfo c in typeof(T).GetTypeInfo().DeclaredConstructors)
             {
