@@ -96,13 +96,13 @@ namespace System.Net.Http
         {
             Uri uri = request.RequestUri;
 
-            Stream stream = await ConnectHelper.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
+            Stream stream = await ConnectHelper.ConnectAsync(uri.IdnHost, uri.Port).ConfigureAwait(false);
 
             TransportContext transportContext = null;
 
             if (uri.Scheme == UriScheme.Https)
             {
-                SslStream sslStream = await EstablishSslConnection(uri.Host, request, stream).ConfigureAwait(false);
+                SslStream sslStream = await EstablishSslConnection(uri.IdnHost, request, stream).ConfigureAwait(false);
 
                 stream = sslStream;
                 transportContext = sslStream.TransportContext;
@@ -113,7 +113,7 @@ namespace System.Net.Http
                 pool = _connectionPoolTable.GetOrAdd(key, _ => new HttpConnectionPool());
             }
 
-            var connection = new HttpConnection(pool, key, stream, transportContext, false);
+            var connection = new HttpConnection(pool, key, uri.IdnHost, stream, transportContext, false);
 
             return connection;
         }
