@@ -108,7 +108,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     break;
                 }
             };
-            Assert.NotNull(constructor);
+
+            // .NET Native prevents reflection on private constructors on non-serializable types.
+            if (constructor == null)
+            {
+                return;
+            }
 
             Exception ex = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] { info, new StreamingContext() }));
             Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
