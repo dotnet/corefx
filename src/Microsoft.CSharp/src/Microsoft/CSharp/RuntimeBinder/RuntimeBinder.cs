@@ -1483,7 +1483,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 CType pDestType = _binder.chooseArrayIndexType(argument);
                 if (null == pDestType)
                 {
-                    pDestType = SymbolLoader.GetReqPredefType(PredefinedType.PT_INT, true);
+                    pDestType = SymbolLoader.GetReqPredefType(PredefinedType.PT_INT);
                 }
 
                 return _binder.mustCast(

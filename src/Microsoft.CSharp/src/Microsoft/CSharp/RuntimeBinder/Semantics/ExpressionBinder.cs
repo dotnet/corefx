@@ -366,7 +366,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static AggregateType GetReqPDT(PredefinedType pt, SymbolLoader symbolLoader)
         {
             Debug.Assert(pt != PredefinedType.PT_VOID);  // use getVoidType()
-            return symbolLoader.GetReqPredefType(pt, true);
+            return symbolLoader.GetReqPredefType(pt);
         }
 
         private AggregateType GetOptPDT(PredefinedType pt)
@@ -383,7 +383,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                return GetSymbolLoader().GetOptPredefType(pt, true);
+                return GetSymbolLoader().GetOptPredefType(pt);
             }
         }
 

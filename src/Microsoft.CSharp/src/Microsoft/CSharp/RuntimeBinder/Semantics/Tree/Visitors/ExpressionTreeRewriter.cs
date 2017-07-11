@@ -1007,7 +1007,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Expr GenerateIndexList(Expr oldIndices)
         {
-            CType intType = symbolLoader.GetReqPredefType(PredefinedType.PT_INT, true);
+            CType intType = symbolLoader.GetReqPredefType(PredefinedType.PT_INT);
 
             Expr newIndices = null;
             Expr newIndicesTail = newIndices;
@@ -1030,7 +1030,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             EXPRFLAG flags = 0;
 
-            AggregateType pObject = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT, true);
+            AggregateType pObject = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
 
             if (expr.Type.IsNullType())
             {
@@ -1038,7 +1038,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, expr, pTypeOf);
             }
 
-            AggregateType stringType = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_STRING, true);
+            AggregateType stringType = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_STRING);
             if (expr.Type != stringType)
             {
                 flags = EXPRFLAG.EXF_BOX;
