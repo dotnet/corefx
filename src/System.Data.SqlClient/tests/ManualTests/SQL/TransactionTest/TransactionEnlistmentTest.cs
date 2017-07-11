@@ -11,7 +11,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     public class TransactionEnlistmentTest
     {
         [CheckConnStrSetupFact]
-        public static void Test8__()
+        public static void TestAmbientTransaction_TxScopeComplete()
         {
             const int inputCol1 = 1;
             const string inputCol2 = "one";
@@ -20,7 +20,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             string connectionString = builder.ConnectionString;
             string testTableName = GenerateTableName();
 
-            RunNonQuery(connectionString, string.Format("create table {0} (col1 int, col2 text)", testTableName));
+            RunNonQuery(connectionString, $"create table {testTableName} (col1 int, col2 text)");
 
             try
             {
@@ -31,20 +31,20 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         connection.Open();
                         using (SqlCommand command = connection.CreateCommand())
                         {
-                            command.CommandText = string.Format("INSERT INTO {0} VALUES ({1}, '{2}')", testTableName, inputCol1, inputCol2);
+                            command.CommandText = $"INSERT INTO {testTableName} VALUES ({inputCol1}, '{inputCol2}')";
                             command.ExecuteNonQuery();
                         }
                     }
                     txScope.Complete();
                 }
 
-                DataTable result = RunQuery(connectionString, string.Format("select col2 from {0} where col1 = {1}", testTableName, inputCol1));
+                DataTable result = RunQuery(connectionString, $"select col2 from {testTableName} where col1 = {inputCol1}");
                 Assert.True(result.Rows.Count > 0);
                 Assert.True(string.Equals(result.Rows[0][0], inputCol2));
             }
             finally
             {
-                RunNonQuery(connectionString, string.Format("drop table {0}", testTableName));
+                RunNonQuery(connectionString, $"drop table {testTableName}");
             }
         }
 

@@ -544,7 +544,7 @@ namespace System.Data.SqlClient
                     { SYNONYM.User, KEY.User_ID },
                     { SYNONYM.WSID, KEY.Workstation_Id }
                 };
-                //Debug.Assert(synonyms.Count == count, "incorrect initial ParseSynonyms size");
+                Debug.Assert(synonyms.Count == count, "incorrect initial ParseSynonyms size");
                 s_sqlClientSynonyms = synonyms;
             }
             return synonyms;

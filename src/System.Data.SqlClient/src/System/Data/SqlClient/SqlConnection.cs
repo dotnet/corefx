@@ -1017,12 +1017,6 @@ namespace System.Data.SqlClient
         {
             SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
 
-            // Fail Fast in case an application is trying to enlist the SqlConnection in a Transaction Scope.
-            if (connectionOptions.Enlist && ADP.GetCurrentTransaction() != null)
-            {
-                //throw ADP.AmbientTransactionIsNotSupported();
-            }
-
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
 
             if (ForceNewConnection)
