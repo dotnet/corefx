@@ -19,7 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public SymbolLoader(
             GlobalSymbolContext globalSymbols,
-            UserStringBuilder userStringBuilder,
             ErrorHandling errorContext
         )
         {
