@@ -26,11 +26,8 @@ using RTHttpCookieUsageBehavior = Windows.Web.Http.Filters.HttpCookieUsageBehavi
 using RTHttpRequestMessage = Windows.Web.Http.HttpRequestMessage;
 using RTPasswordCredential = Windows.Security.Credentials.PasswordCredential;
 using RTCertificate = Windows.Security.Cryptography.Certificates.Certificate;
-using RTCertificateQuery = Windows.Security.Cryptography.Certificates.CertificateQuery;
-using RTCertificateStores = Windows.Security.Cryptography.Certificates.CertificateStores;
 using RTChainValidationResult = Windows.Security.Cryptography.Certificates.ChainValidationResult;
 using RTHttpServerCustomValidationRequestedEventArgs = Windows.Web.Http.Filters.HttpServerCustomValidationRequestedEventArgs;
-using RTIBuffer = Windows.Storage.Streams.IBuffer;
 
 namespace System.Net.Http
 {
