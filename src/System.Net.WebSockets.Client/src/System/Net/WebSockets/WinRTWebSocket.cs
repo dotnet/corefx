@@ -6,15 +6,22 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Windows.Foundation.Metadata;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using Windows.Web;
 
+using RTCertificate = Windows.Security.Cryptography.Certificates.Certificate;
+using RTCertificateQuery = Windows.Security.Cryptography.Certificates.CertificateQuery;
+using RTCertificateStores = Windows.Security.Cryptography.Certificates.CertificateStores;
 using RTWeb​Socket​Error = Windows.Networking.Sockets.Web​Socket​Error;
 
 namespace System.Net.WebSockets
@@ -23,7 +30,15 @@ namespace System.Net.WebSockets
     {
         #region Constants
         private const string HeaderNameCookie = "Cookie";
+        private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
         #endregion
+
+        private static readonly Lazy<bool> s_MessageWebSocketClientCertificateSupported =
+            new Lazy<bool>(InitMessageWebSocketClientCertificateSupported);
+        private static bool MessageWebSocketClientCertificateSupported => s_MessageWebSocketClientCertificateSupported.Value;
+        private static readonly Lazy<bool> s_MessageWebSocketReceiveModeSupported =
+            new Lazy<bool>(InitMessageWebSocketReceiveModeSupported);
+        private static bool MessageWebSocketReceiveModeSupported => s_MessageWebSocketReceiveModeSupported.Value;
 
         private WebSocketCloseStatus? _closeStatus = null;
         private string _closeStatusDescription = null;
@@ -103,6 +118,39 @@ namespace System.Net.WebSockets
             foreach (var subProtocol in options.RequestedSubProtocols)
             {
                 websocketControl.SupportedProtocols.Add(subProtocol);
+            }
+
+            if (options.ClientCertificates.Count > 0)
+            {
+                if (!MessageWebSocketClientCertificateSupported)
+                {
+                    throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                        SR.net_WebSockets_UWPClientCertSupportRequiresWindows10GreaterThan1703));
+                }
+
+                X509Certificate2 dotNetClientCert = CertificateHelper.GetEligibleClientCertificate(options.ClientCertificates);
+                if (dotNetClientCert != null)
+                {
+                    RTCertificate winRtClientCert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(dotNetClientCert);
+                    if (winRtClientCert == null)
+                    {
+                        throw new PlatformNotSupportedException(string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    SR.net_WebSockets_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
+                    }
+
+                    websocketControl.ClientCertificate = winRtClientCert;
+                }
+            }
+
+            // Try to opt into PartialMessage receive mode so that we can hand partial data back to the app as it arrives.
+            // If the MessageWebSocketControl.ReceiveMode API surface is not available, the MessageWebSocket.MessageReceived
+            // event will only get triggered when an entire WebSocket message has been received. This results in large memory
+            // footprint and prevents "streaming" scenarios (e.g., WCF) from working properly.
+            if (MessageWebSocketReceiveModeSupported)
+            {
+                // Always enable partial message receive mode if the WinRT API supports it.
+                _messageWebSocket.Control.ReceiveMode = MessageWebSocketReceiveMode.PartialMessage;
             }
 
             try
@@ -340,7 +388,7 @@ namespace System.Net.WebSockets
                         dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
                         if (dataAvailable == readCount)
                         {
-                            endOfMessage = true;
+                            endOfMessage = !IsPartialMessageEvent(args);
                         }
 
                         WebSocketReceiveResult recvResult = new WebSocketReceiveResult((int) readCount, messageType,
@@ -515,5 +563,34 @@ namespace System.Net.WebSockets
             }
         }
         #endregion
+
+        #region Helpers
+        private static bool InitMessageWebSocketClientCertificateSupported()
+        {
+            return ApiInformation.IsPropertyPresent(
+                "Windows.Networking.Sockets.MessageWebSocketControl",
+                "ClientCertificate");
+        }
+
+        private static bool InitMessageWebSocketReceiveModeSupported()
+        {
+            return ApiInformation.IsPropertyPresent(
+                "Windows.Networking.Sockets.MessageWebSocketControl",
+                "ReceiveMode");
+        }
+
+        private bool IsPartialMessageEvent(MessageWebSocketMessageReceivedEventArgs eventArgs)
+        {
+            if (MessageWebSocketReceiveModeSupported)
+            {
+                return !eventArgs.IsMessageComplete;
+            }
+
+            // When MessageWebSocketMessageReceivedEventArgs.IsMessageComplete is not available, WinRT's behavior
+            // is always to wait for the entire WebSocket message to arrive before raising a MessageReceived event.
+            return false;
+        }
+        #endregion Helpers
+
     }
 }
