@@ -412,7 +412,7 @@ namespace System.Net.WebSockets
                         break;
                 }
 
-                // Propagate a custom exception to any pending SendAsync/CloseAsync operations and close the socket.
+                // Propagate a custom exception to any pending ReceiveAsync/CloseAsync operations and close the socket.
                 WebSocketException customException = new WebSocketException(actualError, exc);
                 AbortInternal(customException);
             }
@@ -473,7 +473,7 @@ namespace System.Net.WebSockets
                 {
                     var thisRef = (WinRTWebSocket)s;
 
-                    // Propagate a custom exception to any pending SendAsync/CloseAsync operations and close the socket.
+                    // Propagate a custom exception to any pending ReceiveAsync/CloseAsync operations and close the socket.
                     var customException = new OperationCanceledException(nameof(WebSocketState.Aborted));
                     thisRef.AbortInternal(customException);
                 }, this);
