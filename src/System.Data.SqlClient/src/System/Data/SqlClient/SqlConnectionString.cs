@@ -4,9 +4,6 @@
 
 
 
-//------------------------------------------------------------------------------
-
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -159,7 +156,7 @@ namespace System.Data.SqlClient
             ExplicitUnbind
         }
 
-        internal static class TRANSACIONBINDING
+        internal static class TRANSACTIONBINDING
         {
             internal const string ImplicitUnbind = "Implicit Unbind";
             internal const string ExplicitUnbind = "Explicit Unbind";
@@ -356,16 +353,16 @@ namespace System.Data.SqlClient
                 throw ADP.InvalidConnectionOptionValue(KEY.Type_System_Version);
             }
 
-            if (ADP.IsEmpty(transactionBindingString))
+            if (string.IsNullOrEmpty(transactionBindingString))
             {
                 transactionBindingString = DbConnectionStringDefaults.TransactionBinding;
             }
 
-            if (transactionBindingString.Equals(TRANSACIONBINDING.ImplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            if (transactionBindingString.Equals(TRANSACTIONBINDING.ImplicitUnbind, StringComparison.OrdinalIgnoreCase))
             {
                 _transactionBinding = TransactionBindingEnum.ImplicitUnbind;
             }
-            else if (transactionBindingString.Equals(TRANSACIONBINDING.ExplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            else if (transactionBindingString.Equals(TRANSACTIONBINDING.ExplicitUnbind, StringComparison.OrdinalIgnoreCase))
             {
                 _transactionBinding = TransactionBindingEnum.ExplicitUnbind;
             }

@@ -159,7 +159,7 @@ namespace System.Data.SqlClient
         //
         // SQL.Connection
         //
-        static internal Exception CannotGetDTCAddress()
+        internal static Exception CannotGetDTCAddress()
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_CannotGetDTCAddress));
         }
@@ -208,11 +208,11 @@ namespace System.Data.SqlClient
         //
         // Global Transactions.
         //
-        static internal Exception GlobalTransactionsNotEnabled()
+        internal static Exception GlobalTransactionsNotEnabled()
         {
             return ADP.InvalidOperation(SR.GetString(SR.GT_Disabled));
         }
-        static internal Exception UnknownSysTxIsolationLevel(SysTx.IsolationLevel isolationLevel)
+        internal static Exception UnknownSysTxIsolationLevel(SysTx.IsolationLevel isolationLevel)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_UnknownSysTxIsolationLevel, isolationLevel.ToString()));
         }
@@ -481,10 +481,10 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerDatabaseStart));
         }
 
-		//
+        //
         // SQL.SqlDelegatedTransaction
         //
-        static internal SysTx.TransactionPromotionException PromotionFailed(Exception inner)
+        internal static SysTx.TransactionPromotionException PromotionFailed(Exception inner)
         {
             SysTx.TransactionPromotionException e = new SysTx.TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
             ADP.TraceExceptionAsReturnValue(e);
@@ -644,7 +644,7 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SQL_OpenResultCountExceeded));
         }
 
-        static internal Exception UnsupportedSysTxForGlobalTransactions()
+        internal static Exception UnsupportedSysTxForGlobalTransactions()
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_UnsupportedSysTxVersion));
         }
