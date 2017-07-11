@@ -201,7 +201,6 @@ namespace System.ComponentModel
                     if (_filter != null)
                     {
                         ComponentCollection filteredComponents = _filter.FilterComponents(_components);
-                        Debug.Assert(filteredComponents != null, "Incorrect ContainerFilterService implementation.");
                         if (filteredComponents != null)
                         {
                             _components = filteredComponents;
