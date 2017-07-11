@@ -6,7 +6,6 @@
       "alwaysRun": false,
       "displayName": "Change permissions to agent folder for cleanup steps",
       "timeoutInMinutes": 0,
-      "refName": "CmdLine_15",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -120,7 +119,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build-managed.sh -OfficialBuildId=$(OfficialBuildId) -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build-managed.sh -OfficialBuildId=$(OfficialBuildId) -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -138,7 +137,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/sync.sh $(PB_SyncArguments)",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/sync.sh $(PB_SyncArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -156,7 +155,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -174,7 +173,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build-tests.sh $(PB_BuildTestsArguments)",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/build-tests.sh $(PB_BuildTestsArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -210,7 +209,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/publish-packages.sh -AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -verbose -- /p:OverwriteOnPublish=false",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/publish-packages.sh -AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -verbose -- /p:OverwriteOnPublish=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -359,7 +358,7 @@
       "allowOverride": true
     },
     "PB_DockerCommonRunArgs": {
-      "value": "--name $(PB_DockerContainerName) -v \"$(PB_GitDirectory):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" $(PB_DockerImageName)"
+      "value": "--rm --name $(PB_DockerContainerName) -v \"$(PB_GitDirectory):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" $(PB_DockerImageName)"
     },
     "PB_DockerContainerName": {
       "value": "corefx-$(Build.BuildId)"
@@ -398,11 +397,10 @@
       "value": "dn-bot"
     },
     "PB_VsoCorefxGitUrl": {
-      "value": "https://github.com/dotnet/corefx"
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/"
     },
     "PB_VsoRepositoryName": {
-      "value": "DotNet-CoreFX-Trusted",
-      "allowOverride": true
+      "value": "DotNet-CoreFX-Trusted"
     },
     "SourceVersion": {
       "value": "HEAD",
@@ -478,7 +476,7 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097748,
+    "revision": 418097767,
     "visibility": "private"
   }
 }
