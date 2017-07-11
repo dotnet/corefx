@@ -504,16 +504,20 @@ namespace System.Net.Http
 
                 return;
             }
-
-            // Get the certs that can be used for Client Authentication.
-            var query = new RTCertificateQuery();
-            var ekus = query.EnhancedKeyUsages;
-            ekus.Add(ClientAuthenticationOID);
-            var clientCertificates = await RTCertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
-
-            if (clientCertificates.Count > 0)
+            else
             {
-                _rtFilter.ClientCertificate = clientCertificates[0];
+                X509Certificate2 clientCert = CertificateHelper.GetEligibleClientCertificate();
+                if (clientCert == null)
+                {
+                    return;
+                }
+
+                // Unlike in the .Manual case above, the conversion to WinRT Certificate should always work;
+                // so we just use an Assert. All the possible client certs were enumerated from that store and
+                // filtered down to a single client cert.
+                RTCertificate rtClientCert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(clientCert);
+                Debug.Assert(rtClientCert != null);
+                _rtFilter.ClientCertificate = rtClientCert;
             }
         }
 
