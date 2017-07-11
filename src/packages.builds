@@ -36,6 +36,10 @@
     <Project Include=".\Native\pkg\runtime.native.System.IO.Compression\runtime.native.System.IO.Compression.builds">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
     </Project>
+    <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography.Apple\runtime.native.System.Security.Cryptography.Apple.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
