@@ -486,14 +486,20 @@ namespace System.Net.Http
             {
                 if (_clientCertificates != null && _clientCertificates.Count > 0)
                 {
-                    RTCertificate cert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(_clientCertificates[0]);
-                    if (cert == null)
+                    X509Certificate2 clientCert = CertificateHelper.GetEligibleClientCertificate(_clientCertificates);
+                    if (clientCert == null)
+                    {
+                        return;
+                    }
+
+                    RTCertificate rtClientCert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(clientCert);
+                    if (rtClientCert == null)
                     {
                         throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
                             SR.net_http_feature_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
                     }
 
-                    _rtFilter.ClientCertificate = cert;
+                    _rtFilter.ClientCertificate = rtClientCert;
                 }
 
                 return;
