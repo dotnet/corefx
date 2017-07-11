@@ -25,7 +25,7 @@ namespace System.Diagnostics
         public static ProcessInfo[] GetProcessInfos(string machineName)
         {
             return IsRemoteMachine(machineName) ?
-                NtProcessManager.GetProcessInfos(machineName, true) :
+                NtProcessManager.GetProcessInfos(machineName, isRemoteMachine: true) :
                 NtProcessInfoHelper.GetProcessInfos(); // Do not use performance counter for local machine
         }
     }
