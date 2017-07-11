@@ -64,7 +64,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 _semanticChecker.GetTypeManager(),
                 bsymmgr,
                 _semanticChecker);
-            _semanticChecker.getPredefTypes().Init(_semanticChecker.GetErrorContext(), _symbolTable);
+            _semanticChecker.getPredefTypes().Init(_symbolTable);
             _semanticChecker.GetTypeManager().InitTypeFactory(_symbolTable);
             SymbolLoader.getPredefinedMembers().RuntimeBinderSymbolTable = _symbolTable;
             SymbolLoader.SetSymbolTable(_symbolTable);

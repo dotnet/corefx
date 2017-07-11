@@ -45,16 +45,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return sym;
         }
 
-        public bool Init(ErrorHandling errorContext, SymbolTable symtable)
+        public void Init(SymbolTable symtable)
         {
             _runtimeBinderSymbolTable = symtable;
             Debug.Assert(_pBSymmgr != null);
             Debug.Assert(_predefSyms == null);
 
             _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
-            Debug.Assert(_predefSyms != null);
-
-            return true;
         }
 
         public void ReportMissingPredefTypeError(ErrorHandling errorContext, PredefinedType pt)
