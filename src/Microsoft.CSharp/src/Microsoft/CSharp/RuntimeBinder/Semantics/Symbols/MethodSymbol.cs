@@ -44,9 +44,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             Debug.Assert(!_inferenceMustFail);
             _checkedInfMustFail = true;
-            for (int ivar = 0; ivar < typeVars.Count; ivar++)
+
+            foreach (CType type in typeVars.Items)
             {
-                TypeParameterType var = typeVars.ItemAsTypeParameterType(ivar);
+                TypeParameterType var = type as TypeParameterType;
                 // See if type var is used in a parameter.
                 for (int ipar = 0; ; ipar++)
                 {

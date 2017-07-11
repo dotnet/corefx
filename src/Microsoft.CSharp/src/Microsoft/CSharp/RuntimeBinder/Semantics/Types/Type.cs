@@ -157,19 +157,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static Type CalculateAssociatedSystemTypeForAggregate(AggregateType aggtype)
         {
             AggregateSymbol agg = aggtype.GetOwningAggregate();
-            TypeArray typeArgs = aggtype.GetTypeArgsAll();
 
             List<Type> list = new List<Type>();
 
             // Get each type arg.
-            for (int i = 0; i < typeArgs.Count; i++)
+            foreach (CType typeArg in aggtype.GetTypeArgsAll().Items)
             {
                 // Unnamed type parameter types are just placeholders.
-                if (typeArgs[i].IsTypeParameterType() && typeArgs[i].AsTypeParameterType().GetTypeParameterSymbol().name == null)
+                if (typeArg.IsTypeParameterType() && typeArg.AsTypeParameterType().GetTypeParameterSymbol().name == null)
                 {
                     return null;
                 }
-                list.Add(typeArgs[i].AssociatedSystemType);
+                list.Add(typeArg.AssociatedSystemType);
             }
 
             Type[] systemTypeArgs = list.ToArray();
@@ -231,10 +230,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_AggregateType:
                     fBogus = AsAggregateType().getAggregate().computeCurrentBogusState();
-                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().Count; i++)
+                    if (!fBogus)
                     {
-                        fBogus |= AsAggregateType().GetTypeArgsAll()[i].computeCurrentBogusState();
+                        foreach (CType typeArg in AsAggregateType().GetTypeArgsAll().Items)
+                        {
+                            if (typeArg.computeCurrentBogusState())
+                            {
+                                fBogus = true;
+                                break;
+                            }
+                        }
                     }
+
                     break;
 
                 case TypeKind.TK_TypeParameterType:

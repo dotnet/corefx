@@ -199,10 +199,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType atsDer = pDerived.AsAggregateType();
             while (atsDer != null)
             {
-                TypeArray ifacesAll = atsDer.GetIfacesAll();
-                for (int i = 0; i < ifacesAll.Count; i++)
+                foreach (CType iface in atsDer.GetIfacesAll().Items)
                 {
-                    if (AreTypesEqualForConversion(ifacesAll[i], pBase))
+                    if (AreTypesEqualForConversion(iface, pBase))
                     {
                         return true;
                     }
@@ -499,10 +498,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             // * From T to any interface type I in T's effective interface set, and
             //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
+            foreach (CType iface in pSource.GetInterfaceBounds().Items)
             {
-                if (pInterfaces[i] == pDest)
+                if (iface == pDest)
                 {
                     return true;
                 }
@@ -528,10 +526,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType atsDer = pDerived.AsAggregateType();
             while (atsDer != null)
             {
-                TypeArray ifacesAll = atsDer.GetIfacesAll();
-                for (int i = 0; i < ifacesAll.Count; i++)
+                foreach (CType iface in atsDer.GetIfacesAll().Items)
                 {
-                    if (HasInterfaceConversion(ifacesAll[i].AsAggregateType(), pBase.AsAggregateType()))
+                    if (HasInterfaceConversion(iface.AsAggregateType(), pBase.AsAggregateType()))
                     {
                         return true;
                     }
@@ -658,10 +655,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             // * From T to any interface type I in T's effective interface set, and
             //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
+            foreach (CType iface in pSource.GetInterfaceBounds().Items)
             {
-                if (pInterfaces[i] == pDest)
+                if (iface == pDest)
                 {
                     return true;
                 }
@@ -819,9 +815,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 while (derived != null)
                 {
-                    for (int i = 0; i < derived.GetIfacesAll().Count; i++)
+                    foreach (AggregateType iface in derived.GetIfacesAll().Items)
                     {
-                        AggregateType iface = derived.GetIfacesAll()[i].AsAggregateType();
                         if (iface.getAggregate() == @base)
                             return true;
                     }

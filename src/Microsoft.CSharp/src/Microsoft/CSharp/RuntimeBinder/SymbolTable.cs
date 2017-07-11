@@ -326,11 +326,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType ctype = GetCTypeFromType(type);
             if (ctype.IsWindowsRuntimeType())
             {
-                TypeArray collectioniFaces = ctype.AsAggregateType().GetWinRTCollectionIfacesAll(_semanticChecker.GetSymbolLoader());
-
-                for (int i = 0; i < collectioniFaces.Count; i++)
+                foreach (CType collectionType in ctype.AsAggregateType().GetWinRTCollectionIfacesAll(_semanticChecker.GetSymbolLoader()).Items)
                 {
-                    CType collectionType = collectioniFaces[i];
                     Debug.Assert(collectionType.isInterfaceType());
 
                     // Insert into our list of Types.

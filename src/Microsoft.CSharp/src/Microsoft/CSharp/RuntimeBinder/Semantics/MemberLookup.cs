@@ -475,9 +475,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeStart.fDiffHidden = (_swtFirst != null);
             }
 
-            for (int i = 0; i < types.Count; i++)
+            foreach (AggregateType type in types.Items)
             {
-                AggregateType type = types[i].AsAggregateType();
                 Debug.Assert(type.isInterfaceType());
                 type.fAllHidden = false;
                 type.fDiffHidden = !!_swtFirst;
@@ -505,10 +504,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     fHideByName |= !_fMulti;
 
                     // Mark base interfaces appropriately.
-                    TypeArray ifaces = typeCur.GetIfacesAll();
-                    for (int i = 0; i < ifaces.Count; i++)
+                    foreach (AggregateType type in typeCur.GetIfacesAll().Items)
                     {
-                        AggregateType type = ifaces[i].AsAggregateType();
                         Debug.Assert(type.isInterfaceType());
                         if (fHideByName)
                             type.fAllHidden = true;
