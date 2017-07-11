@@ -133,12 +133,12 @@ namespace System.ComponentModel
                 return true;
             }
 
-            if (!(obj is AmbientValueAttribute other))
+            if (obj is AmbientValueAttribute other)
             {
-                return false;
+                return Value != null ? Value.Equals(other.Value) : other.Value == null;
             }
 
-            return Value != null ? Value.Equals(other.Value) : other.Value == null;
+            return false;
         }
 
         public override int GetHashCode() => base.GetHashCode();
