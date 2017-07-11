@@ -23,7 +23,10 @@ namespace System.Diagnostics
         /// <returns>An array of process infos, one per found process.</returns>
         public static ProcessInfo[] GetProcessInfos(string machineName)
         {
-            return NtProcessManager.GetProcessInfos(machineName, IsRemoteMachine(machineName));
+            if (!IsRemoteMachine(machineName))
+                throw new PlatformNotSupportedException(SR.GetProcessInfoNotSupported); // NtDll.NtQuerySystemInformation is not available in Uap
+
+            return NtProcessManager.GetProcessInfos(machineName, isRemoteMachine: true);
         }
     }
 

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
@@ -185,7 +186,14 @@ namespace System.Tests
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] 
         public void WorkingSet_Valid_Uap()
         {
-            Assert.Throws<InvalidOperationException>(() => Environment.WorkingSet);
+            try
+            {
+                var workingSet = Environment.WorkingSet;
+            }
+            catch(TargetInvocationException ex)
+            {
+                Assert.True(ex.InnerException is PlatformNotSupportedException);
+            }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
