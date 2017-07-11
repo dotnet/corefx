@@ -31,15 +31,19 @@ namespace System.Net.Http
         private readonly Stream _stream;
         private readonly TransportContext _transportContext;
         private readonly bool _usingProxy;
+        private readonly byte[] _idnHostAsciiBytes;
 
         private ValueStringBuilder _sb; // mutable struct, do not make this readonly
 
         private readonly byte[] _writeBuffer;
         private int _writeOffset;
 
+        private Task<int> _readAheadTask;
         private readonly byte[] _readBuffer;
         private int _readOffset;
         private int _readLength;
+
+        private bool _connectionClose;      // Connection: close was seen on last response
 
         private bool _disposed;
 
@@ -532,8 +536,9 @@ namespace System.Net.Http
         }
 
         public HttpConnection(
-            HttpConnectionPool pool, 
-            HttpConnectionKey key, 
+            HttpConnectionPool pool,
+            HttpConnectionKey key,
+            string requestIdnHost,
             Stream stream, 
             TransportContext transportContext, 
             bool usingProxy)
@@ -543,6 +548,10 @@ namespace System.Net.Http
             _stream = stream;
             _transportContext = transportContext;
             _usingProxy = usingProxy;
+            if (requestIdnHost != null)
+            {
+                _idnHostAsciiBytes = Encoding.ASCII.GetBytes(requestIdnHost);
+            }
 
             const int DefaultCapacity = 16;
             _sb = new ValueStringBuilder(DefaultCapacity);
@@ -553,6 +562,9 @@ namespace System.Net.Http
             _readBuffer = new byte[BufferSize];
             _readLength = 0;
             _readOffset = 0;
+
+            _connectionClose = false;
+            _disposed = false;
 
             _pool.AddConnection(this);
         }
@@ -569,6 +581,15 @@ namespace System.Net.Http
                 _disposed = true;
 
                 _stream.Dispose();
+            }
+        }
+
+        public bool ReadAheadCompleted
+        {
+            get
+            {
+                Debug.Assert(_readAheadTask != null, $"{nameof(_readAheadTask)} should have been initialized");
+                return _readAheadTask.IsCompleted;
             }
         }
 
@@ -599,7 +620,10 @@ namespace System.Net.Http
         {
             await WriteBytesAsync(s_hostKeyAndSeparator, cancellationToken).ConfigureAwait(false);
 
-            await WriteStringAsync(uri.IdnHost, cancellationToken).ConfigureAwait(false);
+            await (_idnHostAsciiBytes != null ?
+                WriteBytesAsync(_idnHostAsciiBytes, cancellationToken) :
+                WriteAsciiStringAsync(uri.IdnHost, cancellationToken)).ConfigureAwait(false);
+
             if (!uri.IsDefaultPort)
             {
                 await WriteByteAsync((byte)':', cancellationToken).ConfigureAwait(false);
@@ -865,6 +889,11 @@ namespace System.Net.Http
                     c = await ReadCharAsync(cancellationToken).ConfigureAwait(false);
                 }
 
+                if (response.Headers.ConnectionClose ?? false)
+                {
+                    _connectionClose = true;
+                }
+
                 // Instantiate responseStream
                 HttpContentReadStream responseStream =
                     request.Method == HttpMethod.Head || status == 204 || status == 304 ? new ContentLengthReadStream(this, 0) : // no response body
@@ -1075,7 +1104,22 @@ namespace System.Net.Http
             Debug.Assert(_readOffset == _readLength);
 
             _readOffset = 0;
-            Task<int> t = _stream.ReadAsync(_readBuffer, 0, BufferSize, cancellationToken);
+            Task<int> t;
+            if (_readAheadTask != null)
+            {
+                // When the connection is put back into the pool, a pre-emptive read is performed
+                // into the read buffer.  That read should not complete prior to us using the
+                // connection again, as that would mean the connection was either closed or had
+                // erroneous data sent on it by the server in response to no request from us.
+                // We need to consume that read prior to issuing another read request.
+                t = _readAheadTask;
+                _readAheadTask = null;
+            }
+            else
+            {
+                t = _stream.ReadAsync(_readBuffer, 0, BufferSize, cancellationToken);
+            }
+
             if (t.IsCompleted)
             {
                 _readLength = t.GetAwaiter().GetResult();
@@ -1185,6 +1229,7 @@ namespace System.Net.Http
 
             // Large read size, and no buffered data.
             // Do an unbuffered read directly against the underlying stream.
+            Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
             count = await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
             return count;
         }
@@ -1262,6 +1307,32 @@ namespace System.Net.Http
         {
             // Make sure there's nothing in the write buffer that should have been flushed
             Debug.Assert(_writeOffset == 0);
+
+            if (_connectionClose)
+            {
+                // Server told us it's closing the connection, so don't put this back in the pool.
+                Dispose();
+                return;
+            }
+
+            try
+            {
+                // When putting a connection back into the pool, we initiate a pre-emptive
+                // read on the stream.  When the connection is subsequently taken out of the
+                // pool, this can be used in place of the first read on the stream that would
+                // otherwise be done.  But by doing it now, we can check the status of the read
+                // at any point to understand if the connection has been closed or if errant data
+                // has been sent on the connection by the server, either of which would mean we
+                // should close the connection and not use it for subsequent requests.
+                Debug.Assert(_readAheadTask == null, $"Expected a previous initial read to already be consumed");
+                _readAheadTask = _stream.ReadAsync(_readBuffer, 0, _readBuffer.Length);
+            }
+            catch
+            {
+                // If reading throws, eat the error but don't pool the connection.
+                Dispose();
+                return;
+            }
 
             _pool.PutConnection(this);
         }
