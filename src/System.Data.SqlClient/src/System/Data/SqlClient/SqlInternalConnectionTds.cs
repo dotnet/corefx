@@ -425,7 +425,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal SqlInternalTransaction CurrentTransaction
+        internal override SqlInternalTransaction CurrentTransaction
         {
             get
             {
@@ -433,7 +433,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal SqlInternalTransaction AvailableInternalTransaction
+        internal override SqlInternalTransaction AvailableInternalTransaction
         {
             get
             {
@@ -441,7 +441,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal SqlInternalTransaction PendingTransaction
+        internal override SqlInternalTransaction PendingTransaction
         {
             get
             {
@@ -465,7 +465,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal bool IsLockedForBulkCopy
+        internal override bool IsLockedForBulkCopy
         {
             get
             {
@@ -473,7 +473,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected internal bool IsNonPoolableTransactionRoot
+        internal protected override bool IsNonPoolableTransactionRoot
         {
             get
             {
@@ -481,7 +481,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal bool IsKatmaiOrNewer
+        internal override bool IsKatmaiOrNewer
         {
             get
             {
@@ -521,7 +521,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected bool ReadyToPrepareTransaction
+        protected override bool ReadyToPrepareTransaction
         {
             get
             {
@@ -530,7 +530,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string ServerVersion
+        public override string ServerVersion
         {
             get
             {
@@ -552,7 +552,7 @@ namespace System.Data.SqlClient
         // GENERAL METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")] // copied from Triaged.cs
-        override protected void ChangeDatabaseInternal(string database)
+        protected override void ChangeDatabaseInternal(string database)
         {
             // Add brackets around database
             database = SqlConnection.FixupDatabaseTransactionName(database);
@@ -561,7 +561,7 @@ namespace System.Data.SqlClient
             _parser.Run(RunBehavior.UntilDone, null, null, null, _parser._physicalStateObj);
         }
 
-        override public void Dispose()
+        public override void Dispose()
         {
             try
             {
@@ -583,7 +583,7 @@ namespace System.Data.SqlClient
             base.Dispose();
         }
 
-        override internal void ValidateConnectionForExecute(SqlCommand command)
+        internal override void ValidateConnectionForExecute(SqlCommand command)
         {
             TdsParser parser = _parser;
             if ((parser == null) || (parser.State == TdsParserState.Broken) || (parser.State == TdsParserState.Closed))
@@ -695,7 +695,7 @@ namespace System.Data.SqlClient
         // POOLING METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        override protected void Activate(SysTx.Transaction transaction)
+        protected override void Activate(SysTx.Transaction transaction)
         {
             // When we're required to automatically enlist in transactions and
             // there is one we enlist in it. On the other hand, if there isn't a
@@ -718,7 +718,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected void InternalDeactivate()
+        protected override void InternalDeactivate()
         {
             // When we're deactivated, the user must have called End on all
             // the async commands, or we don't know that we're in a state that
@@ -789,7 +789,7 @@ namespace System.Data.SqlClient
         // LOCAL TRANSACTION METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        override internal void DisconnectTransaction(SqlInternalTransaction internalTransaction)
+        internal override void DisconnectTransaction(SqlInternalTransaction internalTransaction)
         {
             TdsParser parser = Parser;
 
@@ -804,7 +804,7 @@ namespace System.Data.SqlClient
             ExecuteTransaction(transactionRequest, name, iso, null, false);
         }
 
-        override internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest)
+        internal override void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest)
         {
             if (IsConnectionDoomed)
             {  // doomed means we can't do anything else...
@@ -979,19 +979,19 @@ namespace System.Data.SqlClient
         // DISTRIBUTED TRANSACTION METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        override internal void DelegatedTransactionEnded()
+        internal override void DelegatedTransactionEnded()
         {
             base.DelegatedTransactionEnded();
         }
 
-        override protected byte[] GetDTCAddress()
+        protected override byte[] GetDTCAddress()
         {
             byte[] dtcAddress = _parser.GetDTCAddress(ConnectionOptions.ConnectTimeout, _parser.GetSession(this));
             Debug.Assert(null != dtcAddress, "null dtcAddress?");
             return dtcAddress;
         }
 
-        override protected void PropagateTransactionCookie(byte[] cookie)
+        protected override void PropagateTransactionCookie(byte[] cookie)
         {
             _parser.PropagateDistributedTransaction(cookie, ConnectionOptions.ConnectTimeout, _parser._physicalStateObj);
         }
