@@ -379,7 +379,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pt != PredefinedType.PT_VOID);  // use getVoidType()
             if (WarnIfNotFound)
             {
-                return GetSymbolLoader().GetOptPredefTypeErr(pt, true);
+                return GetSymbolLoader().GetOptPredefTypeErr(pt);
             }
             else
             {

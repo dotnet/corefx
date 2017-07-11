@@ -137,7 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ats;
         }
 
-        public AggregateType GetOptPredefTypeErr(PredefinedType pt, bool fEnsureState)
+        public AggregateType GetOptPredefTypeErr(PredefinedType pt)
         {
             AggregateSymbol agg = GetTypeManager().GetOptPredefAgg(pt);
             if (agg == null)
