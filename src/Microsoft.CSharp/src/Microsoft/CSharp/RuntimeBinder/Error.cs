@@ -58,11 +58,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new ArgumentException(SR.BindImplicitConversionRequireOneArgument);
         }
 
-        internal static Exception BindExplicitConversionRequireOneArgument()
-        {
-            return new ArgumentException(SR.BindExplicitConversionRequireOneArgument);
-        }
-
         internal static Exception BindBinaryAssignmentFailedNullReference()
         {
             return new RuntimeBinderException(SR.BindBinaryAssignmentFailedNullReference);

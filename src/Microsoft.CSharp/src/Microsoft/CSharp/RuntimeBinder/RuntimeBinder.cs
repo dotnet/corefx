@@ -1505,10 +1505,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         internal Expr BindExplicitConversion(ArgumentObject[] arguments, Type returnType, LocalVariableSymbol[] locals)
         {
-            if (arguments.Length != 1)
-            {
-                throw Error.BindExplicitConversionRequireOneArgument();
-            }
+            Debug.Assert(arguments.Length == 1);
 
             // Load the conversions on the target.
             _symbolTable.AddConversionsForType(returnType);

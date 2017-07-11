@@ -42,10 +42,6 @@
           <source>Implicit conversion takes exactly one argument</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Per la conversione implicita viene accettato un solo argomento</target>
         </trans-unit>
-        <trans-unit id="BindExplicitConversionRequireOneArgument" translate="yes" xml:space="preserve">
-          <source>Explicit conversion takes exactly one argument</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Per la conversione esplicita viene accettato un solo argomento</target>
-        </trans-unit>
         <trans-unit id="BindBinaryAssignmentRequireTwoArguments" translate="yes" xml:space="preserve">
           <source>Binary operators cannot be invoked with one argument</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile richiamare operatori binari con un solo argomento</target>
