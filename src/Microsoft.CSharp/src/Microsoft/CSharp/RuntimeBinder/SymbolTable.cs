@@ -949,8 +949,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 ns = _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
             }
-            ns.AddAid(KAID.kaidGlobal);
-            ns.AddAid(KAID.kaidThisAssembly);
 
             return ns;
         }

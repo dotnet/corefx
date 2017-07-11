@@ -13,8 +13,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class BSYMMGR
     {
-        private HashSet<KAID> bsetGlobalAssemblies; // Assemblies in the global alias.
-
         // Special nullable members.
         public PropertySymbol propNubValue;
         public MethodSymbol methNubCtor;
@@ -32,18 +30,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static readonly TypeArray s_taEmpty = new TypeArray(Array.Empty<CType>());
 
-        public BSYMMGR(NameManager nameMgr, TypeManager typeManager)
+        public BSYMMGR(NameManager nameMgr)
         {
             this.m_nameTable = nameMgr;
             this.tableGlobal = new SYMTBL();
             _symFactory = new SymFactory(this.tableGlobal);
             _miscSymFactory = new MiscSymFactory(this.tableGlobal);
 
-            this.bsetGlobalAssemblies = new HashSet<KAID>();
-            this.bsetGlobalAssemblies.Add(KAID.kaidThisAssembly);
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
             _rootNS = _symFactory.CreateNamespace(m_nameTable.Lookup(""), null);
-            GetNsAid(_rootNS, KAID.kaidGlobal);
+            GetNsAid(_rootNS);
         }
 
         public void Init()
@@ -87,9 +83,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return s_taEmpty;
         }
 
-        public AssemblyQualifiedNamespaceSymbol GetRootNsAid(KAID aid)
+        public AssemblyQualifiedNamespaceSymbol GetRootNsAid()
         {
-            return GetNsAid(_rootNS, aid);
+            return GetNsAid(_rootNS);
         }
 
         public NamespaceSymbol GetRootNS()
@@ -255,16 +251,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns, KAID aid)
+        private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns)
         {
-            Name name = GetNameFromPtrs(aid, 0);
+            Name name = GetNameFromPtrs(0, 0);
             Debug.Assert(name != null);
 
             AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
             if (nsa == null)
             {
                 // Create a new one.
-                nsa = _symFactory.CreateNamespaceAid(name, ns, aid);
+                nsa = _symFactory.CreateNamespaceAid(name, ns);
             }
 
             Debug.Assert(nsa.GetNS() == ns);

@@ -340,7 +340,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParentType == null && pParentNS == null)
             {
                 // Use the root namespace as the parent.
-                pParentNS = _BSymmgr.GetRootNsAid(KAID.kaidGlobal);
+                pParentNS = _BSymmgr.GetRootNsAid();
             }
             if (typeArgs == null)
             {

@@ -114,18 +114,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             get { return parent.AsNamespaceOrAggregateSymbol(); }
         }
 
-        public bool InAlias(KAID aid)
-        {
-            //Debug.Assert(DeclFirst() == null || DeclFirst().GetAssemblyID() == infile.GetAssemblyID());
-            Debug.Assert(0 <= aid);
-            return (aid == GetModuleID());
-        }
-
-        private KAID GetModuleID()
-        {
-            return 0;
-        }
-
         public bool isNested()
         {
             return parent != null && parent.IsAggregateSymbol();
