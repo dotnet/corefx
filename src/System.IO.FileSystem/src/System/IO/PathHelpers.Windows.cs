@@ -78,17 +78,13 @@ namespace System.IO
         internal static string NormalizeSearchPattern(string searchPattern)
         {
             Debug.Assert(searchPattern != null);
-            string tempSearchPattern = searchPattern;
-
-            // Make this corner case more useful, like dir
-            if (tempSearchPattern.Equals("."))
-            {
-                tempSearchPattern = "*";
-            }
-
-            CheckSearchPattern(tempSearchPattern);
-            return tempSearchPattern;
-        }
+            
+			// Make this corner case more useful, like dir
+			searchPattern = searchPattern.Equals(".") ? "*" : searchPattern;
+			
+            CheckSearchPattern(searchPattern);
+            return searchPattern;
+        }			
 
         internal static string GetFullSearchString(string fullPath, string searchPattern)
         {
