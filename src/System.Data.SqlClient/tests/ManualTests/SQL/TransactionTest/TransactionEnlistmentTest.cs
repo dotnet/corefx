@@ -48,6 +48,42 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
+        [CheckConnStrSetupFact]
+        public static void TestAmbientTransaction_TxScopeNonComplete()
+        {
+            const int inputCol1 = 2;
+            const string inputCol2 = "two";
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+            string connectionString = builder.ConnectionString;
+            string testTableName = GenerateTableName();
+
+            RunNonQuery(connectionString, $"create table {testTableName} (col1 int, col2 text)");
+
+            try
+            {
+                using (TransactionScope txScope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.MaxValue))
+                {
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+                        using (SqlCommand command = connection.CreateCommand())
+                        {
+                            command.CommandText = $"INSERT INTO {testTableName} VALUES ({inputCol1}, '{inputCol2}')";
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                DataTable result = RunQuery(connectionString, $"select col2 from {testTableName} where col1 = {inputCol1}");
+                Assert.True(result.Rows.Count == 0);
+            }
+            finally
+            {
+                RunNonQuery(connectionString, $"drop table {testTableName}");
+            }
+        }
+
         private static void RunNonQuery(string connectionString, string sql)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
