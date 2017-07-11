@@ -16,6 +16,8 @@ namespace System.Net.WebSockets.Client.Tests
         {
             if (PlatformDetection.IsNetNative)
             {
+                // .NET Native does not include the full exception message. Instead, the exception text
+                // consists of the 'resourceName' along with a link to follow for more information.
                 return string.Concat(resourceName, ". For more information, visit http://go.microsoft.com/fwlink/?LinkId=623485");
             }
 
