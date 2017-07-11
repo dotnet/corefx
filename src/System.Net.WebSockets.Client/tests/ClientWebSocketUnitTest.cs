@@ -57,7 +57,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndCloseOutput_ThrowsInvalidOperationExceptionWithMessage()
@@ -90,7 +89,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndReceive_ThrowsInvalidOperationExceptionWithMessage()
@@ -126,7 +124,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndSend_ThrowsInvalidOperationExceptionWithMessage()
@@ -184,7 +181,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_DisposeAndCloseOutput_ThrowsObjectDisposedExceptionWithMessage()
@@ -202,7 +198,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void ReceiveAsync_CreateAndDisposeAndReceive_ThrowsObjectDisposedExceptionWithMessage()
@@ -223,7 +218,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ActiveIssue(20132, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void SendAsync_CreateAndDisposeAndSend_ThrowsObjectDisposedExceptionWithMessage()

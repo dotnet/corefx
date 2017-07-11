@@ -14,6 +14,11 @@ namespace System.Net.WebSockets.Client.Tests
     {
         public static string GetExceptionMessage(string resourceName, params object[] parameters)
         {
+            if (PlatformDetection.IsNetNative)
+            {
+                return string.Concat(resourceName, ". For more information, visit http://go.microsoft.com/fwlink/?LinkId=623485");
+            }
+
             Type srType = typeof(SR);
             PropertyInfo property = srType.GetRuntimeProperties().Single(p => p.Name == resourceName);
 
