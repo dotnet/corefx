@@ -15,12 +15,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private SymbolTable _runtimeBinderSymbolTable;
         private readonly BSYMMGR _pBSymmgr;
         private AggregateSymbol[] _predefSyms;    // array of predefined symbol types.
-        private KAID _aidMsCorLib;        // The assembly ID for all predefined types.
 
         public PredefinedTypes(BSYMMGR pBSymmgr)
         {
             _pBSymmgr = pBSymmgr;
-            _aidMsCorLib = KAID.kaidNil;
             _runtimeBinderSymbolTable = null;
         }
 
@@ -52,16 +50,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _runtimeBinderSymbolTable = symtable;
             Debug.Assert(_pBSymmgr != null);
             Debug.Assert(_predefSyms == null);
-
-            if (_aidMsCorLib == KAID.kaidNil)
-            {
-                // If we haven't found mscorlib yet, first look for System.Object. Then use its assembly as
-                // the location for all other pre-defined types.
-                AggregateSymbol aggObj = FindPredefinedType(errorContext, PredefinedTypeFacts.GetName(PredefinedType.PT_OBJECT), KAID.kaidGlobal, AggKindEnum.Class, 0, true);
-                if (aggObj == null)
-                    return false;
-                _aidMsCorLib = aggObj.GetAssemblyID();
-            }
 
             _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
             Debug.Assert(_predefSyms != null);

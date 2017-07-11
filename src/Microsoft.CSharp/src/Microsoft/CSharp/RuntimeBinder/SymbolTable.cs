@@ -31,7 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private readonly CSemanticChecker _semanticChecker;
 
         private NamespaceSymbol _rootNamespace;
-        private readonly InputFile _infile;
 
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -71,9 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             NameManager nameManager,
             TypeManager typeManager,
             BSYMMGR bsymmgr,
-            CSemanticChecker semanticChecker,
-
-            InputFile infile)
+            CSemanticChecker semanticChecker)
         {
             _symbolTable = symTable;
             _symFactory = symFactory;
@@ -81,8 +78,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
             _semanticChecker = semanticChecker;
-
-            _infile = infile;
 
             ClearCache();
         }
@@ -956,7 +951,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             ns.AddAid(KAID.kaidGlobal);
             ns.AddAid(KAID.kaidThisAssembly);
-            ns.AddAid(_infile.GetAssemblyID());
 
             return ns;
         }
@@ -999,7 +993,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             NamespaceOrAggregateSymbol parent,
             Type type)
         {
-            AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _infile, _typeManager);
+            AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _typeManager);
             agg.AssociatedSystemType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
             agg.AssociatedAssembly = type.Assembly;
 

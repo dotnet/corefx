@@ -11,18 +11,6 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal struct AidContainer
-    {
-        internal static readonly AidContainer NullAidContainer = default(AidContainer);
-
-        private object _value;
-
-        public AidContainer(FileRecord file)
-        {
-            _value = file;
-        }
-    }
-
     internal sealed class BSYMMGR
     {
         private HashSet<KAID> bsetGlobalAssemblies; // Assemblies in the global alias.
@@ -35,10 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly MiscSymFactory _miscSymFactory;
 
         private readonly NamespaceSymbol _rootNS;         // The "root" (unnamed) namespace.
-
-        // Map from aids to INFILESYMs and EXTERNALIASSYMs
-        private List<AidContainer> ssetAssembly;
-        // Map from aids to MODULESYMs and OUTFILESYMs
 
         private NameManager m_nameTable;
         private SYMTBL tableGlobal;
@@ -55,12 +39,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _symFactory = new SymFactory(this.tableGlobal);
             _miscSymFactory = new MiscSymFactory(this.tableGlobal);
 
-            this.ssetAssembly = new List<AidContainer>();
-
-            InputFile infileUnres = new InputFile();
-            infileUnres.SetAssemblyID(KAID.kaidUnresolved);
-
-            ssetAssembly.Add(new AidContainer(infileUnres));
             this.bsetGlobalAssemblies = new HashSet<KAID>();
             this.bsetGlobalAssemblies.Add(KAID.kaidThisAssembly);
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
@@ -117,12 +95,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public NamespaceSymbol GetRootNS()
         {
             return _rootNS;
-        }
-
-        public KAID AidAlloc(InputFile sym)
-        {
-            ssetAssembly.Add(new AidContainer(sym));
-            return (KAID)(ssetAssembly.Count - 1 + KAID.kaidUnresolved);
         }
 
         public BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
