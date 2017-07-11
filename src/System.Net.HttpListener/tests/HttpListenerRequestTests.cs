@@ -241,7 +241,6 @@ namespace System.Net.Tests
         [InlineData("Unknown-Header: Test", false)]
         public async Task IsWebSocketRequest_GetProperty_ReturnsExpected(string webSocketString, bool expected)
         {
-            // Skip on Windows 7 or UAP platforms. WebSocket support is not present.
             if (PlatformDetection.IsWindows7)
             {
                 return;
