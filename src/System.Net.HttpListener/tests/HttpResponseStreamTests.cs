@@ -552,6 +552,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(22110, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public async Task EndWrite_InvalidAsyncResult_ThrowsArgumentException()
         {
