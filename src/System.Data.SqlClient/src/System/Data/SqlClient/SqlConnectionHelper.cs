@@ -10,7 +10,7 @@ using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.Threading;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 
 namespace System.Data.SqlClient
@@ -155,7 +155,7 @@ namespace System.Data.SqlClient
 
         partial void RepairInnerConnection();
 
-        public override void EnlistTransaction(SysTx.Transaction transaction)
+        public override void EnlistTransaction(Transaction transaction)
         {
             // If we're currently enlisted in a transaction and we were called
             // on the EnlistTransaction method (Whidbey) we're not allowed to
@@ -166,7 +166,7 @@ namespace System.Data.SqlClient
             // NOTE: since transaction enlistment involves round trips to the
             // server, we don't want to lock here, we'll handle the race conditions
             // elsewhere.
-            SysTx.Transaction enlistedTransaction = innerConnection.EnlistedTransaction;
+            Transaction enlistedTransaction = innerConnection.EnlistedTransaction;
             if (enlistedTransaction != null)
             {
                 // Allow calling enlist if already enlisted (no-op)
@@ -176,7 +176,7 @@ namespace System.Data.SqlClient
                 }
 
                 // Allow enlisting in a different transaction if the enlisted transaction has completed.
-                if (enlistedTransaction.TransactionInformation.Status == SysTx.TransactionStatus.Active)
+                if (enlistedTransaction.TransactionInformation.Status == TransactionStatus.Active)
                 {
                     throw ADP.TransactionPresent();
                 }

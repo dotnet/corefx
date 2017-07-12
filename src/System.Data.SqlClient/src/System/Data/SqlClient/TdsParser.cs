@@ -1853,7 +1853,6 @@ namespace System.Data.SqlClient
                                         case TdsEnums.ENV_DEFECTDTC:
                                         case TdsEnums.ENV_TRANSACTIONENDED:
                                         case TdsEnums.ENV_COMMITTRAN:
-                                            // SQLHOT 483
                                             //  Must clear the retain id if the server-side transaction ends by anything other
                                             //  than rollback.
                                             _retainedTransactionId = SqlInternalTransaction.NullTransactionId;

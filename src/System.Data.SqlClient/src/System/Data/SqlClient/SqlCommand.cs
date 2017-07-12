@@ -188,8 +188,6 @@ namespace System.Data.SqlClient
 
         private SqlNotificationRequest _notification;
 
-        private bool _notificationAutoEnlist = true;            // Notifications auto enlistment is turned on by default
-
         // transaction support
         private SqlTransaction _transaction;
 
@@ -333,18 +331,6 @@ namespace System.Data.SqlClient
             {
                 _sqlDep = null;
                 _notification = value;
-            }
-        }
-
-        public bool NotificationAutoEnlist
-        {
-            get
-            {
-                return _notificationAutoEnlist;
-            }
-            set
-            {
-                _notificationAutoEnlist = value;
             }
         }
 
@@ -1087,8 +1073,7 @@ namespace System.Data.SqlClient
                             bool dataReady;
                             Debug.Assert(_stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
                             bool result = _stateObj.Parser.TryRun(RunBehavior.UntilDone, this, null, null, _stateObj, out dataReady);
-                            if (!result)
-                            { throw SQL.SynchronousCallMayNotPend(); }
+                            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
                         }
                         finally
                         {
@@ -2367,8 +2352,7 @@ namespace System.Data.SqlClient
                     bool dataReady;
                     Debug.Assert(_stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
                     bool result = _stateObj.Parser.TryRun(RunBehavior.UntilDone, this, null, null, _stateObj, out dataReady);
-                    if (!result)
-                    { throw SQL.SynchronousCallMayNotPend(); }
+                    if (!result) { throw SQL.SynchronousCallMayNotPend(); }
                 }
             }
             catch (Exception e)
@@ -2589,8 +2573,7 @@ namespace System.Data.SqlClient
                         bool dataReady;
                         Debug.Assert(_stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
                         bool result = _stateObj.Parser.TryRun(RunBehavior.UntilDone, this, null, null, _stateObj, out dataReady);
-                        if (!result)
-                        { throw SQL.SynchronousCallMayNotPend(); }
+                        if (!result) { throw SQL.SynchronousCallMayNotPend(); }
                         // and turn OFF when the ds exhausts the stream on Close()
                         optionSettings = GetResetOptionsString(cmdBehavior);
                     }
@@ -2694,8 +2677,7 @@ namespace System.Data.SqlClient
                     bool dataReady;
                     Debug.Assert(_stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
                     bool result = _stateObj.Parser.TryRun(RunBehavior.UntilDone, this, ds, null, _stateObj, out dataReady);
-                    if (!result)
-                    { throw SQL.SynchronousCallMayNotPend(); }
+                    if (!result) { throw SQL.SynchronousCallMayNotPend(); }
                 }
                 catch (Exception e)
                 {

@@ -9,7 +9,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 
 namespace System.Data.ProviderBase
@@ -29,7 +29,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        protected override void Activate(SysTx.Transaction transaction)
+        protected override void Activate(Transaction transaction)
         {
             throw ADP.ClosedConnectionError();
         }
@@ -54,7 +54,7 @@ namespace System.Data.ProviderBase
             throw ADP.ClosedConnectionError();
         }
 
-        public override void EnlistTransaction(SysTx.Transaction transaction)
+        public override void EnlistTransaction(Transaction transaction)
         {
             throw ADP.ClosedConnectionError();
         }

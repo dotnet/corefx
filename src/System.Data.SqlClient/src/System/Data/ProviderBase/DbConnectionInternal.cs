@@ -521,7 +521,6 @@ namespace System.Data.ProviderBase
 
 #if DEBUG
             int activateCount = Interlocked.Decrement(ref _activateCount);
-            //Debug.Assert(0 == activateCount, "activated multiple times?");
 #endif // DEBUG
 
 

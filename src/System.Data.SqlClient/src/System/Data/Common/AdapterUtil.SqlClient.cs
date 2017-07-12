@@ -312,7 +312,7 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSequentialColumnAccess, badCol.ToString(CultureInfo.InvariantCulture), currCol.ToString(CultureInfo.InvariantCulture)));
         }
 
-        static internal Exception InvalidXmlInvalidValue(string collectionName, string columnName)
+        internal static Exception InvalidXmlInvalidValue(string collectionName, string columnName)
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
@@ -777,7 +777,7 @@ namespace System.Data.Common
             return false;
         }
 
-        static internal ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
+        internal static ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
         {
 #if DEBUG
             switch (value)
@@ -909,7 +909,7 @@ namespace System.Data.Common
         //
         // DbProviderException
         //
-        static internal InvalidOperationException TransactionCompletedButNotDisposed()
+        internal static InvalidOperationException TransactionCompletedButNotDisposed()
         {
             return Provider(SR.GetString(SR.ADP_TransactionCompletedButNotDisposed));
         }
