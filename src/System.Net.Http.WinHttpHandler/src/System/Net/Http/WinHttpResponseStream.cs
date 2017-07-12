@@ -314,11 +314,8 @@ namespace System.Net.Http
             {
                 if (_state.AsyncReadInProgress)
                 {
-                    Debug.Assert(_requestHandle != null);
-                    Debug.Assert(!_requestHandle.IsInvalid);
-                    
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: before dispose");
-                    _requestHandle.Dispose();
+                    _requestHandle?.Dispose();
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: after dispose");
                 }
             }
