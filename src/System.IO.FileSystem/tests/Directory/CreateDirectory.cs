@@ -243,13 +243,13 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax throws PathTooLongException
-        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
+        [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax throws DirectoryNotFoundException
+        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsDirectoryNotFoundException()
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
             Assert.All(paths, (path) =>
             {
-                Assert.Throws<PathTooLongException>(() => Create(path));
+                Assert.Throws<DirectoryNotFoundException>(() => Create(path));
             });
         }
 

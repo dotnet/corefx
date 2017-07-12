@@ -607,14 +607,14 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Long path segment in search pattern throws PathTooLongException
+        [PlatformSpecific(TestPlatforms.Windows)]  // Long path segment in search pattern throws DirectoryNotFoundException
         public void WindowsSearchPatternLongSegment()
         {
-            // Create a path segment longer than the normal max of 255
+            // Create a path segment longer than the extended max
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            string longName = new string('k', 257);
+            string longName = new string('k', IOInputs.MaxLongPath);
 
-            Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(testDir.FullName, longName));
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
