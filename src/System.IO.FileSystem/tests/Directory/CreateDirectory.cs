@@ -248,8 +248,22 @@ namespace System.IO.Tests
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
 
-            // Long directory path with extended syntax throws PathTooLongException.
-            Assert.All(paths, path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
+            // Long directory path with extended syntax throws PathTooLongException on Desktop.
+            // Everywhere else, it may be either PathTooLongException or DirectoryNotFoundException
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.All(paths, path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
+            }
+            else
+            {
+                Assert.All(paths,
+                    path =>
+                    {
+                        AssertExtensions
+                            .ThrowsAny<PathTooLongException, DirectoryNotFoundException>(
+                                () => Create(path));
+                    });
+            }
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
