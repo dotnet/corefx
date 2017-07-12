@@ -10,7 +10,7 @@ internal static partial class Interop
 {
     internal static partial class Kernel32
     {
-		internal const uint CTMF_INCLUDE_APPCONTAINER = 0x00000001;
+        internal const uint CTMF_INCLUDE_APPCONTAINER = 0x00000001;
 
         [DllImport(Interop.Libraries.Kernel32, SetLastError = true)]
         internal static extern bool CheckTokenMembershipEx(SafeAccessTokenHandle TokenHandle, byte[] SidToCheck, uint Flags, ref bool IsMember);

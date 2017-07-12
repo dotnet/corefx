@@ -8,12 +8,6 @@
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'netfx'">None</ResourcesSourceOutputDirectory>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_Principal</GeneratePlatformNotSupportedAssemblyMessage>
-    <!-- 
-      TODO: #22128
-      Getting error BCL0015: kernel32.dll!CheckTokenMembershipEx is not supported on one\more targeted platforms.Consider using advapi32.dll!CheckTokenMembershipEx instead which doesn't exist.
-      Using advapi32.dll!CheckTokenMembershipEx will give out a runtime error: System.EntryPointNotFoundException : Unable to find an entry point named 'CheckTokenMembershipEx' in DLL 'advapi32.dll'.
-    -->
-    <UWPCompatible>false</UWPCompatible>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
     <DefineConstants>$(DefineConstants);uap</DefineConstants>
