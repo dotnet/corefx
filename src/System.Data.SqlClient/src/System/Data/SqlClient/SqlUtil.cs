@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -212,7 +212,7 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.GT_Disabled));
         }
-        internal static Exception UnknownSysTxIsolationLevel(SysTx.IsolationLevel isolationLevel)
+        internal static Exception UnknownSysTxIsolationLevel(Transactions.IsolationLevel isolationLevel)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_UnknownSysTxIsolationLevel, isolationLevel.ToString()));
         }
@@ -484,9 +484,9 @@ namespace System.Data.SqlClient
         //
         // SQL.SqlDelegatedTransaction
         //
-        internal static SysTx.TransactionPromotionException PromotionFailed(Exception inner)
+        internal static TransactionPromotionException PromotionFailed(Exception inner)
         {
-            SysTx.TransactionPromotionException e = new SysTx.TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
+            TransactionPromotionException e = new TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
             ADP.TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -1093,13 +1093,13 @@ namespace System.Data.SqlClient
     static internal class SysTxForGlobalTransactions
     {
         private static readonly Lazy<MethodInfo> _enlistPromotableSinglePhase = new Lazy<MethodInfo>(() =>
-            typeof(SysTx.Transaction).GetMethod("EnlistPromotableSinglePhase", new Type[] { typeof(SysTx.IPromotableSinglePhaseNotification), typeof(Guid) }));
+            typeof(Transaction).GetMethod("EnlistPromotableSinglePhase", new Type[] { typeof(IPromotableSinglePhaseNotification), typeof(Guid) }));
 
         private static readonly Lazy<MethodInfo> _setDistributedTransactionIdentifier = new Lazy<MethodInfo>(() =>
-            typeof(SysTx.Transaction).GetMethod("SetDistributedTransactionIdentifier", new Type[] { typeof(SysTx.IPromotableSinglePhaseNotification), typeof(Guid) }));
+            typeof(Transaction).GetMethod("SetDistributedTransactionIdentifier", new Type[] { typeof(IPromotableSinglePhaseNotification), typeof(Guid) }));
 
         private static readonly Lazy<MethodInfo> _getPromotedToken = new Lazy<MethodInfo>(() =>
-            typeof(SysTx.Transaction).GetMethod("GetPromotedToken"));
+            typeof(Transaction).GetMethod("GetPromotedToken"));
 
         /// <summary>
         /// Enlists the given IPromotableSinglePhaseNotification and Non-MSDTC Promoter type into a transaction

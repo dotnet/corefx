@@ -11,7 +11,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 
 namespace System.Data.ProviderBase
@@ -37,13 +37,13 @@ namespace System.Data.ProviderBase
 
         private DateTime _createTime;               // when the connection was created.
 
-        private SysTx.Transaction _enlistedTransaction;      // [usage must be thread-safe] the transaction that we're enlisted in, either manually or automatically
+        private Transaction _enlistedTransaction;      // [usage must be thread-safe] the transaction that we're enlisted in, either manually or automatically
 
         // _enlistedTransaction is a clone, so that transaction information can be queried even if the original transaction object is disposed.
         // However, there are times when we need to know if the original transaction object was disposed, so we keep a reference to it here.
         // This field should only be assigned a value at the same time _enlistedTransaction is updated.
         // Also, this reference should not be disposed, since we aren't taking ownership of it.
-        private SysTx.Transaction _enlistedTransactionOriginal;
+        private Transaction _enlistedTransactionOriginal;
 
 #if DEBUG
         private int _activateCount;            // debug only counter to verify activate/deactivates are in sync.
@@ -78,7 +78,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        protected internal SysTx.Transaction EnlistedTransaction
+        protected internal Transaction EnlistedTransaction
         {
             get
             {
@@ -86,7 +86,7 @@ namespace System.Data.ProviderBase
             }
             set
             {
-                SysTx.Transaction currentEnlistedTransaction = _enlistedTransaction;
+                Transaction currentEnlistedTransaction = _enlistedTransaction;
                 if (((null == currentEnlistedTransaction) && (null != value))
                     || ((null != currentEnlistedTransaction) && !currentEnlistedTransaction.Equals(value)))
                 {  // WebData 20000024
@@ -99,8 +99,8 @@ namespace System.Data.ProviderBase
                     // SQLBUDT #230558 we need to use a clone of the transaction
                     // when we store it, or we'll end up keeping it past the
                     // duration of the using block of the TransactionScope
-                    SysTx.Transaction valueClone = null;
-                    SysTx.Transaction previousTransactionClone = null;
+                    Transaction valueClone = null;
+                    Transaction previousTransactionClone = null;
                     try
                     {
                         if (null != value)
@@ -182,7 +182,7 @@ namespace System.Data.ProviderBase
                 {
                     bool disposed;
 
-                    SysTx.Transaction currentEnlistedTransactionOriginal = _enlistedTransactionOriginal;
+                    Transaction currentEnlistedTransactionOriginal = _enlistedTransactionOriginal;
                     if (currentEnlistedTransactionOriginal != null)
                     {
                         disposed = currentEnlistedTransactionOriginal.TransactionInformation == null;
@@ -351,9 +351,9 @@ namespace System.Data.ProviderBase
             }
         }
 
-        abstract protected void Activate(SysTx.Transaction transaction);
+        abstract protected void Activate(Transaction transaction);
 
-        internal void ActivateConnection(SysTx.Transaction transaction)
+        internal void ActivateConnection(Transaction transaction)
         {
             // Internal method called from the connection pooler so we don't expose
             // the Activate method publicly.
@@ -598,7 +598,7 @@ namespace System.Data.ProviderBase
             // Dispose of the _enlistedTransaction since it is a clone
             // of the original reference.
             // VSDD 780271 - _enlistedTransaction can be changed by another thread (TX end event)
-            SysTx.Transaction enlistedTransaction = Interlocked.Exchange(ref _enlistedTransaction, null);
+            Transaction enlistedTransaction = Interlocked.Exchange(ref _enlistedTransaction, null);
             if (enlistedTransaction != null)
             {
                 enlistedTransaction.Dispose();
@@ -616,7 +616,7 @@ namespace System.Data.ProviderBase
             _connectionIsDoomed = true;
         }
 
-        abstract public void EnlistTransaction(SysTx.Transaction transaction);
+        abstract public void EnlistTransaction(Transaction transaction);
 
         protected internal virtual DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
         {
@@ -789,21 +789,21 @@ namespace System.Data.ProviderBase
         // Cleanup connection's transaction-specific structures (currently used by Delegated transaction).
         //  This is a separate method because cleanup can be triggered in multiple ways for a delegated
         //  transaction.
-        virtual protected void CleanupTransactionOnCompletion(SysTx.Transaction transaction)
+        virtual protected void CleanupTransactionOnCompletion(Transaction transaction)
         {
         }
 
         internal void DetachCurrentTransactionIfEnded()
         {
-            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
+            Transaction enlistedTransaction = EnlistedTransaction;
             if (enlistedTransaction != null)
             {
                 bool transactionIsDead;
                 try
                 {
-                    transactionIsDead = (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status);
+                    transactionIsDead = (TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status);
                 }
-                catch (SysTx.TransactionException)
+                catch (TransactionException)
                 {
                     // If the transaction is being processed (i.e. is part way through a rollback\commit\etc then TransactionInformation.Status will throw an exception)
                     transactionIsDead = true;
@@ -816,7 +816,7 @@ namespace System.Data.ProviderBase
         }
 
         // Detach transaction from connection.
-        internal void DetachTransaction(SysTx.Transaction transaction, bool isExplicitlyReleasing)
+        internal void DetachTransaction(Transaction transaction, bool isExplicitlyReleasing)
         {
             // potentially a multi-threaded event, so lock the connection to make sure we don't enlist in a new
             // transaction between compare and assignment. No need to short circuit outside of lock, since failed comparisons should
@@ -827,7 +827,7 @@ namespace System.Data.ProviderBase
                 DbConnection owner = (DbConnection)Owner;
                 if (isExplicitlyReleasing || UnbindOnTransactionCompletion || null == owner)
                 {
-                    SysTx.Transaction currentEnlistedTransaction = _enlistedTransaction;
+                    Transaction currentEnlistedTransaction = _enlistedTransaction;
                     if (currentEnlistedTransaction != null && transaction.Equals(currentEnlistedTransaction))
                     {
                         EnlistedTransaction = null;
@@ -842,7 +842,7 @@ namespace System.Data.ProviderBase
         }
 
         // Handle transaction detach, pool cleanup and other post-transaction cleanup tasks associated with
-        internal void CleanupConnectionOnTransactionCompletion(SysTx.Transaction transaction)
+        internal void CleanupConnectionOnTransactionCompletion(Transaction transaction)
         {
             DetachTransaction(transaction, false);
 
@@ -853,9 +853,9 @@ namespace System.Data.ProviderBase
             }
         }
 
-        void TransactionCompletedEvent(object sender, SysTx.TransactionEventArgs e)
+        void TransactionCompletedEvent(object sender, TransactionEventArgs e)
         {
-            SysTx.Transaction transaction = e.Transaction;
+            Transaction transaction = e.Transaction;
 
             CleanupTransactionOnCompletion(transaction);
 
@@ -864,9 +864,9 @@ namespace System.Data.ProviderBase
 
         // TODO: Review whether we need the unmanaged code permission when we have the new object model available.
         // [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        private void TransactionOutcomeEnlist(SysTx.Transaction transaction)
+        private void TransactionOutcomeEnlist(Transaction transaction)
         {
-            transaction.TransactionCompleted += new SysTx.TransactionCompletedEventHandler(TransactionCompletedEvent);
+            transaction.TransactionCompleted += new TransactionCompletedEventHandler(TransactionCompletedEvent);
         }
 
         internal void SetInStasis()

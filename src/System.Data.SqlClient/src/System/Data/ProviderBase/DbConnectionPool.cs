@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 namespace System.Data.ProviderBase
 {
@@ -30,8 +30,8 @@ namespace System.Data.ProviderBase
         // copy as part of the value.
         sealed private class TransactedConnectionList : List<DbConnectionInternal>
         {
-            private SysTx.Transaction _transaction;
-            internal TransactedConnectionList(int initialAllocation, SysTx.Transaction tx) : base(initialAllocation)
+            private Transaction _transaction;
+            internal TransactedConnectionList(int initialAllocation, Transaction tx) : base(initialAllocation)
             {
                 _transaction = tx;
             }
@@ -61,7 +61,7 @@ namespace System.Data.ProviderBase
 
         sealed private class TransactedConnectionPool
         {
-            Dictionary<SysTx.Transaction, TransactedConnectionList> _transactedCxns;
+            Dictionary<Transaction, TransactedConnectionList> _transactedCxns;
 
             DbConnectionPool _pool;
 
@@ -73,7 +73,7 @@ namespace System.Data.ProviderBase
                 Debug.Assert(null != pool, "null pool?");
 
                 _pool = pool;
-                _transactedCxns = new Dictionary<SysTx.Transaction, TransactedConnectionList>();
+                _transactedCxns = new Dictionary<Transaction, TransactedConnectionList>();
             }
 
             internal int ObjectID
@@ -92,7 +92,7 @@ namespace System.Data.ProviderBase
                 }
             }
 
-            internal DbConnectionInternal GetTransactedObject(SysTx.Transaction transaction)
+            internal DbConnectionInternal GetTransactedObject(Transaction transaction)
             {
                 Debug.Assert(null != transaction, "null transaction?");
 
@@ -133,7 +133,7 @@ namespace System.Data.ProviderBase
                 return transactedObject;
             }
 
-            internal void PutTransactedObject(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
+            internal void PutTransactedObject(Transaction transaction, DbConnectionInternal transactedObject)
             {
                 Debug.Assert(null != transaction, "null transaction?");
                 Debug.Assert(null != transactedObject, "null transactedObject?");
@@ -166,7 +166,7 @@ namespace System.Data.ProviderBase
                 {
                     // create the transacted pool, making sure to clone the associated transaction
                     //   for use as a key in our internal dictionary of transactions and connections
-                    SysTx.Transaction transactionClone = null;
+                    Transaction transactionClone = null;
                     TransactedConnectionList newConnections = null;
 
                     try
@@ -223,7 +223,7 @@ namespace System.Data.ProviderBase
                 }
             }
 
-            internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
+            internal void TransactionEnded(Transaction transaction, DbConnectionInternal transactedObject)
             {
                 TransactedConnectionList connections;
                 int entry = -1;
@@ -818,7 +818,7 @@ namespace System.Data.ProviderBase
                             // the transaction asynchronously completing on a second
                             // thread.
 
-                            SysTx.Transaction transaction = obj.EnlistedTransaction;
+                            Transaction transaction = obj.EnlistedTransaction;
                             if (null != transaction)
                             {
                                 // NOTE: we're not locking on _state, so it's possible that its
@@ -1074,7 +1074,7 @@ namespace System.Data.ProviderBase
         private bool TryGetConnection(DbConnection owningObject, uint waitForMultipleObjectsTimeout, bool allowCreate, bool onlyOneCheckConnection, DbConnectionOptions userOptions, out DbConnectionInternal connection)
         {
             DbConnectionInternal obj = null;
-            SysTx.Transaction transaction = null;
+            Transaction transaction = null;
 
             // If automatic transaction enlistment is required, then we try to
             // get the connection from the transacted connection pool first.
@@ -1217,7 +1217,7 @@ namespace System.Data.ProviderBase
             return true;
         }
 
-        private void PrepareConnection(DbConnection owningObject, DbConnectionInternal obj, SysTx.Transaction transaction)
+        private void PrepareConnection(DbConnection owningObject, DbConnectionInternal obj, Transaction transaction)
         {
             lock (obj)
             {   // Protect against Clear and ReclaimEmancipatedObjects, which call IsEmancipated, which is affected by PrePush and PostPop
@@ -1289,7 +1289,7 @@ namespace System.Data.ProviderBase
             return (obj);
         }
 
-        private DbConnectionInternal GetFromTransactedPool(out SysTx.Transaction transaction)
+        private DbConnectionInternal GetFromTransactedPool(out Transaction transaction)
         {
             transaction = ADP.GetCurrentTransaction();
             DbConnectionInternal obj = null;
@@ -1568,7 +1568,7 @@ namespace System.Data.ProviderBase
         //   that is implemented inside DbConnectionPool. This method's counterpart (PutTransactedObject) should
         //   only be called from DbConnectionPool.DeactivateObject and thus the plumbing to provide access to 
         //   other objects is unnecessary (hence the asymmetry of Ended but no Begin)
-        internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
+        internal void TransactionEnded(Transaction transaction, DbConnectionInternal transactedObject)
         {
             Debug.Assert(null != transaction, "null transaction?");
             Debug.Assert(null != transactedObject, "null transactedObject?");

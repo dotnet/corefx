@@ -9,7 +9,7 @@
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 
 namespace System.Data.SqlClient
@@ -232,7 +232,7 @@ namespace System.Data.SqlClient
 
         abstract protected void ChangeDatabaseInternal(string database);
 
-        override protected void CleanupTransactionOnCompletion(SysTx.Transaction transaction)
+        override protected void CleanupTransactionOnCompletion(Transaction transaction)
         {
             // Note: unlocked, potentially multi-threaded code, so pull delegate to local to 
             //  ensure it doesn't change between test and call.
@@ -283,7 +283,7 @@ namespace System.Data.SqlClient
             base.Dispose();
         }
 
-        protected void Enlist(SysTx.Transaction tx)
+        protected void Enlist(Transaction tx)
         {
             // This method should not be called while the connection has a 
             // reference to an active delegated transaction.
@@ -314,8 +314,8 @@ namespace System.Data.SqlClient
                     // There are two mitigations for this:
                     // 1. SqlConnection.EnlistTransaction checks that the enlisted transaction has completed before allowing a different enlistment.
                     // 2. For debug builds, the assert at the beginning of this method checks for an enlistment in an active delegated transaction.
-                    SysTx.Transaction enlistedTransaction = EnlistedTransaction;
-                    if (enlistedTransaction != null && enlistedTransaction.TransactionInformation.Status != SysTx.TransactionStatus.Active)
+                    Transaction enlistedTransaction = EnlistedTransaction;
+                    if (enlistedTransaction != null && enlistedTransaction.TransactionInformation.Status != TransactionStatus.Active)
                     {
                         EnlistNull();
                     }
@@ -328,7 +328,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void EnlistNonNull(SysTx.Transaction tx)
+        private void EnlistNonNull(Transaction tx)
         {
             Debug.Assert(null != tx, "null transaction?");
 
@@ -508,7 +508,7 @@ namespace System.Data.SqlClient
             Debug.Assert(null == CurrentTransaction, "unenlisted transaction with non-null current transaction?");   // verify it!
         }
 
-        override public void EnlistTransaction(SysTx.Transaction transaction)
+        override public void EnlistTransaction(Transaction transaction)
         {
             ValidateConnectionForExecute(null);
 
@@ -583,12 +583,12 @@ namespace System.Data.SqlClient
 
         abstract protected byte[] GetDTCAddress();
 
-        static private byte[] GetTransactionCookie(SysTx.Transaction transaction, byte[] whereAbouts)
+        static private byte[] GetTransactionCookie(Transaction transaction, byte[] whereAbouts)
         {
             byte[] transactionCookie = null;
             if (null != transaction)
             {
-                transactionCookie = SysTx.TransactionInterop.GetExportCookie(transaction, whereAbouts);
+                transactionCookie = TransactionInterop.GetExportCookie(transaction, whereAbouts);
             }
             return transactionCookie;
         }

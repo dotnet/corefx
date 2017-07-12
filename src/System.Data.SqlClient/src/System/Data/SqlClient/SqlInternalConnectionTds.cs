@@ -14,7 +14,7 @@ using System.Globalization;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -652,7 +652,7 @@ namespace System.Data.SqlClient
         {
             // If we are enlisted in a transaction, check that transaction is active.
             // When using explicit transaction unbinding, also verify that the enlisted transaction is the current transaction.
-            SysTx.Transaction enlistedTransaction = EnlistedTransaction;
+            Transaction enlistedTransaction = EnlistedTransaction;
 
             if (enlistedTransaction != null)
             {
@@ -660,16 +660,16 @@ namespace System.Data.SqlClient
 
                 if (requireExplicitTransactionUnbind)
                 {
-                    SysTx.Transaction currentTransaction = SysTx.Transaction.Current;
+                    Transaction currentTransaction = Transaction.Current;
 
-                    if (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status || !enlistedTransaction.Equals(currentTransaction))
+                    if (TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status || !enlistedTransaction.Equals(currentTransaction))
                     {
                         throw ADP.TransactionConnectionMismatch();
                     }
                 }
                 else // implicit transaction unbind
                 {
-                    if (SysTx.TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status)
+                    if (TransactionStatus.Active != enlistedTransaction.TransactionInformation.Status)
                     {
                         if (EnlistedTransactionDisposed)
                         {
@@ -695,7 +695,7 @@ namespace System.Data.SqlClient
         // POOLING METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        protected override void Activate(SysTx.Transaction transaction)
+        protected override void Activate(Transaction transaction)
         {
             // When we're required to automatically enlist in transactions and
             // there is one we enlist in it. On the other hand, if there isn't a
@@ -1046,7 +1046,7 @@ namespace System.Data.SqlClient
             if (enlistOK && ConnectionOptions.Enlist)
             {
                 _parser._physicalStateObj.SniContext = SniContext.Snix_AutoEnlist;
-                SysTx.Transaction tx = ADP.GetCurrentTransaction();
+                Transaction tx = ADP.GetCurrentTransaction();
                 Enlist(tx);
             }
 

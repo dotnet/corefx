@@ -5,11 +5,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Threading;
-using SysTx = System.Transactions;
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlDelegatedTransaction : SysTx.IPromotableSinglePhaseNotification
+    sealed internal class SqlDelegatedTransaction : IPromotableSinglePhaseNotification
     {
         private static int _objectTypeCount;
         private readonly int _objectID = Interlocked.Increment(ref _objectTypeCount);
@@ -32,17 +32,17 @@ namespace System.Data.SqlClient
         private IsolationLevel _isolationLevel;        // the IsolationLevel of the transaction we delegated to the server
         private SqlInternalTransaction _internalTransaction;   // the SQL Server transaction we're delegating to
 
-        private SysTx.Transaction _atomicTransaction;
+        private Transaction _atomicTransaction;
 
         private bool _active;                // Is the transaction active?
 
-        internal SqlDelegatedTransaction(SqlInternalConnection connection, SysTx.Transaction tx)
+        internal SqlDelegatedTransaction(SqlInternalConnection connection, Transaction tx)
         {
             Debug.Assert(null != connection, "null connection?");
             _connection = connection;
             _atomicTransaction = tx;
             _active = false;
-            SysTx.IsolationLevel systxIsolationLevel = (SysTx.IsolationLevel)tx.IsolationLevel;
+            Transactions.IsolationLevel systxIsolationLevel = (Transactions.IsolationLevel)tx.IsolationLevel;
 
             // We need to map the System.Transactions IsolationLevel to the one
             // that System.Data uses and communicates to SqlServer.  We could
@@ -53,19 +53,19 @@ namespace System.Data.SqlClient
             // place.
             switch (systxIsolationLevel)
             {
-                case SysTx.IsolationLevel.ReadCommitted:
+                case Transactions.IsolationLevel.ReadCommitted:
                     _isolationLevel = IsolationLevel.ReadCommitted;
                     break;
-                case SysTx.IsolationLevel.ReadUncommitted:
+                case Transactions.IsolationLevel.ReadUncommitted:
                     _isolationLevel = IsolationLevel.ReadUncommitted;
                     break;
-                case SysTx.IsolationLevel.RepeatableRead:
+                case Transactions.IsolationLevel.RepeatableRead:
                     _isolationLevel = IsolationLevel.RepeatableRead;
                     break;
-                case SysTx.IsolationLevel.Serializable:
+                case Transactions.IsolationLevel.Serializable:
                     _isolationLevel = IsolationLevel.Serializable;
                     break;
-                case SysTx.IsolationLevel.Snapshot:
+                case Transactions.IsolationLevel.Snapshot:
                     _isolationLevel = IsolationLevel.Snapshot;
                     break;
                 default:
@@ -73,7 +73,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal SysTx.Transaction Transaction
+        internal Transaction Transaction
         {
             get { return _atomicTransaction; }
         }
@@ -215,7 +215,7 @@ namespace System.Data.SqlClient
         }
 
         // Called by transaction to initiate abort sequence
-        public void Rollback(SysTx.SinglePhaseEnlistment enlistment)
+        public void Rollback(SinglePhaseEnlistment enlistment)
         {
             Debug.Assert(null != enlistment, "null enlistment?");
 
@@ -288,7 +288,7 @@ namespace System.Data.SqlClient
         }
 
         // Called by the transaction to initiate commit sequence
-        public void SinglePhaseCommit(SysTx.SinglePhaseEnlistment enlistment)
+        public void SinglePhaseCommit(SinglePhaseEnlistment enlistment)
         {
             Debug.Assert(null != enlistment, "null enlistment?");
 
@@ -399,7 +399,7 @@ namespace System.Data.SqlClient
         //  ended event via the internal connection. If it occurs without a prior Rollback or SinglePhaseCommit call,
         //  it indicates the transaction was ended externally (generally that one the the DTC participants aborted
         //  the transaction).
-        internal void TransactionEnded(SysTx.Transaction transaction)
+        internal void TransactionEnded(Transaction transaction)
         {
             SqlInternalConnection connection = _connection;
 
