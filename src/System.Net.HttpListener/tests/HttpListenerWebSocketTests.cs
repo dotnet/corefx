@@ -34,6 +34,7 @@ namespace System.Net.Tests
             Client.Dispose();
         }
 
+        [ActiveIssue(22164, TargetFrameworkMonikers.Uap)] // Fails in RS2 only (works in RS3).
         [ConditionalTheory(nameof(IsNotWindows7))]
         [InlineData(WebSocketMessageType.Text, false)]
         [InlineData(WebSocketMessageType.Binary, false)]
