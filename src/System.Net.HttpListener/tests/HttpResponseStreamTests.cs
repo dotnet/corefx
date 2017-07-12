@@ -539,6 +539,7 @@ namespace System.Net.Tests
             }
         }
 
+        [ActiveIssue(22110, TargetFrameworkMonikers.UapAot)]
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
