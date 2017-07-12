@@ -11,24 +11,15 @@ namespace System.Xml.Tests
 {
     public class TC_SchemaSet_AnyAttribute : TC_SchemaSetBase
     {
-        private ITestOutputHelper _output;
-        public bool bWarningCallback;
-        public bool bErrorCallback;
-        public int errorCount;
-        public int warningCount;
-        public bool WarningInnerExceptionSet = false;
-        public bool ErrorInnerExceptionSet = false;
+        private readonly ITestOutputHelper _output;
+        private int _errorCount;
+        private int _warningCount;
+        private bool _warningInnerExceptionSet;
+        private bool _errorInnerExceptionSet;
 
         public TC_SchemaSet_AnyAttribute(ITestOutputHelper output)
         {
             _output = output;
-        }
-
-        public void Initialize()
-        {
-            bWarningCallback = bErrorCallback = false;
-            errorCount = warningCount = 0;
-            WarningInnerExceptionSet = ErrorInnerExceptionSet = false;
         }
 
         //hook up validaton callback
@@ -37,21 +28,19 @@ namespace System.Xml.Tests
             if (args.Severity == XmlSeverityType.Warning)
             {
                 _output.WriteLine("WARNING: ");
-                bWarningCallback = true;
-                warningCount++;
-                WarningInnerExceptionSet = (args.Exception.InnerException != null);
-                _output.WriteLine("\nInnerExceptionSet : " + WarningInnerExceptionSet + "\n");
+                _warningCount++;
+                _warningInnerExceptionSet = (args.Exception.InnerException != null);
+                _output.WriteLine("\nInnerExceptionSet : " + _warningInnerExceptionSet + "\n");
             }
             else if (args.Severity == XmlSeverityType.Error)
             {
                 _output.WriteLine("ERROR: ");
-                bErrorCallback = true;
-                errorCount++;
-                ErrorInnerExceptionSet = (args.Exception.InnerException != null);
-                _output.WriteLine("\nInnerExceptionSet : " + ErrorInnerExceptionSet + "\n");
+                _errorCount++;
+                _errorInnerExceptionSet = (args.Exception.InnerException != null);
+                _output.WriteLine("\nInnerExceptionSet : " + _errorInnerExceptionSet + "\n");
             }
 
-            _output.WriteLine(args.Message); // Print the error to the screen.
+            _output.WriteLine(args.Message);
         }
 
         public XmlSchema GetUnionSchema(string ns1, string ns2, string attrNs)
@@ -164,14 +153,13 @@ namespace System.Xml.Tests
         [InlineData("##other", "##other", "ns1", 1)]
         public void v1(string ns1, string ns2, string attrNs, int expectedError)
         {
-            Initialize();
             XmlSchemaSet xss = new XmlSchemaSet();
             xss.XmlResolver = new XmlUrlResolver();
             xss.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
             xss.Add(GetIntersectionSchema(ns1, ns2, attrNs));
             xss.Compile();
 
-            Assert.Equal(expectedError, errorCount);
+            Assert.Equal(expectedError, _errorCount);
         }
 
         [Theory]
@@ -193,14 +181,13 @@ namespace System.Xml.Tests
         [InlineData("##other", "ns1 ns2", "ns2", 0)]
         public void v2(string ns1, string ns2, string attrNs, int expectedError)
         {
-            Initialize();
             XmlSchemaSet xss = new XmlSchemaSet();
             xss.XmlResolver = new XmlUrlResolver();
             xss.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
             xss.Add(GetUnionSchema(ns1, ns2, attrNs));
             xss.Compile();
 
-            Assert.Equal(expectedError, errorCount);
+            Assert.Equal(expectedError, _errorCount);
         }
     }
 }
