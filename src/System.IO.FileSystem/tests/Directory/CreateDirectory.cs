@@ -243,14 +243,23 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax throws DirectoryNotFoundException
-        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsDirectoryNotFoundException()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsException()
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
-            Assert.All(paths, (path) =>
+
+            // Long directory path with extended syntax throws PathTooLongException on Nano,
+            // otherwise DirectoryNotFoundException.
+            if (PlatformDetection.IsWindowsNanoServer)
             {
-                Assert.Throws<DirectoryNotFoundException>(() => Create(path));
-            });
+                Assert.All(paths,
+                    path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
+            }
+            else
+            {
+                Assert.All(paths,
+                    path => { Assert.Throws<DirectoryNotFoundException>(() => Create(path)); });
+            }
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
