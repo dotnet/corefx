@@ -315,7 +315,7 @@ namespace System.Net.Http
                 if (_state.AsyncReadInProgress)
                 {
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: before dispose");
-                    _requestHandle?.Dispose();
+                    _requestHandle?.Dispose(); // null check necessary to handle race condition between stream disposal and cancellation
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: after dispose");
                 }
             }
