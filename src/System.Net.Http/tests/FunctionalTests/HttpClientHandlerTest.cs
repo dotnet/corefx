@@ -263,12 +263,24 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        // ArgumentException: The given System.Uri cannot be converted into a Windows.Foundation.Uri.
-        // Please see http://go.microsoft.com/fwlink/?LinkID=215849 for details.
-        //
-        // This is the URI that fails the test:
-        //     LoopbackServer.GetIPv6LinkLocalAddress() == http://[fe80::3df1:c851:8775:4c5b]:25545/
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)] 
+        [ActiveIssue(22158, TargetFrameworkMonikers.Uap)] 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
+        {
+            using (var client = new HttpClient())
+            {
+                var options = new LoopbackServer.Options { Address = LoopbackServer.GetIPv6LinkLocalAddress() };
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    _output.WriteLine(url.ToString());
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        client.GetAsync(url));
+                }, options);
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
@@ -289,7 +301,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static IEnumerable<object[]> GetAsync_IPBasedUri_Success_MemberData()
         {
-            foreach (var addr in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback, LoopbackServer.GetIPv6LinkLocalAddress() })
+            foreach (var addr in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback })
             {
                 if (addr != null)
                 {
@@ -329,7 +341,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)] // UAP is throwing System.OperationCanceledException
+        [ActiveIssue(22159, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_Cancel_CancellationTokenPropagates()
@@ -767,7 +779,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support CredentialCache for Credentials")]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
@@ -784,13 +795,21 @@ namespace System.Net.Http.Functional.Tests
             credentialCache.Add(uri, "Basic", _credential);
 
             var handler = new HttpClientHandler();
-            handler.Credentials = credentialCache;
-            using (var client = new HttpClient(handler))
+            if (PlatformDetection.IsUap)
             {
-                using (HttpResponseMessage response = await client.GetAsync(redirectUri))
+                // UAP does not support CredentialCache for Credentials.
+                Assert.Throws<PlatformNotSupportedException>(() => handler.Credentials = credentialCache);
+            }
+            else
+            {
+                handler.Credentials = credentialCache;
+                using (var client = new HttpClient(handler))
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    using (HttpResponseMessage response = await client.GetAsync(redirectUri))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    }
                 }
             }
         }
@@ -1182,10 +1201,28 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(22163, TargetFrameworkMonikers.Uap)]
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task GetAsync_StatusCode99_ExpectedException()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 99\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => getResponse);
+                }
+            });
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [InlineData(99)] // Doesn't work in UAP
         [InlineData(1000)]
         public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
         {
@@ -1527,7 +1564,7 @@ namespace System.Net.Http.Functional.Tests
 
         #region Various HTTP Method Tests
 
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]  // "The requested operation is invalid"
+        [ActiveIssue(22161, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
