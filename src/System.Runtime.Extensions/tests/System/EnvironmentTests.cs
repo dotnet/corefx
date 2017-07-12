@@ -186,14 +186,7 @@ namespace System.Tests
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] 
         public void WorkingSet_Valid_Uap()
         {
-            try
-            {
-                var workingSet = Environment.WorkingSet;
-            }
-            catch(TargetInvocationException ex)
-            {
-                Assert.True(ex.InnerException is PlatformNotSupportedException);
-            }
+            Assert.Throws<PlatformNotSupportedException>(() => Environment.WorkingSet);
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
