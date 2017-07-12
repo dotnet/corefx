@@ -33,7 +33,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true, "")]
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
@@ -78,7 +77,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true, "")]
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
@@ -125,7 +123,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true, "")]
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
@@ -170,7 +167,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_LargeLengthAsynchronous_Success(bool transferEncodingChunked)
@@ -210,7 +206,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_LargeLengthSynchronous_Success(bool transferEncodingChunked)
@@ -250,7 +245,6 @@ namespace System.Net.Tests
         }
         
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchAsynchronous_Success(bool transferEncodingChunked)
@@ -276,7 +270,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchSynchronous_Success(bool transferEncodingChunked)
@@ -302,7 +295,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_NotEnoughThenCloseAsynchronous_Success(bool transferEncodingChunked)
@@ -327,7 +319,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_Disposed_ReturnsZero(bool transferEncodingChunked)
@@ -356,7 +347,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanSeek_Get_ReturnsFalse()
         {
             HttpListenerRequest response = await _helper.GetRequest(chunked: true);
@@ -375,7 +365,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanRead_Get_ReturnsTrue()
         {
             HttpListenerRequest request = await _helper.GetRequest(chunked: true);
@@ -386,7 +375,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task CanWrite_Get_ReturnsFalse()
         {
             HttpListenerRequest request = await _helper.GetRequest(chunked: true);
@@ -405,7 +393,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_NullBuffer_ThrowsArgumentNullException(bool chunked)
@@ -419,7 +406,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(-1, true)]
         [InlineData(3, true)]
         [InlineData(-1, false)]
@@ -435,7 +421,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(0, 3, true)]
         [InlineData(1, 2, true)]
         [InlineData(2, 1, true)]
@@ -453,7 +438,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_NullAsyncResult_ThrowsArgumentNullException(bool chunked)
@@ -466,7 +450,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_InvalidAsyncResult_ThrowsArgumentException(bool chunked)
@@ -485,7 +468,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndRead_CalledTwice_ThrowsInvalidOperationException(bool chunked)
@@ -501,7 +483,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Read_FromClosedConnectionAsynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -528,7 +509,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(17462, TargetFrameworkMonikers.Uap)]
         public async Task Read_FromClosedConnectionSynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
