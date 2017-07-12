@@ -50,10 +50,6 @@ public static partial class XmlSerializerTests
     private static bool IsTimeSpanSerializationAvailable => !PlatformDetection.IsFullFramework || (AppContext.TryGetSwitch("Switch.System.Xml.EnableTimeSpanSerialization", out bool result) && result);
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithDateTimePropertyAsXmlTime()
     {
         DateTime localTime = new DateTime(549269870000L, DateTimeKind.Local);
@@ -87,10 +83,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_ArrayAsGetSet()
     {
         TypeWithGetSetArrayMembers x = new TypeWithGetSetArrayMembers
@@ -141,10 +133,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_ArrayAsGetOnly()
     {
         TypeWithGetOnlyArrayProperties x = new TypeWithGetOnlyArrayProperties();
@@ -163,10 +151,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_ListRoot()
     {
         MyList x = new MyList("a1", "a2");
@@ -184,10 +168,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_EnumAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<MyEnum>(MyEnum.Two,
@@ -217,10 +197,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_EnumAsMember()
     {
         TypeWithEnumMembers x = new TypeWithEnumMembers { F1 = MyEnum.Three, P1 = MyEnum.Two };
@@ -237,10 +213,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_DCClassWithEnumAndStruct()
     {
         DCClassWithEnumAndStruct value = new DCClassWithEnumAndStruct(true);
@@ -258,10 +230,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_BuiltInTypes()
     {
         BuiltInTypes x = new BuiltInTypes {
@@ -278,10 +246,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypesWithArrayOfOtherTypes()
     {
         SerializeAndDeserialize<TypeHasArrayOfASerializedAsB>(new TypeHasArrayOfASerializedAsB(true),
@@ -299,10 +263,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_WithXElement()
     {
         var original = new WithXElement(true);
@@ -329,10 +289,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -351,10 +307,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -381,10 +333,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);
@@ -411,10 +359,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeNamesWithSpecialCharacters()
     {
         SerializeAndDeserialize<__TypeNameWithSpecialCharacters漢ñ>(new __TypeNameWithSpecialCharacters漢ñ() { PropertyNameWithSpecialCharacters漢ñ = "Test" },
@@ -425,10 +369,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_KnownTypesThroughConstructor()
     {
         KnownTypesThroughConstructor value = new KnownTypesThroughConstructor() { EnumValue = MyEnum.One, SimpleTypeValue = new SimpleKnownTypeValue() { StrProperty = "PropertyValue" } };
@@ -447,10 +387,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_BaseClassAndDerivedClassWithSameProperty()
     {
         DerivedClassWithSameProperty value = new DerivedClassWithSameProperty() { DateTimeProperty = new DateTime(100), IntProperty = 5, StringProperty = "TestString", ListProperty = new List<string>() };
@@ -476,10 +412,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_EnumFlags()
     {
         EnumFlags value1 = EnumFlags.One | EnumFlags.Four;
@@ -490,10 +422,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_SerializeClassThatImplementsInteface()
     {
         ClassImplementsInterface value = new ClassImplementsInterface() { ClassID = "ClassID", DisplayName = "DisplayName", Id = "Id", IsLoaded = true };
@@ -514,10 +442,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_XmlAttributesTest()
     {
         var value = new XmlSerializerAttributes();
@@ -548,10 +472,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_XmlAnyAttributeTest()
     {
         var serializer = new XmlSerializer(typeof(TypeWithAnyAttribute));
@@ -577,10 +497,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_Struct()
     {
         var value = new WithStruct { Some = new SomeStruct { A = 1, B = 2 } };
@@ -599,10 +515,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_Enums()
     {
         var item = new WithEnums() { Int = IntEnum.Option1, Short = ShortEnum.Option2 };
@@ -617,10 +529,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_Nullables()
     {
         var item = new WithNullables() { Optional = IntEnum.Option1, OptionalInt = 42, Struct1 = new SomeStruct { A = 1, B = 2 } };
@@ -647,10 +555,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_ClassImplementingIXmlSerialiable()
     {
         var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
@@ -664,10 +568,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithFieldNameEndBySpecified()
     {
         var value = new TypeWithPropertyNameSpecified() { MyField = "MyField", MyFieldIgnored = 99, MyFieldSpecified = true, MyFieldIgnoredSpecified = false };
@@ -678,10 +578,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XML_TypeWithXmlSchemaFormAttribute()
     {
         var value = new TypeWithXmlSchemaFormAttribute() { NoneSchemaFormListProperty = new List<string> { "abc" }, QualifiedSchemaFormListProperty = new List<bool> { true }, UnqualifiedSchemaFormListProperty = new List<int> { 1 } };
@@ -697,10 +593,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XML_TypeWithTypeNameInXmlTypeAttribute()
     {
         var value = new TypeWithTypeNameInXmlTypeAttribute();
@@ -739,10 +631,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XML_TypeWithXmlTextAttributeOnArray()
     {
         var original = new TypeWithXmlTextAttributeOnArray() { Text = new string[] { "val1", "val2" } };
@@ -756,10 +644,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithSchemaFormInXmlAttribute()
     {
         var value = new TypeWithSchemaFormInXmlAttribute() { TestProperty = "hello" };
@@ -770,10 +654,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithXmlElementProperty()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -793,10 +673,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithXmlDocumentProperty()
     {
         XmlDocument xmlDoc = new XmlDocument();
@@ -810,10 +686,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithNonPublicDefaultConstructor()
     {
         System.Reflection.TypeInfo ti = System.Reflection.IntrospectionExtensions.GetTypeInfo(typeof(TypeWithNonPublicDefaultConstructor));
@@ -841,10 +713,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TestIgnoreWhitespaceForDeserialization()
     {
         string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -864,10 +732,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithBinaryProperty()
     {
         var obj = new TypeWithBinaryProperty();
@@ -881,10 +745,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_DifferentSerializeDeserializeOverloads()
     {
         var expected = new SimpleType() { P1 = "p1 value", P2 = 123 };
@@ -936,10 +796,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [ConditionalFact(nameof(IsTimeSpanSerializationAvailable))]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithTimeSpanProperty()
     {
         var obj = new TypeWithTimeSpanProperty { TimeSpanProperty = TimeSpan.FromMilliseconds(1) };
@@ -952,10 +808,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [ConditionalFact(nameof(IsTimeSpanSerializationAvailable))]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithDefaultTimeSpanProperty()
     {
         var obj = new TypeWithDefaultTimeSpanProperty { TimeSpanProperty2 = new TimeSpan(0, 1, 0) };
@@ -968,10 +820,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithByteProperty()
     {
         var obj = new TypeWithByteProperty() { ByteProperty = 123 };
@@ -984,10 +832,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_DeserializeOutOfRangeByteProperty()
     {
         //Deserialize an instance with out-of-range value for the byte property, expecting exception from deserialization process
@@ -1009,10 +853,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_XmlAttributes_RemoveXmlElementAttribute()
     {
         XmlAttributes attrs = new XmlAttributes();
@@ -1026,10 +866,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_ArrayOfXmlNodeProperty()
     {
         var obj = new TypeWithXmlNodeArrayProperty() {
@@ -1041,10 +877,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithTwoDimensionalArrayProperty2()
     {
         SimpleType[][] simpleType2D = GetObjectwith2DArrayOfSimpleType();
@@ -1087,10 +919,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_SimpleType()
     {
         var serializer = new XmlSerializer(typeof(SimpleType));
@@ -1107,10 +935,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_BaseClassAndDerivedClass2WithSameProperty()
     {
         var value = new DerivedClassWithSameProperty2() { DateTimeProperty = new DateTime(100, DateTimeKind.Utc), IntProperty = 5, StringProperty = "TestString", ListProperty = new List<string>() };
@@ -1136,10 +960,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithPropertiesHavingDefaultValue_DefaultValue()
     {
         var value = new TypeWithPropertiesHavingDefaultValue()
@@ -1160,10 +980,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithStringPropertyWithDefaultValue_NonDefaultValue()
     {
         var value = new TypeWithPropertiesHavingDefaultValue()
@@ -1181,10 +997,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithEnumPropertyHavingDefaultValue()
     {
         var value = new TypeWithEnumPropertyHavingDefaultValue() { EnumProperty = IntEnum.Option0 };
@@ -1206,10 +1018,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithEnumFlagPropertyHavingDefaultValue()
     {
         var value = new TypeWithEnumFlagPropertyHavingDefaultValue() { EnumProperty = EnumFlags.Two | EnumFlags.Three };
@@ -1229,10 +1037,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithEnumFlagPropertyHavingDefaultValue()
     {
@@ -1260,10 +1064,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithXmlQualifiedName()
     {
         var value = new TypeWithXmlQualifiedName()
@@ -1278,10 +1078,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithXmlQualifiedName()
     {
@@ -1302,10 +1098,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithShouldSerializeMethod_WithDefaultValue()
     {
         var value = new TypeWithShouldSerializeMethod();
@@ -1317,10 +1109,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithShouldSerializeMethod_WithNonDefaultValue()
     {
         var value = new TypeWithShouldSerializeMethod() { Foo = "SomeValue" };
@@ -1332,10 +1120,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_KnownTypesThroughConstructorWithArrayProperties()
     {
         int[] intArray = new int[] { 1, 2, 3 };
@@ -1361,10 +1145,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_KnownTypesThroughConstructorWithEnumFlags()
     {
         var enumFlags = EnumFlags.One | EnumFlags.Four;
@@ -1379,10 +1159,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_KnownTypesThroughConstructorWithEnumFlagsXmlQualifiedName()
     {
         var value = new KnownTypesThroughConstructorWithValue() { Value = new XmlQualifiedName("foo") };
@@ -1396,10 +1172,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     static void Xml_TypeWithTypesHavingCustomFormatter()
     {
         var str = "The quick brown fox jumps over the lazy dog.";
@@ -1436,10 +1208,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithArrayPropertyHavingChoice()
     {
         object[] choices = new object[] { "Food", 5 };
@@ -1459,10 +1227,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XML_TypeWithTypeNameInXmlTypeAttribute_WithValue()
     {
         var value = new TypeWithTypeNameInXmlTypeAttribute() { XmlAttributeForm = "SomeValue" };
@@ -1476,10 +1240,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XML_TypeWithFieldsOrdered()
     {
         var value = new TypeWithFieldsOrdered()
@@ -1500,10 +1260,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlSerializerFactoryTest()
     {
         string baseline = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Age>5</Age>\r\n  <Name>Bear</Name>\r\n  <Breed>GermanShepherd</Breed>\r\n</Dog>";
@@ -1517,10 +1273,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlUnknownElementAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -1551,10 +1303,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlUnknownNodeAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -1591,10 +1339,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlUnknownAttributeAndEventHandlerTest()
     {
         List<string> grouplists = new List<string>();
@@ -1622,10 +1366,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlDeserializationEventsTest()
     {
         List<string> grouplists = new List<string>();
@@ -1664,10 +1404,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void XmlSerializerImplementationTest()
     {
         Employee emp = new Employee() { EmployeeName = "Allice" };
@@ -1678,10 +1414,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_HiddenDerivedFieldTest()
     {
         var value = new DerivedClass { value = "on derived" };
@@ -1699,10 +1431,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_NullRefInXmlSerializerCtorTest()
     {
         string defaultNamespace = "http://www.contoso.com";
@@ -1781,10 +1509,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_AliasedPropertyTest()
     {
         var inputList = new List<string> { "item0", "item1", "item2", "item3", "item4" };
@@ -1812,10 +1536,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_DeserializeHiddenMembersTest()
     {
         var xmlSerializer = new XmlSerializer(typeof(DerivedClass1));
@@ -1832,10 +1552,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_SerializeClassNestedInStaticClassTest()
     {
         var value = new Outer.Person() {
@@ -1859,10 +1575,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_XSCoverTest()
     {
         var band = new Orchestra();
@@ -1990,10 +1702,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     public static void Xml_TypeWithMyCollectionField()
     {
         var value = new TypeWithMyCollectionField();
@@ -2005,10 +1713,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-#if XMLSERIALIZERGENERATORTESTS
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
-#endif
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithMyCollectionField()
     {
