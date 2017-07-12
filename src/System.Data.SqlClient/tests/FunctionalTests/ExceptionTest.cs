@@ -76,8 +76,6 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        public static bool IsUsingManagedSNI() => ManualTesting.Tests.DataTestUtility.IsUsingManagedSNI();
-
         [Theory]
         [InlineData(@"np:\\.\pipe\sqlbad\query")]
         [InlineData(@"np:\\.\pipe\MSSQL$NonExistentInstance\sql\query")]
@@ -93,17 +91,15 @@ namespace System.Data.SqlClient.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.DataSource = dataSource;
             builder.ConnectTimeout = 1;
+
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
-                string expectedErrorMsg;
-                if (IsUsingManagedSNI())
-                    expectedErrorMsg = "(provider: Named Pipes Provider, error: 11 - Timeout error)";
-                else
-                    expectedErrorMsg = "(provider: Named Pipes Provider, error: 40 - Could not open a connection to SQL Server)";
-
+                string expectedErrorMsg = "(provider: Named Pipes Provider, error: 40 - Could not open a connection to SQL Server)";
                 VerifyConnectionFailure<SqlException>(() => connection.Open(), expectedErrorMsg);
             }
         }
+
+        public static bool IsUsingManagedSNI() => ManualTesting.Tests.DataTestUtility.IsUsingManagedSNI();
 
         [ConditionalFact(nameof(IsUsingManagedSNI))]
         public void NamedPipeInvalidConnStringTest_ManagedSNI()
