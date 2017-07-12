@@ -248,18 +248,8 @@ namespace System.IO.Tests
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
 
-            // Long directory path with extended syntax throws PathTooLongException on Nano,
-            // otherwise DirectoryNotFoundException.
-            if (PlatformDetection.IsWindowsNanoServer)
-            {
-                Assert.All(paths,
-                    path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
-            }
-            else
-            {
-                Assert.All(paths,
-                    path => { Assert.Throws<DirectoryNotFoundException>(() => Create(path)); });
-            }
+            // Long directory path with extended syntax throws PathTooLongException.
+            Assert.All(paths, path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
