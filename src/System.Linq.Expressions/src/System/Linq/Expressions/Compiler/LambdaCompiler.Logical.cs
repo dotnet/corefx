@@ -319,17 +319,20 @@ namespace System.Linq.Expressions.Compiler
         {
             BinaryExpression b = (BinaryExpression)expr;
 
-            if (b.Method != null && !b.IsLiftedLogical)
+            if (b.Method != null)
             {
-                EmitMethodAndAlso(b, flags);
+                if (b.IsLiftedLogical)
+                {
+                    EmitExpression(b.ReduceUserdefinedLifted());
+                }
+                else
+                {
+                    EmitMethodAndAlso(b, flags);
+                }
             }
             else if (b.Left.Type == typeof(bool?))
             {
                 EmitLiftedAndAlso(b);
-            }
-            else if (b.IsLiftedLogical)
-            {
-                EmitExpression(b.ReduceUserdefinedLifted());
             }
             else
             {
@@ -420,17 +423,20 @@ namespace System.Linq.Expressions.Compiler
         {
             BinaryExpression b = (BinaryExpression)expr;
 
-            if (b.Method != null && !b.IsLiftedLogical)
+            if (b.Method != null)
             {
-                EmitMethodOrElse(b, flags);
+                if (b.IsLiftedLogical)
+                {
+                    EmitExpression(b.ReduceUserdefinedLifted());
+                }
+                else
+                {
+                    EmitMethodOrElse(b, flags);
+                }
             }
             else if (b.Left.Type == typeof(bool?))
             {
                 EmitLiftedOrElse(b);
-            }
-            else if (b.IsLiftedLogical)
-            {
-                EmitExpression(b.ReduceUserdefinedLifted());
             }
             else
             {
