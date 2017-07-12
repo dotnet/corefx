@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Extensions.Tests", "tests\System.Runtime.Extensions.Tests.csproj", "{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -42,6 +42,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1A2F9F4A-A032-433E-B914-ADD5992BB178}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
+	ProjectSection(SolutionItems) = preProject
+		src\Configurations.props = src\Configurations.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{2E666815-2EDB-464B-9DF6-380BF4789AD4}"
 EndProject
@@ -75,8 +78,8 @@ Global
 		{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
 		{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
-		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
-		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
+		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Debug|Any CPU.ActiveCfg = uapaot-Windows_NT-Debug|Any CPU
+		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Debug|Any CPU.Build.0 = uapaot-Windows_NT-Debug|Any CPU
 		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
 		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
 		{33B27785-02FD-4544-8E7D-EB802248BEC3}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
