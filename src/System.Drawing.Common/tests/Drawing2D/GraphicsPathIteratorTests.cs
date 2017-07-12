@@ -368,26 +368,27 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        //public static IEnumerable<object[]> CopyData_StartEndIndexesOutOfRange_TestData()
-        //{
-        //    yield return new object[] { new PointF[3], new byte[3], int.MinValue, 2 };
-        //    yield return new object[] { new PointF[3], new byte[3], 0, int.MaxValue };
-        //    yield return new object[] { new PointF[3], new byte[3], 2, 0 };
-        //}
+        public static IEnumerable<object[]> CopyData_StartEndIndexesOutOfRange_TestData()
+        {
+            yield return new object[] { new PointF[3], new byte[3], int.MinValue, 2 };
+            yield return new object[] { new PointF[3], new byte[3], 0, int.MaxValue };
+            yield return new object[] { new PointF[3], new byte[3], 2, 0 };
+        }
 
-        //[ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        //[MemberData(nameof(CopyData_StartEndIndexesOutOfRange_TestData))]
-        //public void CopyData_StartEndIndexesOutOfRange_ReturnsExpeced(PointF[] points, byte[] types, int startIndex, int endIndex)
-        //{
-        //    PointF[] resultPoints = new PointF[points.Length];
-        //    byte[] resultTypes = new byte[points.Length];
+        [ActiveIssue(22026)]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [MemberData(nameof(CopyData_StartEndIndexesOutOfRange_TestData))]
+        public void CopyData_StartEndIndexesOutOfRange_ReturnsExpeced(PointF[] points, byte[] types, int startIndex, int endIndex)
+        {
+            PointF[] resultPoints = new PointF[points.Length];
+            byte[] resultTypes = new byte[points.Length];
 
-        //    using (GraphicsPath gp = new GraphicsPath(points, types))
-        //    using (GraphicsPathIterator gpi = new GraphicsPathIterator(gp))
-        //    {
-        //        Assert.Equal(0, gpi.CopyData(ref resultPoints, ref resultTypes, startIndex, endIndex));
-        //    }
-        //}
+            using (GraphicsPath gp = new GraphicsPath(points, types))
+            using (GraphicsPathIterator gpi = new GraphicsPathIterator(gp))
+            {
+                Assert.Equal(0, gpi.CopyData(ref resultPoints, ref resultTypes, startIndex, endIndex));
+            }
+        }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CopyData_EqualStartEndIndexes_ReturnsExpeced()
