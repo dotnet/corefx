@@ -14,9 +14,8 @@ namespace System.DirectoryServices
     /// </devdoc>
     public class SearchResult
     {
-        private NetworkCredential _parentCredentials;
-        private AuthenticationTypes _parentAuthenticationType;
-        private ResultPropertyCollection _properties = new ResultPropertyCollection();
+        private readonly NetworkCredential _parentCredentials;
+        private readonly AuthenticationTypes _parentAuthenticationType;
 
         internal SearchResult(NetworkCredential parentCredentials, AuthenticationTypes parentAuthenticationType)
         {
@@ -61,12 +60,6 @@ namespace System.DirectoryServices
         /// <para>Gets a <see cref='System.DirectoryServices.ResultPropertyCollection'/>
         /// of properties set on this object.</para>
         /// </devdoc>
-        public ResultPropertyCollection Properties
-        {
-            get
-            {
-                return _properties;
-            }
-        }
+        public ResultPropertyCollection Properties { get; } = new ResultPropertyCollection();
     }
 }

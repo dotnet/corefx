@@ -13,12 +13,12 @@ namespace System.DirectoryServices.ActiveDirectory
     public class ConfigurationSet
     {
         // Private Variables
-        private DirectoryContext _context = null;
-        private DirectoryEntryManager _directoryEntryMgr = null;
+        private readonly DirectoryContext _context = null;
+        private readonly DirectoryEntryManager _directoryEntryMgr = null;
         private bool _disposed = false;
 
         // variables corresponding to public properties
-        private string _configSetName = null;
+        private readonly string _configSetName = null;
         private ReadOnlySiteCollection _cachedSites = null;
         private AdamInstanceCollection _cachedADAMInstances = null;
         private ApplicationPartitionCollection _cachedApplicationPartitions = null;

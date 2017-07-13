@@ -23,18 +23,18 @@ namespace System.DirectoryServices.ActiveDirectory
 
     public class ReplicationConnection : IDisposable
     {
-        internal DirectoryContext context = null;
-        internal DirectoryEntry cachedDirectoryEntry = null;
+        internal readonly DirectoryContext context = null;
+        internal readonly DirectoryEntry cachedDirectoryEntry = null;
         internal bool existingConnection = false;
         private bool _disposed = false;
         private bool _checkADAM = false;
         private bool _isADAMServer = false;
         private int _options = 0;
 
-        private string _connectionName = null;
+        private readonly string _connectionName = null;
         private string _sourceServerName = null;
         private string _destinationServerName = null;
-        private ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
+        private readonly ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
 
         private const string ADAMGuid = "1.2.840.113556.1.4.1851";
 

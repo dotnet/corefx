@@ -12,18 +12,18 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ActiveDirectorySiteLink : IDisposable
     {
-        internal DirectoryContext context = null;
-        private string _name = null;
-        private ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
+        internal readonly DirectoryContext context = null;
+        private readonly string _name = null;
+        private readonly ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
         private bool _disposed = false;
 
         internal bool existing = false;
-        internal DirectoryEntry cachedEntry = null;
+        internal readonly DirectoryEntry cachedEntry = null;
         private const int systemDefaultCost = 0;
-        private TimeSpan _systemDefaultInterval = new TimeSpan(0, 15, 0);
+        private readonly TimeSpan _systemDefaultInterval = new TimeSpan(0, 15, 0);
         private const int appDefaultCost = 100;
         private const int appDefaultInterval = 180;
-        private ActiveDirectorySiteCollection _sites = new ActiveDirectorySiteCollection();
+        private readonly ActiveDirectorySiteCollection _sites = new ActiveDirectorySiteCollection();
         private bool _siteRetrieved = false;
 
         public ActiveDirectorySiteLink(DirectoryContext context, string siteLinkName) : this(context, siteLinkName, ActiveDirectoryTransportType.Rpc, null)

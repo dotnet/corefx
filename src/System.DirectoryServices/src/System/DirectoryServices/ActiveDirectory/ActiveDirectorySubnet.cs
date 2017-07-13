@@ -10,8 +10,8 @@ namespace System.DirectoryServices.ActiveDirectory
     public class ActiveDirectorySubnet : IDisposable
     {
         private ActiveDirectorySite _site = null;
-        private string _name = null;
-        internal DirectoryContext context = null;
+        private readonly string _name = null;
+        internal readonly DirectoryContext context = null;
         private bool _disposed = false;
 
         internal bool existing = false;

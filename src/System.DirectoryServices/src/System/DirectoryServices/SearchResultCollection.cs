@@ -20,12 +20,10 @@ namespace System.DirectoryServices
     public class SearchResultCollection : MarshalByRefObject, ICollection, IEnumerable, IDisposable
     {
         private IntPtr _handle;
-        private string[] _properties;
         private UnsafeNativeMethods.IDirectorySearch _searchObject;
-        private string _filter;
         private ArrayList _innerList;
         private bool _disposed;
-        private DirectoryEntry _rootEntry;       // clone of parent entry object
+        private readonly DirectoryEntry _rootEntry;       // clone of parent entry object
         private const string ADS_DIRSYNC_COOKIE = "fc8cb04d-311d-406c-8cb9-1ae8b843b418";
         private IntPtr _adsDirsynCookieName = Marshal.StringToCoTaskMemUni(ADS_DIRSYNC_COOKIE);
         private const string ADS_VLV_RESPONSE = "fc8cb04d-311d-406c-8cb9-1ae8b843b419";
@@ -36,8 +34,8 @@ namespace System.DirectoryServices
         internal SearchResultCollection(DirectoryEntry root, IntPtr searchHandle, string[] propertiesLoaded, DirectorySearcher srch)
         {
             _handle = searchHandle;
-            _properties = propertiesLoaded;
-            _filter = srch.Filter;
+            PropertiesLoaded = propertiesLoaded;
+            Filter = srch.Filter;
             _rootEntry = root;
             this.srch = srch;
         }
@@ -65,15 +63,8 @@ namespace System.DirectoryServices
                 return InnerList.Count;
             }
         }
-
-        ///<internalonly/>                                                                       
-        internal string Filter
-        {
-            get
-            {
-                return _filter;
-            }
-        }
+                                                          
+        internal string Filter { get; }
 
         ///<internalonly/>
         private ArrayList InnerList
@@ -131,13 +122,7 @@ namespace System.DirectoryServices
         ///       specified on <see cref='System.DirectoryServices.DirectorySearcher'/> before the
         ///       search was executed.</para>
         /// </devdoc>
-        public string[] PropertiesLoaded
-        {
-            get
-            {
-                return _properties;
-            }
-        }
+        public string[] PropertiesLoaded { get; }
 
         internal byte[] DirsyncCookie
         {

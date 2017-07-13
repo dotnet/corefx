@@ -12,14 +12,14 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ActiveDirectorySiteLinkBridge : IDisposable
     {
-        internal DirectoryContext context = null;
-        private string _name = null;
-        private ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
+        internal readonly DirectoryContext context = null;
+        private readonly string _name = null;
+        private readonly ActiveDirectoryTransportType _transport = ActiveDirectoryTransportType.Rpc;
         private bool _disposed = false;
 
         private bool _existing = false;
         internal DirectoryEntry cachedEntry = null;
-        private ActiveDirectorySiteLinkCollection _links = new ActiveDirectorySiteLinkCollection();
+        private readonly ActiveDirectorySiteLinkCollection _links = new ActiveDirectorySiteLinkCollection();
         private bool _linksRetrieved = false;
 
         public ActiveDirectorySiteLinkBridge(DirectoryContext context, string bridgeName) : this(context, bridgeName, ActiveDirectoryTransportType.Rpc)

@@ -50,7 +50,7 @@ namespace System.DirectoryServices
 
     public class ActiveDirectorySecurity : DirectoryObjectSecurity
     {
-        private SecurityMasks _securityMaskUsedInRetrieval = SecurityMasks.Owner | SecurityMasks.Group | SecurityMasks.Dacl | SecurityMasks.Sacl;
+        private readonly SecurityMasks _securityMaskUsedInRetrieval = SecurityMasks.Owner | SecurityMasks.Group | SecurityMasks.Dacl | SecurityMasks.Sacl;
 
         #region Constructors
 

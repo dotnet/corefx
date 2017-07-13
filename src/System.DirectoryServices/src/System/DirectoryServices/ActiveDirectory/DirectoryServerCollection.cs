@@ -10,15 +10,15 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class DirectoryServerCollection : CollectionBase
     {
-        internal string siteDN = null;
-        internal string transportDN = null;
-        internal DirectoryContext context = null;
+        internal readonly string siteDN = null;
+        internal readonly string transportDN = null;
+        internal readonly DirectoryContext context = null;
         internal bool initialized = false;
-        internal Hashtable changeList = null;
-        private ArrayList _copyList = new ArrayList();
-        private DirectoryEntry _crossRefEntry = null;
-        private bool _isADAM = false;
-        private bool _isForNC = false;
+        internal readonly Hashtable changeList = null;
+        private readonly ArrayList _copyList = new ArrayList();
+        private readonly DirectoryEntry _crossRefEntry = null;
+        private readonly bool _isADAM = false;
+        private readonly bool _isForNC = false;
 
         internal DirectoryServerCollection(DirectoryContext context, string siteDN, string transportName)
         {

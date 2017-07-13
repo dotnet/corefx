@@ -9,8 +9,8 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ReplicationNeighborCollection : ReadOnlyCollectionBase
     {
-        private DirectoryServer _server = null;
-        private Hashtable _nameTable = null;
+        private readonly DirectoryServer _server = null;
+        private readonly Hashtable _nameTable = null;
 
         internal ReplicationNeighborCollection(DirectoryServer server)
         {

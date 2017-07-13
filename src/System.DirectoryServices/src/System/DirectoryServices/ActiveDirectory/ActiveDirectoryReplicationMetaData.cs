@@ -10,10 +10,8 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ActiveDirectoryReplicationMetadata : DictionaryBase
     {
-        private DirectoryServer _server = null;
-        private Hashtable _nameTable = null;
-        private AttributeMetadataCollection _dataValueCollection = new AttributeMetadataCollection();
-        private ReadOnlyStringCollection _dataNameCollection = new ReadOnlyStringCollection();
+        private readonly DirectoryServer _server = null;
+        private readonly Hashtable _nameTable = null;
 
         internal ActiveDirectoryReplicationMetadata(DirectoryServer server)
         {
@@ -36,21 +34,9 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public ReadOnlyStringCollection AttributeNames
-        {
-            get
-            {
-                return _dataNameCollection;
-            }
-        }
+        public ReadOnlyStringCollection AttributeNames { get; } = new ReadOnlyStringCollection();
 
-        public AttributeMetadataCollection Values
-        {
-            get
-            {
-                return _dataValueCollection;
-            }
-        }
+        public AttributeMetadataCollection Values { get; } = new AttributeMetadataCollection();
 
         public bool Contains(string attributeName)
         {
@@ -71,8 +57,8 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             Dictionary.Add(name.ToLower(CultureInfo.InvariantCulture), value);
 
-            _dataNameCollection.Add(name);
-            _dataValueCollection.Add(value);
+            AttributeNames.Add(name);
+            Values.Add(value);
         }
 
         internal void AddHelper(int count, IntPtr info, bool advanced)

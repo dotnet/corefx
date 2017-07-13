@@ -26,14 +26,14 @@ namespace System.DirectoryServices.ActiveDirectory
     public class Forest : IDisposable
     {
         // Private Variables
-        private DirectoryContext _context = null;
-        private DirectoryEntryManager _directoryEntryMgr = null;
-        private IntPtr _dsHandle = IntPtr.Zero;
-        private IntPtr _authIdentity = IntPtr.Zero;
+        private readonly DirectoryContext _context = null;
+        private readonly DirectoryEntryManager _directoryEntryMgr = null;
+        private readonly IntPtr _dsHandle = IntPtr.Zero;
+        private readonly IntPtr _authIdentity = IntPtr.Zero;
         private bool _disposed = false;
 
         // Internal variables corresponding to public properties
-        private string _forestDnsName = null;
+        private readonly string _forestDnsName = null;
         private ReadOnlySiteCollection _cachedSites = null;
         private DomainCollection _cachedDomains = null;
         private GlobalCatalogCollection _cachedGlobalCatalogs = null;

@@ -8,50 +8,21 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ForestTrustRelationshipCollision
     {
-        private ForestTrustCollisionType _type;
-        private TopLevelNameCollisionOptions _tlnFlag;
-        private DomainCollisionOptions _domainFlag;
-        private string _record = null;
-
         internal ForestTrustRelationshipCollision(ForestTrustCollisionType collisionType, TopLevelNameCollisionOptions TLNFlag, DomainCollisionOptions domainFlag, string record)
         {
-            _type = collisionType;
-            _tlnFlag = TLNFlag;
-            _domainFlag = domainFlag;
-            _record = record;
+            CollisionType = collisionType;
+            TopLevelNameCollisionOption = TLNFlag;
+            DomainCollisionOption = domainFlag;
+            CollisionRecord = record;
         }
 
-        public ForestTrustCollisionType CollisionType
-        {
-            get
-            {
-                return _type;
-            }
-        }
+        public ForestTrustCollisionType CollisionType { get; }
 
-        public TopLevelNameCollisionOptions TopLevelNameCollisionOption
-        {
-            get
-            {
-                return _tlnFlag;
-            }
-        }
+        public TopLevelNameCollisionOptions TopLevelNameCollisionOption { get; }
 
-        public DomainCollisionOptions DomainCollisionOption
-        {
-            get
-            {
-                return _domainFlag;
-            }
-        }
+        public DomainCollisionOptions DomainCollisionOption { get; }
 
-        public string CollisionRecord
-        {
-            get
-            {
-                return _record;
-            }
-        }
+        public string CollisionRecord { get; }
     }
 
     public class ForestTrustRelationshipCollisionCollection : ReadOnlyCollectionBase

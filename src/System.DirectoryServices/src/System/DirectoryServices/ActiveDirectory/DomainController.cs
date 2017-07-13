@@ -42,7 +42,7 @@ namespace System.DirectoryServices.ActiveDirectory
     {
         private IntPtr _dsHandle = IntPtr.Zero;
         private IntPtr _authIdentity = IntPtr.Zero;
-        private string[] _becomeRoleOwnerAttrs = null;
+        private readonly string[] _becomeRoleOwnerAttrs = null;
         private bool _disposed = false;
 
         // internal variables for the public properties
@@ -55,7 +55,7 @@ namespace System.DirectoryServices.ActiveDirectory
         private bool _dcInfoInitialized = false;
 
         internal SyncUpdateCallback userDelegate = null;
-        internal SyncReplicaFromAllServersCallback syncAllFunctionPointer = null;
+        internal readonly SyncReplicaFromAllServersCallback syncAllFunctionPointer = null;
 
         // this is twice the maximum allowed RIDPool size which is 15k
         internal const int UpdateRidPoolSeizureValue = 30000;

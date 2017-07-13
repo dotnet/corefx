@@ -38,7 +38,7 @@ namespace System.DirectoryServices
         private bool _disposed = false;
         private AuthenticationTypes _authenticationType = AuthenticationTypes.Secure;
         private NetworkCredential _credentials;
-        private DirectoryEntryConfiguration _options;
+        private readonly DirectoryEntryConfiguration _options;
 
         private PropertyCollection _propertyCollection = null;
         internal bool allowMultipleChange = false;

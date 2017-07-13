@@ -10,11 +10,11 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ActiveDirectorySubnetCollection : CollectionBase
     {
-        internal Hashtable changeList = null;
+        internal readonly Hashtable changeList = null;
         internal bool initialized = false;
-        private string _siteDN = null;
-        private DirectoryContext _context = null;
-        private ArrayList _copyList = new ArrayList();
+        private readonly string _siteDN = null;
+        private readonly DirectoryContext _context = null;
+        private readonly ArrayList _copyList = new ArrayList();
 
         internal ActiveDirectorySubnetCollection(DirectoryContext context, string siteDN)
         {

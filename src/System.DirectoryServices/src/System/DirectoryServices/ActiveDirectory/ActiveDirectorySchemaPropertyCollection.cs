@@ -10,10 +10,10 @@ namespace System.DirectoryServices.ActiveDirectory
     public class ActiveDirectorySchemaPropertyCollection : CollectionBase
     {
         private DirectoryEntry _classEntry = null;
-        private string _propertyName = null;
-        private ActiveDirectorySchemaClass _schemaClass = null;
-        private bool _isBound = false;
-        private DirectoryContext _context = null;
+        private readonly string _propertyName = null;
+        private readonly ActiveDirectorySchemaClass _schemaClass = null;
+        private readonly bool _isBound = false;
+        private readonly DirectoryContext _context = null;
 
         internal ActiveDirectorySchemaPropertyCollection(DirectoryContext context,
                                                         ActiveDirectorySchemaClass schemaClass,

@@ -11,7 +11,7 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class AdamInstance : DirectoryServer
     {
-        private string[] _becomeRoleOwnerAttrs = null;
+        private readonly string[] _becomeRoleOwnerAttrs = null;
         private bool _disposed = false;
 
         // for public properties
@@ -27,7 +27,7 @@ namespace System.DirectoryServices.ActiveDirectory
         private IntPtr _ADAMHandle = (IntPtr)0;
         private IntPtr _authIdentity = IntPtr.Zero;
         private SyncUpdateCallback _userDelegate = null;
-        private SyncReplicaFromAllServersCallback _syncAllFunctionPointer = null;
+        private readonly SyncReplicaFromAllServersCallback _syncAllFunctionPointer = null;
 
         #region constructors
         internal AdamInstance(DirectoryContext context, string adamInstanceName)

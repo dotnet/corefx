@@ -13,8 +13,8 @@ namespace System.DirectoryServices
     /// </devdoc>
     public class SchemaNameCollection : IList
     {
-        private VariantPropGetter _propGetter;
-        private VariantPropSetter _propSetter;
+        private readonly VariantPropGetter _propGetter;
+        private readonly VariantPropSetter _propSetter;
 
         internal SchemaNameCollection(VariantPropGetter propGetter, VariantPropSetter propSetter)
         {

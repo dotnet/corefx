@@ -15,7 +15,7 @@ namespace System.DirectoryServices
     public class DirectoryEntries : IEnumerable
     {
         // the parent of the children in this collection
-        private DirectoryEntry _container;
+        private readonly DirectoryEntry _container;
 
         internal DirectoryEntries(DirectoryEntry parent)
         {

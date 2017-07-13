@@ -18,17 +18,14 @@ namespace System.DirectoryServices.ActiveDirectory
 
     public class ForestTrustDomainInformation
     {
-        private string _dnsName = null;
-        private string _nbName = null;
-        private string _sid = null;
         private ForestTrustDomainStatus _status;
         internal LARGE_INTEGER time;
 
         internal ForestTrustDomainInformation(int flag, LSA_FOREST_TRUST_DOMAIN_INFO domainInfo, LARGE_INTEGER time)
         {
             _status = (ForestTrustDomainStatus)flag;
-            _dnsName = Marshal.PtrToStringUni(domainInfo.DNSNameBuffer, domainInfo.DNSNameLength / 2);
-            _nbName = Marshal.PtrToStringUni(domainInfo.NetBIOSNameBuffer, domainInfo.NetBIOSNameLength / 2);
+            DnsName = Marshal.PtrToStringUni(domainInfo.DNSNameBuffer, domainInfo.DNSNameLength / 2);
+            NetBiosName = Marshal.PtrToStringUni(domainInfo.NetBIOSNameBuffer, domainInfo.NetBIOSNameLength / 2);
             IntPtr ptr = (IntPtr)0;
             int result = UnsafeNativeMethods.ConvertSidToStringSidW(domainInfo.sid, ref ptr);
             if (result == 0)
@@ -38,7 +35,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             try
             {
-                _sid = Marshal.PtrToStringUni(ptr);
+                DomainSid = Marshal.PtrToStringUni(ptr);
             }
             finally
             {
@@ -48,29 +45,11 @@ namespace System.DirectoryServices.ActiveDirectory
             this.time = time;
         }
 
-        public string DnsName
-        {
-            get
-            {
-                return _dnsName;
-            }
-        }
+        public string DnsName { get; }
 
-        public string NetBiosName
-        {
-            get
-            {
-                return _nbName;
-            }
-        }
+        public string NetBiosName { get; }
 
-        public string DomainSid
-        {
-            get
-            {
-                return _sid;
-            }
-        }
+        public string DomainSid { get; }
 
         public ForestTrustDomainStatus Status
         {

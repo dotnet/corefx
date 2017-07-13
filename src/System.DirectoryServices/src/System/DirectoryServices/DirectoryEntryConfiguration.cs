@@ -9,7 +9,7 @@ namespace System.DirectoryServices
 {
     public class DirectoryEntryConfiguration
     {
-        private DirectoryEntry _entry;
+        private readonly DirectoryEntry _entry;
         private const int ISC_RET_MUTUAL_AUTH = 0x00000002;
 
         internal DirectoryEntryConfiguration(DirectoryEntry entry)

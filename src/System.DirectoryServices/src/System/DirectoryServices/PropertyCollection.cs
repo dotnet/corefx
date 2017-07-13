@@ -15,8 +15,8 @@ namespace System.DirectoryServices
     /// </devdoc>
     public class PropertyCollection : IDictionary
     {
-        private DirectoryEntry _entry;
-        internal Hashtable valueTable = null;
+        private readonly DirectoryEntry _entry;
+        internal readonly Hashtable valueTable = null;
 
         internal PropertyCollection(DirectoryEntry entry)
         {

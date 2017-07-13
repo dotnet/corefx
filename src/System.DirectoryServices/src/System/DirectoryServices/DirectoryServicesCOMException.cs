@@ -11,12 +11,12 @@ namespace System.DirectoryServices
 {
     public class DirectoryServicesCOMException : COMException, ISerializable
     {
-        private int _extendederror = 0;
-        private string _extendedmessage = "";
-
         public DirectoryServicesCOMException() { }
+
         public DirectoryServicesCOMException(string message) : base(message) { }
+
         public DirectoryServicesCOMException(string message, Exception inner) : base(message, inner) { }
+
         protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             throw new PlatformNotSupportedException();
@@ -24,25 +24,13 @@ namespace System.DirectoryServices
 
         internal DirectoryServicesCOMException(string extendedMessage, int extendedError, COMException e) : base(e.Message, e.ErrorCode)
         {
-            _extendederror = extendedError;
-            _extendedmessage = extendedMessage;
+            ExtendedError = extendedError;
+            ExtendedErrorMessage = extendedMessage;
         }
 
-        public int ExtendedError
-        {
-            get
-            {
-                return _extendederror;
-            }
-        }
+        public int ExtendedError { get; }
 
-        public string ExtendedErrorMessage
-        {
-            get
-            {
-                return _extendedmessage;
-            }
-        }
+        public string ExtendedErrorMessage { get; }
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {

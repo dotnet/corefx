@@ -28,21 +28,21 @@ namespace System.DirectoryServices.ActiveDirectory
 
     public class ActiveDirectorySite : IDisposable
     {
-        internal DirectoryContext context = null;
-        private string _name = null;
-        internal DirectoryEntry cachedEntry = null;
+        internal readonly DirectoryContext context = null;
+        private readonly string _name = null;
+        internal readonly DirectoryEntry cachedEntry = null;
         private DirectoryEntry _ntdsEntry = null;
-        private ActiveDirectorySubnetCollection _subnets = null;
+        private readonly ActiveDirectorySubnetCollection _subnets = null;
         private DirectoryServer _topologyGenerator = null;
-        private ReadOnlySiteCollection _adjacentSites = new ReadOnlySiteCollection();
+        private readonly ReadOnlySiteCollection _adjacentSites = new ReadOnlySiteCollection();
         private bool _disposed = false;
-        private DomainCollection _domains = new DomainCollection(null);
-        private ReadOnlyDirectoryServerCollection _servers = new ReadOnlyDirectoryServerCollection();
-        private ReadOnlySiteLinkCollection _links = new ReadOnlySiteLinkCollection();
+        private readonly DomainCollection _domains = new DomainCollection(null);
+        private readonly ReadOnlyDirectoryServerCollection _servers = new ReadOnlyDirectoryServerCollection();
+        private readonly ReadOnlySiteLinkCollection _links = new ReadOnlySiteLinkCollection();
         private ActiveDirectorySiteOptions _siteOptions = ActiveDirectorySiteOptions.None;
         private ReadOnlyDirectoryServerCollection _bridgeheadServers = new ReadOnlyDirectoryServerCollection();
-        private DirectoryServerCollection _SMTPBridgeheadServers = null;
-        private DirectoryServerCollection _RPCBridgeheadServers = null;
+        private readonly DirectoryServerCollection _SMTPBridgeheadServers = null;
+        private readonly DirectoryServerCollection _RPCBridgeheadServers = null;
         private byte[] _replicationSchedule = null;
 
         internal bool existing = false;
