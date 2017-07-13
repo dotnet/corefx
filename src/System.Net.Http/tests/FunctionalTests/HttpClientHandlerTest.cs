@@ -180,6 +180,17 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Theory]
+        [InlineData(-1)]
+        [InlineData((long)int.MaxValue + (long)1)]
+        public void MaxRequestContentBufferSize_SetInvalidValue_ThrowsArgumentOutOfRangeException(long value)
+        {
+            using (var handler = new HttpClientHandler())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => handler.MaxRequestContentBufferSize = value);
+            }
+        }
+
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP will send default credentials based on other criteria.")]
         [Theory]
         [InlineData(false)]

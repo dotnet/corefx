@@ -53,9 +53,6 @@ namespace System.Net.Http
         private readonly HttpHandlerToFilter _handlerToFilter;
         private readonly HttpMessageHandler _diagnosticsPipeline;
 
-        private volatile bool _operationStarted;
-        private volatile bool _disposed;
-
         private ClientCertificateOption _clientCertificateOptions;
         private CookieContainer _cookieContainer;
         private bool _useCookies;
@@ -254,39 +251,6 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _rtFilter.MaxConnectionsPerServer = (uint)value;
-            }
-        }
-        
-        public long MaxRequestContentBufferSize
-        {
-            // This property has been deprecated. In the .NET Framework it was only used when the handler needed to 
-            // automatically buffer the request content. That only happened if neither 'Content-Length' nor 
-            // 'Transfer-Encoding: chunked' request headers were specified. So, the handler thus needed to buffer
-            // in the request content to determine its length and then would choose 'Content-Length' semantics when
-            // POST'ing. In .NET Core and UAP platforms, the handler will resolve the ambiguity by always choosing
-            // 'Transfer-Encoding: chunked'. The handler will never automatically buffer in the request content.
-            get
-            {
-                return 0; // Returning zero is appropriate since in .NET Framework it means no limit.
-            }
-
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
-
-                if (value > HttpContent.MaxBufferSize)
-                {
-                    throw new ArgumentOutOfRangeException("value", value,
-                        string.Format(CultureInfo.InvariantCulture, SR.net_http_content_buffersize_limit,
-                        HttpContent.MaxBufferSize));
-                }                
-
-                CheckDisposedOrStarted();
-
-                // No-op on property setter.
             }
         }
 
@@ -740,23 +704,6 @@ namespace System.Net.Http
                 }
 
                 _operationStarted = true;
-            }
-        }
-
-        private void CheckDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().ToString());
-            }
-        }
-
-        private void CheckDisposedOrStarted()
-        {
-            CheckDisposed();
-            if (_operationStarted)
-            {
-                throw new InvalidOperationException(SR.net_http_operation_started);
             }
         }
 
