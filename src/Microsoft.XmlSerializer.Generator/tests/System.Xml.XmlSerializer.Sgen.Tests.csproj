@@ -25,6 +25,10 @@
       <Project>{4ef0e49d-20e4-4113-9717-fe3860939c26}</Project>
       <Name>System.Xml.XmlSerializer.Sgen.Data</Name>
     </ProjectReference>
+    <ProjectReference Include="System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.csproj">
+      <Project>{cb265e71-bb61-42d6-9f6a-2415839ced95}</Project>
+      <Name>System.Xml.XmlSerializer.Sgen.Data.XmlSerializers</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
