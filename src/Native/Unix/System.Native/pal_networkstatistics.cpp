@@ -36,6 +36,7 @@
 #include <netinet/udp_var.h>
 #include <netinet/icmp6.h>
 #include <netinet/icmp_var.h>
+#include <net/if.h>
 
 template <class RetType>
 int32_t ReadSysctlVar(const char* name, RetType* value)
