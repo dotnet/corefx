@@ -136,7 +136,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 // different blobs at runtime for some obscure reason. Excluding those from the check.
                 !(obj is WeakReference<Point>) &&
                 !(obj is Collections.Specialized.HybridDictionary) &&
-                !(obj is System.Net.CookieContainer))
+                !(obj is System.Net.CookieContainer) &&
+                !(obj is SortedList))
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
 
