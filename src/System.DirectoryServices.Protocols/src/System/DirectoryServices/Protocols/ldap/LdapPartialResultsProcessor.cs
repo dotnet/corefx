@@ -84,7 +84,7 @@ namespace System.DirectoryServices.Protocols
                     _currentIndex++;
 
                     // have work to do
-                    if (asyncResult.resultStatus != ResultsStatus.Done)
+                    if (asyncResult._resultStatus != ResultsStatus.Done)
                         break;
 
                     if (i >= count)
@@ -100,21 +100,21 @@ namespace System.DirectoryServices.Protocols
                 GetResultsHelper(asyncResult);
 
                 // if we are done with the asynchronous search, we need to fire callback and signal the waitable object
-                if (asyncResult.resultStatus == ResultsStatus.Done)
+                if (asyncResult._resultStatus == ResultsStatus.Done)
                 {
-                    asyncResult.manualResetEvent.Set();
-                    asyncResult.completed = true;
-                    if (asyncResult.callback != null)
+                    asyncResult._manualResetEvent.Set();
+                    asyncResult._completed = true;
+                    if (asyncResult._callback != null)
                     {
-                        tmpCallback = asyncResult.callback;
+                        tmpCallback = asyncResult._callback;
                     }
                 }
-                else if (asyncResult.callback != null && asyncResult.partialCallback)
+                else if (asyncResult._callback != null && asyncResult._partialCallback)
                 {
                     // if user specify callback to be called even when partial results become available                    
-                    if (asyncResult.response != null && (asyncResult.response.Entries.Count > 0 || asyncResult.response.References.Count > 0))
+                    if (asyncResult._response != null && (asyncResult._response.Entries.Count > 0 || asyncResult._response.References.Count > 0))
                     {
-                        tmpCallback = asyncResult.callback;
+                        tmpCallback = asyncResult._callback;
                     }
                 }
             }
@@ -125,22 +125,22 @@ namespace System.DirectoryServices.Protocols
 
         private void GetResultsHelper(LdapPartialAsyncResult asyncResult)
         {
-            LdapConnection con = asyncResult.con;
+            LdapConnection con = asyncResult._con;
             IntPtr ldapResult = IntPtr.Zero;
             IntPtr entryMessage = IntPtr.Zero;
             ResultAll resultType = ResultAll.LDAP_MSG_RECEIVED;
 
-            if (asyncResult.resultStatus == ResultsStatus.CompleteResult)
+            if (asyncResult._resultStatus == ResultsStatus.CompleteResult)
                 resultType = ResultAll.LDAP_MSG_POLLINGALL;
 
             try
             {
-                SearchResponse response = (SearchResponse)con.ConstructResponse(asyncResult.messageID, LdapOperation.LdapSearch, resultType, asyncResult.requestTimeout, false);
+                SearchResponse response = (SearchResponse)con.ConstructResponse(asyncResult._messageID, LdapOperation.LdapSearch, resultType, asyncResult._requestTimeout, false);
                 // this should only happen in the polling thread case                    
                 if (response == null)
                 {
                     // only when request time out has not yet expiered
-                    if ((asyncResult.startTime.Ticks + asyncResult.requestTimeout.Ticks) > DateTime.Now.Ticks)
+                    if ((asyncResult._startTime.Ticks + asyncResult._requestTimeout.Ticks) > DateTime.Now.Ticks)
                     {
                         // this is expected, just the client does not have the result yet 
                         return;
@@ -152,14 +152,14 @@ namespace System.DirectoryServices.Protocols
                     }
                 }
 
-                if (asyncResult.response != null)
-                    AddResult(asyncResult.response, response);
+                if (asyncResult._response != null)
+                    AddResult(asyncResult._response, response);
                 else
-                    asyncResult.response = response;
+                    asyncResult._response = response;
 
                 // if search is done, set the flag
                 if (response.searchDone)
-                    asyncResult.resultStatus = ResultsStatus.Done;
+                    asyncResult._resultStatus = ResultsStatus.Done;
             }
             catch (Exception e)
             {
@@ -167,47 +167,47 @@ namespace System.DirectoryServices.Protocols
                 {
                     SearchResponse response = (SearchResponse)(((DirectoryOperationException)e).Response);
 
-                    if (asyncResult.response != null)
-                        AddResult(asyncResult.response, response);
+                    if (asyncResult._response != null)
+                        AddResult(asyncResult._response, response);
                     else
-                        asyncResult.response = response;
+                        asyncResult._response = response;
 
                     // set the response back to the exception so it holds all the results up to now
-                    ((DirectoryOperationException)e).Response = asyncResult.response;
+                    ((DirectoryOperationException)e).Response = asyncResult._response;
                 }
                 else if (e is LdapException)
                 {
                     LdapException ldapE = (LdapException)e;
                     LdapError errorCode = (LdapError)ldapE.ErrorCode;
 
-                    if (asyncResult.response != null)
+                    if (asyncResult._response != null)
                     {
                         // add previous retrieved entries if available
-                        if (asyncResult.response.Entries != null)
+                        if (asyncResult._response.Entries != null)
                         {
-                            for (int i = 0; i < asyncResult.response.Entries.Count; i++)
+                            for (int i = 0; i < asyncResult._response.Entries.Count; i++)
                             {
-                                ldapE.results.Add(asyncResult.response.Entries[i]);
+                                ldapE.results.Add(asyncResult._response.Entries[i]);
                             }
                         }
 
                         // add previous retrieved references if available
-                        if (asyncResult.response.References != null)
+                        if (asyncResult._response.References != null)
                         {
-                            for (int i = 0; i < asyncResult.response.References.Count; i++)
+                            for (int i = 0; i < asyncResult._response.References.Count; i++)
                             {
-                                ldapE.results.Add(asyncResult.response.References[i]);
+                                ldapE.results.Add(asyncResult._response.References[i]);
                             }
                         }
                     }
                 }
 
                 // exception occurs, this operation is done.
-                asyncResult.exception = e;
-                asyncResult.resultStatus = ResultsStatus.Done;
+                asyncResult._exception = e;
+                asyncResult._resultStatus = ResultsStatus.Done;
 
                 // need to abandon this request
-                Wldap32.ldap_abandon(con.ldapHandle, asyncResult.messageID);
+                Wldap32.ldap_abandon(con._ldapHandle, asyncResult._messageID);
             }
         }
 
@@ -218,8 +218,8 @@ namespace System.DirectoryServices.Protocols
                 if (_resultList.Contains(asyncResult))
                 {
                     // we don't need partial results anymore, polling for complete results
-                    if (asyncResult.resultStatus == ResultsStatus.PartialResult)
-                        asyncResult.resultStatus = ResultsStatus.CompleteResult;
+                    if (asyncResult._resultStatus == ResultsStatus.PartialResult)
+                        asyncResult._resultStatus = ResultsStatus.CompleteResult;
                 }
                 else
                     throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.InvalidAsyncResult));
@@ -233,33 +233,33 @@ namespace System.DirectoryServices.Protocols
                 if (!_resultList.Contains(asyncResult))
                     throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.InvalidAsyncResult));
 
-                if (asyncResult.exception != null)
+                if (asyncResult._exception != null)
                 {
                     // remove this async operation
 
                     // the async operation basically failed, we won't do it any more, so throw exception to the user and remove it from the list
                     _resultList.Remove(asyncResult);
-                    throw asyncResult.exception;
+                    throw asyncResult._exception;
                 }
 
                 PartialResultsCollection collection = new PartialResultsCollection();
 
-                if (asyncResult.response != null)
+                if (asyncResult._response != null)
                 {
-                    if (asyncResult.response.Entries != null)
+                    if (asyncResult._response.Entries != null)
                     {
-                        for (int i = 0; i < asyncResult.response.Entries.Count; i++)
-                            collection.Add(asyncResult.response.Entries[i]);
+                        for (int i = 0; i < asyncResult._response.Entries.Count; i++)
+                            collection.Add(asyncResult._response.Entries[i]);
 
-                        asyncResult.response.Entries.Clear();
+                        asyncResult._response.Entries.Clear();
                     }
 
-                    if (asyncResult.response.References != null)
+                    if (asyncResult._response.References != null)
                     {
-                        for (int i = 0; i < asyncResult.response.References.Count; i++)
-                            collection.Add(asyncResult.response.References[i]);
+                        for (int i = 0; i < asyncResult._response.References.Count; i++)
+                            collection.Add(asyncResult._response.References[i]);
 
-                        asyncResult.response.References.Clear();
+                        asyncResult._response.References.Clear();
                     }
                 }
 
@@ -274,17 +274,17 @@ namespace System.DirectoryServices.Protocols
                 if (!_resultList.Contains(asyncResult))
                     throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.InvalidAsyncResult));
 
-                Debug.Assert(asyncResult.resultStatus == ResultsStatus.Done);
+                Debug.Assert(asyncResult._resultStatus == ResultsStatus.Done);
 
                 _resultList.Remove(asyncResult);
 
-                if (asyncResult.exception != null)
+                if (asyncResult._exception != null)
                 {
-                    throw asyncResult.exception;
+                    throw asyncResult._exception;
                 }
                 else
                 {
-                    return asyncResult.response;
+                    return asyncResult._response;
                 }
             }
         }

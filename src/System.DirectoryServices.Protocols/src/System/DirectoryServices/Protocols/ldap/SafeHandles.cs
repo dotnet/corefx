@@ -54,7 +54,8 @@ namespace System.DirectoryServices.Protocols
     [SuppressUnmanagedCodeSecurityAttribute()]
     sealed internal class ConnectionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        internal bool needDispose = false;
+        internal bool _needDispose = false;
+
         internal ConnectionHandle() : base(true)
         {
             SetHandle(Wldap32.ldap_init(null, 389));
@@ -75,7 +76,7 @@ namespace System.DirectoryServices.Protocols
         internal ConnectionHandle(IntPtr value, bool disposeHandle)
             : base(true)
         {
-            needDispose = disposeHandle;
+            _needDispose = disposeHandle;
             if (value == IntPtr.Zero)
             {
                 int error = Wldap32.LdapGetLastError();
@@ -96,7 +97,7 @@ namespace System.DirectoryServices.Protocols
         {
             if (handle != IntPtr.Zero)
             {
-                if (needDispose)
+                if (_needDispose)
                 {
                     Wldap32.ldap_unbind(handle);
                 }
