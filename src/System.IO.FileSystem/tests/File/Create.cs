@@ -152,16 +152,29 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
         public void LongPath()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            Assert.Throws<PathTooLongException>(() => Create(Path.Combine(testDir.FullName, new string('a', 300))));
 
-            //TODO #645: File creation does not yet have long path support on Unix or Windows
-            //using (Create(Path.Combine(testDir.FullName, new string('k', 257))))
-            //{
-            //    Assert.True(File.Exists(Path.Combine(testDir.FullName, new string('k', 257))));
-            //}
+            // Long path should throw PathTooLongException on Desktop and IOException
+            // elsewhere.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<PathTooLongException>(
+                    () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
+            }
+            else
+            {
+                Assert.Throws<IOException>(
+                    () => Create(Path.Combine(testDir.FullName, new string('a', IOInputs.MaxComponent + 1))));
+
+                var fileName = new string('k', IOInputs.MaxComponent - 1);
+                using (Create(Path.Combine(testDir.FullName, fileName)))
+                {
+                    Assert.True(File.Exists(Path.Combine(testDir.FullName, fileName)));
+                }
+            }
         }
 
         #endregion
