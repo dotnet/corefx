@@ -18,14 +18,14 @@ namespace System.DirectoryServices.Protocols
         internal BerSafeHandle() : base(true)
         {
             SetHandle(Wldap32.ber_alloc(1));
-            if (handle == (IntPtr)0)
+            if (handle == IntPtr.Zero)
                 throw new OutOfMemoryException();
         }
 
         internal BerSafeHandle(berval value) : base(true)
         {
             SetHandle(Wldap32.ber_init(value));
-            if (handle == (IntPtr)0)
+            if (handle == IntPtr.Zero)
                 throw new BerConversionException();
         }
 
@@ -59,7 +59,7 @@ namespace System.DirectoryServices.Protocols
         {
             SetHandle(Wldap32.ldap_init(null, 389));
 
-            if (handle == (IntPtr)0)
+            if (handle == IntPtr.Zero)
             {
                 int error = Wldap32.LdapGetLastError();
                 if (Utility.IsLdapError((LdapError)error))
@@ -76,7 +76,7 @@ namespace System.DirectoryServices.Protocols
             : base(true)
         {
             needDispose = disposeHandle;
-            if (value == (IntPtr)0)
+            if (value == IntPtr.Zero)
             {
                 int error = Wldap32.LdapGetLastError();
                 if (Utility.IsLdapError((LdapError)error))
@@ -94,13 +94,13 @@ namespace System.DirectoryServices.Protocols
         }
         override protected bool ReleaseHandle()
         {
-            if (handle != (IntPtr)0)
+            if (handle != IntPtr.Zero)
             {
                 if (needDispose)
                 {
                     Wldap32.ldap_unbind(handle);
                 }
-                handle = (IntPtr)0;
+                handle = IntPtr.Zero;
             }
             return true;
         }

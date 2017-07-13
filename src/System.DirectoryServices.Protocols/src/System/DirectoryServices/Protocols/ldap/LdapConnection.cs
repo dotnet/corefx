@@ -508,21 +508,21 @@ namespace System.DirectoryServices.Protocols
 
         private int SendRequestHelper(DirectoryRequest request, ref int messageID)
         {
-            IntPtr serverControlArray = (IntPtr)0;
+            IntPtr serverControlArray = IntPtr.Zero;
             LdapControl[] managedServerControls = null;
-            IntPtr clientControlArray = (IntPtr)0;
+            IntPtr clientControlArray = IntPtr.Zero;
             LdapControl[] managedClientControls = null;
 
             string strValue = null;
 
             ArrayList ptrToFree = new ArrayList();
             LdapMod[] modifications = null;
-            IntPtr modArray = (IntPtr)0;
+            IntPtr modArray = IntPtr.Zero;
             int addModCount = 0;
 
             berval berValuePtr = null;
 
-            IntPtr searchAttributes = (IntPtr)0;
+            IntPtr searchAttributes = IntPtr.Zero;
             DereferenceAlias searchAliases;
             int attributeCount = 0;
 
@@ -544,8 +544,8 @@ namespace System.DirectoryServices.Protocols
 
             try
             {
-                IntPtr controlPtr = (IntPtr)0;
-                IntPtr tempPtr = (IntPtr)0;
+                IntPtr controlPtr = IntPtr.Zero;
+                IntPtr tempPtr = IntPtr.Zero;
 
                 // build server control
                 managedServerControls = BuildControlArray(request.Controls, true);
@@ -562,7 +562,7 @@ namespace System.DirectoryServices.Protocols
                         Marshal.WriteIntPtr(tempPtr, controlPtr);
                     }
                     tempPtr = (IntPtr)((long)serverControlArray + IntPtr.Size * managedServerControls.Length);
-                    Marshal.WriteIntPtr(tempPtr, (IntPtr)0);
+                    Marshal.WriteIntPtr(tempPtr, IntPtr.Zero);
                 }
 
                 // build client control
@@ -578,7 +578,7 @@ namespace System.DirectoryServices.Protocols
                         Marshal.WriteIntPtr(tempPtr, controlPtr);
                     }
                     tempPtr = (IntPtr)((long)clientControlArray + IntPtr.Size * managedClientControls.Length);
-                    Marshal.WriteIntPtr(tempPtr, (IntPtr)0);
+                    Marshal.WriteIntPtr(tempPtr, IntPtr.Zero);
                 }
 
                 if (request is DeleteRequest)
@@ -652,7 +652,7 @@ namespace System.DirectoryServices.Protocols
                         Marshal.WriteIntPtr(tempPtr, controlPtr);
                     }
                     tempPtr = (IntPtr)((long)modArray + IntPtr.Size * i);
-                    Marshal.WriteIntPtr(tempPtr, (IntPtr)0);
+                    Marshal.WriteIntPtr(tempPtr, IntPtr.Zero);
 
                     if (request is AddRequest)
                     {
@@ -714,7 +714,7 @@ namespace System.DirectoryServices.Protocols
                             Marshal.WriteIntPtr(tempPtr, controlPtr);
                         }
                         tempPtr = (IntPtr)((long)searchAttributes + IntPtr.Size * i);
-                        Marshal.WriteIntPtr(tempPtr, (IntPtr)0);
+                        Marshal.WriteIntPtr(tempPtr, IntPtr.Zero);
                     }
 
                     // processing the scope
@@ -763,13 +763,13 @@ namespace System.DirectoryServices.Protocols
             {
                 GC.KeepAlive(modifications);
 
-                if (serverControlArray != (IntPtr)0)
+                if (serverControlArray != IntPtr.Zero)
                 {
                     //release the memory from the heap
                     for (int i = 0; i < managedServerControls.Length; i++)
                     {
                         IntPtr tempPtr = Marshal.ReadIntPtr(serverControlArray, IntPtr.Size * i);
-                        if (tempPtr != (IntPtr)0)
+                        if (tempPtr != IntPtr.Zero)
                             Marshal.FreeHGlobal(tempPtr);
                     }
                     Marshal.FreeHGlobal(serverControlArray);
@@ -779,24 +779,24 @@ namespace System.DirectoryServices.Protocols
                 {
                     for (int i = 0; i < managedServerControls.Length; i++)
                     {
-                        if (managedServerControls[i].ldctl_oid != (IntPtr)0)
+                        if (managedServerControls[i].ldctl_oid != IntPtr.Zero)
                             Marshal.FreeHGlobal(managedServerControls[i].ldctl_oid);
 
                         if (managedServerControls[i].ldctl_value != null)
                         {
-                            if (managedServerControls[i].ldctl_value.bv_val != (IntPtr)0)
+                            if (managedServerControls[i].ldctl_value.bv_val != IntPtr.Zero)
                                 Marshal.FreeHGlobal(managedServerControls[i].ldctl_value.bv_val);
                         }
                     }
                 }
 
-                if (clientControlArray != (IntPtr)0)
+                if (clientControlArray != IntPtr.Zero)
                 {
                     // release the memory from the heap
                     for (int i = 0; i < managedClientControls.Length; i++)
                     {
                         IntPtr tempPtr = Marshal.ReadIntPtr(clientControlArray, IntPtr.Size * i);
-                        if (tempPtr != (IntPtr)0)
+                        if (tempPtr != IntPtr.Zero)
                             Marshal.FreeHGlobal(tempPtr);
                     }
                     Marshal.FreeHGlobal(clientControlArray);
@@ -806,24 +806,24 @@ namespace System.DirectoryServices.Protocols
                 {
                     for (int i = 0; i < managedClientControls.Length; i++)
                     {
-                        if (managedClientControls[i].ldctl_oid != (IntPtr)0)
+                        if (managedClientControls[i].ldctl_oid != IntPtr.Zero)
                             Marshal.FreeHGlobal(managedClientControls[i].ldctl_oid);
 
                         if (managedClientControls[i].ldctl_value != null)
                         {
-                            if (managedClientControls[i].ldctl_value.bv_val != (IntPtr)0)
+                            if (managedClientControls[i].ldctl_value.bv_val != IntPtr.Zero)
                                 Marshal.FreeHGlobal(managedClientControls[i].ldctl_value.bv_val);
                         }
                     }
                 }
 
-                if (modArray != (IntPtr)0)
+                if (modArray != IntPtr.Zero)
                 {
                     // release the memory from the heap
                     for (int i = 0; i < addModCount - 1; i++)
                     {
                         IntPtr tempPtr = Marshal.ReadIntPtr(modArray, IntPtr.Size * i);
-                        if (tempPtr != (IntPtr)0)
+                        if (tempPtr != IntPtr.Zero)
                             Marshal.FreeHGlobal(tempPtr);
                     }
                     Marshal.FreeHGlobal(modArray);
@@ -838,16 +838,16 @@ namespace System.DirectoryServices.Protocols
 
                 if (berValuePtr != null)
                 {
-                    if (berValuePtr.bv_val != (IntPtr)0)
+                    if (berValuePtr.bv_val != IntPtr.Zero)
                         Marshal.FreeHGlobal(berValuePtr.bv_val);
                 }
 
-                if (searchAttributes != (IntPtr)0)
+                if (searchAttributes != IntPtr.Zero)
                 {
                     for (int i = 0; i < attributeCount; i++)
                     {
                         IntPtr tempPtr = Marshal.ReadIntPtr(searchAttributes, IntPtr.Size * i);
-                        if (tempPtr != (IntPtr)0)
+                        if (tempPtr != IntPtr.Zero)
                             Marshal.FreeHGlobal(tempPtr);
                     }
                     Marshal.FreeHGlobal(searchAttributes);
@@ -861,24 +861,24 @@ namespace System.DirectoryServices.Protocols
             byte[][] certAuthorities = null;
             int count = ClientCertificates == null ? 0 : ClientCertificates.Count;
 
-            if (count == 0 && _options.clientCertificateDelegate == null)
+            if (count == 0 && _options._clientCertificateDelegate == null)
             {
                 return false;
             }
 
             // if user specify certificate through property and not though option, we don't need to check CA
-            if (_options.clientCertificateDelegate == null)
+            if (_options._clientCertificateDelegate == null)
             {
                 certificate = ClientCertificates[0].Handle;
                 return true;
             }
 
             // processing the CA
-            if (CAs != (IntPtr)0)
+            if (CAs != IntPtr.Zero)
             {
                 SecPkgContext_IssuerListInfoEx trustedCAs = (SecPkgContext_IssuerListInfoEx)Marshal.PtrToStructure(CAs, typeof(SecPkgContext_IssuerListInfoEx));
                 int issuerNumber = trustedCAs.cIssuers;
-                IntPtr tempPtr = (IntPtr)0;
+                IntPtr tempPtr = IntPtr.Zero;
                 for (int i = 0; i < issuerNumber; i++)
                 {
                     tempPtr = (IntPtr)((long)trustedCAs.aIssuers + Marshal.SizeOf(typeof(CRYPTOAPI_BLOB)) * i);
@@ -899,7 +899,7 @@ namespace System.DirectoryServices.Protocols
                 }
             }
 
-            X509Certificate cert = _options.clientCertificateDelegate(this, certAuthorities);
+            X509Certificate cert = _options._clientCertificateDelegate(this, certAuthorities);
             if (cert != null)
             {
                 certificate = cert.Handle;
@@ -907,7 +907,7 @@ namespace System.DirectoryServices.Protocols
             }
             else
             {
-                certificate = (IntPtr)0;
+                certificate = IntPtr.Zero;
                 return false;
             }
         }
@@ -1203,7 +1203,7 @@ namespace System.DirectoryServices.Protocols
                             // treat the control value as null
                             managedControls[i].ldctl_value = new berval();
                             managedControls[i].ldctl_value.bv_len = 0;
-                            managedControls[i].ldctl_value.bv_val = (IntPtr)0;
+                            managedControls[i].ldctl_value.bv_val = IntPtr.Zero;
                         }
                         else
                         {
@@ -1292,8 +1292,8 @@ namespace System.DirectoryServices.Protocols
 
                     attributes[i].values = Utility.AllocHGlobalIntPtrArray(valuesCount + 1);
                     int structSize = Marshal.SizeOf(typeof(berval));
-                    IntPtr controlPtr = (IntPtr)0;
-                    IntPtr tempPtr = (IntPtr)0;
+                    IntPtr controlPtr = IntPtr.Zero;
+                    IntPtr tempPtr = IntPtr.Zero;
                     int m = 0;
                     for (m = 0; m < valuesCount; m++)
                     {
@@ -1305,7 +1305,7 @@ namespace System.DirectoryServices.Protocols
                         Marshal.WriteIntPtr(tempPtr, controlPtr);
                     }
                     tempPtr = (IntPtr)((long)attributes[i].values + IntPtr.Size * m);
-                    Marshal.WriteIntPtr(tempPtr, (IntPtr)0);
+                    Marshal.WriteIntPtr(tempPtr, IntPtr.Zero);
                 }
             }
 
@@ -1317,13 +1317,13 @@ namespace System.DirectoryServices.Protocols
             int error;
             LDAP_TIMEVAL timeout = new LDAP_TIMEVAL();
             timeout.tv_sec = (int)(requestTimeOut.Ticks / TimeSpan.TicksPerSecond);
-            IntPtr ldapResult = (IntPtr)0;
+            IntPtr ldapResult = IntPtr.Zero;
             DirectoryResponse response = null;
 
-            IntPtr requestName = (IntPtr)0;
-            IntPtr requestValue = (IntPtr)0;
+            IntPtr requestName = IntPtr.Zero;
+            IntPtr requestValue = IntPtr.Zero;
 
-            IntPtr entryMessage = (IntPtr)0;
+            IntPtr entryMessage = IntPtr.Zero;
 
             bool needAbandon = true;
 
@@ -1381,18 +1381,18 @@ namespace System.DirectoryServices.Protocols
                                 if (resulterror == 0)
                                 {
                                     string name = null;
-                                    if (requestName != (IntPtr)0)
+                                    if (requestName != IntPtr.Zero)
                                     {
                                         name = Marshal.PtrToStringUni(requestName);
                                     }
 
                                     berval val = null;
                                     byte[] requestValueArray = null;
-                                    if (requestValue != (IntPtr)0)
+                                    if (requestValue != IntPtr.Zero)
                                     {
                                         val = new berval();
                                         Marshal.PtrToStructure(requestValue, val);
-                                        if (val.bv_len != 0 && val.bv_val != (IntPtr)0)
+                                        if (val.bv_len != 0 && val.bv_val != IntPtr.Zero)
                                         {
                                             requestValueArray = new byte[val.bv_len];
                                             Marshal.Copy(val.bv_val, requestValueArray, 0, val.bv_len);
@@ -1423,7 +1423,7 @@ namespace System.DirectoryServices.Protocols
                             entryMessage = Wldap32.ldap_first_entry(ldapHandle, ldapResult);
 
                             int entrycount = 0;
-                            while (entryMessage != (IntPtr)0)
+                            while (entryMessage != IntPtr.Zero)
                             {
                                 SearchResultEntry entry = ConstructEntry(entryMessage);
                                 if (entry != null)
@@ -1436,7 +1436,7 @@ namespace System.DirectoryServices.Protocols
                             // parsing the reference
                             IntPtr referenceMessage = Wldap32.ldap_first_reference(ldapHandle, ldapResult);
 
-                            while (referenceMessage != (IntPtr)0)
+                            while (referenceMessage != IntPtr.Zero)
                             {
                                 SearchResultReference reference = ConstructReference(referenceMessage);
                                 if (reference != null)
@@ -1471,13 +1471,13 @@ namespace System.DirectoryServices.Protocols
                 }
                 finally
                 {
-                    if (requestName != (IntPtr)0)
+                    if (requestName != IntPtr.Zero)
                         Wldap32.ldap_memfree(requestName);
 
-                    if (requestValue != (IntPtr)0)
+                    if (requestValue != IntPtr.Zero)
                         Wldap32.ldap_memfree(requestValue);
 
-                    if (ldapResult != (IntPtr)0)
+                    if (ldapResult != IntPtr.Zero)
                     {
                         Wldap32.ldap_msgfree(ldapResult);
                     }
@@ -1515,10 +1515,10 @@ namespace System.DirectoryServices.Protocols
 
         internal unsafe int ConstructParsedResult(IntPtr ldapResult, ref int serverError, ref string responseDn, ref string responseMessage, ref Uri[] responseReferral, ref DirectoryControl[] responseControl)
         {
-            IntPtr dn = (IntPtr)0;
-            IntPtr message = (IntPtr)0;
-            IntPtr referral = (IntPtr)0;
-            IntPtr control = (IntPtr)0;
+            IntPtr dn = IntPtr.Zero;
+            IntPtr message = IntPtr.Zero;
+            IntPtr referral = IntPtr.Zero;
+            IntPtr control = IntPtr.Zero;
             int resulterror = 0;
 
             try
@@ -1534,7 +1534,7 @@ namespace System.DirectoryServices.Protocols
                     responseMessage = Marshal.PtrToStringUni(message);
 
                     // parsing referral                    
-                    if (referral != (IntPtr)0)
+                    if (referral != IntPtr.Zero)
                     {
                         char** tempPtr = (char**)referral;
                         char* singleReferral = tempPtr[0];
@@ -1558,13 +1558,13 @@ namespace System.DirectoryServices.Protocols
                     }
 
                     // parsing control                                                
-                    if (control != (IntPtr)0)
+                    if (control != IntPtr.Zero)
                     {
                         int i = 0;
                         IntPtr tempControlPtr = control;
                         IntPtr singleControl = Marshal.ReadIntPtr(tempControlPtr, 0);
                         ArrayList controlList = new ArrayList();
-                        while (singleControl != (IntPtr)0)
+                        while (singleControl != IntPtr.Zero)
                         {
                             DirectoryControl directoryControl = ConstructControl(singleControl);
                             controlList.Add(directoryControl);
@@ -1592,18 +1592,18 @@ namespace System.DirectoryServices.Protocols
             }
             finally
             {
-                if (dn != (IntPtr)0)
+                if (dn != IntPtr.Zero)
                 {
                     Wldap32.ldap_memfree(dn);
                 }
 
-                if (message != (IntPtr)0)
+                if (message != IntPtr.Zero)
                     Wldap32.ldap_memfree(message);
 
-                if (referral != (IntPtr)0)
+                if (referral != IntPtr.Zero)
                     Wldap32.ldap_value_free(referral);
 
-                if (control != (IntPtr)0)
+                if (control != IntPtr.Zero)
                     Wldap32.ldap_controls_free(control);
             }
 
@@ -1612,21 +1612,21 @@ namespace System.DirectoryServices.Protocols
 
         internal SearchResultEntry ConstructEntry(IntPtr entryMessage)
         {
-            IntPtr dn = (IntPtr)0;
+            IntPtr dn = IntPtr.Zero;
             string entryDn = null;
-            IntPtr attribute = (IntPtr)0;
-            IntPtr address = (IntPtr)0;
+            IntPtr attribute = IntPtr.Zero;
+            IntPtr address = IntPtr.Zero;
             SearchResultAttributeCollection attributes = null;
 
             try
             {
                 // get the dn
                 dn = Wldap32.ldap_get_dn(ldapHandle, entryMessage);
-                if (dn != (IntPtr)0)
+                if (dn != IntPtr.Zero)
                 {
                     entryDn = Marshal.PtrToStringUni(dn);
                     Wldap32.ldap_memfree(dn);
-                    dn = (IntPtr)0;
+                    dn = IntPtr.Zero;
                 }
 
                 SearchResultEntry resultEntry = new SearchResultEntry(entryDn);
@@ -1636,7 +1636,7 @@ namespace System.DirectoryServices.Protocols
                 attribute = Wldap32.ldap_first_attribute(ldapHandle, entryMessage, ref address);
 
                 int tempcount = 0;
-                while (attribute != (IntPtr)0)
+                while (attribute != IntPtr.Zero)
                 {
                     DirectoryAttribute attr = ConstructAttribute(entryMessage, attribute);
                     attributes.Add(attr.Name, attr);
@@ -1646,25 +1646,25 @@ namespace System.DirectoryServices.Protocols
                     attribute = Wldap32.ldap_next_attribute(ldapHandle, entryMessage, address);
                 }
 
-                if (address != (IntPtr)0)
+                if (address != IntPtr.Zero)
                 {
                     Wldap32.ber_free(address, 0);
-                    address = (IntPtr)0;
+                    address = IntPtr.Zero;
                 }
 
                 return resultEntry;
             }
             finally
             {
-                if (dn != (IntPtr)0)
+                if (dn != IntPtr.Zero)
                 {
                     Wldap32.ldap_memfree(dn);
                 }
 
-                if (attribute != (IntPtr)0)
+                if (attribute != IntPtr.Zero)
                     Wldap32.ldap_memfree(attribute);
 
-                if (address != (IntPtr)0)
+                if (address != IntPtr.Zero)
                 {
                     Wldap32.ber_free(address, 0);
                 }
@@ -1684,17 +1684,17 @@ namespace System.DirectoryServices.Protocols
             IntPtr valuesArray = Wldap32.ldap_get_values_len(ldapHandle, entryMessage, name);
             try
             {
-                IntPtr tempPtr = (IntPtr)0;
+                IntPtr tempPtr = IntPtr.Zero;
                 int count = 0;
-                if (valuesArray != (IntPtr)0)
+                if (valuesArray != IntPtr.Zero)
                 {
                     tempPtr = Marshal.ReadIntPtr(valuesArray, IntPtr.Size * count);
-                    while (tempPtr != (IntPtr)0)
+                    while (tempPtr != IntPtr.Zero)
                     {
                         berval bervalue = new berval();
                         Marshal.PtrToStructure(tempPtr, bervalue);
                         byte[] byteArray = null;
-                        if (bervalue.bv_len > 0 && bervalue.bv_val != (IntPtr)0)
+                        if (bervalue.bv_len > 0 && bervalue.bv_val != IntPtr.Zero)
                         {
                             byteArray = new byte[bervalue.bv_len];
                             Marshal.Copy(bervalue.bv_val, byteArray, 0, bervalue.bv_len);
@@ -1708,7 +1708,7 @@ namespace System.DirectoryServices.Protocols
             }
             finally
             {
-                if (valuesArray != (IntPtr)0)
+                if (valuesArray != IntPtr.Zero)
                     Wldap32.ldap_value_free_len(valuesArray);
             }
 
@@ -1720,7 +1720,7 @@ namespace System.DirectoryServices.Protocols
             SearchResultReference reference = null;
             ArrayList referralList = new ArrayList();
             Uri[] uris = null;
-            IntPtr referenceArray = (IntPtr)0;
+            IntPtr referenceArray = IntPtr.Zero;
 
             int error = Wldap32.ldap_parse_reference(ldapHandle, referenceMessage, ref referenceArray);
 
@@ -1728,12 +1728,12 @@ namespace System.DirectoryServices.Protocols
             {
                 if (error == 0)
                 {
-                    IntPtr tempPtr = (IntPtr)0;
+                    IntPtr tempPtr = IntPtr.Zero;
                     int count = 0;
-                    if (referenceArray != (IntPtr)0)
+                    if (referenceArray != IntPtr.Zero)
                     {
                         tempPtr = Marshal.ReadIntPtr(referenceArray, IntPtr.Size * count);
-                        while (tempPtr != (IntPtr)0)
+                        while (tempPtr != IntPtr.Zero)
                         {
                             string s = Marshal.PtrToStringUni(tempPtr);
                             referralList.Add(s);
@@ -1743,7 +1743,7 @@ namespace System.DirectoryServices.Protocols
                         }
 
                         Wldap32.ldap_value_free(referenceArray);
-                        referenceArray = (IntPtr)0;
+                        referenceArray = IntPtr.Zero;
                     }
 
                     if (referralList.Count > 0)
@@ -1760,7 +1760,7 @@ namespace System.DirectoryServices.Protocols
             }
             finally
             {
-                if (referenceArray != (IntPtr)0)
+                if (referenceArray != IntPtr.Zero)
                     Wldap32.ldap_value_free(referenceArray);
             }
 
@@ -1816,7 +1816,7 @@ namespace System.DirectoryServices.Protocols
             LdapControl control = new LdapControl();
             Marshal.PtrToStructure(controlPtr, control);
 
-            Debug.Assert(control.ldctl_oid != (IntPtr)0);
+            Debug.Assert(control.ldctl_oid != IntPtr.Zero);
             string controlType = Marshal.PtrToStringUni(control.ldctl_oid);
 
             byte[] bytes = new byte[control.ldctl_value.bv_len];

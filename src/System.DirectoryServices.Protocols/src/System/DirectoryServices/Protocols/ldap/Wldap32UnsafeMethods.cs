@@ -126,7 +126,7 @@ namespace System.DirectoryServices.Protocols
     internal sealed class berval
     {
         public int bv_len = 0;
-        public IntPtr bv_val = (IntPtr)0;
+        public IntPtr bv_val = IntPtr.Zero;
 
         public berval() { }
     }
@@ -135,13 +135,13 @@ namespace System.DirectoryServices.Protocols
     internal sealed class SafeBerval
     {
         public int bv_len = 0;
-        public IntPtr bv_val = (IntPtr)0;
 
         public SafeBerval() { }
+        public IntPtr bv_val = IntPtr.Zero;
 
         ~SafeBerval()
         {
-            if (bv_val != (IntPtr)0)
+            if (bv_val != IntPtr.Zero)
                 Marshal.FreeHGlobal(bv_val);
         }
     }
@@ -149,7 +149,7 @@ namespace System.DirectoryServices.Protocols
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal sealed class LdapControl
     {
-        public IntPtr ldctl_oid = (IntPtr)0;
+        public IntPtr ldctl_oid = IntPtr.Zero;
         public berval ldctl_value = null;
         public bool ldctl_iscritical = false;
 
@@ -183,16 +183,16 @@ namespace System.DirectoryServices.Protocols
     internal sealed class LdapMod
     {
         public int type = 0;
-        public IntPtr attribute = (IntPtr)0;
-        public IntPtr values = (IntPtr)0;
+        public IntPtr attribute = IntPtr.Zero;
+        public IntPtr values = IntPtr.Zero;
 
         public LdapMod() { }
         ~LdapMod()
         {
-            if (attribute != (IntPtr)0)
+            if (attribute != IntPtr.Zero)
                 Marshal.FreeHGlobal(attribute);
 
-            if (values != (IntPtr)0)
+            if (values != IntPtr.Zero)
                 Marshal.FreeHGlobal(values);
         }
     }

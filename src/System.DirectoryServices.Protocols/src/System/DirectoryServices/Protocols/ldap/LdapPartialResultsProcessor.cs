@@ -126,8 +126,8 @@ namespace System.DirectoryServices.Protocols
         private void GetResultsHelper(LdapPartialAsyncResult asyncResult)
         {
             LdapConnection con = asyncResult.con;
-            IntPtr ldapResult = (IntPtr)0;
-            IntPtr entryMessage = (IntPtr)0;
+            IntPtr ldapResult = IntPtr.Zero;
+            IntPtr entryMessage = IntPtr.Zero;
             ResultAll resultType = ResultAll.LDAP_MSG_RECEIVED;
 
             if (asyncResult.resultStatus == ResultsStatus.CompleteResult)
