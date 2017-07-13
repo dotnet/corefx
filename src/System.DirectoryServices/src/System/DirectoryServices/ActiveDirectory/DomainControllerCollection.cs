@@ -18,13 +18,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public DomainController this[int index]
-        {
-            get
-            {
-                return (DomainController)InnerList[index];
-            }
-        }
+        public DomainController this[int index] => (DomainController)InnerList[index];
 
         public bool Contains(DomainController domainController)
         {

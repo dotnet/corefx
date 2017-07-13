@@ -962,10 +962,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region private methods
 
-        internal DirectoryContext GetDirectoryContext()
-        {
-            return context;
-        }
+        internal DirectoryContext GetDirectoryContext() => context;
 
         private int GetDomainModeLevel()
         {

@@ -45,10 +45,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public DirectoryServer this[int index]
         {
-            get
-            {
-                return (DirectoryServer)InnerList[index];
-            }
+            get => (DirectoryServer)InnerList[index];
             set
             {
                 DirectoryServer server = (DirectoryServer)value;

@@ -21,13 +21,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public DirectoryServer this[int index]
-        {
-            get
-            {
-                return (DirectoryServer)InnerList[index];
-            }
-        }
+        public DirectoryServer this[int index] => (DirectoryServer)InnerList[index];
 
         public bool Contains(DirectoryServer directoryServer)
         {
@@ -66,19 +60,10 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(directoryServers, index);
         }
 
-        internal int Add(DirectoryServer server)
-        {
-            return InnerList.Add(server);
-        }
+        internal int Add(DirectoryServer server) => InnerList.Add(server);
 
-        internal void AddRange(ICollection servers)
-        {
-            InnerList.AddRange(servers);
-        }
+        internal void AddRange(ICollection servers) => InnerList.AddRange(servers);
 
-        internal void Clear()
-        {
-            InnerList.Clear();
-        }
+        internal void Clear() => InnerList.Clear();
     }
 }

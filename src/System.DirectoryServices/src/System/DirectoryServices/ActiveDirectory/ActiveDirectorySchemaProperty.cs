@@ -477,10 +477,7 @@ namespace System.DirectoryServices.ActiveDirectory
             isBound = true;
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
         public DirectoryEntry GetDirectoryEntry()
         {

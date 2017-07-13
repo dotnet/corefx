@@ -51,10 +51,7 @@ namespace System.DirectoryServices.ActiveDirectory
         #endregion IDisposable
 
         #region public methods
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
         public abstract DirectoryEntry GetDirectoryEntry();
 

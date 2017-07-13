@@ -817,21 +817,9 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public override ReplicationConnectionCollection InboundConnections
-        {
-            get
-            {
-                return GetInboundConnectionsHelper();
-            }
-        }
+        public override ReplicationConnectionCollection InboundConnections => GetInboundConnectionsHelper();
 
-        public override ReplicationConnectionCollection OutboundConnections
-        {
-            get
-            {
-                return GetOutboundConnectionsHelper();
-            }
-        }
+        public override ReplicationConnectionCollection OutboundConnections => GetOutboundConnectionsHelper();
 
         #endregion public properties
 

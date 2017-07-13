@@ -102,17 +102,10 @@ namespace System.DirectoryServices.Design
 
         /// <include file='doc\MessageFormatterConverter.uex' path='docs/doc[@for="DirectoryEntryConverter.GetStandardValuesExclusive"]/*' />
         /// <internalonly/>                                   
-        public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
-        {
-            return false;
-        }
+        public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) => false;
 
         /// <include file='doc\MessageFormatterConverter.uex' path='docs/doc[@for="DirectoryEntryConverter.GetStandardValuesSupported"]/*' />
         /// <internalonly/>                        
-        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
     }
 }
-

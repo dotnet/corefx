@@ -14,28 +14,10 @@ namespace System.DirectoryServices.ActiveDirectory
         {
         }
 
-        public DateTime OperationStartTime
-        {
-            get
-            {
-                return startTime;
-            }
-        }
+        public DateTime OperationStartTime => startTime;
 
-        public ReplicationOperation CurrentOperation
-        {
-            get
-            {
-                return currentOp;
-            }
-        }
+        public ReplicationOperation CurrentOperation => currentOp;
 
-        public ReplicationOperationCollection PendingOperations
-        {
-            get
-            {
-                return collection;
-            }
-        }
+        public ReplicationOperationCollection PendingOperations => collection;
     }
 }

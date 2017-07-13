@@ -23,10 +23,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySite this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySite)InnerList[index];
-            }
+            get => (ActiveDirectorySite)InnerList[index];
             set
             {
                 ActiveDirectorySite site = (ActiveDirectorySite)value;

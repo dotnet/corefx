@@ -93,11 +93,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region IDisposable
 
-        ~DomainController()
-        {
-            // finalizer is called => Dispose has not been called yet.
-            Dispose(false);
-        }
+        ~DomainController() => Dispose(false);
 
         // private Dispose method
         protected override void Dispose(bool disposing)
@@ -892,21 +888,9 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public override ReplicationConnectionCollection InboundConnections
-        {
-            get
-            {
-                return GetInboundConnectionsHelper();
-            }
-        }
+        public override ReplicationConnectionCollection InboundConnections => GetInboundConnectionsHelper();
 
-        public override ReplicationConnectionCollection OutboundConnections
-        {
-            get
-            {
-                return GetOutboundConnectionsHelper();
-            }
-        }
+        public override ReplicationConnectionCollection OutboundConnections => GetOutboundConnectionsHelper();
 
         internal IntPtr Handle
         {

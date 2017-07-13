@@ -115,13 +115,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public int LastSyncResult { get; }
 
-        public string LastSyncMessage
-        {
-            get
-            {
-                return ExceptionHelper.GetErrorMessage(LastSyncResult, false);
-            }
-        }
+        public string LastSyncMessage => ExceptionHelper.GetErrorMessage(LastSyncResult, false);
 
         public int ConsecutiveFailureCount { get; }
     }

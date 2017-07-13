@@ -31,10 +31,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public TopLevelNameStatus Status
         {
-            get
-            {
-                return _status;
-            }
+            get => _status;
             set
             {
                 if (value != TopLevelNameStatus.Enabled &&

@@ -30,7 +30,6 @@ namespace System.DirectoryServices
         private bool _scopeSpecified = false;
         private int _sizeLimit = 0;
         private TimeSpan _serverTimeLimit = s_minusOneSecond;
-        private bool _propertyNamesOnly = false;
         private TimeSpan _clientTimeout = s_minusOneSecond;
         private int _pageSize = 0;
         private TimeSpan _serverPageTimeLimit = s_minusOneSecond;
@@ -40,8 +39,6 @@ namespace System.DirectoryServices
         private bool _cacheResultsSpecified = false;
         private bool _rootEntryAllocated = false;             // true: if a temporary entry inside Searcher has been created
         private string _assertDefaultNamingContext = null;
-        private bool _asynchronous = false;
-        private bool _tombstone = false;
         private string _attributeScopeQuery = "";
         private bool _attributeScopeQuerySpecified = false;
         private DereferenceAlias _derefAlias = DereferenceAlias.Never;
@@ -167,15 +164,10 @@ namespace System.DirectoryServices
         ///       client machine.
         ///    </para>
         /// </devdoc>
-        [
-            DefaultValue(true),
-        ]
+        [DefaultValue(true)]
         public bool CacheResults
         {
-            get
-            {
-                return _cacheResults;
-            }
+            get => _cacheResults;
             set
             {
                 // user explicitly set CacheResults to true and also want VLV
@@ -196,10 +188,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public TimeSpan ClientTimeout
         {
-            get
-            {
-                return _clientTimeout;
-            }
+            get => _clientTimeout;
             set
             {
                 // prevent integer overflow
@@ -217,20 +206,8 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value indicating whether the search should retrieve only the names of requested
         ///       properties or the names and values of requested properties.</para>
         /// </devdoc>        
-        [
-            DefaultValue(false),
-        ]
-        public bool PropertyNamesOnly
-        {
-            get
-            {
-                return _propertyNamesOnly;
-            }
-            set
-            {
-                _propertyNamesOnly = value;
-            }
-        }
+        [DefaultValue(false)]
+        public bool PropertyNamesOnly { get; set; }
 
         /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Filter"]/*' />
         /// <devdoc>
@@ -245,10 +222,7 @@ namespace System.DirectoryServices
         ]
         public string Filter
         {
-            get
-            {
-                return _filter;
-            }
+            get => _filter;
             set
             {
                 if (value == null || value.Length == 0)
@@ -261,15 +235,10 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>Gets or sets the page size in a paged search.</para>
         /// </devdoc>
-        [
-            DefaultValue(0),
-        ]
+        [DefaultValue(0)]
         public int PageSize
         {
-            get
-            {
-                return _pageSize;
-            }
+            get => _pageSize;
             set
             {
                 if (value < 0)
@@ -304,15 +273,10 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>Gets or sets how referrals are chased.</para>
         /// </devdoc>
-        [
-            DefaultValue(ReferralChasingOption.External),
-        ]
+        [DefaultValue(ReferralChasingOption.External)]
         public ReferralChasingOption ReferralChasing
         {
-            get
-            {
-                return _referralChasing;
-            }
+            get => _referralChasing;
             set
             {
                 if (value != ReferralChasingOption.None &&
@@ -329,15 +293,10 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>Gets or sets the scope of the search that should be observed by the server.</para>
         /// </devdoc>
-        [
-            DefaultValue(SearchScope.Subtree),
-        ]
+        [DefaultValue(SearchScope.Subtree)]
         public SearchScope SearchScope
         {
-            get
-            {
-                return _scope;
-            }
+            get => _scope;
             set
             {
                 if (value < SearchScope.Base || value > SearchScope.Subtree)
@@ -363,10 +322,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public TimeSpan ServerPageTimeLimit
         {
-            get
-            {
-                return _serverPageTimeLimit;
-            }
+            get => _serverPageTimeLimit;
             set
             {
                 // prevent integer overflow
@@ -386,10 +342,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public TimeSpan ServerTimeLimit
         {
-            get
-            {
-                return _serverTimeLimit;
-            }
+            get => _serverTimeLimit;
             set
             {
                 // prevent integer overflow
@@ -407,15 +360,10 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets the maximum number of objects that the 
         ///       server should return in a search.</para>
         /// </devdoc>
-        [
-            DefaultValue(0),
-        ]
+        [DefaultValue(0)]
         public int SizeLimit
         {
-            get
-            {
-                return _sizeLimit;
-            }
+            get => _sizeLimit;
             set
             {
                 if (value < 0)
@@ -468,23 +416,11 @@ namespace System.DirectoryServices
         ///    <para>Gets the property on which the results should be 
         ///       sorted.</para>
         /// </devdoc>
-        [
-            TypeConverterAttribute(typeof(ExpandableObjectConverter))
-        ]
+        [TypeConverter(typeof(ExpandableObjectConverter))]
         public SortOption Sort
         {
-            get
-            {
-                return _sort;
-            }
-
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("value");
-
-                _sort = value;
-            }
+            get => _sort;
+            set => _sort = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Asynchronous"]/*' />
@@ -492,40 +428,16 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value indicating whether searches should be carried out in an asynchronous  
         ///       way.</para>
         /// </devdoc>
-        [
-            DefaultValue(false),
-        ]
-        public bool Asynchronous
-        {
-            get
-            {
-                return _asynchronous;
-            }
-            set
-            {
-                _asynchronous = value;
-            }
-        }
+        [DefaultValue(false)]
+        public bool Asynchronous { get; set; }
 
         /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Tombstone"]/*' />
         /// <devdoc>
         ///    <para>Gets or sets a value indicateing whether the search should also return deleted objects that match the search  
         ///       filter.</para>
         /// </devdoc>
-        [
-            DefaultValue(false),
-        ]
-        public bool Tombstone
-        {
-            get
-            {
-                return _tombstone;
-            }
-            set
-            {
-                _tombstone = value;
-            }
-        }
+        [DefaultValue(false)]
+        public bool Tombstone { get; set; }
 
         /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.AttributeScopeQuery"]/*' />
         /// <devdoc>
@@ -539,10 +451,7 @@ namespace System.DirectoryServices
         ]
         public string AttributeScopeQuery
         {
-            get
-            {
-                return _attributeScopeQuery;
-            }
+            get => _attributeScopeQuery;
             set
             {
                 if (value == null)
@@ -576,16 +485,10 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value to indicate how the aliases of found objects are to be  
         ///       resolved.</para>
         /// </devdoc>
-        [
-            DefaultValue(DereferenceAlias.Never),
-        ]
+        [DefaultValue(DereferenceAlias.Never)]
         public DereferenceAlias DerefAlias
         {
-            get
-            {
-                return _derefAlias;
-            }
-
+            get => _derefAlias;
             set
             {
                 if (value < DereferenceAlias.Never || value > DereferenceAlias.Always)
@@ -600,15 +503,10 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value to indicate the search should return security access information for the specified 
         ///       attributes.</para>
         /// </devdoc>
-        [
-            DefaultValue(SecurityMasks.None),
-        ]
+        [DefaultValue(SecurityMasks.None)]
         public SecurityMasks SecurityMasks
         {
-            get
-            {
-                return _securityMask;
-            }
+            get => _securityMask;
             set
             {
                 // make sure the behavior is consistent with native ADSI
@@ -624,15 +522,10 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value to return extended DNs according to the requested 
         ///       format.</para>
         /// </devdoc>
-        [
-            DefaultValue(ExtendedDN.None),
-        ]
+        [DefaultValue(ExtendedDN.None)]
         public ExtendedDN ExtendedDN
         {
-            get
-            {
-                return _extendedDN;
-            }
+            get => _extendedDN;
             set
             {
                 if (value < ExtendedDN.None || value > ExtendedDN.Standard)
@@ -647,9 +540,7 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value to indicate a directory synchronization search, which returns all changes since a specified
         ///       state.</para>
         /// </devdoc>
-        [
-            DefaultValue(null),
-        ]
+        [DefaultValue(null)]
         public DirectorySynchronization DirectorySynchronization
         {
             get
@@ -687,9 +578,7 @@ namespace System.DirectoryServices
         ///    <para>Gets or sets a value to indicate the search should use the LDAP virtual list view (VLV)
         ///       control.</para>
         /// </devdoc>
-        [
-            DefaultValue(null),
-        ]
+        [DefaultValue(null)]
         public DirectoryVirtualListView VirtualListView
         {
             get
@@ -773,10 +662,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para> Executes the search and returns a collection of the entries that are found.</para>
         /// </devdoc>                
-        public SearchResultCollection FindAll()
-        {
-            return FindAll(true);
-        }
+        public SearchResultCollection FindAll() => FindAll(true);
 
         private SearchResultCollection FindAll(bool findMoreThanOne)
         {

@@ -879,17 +879,9 @@ namespace System.DirectoryServices.ActiveDirectory
                 set;
             }
 
-            bool Abstract
-            {
-                get;
-                set;
-            }
+            bool Abstract { get; set; }
 
-            bool Auxiliary
-            {
-                get;
-                set;
-            }
+            bool Auxiliary { get; set; }
 
             object MandatoryProperties
             {
@@ -905,11 +897,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 set;
             }
 
-            object NamingProperties
-            {
-                get;
-                set;
-            }
+            object NamingProperties { get; set; }
 
             object DerivedFrom
             {
@@ -931,17 +919,9 @@ namespace System.DirectoryServices.ActiveDirectory
                 set;
             }
 
-            object Containment
-            {
-                get;
-                set;
-            }
+            object Containment { get; set; }
 
-            bool Container
-            {
-                get;
-                set;
-            }
+            bool Container { get; set; }
 
             string HelpFileName
             {

@@ -54,10 +54,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public object this[int index]
         {
-            get
-            {
-                return List[index];
-            }
+            get => List[index];
             set
             {
                 if (_needNewBehavior && !_allowMultipleChange)
@@ -148,10 +145,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>Appends the value to the set of values for this property.</para>
         /// </devdoc>
-        public int Add(object value)
-        {
-            return List.Add(value);
-        }
+        public int Add(object value) => List.Add(value);
 
         /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.AddRange"]/*' />
         /// <devdoc>
@@ -210,19 +204,13 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public int IndexOf(object value)
-        {
-            return List.IndexOf(value);
-        }
+        public int IndexOf(object value) => List.IndexOf(value);
 
         /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Insert"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public void Insert(int index, object value)
-        {
-            List.Insert(index, value);
-        }
+        public void Insert(int index, object value) => List.Insert(index, value);
 
         /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.PopulateList"]/*' />
         ///<internalonly/>                           

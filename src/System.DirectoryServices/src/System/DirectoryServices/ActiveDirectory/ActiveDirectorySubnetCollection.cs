@@ -27,10 +27,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySubnet this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySubnet)InnerList[index];
-            }
+            get => (ActiveDirectorySubnet)InnerList[index];
             set
             {
                 ActiveDirectorySubnet subnet = (ActiveDirectorySubnet)value;

@@ -54,8 +54,7 @@ namespace System.DirectoryServices
 
         #region Constructors
 
-        public ActiveDirectorySecurity()
-            : base()
+        public ActiveDirectorySecurity() : base()
         {
         }
 
@@ -355,20 +354,13 @@ namespace System.DirectoryServices
         #endregion
 
         #region some overrides
-        public override Type AccessRightType
-        {
-            get { return typeof(System.DirectoryServices.ActiveDirectoryRights); }
-        }
 
-        public override Type AccessRuleType
-        {
-            get { return typeof(System.DirectoryServices.ActiveDirectoryAccessRule); }
-        }
+        public override Type AccessRightType => typeof(ActiveDirectoryRights);
 
-        public override Type AuditRuleType
-        {
-            get { return typeof(System.DirectoryServices.ActiveDirectoryAuditRule); }
-        }
+        public override Type AccessRuleType => typeof(ActiveDirectoryAccessRule);
+
+        public override Type AuditRuleType => typeof(ActiveDirectoryAuditRule);
+
         #endregion
 
     }
@@ -377,10 +369,8 @@ namespace System.DirectoryServices
     {
         #region Access mask to rights translation
 
-        internal static int AccessMaskFromRights(ActiveDirectoryRights adRights)
-        {
-            return (int)adRights;
-        }
+        internal static int AccessMaskFromRights(ActiveDirectoryRights adRights) => (int)adRights;
+
         internal static ActiveDirectoryRights RightsFromAccessMask(int accessMask)
         {
             return (ActiveDirectoryRights)accessMask;
@@ -666,18 +656,12 @@ namespace System.DirectoryServices
 
         public ActiveDirectoryRights ActiveDirectoryRights
         {
-            get
-            {
-                return ActiveDirectoryRightsTranslator.RightsFromAccessMask(base.AccessMask);
-            }
+            get => ActiveDirectoryRightsTranslator.RightsFromAccessMask(base.AccessMask);
         }
 
         public ActiveDirectorySecurityInheritance InheritanceType
         {
-            get
-            {
-                return ActiveDirectoryInheritanceTranslator.GetEffectiveInheritanceFlags(base.InheritanceFlags, base.PropagationFlags);
-            }
+            get => ActiveDirectoryInheritanceTranslator.GetEffectiveInheritanceFlags(InheritanceFlags, PropagationFlags);
         }
 
         #endregion
@@ -1417,18 +1401,12 @@ namespace System.DirectoryServices
 
         public ActiveDirectoryRights ActiveDirectoryRights
         {
-            get
-            {
-                return ActiveDirectoryRightsTranslator.RightsFromAccessMask(base.AccessMask);
-            }
+            get => ActiveDirectoryRightsTranslator.RightsFromAccessMask(AccessMask);
         }
 
         public ActiveDirectorySecurityInheritance InheritanceType
         {
-            get
-            {
-                return ActiveDirectoryInheritanceTranslator.GetEffectiveInheritanceFlags(base.InheritanceFlags, base.PropagationFlags);
-            }
+            get => ActiveDirectoryInheritanceTranslator.GetEffectiveInheritanceFlags(InheritanceFlags, PropagationFlags);
         }
 
         #endregion

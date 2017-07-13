@@ -18,13 +18,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public AdamInstance this[int index]
-        {
-            get
-            {
-                return (AdamInstance)InnerList[index];
-            }
-        }
+        public AdamInstance this[int index] => (AdamInstance)InnerList[index];
 
         public bool Contains(AdamInstance adamInstance)
         {

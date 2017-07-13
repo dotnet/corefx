@@ -60,10 +60,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region IDisposable
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        public void Dispose() => Dispose(true);
 
         // private Dispose method
         protected void Dispose(bool disposing)
@@ -232,10 +229,7 @@ namespace System.DirectoryServices.ActiveDirectory
             RaiseForestFunctionalityLevel((int)forestMode);
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
         public GlobalCatalog FindGlobalCatalog()
         {
@@ -638,10 +632,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public static Forest GetCurrentForest()
-        {
-            return Forest.GetForest(new DirectoryContext(DirectoryContextType.Forest));
-        }
+        public static Forest GetCurrentForest() => GetForest(new DirectoryContext(DirectoryContextType.Forest));
 
         #endregion public methods
 
@@ -802,10 +793,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region private methods
 
-        internal DirectoryContext GetDirectoryContext()
-        {
-            return _context;
-        }
+        internal DirectoryContext GetDirectoryContext() => _context;
 
         private int GetForestModeLevel()
         {

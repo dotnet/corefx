@@ -28,10 +28,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public TrustRelationshipInformation this[int index]
         {
-            get
-            {
-                return (TrustRelationshipInformation)InnerList[index];
-            }
+            get => (TrustRelationshipInformation)InnerList[index];
         }
 
         public bool Contains(TrustRelationshipInformation information)
@@ -55,9 +52,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(array, index);
         }
 
-        internal int Add(TrustRelationshipInformation info)
-        {
-            return InnerList.Add(info);
-        }
+        internal int Add(TrustRelationshipInformation info) => InnerList.Add(info);
     }
 }

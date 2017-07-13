@@ -40,19 +40,13 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public bool Contains(object value)
-        {
-            return InnerList.Contains(value);
-        }
+        public bool Contains(object value) => InnerList.Contains(value);
 
         /// <include file='doc\ResultPropertyValueCollection.uex' path='docs/doc[@for="ResultPropertyValueCollection.IndexOf"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public int IndexOf(object value)
-        {
-            return InnerList.IndexOf(value);
-        }
+        public int IndexOf(object value) => InnerList.IndexOf(value);
 
         /// <include file='doc\ResultPropertyValueCollection.uex' path='docs/doc[@for="ResultPropertyValueCollection.CopyTo"]/*' />
         /// <devdoc>

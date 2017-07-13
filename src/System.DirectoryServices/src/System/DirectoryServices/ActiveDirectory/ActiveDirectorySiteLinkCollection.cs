@@ -17,10 +17,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySiteLink this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySiteLink)InnerList[index];
-            }
+            get => (ActiveDirectorySiteLink)InnerList[index];
             set
             {
                 ActiveDirectorySiteLink link = (ActiveDirectorySiteLink)value;

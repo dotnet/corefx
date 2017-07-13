@@ -19,13 +19,7 @@ namespace System.DirectoryServices.ActiveDirectory
             _nameTable = Hashtable.Synchronized(tempNameTable);
         }
 
-        public ReplicationOperation this[int index]
-        {
-            get
-            {
-                return (ReplicationOperation)InnerList[index];
-            }
-        }
+        public ReplicationOperation this[int index] => (ReplicationOperation)InnerList[index];
 
         public bool Contains(ReplicationOperation operation)
         {
@@ -48,10 +42,7 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(operations, index);
         }
 
-        private int Add(ReplicationOperation operation)
-        {
-            return InnerList.Add(operation);
-        }
+        private int Add(ReplicationOperation operation) => InnerList.Add(operation);
 
         internal void AddHelper(DS_REPL_PENDING_OPS operations, IntPtr info)
         {
@@ -78,4 +69,3 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 }
-

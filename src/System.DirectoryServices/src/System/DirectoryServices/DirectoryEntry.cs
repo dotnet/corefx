@@ -34,7 +34,6 @@ namespace System.DirectoryServices
 #pragma warning disable 0414
         internal bool propertiesAlreadyEnumerated = false;
 #pragma warning restore 0414
-        private bool _justCreated = false;   // 'true' if newly created entry was not yet stored by CommitChanges().
         private bool _disposed = false;
         private AuthenticationTypes _authenticationType = AuthenticationTypes.Secure;
         private NetworkCredential _credentials;
@@ -178,15 +177,10 @@ namespace System.DirectoryServices
         }
 
         /// <include file='doc\DirectoryEntry.uex' path='docs/doc[@for="DirectoryEntry.AuthenticationType"]/*' />
-        [
-            DefaultValue(AuthenticationTypes.Secure),
-        ]
+        [DefaultValue(AuthenticationTypes.Secure)]
         public AuthenticationTypes AuthenticationType
         {
-            get
-            {
-                return _authenticationType;
-            }
+            get => _authenticationType;
             set
             {
                 if (_authenticationType == value)
@@ -197,13 +191,7 @@ namespace System.DirectoryServices
             }
         }
 
-        private bool Bound
-        {
-            get
-            {
-                return _adsObject != null;
-            }
-        }
+        private bool Bound => _adsObject != null;
 
         /// <include file='doc\DirectoryEntry.uex' path='docs/doc[@for="DirectoryEntry.Children"]/*' />
         /// <devdoc>
@@ -211,13 +199,7 @@ namespace System.DirectoryServices
         /// containing the child entries of this node in the Active
         /// Directory hierarchy.</para>
         /// </devdoc>
-        public DirectoryEntries Children
-        {
-            get
-            {
-                return new DirectoryEntries(this);
-            }
-        }
+        public DirectoryEntries Children => new DirectoryEntries(this);
 
         internal UnsafeNativeMethods.IAdsContainer ContainerObject
         {
@@ -291,17 +273,7 @@ namespace System.DirectoryServices
             }
         }
 
-        internal bool JustCreated
-        {
-            get
-            {
-                return _justCreated;
-            }
-            set
-            {
-                _justCreated = value;
-            }
-        }
+        internal bool JustCreated { get; set; }
 
         /// <include file='doc\DirectoryEntry.uex' path='docs/doc[@for="DirectoryEntry.Name"]/*' />
         /// <devdoc>
@@ -410,10 +382,7 @@ namespace System.DirectoryServices
         ]
         public string Path
         {
-            get
-            {
-                return _path;
-            }
+            get => _path;
             set
             {
                 if (value == null)
@@ -494,10 +463,7 @@ namespace System.DirectoryServices
         ]
         public bool UsePropertyCache
         {
-            get
-            {
-                return _useCache;
-            }
+            get => _useCache;
             set
             {
                 if (value == _useCache)
@@ -682,7 +648,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public void CommitChanges()
         {
-            if (_justCreated)
+            if (JustCreated)
             {
                 // Note: Permissions Demand is not necessary here, because entry has already been created with appr. permissions. 
                 // Write changes regardless of Caching mode to finish construction of a new entry.
@@ -699,7 +665,7 @@ namespace System.DirectoryServices
                 {
                     throw COMExceptionHelper.CreateFormattedComException(e);
                 }
-                _justCreated = false;
+                JustCreated = false;
                 _objectSecurityInitialized = false;
                 _objectSecurityModified = false;
 
@@ -740,7 +706,7 @@ namespace System.DirectoryServices
 
         internal void CommitIfNotCaching()
         {
-            if (_justCreated)
+            if (JustCreated)
                 return;   // Do not write changes, beacuse the entry is just under construction until CommitChanges() is called.
 
             if (_useCache)
@@ -772,10 +738,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>Creates a copy of this entry as a child of the given parent.</para>
         /// </devdoc>
-        public DirectoryEntry CopyTo(DirectoryEntry newParent)
-        {
-            return CopyTo(newParent, null);
-        }
+        public DirectoryEntry CopyTo(DirectoryEntry newParent) => CopyTo(newParent, null);
 
         /// <include file='doc\DirectoryEntry.uex' path='docs/doc[@for="DirectoryEntry.CopyTo1"]/*' />
         /// <devdoc>
@@ -1181,10 +1144,7 @@ namespace System.DirectoryServices
         ///       Changes the name of this entry.
         ///    </para>
         /// </devdoc>
-        public void Rename(string newName)
-        {
-            MoveTo(Parent, newName);
-        }
+        public void Rename(string newName) => MoveTo(Parent, newName);
 
         private void Unbind()
         {

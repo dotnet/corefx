@@ -18,13 +18,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public GlobalCatalog this[int index]
-        {
-            get
-            {
-                return (GlobalCatalog)InnerList[index];
-            }
-        }
+        public GlobalCatalog this[int index] => (GlobalCatalog)InnerList[index];
 
         public bool Contains(GlobalCatalog globalCatalog)
         {

@@ -54,10 +54,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySchemaProperty this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySchemaProperty)List[index];
-            }
+            get => (ActiveDirectorySchemaProperty)List[index];
             set
             {
                 if (value == null)

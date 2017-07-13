@@ -15,11 +15,7 @@ namespace System.DirectoryServices.ActiveDirectory
             SetHandle(value);
         }
 
-        override protected bool ReleaseHandle()
-        {
-            // STATUS_SUCCESS is 0
-            return UnsafeNativeMethods.LsaClose(handle) == 0;
-        }
+        override protected bool ReleaseHandle() => UnsafeNativeMethods.LsaClose(handle) == 0;
     }
 
     [SuppressUnmanagedCodeSecurityAttribute()]
@@ -32,11 +28,7 @@ namespace System.DirectoryServices.ActiveDirectory
             SetHandle(value);
         }
 
-        override protected bool ReleaseHandle()
-        {
-            // STATUS_SUCCESS is 0
-            return NativeMethods.LsaDeregisterLogonProcess(handle) == 0;
-        }
+        override protected bool ReleaseHandle() => NativeMethods.LsaDeregisterLogonProcess(handle) == 0;
     }
 
     [SuppressUnmanagedCodeSecurityAttribute()]
@@ -49,9 +41,6 @@ namespace System.DirectoryServices.ActiveDirectory
             SetHandle(value);
         }
 
-        override protected bool ReleaseHandle()
-        {
-            return UnsafeNativeMethods.FreeLibrary(handle) != 0;
-        }
+        override protected bool ReleaseHandle() => UnsafeNativeMethods.FreeLibrary(handle) != 0;
     }
 }

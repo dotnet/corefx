@@ -53,10 +53,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ForestTrustDomainStatus Status
         {
-            get
-            {
-                return _status;
-            }
+            get => _status;
             set
             {
                 if (value != ForestTrustDomainStatus.Enabled &&

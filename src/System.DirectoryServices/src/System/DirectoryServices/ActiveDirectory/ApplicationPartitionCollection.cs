@@ -18,13 +18,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public ApplicationPartition this[int index]
-        {
-            get
-            {
-                return (ApplicationPartition)InnerList[index];
-            }
-        }
+        public ApplicationPartition this[int index] => (ApplicationPartition)InnerList[index];
 
         public bool Contains(ApplicationPartition applicationPartition)
         {

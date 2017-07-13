@@ -18,13 +18,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public ActiveDirectorySite this[int index]
-        {
-            get
-            {
-                return (ActiveDirectorySite)InnerList[index];
-            }
-        }
+        public ActiveDirectorySite this[int index] => (ActiveDirectorySite)InnerList[index];
 
         public bool Contains(ActiveDirectorySite site)
         {
@@ -73,14 +67,8 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(sites, index);
         }
 
-        internal int Add(ActiveDirectorySite site)
-        {
-            return InnerList.Add(site);
-        }
+        internal int Add(ActiveDirectorySite site) => InnerList.Add(site);
 
-        internal void Clear()
-        {
-            InnerList.Clear();
-        }
+        internal void Clear() => InnerList.Clear();
     }
 }

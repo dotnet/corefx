@@ -20,10 +20,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySchemaProperty this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySchemaProperty)InnerList[index];
-            }
+            get => (ActiveDirectorySchemaProperty)InnerList[index];
         }
 
         public bool Contains(ActiveDirectorySchemaProperty schemaProperty)

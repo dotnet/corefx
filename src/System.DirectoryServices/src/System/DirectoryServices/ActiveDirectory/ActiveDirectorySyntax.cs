@@ -33,10 +33,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
     internal class OMObjectClass
     {
-        public OMObjectClass(byte[] data)
-        {
-            Data = data;
-        }
+        public OMObjectClass(byte[] data) => Data = data;
 
         public bool Equals(OMObjectClass OMObjectClass)
         {

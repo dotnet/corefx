@@ -71,25 +71,13 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public ICollection PropertyNames
-        {
-            get
-            {
-                return new KeysCollection(this);
-            }
-        }
+        public ICollection PropertyNames => new KeysCollection(this);
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.Values"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public ICollection Values
-        {
-            get
-            {
-                return new ValuesCollection(this);
-            }
-        }
+        public ICollection Values => new ValuesCollection(this);
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.Contains"]/*' />
         /// <devdoc>
@@ -150,46 +138,21 @@ namespace System.DirectoryServices
         ///<internalonly/>
         object IDictionary.this[object key]
         {
-            get
-            {
-                return this[(string)key];
-            }
-
-            set
-            {
-                throw new NotSupportedException(SR.DSPropertySetSupported);
-            }
+            get => this[(string)key];
+            set => throw new NotSupportedException(SR.DSPropertySetSupported);
         }
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.IsFixedSize"]/*' />
         ///<internalonly/>
-        bool IDictionary.IsFixedSize
-        {
-            get
-            {
-                return true;
-            }
-        }
+        bool IDictionary.IsFixedSize => true;
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.IsReadOnly"]/*' />
         ///<internalonly/>
-        bool IDictionary.IsReadOnly
-        {
-            get
-            {
-                return true;
-            }
-        }
+        bool IDictionary.IsReadOnly => true;
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.Keys"]/*' />
         ///<internalonly/>
-        ICollection IDictionary.Keys
-        {
-            get
-            {
-                return new KeysCollection(this);
-            }
-        }
+        ICollection IDictionary.Keys => new KeysCollection(this);
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.Add"]/*' />
         ///<internalonly/>
@@ -207,10 +170,7 @@ namespace System.DirectoryServices
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.Contains"]/*' />
         ///<internalonly/>
-        bool IDictionary.Contains(object value)
-        {
-            return this.Contains((string)value);
-        }
+        bool IDictionary.Contains(object value) => Contains((string)value);
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IDictionary.Remove"]/*' />
         ///<internalonly/>
@@ -221,30 +181,15 @@ namespace System.DirectoryServices
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.IEnumerable.GetEnumerator"]/*' />
         ///<internalonly/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return (IEnumerator)GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ICollection.IsSynchronized"]/*' />
         ///<internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ICollection.SyncRoot"]/*' />
         ///<internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ICollection.CopyTo"]/*' />
         ///<internalonly/>
@@ -285,10 +230,7 @@ namespace System.DirectoryServices
                 _parentEntry = parent;
             }
 
-            ~PropertyEnumerator()
-            {
-                Dispose(true);      // finalizer is called => Dispose has not been called yet.
-            }
+            ~PropertyEnumerator() => Dispose(true);
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyEnumerator.Dispose"]/*' />
             /// <devdoc>        
@@ -312,13 +254,7 @@ namespace System.DirectoryServices
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.PropertyEnumerator.Current"]/*' />
             ///<internalonly/>
-            public object Current
-            {
-                get
-                {
-                    return Entry.Value;
-                }
-            }
+            public object Current => Entry.Value;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.PropertyEnumerator.Entry"]/*' />
             ///<internalonly/>
@@ -335,23 +271,11 @@ namespace System.DirectoryServices
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.PropertyEnumerator.Key"]/*' />
             ///<internalonly/>
-            public object Key
-            {
-                get
-                {
-                    return Entry.Key;
-                }
-            }
+            public object Key => Entry.Key;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.PropertyEnumerator.Value"]/*' />
             ///<internalonly/>
-            public object Value
-            {
-                get
-                {
-                    return Entry.Value;
-                }
-            }
+            public object Value => Entry.Value;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.PropertyEnumerator.MoveNext"]/*' />
             ///<internalonly/>
@@ -408,43 +332,19 @@ namespace System.DirectoryServices
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.Count"]/*' />
             ///<internalonly/>
-            public int Count
-            {
-                get
-                {
-                    return props.Count;
-                }
-            }
+            public int Count => props.Count;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.IsReadOnly"]/*' />
             ///<internalonly/>
-            public bool IsReadOnly
-            {
-                get
-                {
-                    return true;
-                }
-            }
+            public bool IsReadOnly => true;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.IsSynchronized"]/*' />
             ///<internalonly/>
-            public bool IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            public bool IsSynchronized => false;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.SyncRoot"]/*' />
             ///<internalonly/>
-            public object SyncRoot
-            {
-                get
-                {
-                    return ((ICollection)props).SyncRoot;
-                }
-            }
+            public object SyncRoot => ((ICollection)props).SyncRoot;
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.CopyTo"]/*' />
             ///<internalonly/>
@@ -456,10 +356,7 @@ namespace System.DirectoryServices
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesCollection.GetEnumerator"]/*' />
             ///<internalonly/>
-            public virtual IEnumerator GetEnumerator()
-            {
-                return new ValuesEnumerator(props);
-            }
+            public virtual IEnumerator GetEnumerator() => new ValuesEnumerator(props);
         }
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.KeysCollection"]/*' />
@@ -535,10 +432,7 @@ namespace System.DirectoryServices
 
             /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.ValuesEnumerator.Reset"]/*' />
             ///<internalonly/>
-            public void Reset()
-            {
-                _currentIndex = -1;
-            }
+            public void Reset() => _currentIndex = -1;
         }
 
         /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection.KeysEnumerator"]/*' />
@@ -566,4 +460,3 @@ namespace System.DirectoryServices
         }
     }
 }
-

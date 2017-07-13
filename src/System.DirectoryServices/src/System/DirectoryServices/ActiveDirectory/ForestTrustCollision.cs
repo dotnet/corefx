@@ -31,10 +31,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ForestTrustRelationshipCollision this[int index]
         {
-            get
-            {
-                return (ForestTrustRelationshipCollision)InnerList[index];
-            }
+            get => (ForestTrustRelationshipCollision)InnerList[index];
         }
 
         public bool Contains(ForestTrustRelationshipCollision collision)
@@ -58,9 +55,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(array, index);
         }
 
-        internal int Add(ForestTrustRelationshipCollision collision)
-        {
-            return InnerList.Add(collision);
-        }
+        internal int Add(ForestTrustRelationshipCollision collision) => InnerList.Add(collision);
     }
 }

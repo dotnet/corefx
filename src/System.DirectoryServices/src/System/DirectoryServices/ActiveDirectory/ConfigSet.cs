@@ -46,10 +46,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region IDisposable
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        public void Dispose() => Dispose(true);
 
         // private Dispose method
         protected virtual void Dispose(bool disposing)
@@ -264,10 +261,8 @@ namespace System.DirectoryServices.ActiveDirectory
             _cachedSecurityLevel = (ReplicationSecurityLevel)(-1);
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
+
         #endregion public methods
 
         #region public properties

@@ -12,10 +12,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ForestTrustDomainInformation this[int index]
         {
-            get
-            {
-                return (ForestTrustDomainInformation)InnerList[index];
-            }
+            get => (ForestTrustDomainInformation)InnerList[index];
         }
 
         public bool Contains(ForestTrustDomainInformation information)
@@ -39,9 +36,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(array, index);
         }
 
-        internal int Add(ForestTrustDomainInformation info)
-        {
-            return InnerList.Add(info);
-        }
+        internal int Add(ForestTrustDomainInformation info) => InnerList.Add(info);
     }
 }

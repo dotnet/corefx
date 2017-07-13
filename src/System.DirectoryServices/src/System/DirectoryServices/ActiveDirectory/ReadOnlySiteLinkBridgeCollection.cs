@@ -12,10 +12,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySiteLinkBridge this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySiteLinkBridge)InnerList[index];
-            }
+            get => (ActiveDirectorySiteLinkBridge)InnerList[index];
         }
 
         public bool Contains(ActiveDirectorySiteLinkBridge bridge)
@@ -63,14 +60,8 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(bridges, index);
         }
 
-        internal int Add(ActiveDirectorySiteLinkBridge bridge)
-        {
-            return InnerList.Add(bridge);
-        }
+        internal int Add(ActiveDirectorySiteLinkBridge bridge) => InnerList.Add(bridge);
 
-        internal void Clear()
-        {
-            InnerList.Clear();
-        }
+        internal void Clear() => InnerList.Clear();
     }
 }

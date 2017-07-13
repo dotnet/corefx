@@ -19,13 +19,7 @@ namespace System.DirectoryServices.ActiveDirectory
             _nameTable = Hashtable.Synchronized(tempNameTable);
         }
 
-        public ReplicationFailure this[int index]
-        {
-            get
-            {
-                return (ReplicationFailure)InnerList[index];
-            }
-        }
+        public ReplicationFailure this[int index] => (ReplicationFailure)InnerList[index];
 
         public bool Contains(ReplicationFailure failure)
         {
@@ -48,10 +42,7 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(failures, index);
         }
 
-        private int Add(ReplicationFailure failure)
-        {
-            return InnerList.Add(failure);
-        }
+        private int Add(ReplicationFailure failure) => InnerList.Add(failure);
 
         internal void AddHelper(DS_REPL_KCC_DSA_FAILURES failures, IntPtr info)
         {

@@ -133,10 +133,7 @@ namespace System.DirectoryServices
         ///       Determines if the collection contains a specific value.
         ///    </para>
         /// </devdoc>
-        public bool Contains(string value)
-        {
-            return IndexOf(value) != -1;
-        }
+        public bool Contains(string value) => IndexOf(value) != -1;
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.CopyTo"]/*' />
         /// <devdoc>
@@ -227,23 +224,11 @@ namespace System.DirectoryServices
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IsReadOnly"]/*' />
         /// <internalonly/>
-        bool IList.IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool IList.IsReadOnly => false;
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IsFixedSize"]/*' />
         /// <internalonly/>
-        bool IList.IsFixedSize
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool IList.IsFixedSize => false;
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.CopyTo"]/*' />
         /// <internalonly/>
@@ -255,72 +240,39 @@ namespace System.DirectoryServices
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.IsSynchronized"]/*' />
         /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.SyncRoot"]/*' />
         /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.this"]/*' />
         /// <internalonly/>
         object IList.this[int index]
         {
-            get
-            {
-                return this[index];
-            }
-            set
-            {
-                this[index] = (string)value;
-            }
+            get => this[index];
+            set => this[index] = (string)value;
         }
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Add"]/*' />
         /// <internalonly/>            
-        int IList.Add(object value)
-        {
-            return Add((string)value);
-        }
+        int IList.Add(object value) => Add((string)value);
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Contains"]/*' />
         /// <internalonly/>
-        bool IList.Contains(object value)
-        {
-            return Contains((string)value);
-        }
+        bool IList.Contains(object value) => Contains((string)value);
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IndexOf"]/*' />
         /// <internalonly/>                           
-        int IList.IndexOf(object value)
-        {
-            return IndexOf((string)value);
-        }
+        int IList.IndexOf(object value) => IndexOf((string)value);
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Insert"]/*' />
         /// <internalonly/>
-        void IList.Insert(int index, object value)
-        {
-            Insert(index, (string)value);
-        }
+        void IList.Insert(int index, object value) => Insert(index, (string)value);
 
         /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Remove"]/*' />
         /// <internalonly/>
-        void IList.Remove(object value)
-        {
-            Remove((string)value);
-        }
+        void IList.Remove(object value) => Remove((string)value);
 
         internal delegate object VariantPropGetter();
         internal delegate void VariantPropSetter(object value);
@@ -335,32 +287,14 @@ namespace System.DirectoryServices
             {
                 _obj = wrapped;
             }
-            public VariantPropGetter Getter
-            {
-                get
-                {
-                    return new VariantPropGetter(GetFilter);
-                }
-            }
 
-            public VariantPropSetter Setter
-            {
-                get
-                {
-                    return new VariantPropSetter(SetFilter);
-                }
-            }
+            public VariantPropGetter Getter => new VariantPropGetter(GetFilter);
 
-            private object GetFilter()
-            {
-                return _obj.Filter;
-            }
+            public VariantPropSetter Setter => new VariantPropSetter(SetFilter);
 
-            private void SetFilter(object value)
-            {
-                _obj.Filter = value;
-            }
+            private object GetFilter() => _obj.Filter;
+
+            private void SetFilter(object value) => _obj.Filter = value;
         }
     }
 }
-

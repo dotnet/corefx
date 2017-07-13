@@ -52,36 +52,12 @@ namespace System.DirectoryServices.ActiveDirectory
             this.type = obj.TrustType;
         }
 
-        public string SourceName
-        {
-            get
-            {
-                return this.source;
-            }
-        }
+        public string SourceName => source;
 
-        public string TargetName
-        {
-            get
-            {
-                return target;
-            }
-        }
+        public string TargetName => target;
 
-        public TrustType TrustType
-        {
-            get
-            {
-                return type;
-            }
-        }
+        public TrustType TrustType => type;
 
-        public TrustDirection TrustDirection
-        {
-            get
-            {
-                return direction;
-            }
-        }
+        public TrustDirection TrustDirection => direction;
     }
 }

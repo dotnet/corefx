@@ -73,9 +73,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(values, index);
         }
 
-        internal void Add(String value)
-        {
-            InnerList.Add(value);
-        }
+        internal void Add(string value) => InnerList.Add(value);
     }
 }

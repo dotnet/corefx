@@ -47,13 +47,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         /// <para> Gets the path for this <see cref='System.DirectoryServices.SearchResult'/>.</para>
         /// </devdoc>
-        public string Path
-        {
-            get
-            {
-                return (string)Properties["ADsPath"][0];
-            }
-        }
+        public string Path => (string)Properties["ADsPath"][0];
 
         /// <include file='doc\SearchResult.uex' path='docs/doc[@for="SearchResult.Properties"]/*' />
         /// <devdoc>

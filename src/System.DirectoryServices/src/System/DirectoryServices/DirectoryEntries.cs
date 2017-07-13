@@ -106,10 +106,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>        
-        public IEnumerator GetEnumerator()
-        {
-            return new ChildEnumerator(_container);
-        }
+        public IEnumerator GetEnumerator() => new ChildEnumerator(_container);
 
         /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.ChildEnumerator"]/*' />
         /// <devdoc>
@@ -187,14 +184,7 @@ namespace System.DirectoryServices
                 }
             }
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return Current;
-                }
-            }
+            object IEnumerator.Current => Current;
         }
     }
 }
-

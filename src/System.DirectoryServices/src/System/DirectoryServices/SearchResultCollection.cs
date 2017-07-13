@@ -44,25 +44,13 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public SearchResult this[int index]
-        {
-            get
-            {
-                return (SearchResult)InnerList[index];
-            }
-        }
+        public SearchResult this[int index] => (SearchResult)InnerList[index];
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.Count"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>        
-        public int Count
-        {
-            get
-            {
-                return InnerList.Count;
-            }
-        }
+        public int Count => InnerList.Count;
                                                           
         internal string Filter { get; }
 
@@ -124,23 +112,11 @@ namespace System.DirectoryServices
         /// </devdoc>
         public string[] PropertiesLoaded { get; }
 
-        internal byte[] DirsyncCookie
-        {
-            get
-            {
-                return RetrieveDirectorySynchronizationCookie();
-            }
-        }
+        internal byte[] DirsyncCookie => RetrieveDirectorySynchronizationCookie();
 
-        internal DirectoryVirtualListView VLVResponse
-        {
-            get
-            {
-                return RetrieveVLVResponse();
-            }
-        }
+        internal DirectoryVirtualListView VLVResponse => RetrieveVLVResponse();
 
-        internal unsafe byte[] RetrieveDirectorySynchronizationCookie()
+        private unsafe byte[] RetrieveDirectorySynchronizationCookie()
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -168,7 +144,7 @@ namespace System.DirectoryServices
             }
         }
 
-        internal unsafe DirectoryVirtualListView RetrieveVLVResponse()
+        private unsafe DirectoryVirtualListView RetrieveVLVResponse()
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -240,10 +216,7 @@ namespace System.DirectoryServices
         }
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for=".Finalize"]/*' />
-        ~SearchResultCollection()
-        {
-            Dispose(false);      // finalizer is called => Dispose has not been called yet.
-        }
+        ~SearchResultCollection() => Dispose(false);
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.GetEnumerator"]/*' />
         /// <devdoc>
@@ -263,10 +236,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>        
-        public bool Contains(SearchResult result)
-        {
-            return InnerList.Contains(result);
-        }
+        public bool Contains(SearchResult result) => InnerList.Contains(result);
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.CopyTo"]/*' />
         /// <devdoc>
@@ -281,30 +251,15 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>        
-        public int IndexOf(SearchResult result)
-        {
-            return InnerList.IndexOf(result);
-        }
+        public int IndexOf(SearchResult result) => InnerList.IndexOf(result);
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.ICollection.IsSynchronized"]/*' />
         ///<internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.ICollection.SyncRoot"]/*' />
         ///<internalonly/>             
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection.ICollection.CopyTo"]/*' />
         /// <internalonly/>
@@ -335,13 +290,6 @@ namespace System.DirectoryServices
                 _parentAuthenticationType = parentAuthenticationType;
                 _results = results;
                 _initialized = false;
-
-                // get the app configuration information
-                //object o = PrivilegedConfigurationManager.GetSection("system.directoryservices");
-                //if (o != null && o is bool)
-                //{
-                //    _waitForResult = (bool)o;
-                //}
             }
 
             /// <devdoc>
@@ -514,13 +462,7 @@ namespace System.DirectoryServices
                 _initialized = false;
             }
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return Current;
-                }
-            }
+            object IEnumerator.Current => Current;
 
             private void CleanLastError()
             {

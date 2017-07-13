@@ -96,10 +96,7 @@ namespace System.DirectoryServices.ActiveDirectory
             _pathCracker.EscapedMode = NativeComInterfaces.ADS_ESCAPEDMODE_ON;
         }
 
-        internal ICollection GetCachedDirectoryEntries()
-        {
-            return _directoryEntries.Values;
-        }
+        internal ICollection GetCachedDirectoryEntries() => _directoryEntries.Values;
 
         internal DirectoryEntry GetCachedDirectoryEntry(WellKnownDN dn)
         {

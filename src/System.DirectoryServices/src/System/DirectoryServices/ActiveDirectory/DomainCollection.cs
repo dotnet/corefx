@@ -21,13 +21,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public Domain this[int index]
-        {
-            get
-            {
-                return (Domain)InnerList[index];
-            }
-        }
+        public Domain this[int index] => (Domain)InnerList[index];
 
         public bool Contains(Domain domain)
         {
@@ -66,13 +60,8 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(domains, index);
         }
 
-        internal int Add(Domain domain)
-        {
-            return InnerList.Add(domain);
-        }
-        internal void Clear()
-        {
-            InnerList.Clear();
-        }
+        internal int Add(Domain domain) => InnerList.Add(domain);
+
+        internal void Clear() => InnerList.Clear();
     }
 }

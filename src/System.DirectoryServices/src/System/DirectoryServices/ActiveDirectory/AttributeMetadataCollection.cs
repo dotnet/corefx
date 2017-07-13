@@ -10,13 +10,7 @@ namespace System.DirectoryServices.ActiveDirectory
     {
         internal AttributeMetadataCollection() { }
 
-        public AttributeMetadata this[int index]
-        {
-            get
-            {
-                return (AttributeMetadata)InnerList[index];
-            }
-        }
+        public AttributeMetadata this[int index] => (AttributeMetadata)InnerList[index];
 
         public bool Contains(AttributeMetadata metadata)
         {
@@ -58,9 +52,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(metadata, index);
         }
 
-        internal int Add(AttributeMetadata metadata)
-        {
-            return InnerList.Add(metadata);
-        }
+        internal int Add(AttributeMetadata metadata) => InnerList.Add(metadata);
     }
 }

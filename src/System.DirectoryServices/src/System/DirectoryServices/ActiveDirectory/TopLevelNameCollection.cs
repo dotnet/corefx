@@ -10,13 +10,7 @@ namespace System.DirectoryServices.ActiveDirectory
     {
         internal TopLevelNameCollection() { }
 
-        public TopLevelName this[int index]
-        {
-            get
-            {
-                return (TopLevelName)InnerList[index];
-            }
-        }
+        public TopLevelName this[int index] => (TopLevelName)InnerList[index];
 
         public bool Contains(TopLevelName name)
         {

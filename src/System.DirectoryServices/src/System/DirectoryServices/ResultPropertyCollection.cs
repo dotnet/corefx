@@ -41,22 +41,13 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public ICollection PropertyNames
-        {
-            get { return Dictionary.Keys; }
-        }
+        public ICollection PropertyNames => Dictionary.Keys;
 
         /// <include file='doc\ResultPropertyCollection.uex' path='docs/doc[@for="ResultPropertyCollection.Values"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public ICollection Values
-        {
-            get
-            {
-                return Dictionary.Values;
-            }
-        }
+        public ICollection Values => Dictionary.Values;
 
         internal void Add(string name, ResultPropertyValueCollection value)
         {

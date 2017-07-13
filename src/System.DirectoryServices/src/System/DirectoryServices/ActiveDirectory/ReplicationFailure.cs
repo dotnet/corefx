@@ -60,20 +60,8 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public int ConsecutiveFailureCount { get; }
 
-        public int LastErrorCode
-        {
-            get
-            {
-                return lastResult;
-            }
-        }
+        public int LastErrorCode => lastResult;
 
-        public string LastErrorMessage
-        {
-            get
-            {
-                return ExceptionHelper.GetErrorMessage(LastErrorCode, false);
-            }
-        }
+        public string LastErrorMessage => ExceptionHelper.GetErrorMessage(LastErrorCode, false);
     }
 }

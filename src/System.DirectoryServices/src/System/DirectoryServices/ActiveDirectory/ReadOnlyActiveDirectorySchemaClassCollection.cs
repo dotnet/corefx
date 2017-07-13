@@ -20,10 +20,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public ActiveDirectorySchemaClass this[int index]
         {
-            get
-            {
-                return (ActiveDirectorySchemaClass)InnerList[index];
-            }
+            get => (ActiveDirectorySchemaClass)InnerList[index];
         }
 
         public bool Contains(ActiveDirectorySchemaClass schemaClass)

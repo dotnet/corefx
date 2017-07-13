@@ -10,13 +10,7 @@ namespace System.DirectoryServices.ActiveDirectory
     {
         internal ReplicationConnectionCollection() { }
 
-        public ReplicationConnection this[int index]
-        {
-            get
-            {
-                return (ReplicationConnection)InnerList[index];
-            }
-        }
+        public ReplicationConnection this[int index] => (ReplicationConnection)InnerList[index];
 
         public bool Contains(ReplicationConnection connection)
         {
@@ -69,9 +63,6 @@ namespace System.DirectoryServices.ActiveDirectory
             InnerList.CopyTo(connections, index);
         }
 
-        internal int Add(ReplicationConnection value)
-        {
-            return InnerList.Add(value);
-        }
+        internal int Add(ReplicationConnection value) => InnerList.Add(value);
     }
 }
