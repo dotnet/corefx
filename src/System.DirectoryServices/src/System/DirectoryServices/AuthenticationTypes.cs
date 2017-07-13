@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.DirectoryServices.Interop;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.DirectoryServices.Interop;
-
     /// <include file='doc\AuthenticationTypes.uex' path='docs/doc[@for="AuthenticationTypes"]/*' />
     /// <devdoc>
     ///    <para>

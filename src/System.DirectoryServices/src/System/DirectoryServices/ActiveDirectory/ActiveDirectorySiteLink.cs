@@ -2,17 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.Globalization;
+using System.ComponentModel;
+using System.Diagnostics;
+
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.DirectoryServices;
-    using System.Globalization;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System.Security.Permissions;
-
     public class ActiveDirectorySiteLink : IDisposable
     {
         internal DirectoryContext context = null;

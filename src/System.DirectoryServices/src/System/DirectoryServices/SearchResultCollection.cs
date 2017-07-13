@@ -2,22 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using INTPTR_INTCAST = System.Int32;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.DirectoryServices.Interop;
+using System.Text;
+
 using INTPTR_INTPTRCAST = System.IntPtr;
 
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Net;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-    using System.Text;
-    using System.Configuration;
-    using System.Security.Permissions;
-    using System.Globalization;
-
     /// <include file='doc\SearchResultCollection.uex' path='docs/doc[@for="SearchResultCollection"]/*' />
     /// <devdoc>
     /// <para>Contains the instances of <see cref='System.DirectoryServices.SearchResult'/> returned during a 

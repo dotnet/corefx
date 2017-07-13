@@ -2,22 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.DirectoryServices.Interop;
+using System.ComponentModel;
+using System.Threading;
+using System.Reflection;
+using System.Security.Permissions;
+using System.DirectoryServices.Design;
+using System.Globalization;
+using System.Net;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Text;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-    using System.ComponentModel;
-    using System.Threading;
-    using System.Reflection;
-    using System.Security.Permissions;
-    using System.DirectoryServices.Design;
-    using System.Globalization;
-    using System.Net;
-
     /// <include file='doc\DirectoryEntry.uex' path='docs/doc[@for="DirectoryEntry"]/*' />
     /// <devdoc>
     ///    <para> Encapsulates a node or an object in the Active Directory hierarchy.</para>

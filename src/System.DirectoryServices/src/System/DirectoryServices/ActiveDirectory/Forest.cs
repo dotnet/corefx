@@ -2,19 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
+using System.Collections;
+using System.Globalization;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Text;
-    using System.Threading;
-    using System.Collections;
-    using System.Globalization;
-    using System.ComponentModel;
-    using System.DirectoryServices;
-    using System.Runtime.InteropServices;
-    using System.Diagnostics;
-    using System.Security.Permissions;
-
     public enum ForestMode : int
     {
         Unknown = -1,

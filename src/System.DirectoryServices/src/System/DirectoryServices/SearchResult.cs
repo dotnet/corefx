@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Net;
+using System.Security.Permissions;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Net;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.Security.Permissions;
-
     /// <include file='doc\SearchResult.uex' path='docs/doc[@for="SearchResult"]/*' />
     /// <devdoc>
     ///    <para>Encapsulates a node in the Active Directory hierarchy 

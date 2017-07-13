@@ -2,19 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Text;
 using System.Net;
 using System.Collections;
 using System.Security.Principal;
 using System.Security.Permissions;
-using System.DirectoryServices;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Globalization;
 
 #pragma warning disable 618
-[assembly:SecurityPermission(SecurityAction.RequestMinimum, UnmanagedCode = true),
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, UnmanagedCode = true),
 SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true),
 EnvironmentPermission(SecurityAction.RequestMinimum, Unrestricted = true),
 ]

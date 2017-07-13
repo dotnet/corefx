@@ -2,15 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Security;
+using System.Runtime.InteropServices;
+
 namespace System.DirectoryServices.ActiveDirectory
 {
 #pragma warning disable BCL0015 // CoreFxPort
-    using System;
-    using System.Security;
-    using System.Collections;
-    using System.DirectoryServices;
-    using System.DirectoryServices.Interop;
-    using System.Runtime.InteropServices;
 
     /*typedef struct _DOMAIN_CONTROLLER_INFO {
 		LPTSTR DomainControllerName;

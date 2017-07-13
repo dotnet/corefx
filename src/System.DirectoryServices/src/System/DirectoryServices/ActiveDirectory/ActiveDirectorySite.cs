@@ -2,18 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.Diagnostics;
+using System.Text;
+
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.DirectoryServices;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
-    using System.ComponentModel;
-    using System.Security.Permissions;
-
     [Flags]
     public enum ActiveDirectorySiteOptions
     {

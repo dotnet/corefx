@@ -4,12 +4,6 @@
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Collections;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-    using System.Security.Permissions;
-
     public abstract class ActiveDirectoryPartition : IDisposable
     {
         private bool _disposed = false;

@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.DirectoryServices.Interop;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-
     /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection"]/*' />
     /// <devdoc>
     /// <para>Contains a list of schema names used for the <see cref='System.DirectoryServices.DirectoryEntries.SchemaFilter'/> property of a <see cref='System.DirectoryServices.DirectoryEntries'/>.</para>

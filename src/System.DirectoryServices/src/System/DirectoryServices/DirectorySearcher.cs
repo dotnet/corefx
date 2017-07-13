@@ -2,23 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.Collections.Specialized;
+using System.DirectoryServices.Interop;
+using System.ComponentModel;
+
 using INTPTR_INTPTRCAST = System.IntPtr;
-using INTPTR_INTCAST = System.Int32;
 
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Collections.Specialized;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-    using System.DirectoryServices.Design;
-    using System.ComponentModel;
-    using System.Security.Permissions;
-    using System.Globalization;
-    using Microsoft.Win32;
-
     /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher"]/*' />
     /// <devdoc>
     ///    <para> Performs queries against the Active Directory hierarchy.</para>

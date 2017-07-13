@@ -2,21 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// </copyright>
+using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Text;
+using System.Collections;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Net;
-    using System.Runtime.InteropServices;
-    using System.Security.Authentication;
-    using System.Text;
-    using System.Collections;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Globalization;
-
-
     public class SyncFromAllServersErrorInformation
     {
         private SyncFromAllServersErrorCategory _category;

@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.DirectoryServices.Interop;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-    using System.Security.Permissions;
-
     /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection"]/*' />
     /// <devdoc>
     ///    <para>Holds a collection of values for a multi-valued property.</para>

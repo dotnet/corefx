@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.DirectoryServices.Interop;
+using System.Globalization;
+
 namespace System.DirectoryServices
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.DirectoryServices.Interop;
-    using System.Security.Permissions;
-    using System.Globalization;
-
     /// <include file='doc\PropertyCollection.uex' path='docs/doc[@for="PropertyCollection"]/*' />
     /// <devdoc>
     /// <para>Contains the properties on a <see cref='System.DirectoryServices.DirectoryEntry'/>.</para>

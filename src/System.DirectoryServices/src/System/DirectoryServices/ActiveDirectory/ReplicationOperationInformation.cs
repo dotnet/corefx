@@ -4,11 +4,6 @@
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Collections;
-    using System.Diagnostics;
-
     public class ReplicationOperationInformation
     {
         internal DateTime startTime;

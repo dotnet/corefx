@@ -4,8 +4,6 @@
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-
     public enum ActiveDirectorySyntax : int
     {
         CaseExactString = 0,

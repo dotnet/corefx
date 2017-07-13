@@ -2,19 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Net;
+using System.ComponentModel;
+using System.Collections;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+
 namespace System.DirectoryServices.ActiveDirectory
 {
-    using System;
-    using System.Net;
-    using System.ComponentModel;
-    using System.Collections;
-    using System.Globalization;
-    using System.Security.Principal;
-    using System.Runtime.InteropServices;
-    using System.Threading;
-    using System.Diagnostics;
-    using System.Security.Permissions;
-
     [Flags]
     public enum SyncFromAllServersOptions
     {
