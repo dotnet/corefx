@@ -894,6 +894,15 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void Clone_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.Clone());
+        }
+
         private void AssertDefaults(PathGradientBrush brush)
         {
             Assert.Equal(_defaultRectangle, brush.Rectangle);
