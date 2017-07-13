@@ -2,31 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
+using System.Security;
+
 namespace System.DirectoryServices.Protocols
 {
-    using System;
-    using Microsoft.Win32.SafeHandles;
-    using System.Runtime.InteropServices;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
-    using System.Diagnostics;
-    using System.Security;
-
-    [SuppressUnmanagedCodeSecurityAttribute()]
+    [SuppressUnmanagedCodeSecurity]
     internal sealed class BerSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal BerSafeHandle() : base(true)
         {
             SetHandle(Wldap32.ber_alloc(1));
             if (handle == IntPtr.Zero)
+            {
                 throw new OutOfMemoryException();
+            }
         }
 
         internal BerSafeHandle(berval value) : base(true)
         {
             SetHandle(Wldap32.ber_init(value));
             if (handle == IntPtr.Zero)
+            {
                 throw new BerConversionException();
+            }
         }
 
         override protected bool ReleaseHandle()
@@ -36,8 +36,8 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
-    sealed internal class HGlobalMemHandle : SafeHandleZeroOrMinusOneIsInvalid
+    [SuppressUnmanagedCodeSecurity]
+    internal sealed class HGlobalMemHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal HGlobalMemHandle(IntPtr value) : base(true)
         {
@@ -51,8 +51,8 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
-    sealed internal class ConnectionHandle : SafeHandleZeroOrMinusOneIsInvalid
+    [SuppressUnmanagedCodeSecurity]
+    internal sealed class ConnectionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal bool _needDispose = false;
 
@@ -69,12 +69,13 @@ namespace System.DirectoryServices.Protocols
                     throw new LdapException(error, errorMessage);
                 }
                 else
+                {
                     throw new LdapException(error);
+                }
             }
         }
 
-        internal ConnectionHandle(IntPtr value, bool disposeHandle)
-            : base(true)
+        internal ConnectionHandle(IntPtr value, bool disposeHandle) : base(true)
         {
             _needDispose = disposeHandle;
             if (value == IntPtr.Zero)
@@ -86,7 +87,9 @@ namespace System.DirectoryServices.Protocols
                     throw new LdapException(error, errorMessage);
                 }
                 else
+                {
                     throw new LdapException(error);
+                }
             }
             else
             {
@@ -101,6 +104,7 @@ namespace System.DirectoryServices.Protocols
                 {
                     Wldap32.ldap_unbind(handle);
                 }
+
                 handle = IntPtr.Zero;
             }
             return true;

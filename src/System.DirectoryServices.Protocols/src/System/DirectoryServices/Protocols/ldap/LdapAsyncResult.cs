@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
+using Microsoft.Win32.SafeHandles;
+
 namespace System.DirectoryServices.Protocols
 {
-    using System;
-    using System.Threading;
-    using System.Net;
-    using System.Text;
-    using System.IO;
-    using Microsoft.Win32.SafeHandles;
-
     internal class LdapAsyncResult : IAsyncResult
     {
         private LdapAsyncWaitHandle _asyncWaitHandle = null;
@@ -30,60 +26,37 @@ namespace System.DirectoryServices.Protocols
             _partialResults = partialResults;
         }
 
-        object IAsyncResult.AsyncState
-        {
-            get { return _stateObject; }
-        }
+        object IAsyncResult.AsyncState => _stateObject;
 
         WaitHandle IAsyncResult.AsyncWaitHandle
         {
-            get
-            {
-                if (null == _asyncWaitHandle)
-                {
-                    _asyncWaitHandle = new LdapAsyncWaitHandle(_manualResetEvent.SafeWaitHandle);
-                }
-
-                return (WaitHandle)_asyncWaitHandle;
-            }
+            get => _asyncWaitHandle ?? (_asyncWaitHandle = new LdapAsyncWaitHandle(_manualResetEvent.SafeWaitHandle));
         }
 
-        bool IAsyncResult.CompletedSynchronously
-        {
-            get { return _completedSynchronously; }
-        }
+        bool IAsyncResult.CompletedSynchronously => _completedSynchronously;
 
-        bool IAsyncResult.IsCompleted
-        {
-            get { return _completed; }
-        }
+        bool IAsyncResult.IsCompleted => _completed;
 
-        public override int GetHashCode()
-        {
-            return _manualResetEvent.GetHashCode();
-        }
+        public override int GetHashCode() => _manualResetEvent.GetHashCode();
 
-        public override bool Equals(object o)
+        public override bool Equals(object obj)
         {
-            if ((!(o is LdapAsyncResult)) || (o == null))
+            if (!(obj is LdapAsyncResult otherAsyncResult))
             {
                 return false;
             }
 
-            return (this == (LdapAsyncResult)o);
+            return this == otherAsyncResult;
         }
 
-        sealed internal class LdapAsyncWaitHandle : WaitHandle
+        private sealed class LdapAsyncWaitHandle : WaitHandle
         {
             public LdapAsyncWaitHandle(SafeWaitHandle handle) : base()
             {
-                this.SafeWaitHandle = handle;
+                SafeWaitHandle = handle;
             }
 
-            ~LdapAsyncWaitHandle()
-            {
-                this.SafeWaitHandle = null;
-            }
+            ~LdapAsyncWaitHandle() => SafeWaitHandle = null;
         }
     }
 
@@ -127,4 +100,3 @@ namespace System.DirectoryServices.Protocols
         }
     }
 }
-
