@@ -150,14 +150,13 @@ namespace Windows.UI.Xaml.Media.Animation.Tests
             yield return new object[] { RepeatBehavior.Forever, new RepeatBehavior(2), false };
 
             yield return new object[] { new RepeatBehavior { Type = RepeatBehaviorType.Count - 1 }, new RepeatBehavior { Type = RepeatBehaviorType.Count - 1 }, false };
-            yield return new object[] { new RepeatBehavior { Type = RepeatBehaviorType.Forever + 1 }, new RepeatBehavior { Type = RepeatBehaviorType.Count + 1 }, false };
+            yield return new object[] { new RepeatBehavior { Type = RepeatBehaviorType.Forever + 1 }, new RepeatBehavior(TimeSpan.FromSeconds(1)) { Type = RepeatBehaviorType.Count + 1 }, false };
             yield return new object[] { new RepeatBehavior(TimeSpan.FromSeconds(2)), new object(), false };
             yield return new object[] { new RepeatBehavior(TimeSpan.FromSeconds(2)), null, false };
         }
 
         [Theory]
         [MemberData(nameof(Equals_TestData))]
-        [ActiveIssue(21351, TargetFrameworkMonikers.UapAot)]
         public void Equals_Object_ReturnsExpected(RepeatBehavior repeatBehaviour, object other, bool expected)
         {
             Assert.Equal(expected, repeatBehaviour.Equals(other));
