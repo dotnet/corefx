@@ -61,7 +61,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 if (!Contains(server))
                     List[index] = server;
                 else
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , server), "value");
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , server), "value");
             }
         }
 
@@ -92,7 +92,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 else
                 {
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , server), "server");
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , server), "server");
                 }
             }
             else
@@ -107,7 +107,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 if (!Contains(server))
                     return List.Add(server);
                 else
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , server), "server");
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , server), "server");
             }
         }
 
@@ -193,7 +193,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 else
                 {
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , server), "server");
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , server), "server");
                 }
             }
             else
@@ -209,7 +209,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 if (!Contains(server))
                     List.Insert(index, server);
                 else
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , server));
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , server));
             }
         }
 
@@ -230,7 +230,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
 
             // something that does not exist in the collection
-            throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.NotFoundInCollection , server), "server");
+            throw new ArgumentException(SR.Format(SR.NotFoundInCollection , server), "server");
         }
 
         protected override void OnClear()

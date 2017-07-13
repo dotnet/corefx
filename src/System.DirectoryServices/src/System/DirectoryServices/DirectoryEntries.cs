@@ -43,7 +43,7 @@ namespace System.DirectoryServices
         private void CheckIsContainer()
         {
             if (!_container.IsContainer)
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.DSNotAContainer , _container.Path));
+                throw new InvalidOperationException(SR.Format(SR.DSNotAContainer , _container.Path));
         }
 
         /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.Add"]/*' />

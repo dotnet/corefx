@@ -77,7 +77,7 @@ namespace System.DirectoryServices.ActiveDirectory
             catch (ActiveDirectoryObjectNotFoundException)
             {
                 // this is the case where the context is a config set and we could not find an ADAM instance in that config set
-                throw new ActiveDirectoryOperationException(String.Format(CultureInfo.CurrentCulture, SR.ADAMInstanceNotFoundInConfigSet , context.Name));
+                throw new ActiveDirectoryOperationException(SR.Format(SR.ADAMInstanceNotFoundInConfigSet , context.Name));
             }
 
             try
@@ -95,7 +95,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         throw new NotSupportedException(SR.NotSupportTransportSMTP);
                     }
 
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.TransportNotFound , transport.ToString()), typeof(ActiveDirectoryInterSiteTransport), transport.ToString());
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.TransportNotFound , transport.ToString()), typeof(ActiveDirectoryInterSiteTransport), transport.ToString());
                 }
                 else
                     throw ExceptionHelper.GetExceptionFromCOMException(context, e);

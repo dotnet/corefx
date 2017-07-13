@@ -69,7 +69,7 @@ namespace System.DirectoryServices
             }
             else
             {
-                errorMsg = String.Format(CultureInfo.CurrentCulture, SR.DSUnknown , Convert.ToString(hr, 16));
+                errorMsg = SR.Format(SR.DSUnknown , Convert.ToString(hr, 16));
             }
 
             return CreateFormattedComException(new COMException(errorMsg, hr));

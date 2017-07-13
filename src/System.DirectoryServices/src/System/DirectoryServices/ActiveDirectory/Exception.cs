@@ -210,7 +210,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 String s = base.Message;
                 if (!((_name == null) ||
                        (_name.Length == 0)))
-                    return s + Environment.NewLine + String.Format(CultureInfo.CurrentCulture, SR.Name , _name) + Environment.NewLine;
+                    return s + Environment.NewLine + SR.Format(SR.Name , _name) + Environment.NewLine;
                 else
                     return s;
             }
@@ -461,7 +461,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             else
             {
-                errorMsg = String.Format(CultureInfo.CurrentCulture, SR.DSUnknown , Convert.ToString(temp, 16));
+                errorMsg = SR.Format(SR.DSUnknown , Convert.ToString(temp, 16));
             }
 
             return errorMsg;

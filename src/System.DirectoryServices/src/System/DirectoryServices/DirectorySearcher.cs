@@ -801,7 +801,7 @@ namespace System.DirectoryServices
 
             UnsafeNativeMethods.IAds adsObject = clonedRoot.AdsObject;
             if (!(adsObject is UnsafeNativeMethods.IDirectorySearch))
-                throw new NotSupportedException(String.Format(CultureInfo.CurrentCulture, SR.DSSearchUnsupported , SearchRoot.Path));
+                throw new NotSupportedException(SR.Format(SR.DSSearchUnsupported , SearchRoot.Path));
 
             // this is a little bit hacky, but we need to perform a bind here, so we make sure the LDAP connection that we hold has more than
             // one reference count, one by SearchResultCollection object, one by DirectorySearcher object. In this way, when user calls
@@ -1163,7 +1163,7 @@ namespace System.DirectoryServices
                                 property = "VirtualListView";
                                 break;
                         }
-                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.DSSearchPreferencesNotAccepted , property));
+                        throw new InvalidOperationException(SR.Format(SR.DSSearchPreferencesNotAccepted , property));
                     }
 
                     tempPtr = IntPtr.Add(tempPtr, structSize);

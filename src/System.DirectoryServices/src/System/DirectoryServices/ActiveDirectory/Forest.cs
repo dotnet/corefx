@@ -124,7 +124,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.DCNotFound , context.Name), typeof(Forest), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(Forest), null);
                     }
                 }
             }
@@ -141,7 +141,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 rootDSE = directoryEntryMgr.GetCachedDirectoryEntry(WellKnownDN.RootDSE);
                 if ((context.isServer()) && (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectory)))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.DCNotFound , context.Name), typeof(Forest), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(Forest), null);
                 }
                 rootDomainNC = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.RootDomainNamingContext);
             }
@@ -157,7 +157,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.DCNotFound , context.Name), typeof(Forest), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(Forest), null);
                     }
                 }
                 else
@@ -351,7 +351,7 @@ namespace System.DirectoryServices.ActiveDirectory
             else
             {
                 // trust relationship does not exist
-                throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ForestTrustDoesNotExist , Name, targetForestName), typeof(TrustRelationshipInformation), null);
+                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ForestTrustDoesNotExist , Name, targetForestName), typeof(TrustRelationshipInformation), null);
             }
         }
 
@@ -467,7 +467,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 catch (ActiveDirectoryObjectNotFoundException)
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
                 }
             }
 
@@ -480,7 +480,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 catch (ActiveDirectoryObjectNotFoundException)
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
                 }
             }
         }
@@ -638,7 +638,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             catch (ActiveDirectoryObjectNotFoundException)
             {
-                throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
+                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
             }
         }
 
@@ -1235,7 +1235,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 catch (ActiveDirectoryObjectNotFoundException)
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
                 }
             }
 
@@ -1248,7 +1248,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 catch (ActiveDirectoryObjectNotFoundException)
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.WrongTrustDirection , Name, targetForest.Name, direction), typeof(ForestTrustRelationshipInformation), null);
                 }
             }
         }

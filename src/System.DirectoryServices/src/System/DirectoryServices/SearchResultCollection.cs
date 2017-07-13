@@ -452,7 +452,7 @@ namespace System.DirectoryServices
                     {
                         //throw a clearer exception if the filter was invalid
                         if (hr == UnsafeNativeMethods.INVALID_FILTER)
-                            throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DSInvalidSearchFilter , _results.Filter));
+                            throw new ArgumentException(SR.Format(SR.DSInvalidSearchFilter , _results.Filter));
                         if (hr != 0)
                             throw COMExceptionHelper.CreateFormattedComException(hr);
 
@@ -517,7 +517,7 @@ namespace System.DirectoryServices
                     }
                     //throw a clearer exception if the filter was invalid
                     if (hr == UnsafeNativeMethods.INVALID_FILTER)
-                        throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DSInvalidSearchFilter , _results.Filter));
+                        throw new ArgumentException(SR.Format(SR.DSInvalidSearchFilter , _results.Filter));
                     if (hr != 0)
                         throw COMExceptionHelper.CreateFormattedComException(hr);
 

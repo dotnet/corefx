@@ -67,7 +67,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if (!value.isBound)
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.SchemaObjectNotCommitted , value.Name));
+                    throw new InvalidOperationException(SR.Format(SR.SchemaObjectNotCommitted , value.Name));
                 }
 
                 if (!Contains(value))
@@ -76,7 +76,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 else
                 {
-                    throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , value), "value");
+                    throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , value), nameof(value));
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (!schemaClass.isBound)
             {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.SchemaObjectNotCommitted , schemaClass.Name));
+                throw new InvalidOperationException(SR.Format(SR.SchemaObjectNotCommitted , schemaClass.Name));
             }
 
             if (!Contains(schemaClass))
@@ -99,7 +99,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             else
             {
-                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.AlreadyExistingInCollection , schemaClass), "schemaClass");
+                throw new ArgumentException(SR.Format(SR.AlreadyExistingInCollection , schemaClass), nameof(schemaClass));
             }
         }
 

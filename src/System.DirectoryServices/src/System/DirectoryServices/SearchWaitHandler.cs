@@ -29,7 +29,7 @@ namespace System.DirectoryServices
     //            {
     //                case "DirectorySearcher":
     //                    if (foundWaitStatus)
-    //                        throw new ConfigurationErrorsException(String.Format(CultureInfo.CurrentCulture, SR.ConfigSectionsUnique , "DirectorySearcher"));
+    //                        throw new ConfigurationErrorsException(SR.Format(SR.ConfigSectionsUnique , "DirectorySearcher"));
     //                    HandlerBase.RemoveBooleanAttribute(child, "waitForPagedSearchData", ref waitForSearchResult);
     //                    foundWaitStatus = true;
     //                    break;
@@ -62,7 +62,7 @@ namespace System.DirectoryServices
             //    }
             //    catch (FormatException)
             //    {
-            //        throw new ConfigurationErrorsException(String.Format(CultureInfo.CurrentCulture, SR.Invalid, _boolean_attribute, name));
+            //        throw new ConfigurationErrorsException(SR.Format(SR.Invalid, _boolean_attribute, name));
             //    }
             //}
         }

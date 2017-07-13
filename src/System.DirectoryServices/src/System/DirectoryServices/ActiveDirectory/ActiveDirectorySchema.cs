@@ -123,7 +123,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
                     }
                 }
             }
@@ -139,7 +139,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if ((context.isServer()) && (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectoryOrADAM)))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
                 }
 
                 schemaNC = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.SchemaNamingContext);
@@ -160,7 +160,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
                     }
                 }
                 else
