@@ -259,18 +259,34 @@ namespace System.Net.Http
         
         public long MaxRequestContentBufferSize
         {
-            get { return HttpContent.MaxBufferSize; }
+            // This property has been deprecated. In the .NET Framework it was only used when the handler needed to 
+            // automatically buffer the request content. That only happened if neither 'Content-Length' nor 
+            // 'Transfer-Encoding: chunked' request headers were specified. So, the handler thus needed to buffer
+            // in the request content to determine its length and then would choose 'Content-Length' semantics when
+            // POST'ing. In .NET Core and UAP platforms, the handler will resolve the ambiguity by always choosing
+            // 'Transfer-Encoding: chunked'. The handler will never automatically buffer in the request content.
+            get
+            {
+                return 0; // Returning zero is appropriate since in .NET Framework it means no limit.
+            }
+
             set
             {
-                // .NET Native port note: We don't have an easy way to implement the MaxRequestContentBufferSize property. To maximize the chance of app compat,
-                // we will "succeed" as long as the requested buffer size doesn't exceed the max. However, no actual
-                // enforcement of the max buffer size occurs.
-                if (value > MaxRequestContentBufferSize)
+                if (value < 0)
                 {
-                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                        SR.net_http_value_not_supported, value, nameof(MaxRequestContentBufferSize)));
+                    throw new ArgumentOutOfRangeException("value");
                 }
+
+                if (value > HttpContent.MaxBufferSize)
+                {
+                    throw new ArgumentOutOfRangeException("value", value,
+                        string.Format(CultureInfo.InvariantCulture, SR.net_http_content_buffersize_limit,
+                        HttpContent.MaxBufferSize));
+                }                
+
                 CheckDisposedOrStarted();
+
+                // No-op on property setter.
             }
         }
 
