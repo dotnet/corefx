@@ -580,7 +580,6 @@ namespace System.ComponentModel
 
                     if (pos == -1)
                     {
-                        Debug.Fail("Item is no longer in our list but we are still getting change notifications.");
                         UnhookPropertyChanged(item);
                         ResetBindings();
                     }
