@@ -55,11 +55,8 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             List<string> allbaseclasses = GetAllClassdNames(basefile);
             List<string> allclasses = GetAllClassdNames(codefile);
             CompareList(allbaseclasses, allclasses);
-
-
             List<string> allbasemethods = GetAllMethodNames(basefile);
             List<string> allmethods = GetAllMethodNames(codefile);
-
             List<string> allbaselines = GetAllLines(basefile);
             List<string> alllines = GetAllLines(codefile);
             CompareList(allbaselines, alllines);
