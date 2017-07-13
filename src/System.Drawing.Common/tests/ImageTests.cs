@@ -46,7 +46,7 @@ namespace System.Drawing.Tests
 
         [Fact]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
-        public void FromFile_LongFile_ThrowsPathTooLongException()
+        public void FromFile_LongSegment_ThrowsException()
         {
             // Throws PathTooLongException on Desktop and FileNotFoundException elsewhere.
             if (PlatformDetection.IsFullFramework)
