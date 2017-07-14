@@ -27,7 +27,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         Name = "System.Threading.Tasks.Dataflow.DataflowEventSource",
         Guid = "16F53577-E41D-43D4-B47E-C17025BF4025",
         LocalizationResources = "FxResources.System.Threading.Tasks.Dataflow.SR")]
-    internal sealed class DataflowEtwProvider : EventSource
+    public sealed class DataflowEtwProvider : EventSource
     {
         /// <summary>
         /// Defines the singleton instance for the dataflow ETW provider.
@@ -79,8 +79,9 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
+        /// <summary>Event for when a new block is instantiated.</summary>
         [Event(DATAFLOWBLOCKCREATED_EVENTID, Level = EventLevel.Informational)]
-        private void DataflowBlockCreated(string blockName, int blockId)
+        public void DataflowBlockCreated(string blockName, int blockId)
         {
             WriteEvent(DATAFLOWBLOCKCREATED_EVENTID, blockName, blockId);
         }
@@ -106,14 +107,15 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
+        /// <summary>Event for a block launching a task to handle messages.</summary>
         [Event(TASKLAUNCHED_EVENTID, Level = EventLevel.Informational)]
-        private void TaskLaunchedForMessageHandling(int blockId, TaskLaunchedReason reason, int availableMessages, int taskId)
+        public void TaskLaunchedForMessageHandling(int blockId, TaskLaunchedReason reason, int availableMessages, int taskId)
         {
             WriteEvent(TASKLAUNCHED_EVENTID, blockId, reason, availableMessages, taskId);
         }
 
         /// <summary>Describes the reason a task is being launched.</summary>
-        internal enum TaskLaunchedReason
+        public enum TaskLaunchedReason
         {
             /// <summary>A task is being launched to process incoming messages.</summary>
             ProcessingInputMessages = 1,
@@ -152,7 +154,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         }
 
         /// <summary>Describes the reason a block completed.</summary>
-        internal enum BlockCompletionReason
+        public enum BlockCompletionReason
         {
             /// <summary>The block completed successfully.</summary>
             RanToCompletion = (int)TaskStatus.RanToCompletion,
@@ -162,8 +164,9 @@ namespace System.Threading.Tasks.Dataflow.Internal
             Canceled = (int)TaskStatus.Canceled
         }
 
+        /// <summary>Event for a block completing.</summary>
         [Event(BLOCKCOMPLETED_EVENTID, Level = EventLevel.Informational)]
-        private void DataflowBlockCompleted(int blockId, BlockCompletionReason reason, string exceptionData)
+        public void DataflowBlockCompleted(int blockId, BlockCompletionReason reason, string exceptionData)
         {
             WriteEvent(BLOCKCOMPLETED_EVENTID, blockId, reason, exceptionData);
         }
@@ -184,8 +187,9 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
+        /// <summary>Event for a block linking.</summary>
         [Event(BLOCKLINKED_EVENTID, Level = EventLevel.Informational)]
-        private void DataflowBlockLinking(int sourceId, int targetId)
+        public void DataflowBlockLinking(int sourceId, int targetId)
         {
             WriteEvent(BLOCKLINKED_EVENTID, sourceId, targetId);
         }
@@ -207,8 +211,9 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
+        /// <summary>Event for a block unlinking.</summary>
         [Event(BLOCKUNLINKED_EVENTID, Level = EventLevel.Informational)]
-        private void DataflowBlockUnlinking(int sourceId, int targetId)
+        public void DataflowBlockUnlinking(int sourceId, int targetId)
         {
             WriteEvent(BLOCKUNLINKED_EVENTID, sourceId, targetId);
         }
