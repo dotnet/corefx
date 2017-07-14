@@ -35,7 +35,7 @@
     <Compile Include="HttpListenerTimeoutManagerTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
-    <TestCommandLines Include="ulimit -n 70000" />
+    <TestCommandLines Include="ulimit -n 7000" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
