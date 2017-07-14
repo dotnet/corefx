@@ -16,6 +16,8 @@
   <PropertyGroup>
     <AppXRunnerVersion>1.0.3-prerelease-00614-01</AppXRunnerVersion>
     <RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>4.3.0</RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>
+    <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0007</XunitPerfAnalysisPackageVersion>
+    <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
     <XunitNetcoreExtensionsVersion>1.0.0-prerelease-01005-01</XunitNetcoreExtensionsVersion>
     <RuntimeWin10RuntimeNativeSystemIOCompressionVersion>4.0.1</RuntimeWin10RuntimeNativeSystemIOCompressionVersion>
 
@@ -78,6 +80,14 @@
 
     <StaticDependency Include="Microsoft.xunit.netcore.extensions;Microsoft.DotNet.BuildTools.TestSuite">
       <Version>$(XunitNetcoreExtensionsVersion)</Version>
+    </StaticDependency>
+
+    <PerformancePackDependency Include="xunit.performance.core" />
+    <PerformancePackDependency Include="xunit.performance.api" />
+    <PerformancePackDependency Include="xunit.performance.execution" />
+    <PerformancePackDependency Include="xunit.performance.metrics" />
+    <StaticDependency Include="@(PerformancePackDependency)">
+      <Version>$(XunitPerfAnalysisPackageVersion)</Version>
     </StaticDependency>
 
     <!--

@@ -20,6 +20,9 @@
     <Compile Include="DcjsPerformanceTest.cs" />
     <Compile Include="JsonNetPerformanceTest.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ReferenceFromRuntime Include="Newtonsoft.Json" />
+  </ItemGroup>
   <ItemGroup Condition="'$(UseContractReferences)' == ''" >
     <ProjectReference Include="..\..\..\System.Private.DataContractSerialization\src\System.Private.DataContractSerialization.csproj">
       <Project>{6B4C1660-D158-4820-BE1C-D7A29CEBEC9B}</Project>
@@ -33,6 +36,12 @@
     <ProjectReference Include="..\..\..\System.Xml.XmlSerializer\pkg\System.Xml.XmlSerializer.pkgproj">
       <Project>{D62A6082-5229-4845-8BE9-75753E08C65A}</Project>
       <Name>System.Xml.XmlSerializer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>PerfRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

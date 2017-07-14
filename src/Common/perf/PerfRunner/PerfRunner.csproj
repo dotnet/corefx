@@ -10,7 +10,7 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <NoWarn>0436</NoWarn>
     <IsTestProject>true</IsTestProject> 
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
