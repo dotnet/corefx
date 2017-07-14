@@ -10,17 +10,16 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "https://github.com/dotnet/corefx/issues/22174")]
     public class ProcessStreamReadTests : ProcessTestBase
     {
         [Fact]
         public void TestSyncErrorStream()
         {
-            Process p = CreateProcess(ErrorProcessBody);
+            Process p = CreateProcessPortable(RemotelyInvokable.ErrorProcessBody);
             p.StartInfo.RedirectStandardError = true;
             p.Start();
-            string expected = TestConsoleApp + " started error stream" + Environment.NewLine +
-                              TestConsoleApp + " closed error stream" + Environment.NewLine;
+            string expected = RemotelyInvokable.TestConsoleApp + " started error stream" + Environment.NewLine +
+                              RemotelyInvokable.TestConsoleApp + " closed error stream" + Environment.NewLine;
             Assert.Equal(expected, p.StandardError.ReadToEnd());
             Assert.True(p.WaitForExit(WaitInMS));
         }
@@ -31,7 +30,7 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < 2; ++i)
             {
                 StringBuilder sb = new StringBuilder();
-                Process p = CreateProcess(ErrorProcessBody);
+                Process p = CreateProcessPortable(RemotelyInvokable.ErrorProcessBody);
                 p.StartInfo.RedirectStandardError = true;
                 p.ErrorDataReceived += (s, e) =>
                 {
@@ -47,28 +46,20 @@ namespace System.Diagnostics.Tests
                 Assert.True(p.WaitForExit(WaitInMS));
                 p.WaitForExit(); // This ensures async event handlers are finished processing.
 
-                string expected = TestConsoleApp + " started error stream" + (i == 1 ? "" : TestConsoleApp + " closed error stream");
+                string expected = RemotelyInvokable.TestConsoleApp + " started error stream" + (i == 1 ? "" : RemotelyInvokable.TestConsoleApp + " closed error stream");
                 Assert.Equal(expected, sb.ToString());
             }
         }
 
-        private static int ErrorProcessBody()
-        {
-            Console.Error.WriteLine(TestConsoleApp + " started error stream");
-            Console.Error.WriteLine(TestConsoleApp + " closed error stream");
-            return SuccessExitCode;
-        }
-
-
         [Fact]
         public void TestSyncOutputStream()
         {
-            Process p = CreateProcess(StreamBody);
+            Process p = CreateProcessPortable(RemotelyInvokable.StreamBody);
             p.StartInfo.RedirectStandardOutput = true;
             p.Start();
             string s = p.StandardOutput.ReadToEnd();
             Assert.True(p.WaitForExit(WaitInMS));
-            Assert.Equal(TestConsoleApp + " started" + Environment.NewLine + TestConsoleApp + " closed" + Environment.NewLine, s);
+            Assert.Equal(RemotelyInvokable.TestConsoleApp + " started" + Environment.NewLine + RemotelyInvokable.TestConsoleApp + " closed" + Environment.NewLine, s);
         }
 
         [Fact]
@@ -77,7 +68,7 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < 2; ++i)
             {
                 StringBuilder sb = new StringBuilder();
-                Process p = CreateProcess(StreamBody);
+                Process p = CreateProcessPortable(RemotelyInvokable.StreamBody);
                 p.StartInfo.RedirectStandardOutput = true;
                 p.OutputDataReceived += (s, e) =>
                 {
@@ -92,27 +83,16 @@ namespace System.Diagnostics.Tests
                 Assert.True(p.WaitForExit(WaitInMS));
                 p.WaitForExit(); // This ensures async event handlers are finished processing.
 
-                string expected = TestConsoleApp + " started" + (i == 1 ? "" : TestConsoleApp + " closed");
+                string expected = RemotelyInvokable.TestConsoleApp + " started" + (i == 1 ? "" : RemotelyInvokable.TestConsoleApp + " closed");
                 Assert.Equal(expected, sb.ToString());
             }
-        }
-
-        private static int StreamBody()
-        {
-            Console.WriteLine(TestConsoleApp + " started");
-            Console.WriteLine(TestConsoleApp + " closed");
-            return SuccessExitCode;
         }
 
         [Fact]
         public void TestSyncStreams()
         {
             const string expected = "This string should come as output";
-            Process p = CreateProcess(() =>
-            {
-                Console.ReadLine();
-                return SuccessExitCode;
-            });
+            Process p = CreateProcessPortable(RemotelyInvokable.ReadLine);
             p.StartInfo.RedirectStandardInput = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += (s, e) => { Assert.Equal(expected, e.Data); };
@@ -145,17 +125,8 @@ namespace System.Diagnostics.Tests
             // Set the O_CLOEXEC flag when creating the redirection pipes. So that no child process would inherit the
             // file descriptors referencing those pipes.
             const string ExpectedLine = "NULL";
-            Process p1 = CreateProcess(() =>
-            {
-                string line = Console.ReadLine();
-                Console.WriteLine(line == null ? ExpectedLine : "NOT_" + ExpectedLine);
-                return SuccessExitCode;
-            });
-            Process p2 = CreateProcess(() =>
-            {
-                Console.ReadLine();
-                return SuccessExitCode;
-            });
+            Process p1 = CreateProcessPortable(RemotelyInvokable.ReadLineWriteIfNull);
+            Process p2 = CreateProcessPortable(RemotelyInvokable.ReadLine);
 
             // Start the first child process
             p1.StartInfo.RedirectStandardInput = true;
@@ -193,19 +164,7 @@ namespace System.Diagnostics.Tests
             var receivedOutput = false;
             var collectedExceptions = new List<Exception>();
 
-            Process p = CreateProcess(() =>
-            {
-                var stdout = Console.OpenStandardOutput();
-                var bytes = new byte[] { 97, 0 }; //Encoding.Unicode.GetBytes("a");
-
-                for (int i = 0; i != bytes.Length; ++i)
-                {
-                    stdout.WriteByte(bytes[i]);
-                    stdout.Flush();
-                    Thread.Sleep(100);
-                }
-                return SuccessExitCode;
-            });
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteSlowlyByByte);
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.StandardOutputEncoding = Encoding.Unicode;
             p.OutputDataReceived += (s, e) =>
@@ -248,14 +207,7 @@ namespace System.Diagnostics.Tests
             int nonWhitespaceLinesReceived = 0;
             int totalLinesReceived = 0;
 
-            Process p = CreateProcess(() =>
-            {
-                for (int i = 0; i < ExpectedLineCount; i++)
-                {
-                    Console.WriteLine("This is line #" + i + ".");
-                }
-                return SuccessExitCode;
-            });
+            Process p = CreateProcessPortable(RemotelyInvokable.Write144Lines);
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += (s, e) =>
             {
@@ -289,7 +241,7 @@ namespace System.Diagnostics.Tests
             }
 
             {
-                Process p = CreateProcess(StreamBody);
+                Process p = CreateProcessPortable(RemotelyInvokable.StreamBody);
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.OutputDataReceived += (s, e) => {};
@@ -305,7 +257,7 @@ namespace System.Diagnostics.Tests
             }
 
             {
-                Process p = CreateProcess(StreamBody);
+                Process p = CreateProcessPortable(RemotelyInvokable.StreamBody);
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.OutputDataReceived += (s, e) => {};

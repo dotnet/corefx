@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    public class ProcessTestBase : RemoteExecutorTestBase
+    public partial class ProcessTestBase : RemoteExecutorTestBase
     {
         protected const int WaitInMS = 30 * 1000;
         protected Process _process;
@@ -59,15 +60,6 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
-        protected Process CreateProcessLong()
-        {
-            return CreateProcess(() =>
-            {
-                Thread.Sleep(WaitInMS);
-                return SuccessExitCode;
-            });
-        }
-
         protected void StartSleepKillWait(Process p)
         {
             p.Start();
@@ -75,6 +67,5 @@ namespace System.Diagnostics.Tests
             p.Kill();
             Assert.True(p.WaitForExit(WaitInMS));
         }
-
     }
 }
