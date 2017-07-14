@@ -287,7 +287,7 @@ namespace System.Xml.Serialization
                                 {
                                     AssemblyName name = type.Assembly.GetName();
                                     var serializerName = Compiler.GetTempAssemblyName(name, defaultNamespace);
-                                    throw new FileLoadException(string.Format("Fail to load assembly {0} or {0} doesn't exist under PreGen Mode.", serializerName));
+                                    throw new FileLoadException(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
                                 }
 
                                 // need to reflect and generate new serialization assembly
@@ -842,7 +842,6 @@ namespace System.Xml.Serialization
                 }
             }
 
-            Console.Out.WriteLine("Start generating code stream");
             return TempAssembly.GenerateSerializerToStream(mappings, types, null, assembly, new Hashtable(), stream);
         }
 #endif
