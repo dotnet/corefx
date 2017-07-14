@@ -52,7 +52,7 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
-  <Target Name="BuildNetfxRemoteInvoker" AfterTargets="AfterBuild">
+  <Target Condition=" '$(TargetGroup)' == 'uap' " Name="BuildNetfxRemoteInvoker" AfterTargets="AfterBuild">
     <MSBuild Projects="RemoteInvokeNetfx\RemoteInvokeNetfx.csproj" Properties="Configuration=Debug; Platform=$(Platform); OutputPath=$(OutputPath); IntermediateOutputPath=$(IntermediateOutputPath)" />
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
