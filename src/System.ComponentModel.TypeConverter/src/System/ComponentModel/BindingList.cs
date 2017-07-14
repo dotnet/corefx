@@ -83,8 +83,8 @@ namespace System.ComponentModel
                     return true;
                 }
 
-                BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance;
-                return itemType.GetConstructor(bindingFlags, null, Array.Empty<Type>(), null) != null;
+                const BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance;
+                return itemType.GetConstructor(BindingFlags, null, Array.Empty<Type>(), null) != null;
             }
         }
 
