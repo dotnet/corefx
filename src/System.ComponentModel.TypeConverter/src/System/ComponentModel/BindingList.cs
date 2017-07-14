@@ -83,8 +83,8 @@ namespace System.ComponentModel
                     return true;
                 }
 
-                ConstructorInfo constructor = itemType.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance, null, Array.Empty<Type>(), null);
-                return constructor != null;
+                BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance;
+                return itemType.GetConstructor(bindingFlags, null, Array.Empty<Type>(), null) != null;
             }
         }
 
@@ -511,6 +511,8 @@ namespace System.ComponentModel
 
                     if (pos == -1)
                     {
+                        // The item was removed from the list but we still get change notifications or
+                        // the sender is invalid and was never added to the list.
                         UnhookPropertyChanged(item);
                         ResetBindings();
                     }

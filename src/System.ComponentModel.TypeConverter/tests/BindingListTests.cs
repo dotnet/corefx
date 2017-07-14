@@ -313,7 +313,7 @@ namespace System.ComponentModel.Tests
             };
 
             Assert.NotNull(bindingList.AddNew());
-            Assert.True(calledAddingNew, "2");
+            Assert.True(calledAddingNew);
         }
 
         [Fact]
@@ -344,14 +344,14 @@ namespace System.ComponentModel.Tests
 
             Assert.Equal(1, bindingList.Count);
             Assert.Equal(0, bindingList.IndexOf(newValue));
-            Assert.True(calledListChanged, "6");
+            Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
             Assert.Equal(0, listChangedIndex);
 
             calledListChanged = false;
             bindingList.CancelNew(0);
             Assert.Equal(0, bindingList.Count);
-            Assert.True(calledListChanged, "10");
+            Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemDeleted, listChangedType);
             Assert.Equal(0, listChangedIndex);
         }
@@ -385,7 +385,7 @@ namespace System.ComponentModel.Tests
 
             Assert.Equal(3, bindingList.Count);
             Assert.Equal(2, bindingList.IndexOf(newValue));
-            Assert.True(calledListChanged, "6");
+            Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
             Assert.Equal(2, listChangedIndex);
 
@@ -399,7 +399,7 @@ namespace System.ComponentModel.Tests
             // Cancelling index 2 changes the list.
             bindingList.CancelNew(2);
 
-            Assert.True(calledListChanged, "11");
+            Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemDeleted, listChangedType);
             Assert.Equal(2, listChangedIndex);
             Assert.Equal(2, bindingList.Count);
@@ -527,7 +527,7 @@ namespace System.ComponentModel.Tests
             calledListChanged = false;
             bindingList.EndNew(2);
             Assert.Equal(1, bindingList.Count);
-            Assert.False(calledListChanged, "10");
+            Assert.False(calledListChanged);
 
             // CancelNew with a valid index changes the list.
             bindingList.CancelNew(0);
@@ -960,7 +960,7 @@ namespace System.ComponentModel.Tests
 
             private void OnPropertyChanged()
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
             }
         }
 
