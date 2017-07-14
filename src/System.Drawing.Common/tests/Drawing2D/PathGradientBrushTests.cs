@@ -37,7 +37,7 @@ namespace System.Drawing.Drawing2D.Tests
         private readonly RectangleF _defaultRectangle = new RectangleF(1, 2, 19, 28);
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void Ctor_Points_ReturmsExpected()
+        public void Ctor_Points_ReturnsExpected()
         {
             using (PathGradientBrush bi = new PathGradientBrush(_defaultIntPoints))
             using (PathGradientBrush bf = new PathGradientBrush(_defaultFloatPoints))
@@ -60,7 +60,7 @@ namespace System.Drawing.Drawing2D.Tests
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(WrapMode_TestData))]
-        public void Ctor_PointsWrapMode_ReturmsExpected(WrapMode wrapMode)
+        public void Ctor_PointsWrapMode_ReturnsExpected(WrapMode wrapMode)
         {
             using (PathGradientBrush brushInt = new PathGradientBrush(_defaultIntPoints, wrapMode))
             using (PathGradientBrush brushFloat = new PathGradientBrush(_defaultFloatPoints, wrapMode))
@@ -82,7 +82,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
-        public void Ctor_PointsLenghtLessThenTwo_ThrowsOutOfMemoryException(int pointsLeght)
+        public void Ctor_PointsLengthLessThenTwo_ThrowsOutOfMemoryException(int pointsLeght)
         {
             Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLeght]));
             Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLeght], WrapMode.Clamp));
@@ -93,8 +93,11 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_InvalidWrapMode_ThrowsInvalidEnumArgumentException()
         {
-            AssertExtensions.Throws<InvalidEnumArgumentException>("wrapMode", () => new PathGradientBrush(_defaultIntPoints, (WrapMode)int.MaxValue));
-            AssertExtensions.Throws<InvalidEnumArgumentException>("wrapMode", () => new PathGradientBrush(_defaultFloatPoints, (WrapMode)int.MaxValue));
+            AssertExtensions.Throws<InvalidEnumArgumentException>("wrapMode", () => 
+                new PathGradientBrush(_defaultIntPoints, (WrapMode)int.MaxValue));
+
+            AssertExtensions.Throws<InvalidEnumArgumentException>("wrapMode", () => 
+                new PathGradientBrush(_defaultFloatPoints, (WrapMode)int.MaxValue));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -321,7 +324,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>("source",() => brush.Blend = new Blend() { Factors = new float[0], Positions = null });
+                AssertExtensions.Throws<ArgumentNullException>("source", () => 
+                    brush.Blend = new Blend() { Factors = new float[0], Positions = null });
             }
         }
 
@@ -575,8 +579,11 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = null });
-                Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = new float[2] });
+                Assert.Throws<NullReferenceException>(() => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = null });
+
+                Assert.Throws<NullReferenceException>(() => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = new float[2] });
             }
         }
 
@@ -585,7 +592,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>("source", () => brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = null });
+                AssertExtensions.Throws<ArgumentNullException>("source", () => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = null });
             }
         }
 
@@ -603,7 +611,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = new ColorBlend() { Colors = new Color[0], Positions = new float[0] });
+                AssertExtensions.Throws<ArgumentException>(null, () => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = new Color[0], Positions = new float[0] });
             }
         }
 
@@ -612,7 +621,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = new float[2] });
+                AssertExtensions.Throws<ArgumentException>(null, () => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = new float[2] });
             }
         }
 
@@ -621,7 +631,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => brush.InterpolationColors = new ColorBlend() { Colors = new Color[2], Positions = new float[1] });
+                Assert.Throws<ArgumentOutOfRangeException>(() => 
+                    brush.InterpolationColors = new ColorBlend() { Colors = new Color[2], Positions = new float[1] });
             }
         }
 
