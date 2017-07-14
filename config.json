@@ -40,7 +40,7 @@
       "description": "The RID of the target package.",
       "valueType": "property",
       "values": ["win7-x64", "ubuntu.14.04-x64"],
-      "defaultValue": "${RuntimeOS}-${ArchGroup}"
+      "defaultValue": ""
     },
     "PortableBuild": {
       "description": "Indicates if this is a portable build.",
