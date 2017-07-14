@@ -38,6 +38,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ats;
         }
         public CType GetUnderlyingType() { return UnderlyingType; }
+
+        public override CType StripNubs() => UnderlyingType;
+
+        public override CType StripNubs(out int pcnub)
+        {
+            pcnub = 1;
+            return UnderlyingType;
+        }
+
         public void SetUnderlyingType(CType pType) { UnderlyingType = pType; }
 
         public CType UnderlyingType;
