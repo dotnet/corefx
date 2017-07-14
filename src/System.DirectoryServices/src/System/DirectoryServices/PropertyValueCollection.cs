@@ -7,9 +7,8 @@ using System.DirectoryServices.Interop;
 
 namespace System.DirectoryServices
 {
-    /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection"]/*' />
     /// <devdoc>
-    ///    <para>Holds a collection of values for a multi-valued property.</para>
+    /// Holds a collection of values for a multi-valued property.
     /// </devdoc>
     public class PropertyValueCollection : CollectionBase
     {
@@ -48,10 +47,6 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.this"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public object this[int index]
         {
             get => List[index];
@@ -66,16 +61,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.PropertyName"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public string PropertyName { get; }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Value"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public object Value
         {
             get
@@ -141,15 +128,13 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Add"]/*' />
         /// <devdoc>
-        ///    <para>Appends the value to the set of values for this property.</para>
+        /// Appends the value to the set of values for this property.
         /// </devdoc>
         public int Add(object value) => List.Add(value);
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.AddRange"]/*' />
         /// <devdoc>
-        ///    <para>Appends the values to the set of values for this property.</para>
+        /// Appends the values to the set of values for this property.
         /// </devdoc>
         public void AddRange(object[] value)
         {
@@ -163,9 +148,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.AddRange1"]/*' />
         /// <devdoc>
-        ///    <para>Appends the values to the set of values for this property.</para>
+        /// Appends the values to the set of values for this property.
         /// </devdoc>
         public void AddRange(PropertyValueCollection value)
         {
@@ -180,40 +164,21 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Contains"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public bool Contains(object value)
-        {
-            return List.Contains(value);
-        }
+        public bool Contains(object value) => List.Contains(value);
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.CopyTo"]/*' />
         /// <devdoc>
-        /// <para>Copies the elements of this instance into an <see cref='System.Array'/>,
-        ///    starting at a particular index
-        ///    into the given <paramref name="array"/>.</para>
+        /// Copies the elements of this instance into an <see cref='System.Array'/>,
+        /// starting at a particular index into the given <paramref name="array"/>.
         /// </devdoc>
         public void CopyTo(object[] array, int index)
         {
             List.CopyTo(array, index);
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.IndexOf"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public int IndexOf(object value) => List.IndexOf(value);
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Insert"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void Insert(int index, object value) => List.Insert(index, value);
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.PopulateList"]/*' />
-        ///<internalonly/>                           
         private void PopulateList()
         {
             //No need to fill the cache here, when GetEx is calles, an implicit 
@@ -240,9 +205,8 @@ namespace System.DirectoryServices
                 InnerList.Add(var);
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.Remove"]/*' />
         /// <devdoc>
-        ///    <para>Removes the value from the collection.</para>
+        /// Removes the value from the collection.
         /// </devdoc>
         public void Remove(object value)
         {
@@ -263,8 +227,6 @@ namespace System.DirectoryServices
                 List.Remove(value);
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.OnClear"]/*' />
-        ///<internalonly/>                           
         protected override void OnClearComplete()
         {
             if (_needNewBehavior && !_allowMultipleChange && _updateType != UpdateType.None && _updateType != UpdateType.Update)
@@ -286,8 +248,6 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.OnInsert"]/*' />
-        ///<internalonly/>
         protected override void OnInsertComplete(int index, object value)
         {
             if (_needNewBehavior)
@@ -321,8 +281,6 @@ namespace System.DirectoryServices
             _entry.CommitIfNotCaching();
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.OnRemove"]/*' />
-        ///<internalonly/>                          
         protected override void OnRemoveComplete(int index, object value)
         {
             if (_needNewBehavior)
@@ -356,8 +314,6 @@ namespace System.DirectoryServices
             _entry.CommitIfNotCaching();
         }
 
-        /// <include file='doc\PropertyValueCollection.uex' path='docs/doc[@for="PropertyValueCollection.OnSet"]/*' />
-        ///<internalonly/>                          
         protected override void OnSetComplete(int index, object oldValue, object newValue)
         {
             // no need to consider the not allowing accumulative change case as it does not support Set

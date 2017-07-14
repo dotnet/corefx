@@ -7,9 +7,8 @@ using System.DirectoryServices.Interop;
 
 namespace System.DirectoryServices
 {
-    /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection"]/*' />
     /// <devdoc>
-    /// <para>Contains a list of schema names used for the <see cref='System.DirectoryServices.DirectoryEntries.SchemaFilter'/> property of a <see cref='System.DirectoryServices.DirectoryEntries'/>.</para>
+    /// Contains a list of schema names used for the <see cref='System.DirectoryServices.DirectoryEntries.SchemaFilter'/> property of a <see cref='System.DirectoryServices.DirectoryEntries'/>.
     /// </devdoc>
     public class SchemaNameCollection : IList
     {
@@ -22,11 +21,9 @@ namespace System.DirectoryServices
             _propSetter = propSetter;
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.this"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the object
-        ///       at the given index.</para>
-        /// </devdoc>
+        ///  Gets or sets the object at the given index.
+        ///  </devdoc>
         public string this[int index]
         {
             get
@@ -42,11 +39,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Count"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Gets the number of objects available on this entry.
-        ///    </para>
+        /// Gets the number of objects available on this entry.
         /// </devdoc>
         public int Count
         {
@@ -57,12 +51,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Add"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Appends the value to the
-        ///       collection.
-        ///    </para>
+        /// Appends the value to the collection.
         /// </devdoc>
         public int Add(string value)
         {
@@ -75,11 +65,8 @@ namespace System.DirectoryServices
             return newValues.Length - 1;
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.AddRange"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Appends the values to the collection.
-        ///    </para>
+        /// Appends the values to the collection.
         /// </devdoc>
         public void AddRange(string[] value)
         {
@@ -96,10 +83,6 @@ namespace System.DirectoryServices
             _propSetter(newValues);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.AddRange1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void AddRange(SchemaNameCollection value)
         {
             if (value == null)
@@ -115,11 +98,8 @@ namespace System.DirectoryServices
             _propSetter(newValues);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Clear"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Removes all items from the collection.
-        ///    </para>
+        /// Removes all items from the collection.
         /// </devdoc>
         public void Clear()
         {
@@ -127,28 +107,17 @@ namespace System.DirectoryServices
             _propSetter(newValues);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Contains"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Determines if the collection contains a specific value.
-        ///    </para>
+        /// Determines if the collection contains a specific value.
         /// </devdoc>
         public bool Contains(string value) => IndexOf(value) != -1;
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.CopyTo"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void CopyTo(String[] stringArray, int index)
         {
             object[] values = GetValue();
             values.CopyTo(stringArray, index);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.GetEnumerator"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public IEnumerator GetEnumerator()
         {
             object[] values = GetValue();
@@ -164,11 +133,8 @@ namespace System.DirectoryServices
                 return (object[])value;
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IndexOf"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Determines the index of a specific item in the collection.
-        ///    </para>
+        /// Determines the index of a specific item in the collection.
         /// </devdoc>
         public int IndexOf(string value)
         {
@@ -181,9 +147,8 @@ namespace System.DirectoryServices
             return -1;
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Insert"]/*' />
         /// <devdoc>
-        ///    <para>Inserts an item at the specified position in the collection.</para>
+        /// nserts an item at the specified position in the collection.
         /// </devdoc>
         public void Insert(int index, string value)
         {
@@ -192,9 +157,8 @@ namespace System.DirectoryServices
             _propSetter(tmpList.ToArray());
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.Remove"]/*' />
         /// <devdoc>
-        ///    <para>Removes an item from the collection.</para>
+        /// Removes an item from the collection.
         /// </devdoc>
         public void Remove(string value)
         {
@@ -203,10 +167,8 @@ namespace System.DirectoryServices
             RemoveAt(index);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.RemoveAt"]/*' />
         /// <devdoc>
-        ///    <para>Removes the
-        ///       item at the specified index from the collection.</para>
+        /// Removes the item at the specified index from the collection.
         /// </devdoc>
         public void RemoveAt(int index)
         {
@@ -222,56 +184,34 @@ namespace System.DirectoryServices
             _propSetter(newValues);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IsReadOnly"]/*' />
-        /// <internalonly/>
         bool IList.IsReadOnly => false;
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IsFixedSize"]/*' />
-        /// <internalonly/>
         bool IList.IsFixedSize => false;
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.CopyTo"]/*' />
-        /// <internalonly/>
         void ICollection.CopyTo(Array array, int index)
         {
             object[] values = GetValue();
             values.CopyTo(array, index);
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.IsSynchronized"]/*' />
-        /// <internalonly/>
         bool ICollection.IsSynchronized => false;
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.ICollection.SyncRoot"]/*' />
-        /// <internalonly/>
         object ICollection.SyncRoot => this;
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.this"]/*' />
-        /// <internalonly/>
         object IList.this[int index]
         {
             get => this[index];
             set => this[index] = (string)value;
         }
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Add"]/*' />
-        /// <internalonly/>            
         int IList.Add(object value) => Add((string)value);
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Contains"]/*' />
-        /// <internalonly/>
         bool IList.Contains(object value) => Contains((string)value);
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.IndexOf"]/*' />
-        /// <internalonly/>                           
         int IList.IndexOf(object value) => IndexOf((string)value);
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Insert"]/*' />
-        /// <internalonly/>
         void IList.Insert(int index, object value) => Insert(index, (string)value);
 
-        /// <include file='doc\SchemaNameCollection.uex' path='docs/doc[@for="SchemaNameCollection.IList.Remove"]/*' />
-        /// <internalonly/>
         void IList.Remove(object value) => Remove((string)value);
 
         internal delegate object VariantPropGetter();

@@ -12,9 +12,8 @@ using INTPTR_INTPTRCAST = System.IntPtr;
 
 namespace System.DirectoryServices
 {
-    /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher"]/*' />
     /// <devdoc>
-    ///    <para> Performs queries against the Active Directory hierarchy.</para>
+    /// Performs queries against the Active Directory hierarchy.
     /// </devdoc>
     public class DirectorySearcher : Component
     {
@@ -52,84 +51,76 @@ namespace System.DirectoryServices
 
         private const string defaultFilter = "(objectClass=*)";
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
-        /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default values.</para>
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
+        /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default values.
         /// </devdoc>
         public DirectorySearcher() : this(null, defaultFilter, null, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher1"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
         /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
-        ///    values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to the given value.</para>
+        ///  values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to the given value.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot) : this(searchRoot, defaultFilter, null, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher2"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
         /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
-        ///    values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the respective given values.</para>
+        /// values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter) : this(searchRoot, filter, null, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher3"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
         /// <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to its default 
-        ///    value, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.</para>
+        /// value, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter, string[] propertiesToLoad) : this(searchRoot, filter, propertiesToLoad, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher4"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
         /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
-        ///    values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the given value.</para>
+        ///    values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the given value.
         /// </devdoc>
         public DirectorySearcher(string filter) : this(null, filter, null, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher5"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> 
         /// and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default
-        /// values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.</para>
+        /// values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(string filter, string[] propertiesToLoad) : this(null, filter, propertiesToLoad, System.DirectoryServices.SearchScope.Subtree)
         {
             _scopeSpecified = false;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher6"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to its default 
-        ///    value, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to the respective given values.</para>
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to its default 
+        /// value, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to the respective given values.</para>
         /// </devdoc>
         public DirectorySearcher(string filter, string[] propertiesToLoad, SearchScope scope) : this(null, filter, propertiesToLoad, scope)
         {
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySearcher7"]/*' />
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with the <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> properties set to the given 
-        ///    values.</para>
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with the <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> properties set to the given 
+        /// values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter, string[] propertiesToLoad, SearchScope scope)
         {
@@ -140,9 +131,6 @@ namespace System.DirectoryServices
             this.SearchScope = scope;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Dispose"]/*' />
-        /// <devdoc>        
-        /// </devdoc>
         protected override void Dispose(bool disposing)
         {
             // safe to call while finalizing or disposing
@@ -157,12 +145,9 @@ namespace System.DirectoryServices
             base.Dispose(disposing);
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.CacheResults"]/*' />
         /// <devdoc>
-        ///    <para>
-        ///       Gets or sets a value indicating whether the result should be cached on the
-        ///       client machine.
-        ///    </para>
+        /// Gets or sets a value indicating whether the result should be cached on the
+        /// client machine.
         /// </devdoc>
         [DefaultValue(true)]
         public bool CacheResults
@@ -180,11 +165,10 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.ClientTimeout"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the maximum amount of time that the client waits for
-        ///       the server to return results. If the server does not respond within this time,
-        ///       the search is aborted, and no results are returned.</para>
+        ///  Gets or sets the maximum amount of time that the client waits for
+        ///  the server to return results. If the server does not respond within this time,
+        ///  the search is aborted, and no results are returned.</para>
         /// </devdoc>
         public TimeSpan ClientTimeout
         {
@@ -201,20 +185,16 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.PropertyNamesOnly"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value indicating whether the search should retrieve only the names of requested
-        ///       properties or the names and values of requested properties.</para>
+        /// Gets or sets a value indicating whether the search should retrieve only the names of requested
+        /// properties or the names and values of requested properties.</para>
         /// </devdoc>        
         [DefaultValue(false)]
         public bool PropertyNamesOnly { get; set; }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Filter"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the Lightweight Directory Access Protocol (LDAP) filter string
-        ///       format.</para>
-        ///    <![CDATA[ (objectClass=*) (!(objectClass=user)) (&(objectClass=user)(sn=Jones)) ]]>
-        ///    </devdoc>
+        /// Gets or sets the Lightweight Directory Access Protocol (LDAP) filter string format.
+        /// </devdoc>
         [
             DefaultValue(defaultFilter),
             // CoreFXPort - Remove design support      
@@ -231,9 +211,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.PageSize"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the page size in a paged search.</para>
+        /// Gets or sets the page size in a paged search.
         /// </devdoc>
         [DefaultValue(0)]
         public int PageSize
@@ -252,10 +231,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.PropertiesToLoad"]/*' />
         /// <devdoc>
-        /// <para>Gets the set of properties retrieved during the search. By default, the <see cref='System.DirectoryServices.DirectoryEntry.Path'/>
-        /// and <see cref='System.DirectoryServices.DirectoryEntry.Name'/> properties are retrieved.</para>
+        /// Gets the set of properties retrieved during the search. By default, the <see cref='System.DirectoryServices.DirectoryEntry.Path'/>
+        /// and <see cref='System.DirectoryServices.DirectoryEntry.Name'/> properties are retrieved.
         /// </devdoc>
         public StringCollection PropertiesToLoad
         {
@@ -269,9 +247,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.ReferralChasing"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets how referrals are chased.</para>
+        /// Gets or sets how referrals are chased.
         /// </devdoc>
         [DefaultValue(ReferralChasingOption.External)]
         public ReferralChasingOption ReferralChasing
@@ -289,9 +266,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.SearchScope"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the scope of the search that should be observed by the server.</para>
+        /// Gets or sets the scope of the search that should be observed by the server.
         /// </devdoc>
         [DefaultValue(SearchScope.Subtree)]
         public SearchScope SearchScope
@@ -314,11 +290,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.ServerPageTimeLimit"]/*' />
         /// <devdoc>
-        ///    <para> Gets or sets the time limit that the server should 
-        ///       observe to search a page of results (as opposed to
-        ///       the time limit for the entire search).</para>
+        /// Gets or sets the time limit that the server should observe to search a page of results (as
+        /// opposed to the time limit for the entire search).
         /// </devdoc>
         public TimeSpan ServerPageTimeLimit
         {
@@ -335,10 +309,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.ServerTimeLimit"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the maximum amount of time the server spends searching. If the
-        ///       time limit is reached, only entries found up to that point will be returned.</para>
+        /// Gets or sets the maximum amount of time the server spends searching. If the
+        /// time limit is reached, only entries found up to that point will be returned.
         /// </devdoc>
         public TimeSpan ServerTimeLimit
         {
@@ -355,10 +328,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.SizeLimit"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the maximum number of objects that the 
-        ///       server should return in a search.</para>
+        ///  Gets or sets the maximum number of objects that the 
+        ///  server should return in a search.
         /// </devdoc>
         [DefaultValue(0)]
         public int SizeLimit
@@ -372,14 +344,11 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.SearchRoot"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets the node in the Active Directory hierarchy 
-        ///       at which the search will start.</para>
+        /// Gets or sets the node in the Active Directory hierarchy 
+        /// at which the search will start.
         /// </devdoc>
-        [
-            DefaultValueAttribute(null)
-        ]
+        [DefaultValue(null)]
         public DirectoryEntry SearchRoot
         {
             get
@@ -411,10 +380,8 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Sort"]/*' />
         /// <devdoc>
-        ///    <para>Gets the property on which the results should be 
-        ///       sorted.</para>
+        /// Gets the property on which the results should be sorted.
         /// </devdoc>
         [TypeConverter(typeof(ExpandableObjectConverter))]
         public SortOption Sort
@@ -423,26 +390,23 @@ namespace System.DirectoryServices
             set => _sort = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Asynchronous"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value indicating whether searches should be carried out in an asynchronous  
-        ///       way.</para>
+        /// Gets or sets a value indicating whether searches should be carried out in an asynchronous  
+        /// way.
         /// </devdoc>
         [DefaultValue(false)]
         public bool Asynchronous { get; set; }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.Tombstone"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value indicateing whether the search should also return deleted objects that match the search  
-        ///       filter.</para>
+        /// Gets or sets a value indicateing whether the search should also return deleted objects that match the search  
+        /// filter.
         /// </devdoc>
         [DefaultValue(false)]
         public bool Tombstone { get; set; }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.AttributeScopeQuery"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets an attribute name to indicate that an attribute-scoped query search should be   
-        ///       performed.</para>
+        /// Gets or sets an attribute name to indicate that an attribute-scoped query search should be   
+        /// performed.
         /// </devdoc>
         [
             DefaultValue(""),
@@ -480,10 +444,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DerefAlias"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value to indicate how the aliases of found objects are to be  
-        ///       resolved.</para>
+        /// Gets or sets a value to indicate how the aliases of found objects are to be  
+        /// resolved.
         /// </devdoc>
         [DefaultValue(DereferenceAlias.Never)]
         public DereferenceAlias DerefAlias
@@ -498,10 +461,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.SecurityMasks"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value to indicate the search should return security access information for the specified 
-        ///       attributes.</para>
+        /// Gets or sets a value to indicate the search should return security access information for the specified 
+        /// attributes.
         /// </devdoc>
         [DefaultValue(SecurityMasks.None)]
         public SecurityMasks SecurityMasks
@@ -517,10 +479,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.ExtendedDn"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value to return extended DNs according to the requested 
-        ///       format.</para>
+        /// Gets or sets a value to return extended DNs according to the requested 
+        /// format.
         /// </devdoc>
         [DefaultValue(ExtendedDN.None)]
         public ExtendedDN ExtendedDN
@@ -535,10 +496,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.DirectorySynchronization"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value to indicate a directory synchronization search, which returns all changes since a specified
-        ///       state.</para>
+        /// Gets or sets a value to indicate a directory synchronization search, which returns all changes since a specified
+        /// state.
         /// </devdoc>
         [DefaultValue(null)]
         public DirectorySynchronization DirectorySynchronization
@@ -573,10 +533,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.VirtualListView"]/*' />
         /// <devdoc>
-        ///    <para>Gets or sets a value to indicate the search should use the LDAP virtual list view (VLV)
-        ///       control.</para>
+        /// Gets or sets a value to indicate the search should use the LDAP virtual list view (VLV)
+        /// control.
         /// </devdoc>
         [DefaultValue(null)]
         public DirectoryVirtualListView VirtualListView
@@ -619,10 +578,9 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.FindOne"]/*' />
         /// <devdoc>
-        ///    <para>Executes the search and returns only the first entry that is found.</para>
-        /// </devdoc>                
+        /// Executes the search and returns only the first entry that is found.
+        /// </devdoc>
         public SearchResult FindOne()
         {
             DirectorySynchronization tempsync = null;
@@ -658,10 +616,9 @@ namespace System.DirectoryServices
             return resultEntry;
         }
 
-        /// <include file='doc\DirectorySearcher.uex' path='docs/doc[@for="DirectorySearcher.FindAll"]/*' />
         /// <devdoc>
-        ///    <para> Executes the search and returns a collection of the entries that are found.</para>
-        /// </devdoc>                
+        /// Executes the search and returns a collection of the entries that are found.
+        /// </devdoc>
         public SearchResultCollection FindAll() => FindAll(true);
 
         private SearchResultCollection FindAll(bool findMoreThanOne)

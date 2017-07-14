@@ -44,10 +44,6 @@ namespace System.DirectoryServices.ActiveDirectory
             return Dictionary.Contains(tempName);
         }
 
-        /// <include file='doc\ResultPropertyCollection.uex' path='docs/doc[@for="ResultPropertyCollection.CopyTo"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void CopyTo(AttributeMetadata[] array, int index)
         {
             Dictionary.Values.CopyTo((Array)array, index);

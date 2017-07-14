@@ -8,9 +8,8 @@ using System.DirectoryServices.Interop;
 
 namespace System.DirectoryServices
 {
-    /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries"]/*' />
     /// <devdoc>
-    ///    <para>Contains the children (child entries) of an entry in the Active Directory.</para>
+    /// Contains the children (child entries) of an entry in the Active Directory.
     /// </devdoc>    
     public class DirectoryEntries : IEnumerable
     {
@@ -21,10 +20,9 @@ namespace System.DirectoryServices
         {
             _container = parent;
         }
-
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.SchemaFilter"]/*' />
+        
         /// <devdoc>
-        ///    <para>Gets the schemas that specify which children are shown.</para>
+        /// Gets the schemas that specify which children are shown.
         /// </devdoc>
         public SchemaNameCollection SchemaFilter
         {
@@ -41,11 +39,10 @@ namespace System.DirectoryServices
             if (!_container.IsContainer)
                 throw new InvalidOperationException(SR.Format(SR.DSNotAContainer , _container.Path));
         }
-
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.Add"]/*' />
+        
         /// <devdoc>
-        ///    <para>Creates a request to create a new entry in the container.</para>
-        /// </devdoc>                
+        /// Creates a request to create a new entry in the container.
+        /// </devdoc>
         public DirectoryEntry Add(string name, string schemaClassName)
         {
             CheckIsContainer();
@@ -54,21 +51,19 @@ namespace System.DirectoryServices
             entry.JustCreated = true;       // suspend writing changes until CommitChanges() is called
             return entry;
         }
-
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.Find"]/*' />
+        
         /// <devdoc>
-        ///    <para>Returns the child with the given name.</para>
-        /// </devdoc>                
+        /// Returns the child with the given name.
+        /// </devdoc>
         public DirectoryEntry Find(string name)
         {
             // For IIS: and WinNT: providers  schemaClassName == "" does general search.
             return Find(name, null);
         }
 
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.Find1"]/*' />
         /// <devdoc>
-        ///    <para>Returns the child with the given name and of the given type.</para>
-        /// </devdoc>                
+        /// Returns the child with the given name and of the given type.
+        /// </devdoc>
         public DirectoryEntry Find(string name, string schemaClassName)
         {
             CheckIsContainer();
@@ -84,11 +79,10 @@ namespace System.DirectoryServices
             }
             return new DirectoryEntry(o, _container.UsePropertyCache, _container.GetUsername(), _container.GetPassword(), _container.AuthenticationType);
         }
-
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.Remove"]/*' />
+        
         /// <devdoc>
-        /// <para>Deletes a child <see cref='System.DirectoryServices.DirectoryEntry'/> from this collection.</para>
-        /// </devdoc>                
+        /// Deletes a child <see cref='System.DirectoryServices.DirectoryEntry'/> from this collection.
+        /// </devdoc>
         public void Remove(DirectoryEntry entry)
         {
             CheckIsContainer();
@@ -102,18 +96,11 @@ namespace System.DirectoryServices
             }
         }
 
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.GetEnumerator"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>        
         public IEnumerator GetEnumerator() => new ChildEnumerator(_container);
-
-        /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.ChildEnumerator"]/*' />
+        
         /// <devdoc>
-        ///    <para>
-        ///       Supports a simple ForEach-style iteration over a collection and defines
-        ///       enumerators, size, and synchronization methods.
-        ///    </para>
+        /// Supports a simple ForEach-style iteration over a collection and defines
+        /// enumerators, size, and synchronization methods.
         /// </devdoc>
         private class ChildEnumerator : IEnumerator
         {
@@ -129,10 +116,9 @@ namespace System.DirectoryServices
                     _enumVariant = new SafeNativeMethods.EnumVariant((SafeNativeMethods.IEnumVariant)container.ContainerObject._NewEnum);
                 }
             }
-
-            /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.ChildEnumerator.Current"]/*' />
+            
             /// <devdoc>
-            ///    <para>Gets the current element in the collection.</para>
+            /// Gets the current element in the collection.
             /// </devdoc>
             public DirectoryEntry Current
             {
@@ -147,12 +133,10 @@ namespace System.DirectoryServices
                     return _currentEntry;
                 }
             }
-
-            /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.ChildEnumerator.MoveNext"]/*' />
+            
             /// <devdoc>
-            ///    <para>Advances
-            ///       the enumerator to the next element of the collection
-            ///       and returns a Boolean value indicating whether a valid element is available.</para>
+            /// Advances the enumerator to the next element of the collection
+            /// and returns a Boolean value indicating whether a valid element is available.</para>
             /// </devdoc>                        
             public bool MoveNext()
             {
@@ -163,9 +147,8 @@ namespace System.DirectoryServices
                 return _enumVariant.GetNext();
             }
 
-            /// <include file='doc\DirectoryEntries.uex' path='docs/doc[@for="DirectoryEntries.ChildEnumerator.Reset"]/*' />
             /// <devdoc>
-            ///    <para>Resets the enumerator back to its initial position before the first element in the collection.</para>
+            /// Resets the enumerator back to its initial position before the first element in the collection.
             /// </devdoc>
             public void Reset()
             {
