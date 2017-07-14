@@ -49,13 +49,20 @@ namespace System.DirectoryServices.Interop
             {
                 _enumerator = en ?? throw new ArgumentNullException(nameof(en));
             }
-    
+
+            /// <devdoc>
+            /// Moves the enumerator to the next value In the list.
+            /// </devdoc>
             public bool GetNext()
             {
                 Advance();
                 return _currentValue != s_noMoreValues;
             }
-    
+
+            /// <devdoc>
+            /// Returns the current value of the enumerator. If GetNext() has never been called,
+            /// or if it has been called but it returned false, will throw an exception.
+            /// </devdoc>
             public object GetValue()
             {
                 if (_currentValue == s_noMoreValues)
@@ -66,6 +73,9 @@ namespace System.DirectoryServices.Interop
                 return _currentValue;
             }
 
+            /// <devdoc>
+            /// Returns the enumerator to the start of the sequence.
+            /// </devdoc>
             public void Reset()
             {
                 _enumerator.Reset();

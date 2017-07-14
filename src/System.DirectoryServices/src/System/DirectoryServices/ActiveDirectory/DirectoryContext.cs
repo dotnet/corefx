@@ -184,7 +184,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public DirectoryContextType ContextType => _contextType;
 
-        internal NetworkCredential Credential =>_credential;
+        internal NetworkCredential Credential => _credential;
 
         #endregion public properties
 

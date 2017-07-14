@@ -54,7 +54,7 @@ namespace System.DirectoryServices
 
         #region Constructors
 
-        public ActiveDirectorySecurity() : base()
+        public ActiveDirectorySecurity()
         {
         }
 
