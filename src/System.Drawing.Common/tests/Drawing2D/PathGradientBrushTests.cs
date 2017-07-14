@@ -141,6 +141,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void Clone_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.Clone());
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CenterColor_ReturnsExpected()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -151,6 +160,15 @@ namespace System.Drawing.Drawing2D.Tests
                 brush.CenterColor = Color.Transparent;
                 Assert.Equal(Color.Transparent.ToArgb(), brush.CenterColor.ToArgb());
             }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void CenterColor_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.CenterColor = Color.Blue);
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -183,6 +201,16 @@ namespace System.Drawing.Drawing2D.Tests
                 Assert.NotEqual(Color.FromArgb(255, 0, 0, 255), brush.SurroundColors[0]);
                 Assert.Equal(defaultColors, brush.SurroundColors);
             }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void SurroundColors_Disposed_ThrowsArgumentException()
+        {
+            Color[] colors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.SurroundColors = colors);
         }
 
         public static IEnumerable<object[]> SurroundColors_InvalidColorsLength_TestData()
@@ -228,6 +256,15 @@ namespace System.Drawing.Drawing2D.Tests
                 Assert.Equal(float.NaN, brush.CenterPoint.X);
                 Assert.Equal(float.NegativeInfinity, brush.CenterPoint.Y);
             }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void CenterPoint_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.CenterPoint);
         }
 
         public static IEnumerable<object[]> Blend_FactorsPositions_TestData()
@@ -276,6 +313,15 @@ namespace System.Drawing.Drawing2D.Tests
                 brush.Blend.Positions = new float[2];
                 Assert.Equal(1, brush.Blend.Positions.Length);
             }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void Blend_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend);
         }
 
         public static IEnumerable<object[]> Blend_InvalidFactorsPositions_TestData()
@@ -413,6 +459,16 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void SetSigmaBellShape_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(1f));
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(1f, 1f));
+        }
+
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-1)]
         [InlineData(1.1f)]
@@ -501,6 +557,16 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void SetBlendTriangularShape_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(1f));
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(1f, 1f));
+        }
+
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(-1)]
         [InlineData(1.1f)]
@@ -563,6 +629,15 @@ namespace System.Drawing.Drawing2D.Tests
                 brush.InterpolationColors.Positions = new float[2];
                 Assert.Equal(1, brush.InterpolationColors.Positions.Length);
             }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void InterpolationColors_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -661,6 +736,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void Transform_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.Transform);
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Transform_Null_ArgumentNullException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -695,6 +779,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void ResetTransform_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.ResetTransform());
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void MultiplyTransform_Matrix_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -719,6 +812,18 @@ namespace System.Drawing.Drawing2D.Tests
                 defaultMatrix.Multiply(matrix, matrixOrder);
                 brush.MultiplyTransform(matrix, matrixOrder);
                 Assert.Equal(defaultMatrix, brush.Transform);
+            }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void MultiplyTransform_Disposed_ThrowsArgumentException()
+        {
+            using (Matrix matrix = new Matrix(1, 0, 0, 1, 1, 1))
+            {
+                PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+                brush.Dispose();
+
+                AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(matrix, MatrixOrder.Append));
             }
         }
 
@@ -780,6 +885,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void TranslateTransform_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(20f, 30f, MatrixOrder.Append));
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void TranslateTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -827,6 +941,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void ScaleTransform_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0.25f, 2, MatrixOrder.Append));
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ScaleTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -865,6 +988,15 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void RotateTransform_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(45, MatrixOrder.Append));
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void RotateTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -885,6 +1017,15 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void FocusScales_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.FocusScales);
+        }
+
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(WrapMode_TestData))]
         public void WrapMode_ReturnsExpected(WrapMode wrapMode)
@@ -897,21 +1038,21 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void WrapMode_Disposed_ThrowsArgumentException()
+        {
+            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
+            brush.Dispose();
+
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode);
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void WrapMode_Invalid_InvalidEnumArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
                 AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => brush.WrapMode = (WrapMode)int.MinValue);
             }
-        }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void Clone_Disposed_ThrowsArgumentException()
-        {
-            PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
-            brush.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => brush.Clone());
         }
 
         private void AssertDefaults(PathGradientBrush brush)
