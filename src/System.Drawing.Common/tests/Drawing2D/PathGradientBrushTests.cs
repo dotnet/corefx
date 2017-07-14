@@ -82,12 +82,12 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
-        public void Ctor_PointsLengthLessThenTwo_ThrowsOutOfMemoryException(int pointsLeght)
+        public void Ctor_PointsLengthLessThenTwo_ThrowsOutOfMemoryException(int pointsLegth)
         {
-            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLeght]));
-            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLeght], WrapMode.Clamp));
-            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new PointF[pointsLeght]));
-            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new PointF[pointsLeght], WrapMode.Clamp));
+            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLegth]));
+            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new Point[pointsLegth], WrapMode.Clamp));
+            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new PointF[pointsLegth]));
+            Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new PointF[pointsLegth], WrapMode.Clamp));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
