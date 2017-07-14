@@ -3,7 +3,7 @@
   <Library Name="*System.Net.Primitives*">
     <Assembly Name="System.Net.Primitives">
        <!-- VSO 449560 The following types are used by HttpListener. -->
-       <Type Name="System.Net.Cookie" Browse="Required Public" Dynamic="Required Public">
+       <Type Name="System.Net.Cookie">
          <!-- Used by CookieParser -->
          <Method Name="InternalSetName" Dynamic="Required" />
          <Field Name="IsQuotedDomain" Dynamic="Required" />
@@ -14,7 +14,7 @@
          <Method Name="Clone" Dynamic="Required" />
          <Property Name="Variant" Dynamic="Required" />
        </Type>
-       <Type Name="System.Net.CookieCollection" Browse="Required Public" Dynamic="Required Public">
+       <Type Name="System.Net.CookieCollection">
          <Method Name="InternalAdd" Dynamic="Required" />
        </Type>
     </Assembly>
