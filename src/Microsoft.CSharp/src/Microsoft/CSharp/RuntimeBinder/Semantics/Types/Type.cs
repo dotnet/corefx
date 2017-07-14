@@ -464,9 +464,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public virtual CType StripNubs() => this;
 
-        public virtual CType StripNubs(out int pcnub)
+        public virtual CType StripNubs(out bool wasNullable)
         {
-            pcnub = 0;
+            wasNullable = false;
             return this;
         }
 

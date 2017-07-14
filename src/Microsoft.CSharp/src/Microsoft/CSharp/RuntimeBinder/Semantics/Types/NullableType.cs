@@ -41,9 +41,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public override CType StripNubs() => UnderlyingType;
 
-        public override CType StripNubs(out int pcnub)
+        public override CType StripNubs(out bool wasNullable)
         {
-            pcnub = 1;
+            wasNullable = true;
             return UnderlyingType;
         }
 
