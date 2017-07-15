@@ -307,21 +307,27 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             List<Type> list = new List<Type>();
             list.Insert(0, type);
-            for (Type parent = type.BaseType; parent != null; parent = parent.BaseType)
-            {
-                // Load it in the symbol table.
-                LoadSymbolsFromType(parent);
-
-                // Insert into our list of Types.
-                list.Insert(0, parent);
-            }
-
             if (type.IsInterface)
             {
                 foreach (Type iface in type.GetInterfaces())
                 {
                     LoadSymbolsFromType(iface);
                     list.Insert(0, iface);
+                }
+
+                Type obj = typeof(object);
+                LoadSymbolsFromType(obj);
+                list.Insert(0, obj);
+            }
+            else
+            {
+                for (Type parent = type.BaseType; parent != null; parent = parent.BaseType)
+                {
+                    // Load it in the symbol table.
+                    LoadSymbolsFromType(parent);
+
+                    // Insert into our list of Types.
+                    list.Insert(0, parent);
                 }
             }
 

@@ -165,5 +165,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             dynamic res = itd[d];
             Assert.Equal(6, res);
         }
+
+        [Fact]
+        public void InterfaceMethodInheritedFromObject()
+        {
+            ITestDerived itd = new TestImpl();
+            dynamic d = itd;
+            dynamic res = itd.Equals(d);
+            Assert.True(res);
+        }
     }
 }

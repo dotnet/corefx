@@ -61,6 +61,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         yield return iface;
                     }
+
+                    yield return getAggregate().GetTypeManager().ObjectAggregateType;
                 }
                 else
                 {
