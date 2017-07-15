@@ -134,7 +134,7 @@
     <_runtimeOS>$(RuntimeOS)</_runtimeOS>
     <_runtimeOS Condition="'$(_runtimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</_runtimeOS>
     <_runtimeOS Condition="'$(PortableBuild)' == 'true'">$(_portableOS)</_runtimeOS>
-    <HostRID>$(_runtimeOS)-x64</HostRID>
+    <ToolRuntimeRID>$(_runtimeOS)-x64</ToolRuntimeRID>
 
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
     <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx'">linux</_portableOS>
