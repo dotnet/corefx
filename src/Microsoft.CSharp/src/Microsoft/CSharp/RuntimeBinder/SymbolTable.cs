@@ -221,9 +221,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             IEnumerable<MemberInfo> result = Array.Empty<MemberInfo>();
 
-            foreach (Type t in inheritance)
+            for (int i = inheritance.Count - 1; i >= 0; --i)
             {
-                Type type = t;
+                Type type = inheritance[i];
                 if (type.IsGenericType)
                 {
                     type = type.GetGenericTypeDefinition();
@@ -305,29 +305,36 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private List<Type> CreateInheritanceHierarchyList(Type type)
         {
-            List<Type> list = new List<Type>();
-            list.Insert(0, type);
+            List<Type> list;
             if (type.IsInterface)
             {
+                Type[] ifaces = type.GetInterfaces();
+
+                // Since IsWindowsRuntimeType() is rare, this is probably the final size
+                list = new List<Type>(ifaces.Length + 2)
+                {
+                    type
+                };
                 foreach (Type iface in type.GetInterfaces())
                 {
                     LoadSymbolsFromType(iface);
-                    list.Insert(0, iface);
+                    list.Add(iface);
                 }
 
                 Type obj = typeof(object);
                 LoadSymbolsFromType(obj);
-                list.Insert(0, obj);
+                list.Add(obj);
             }
             else
             {
+                list = new List<Type> { type };
                 for (Type parent = type.BaseType; parent != null; parent = parent.BaseType)
                 {
                     // Load it in the symbol table.
                     LoadSymbolsFromType(parent);
 
                     // Insert into our list of Types.
-                    list.Insert(0, parent);
+                    list.Add(parent);
                 }
             }
 
@@ -344,7 +351,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Debug.Assert(collectionType.isInterfaceType());
 
                     // Insert into our list of Types.
-                    list.Insert(0, collectionType.AssociatedSystemType);
+                    list.Add(collectionType.AssociatedSystemType);
                 }
             }
             return list;
