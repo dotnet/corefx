@@ -316,6 +316,15 @@ namespace Microsoft.CSharp.RuntimeBinder
                 list.Insert(0, parent);
             }
 
+            if (type.IsInterface)
+            {
+                foreach (Type iface in type.GetInterfaces())
+                {
+                    LoadSymbolsFromType(iface);
+                    list.Insert(0, iface);
+                }
+            }
+
             // If we have a WinRT type then we should load the members of it's collection interfaces
             // as well as those members are on this type as far as the user is concerned.
             CType ctype = GetCTypeFromType(type);
@@ -2015,6 +2024,10 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         internal void AddConversionsForType(Type type)
         {
+            if (type.IsInterface)
+            {
+                AddConversionsForOneType(type);
+            }
             for (Type t = type; t.BaseType != null; t = t.BaseType)
             {
                 AddConversionsForOneType(t);
