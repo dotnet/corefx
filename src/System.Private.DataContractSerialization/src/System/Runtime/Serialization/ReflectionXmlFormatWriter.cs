@@ -65,19 +65,39 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
+                    Type enumeratorType = null;
+                    Type[] keyValueTypes = null;
+                    if (collectionDataContract.Kind == CollectionKind.GenericDictionary)
+                    {
+                        keyValueTypes = collectionDataContract.ItemType.GetGenericArguments();
+                        enumeratorType = Globals.TypeOfGenericDictionaryEnumerator.MakeGenericType(keyValueTypes);
+                    }
+                    else if (collectionDataContract.Kind == CollectionKind.Dictionary)
+                    {
+                        keyValueTypes = new Type[] { Globals.TypeOfObject, Globals.TypeOfObject };
+                        enumeratorType = Globals.TypeOfDictionaryEnumerator;
+                    }
+                    else
+                    {
+                        enumeratorType = collectionDataContract.GetEnumeratorMethod.ReturnType;
+                    }
+
+                    MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
+                    Type elementType = getCurrentMethod.ReturnType;
+
                     bool isDictionary = collectionDataContract.Kind == CollectionKind.Dictionary || collectionDataContract.Kind == CollectionKind.GenericDictionary;
                     while (enumerator.MoveNext())
                     {
                         object current = enumerator.Current;
                         context.IncrementItemCount(1);
-                        _reflectionClassWriter.ReflectionWriteStartElement(xmlWriter, enumeratorReturnType, ns, ns.Value, itemName.Value, 0);
+                        _reflectionClassWriter.ReflectionWriteStartElement(xmlWriter, elementType, ns, ns.Value, itemName.Value, 0);
                         if (isDictionary)
                         {
                             collectionDataContract.ItemContract.WriteXmlValue(xmlWriter, current, context);
                         }
                         else
                         {
-                            _reflectionClassWriter.ReflectionWriteValue(xmlWriter, context, enumeratorReturnType, current, false, primitiveContractForParamType: null);
+                            _reflectionClassWriter.ReflectionWriteValue(xmlWriter, context, elementType, current, false, primitiveContractForParamType: null);
                         }
 
                         _reflectionClassWriter.ReflectionWriteEndElement(xmlWriter);
