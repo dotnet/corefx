@@ -27,9 +27,9 @@ namespace System.Drawing
         private int _busy;
         private bool _invalidateWhenFree;
 
-        private const int BufferFree = 0; //the graphics buffer is free to use
-        private const int BUFFER_BUSY_PAINTING = 1; //graphics buffer is busy being created/painting
-        private const int BufferBusyDisposing = 2; //graphics buffer is busy disposing
+        private const int BufferFree = 0; // The graphics buffer is free to use.
+        private const int BufferBusyPainting = 1; // The graphics buffer is busy being created/painting.
+        private const int BufferBusyDisposing = 2; // The graphics buffer is busy disposing.
 
         private static TraceSwitch s_doubleBuffering;
 
@@ -127,7 +127,7 @@ namespace System.Drawing
         /// </summary>
         private BufferedGraphics AllocBuffer(Graphics targetGraphics, IntPtr targetDC, Rectangle targetRectangle)
         {
-            int oldBusy = Interlocked.CompareExchange(ref _busy, BUFFER_BUSY_PAINTING, BufferFree);
+            int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyPainting, BufferFree);
 
             // In the case were we have contention on the buffer - i.e. two threads 
             // trying to use the buffer at the same time, we just create a temp 
@@ -172,9 +172,11 @@ namespace System.Drawing
             }
             catch
             {
-                _busy = BufferFree; // free the buffer so it can be disposed.
+                // Free the buffer so it can be disposed.
+                _busy = BufferFree;
                 throw;
             }
+
             return _buffer;
         }
 
@@ -206,39 +208,25 @@ namespace System.Drawing
 
 
         /// <summary>
-        /// FillBitmapInfo
-        ///
         /// Fills in the fields of a BITMAPINFO so that we can create a bitmap
         /// that matches the format of the display.
         /// 
         /// This is done by creating a compatible bitmap and calling GetDIBits
-        /// to return the color masks.  This is done with two calls.  The first
+        /// to return the color masks. This is done with two calls. The first
         /// call passes in biBitCount = 0 to GetDIBits which will fill in the
-        /// base BITMAPINFOHEADER data.  The second call to GetDIBits (passing
+        /// base BITMAPINFOHEADER data. The second call to GetDIBits (passing
         /// in the BITMAPINFO filled in by the first call) will return the color
         /// table or bitmasks, as appropriate.
-        /// 
-        /// Returns:
-        ///   TRUE if successful, FALSE otherwise.
-        /// 
-        /// History:
-        ///  07-Jun-1995 -by- Gilman Wong [Microsoft]
-        /// Wrote it.
-        /// 
-        ///  15-Nov-2000 -by- Chris Anderson [Microsoft]
-        /// Ported it to C#
-        ///
         /// </summary>
+        /// <returns>True if successful, false otherwise.</returns>
         private bool FillBitmapInfo(IntPtr hdc, IntPtr hpal, ref NativeMethods.BITMAPINFO_FLAT pbmi)
         {
             IntPtr hbm = IntPtr.Zero;
             bool bRet = false;
             try
             {
-                //
                 // Create a dummy bitmap from which we can query color format info
                 // about the device surface.
-                //
                 hbm = SafeNativeMethods.CreateCompatibleBitmap(new HandleRef(null, hdc), 1, 1);
 
                 if (hbm == IntPtr.Zero)
@@ -248,10 +236,8 @@ namespace System.Drawing
 
                 pbmi.bmiHeader_biSize = Marshal.SizeOf(typeof(NativeMethods.BITMAPINFOHEADER));
                 pbmi.bmiColors = new byte[NativeMethods.BITMAPINFO_MAX_COLORSIZE * 4];
-
-                //
+                
                 // Call first time to fill in BITMAPINFO header.
-                //
                 SafeNativeMethods.GetDIBits(new HandleRef(null, hdc),
                                                     new HandleRef(null, hbm),
                                                     0,
@@ -268,10 +254,7 @@ namespace System.Drawing
                 {
                     if (pbmi.bmiHeader_biCompression == NativeMethods.BI_BITFIELDS)
                     {
-                        //
                         // Call a second time to get the color masks.
-                        // It's a GetDIBits Win32 "feature".
-                        //
                         SafeNativeMethods.GetDIBits(new HandleRef(null, hdc),
                                                 new HandleRef(null, hbm),
                                                 0,
@@ -295,15 +278,12 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// Initialize the color table of the BITMAPINFO pointed to by pbmi.  Colors
+        /// Initialize the color table of the BITMAPINFO pointed to by pbmi. Colors
         /// are set to the current system palette.
         ///
         /// Note: call only valid for displays of 8bpp or less.
-        ///
-        /// Returns:
-        ///   TRUE if successful, FALSE otherwise.
-        ///
         /// </summary>
+        /// <returns>True is successful, false otherwise.</returns>
         private unsafe bool FillColorTable(IntPtr hdc, IntPtr hpal, ref NativeMethods.BITMAPINFO_FLAT pbmi)
         {
             byte[] aj = new byte[sizeof(NativeMethods.PALETTEENTRY) * 256];
@@ -320,8 +300,7 @@ namespace System.Drawing
                     {
                         Debug.WriteLineIf(DoubleBuffering.TraceVerbose, "8 bit or less...");
 
-                        // NOTE : Didn't port "MyGetPaletteEntries" as it is only
-                        //      : for 4bpp displays, which we don't work on anyway.
+                        // Note: we don't support 4bpp displays.
                         uint palRet;
                         IntPtr palHalftone = IntPtr.Zero;
                         if (hpal == IntPtr.Zero)
@@ -335,6 +314,7 @@ namespace System.Drawing
                             Debug.WriteLineIf(DoubleBuffering.TraceVerbose, "using custom palette...");
                             palRet = SafeNativeMethods.GetPaletteEntries(new HandleRef(null, hpal), 0, cColors, aj);
                         }
+
                         if (palRet != 0)
                         {
                             for (int i = 0; i < cColors; i++)
@@ -363,13 +343,13 @@ namespace System.Drawing
         /// </summary>
         private Graphics CreateBuffer(IntPtr src, int offsetX, int offsetY, int width, int height)
         {
-            //create the compat DC
+            // Create the compat DC.
             _busy = BufferBusyDisposing;
             DisposeDC();
-            _busy = BUFFER_BUSY_PAINTING;
+            _busy = BufferBusyPainting;
             _compatDC = UnsafeNativeMethods.CreateCompatibleDC(new HandleRef(null, src));
 
-            //recreate the bitmap if necessary
+            // Recreate the bitmap if necessary.
             if (width > _bufferSize.Width || height > _bufferSize.Height)
             {
                 Debug.WriteLineIf(DoubleBuffering.TraceInfo, "allocating new bitmap: " + width + " x " + height);
@@ -378,7 +358,7 @@ namespace System.Drawing
 
                 _busy = BufferBusyDisposing;
                 DisposeBitmap();
-                _busy = BUFFER_BUSY_PAINTING;
+                _busy = BufferBusyPainting;
 
                 Debug.WriteLineIf(DoubleBuffering.TraceInfo, "    new size         : " + optWidth + " x " + optHeight);
                 IntPtr pvbits = IntPtr.Zero;
@@ -386,10 +366,10 @@ namespace System.Drawing
                 _bufferSize = new Size(optWidth, optHeight);
             }
 
-            //select the bitmap
+            // Select the bitmap.
             _oldBitmap = SafeNativeMethods.SelectObject(new HandleRef(this, _compatDC), new HandleRef(this, _dib));
 
-            //create compat graphics
+            // Create compat graphics.
             Debug.WriteLineIf(DoubleBuffering.TraceInfo, "    Create compatGraphics");
             _compatGraphics = Graphics.FromHdcInternal(_compatDC);
             _compatGraphics.TranslateTransform(-_targetLoc.X, -_targetLoc.Y);
@@ -410,10 +390,8 @@ namespace System.Drawing
         /// Note: On palettized displays, if the system palette changes the
         ///       UpdateDIBColorTable function should be called to maintain
         ///       the identity palette mapping between the DIB and the display.
-        ///
-        /// Returns:
-        ///   Valid bitmap handle if successful, NULL if error.
-        /// </summary>        
+        /// </summary>
+        /// <returns>A valid bitmap handle if successul, IntPtr.Zero otherwise.</returns>
         [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke")]
         private IntPtr CreateCompatibleDIB(IntPtr hdc, IntPtr hpal, int ulWidth, int ulHeight, ref IntPtr ppvBits)
         {
@@ -442,7 +420,6 @@ namespace System.Drawing
             if (FillBitmapInfo(hdc, hpal, ref pbmi))
             {
                 // Change bitmap size to match specified dimensions.
-
                 pbmi.bmiHeader_biWidth = ulWidth;
                 pbmi.bmiHeader_biHeight = ulHeight;
                 if (pbmi.bmiHeader_biCompression == NativeMethods.BI_RGB)
@@ -467,9 +444,8 @@ namespace System.Drawing
                 pbmi.bmiHeader_biClrUsed = 0;
                 pbmi.bmiHeader_biClrImportant = 0;
 
-                // Create the DIB section.  Let Win32 allocate the memory and return
+                // Create the DIB section. Let Win32 allocate the memory and return
                 // a pointer to the bitmap surface.
-
                 hbmRet = SafeNativeMethods.CreateDIBSection(new HandleRef(null, hdc), ref pbmi, NativeMethods.DIB_RGB_COLORS, ref ppvBits, IntPtr.Zero, 0);
                 Win32Exception ex = null;
                 if (hbmRet == IntPtr.Zero)
@@ -547,7 +523,7 @@ namespace System.Drawing
 
             if (disposing)
             {
-                if (oldBusy == BUFFER_BUSY_PAINTING)
+                if (oldBusy == BufferBusyPainting)
                 {
 #if DEBUG
                     Debug.WriteLineIf(DoubleBuffering.TraceInfo, "Stack at busy buffer: \n" + _stackAtBusy);
@@ -601,8 +577,7 @@ namespace System.Drawing
         {
             int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyDisposing, BufferFree);
 
-            //if we're not busy with our buffer, lets
-            //clean it up now
+            // If we're not busy with our buffer, lets clean it up now
             if (oldBusy == BufferFree)
             {
                 Dispose();
@@ -610,9 +585,7 @@ namespace System.Drawing
             }
             else
             {
-                //this will indicate to free the buffer 
-                //as soon as it becomes non-busy
-                //
+                // This will indicate to free the buffer as soon as it becomes non-busy.
                 _invalidateWhenFree = true;
             }
         }

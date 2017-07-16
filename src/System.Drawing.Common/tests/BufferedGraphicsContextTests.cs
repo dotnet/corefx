@@ -17,7 +17,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]   
         public void Allocate_ValidTargetGraphics_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -31,7 +31,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_LargeRectWithTargetGraphics_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -45,7 +45,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_ValidTargetHdc_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -69,7 +69,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_LargeRectWithTargetHdc_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -102,7 +102,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_NullGraphicsZeroSize_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -112,7 +112,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_NullGraphicsNonZeroSize_ThrowsArgumentNullException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -122,7 +122,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_DisposedGraphics_ThrowsArgumentException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -137,7 +137,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Allocate_BusyGraphics_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -212,7 +212,7 @@ namespace System.Drawing.Tests
             var context = new BufferedGraphicsContext();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_BusyAndValidated_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -226,7 +226,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Dispose_BusyAndInvalidated_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())

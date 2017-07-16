@@ -15,15 +15,15 @@ namespace System.Drawing
     public sealed class BufferedGraphics : IDisposable
     {
         private Graphics _bufferedGraphicsSurface;
-        private Graphics _targetGraphics;
+        private readonly Graphics _targetGraphics;
         private BufferedGraphicsContext _context;
-        private IntPtr _targetDC;
-        private Point _targetLoc;
-        private Size _virtualSize;
-        private static int s_rop = 0xcc0020; // RasterOp.SOURCE.GetRop();
+        private readonly IntPtr _targetDC;
+        private readonly Point _targetLoc;
+        private readonly Size _virtualSize;
+        private const int RasterOp = 0xcc0020; // RasterOp.SOURCE.GetRop();
 
         /// <summary>
-        /// Internal constructor, this class is created by the BufferedGraphicsContext.
+        /// Internal constructor, this class is created by BufferedGraphicsContext.
         /// </summary>
         internal BufferedGraphics(Graphics bufferedGraphicsSurface, BufferedGraphicsContext context, Graphics targetGraphics,
                                   IntPtr targetDC, Point targetLoc, Size virtualSize)
@@ -57,6 +57,7 @@ namespace System.Drawing
                         _context = null;
                     }
                 }
+
                 if (_bufferedGraphicsSurface != null)
                 {
                     _bufferedGraphicsSurface.Dispose();
@@ -125,7 +126,7 @@ namespace System.Drawing
             try
             {
                 SafeNativeMethods.BitBlt(refTargetDC, _targetLoc.X, _targetLoc.Y, _virtualSize.Width, _virtualSize.Height,
-                                         new HandleRef(buffer.Graphics, sourceDC), 0, 0, s_rop);
+                                         new HandleRef(buffer.Graphics, sourceDC), 0, 0, RasterOp);
             }
             finally
             {
