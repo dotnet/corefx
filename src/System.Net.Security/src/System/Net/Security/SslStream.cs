@@ -105,7 +105,7 @@ namespace System.Net.Security
         //
         public virtual IAsyncResult BeginAuthenticateAsClient(string targetHost, AsyncCallback asyncCallback, object asyncState)
         {
-            return BeginAuthenticateAsClient(targetHost, new X509CertificateCollection(), SecurityProtocol.SystemDefaultSecurityProtocols, false,
+            return BeginAuthenticateAsClient(targetHost, null, SecurityProtocol.SystemDefaultSecurityProtocols, false,
                                            asyncCallback, asyncState);
         }
 
@@ -192,7 +192,7 @@ namespace System.Net.Security
         #region Synchronous methods
         public virtual void AuthenticateAsClient(string targetHost)
         {
-            AuthenticateAsClient(targetHost, new X509CertificateCollection(), SecurityProtocol.SystemDefaultSecurityProtocols, false);
+            AuthenticateAsClient(targetHost, null, SecurityProtocol.SystemDefaultSecurityProtocols, false);
         }
 
         public virtual void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation)
