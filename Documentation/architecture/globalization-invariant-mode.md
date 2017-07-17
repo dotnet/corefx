@@ -35,20 +35,20 @@ Note: On Linux, .NET Core relies on globalization data from ICU. For example, [.
   
 ## Cultures and culture data
  
-When enabling the invariant mode, all cultures behave like the invariant culture. The invariant culture hs the following characteristics: 
+When enabling the invariant mode, all cultures behave like the invariant culture. The invariant culture has the following characteristics: 
  
 * Culture names (English, native display, ISO, language names) will return invariant names. For instance, when requesting culture native name, you will get "Invariant Language (Invariant Country)".
 * All cultures LCID will have value 0x1000 (which means Custom Locale ID). The exception is the invariant cultures which will still have 0x7F.
-* All culture parents will be invariant. In other word, there will not be any neutral cultures by default but the apps can still create a culture like "en"
+* All culture parents will be invariant. In other word, there will not be any neutral cultures by default but the apps can still create a culture like "en".
 * The application can still create any culture (e.g. "en-US") but all the culture data will still be driven from the Invariant culture. Also, the culture name used to create the culture should conform to [BCP 47 specs](https://tools.ietf.org/html/bcp47).
-* All Date/Time formatting and parsing will use fixed date and time patterns. For example, the short date will be "MM/dd/yyyy" regardless of the culture used. Applications having old formatted date/time strings may not be able to parse such string without using ParseExact.
+* All Date/Time formatting and parsing will use fixed date and time patterns. For example, the short date will be "MM/dd/yyyy" regardless of the culture used. Applications having old formatted date/time strings may not be able to parse such strings without using ParseExact.
 * Numbers will always be formatted as the invariant culture. For example, decimal point will always be formatted as ".". Number strings previously formatted with cultures that have different symbols will fail parsing.
 * All cultures will have currency symbol as "¤"
 * Culture enumeration will always return a list with one culture which is the invariant culture.
  
 ## String casing
  
-String casing (ToUpper and ToLower) will be performed for the ASCII range only. Requests to case code points outside that range will not be performed,however no exception will be thrown. In other words, casing will only be performed for character range ['a'..'z'].
+String casing (ToUpper and ToLower) will be performed for the ASCII range only. Requests to case code points outside that range will not be performed, however no exception will be thrown. In other words, casing will only be performed for character range ['a'..'z'].
  
 Turkish I casing will not be supported when using Turkish cultures.
  
@@ -71,7 +71,7 @@ However, the following comparison will resolve to being equal:
 * 'I', using 
 * CompareOptions.Ignorecase
  
-It is worth to notice that all other [sort comparison options](https://docs.microsoft.com/dotnet/api/system.globalization.compareoptions) (for example, ignore symbols, ignore space, Katakana, Hiragana) will have no effect in the invariant mode (they are ignored).
+It is worth noticing that all other [sort comparison options](https://docs.microsoft.com/dotnet/api/system.globalization.compareoptions) (for example, ignore symbols, ignore space, Katakana, Hiragana) will have no effect in the invariant mode (they are ignored).
  
 ## Sort keys
  
@@ -89,12 +89,12 @@ String normalization normalizes a string into some form (for example, composed, 
 [Internationalized Domain Names](https://en.wikipedia.org/wiki/Internationalized_domain_name) require globalization data to perform conversion to ACII or Unicode forms, which isn't available in the invariant mode. In this mode, IDN functionality has the following behavior:
 
 * IDN support doesn't conform to the latest standard.
-* IDN support will be incorrect if input IDN string is not normalized since normalization is not supported in invariant mode.
+* IDN support will be incorrect if the input IDN string is not normalized since normalization is not supported in invariant mode.
 * Some basic IDN strings will still produce correct values.
  
 ## Time zone display name in Linux
  
-When running on Linux ICU is used to get the time zone display name. In invariant mode, the standard time zone names are returned instead.
+When running on Linux, ICU is used to get the time zone display name. In invariant mode, the standard time zone names are returned instead.
  
 ## Enabling the invariant mode
  
