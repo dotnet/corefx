@@ -41,17 +41,12 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult) => throw new InvalidOperationException(SR.net_writeonlystream);
         
-        public new Task<int> ReadAsync(Byte[] buffer, int offset, int count)
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return ReadAsync(buffer, offset, count, CancellationToken.None);
-        }
-        
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
-        {
-            return Task<int>.Factory.FromAsync(
-                (callback, state) => this.BeginRead(buffer, offset, size, callback, state),
-                iar => this.EndRead(iar),
-                null);
+            return Task.Factory.FromAsync(
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginRead(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndRead(iar),
+                buffer, offset, count, this);
         }
 
         public override void Write(byte[] buffer, int offset, int size)
@@ -116,17 +111,12 @@ namespace System.Net
             EndWriteCore(asyncResult);
         }
         
-        public new Task WriteAsync(Byte[] buffer, int offset, int size)
-        {
-            return WriteAsync(buffer, offset, size, CancellationToken.None);
-        }
-        
-        public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return Task.Factory.FromAsync(
-                (callback, state) => this.BeginWrite(buffer, offset, size, callback, state),
-                iar => this.EndWrite(iar),
-                null);
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginWrite(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndWrite(iar),
+                buffer, offset, count, this);
         }
 
         protected override void Dispose(bool disposing)
