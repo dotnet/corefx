@@ -48,7 +48,16 @@ namespace System.Net
 #if NET46    
     [SecuritySafeCritical]
 #endif
-    internal sealed partial class NetEventSource : EventSource
+
+    // Unblock reflection in ILC mode by declaring types and methods as public.
+    // An alternative would be to unblock reflection via rd.xml/csproj changes, but that would
+    // result in a size hit for all of the metadata.
+#if uap
+    public
+#else
+    internal
+#endif
+    sealed partial class NetEventSource : EventSource
     {
         /// <summary>The single event source instance to use for all logging.</summary>
         public static readonly NetEventSource Log = new NetEventSource();
@@ -135,7 +144,12 @@ namespace System.Net
         }
 
         [Event(EnterEventId, Level = EventLevel.Informational, Keywords = Keywords.EnterExit)]
-        private void Enter(string thisOrContextObject, string memberName, string parameters) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void Enter(string thisOrContextObject, string memberName, string parameters) =>
             WriteEvent(EnterEventId, thisOrContextObject, memberName ?? MissingMember, parameters);
         #endregion
 
@@ -179,7 +193,12 @@ namespace System.Net
         }
 
         [Event(ExitEventId, Level = EventLevel.Informational, Keywords = Keywords.EnterExit)]
-        private void Exit(string thisOrContextObject, string memberName, string result) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void Exit(string thisOrContextObject, string memberName, string result) =>
             WriteEvent(ExitEventId, thisOrContextObject, memberName ?? MissingMember, result);
         #endregion
 
@@ -209,7 +228,12 @@ namespace System.Net
         }
 
         [Event(InfoEventId, Level = EventLevel.Informational, Keywords = Keywords.Default)]
-        private void Info(string thisOrContextObject, string memberName, string message) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void Info(string thisOrContextObject, string memberName, string message) =>
             WriteEvent(InfoEventId, thisOrContextObject, memberName ?? MissingMember, message);
         #endregion
 
@@ -239,7 +263,12 @@ namespace System.Net
         }
 
         [Event(ErrorEventId, Level = EventLevel.Warning, Keywords = Keywords.Default)]
-        private void ErrorMessage(string thisOrContextObject, string memberName, string message) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void ErrorMessage(string thisOrContextObject, string memberName, string message) =>
             WriteEvent(ErrorEventId, thisOrContextObject, memberName ?? MissingMember, message);
         #endregion
 
@@ -273,7 +302,12 @@ namespace System.Net
         }
 
         [Event(CriticalFailureEventId, Level = EventLevel.Critical, Keywords = Keywords.Debug)]
-        private void CriticalFailure(string thisOrContextObject, string memberName, string message) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void CriticalFailure(string thisOrContextObject, string memberName, string message) =>
             WriteEvent(CriticalFailureEventId, thisOrContextObject, memberName ?? MissingMember, message);
         #endregion
 
@@ -341,7 +375,12 @@ namespace System.Net
         }
 
         [Event(DumpArrayEventId, Level = EventLevel.Verbose, Keywords = Keywords.Debug)]
-        private unsafe void DumpBuffer(string thisOrContextObject, string memberName, byte[] buffer) =>
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void DumpBuffer(string thisOrContextObject, string memberName, byte[] buffer) =>
             WriteEvent(DumpArrayEventId, thisOrContextObject, memberName ?? MissingMember, buffer);
         #endregion
 
@@ -373,14 +412,24 @@ namespace System.Net
         }
 
         [Event(AssociateEventId, Level = EventLevel.Informational, Keywords = Keywords.Default, Message = "[{2}]<-->[{3}]")]
-        private void Associate(string thisOrContextObject, string memberName, string first, string second) =>
+#if uap
+        public
+#else
+        private
+#endif
+        void Associate(string thisOrContextObject, string memberName, string first, string second) =>
             WriteEvent(AssociateEventId, thisOrContextObject, memberName ?? MissingMember, first, second);
         #endregion
         #endregion
 
         #region Helpers
         [Conditional("DEBUG_NETEVENTSOURCE_MISUSE")]
-        private static void DebugValidateArg(object arg)
+#if uap
+        public
+#else
+        private
+#endif
+        static void DebugValidateArg(object arg)
         {
             if (!IsEnabled)
             {
@@ -390,7 +439,12 @@ namespace System.Net
         }
 
         [Conditional("DEBUG_NETEVENTSOURCE_MISUSE")]
-        private static void DebugValidateArg(FormattableString arg)
+#if uap
+        public
+#else
+        private
+#endif
+        static void DebugValidateArg(FormattableString arg)
         {
             Debug.Assert(IsEnabled || arg == null, $"Should not be formatting FormattableString \"{arg}\" if tracing isn't enabled");
         }
@@ -460,7 +514,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private static string Format(FormattableString s)
+#if uap
+        public
+#else
+        private
+#endif
+        static string Format(FormattableString s)
         {
             switch (s.ArgumentCount)
             {
@@ -485,7 +544,12 @@ namespace System.Net
         #region Custom WriteEvent overloads
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3, string arg4)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3, string arg4)
         {
             if (IsEnabled())
             {
@@ -520,7 +584,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, string arg2, byte[] arg3)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, string arg2, byte[] arg3)
         {
             if (IsEnabled())
             {
@@ -554,7 +623,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, int arg2, int arg3, int arg4)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, int arg2, int arg3, int arg4)
         {
             if (IsEnabled())
             {
@@ -583,7 +657,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, int arg2, string arg3)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, int arg2, string arg3)
         {
             if (IsEnabled())
             {
@@ -611,7 +690,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, string arg2, int arg3)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, string arg2, int arg3)
         {
             if (IsEnabled())
             {
@@ -639,7 +723,12 @@ namespace System.Net
         }
 
         [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3, int arg4)
+#if uap
+        public
+#else
+        private
+#endif
+        unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3, int arg4)
         {
             if (IsEnabled())
             {

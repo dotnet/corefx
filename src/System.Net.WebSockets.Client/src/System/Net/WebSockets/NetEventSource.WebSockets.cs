@@ -7,5 +7,13 @@ using System.Diagnostics.Tracing;
 namespace System.Net
 {
     [EventSource(Name = "Microsoft-System-Net-WebSockets-Client")]
-    internal sealed partial class NetEventSource { }
+    // Unblock reflection in ILC mode by declaring types and methods as public.
+    // An alternative would be to unblock reflection via rd.xml/csproj changes, but that would
+    // result in a size hit for all of the metadata and we would 
+#if uap
+    public
+#else
+    internal
+#endif
+    sealed partial class NetEventSource { }
 }
