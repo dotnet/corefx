@@ -681,7 +681,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            string expected = RunnerName;
+            string expected = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
             Assert.Equal(Path.GetFileNameWithoutExtension(expected), Path.GetFileNameWithoutExtension(_process.ProcessName), StringComparer.OrdinalIgnoreCase);
         }
 
