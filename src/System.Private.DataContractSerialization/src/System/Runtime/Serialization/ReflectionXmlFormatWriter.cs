@@ -50,9 +50,8 @@ namespace System.Runtime.Serialization
             {
                 collectionDataContract.IncrementCollectionCount(xmlWriter, obj, context);
 
-                Type enumeratorReturnType;
-                IEnumerator enumerator = collectionDataContract.GetEnumeratorForCollection(obj, out enumeratorReturnType);
-                PrimitiveDataContract primitiveContractForType = PrimitiveDataContract.GetPrimitiveDataContract(enumeratorReturnType);
+                IEnumerator enumerator = collectionDataContract.GetEnumeratorForCollection(obj);
+                PrimitiveDataContract primitiveContractForType = PrimitiveDataContract.GetPrimitiveDataContract(collectionDataContract.UnderlyingType);
 
                 if (primitiveContractForType != null && primitiveContractForType.UnderlyingType != Globals.TypeOfObject)
                 {
@@ -65,26 +64,7 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
-                    Type enumeratorType = null;
-                    Type[] keyValueTypes = null;
-                    if (collectionDataContract.Kind == CollectionKind.GenericDictionary)
-                    {
-                        keyValueTypes = collectionDataContract.ItemType.GetGenericArguments();
-                        enumeratorType = Globals.TypeOfGenericDictionaryEnumerator.MakeGenericType(keyValueTypes);
-                    }
-                    else if (collectionDataContract.Kind == CollectionKind.Dictionary)
-                    {
-                        keyValueTypes = new Type[] { Globals.TypeOfObject, Globals.TypeOfObject };
-                        enumeratorType = Globals.TypeOfDictionaryEnumerator;
-                    }
-                    else
-                    {
-                        enumeratorType = collectionDataContract.GetEnumeratorMethod.ReturnType;
-                    }
-
-                    MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
-                    Type elementType = getCurrentMethod.ReturnType;
-
+                    Type elementType = collectionDataContract.GetCollectionElementType();
                     bool isDictionary = collectionDataContract.Kind == CollectionKind.Dictionary || collectionDataContract.Kind == CollectionKind.GenericDictionary;
                     while (enumerator.MoveNext())
                     {
