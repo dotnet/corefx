@@ -43,6 +43,7 @@
     <Compile Include="ProcessWaitingTests.cs" />
     <Compile Include="RemotelyInvokable.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
+    <SupplementalTestData Include="$(OutputPath)\RemoteInvokeNetfx.exe" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
@@ -50,7 +51,7 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
-  <Target Condition="'$(TargetsWindows)' == 'true'" Name="BuildNetfxRemoteInvoker" AfterTargets="AfterBuild">
+  <Target Condition="'$(TargetsWindows)' == 'true'" Name="BuildNetfxRemoteInvoker" AfterTargets="BeforeBuild">
     <MSBuild Projects="RemoteInvokeNetfx\RemoteInvokeNetfx.csproj" Properties="Configuration=Debug; Platform=$(Platform); OutputPath=$(OutputPath); IntermediateOutputPath=$(IntermediateOutputPath)" />
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
