@@ -106,7 +106,7 @@ namespace System.Composition.Hosting.Core.Tests
                 return null;
             });
 
-            AssertExtensions.Throws<ArgumentNullException>("getDescriptor", () => promise.GetDescriptor());
+            AssertExtensions.Throws<ArgumentNullException>("descriptor", () => promise.GetDescriptor());
         }
 
         [Fact]
