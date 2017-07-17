@@ -40,6 +40,14 @@ namespace System.Net
         }
 
         public override int EndRead(IAsyncResult asyncResult) => throw new InvalidOperationException(SR.net_writeonlystream);
+        
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return Task.Factory.FromAsync(
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginRead(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndRead(iar),
+                buffer, offset, count, this);
+        }
 
         public override void Write(byte[] buffer, int offset, int size)
         {
@@ -101,6 +109,14 @@ namespace System.Net
             }
 
             EndWriteCore(asyncResult);
+        }
+        
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return Task.Factory.FromAsync(
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginWrite(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndWrite(iar),
+                buffer, offset, count, this);
         }
 
         protected override void Dispose(bool disposing)

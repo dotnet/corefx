@@ -65,6 +65,14 @@ namespace System.Net
 
             return BeginReadCore(buffer, offset, size, callback, state);
         }
+        
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return Task.Factory.FromAsync(
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginRead(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndRead(iar),
+                buffer, offset, count, this);
+        }
 
         public override void Flush() { }
         public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -89,6 +97,14 @@ namespace System.Net
         }
 
         public override void EndWrite(IAsyncResult asyncResult) => throw new InvalidOperationException(SR.net_readonlystream);
+        
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return Task.Factory.FromAsync(
+                (localBuffer, localOffset, localCount, callback, state) => ((Stream)state).BeginWrite(localBuffer, localOffset, localCount, callback, state),
+                iar => ((Stream)iar.AsyncState).EndWrite(iar),
+                buffer, offset, count, this);
+        }
 
         internal bool Closed => _closed;
 
