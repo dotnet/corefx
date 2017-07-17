@@ -40,23 +40,25 @@ namespace System.Diagnostics.Tests
             base.Dispose(disposing);
         }
 
-        protected Process CreateProcess(Func<int> method = null)
+        protected void AddProcessForDispose(Process p)
         {
-            Process p = RemoteInvoke(method ?? (() => SuccessExitCode), new RemoteInvokeOptions { Start = false }).Process;
             lock (_processes)
             {
                 _processes.Add(p);
             }
+        }
+
+        protected Process CreateProcess(Func<int> method = null)
+        {
+            Process p = RemoteInvoke(method ?? (() => SuccessExitCode), new RemoteInvokeOptions { Start = false }).Process;
+            AddProcessForDispose(p);
             return p;
         }
 
         protected Process CreateProcess(Func<string, int> method, string arg)
         {
             Process p = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }).Process;
-            lock (_processes)
-            {
-                _processes.Add(p);
-            }
+            AddProcessForDispose(p);
             return p;
         }
 

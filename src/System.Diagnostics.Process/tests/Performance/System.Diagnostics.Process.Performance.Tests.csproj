@@ -11,9 +11,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\ProcessTestBase.cs" />
+    <Compile Condition="'$(TargetsWindows)' != 'true'" Include="..\ProcessTestBase.Unix.cs" />
+    <Compile Condition="'$(TargetsWindows)' == 'true'" Include="..\ProcessTestBase.Windows.cs" />
+    <Compile Include="..\RemotelyInvokable.cs" />
     <Compile Include="Perf.Process.cs" />
+    <Compile Include="$(CommonPath)\System\PasteArguments.cs">
+      <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -681,9 +681,8 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            // Processes are not hosted by dotnet in the full .NET Framework.
-            string expected = PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative ? TestConsoleApp : HostRunner;
-            Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(expected), StringComparer.OrdinalIgnoreCase);
+            string expected = RunnerName;
+            Assert.Equal(Path.GetFileNameWithoutExtension(expected), Path.GetFileNameWithoutExtension(_process.ProcessName), StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]

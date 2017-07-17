@@ -46,7 +46,7 @@ namespace System.Diagnostics.Tests
                 throw new Exception($"Method needs to be defined in {nameof(RemotelyInvokable)} class.");
             }
 
-            return new Process()
+            var p = new Process()
             {
                 StartInfo = new ProcessStartInfo()
                 {
@@ -54,6 +54,9 @@ namespace System.Diagnostics.Tests
                     Arguments = $"{method.Name} {PasteArguments.Paste(args, false)}"
                 }
             };
+
+            AddProcessForDispose(p);
+            return p;
         }
     }
 }
