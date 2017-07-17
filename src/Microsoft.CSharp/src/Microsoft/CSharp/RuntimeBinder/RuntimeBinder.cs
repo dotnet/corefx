@@ -384,8 +384,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 type = arguments[0].Value as Type;
                 if (type == null)
                 {
-                    Debug.Assert(false, "Cannot make static call without specifying a type");
-                    throw Error.InternalCompilerError();
+                    throw Error.BindStaticRequiresType(arguments[0].Info.Name);
                 }
             }
             else
@@ -843,11 +842,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (payload.StaticCall)
             {
                 Type t = arguments[0].Value as Type;
-                if (t == null)
-                {
-                    Debug.Assert(false, "Cannot make static call without specifying a type");
-                    throw Error.InternalCompilerError();
-                }
+                Debug.Assert(t != null); // Would have thrown in PopulateSymbolTableWithPayloadInformation already
 
                 callingObject = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(t), t.ContainsGenericParameters ?
                         _exprFactory.CreateTypeArguments(SymbolLoader.getBSymmgr().AllocParams(_symbolTable.GetCTypeArrayFromTypes(t.GetGenericArguments())), null) : null);
