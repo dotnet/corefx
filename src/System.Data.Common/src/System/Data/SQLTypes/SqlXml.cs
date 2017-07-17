@@ -19,12 +19,14 @@ namespace System.Data.SqlTypes
         private static readonly Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> s_sqlReaderDelegate = CreateSqlReaderDelegate();
         private static readonly XmlReaderSettings s_defaultXmlReaderSettings = new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment };
         private static readonly XmlReaderSettings s_defaultXmlReaderSettingsCloseInput = new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment, CloseInput = true };
+#if !uapaot
         private static MethodInfo s_createSqlReaderMethodInfo;
+        private MethodInfo _createSqlReaderMethodInfo;
+#endif
 
         private bool _fNotNull; // false if null, the default ctor (plain 0) will make it Null
         private Stream _stream;
         private bool _firstCreateReader;
-        private MethodInfo _createSqlReaderMethodInfo;
 
         public SqlXml()
         {
@@ -84,12 +86,14 @@ namespace System.Data.SqlTypes
                 stream.Seek(0, SeekOrigin.Begin);
             }
 
+#if !uapaot
             // NOTE: Maintaining createSqlReaderMethodInfo private field member to preserve the serialization of the class
             if (_createSqlReaderMethodInfo == null)
             {
                 _createSqlReaderMethodInfo = CreateSqlReaderMethodInfo;
             }
             Debug.Assert(_createSqlReaderMethodInfo != null, "MethodInfo reference for XmlReader.CreateSqlReader should not be null.");
+#endif
 
             XmlReader r = CreateSqlXmlReader(stream);
             _firstCreateReader = false;
@@ -118,6 +122,9 @@ namespace System.Data.SqlTypes
             }
         }
 
+#if uapaot
+        private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate() => System.Xml.XmlReader.CreateSqlReader;
+#else
         private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate()
         {
             Debug.Assert(CreateSqlReaderMethodInfo != null, "MethodInfo reference for XmlReader.CreateSqlReader should not be null.");
@@ -137,6 +144,7 @@ namespace System.Data.SqlTypes
                 return s_createSqlReaderMethodInfo;
             }
         }
+#endif
 
         // INullable
         public bool IsNull

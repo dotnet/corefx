@@ -49,8 +49,8 @@
     <Compile Include="System\Drawing\BufferedGraphics.cs" />
     <Compile Include="System\Drawing\BufferedGraphicsContext.cs" />
     <Compile Include="System\Drawing\BufferedGraphicsManager.cs" />
+    <Compile Include="System\Drawing\ClientUtils.cs" />
     <Compile Include="System\Drawing\ColorTranslator.cs" />
-    <Compile Include="System\Drawing\Configuration\SystemDrawingSection.cs" />
     <Compile Include="System\Drawing\ContentAlignment.cs" />
     <Compile Include="System\Drawing\CopyPixelOperation.cs" />
     <Compile Include="System\Drawing\DashCap.cs" />
@@ -147,7 +147,6 @@
     <Compile Include="System\Drawing\Internal\GPRECTF.cs" />
     <Compile Include="System\Drawing\Internal\GPStream.cs" />
     <Compile Include="System\Drawing\Internal\ISystemEventTracker.cs" />
-    <Compile Include="System\Drawing\Internal\RectangleFEx.cs" />
     <Compile Include="System\Drawing\Internal\SystemColorTracker.cs" />
     <Compile Include="System\Drawing\LocalAppContextSwitches.cs" />
     <Compile Include="System\Drawing\NativeMethods.cs" />
@@ -209,19 +208,15 @@
     <Compile Include="System\Drawing\ToolboxBitmapAttribute.cs" />
     <Compile Include="System\Drawing\Unit.cs" />
     <Compile Include="System\Drawing\UnsafeNativeMethods.cs" />
-    <Compile Include="misc\ClientUtils.cs" />
     <Compile Include="misc\CompModSwitches.cs" />
-    <Compile Include="misc\CoreSwitches.cs" />
     <Compile Include="misc\DbgUtil.cs" />
     <Compile Include="misc\DebugHandleTracker.cs" />
     <Compile Include="misc\DpiHelper.cs" />
     <Compile Include="misc\ExternDll.cs" />
     <Compile Include="misc\GDI\ApplyGraphicsProperties.cs" />
     <Compile Include="misc\GDI\DeviceContext.cs" />
-    <Compile Include="misc\GDI\DeviceContextGraphicsMode.cs" />
     <Compile Include="misc\GDI\DeviceContexts.cs" />
     <Compile Include="misc\GDI\DeviceContextType.cs" />
-    <Compile Include="misc\GDI\GdiObjectType.cs" />
     <Compile Include="misc\GDI\NativeMethods.cs" />
     <Compile Include="misc\GDI\SafeNativeMethods.cs" />
     <Compile Include="misc\GDI\UnsafeNativeMethods.cs" />
@@ -250,9 +245,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\System\Drawing\DefaultComponent.bmp" />
+    <EmbeddedResource Include="Resources\System\Drawing\DefaultComponent.bmp">
+      <LogicalName>System.Drawing.DefaultComponent.bmp</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\System\Drawing\Printing\PrintDocument.bmp" />
-    <EmbeddedResource Include="Resources\System\Drawing\ShieldIcon.ico" />
+    <EmbeddedResource Include="Resources\System\Drawing\ShieldIcon.ico">
+      <LogicalName>System.Drawing.ShieldIcon.ico</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

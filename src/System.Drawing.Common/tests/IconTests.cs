@@ -96,15 +96,15 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullFilePath_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null));
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null, new Size(32, 32)));
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null, 32, 32));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null, new Size(32, 32)));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null, 32, 32));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Stream()
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico"), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico")))
             {
                 var icon = new Icon(stream);
                 Assert.Equal(32, icon.Width);
@@ -117,7 +117,7 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Width_Height(string fileName, Size size, Size expectedSize)
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath(fileName), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath(fileName)))
             using (var icon = new Icon(stream, size.Width, size.Height))
             {
                 Assert.Equal(expectedSize.Width, icon.Width);
@@ -130,7 +130,7 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Size(string fileName, Size size, Size expectedSize)
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath(fileName), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath(fileName)))
             using (var icon = new Icon(stream, size))
             {
                 Assert.Equal(expectedSize.Width, icon.Width);
@@ -455,7 +455,7 @@ namespace System.Drawing.Tests
                 var icon = Icon.FromHandle(source.Handle);
                 icon.Dispose();
 
-                Assert.Throws<ArgumentNullException>("dataStream", () => icon.Save(null));
+                AssertExtensions.Throws<ArgumentNullException>("dataStream", () => icon.Save(null));
             }
         }
 

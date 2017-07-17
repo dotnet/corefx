@@ -37,7 +37,7 @@ namespace System.Drawing.Tests
         public static IEnumerable<object[]> Ctor_FilePath_TestData()
         {
             yield return new object[] { "16x16_one_entry_4bit.ico", 16, 16, PixelFormat.Format32bppArgb, ImageFormat.Icon };
-            yield return new object[] { "173x183_indexed_8bit.bmp", 173, 183, PixelFormat.Format8bppIndexed, ImageFormat.Bmp };
+            yield return new object[] { "bitmap_173x183_indexed_8bit.bmp", 173, 183, PixelFormat.Format8bppIndexed, ImageFormat.Bmp };
             yield return new object[] { "16x16_nonindexed_24bit.png", 16, 16, PixelFormat.Format24bppRgb, ImageFormat.Png };
         }
 
@@ -73,8 +73,8 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullFilePath_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("path", () => new Bitmap((string)null));
-            Assert.Throws<ArgumentNullException>("path", () => new Bitmap((string)null, false));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Bitmap((string)null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Bitmap((string)null, false));
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -91,7 +91,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Type_ResourceName()
         {
-            using (var bitmap = new Bitmap(typeof(BitmapTests), "173x183_indexed_8bit.bmp"))
+            using (var bitmap = new Bitmap(typeof(BitmapTests), "bitmap_173x183_indexed_8bit.bmp"))
             {
                 Assert.Equal(173, bitmap.Width);
                 Assert.Equal(183, bitmap.Height);
@@ -109,8 +109,8 @@ namespace System.Drawing.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(typeof(Bitmap), null)]
         [InlineData(typeof(Bitmap), "")]
-        [InlineData(typeof(Bitmap), "173x183_indexed_8bit.bmp")]
-        [InlineData(typeof(BitmapTests), "173x183_INDEXED_8bit.bmp")]
+        [InlineData(typeof(Bitmap), "bitmap_173x183_indexed_8bit.bmp")]
+        [InlineData(typeof(BitmapTests), "bitmap_173x183_INDEXED_8bit.bmp")]
         [InlineData(typeof(BitmapTests), "empty.file")]
         public void Ctor_InvalidResource_ThrowsArgumentException(Type type, string resource)
         {
@@ -362,8 +362,8 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullImageWithSize_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("image", () => new Bitmap(null, new Size(1, 2)));
-            Assert.Throws<ArgumentNullException>("image", () => new Bitmap(null, 1, 2));
+            AssertExtensions.Throws<ArgumentNullException>("image", () => new Bitmap(null, new Size(1, 2)));
+            AssertExtensions.Throws<ArgumentNullException>("image", () => new Bitmap(null, 1, 2));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -599,7 +599,7 @@ namespace System.Drawing.Tests
         {
             using (var bitmap = new Bitmap(1, 1))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.GetPixel(x, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("x", () => bitmap.GetPixel(x, 0));
             }
         }
 
@@ -610,7 +610,7 @@ namespace System.Drawing.Tests
         {
             using (var bitmap = new Bitmap(1, 1))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.GetPixel(0, y));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("y", () => bitmap.GetPixel(0, y));
             }
         }
 
@@ -971,7 +971,7 @@ namespace System.Drawing.Tests
         {
             using (var bitmap = new Bitmap(1, 1))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("x", () => bitmap.SetPixel(x, 0, Color.Red));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("x", () => bitmap.SetPixel(x, 0, Color.Red));
             }
         }
 
@@ -982,7 +982,7 @@ namespace System.Drawing.Tests
         {
             using (var bitmap = new Bitmap(1, 1))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("y", () => bitmap.SetPixel(0, y, Color.Red));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("y", () => bitmap.SetPixel(0, y, Color.Red));
             }
         }
 

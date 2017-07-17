@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -170,7 +169,10 @@ namespace System.Diagnostics
 
                         if (Options.CheckExitCode)
                         {
-                            Assert.Equal(SuccessExitCode, Process.ExitCode);
+                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                Assert.Equal(Options.ExpectedExitCode, Process.ExitCode);
+                            else
+                                Assert.Equal(unchecked((sbyte)Options.ExpectedExitCode), unchecked((sbyte)Process.ExitCode));
                         }
                     }
                     finally
@@ -196,5 +198,6 @@ namespace System.Diagnostics
         public bool CheckExitCode { get; set; } = true;
 
         public int TimeOut {get; set; } = RemoteExecutorTestBase.FailWaitTimeoutMilliseconds;
+        public int ExpectedExitCode { get; set; } = RemoteExecutorTestBase.SuccessExitCode;
     }
 }
