@@ -202,6 +202,7 @@ namespace System.Linq.Expressions.Tests
 
         #endregion
 
+#if FEATURE_COMPILE
         [Fact]
         public static void VerifyIL_NullableShortNegateChecked()
         {
@@ -233,5 +234,7 @@ namespace System.Linq.Expressions.Tests
                     IL_001d: ret
                 }");
         }
+#endif
+
     }
 }
