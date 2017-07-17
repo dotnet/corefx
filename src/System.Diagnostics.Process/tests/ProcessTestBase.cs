@@ -65,7 +65,7 @@ namespace System.Diagnostics.Tests
         protected void StartSleepKillWait(Process p)
         {
             p.Start();
-            Thread.Sleep(50);
+            Thread.Sleep(200);
             p.Kill();
             Assert.True(p.WaitForExit(WaitInMS));
         }

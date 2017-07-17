@@ -159,6 +159,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "There is 2 bugs in Desktop in this codepath, see: dotnet/corefx #18437 and #18436")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "No simple way to perform this on uap using cmd.exe")]
         public void TestAsyncHalfCharacterAtATime()
         {
             var receivedOutput = false;
@@ -174,7 +175,7 @@ namespace System.Diagnostics.Tests
                     if (!receivedOutput)
                     {
                         receivedOutput = true;
-                        Assert.Equal(e.Data, "a");
+                        Assert.Equal("a", e.Data);
                     }
                 }
                 catch (Exception ex)

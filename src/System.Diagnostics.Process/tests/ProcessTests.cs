@@ -1497,6 +1497,19 @@ namespace System.Diagnostics.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => process.Start());
         }
 
+        [Fact]
+        public void TestLongProcessIsWorking()
+        {
+            // Sanity check for CreateProcessLong
+            Process p = CreateProcessLong();
+            p.Start();
+            Thread.Sleep(500);
+            Assert.False(p.HasExited);
+            p.Kill();
+            p.WaitForExit();
+            Assert.True(p.HasExited);
+        }
+
         private string GetCurrentProcessName()
         {
             return $"{Process.GetCurrentProcess().ProcessName}.exe";
