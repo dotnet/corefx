@@ -280,7 +280,7 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(NonControlWhiteSpace))]
-        [ActiveIssue(21358, "Pending CoreCLR behavior change")]
+        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // not NetFX
         public void NonControlWhiteSpaceExists(string component)

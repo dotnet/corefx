@@ -48,7 +48,7 @@ namespace System.IO.Tests
         [InlineData("\u00A0")] // Non-breaking Space
         [InlineData("\u2028")] // Line separator
         [InlineData("\u2029")] // Paragraph separator
-        [ActiveIssue(21358, "Pending CoreCLR behavior change")]
+        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         public static void GetDirectoryName_NonControl(string path)
         {
             Assert.Equal(string.Empty, Path.GetDirectoryName(path));
@@ -58,7 +58,7 @@ namespace System.IO.Tests
         [InlineData("\u00A0")] // Non-breaking Space
         [InlineData("\u2028")] // Line separator
         [InlineData("\u2029")] // Paragraph separator
-        [ActiveIssue(21358, "Pending CoreCLR behavior change")]
+        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         public static void GetDirectoryName_NonControlWithSeparator(string path)
         {
             Assert.Equal(path, Path.GetDirectoryName(Path.Combine(path, path)));
@@ -441,7 +441,7 @@ namespace System.IO.Tests
         [InlineData("\u00A0")] // Non breaking space
         [InlineData("\u2028")] // Line separator
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ActiveIssue(21358, "Pending CoreCLR behavior change")]
+        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // not NetFX
         public static void GetFullPath_NonControlWhiteSpaceStays(string component)
         {
