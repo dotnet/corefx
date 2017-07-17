@@ -3469,9 +3469,6 @@ public static partial class DataContractSerializerTests
     /// This case is a part of DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes, but in failed in ReflectionOnly test.
     /// </summary>
     [Fact]
-#if ReflectionOnly
-    [ActiveIssue("ReflectionOnly failed")]
-#endif
     public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailInReflectionOnly()
     {
         string assemblyName = typeof(DataContractSerializerTests).Assembly.FullName;
