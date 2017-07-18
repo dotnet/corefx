@@ -22,7 +22,6 @@
     "netstandard1.6": {}
   },
   "supports": {
-    "coreFx.Test.netcoreapp1.0": {},
-    "coreFx.Test.net463": {}
+    "coreFx.Test.netcoreapp1.0": {}
   }
 }

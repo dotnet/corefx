@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Perf Analysis NuGet package paths -->
+  <PropertyGroup>
+    <TraceEventPackage>Microsoft.Diagnostics.Tracing.TraceEvent\$(TraceEventPackageVersion)</TraceEventPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TraceEventNativePath Include="$(PackagesDir)\$(TraceEventPackage)\lib\native\**\*.*" />
+  </ItemGroup>
+
+  <Target Name ="PublishPerfRunner" Condition="'$(Performance)'=='true'" BeforeTargets="RunTestsForProject">
+    <Copy SourceFiles="@(TraceEventNativePath)" DestinationFiles="@(TraceEventNativePath->'$(StartWorkingDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <PropertyGroup Condition="'$(TargetOS)'=='Linux'">
+    <PerfTestCommandDotnetExecutable>$RUNTIME_PATH/dotnet</PerfTestCommandDotnetExecutable>
+    <PerfTestCommand>$(PerfTestCommandDotnetExecutable) PerfRunner.exe  --perf:runid Perf</PerfTestCommand>
+    <BenchviewDir>$(ToolsDir)Microsoft.BenchView.JSONFormat/tools</BenchviewDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetOS)'=='Windows_NT'">
+    <PerfTestCommandDotnetExecutable>PerfRunner.exe</PerfTestCommandDotnetExecutable>
+    <PerfTestCommand>$(TestHostExecutable) $(PerfTestCommandDotnetExecutable) --perf:runid Perf</PerfTestCommand>
+    <BenchviewDir>$(ToolsDir)Microsoft.BenchView.JSONFormat\tools</BenchviewDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PerfTestCommandLines Include="$(PerfTestCommand)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetOS)'=='Windows_NT' and '$(LogToBenchview)' == 'true'">
+    <PerfTestCommandLines Include="if exist Perf-$(AssemblyName).xml (" />
+    <PerfTestCommandLines Include="py $(BenchviewDir)\measurement.py xunit Perf-$(AssemblyName).xml --better desc --drop-first-value --append -o $(ProjectDir)measurement.json" />
+    <PerfTestCommandLines Include=")" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetOS)'=='Linux' and '$(LogToBenchview)' == 'true'">
+    <PerfTestCommandLines Include="if [ -a Perf-$(AssemblyName).xml ]" />
+    <PerfTestCommandLines Include="then" />
+    <PerfTestCommandLines Include="python3.5 $(BenchviewDir)\measurement.py xunit Perf-$(AssemblyName).xml --better desc --drop-first-value --append -o $(ProjectDir)measurement.json" />
+    <PerfTestCommandLines Include="fi" />
+  </ItemGroup>
+  <!-- Optimizations to configure Xunit for performance -->
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
+    <AssemblyInfoUsings Include="using Microsoft.Xunit.Performance%3B" />
+    <AssemblyInfoLines Include="[assembly:OptimizeForBenchmarks]" />
+  </ItemGroup>
+
+  <Target Name="UploadToBenchview" Condition="'$(LogToBenchview)' == 'true'" AfterTargets="TestAllProjects">
+    <ItemGroup Condition="'$(TargetOS)'=='Windows_NT'">
+      <BenchviewCalls Include="py $(BenchviewDir)\submission.py $(ProjectDir)measurement.json --build $(ProjectDir)build.json --machine-data $(ProjectDir)machinedata.json --metadata $(ProjectDir)submission-metadata.json --group &quot;CoreFx&quot; --type &quot;$(BenchviewRuntype)&quot; --config-name &quot;$(ConfigurationGroup)&quot; --config Configuration &quot;$(ConfigurationGroup)&quot; --config OS &quot;$(TargetOS)&quot; -arch &quot;$(Platform)&quot; --machinepool &quot;PerfSnake&quot;"/>
+      <BenchviewCalls Include = "py $(BenchviewDir)\upload.py submission.json --container corefx"/>
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetOS)'=='Linux'">
+      <BenchviewCalls Include="python3.5 $(BenchviewDir)/submission.py $(ProjectDir)measurement.json --build $(ProjectDir)build.json --machine-data $(ProjectDir)machinedata.json --metadata $(ProjectDir)submission-metadata.json --group &quot;CoreFx&quot; --type &quot;$(BenchviewRuntype)&quot; --config-name &quot;$(ConfigurationGroup)&quot; --config Configuration &quot;$(ConfigurationGroup)&quot; --config OS &quot;$(TargetOS)&quot; -arch &quot;$(Platform)&quot; --machinepool &quot;PerfSnake&quot;"/>
+      <BenchviewCalls Include = "python3.5 $(BenchviewDir)/upload.py submission.json --container corefx"/>
+    </ItemGroup>
+    <Exec Command="%(BenchviewCalls.Identity)"/>
+    </Target>
+
+  <Target Name="WarnForDebugPerfConfiguration"
+          BeforeTargets="RunTestsForProject"
+          Condition="'$(Performance)' == 'true' and !$(ConfigurationGroup.ToLower().Contains('release'))">
+    <Warning Text="You are running performance tests in a configuration other than Release. Your results may be unreliable." />
+  </Target>
+</Project>

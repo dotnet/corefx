@@ -10,7 +10,7 @@
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludePerformanceTests>true</IncludePerformanceTests>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
     <AssemblyName>System.Globalization.Performance.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
