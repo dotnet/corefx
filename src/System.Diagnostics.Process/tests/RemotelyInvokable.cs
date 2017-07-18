@@ -40,7 +40,7 @@ namespace System.Diagnostics.Tests
 
         public static string ExitWithCodeUapCmd(string exitCodeStr)
         {
-            return $@"exit {int.Parse(exitCodeStr)}";
+            return $@"exit {exitCodeStr}";
         }
 
         public static int ExitWithCode(string exitCodeStr)
