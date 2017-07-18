@@ -329,7 +329,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static bool IsReallyAType(CType pType)
         {
             if (pType.IsNullType() || pType.IsBoundLambdaType() ||
-                pType.IsVoidType() ||
+                pType is VoidType ||
                 pType.IsMethodGroupType())
             {
                 return false;
@@ -1078,7 +1078,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            if (pDelegateReturnType.IsVoidType())
+            if (pDelegateReturnType is VoidType)
             {
                 return false;
             }
@@ -1104,7 +1104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethPropWithInst mwi = argsBinder.GetResultsOfBind().GetBestResult();
             CType pMethodReturnType = GetTypeManager().SubstType(mwi.Meth().RetType,
                 mwi.GetType(), mwi.TypeArgs);
-            if (pMethodReturnType.IsVoidType())
+            if (pMethodReturnType is VoidType)
             {
                 return false;
             }

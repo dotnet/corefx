@@ -1062,7 +1062,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // These guys have no accessibility concerns.
-            Debug.Assert(!typeSrc.IsVoidType() && !typeSrc.IsErrorType() && !(typeSrc is TypeParameterType));
+            Debug.Assert(!(typeSrc is VoidType) && !typeSrc.IsErrorType() && !(typeSrc is TypeParameterType));
 
             if (typeSrc.IsParameterModifierType() || typeSrc.IsPointerType())
             {

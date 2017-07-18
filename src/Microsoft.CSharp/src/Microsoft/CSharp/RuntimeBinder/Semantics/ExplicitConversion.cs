@@ -820,7 +820,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return result;
                 }
 
-                if (_typeSrc.IsVoidType())
+                if (_typeSrc is VoidType)
                 {
                     // No conversion is allowed to or from a void type (user defined or otherwise)
                     // This is most likely the result of a failed anonymous method or member group conversion

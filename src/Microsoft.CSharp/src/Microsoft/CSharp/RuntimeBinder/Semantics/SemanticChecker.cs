@@ -90,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (!type.IsAggregateType())
             {
-                Debug.Assert(type.IsVoidType() || type.IsErrorType() || type is TypeParameterType);
+                Debug.Assert(type is VoidType || type.IsErrorType() || type is TypeParameterType);
                 return true;
             }
 
