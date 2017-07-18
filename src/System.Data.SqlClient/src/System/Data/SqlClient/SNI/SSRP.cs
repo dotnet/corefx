@@ -32,9 +32,9 @@ namespace System.Data.SqlClient.SNI
             {
                 responsePacket = SendUDPRequest(browserHostName, SqlServerBrowserPort, instanceInfoRequest);
             }
-            catch (SocketException)
+            catch (SocketException se)
             {
-                throw new Exception(SQLMessage.SqlServerBrowserNotAccessible(), new SocketException());
+                throw new Exception(SQLMessage.SqlServerBrowserNotAccessible(), se);
             }
 
             const byte SvrResp = 0x05;
