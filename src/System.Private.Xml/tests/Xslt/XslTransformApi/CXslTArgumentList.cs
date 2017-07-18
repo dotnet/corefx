@@ -2989,26 +2989,15 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
         [Theory]
-        public void AddExtObject25(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        public void TC_ExtensionObj_Function_Mismatch_IncorrectCasing(InputType xslInputType, ReaderType readerType, TransformType outputType, DocType navType)
         {
             MyObject obj = new MyObject(25, _output);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
-            if (LoadXSL("MyObject_CaseSensitive.xsl", inputType, readerType) == 1)
-            {
-                try
-                {
-                    Transform_ArgList("fruits.xml", transformType, docType);
-                    CheckResult(419.3031944636, transformType);
-                }
-                catch (System.Xml.Xsl.XsltException)
-                {
-                    return;
-                }
-            }
-            _output.WriteLine("Exception not thrown for wrong-case spelling of methods");
-            Assert.True(false);
+            Assert.True(LoadXSL("MyObject_CaseSensitive.xsl", xslInputType, readerType) == 1, "LoadXSL failed");
+            var e = Assert.Throws<XsltException>(() => Transform_ArgList("fruits.xml", outputType, navType));
+            CheckExpectedError(e, "System.Xml", "Xslt_UnknownXsltFunction", new[] { "FN3" });
         }
 
         //[Variation("Object namespace System.Xml.Tests found")]

@@ -384,31 +384,32 @@ namespace System.Xml.Tests
         [Theory]
         public void XmlResolver1(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-
-            try
+            using (new AllowDefaultResolverContext())
             {
-                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+
+                try
                 {
-                    xslt.XmlResolver = null;
-                    if (Transform("fruits.xml", transformType, docType) == 1)
+                    if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
                     {
-                        VerifyResult(expected);
-                        return;
+                        xslt.XmlResolver = null;
+                        if (Transform("fruits.xml", transformType, docType) == 1)
+                        {
+                            VerifyResult(expected);
+                            return;
+                        }
+                        else
+                            Assert.True(false);
                     }
-                    else
-                        Assert.True(false);
                 }
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine("Should not throw error loading stylesheet with include/import when resolver property is set to NULL!");
-                _output.WriteLine(e.ToString());
+                catch (Exception e)
+                {
+                    _output.WriteLine("Should not throw error loading stylesheet with include/import when resolver property is set to NULL!");
+                    _output.WriteLine(e.ToString());
+                    Assert.True(false);
+                }
                 Assert.True(false);
             }
-            Assert.True(false);
         }
 
         //[Variation("Set XmlResolver property to null, load style sheet with document function, should not resolve during transform")]
@@ -462,27 +463,16 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.")]
-        public void XmlResolver3(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        public void TC_Xslt_Document_Function_Use_XmlUrlResolver(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
-
-            // SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
-            if (LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1)
-            {
-                if ((Transform("fruits.xml", transformType, docType) == 1) && (CheckResult(377.8217373898, transformType) == 1))
-                    return;
-            }
-            else
-            {
-                _output.WriteLine("Problem loading stylesheet with document function and default resolver!");
-                Assert.True(false);
-            }
-            Assert.True(false);
+            // with XmlUrlResolver it should be able to open referenced file
+            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
+            xslt.XmlResolver = new XmlUrlResolver();
+            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
 
         //[Variation("document() has absolute URI")]
@@ -498,17 +488,10 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "When style sheet URI = Intranet zone, XmlSecureResolver does not resolve document function")]
-        public void XmlResolver7(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory(Skip = "Absolute path is hard coded, it needs to be set dynamically")]
+        public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // Skip this test for Load(URI)
-            // Reason: When style sheet URI = Intranet zone, XmlSecureResolver does not resolve document function
-
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
             // copy file on the local machine
-
             try
             {
                 string tempDir = Path.GetTempPath();
@@ -523,13 +506,18 @@ namespace System.Xml.Tests
             {
                 _output.WriteLine(e.ToString());
                 _output.WriteLine("Could not copy file to local. Some other issues prevented this test from running");
-                return; //return TEST_SKIPPED;
+                throw;
             }
 
+            const string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>";
             if (LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType) == 1)
             {
-                if ((Transform("fruits.xml", transformType, docType) == 1) && (CheckResult(377.8217373898, transformType) == 1))
+                xslt.XmlResolver = new XmlUrlResolver();
+                if (Transform("fruits.xml", transformType, docType) == 1)
+                {
+                    VerifyResult(expected);
                     return;
+                }
                 else
                 {
                     _output.WriteLine("Failed to resolve document function with absolute URI.");
@@ -798,26 +786,27 @@ namespace System.Xml.Tests
         [Theory]
         public void LoadGeneric7(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-
-            FileStream s2;
-
-            // check immediately after load and after transform
-            if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+            using (new AllowDefaultResolverContext())
             {
-                s2 = new FileStream(FullFilePath("XmlResolver_Main.xsl"), FileMode.Open, FileAccess.Read, FileShare.Read);
-                s2.Dispose();
-                if (Transform("fruits.xml", transformType, docType) == 1)
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+
+                FileStream s2;
+
+                // check immediately after load and after transform
+                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
                 {
-                    VerifyResult(expected);
                     s2 = new FileStream(FullFilePath("XmlResolver_Main.xsl"), FileMode.Open, FileAccess.Read, FileShare.Read);
                     s2.Dispose();
-                    return;
+                    if (Transform("fruits.xml", transformType, docType) == 1)
+                    {
+                        VerifyResult(expected);
+                        s2 = new FileStream(FullFilePath("XmlResolver_Main.xsl"), FileMode.Open, FileAccess.Read, FileShare.Read);
+                        s2.Dispose();
+                        return;
+                    }
                 }
+                Assert.True(false);
             }
-            Assert.True(false);
         }
 
         //[Variation("Verify that included files are closed properly after Load - Read Access")]
@@ -836,27 +825,28 @@ namespace System.Xml.Tests
         [Theory]
         public void LoadGeneric9(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-
-            FileStream s2;
-
-            // check immediately after load and after transform
-            if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+            using (new AllowDefaultResolverContext())
             {
-                s2 = new FileStream(FullFilePath("XmlResolver_Sub.xsl"), FileMode.Open, FileAccess.Read);
-                s2.Dispose();
-                if (Transform("fruits.xml", transformType, docType) == 1)
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+
+                FileStream s2;
+
+                // check immediately after load and after transform
+                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
                 {
-                    VerifyResult(expected);
-                    s2 = new FileStream(FullFilePath("XmlResolver_Include.xsl"), FileMode.Open, FileAccess.Read, FileShare.Read);
+                    s2 = new FileStream(FullFilePath("XmlResolver_Sub.xsl"), FileMode.Open, FileAccess.Read);
                     s2.Dispose();
-                    return;
+                    if (Transform("fruits.xml", transformType, docType) == 1)
+                    {
+                        VerifyResult(expected);
+                        s2 = new FileStream(FullFilePath("XmlResolver_Include.xsl"), FileMode.Open, FileAccess.Read, FileShare.Read);
+                        s2.Dispose();
+                        return;
+                    }
                 }
+                _output.WriteLine("Appeared to not close file properly after loading.");
+                Assert.True(false);
             }
-            _output.WriteLine("Appeared to not close file properly after loading.");
-            Assert.True(false);
         }
 
         //[Variation("Load stylesheet with entity reference: Bug #68450 ")]
@@ -1056,34 +1046,6 @@ namespace System.Xml.Tests
             Assert.True(false);
         }
 
-        //[Variation("Call Load with null custom resolver and style sheet has import/include, should fail")]
-        [InlineData(InputType.Reader, ReaderType.XmlValidatingReader)]
-        [InlineData(InputType.URI, ReaderType.XmlValidatingReader)]
-        [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader)]
-        [Theory(Skip = "By design bug #84957: Skip this test for Load(url, resolver)")]
-        public void LoadGeneric5(InputType inputType, ReaderType readerType)
-        {
-            // By design bug #84957: Skip this test for Load(url, resolver)
-            //if (MyInputType() == InputType.URI)
-            //{
-            //    _output.WriteLine("By design bug #84957: Skip this test for Load(url, resolver)");
-            //    return TEST_SKIPPED;
-            //}
-
-            CustomNullResolver myResolver = new CustomNullResolver(null);
-            try
-            {
-                LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType);
-            }
-            catch (System.Xml.Xsl.XsltCompileException e)
-            {
-                CheckExpectedError(e.InnerException, "System.Data.Sqlxml", "Xslt_CantResolve", new string[] { new Uri(FullFilePath("XmlResolver_Include.xsl", false)).ToString() });
-                return;
-            }
-            _output.WriteLine("Exception not thrown for null resolver");
-            Assert.True(false);
-        }
-
         //[Variation("Call Load with null custom resolver and style sheet has no import/include, should not error")]
         [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Reader, DocType.XPathDocument)]
         [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
@@ -1097,30 +1059,20 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "By design bug #84957: Skip this test for Load(url, resolver)")]
-        public void LoadGeneric6(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        public void TC_Resolver_Null_Should_Not_Break_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // By design bug #84957: Skip this test for Load(url, resolver)
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result>
+		1.No Value Specified
+		2.No Value Specified
+		3.No Value Specified
+		4.No Value Specified
+		5.No Value Specified
+		6.No Value Specified</result>";
 
-            //if (MyInputType() == InputType.URI)
-            //{
-            //    _output.WriteLine("By design bug #84957: Skip this test for Load(url, resolver)");
-            //    return TEST_SKIPPED;
-            //}
-
-            CustomNullResolver myResolver = new CustomNullResolver(null);
-            if (LoadXSL_Resolver("showParam.xsl", myResolver, inputType, readerType) == 1)
-            {
-                if ((Transform("fruits.xml", transformType, docType) == 1) && (CheckResult(466.5112789241, transformType) == 1))
-                    return;
-                else
-                    Assert.True(false);
-            }
-            else
-            {
-                _output.WriteLine("Failed to load style sheet!");
-                Assert.True(false);
-            }
+            Assert.True(LoadXSL_Resolver("showParam.xsl", null, inputType, readerType) == 1);
+            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            VerifyResult(expected);
         }
 
         //[Variation("Style sheet has import/include, call Load first with custom null resolver and then default resolver, should not fail")]
@@ -1136,40 +1088,28 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "By design bug #84957: Skip this test for Load(url, resolver)")]
-        public void LoadGeneric7(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        public void TC_CustomNullResover_Then_XmlUrlResolver(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // By design bug #84957: Skip this test for Load(url, resolver)
-
-            //if (MyInputType() == InputType.URI)
-            //{
-            //    _output.WriteLine("By design bug #84957: Skip this test for Load(url, resolver)");
-            //    return TEST_SKIPPED;
-            //}
-
-            CustomNullResolver myResolver = new CustomNullResolver(null);
-
-            try
+            CustomNullResolver myResolver = new CustomNullResolver(_output);
+            if (inputType == InputType.URI)
             {
-                LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType);
+                var e = Assert.Throws<XmlException>(() => LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType));
+                var absoluteUri = new Uri(Path.Combine(Environment.CurrentDirectory, FullFilePath("XmlResolver_Main.xsl"))).AbsoluteUri;
+                CheckExpectedError(e, "System.Xml", "Xml_CannotResolveUrl", new[] { absoluteUri });
             }
-            catch (System.Xml.Xsl.XsltCompileException e)
+            else
             {
-                CheckExpectedError(e.InnerException, "System.Data.Sqlxml", "Xslt_CantResolve", new string[] { new Uri(FullFilePath("XmlResolver_Include.xsl", false)).ToString() });
-                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
-                {
-                    if ((Transform("fruits.xml", transformType, docType) == 1) && (CheckResult(428.8541842246, transformType) == 1))
-                        return;
-                    else
-                        Assert.True(false);
-                }
-                else
-                {
-                    _output.WriteLine("Failed to load stylesheet using default resolver");
-                    Assert.True(false);
-                }
+                var e = Assert.Throws<XsltCompileException>(() => LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType));
+                var xsltException = Assert.IsType<XsltException>(e.InnerException);
+                var absoluteUri = new Uri(Path.Combine(Environment.CurrentDirectory, FullFilePath("XmlResolver_Include.xsl"))).AbsoluteUri;
+                CheckExpectedError(xsltException, "System.Xml", "Xslt_CantResolve", new[] { absoluteUri });
             }
-            Assert.True(false);
+
+            Assert.True(LoadXSL_Resolver("XmlResolver_Main.xsl", new XmlUrlResolver(), inputType, readerType) == 1);
+            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+            VerifyResult(expected);
         }
 
         //[Variation("Style sheet has import/include, call Load first with default resolver and then with custom null resolver, should fail")]
@@ -1185,35 +1125,14 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "By design bug #84957: Skip this test for Load(url, resolver)")]
-        public void LoadGeneric8(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        public void TC_No_Explicit_Resolver_Prohibits_External_Url(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // By design bug #84957: Skip this test for Load(url, resolver)
-
-            //if (MyInputType() == InputType.URI)
-            //{
-            //    _output.WriteLine("By design bug #84957: Skip this test for Load(url, resolver)");
-            //    return TEST_SKIPPED;
-            //}
-
-            CustomNullResolver myResolver = new CustomNullResolver(null);
-
-            if ((LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1))
-            {
-                try
-                {
-                    LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType);
-                }
-                catch (System.Xml.Xsl.XsltCompileException e)
-                {
-                    CheckExpectedError(e.InnerException, "System.Data.Sqlxml", "Xslt_CantResolve", new string[] { new Uri(FullFilePath("XmlResolver_Include.xsl", false)).ToString() });
-                    return;
-                }
-                _output.WriteLine("No exception generated when loading with an invalid resolver after loading with valid resolver");
-                Assert.True(false);
-            }
-            _output.WriteLine("Could not load style sheet with default resolver");
-            Assert.True(false);
+            AppContext.TryGetSwitch("Switch.System.Xml.AllowDefaultResolver", out bool isEnabled);
+            Assert.False(isEnabled);
+            var e = Assert.Throws<XsltCompileException>(() => LoadXSL("XmlResolver_Main.xsl", inputType, readerType));
+            var xmlException = Assert.IsType<XmlException>(e.InnerException);
+            CheckExpectedError(xmlException, "System.Xml", "Xml_NullResolver", Array.Empty<string>());
         }
 
         //[Variation("Load with resolver with credentials, then load XSL that does not need cred.")]
@@ -1232,24 +1151,25 @@ namespace System.Xml.Tests
         [Theory]
         public void LoadGeneric9(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-
-            if ((LoadXSL_Resolver("XmlResolver_Main.xsl", GetDefaultCredResolver(), inputType, readerType) == 1))
+            using (new AllowDefaultResolverContext())
             {
-                if ((LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1) && (Transform("fruits.xml", transformType, docType) == 1))
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+
+                if ((LoadXSL_Resolver("XmlResolver_Main.xsl", GetDefaultCredResolver(), inputType, readerType) == 1))
                 {
-                    VerifyResult(expected);
-                    return;
+                    if ((LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1) && (Transform("fruits.xml", transformType, docType) == 1))
+                    {
+                        VerifyResult(expected);
+                        return;
+                    }
                 }
-            }
-            else
-            {
-                _output.WriteLine("Failed to load!");
+                else
+                {
+                    _output.WriteLine("Failed to load!");
+                    Assert.True(false);
+                }
                 Assert.True(false);
             }
-            Assert.True(false);
         }
 
         //[Variation("Call Load() many times with null resolver then perform a transform")]
@@ -1643,30 +1563,17 @@ namespace System.Xml.Tests
 
         //[Variation("Regression case for bug 80768")]
         [InlineData(TransformType.Stream)]
-        [Theory(Skip = "Not InProc")]
-        public void LoadNavigator4(TransformType transformType)
+        [Theory]
+        public void TC_Ensure_Script_Not_Allowed(TransformType transformType)
         {
-            //if (_isInProc)
-            //    return TEST_SKIPPED;
-
 #pragma warning disable 0618
             xslt = new XslTransform();
 
-            XmlValidatingReader xrLoad = new XmlValidatingReader(new XmlTextReader(FullFilePath("Bug80768.xsl")));
+            var xrLoad = new XmlValidatingReader(new XmlTextReader(FullFilePath("Bug80768.xsl")));
 #pragma warning restore 0618
-            XPathDocument xd = new XPathDocument(xrLoad, XmlSpace.Preserve);
-
-            xslt.Load(xd);
-
-            FileStream fs = new FileStream(_strOutFile, FileMode.Create, FileAccess.ReadWrite);
-            XPathNavigator xn = new MyNavigator(FullFilePath("foo.xml"));
-            xslt.Transform(xn, null, fs);
-            fs.Dispose();
-
-            if (CheckResult(383.0855503831, transformType) == 1)
-                return;
-            else
-                Assert.True(false);
+            var xd = new XPathDocument(xrLoad, XmlSpace.Preserve);
+            var e = Assert.Throws<XsltCompileException>(() => xslt.Load(xd, new XmlUrlResolver()));
+            Assert.IsType<PlatformNotSupportedException>(e.InnerException);
         }
     }
 
@@ -2179,29 +2086,30 @@ namespace System.Xml.Tests
         [Theory]
         public void XmlResolver1(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-
-            try
+            using (new AllowDefaultResolverContext())
             {
-                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+
+                try
                 {
-                    if (TransformResolver("fruits.xml", transformType, docType, null) == 1)
+                    if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
                     {
-                        VerifyResult(expected);
-                        return;
+                        if (TransformResolver("fruits.xml", transformType, docType, null) == 1)
+                        {
+                            VerifyResult(expected);
+                            return;
+                        }
+                        else
+                            Assert.True(false);
                     }
-                    else
-                        Assert.True(false);
                 }
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine(e.ToString());
+                catch (Exception e)
+                {
+                    _output.WriteLine(e.ToString());
+                    Assert.True(false);
+                }
                 Assert.True(false);
             }
-            Assert.True(false);
         }
 
         //[Variation("Pass null XmlResolver, load style sheet with document function, should not resolve during transform")]
@@ -2254,27 +2162,15 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.")]
-        public void XmlResolver3(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        public void TC_Xslt_Document_Function_Use_XmlUrlResolver(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
-
-            // SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
-            if (LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1)
-            {
-                if ((Transform("fruits.xml", transformType, docType) == 1) && (CheckResult(377.8217373898, transformType) == 1))
-                    return;
-            }
-            else
-            {
-                _output.WriteLine("Problem loading stylesheet with document function and default resolver!");
-                Assert.True(false);
-            }
-            Assert.True(false);
+            // with XmlUrlResolver it should be able to open referenced file
+            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
+            Assert.True(TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver()) == 1);
+            VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
 
         //[Variation("document() has absolute URI")]
@@ -2290,8 +2186,8 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "When style sheet URI = Intranet zone, XmlSecureResolver does not resolve document function")]
-        public void XmlResolver5(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory(Skip = "Absolute path is hard coded, it needs to be set dynamically")]
+        public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
             // Skip this test for Load(URI)
             // Reason: When style sheet URI = Intranet zone, XmlSecureResolver does not resolve document function
@@ -2320,8 +2216,10 @@ namespace System.Xml.Tests
 
             if (LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType) == 1)
             {
-                if ((TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver()) == 1) && (CheckResult(377.8217373898, transformType) == 1))
+                if ((TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver()) == 1))
+                {
                     return;
+                }
                 else
                 {
                     _output.WriteLine("Failed to resolve document function with absolute URI.");
@@ -2750,26 +2648,27 @@ namespace System.Xml.Tests
         [Theory]
         public void TransformStrStrResolver1(InputType inputType, ReaderType readerType)
         {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-
-            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
-            String szFullFilename = FullFilePath("fruits.xml");
-
-            try
+            using (new AllowDefaultResolverContext())
             {
-                if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+                string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
+                string szFullFilename = FullFilePath("fruits.xml");
+
+                try
                 {
-                    CallTransform(xslt, szFullFilename, _strOutFile, null);
-                    VerifyResult(expected);
-                    return;
+                    if (LoadXSL("XmlResolver_Main.xsl", inputType, readerType) == 1)
+                    {
+                        CallTransform(xslt, szFullFilename, _strOutFile, null);
+                        VerifyResult(expected);
+                        return;
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine(e.ToString());
+                catch (Exception e)
+                {
+                    _output.WriteLine(e.ToString());
+                    Assert.True(false);
+                }
                 Assert.True(false);
             }
-            Assert.True(false);
         }
 
         //[Variation("Pass null XmlResolver, load style sheet with document function, should not resolve during transform")]
@@ -2802,30 +2701,15 @@ namespace System.Xml.Tests
         [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Stream)]
         [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.Stream)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream)]
-        [Theory(Skip = "SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.")]
-        public void TransformStrStrResolver3(InputType inputType, ReaderType readerType, TransformType transformType)
+        [Theory]
+        public void TC_Xslt_Document_Function_Use_XmlUrlResolver(InputType inputType, ReaderType readerType, TransformType transformType)
         {
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
-
-            // SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
-            String szFullFilename = FullFilePath("fruits.xml");
-
-            if (LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1)
-            {
-                CallTransform(xslt, szFullFilename, "out.xml", new XmlUrlResolver());
-                if (CheckResult(377.8217373898, transformType) == 1)
-                    return;
-            }
-            else
-            {
-                _output.WriteLine("Problem loading stylesheet with document function and default resolver!");
-                Assert.True(false);
-            }
-            Assert.True(false);
+            // with XmlUrlResolver it should be able to open referenced file
+            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
+            CallTransform(xslt, FullFilePath("fruits.xml"), _strOutFile, new XmlUrlResolver());
+            VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
     }
 
@@ -2889,20 +2773,17 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
         //[Variation("Subclassed XPathNodeIterator returned from an extension object or XsltFunction is not accepted by XPath", Pri = 1)]
         [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.")]
-        public void var3(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [Theory]
+        [ActiveIssue(22373)]
+        public void TC_XPathNodeIterator_From_ExtensionObject(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // SQLBU Defect Tracking Bug 430834: Skipping when input type is URI, see bug for more details.
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
             m_xsltArg = new XsltArgumentList();
             m_xsltArg.AddExtensionObject("http://foo.com", new MyXsltExtension());
+            Assert.True(LoadXSL("Bug111075.xsl", inputType, readerType) == 1);
+            Assert.True(Transform_ArgList("Bug111075.xml", transformType, docType) == 1);
 
-            if ((LoadXSL("Bug111075.xsl", inputType, readerType) == 1) && (Transform_ArgList("Bug111075.xml", transformType, docType) == 1) && (CheckResult(444.7202431861, transformType) == 1))
-                return;
-            else
-                Assert.True(false);
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><distinct-countries>France, Spain, Austria, Germany</distinct-countries>";
+            VerifyResult(expected);
         }
 
         //[Variation("Iterator using for-each over a variable is not reset correctly while using msxsl:node-set()", Pri = 1)]
@@ -2925,6 +2806,19 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
             }
             else
                 Assert.True(false);
+        }
+    }
+
+    internal sealed class AllowDefaultResolverContext : IDisposable
+    {
+        public AllowDefaultResolverContext()
+        {
+            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
+        }
+
+        public void Dispose()
+        {
+            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", false);
         }
     }
 
@@ -3007,7 +2901,7 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
             {
                 if (!nodelist.Contains(nodeset.Current.Value))
                 {
-                    nodelist.Add(nodeset.Current.Value, nodeset.Current);
+                    nodelist.Add(nodeset.Current.Value, nodeset.Current.Clone());
                 }
             }
             return new MyArrayIterator(new ArrayList(nodelist.Values));

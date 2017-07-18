@@ -63,7 +63,6 @@ namespace System.Xml.Tests
         private string _strPath;           // Path of the data files
 
         private string _httpPath;          // HTTP Path of the data files
-        private bool _fTrace;            // Should we write out the results of the transform?
 
         // Other global variables
         protected string _strOutFile;        // File to create when using write transforms
@@ -165,9 +164,6 @@ namespace System.Xml.Tests
 
         public void Init(object objParam)
         {
-            // Get parameter info from runtime variables passed to LTM
-            _fTrace = false;
-
             // FullFilePath and FullHttpPath attempt to normalize file paths, however
             // as an extra step we can normalize them here, when they are first read
             // from the LTM file.
@@ -816,33 +812,6 @@ namespace System.Xml.Tests
                         }
                         break;
                 }
-                return 1;
-            }
-        }
-
-        // --------------------------------------------------------------------------------------------------------------
-        //  CheckResult
-        //  -------------------------------------------------------------------------------------------------------------
-        public int CheckResult(double szExpResult, TransformType transformType)
-        {
-            lock (s_outFileMemoryLock)
-            {
-                double checksumActual;
-                CXsltChecksum check = new CXsltChecksum(_fTrace, _output);
-
-                if (transformType == TransformType.Reader)
-                    checksumActual = check.Calc(xrXSLT);
-                else
-                    checksumActual = check.Calc(_strOutFile);
-
-                if (szExpResult != checksumActual || _fTrace)
-                {
-                    _output.WriteLine("XML: {0}", check.Xml);
-                    _output.WriteLine("Actual checksum: {0}, Expected: {1}", checksumActual, szExpResult);
-                }
-                if (szExpResult != checksumActual)
-                    return 0;
-
                 return 1;
             }
         }
