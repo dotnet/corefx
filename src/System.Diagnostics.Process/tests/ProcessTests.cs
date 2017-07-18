@@ -589,6 +589,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessStartTime()
         {
+            TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
             var p = CreateProcessPortable(RemotelyInvokable.ReadLine);
 
             DateTime testStartTime = DateTime.Now;
@@ -604,7 +605,7 @@ namespace System.Diagnostics.Tests
             Assert.True(p.WaitForExit(WaitInMS));
             DateTime testEndTime = DateTime.Now;
 
-            Assert.InRange(processStartTime, testStartTime, testEndTime);
+            Assert.InRange(processStartTime, testStartTime - allowedWindow, testEndTime + allowedWindow);
         }
 
         [Fact]
