@@ -249,14 +249,22 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22264", TargetFrameworkMonikers.UapNotUapAot)]
         public void TestMainModuleOnNonOSX()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return;
+
             Process p = Process.GetCurrentProcess();
+
+            // On UAP casing may not match - we use Path.GetFileName(exePath) instead of kernel32!GetModuleFileNameEx which is not available on UAP
+            Func<string, string> normalize = PlatformDetection.IsUap ?
+                (Func<string, string>)((s) => s.ToLowerInvariant()) :
+                (s) => s;
+
             Assert.True(p.Modules.Count > 0);
-            Assert.Equal(HostRunnerName.ToLowerInvariant(), p.MainModule.ModuleName.ToLowerInvariant());
-            Assert.EndsWith(HostRunnerName, p.MainModule.FileName);
-            Assert.Equal(string.Format("System.Diagnostics.ProcessModule ({0})", HostRunnerName), p.MainModule.ToString());
+            Assert.Equal(normalize(HostRunnerName), normalize(p.MainModule.ModuleName));
+            Assert.EndsWith(normalize(HostRunnerName), normalize(p.MainModule.FileName));
+            Assert.Equal(normalize(string.Format("System.Diagnostics.ProcessModule ({0})", HostRunnerName)), normalize(p.MainModule.ToString()));
         }
 
         [Fact]
@@ -579,20 +587,17 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22266", TargetFrameworkMonikers.UapNotUapAot)]
         public void TestProcessStartTime()
         {
-            TimeSpan allowedWindow = TimeSpan.FromSeconds(3);
-            DateTime testStartTime = DateTime.UtcNow;
-            using (var remote = RemoteInvoke(() => { Console.Write(Process.GetCurrentProcess().StartTime.ToUniversalTime()); return SuccessExitCode; },
-                new RemoteInvokeOptions { StartInfo = new ProcessStartInfo { RedirectStandardOutput = true } }))
-            {
-                Assert.Equal(remote.Process.StartTime, remote.Process.StartTime);
+            var p = CreateProcessPortable(RemotelyInvokable.Dummy);
 
-                DateTime remoteStartTime = DateTime.Parse(remote.Process.StandardOutput.ReadToEnd());
-                DateTime curTime = DateTime.UtcNow;
-                Assert.InRange(remoteStartTime, testStartTime - allowedWindow, curTime + allowedWindow);
-            }
+            DateTime testStartTime = DateTime.Now;
+            p.Start();
+            p.WaitForExit();
+            DateTime testEndTime = DateTime.Now;
+
+            Assert.Equal(p.StartTime, p.StartTime);
+            Assert.InRange(p.StartTime, testStartTime, testEndTime);
         }
 
         [Fact]
@@ -1213,12 +1218,22 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // CloseMainWindow is a no-op and always returns false on Unix.
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "MainWindow handle is not available on UAP")]
-        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException_WindowsNonUap()
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.CloseMainWindow());
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        // CloseMainWindow is a no-op and always returns false on Unix or Uap.
+        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException_NonWindowsOrUap()
+        {
+            var process = new Process();
+            Assert.False(process.CloseMainWindow());
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Needs to get the process Id from OS
