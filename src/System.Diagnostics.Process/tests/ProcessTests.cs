@@ -589,15 +589,22 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessStartTime()
         {
-            var p = CreateProcessPortable(RemotelyInvokable.Dummy);
+            var p = CreateProcessPortable(RemotelyInvokable.ReadLine);
 
             DateTime testStartTime = DateTime.Now;
+            p.StartInfo.RedirectStandardInput = true;
             p.Start();
-            p.WaitForExit();
+            Assert.Equal(p.StartTime, p.StartTime);
+            DateTime processStartTime = p.StartTime;
+            using (StreamWriter writer = p.StandardInput)
+            {
+                writer.WriteLine("start");
+            }
+
+            Assert.True(p.WaitForExit(WaitInMS));
             DateTime testEndTime = DateTime.Now;
 
-            Assert.Equal(p.StartTime, p.StartTime);
-            Assert.InRange(p.StartTime, testStartTime, testEndTime);
+            Assert.InRange(processStartTime, testStartTime, testEndTime);
         }
 
         [Fact]
