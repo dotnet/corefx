@@ -293,7 +293,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // a type variable. This will involve a type check and possibly an unbox.
                     // There is an explicit conversion from non-interface X to the type var iff there is an
                     // implicit conversion from the type var to X.
-                    if (_typeSrc.IsTypeParameterType())
+                    if (_typeSrc is TypeParameterType)
                     {
                         // Need to box first before unboxing.
                         Expr exprT;
@@ -771,7 +771,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From T to any interface-type I provided there isn't already an implicit reference
                 //   conversion from T to I.
 
-                if (!_typeSrc.IsTypeParameterType())
+                if (!(_typeSrc is TypeParameterType))
                 {
                     return AggCastResult.Failure;
                 }

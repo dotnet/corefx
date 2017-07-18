@@ -26,7 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public PointerType AsPointerType() { return this as PointerType; }
         public ParameterModifierType AsParameterModifierType() { return this as ParameterModifierType; }
         public NullableType AsNullableType() { return this as NullableType; }
-        public TypeParameterType AsTypeParameterType() { return this as TypeParameterType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
         public bool IsVoidType() { return this is VoidType; }
@@ -39,7 +38,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsPointerType() { return this is PointerType; }
         public bool IsParameterModifierType() { return this is ParameterModifierType; }
         public bool IsNullableType() { return this is NullableType; }
-        public bool IsTypeParameterType() { return this is TypeParameterType; }
 
         public bool IsWindowsRuntimeType()
         {
@@ -65,12 +63,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
             return false;
-        }
-
-        // API similar to System.Type
-        public bool IsGenericParameter
-        {
-            get { return IsTypeParameterType(); }
         }
 
         private Type _associatedSystemType;
@@ -122,7 +114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_TypeParameterType:
-                    TypeParameterType t = src.AsTypeParameterType();
+                    TypeParameterType t = (TypeParameterType)src;
                     if (t.IsMethodTypeParameter())
                     {
                         MethodInfo meth = t.GetOwningSymbol().AsMethodSymbol().AssociatedMemberInfo as MethodInfo;
@@ -164,7 +156,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int i = 0; i < typeArgs.Count; i++)
             {
                 // Unnamed type parameter types are just placeholders.
-                if (typeArgs[i].IsTypeParameterType() && typeArgs[i].AsTypeParameterType().GetTypeParameterSymbol().name == null)
+                if (typeArgs[i] is TypeParameterType typeParamArg && typeParamArg.GetTypeParameterSymbol().name == null)
                 {
                     return null;
                 }
@@ -595,7 +587,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (GetTypeKind())
             {
                 case TypeKind.TK_TypeParameterType:
-                    return AsTypeParameterType().IsValueType();
+                    return (this as TypeParameterType).IsValueType();
                 case TypeKind.TK_AggregateType:
                     return AsAggregateType().getAggregate().IsValueType();
                 case TypeKind.TK_NullableType:
@@ -609,7 +601,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (GetTypeKind())
             {
                 case TypeKind.TK_TypeParameterType:
-                    return AsTypeParameterType().IsNonNullableValueType();
+                    return (this as TypeParameterType).IsNonNullableValueType();
                 case TypeKind.TK_AggregateType:
                     return AsAggregateType().getAggregate().IsValueType();
                 case TypeKind.TK_NullableType:
@@ -626,7 +618,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullType:
                     return true;
                 case TypeKind.TK_TypeParameterType:
-                    return AsTypeParameterType().IsReferenceType();
+                    return (this as TypeParameterType).IsReferenceType();
                 case TypeKind.TK_AggregateType:
                     return AsAggregateType().getAggregate().IsRefType();
                 default:

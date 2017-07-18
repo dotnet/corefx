@@ -148,7 +148,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(typeSym != null);
             Debug.Assert(typeSym.IsAggregateType() ||
-                   typeSym.IsTypeParameterType() ||
+                   typeSym is TypeParameterType ||
                    typeSym.IsArrayType() ||
                    typeSym.IsNullableType());
 
@@ -159,7 +159,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ArrayType:
                     return GetReqPredefType(PredefinedType.PT_ARRAY);
                 case TypeKind.TK_TypeParameterType:
-                    return typeSym.AsTypeParameterType().GetEffectiveBaseClass();
+                    return (typeSym as TypeParameterType).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
                     return typeSym.AsNullableType().GetAts(ErrorContext);
             }
@@ -441,13 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // * Implicit conversions involving type parameters that are known to be reference types.
-            if (pSource.IsTypeParameterType() &&
-                HasImplicitReferenceTypeParameterConversion(pSource.AsTypeParameterType(), pDest))
-            {
-                return true;
-            }
-
-            return false;
+            return pSource is TypeParameterType srcParType && HasImplicitReferenceTypeParameterConversion(srcParType, pDest);
         }
 
         private bool HasImplicitReferenceTypeParameterConversion(
@@ -491,11 +485,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
             // * From T to a type parameter U, provided T depends on U.
-            if (pDest.IsTypeParameterType() && pSource.DependsOn(pDest.AsTypeParameterType()))
-            {
-                return true;
-            }
-            return false;
+            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
         }
 
         private bool HasAnyBaseInterfaceConversion(CType pDerived, CType pBase)
@@ -585,7 +575,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     continue;
                 }
-                TypeParameterType pParam = pTypeParams[iParam].AsTypeParameterType();
+                TypeParameterType pParam = (TypeParameterType)pTypeParams[iParam];
                 if (pParam.Invariant)
                 {
                     return false;
@@ -670,11 +660,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            if (pDest.IsTypeParameterType() && pSource.DependsOn(pDest.AsTypeParameterType()))
-            {
-                return true;
-            }
-            return false;
+
+            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
         }
 
         public bool HasImplicitBoxingConversion(CType pSource, CType pDest)
@@ -684,8 +671,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Certain type parameter conversions are classified as boxing conversions.
 
-            if (pSource.IsTypeParameterType() &&
-                HasImplicitBoxingTypeParameterConversion(pSource.AsTypeParameterType(), pDest))
+            if (pSource is TypeParameterType srcParType && HasImplicitBoxingTypeParameterConversion(srcParType, pDest))
             {
                 return true;
             }
@@ -773,12 +759,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            if (pSource.IsTypeParameterType() &&
-                HasImplicitTypeParameterBaseConversion(pSource.AsTypeParameterType(), pDest))
-            {
-                return true;
-            }
-            return false;
+
+            return pSource is TypeParameterType srcParType && HasImplicitTypeParameterBaseConversion(srcParType, pDest);
         }
 
         public bool FCanLift()

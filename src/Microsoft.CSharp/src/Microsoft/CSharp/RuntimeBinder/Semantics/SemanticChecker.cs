@@ -36,7 +36,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
             Debug.Assert(typeThru == null ||
                    typeThru.IsAggregateType() ||
-                   typeThru.IsTypeParameterType() ||
+                   typeThru is TypeParameterType ||
                    typeThru.IsArrayType() ||
                    typeThru.IsNullableType() ||
                    typeThru.IsErrorType());
@@ -90,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (!type.IsAggregateType())
             {
-                Debug.Assert(type.IsVoidType() || type.IsErrorType() || type.IsTypeParameterType());
+                Debug.Assert(type.IsVoidType() || type.IsErrorType() || type is TypeParameterType);
                 return true;
             }
 
@@ -159,7 +159,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
             Debug.Assert(typeThru == null ||
                    typeThru.IsAggregateType() ||
-                   typeThru.IsTypeParameterType() ||
+                   typeThru is TypeParameterType ||
                    typeThru.IsArrayType() ||
                    typeThru.IsNullableType() ||
                    typeThru.IsErrorType());

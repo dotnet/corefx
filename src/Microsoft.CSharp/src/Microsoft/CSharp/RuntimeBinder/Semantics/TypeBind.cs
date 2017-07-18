@@ -134,7 +134,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int i = 0; i < typeVars.Count; i++)
             {
                 // Empty bounds should be set to object.
-                TypeParameterType var = typeVars.ItemAsTypeParameterType(i);
+                TypeParameterType var = (TypeParameterType)typeVars[i];
                 CType arg = typeArgs[i];
 
                 bool fOK = CheckSingleConstraint(checker, errHandling, symErr, var, arg, typeArgsCls, typeArgsMeth, flags);
@@ -215,9 +215,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 bool bIsValueType = arg.IsValType();
                 bool bIsNullable = arg.IsNullableType();
-                if (bIsValueType && arg.IsTypeParameterType())
+                if (bIsValueType && arg is TypeParameterType typeArg)
                 {
-                    TypeArray pArgBnds = arg.AsTypeParameterType().GetBounds();
+                    TypeArray pArgBnds = typeArg.GetBounds();
                     if (pArgBnds.Count > 0)
                     {
                         bIsNullable = pArgBnds[0].IsNullableType();
@@ -289,7 +289,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 error = ErrorCode.ERR_GenericConstraintNotSatisfiedNullableInterface;
                             }
                         }
-                        else if (arg.IsTypeParameterType())
+                        else if (arg is TypeParameterType)
                         {
                             // Type variables can satisfy bounds through boxing and type variable conversions
                             Debug.Assert(!arg.IsRefType());
@@ -328,7 +328,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return !fError;
                 }
             }
-            else if (arg.IsTypeParameterType() && arg.AsTypeParameterType().HasNewConstraint())
+            else if (arg is TypeParameterType typeArg && typeArg.HasNewConstraint())
             {
                 return !fError;
             }
@@ -376,7 +376,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            Debug.Assert(typeBnd.IsAggregateType() || typeBnd.IsTypeParameterType() || typeBnd.IsArrayType());
+            Debug.Assert(typeBnd.IsAggregateType() || typeBnd is TypeParameterType || typeBnd.IsArrayType());
 
             switch (arg.GetTypeKind())
             {

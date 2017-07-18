@@ -1425,7 +1425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             if (0 != (_pGroup.Flags & EXPRFLAG.EXF_CTOR))
                             {
-                                Debug.Assert(!_pGroup.ParentType.IsTypeParameterType());
+                                Debug.Assert(!(_pGroup.ParentType is TypeParameterType));
                                 GetErrorContext().MakeError(out error, ErrorCode.ERR_BadCtorArgCount, _pGroup.ParentType, _pArguments.carg);
                             }
                             else

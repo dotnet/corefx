@@ -687,12 +687,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 isExtensionMethod = true;
                 TypeArray extParams = GetTypes().SubstTypeArray(mwiWrap.Meth().Params, mwiWrap.GetType());
                 // The this parameter must be a reference type.
-                if (extParams[0].IsTypeParameterType() ? !@params[0].IsRefType() : !extParams[0].IsRefType())
+                CType param = extParams[0] is TypeParameterType ? @params[0] : extParams[0];
+                if (!param.IsRefType())
                 {
                     // We should issue a better message here.
                     // We were only disallowing value types, hence the error message specific to value types.
                     // Now we are issuing the same error message for not-known to be reference types, not just value types.
-                    ErrorContext.Error(ErrorCode.ERR_ValueTypeExtDelegate, mwiWrap, extParams[0].IsTypeParameterType() ? @params[0] : extParams[0]);
+                    ErrorContext.Error(ErrorCode.ERR_ValueTypeExtDelegate, mwiWrap, param);
                 }
             }
 
@@ -942,9 +943,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fIntPtrOverride2 = false;
 
             // Get the list of operators from the source.
-            if (typeSrcBase.IsTypeParameterType())
+            if (typeSrcBase is TypeParameterType typeParamSrc)
             {
-                AggregateType atsBase = typeSrcBase.AsTypeParameterType().GetEffectiveBaseClass();
+                AggregateType atsBase = typeParamSrc.GetEffectiveBaseClass();
                 if (atsBase != null && atsBase.getAggregate().HasConversion(GetSymbolLoader()))
                 {
                     rgats[cats++] = atsBase;
@@ -964,13 +965,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Get the list of operators from the destination.
-            if (typeDstBase.IsTypeParameterType())
+            if (typeDstBase is TypeParameterType typeParamDst)
             {
                 // If an explicit conversion exists from typeSrc to the class bound, then
                 // an explicit conversion exists from typeSrc to typeDst. An implicit is no better
                 // than an explicit.
                 AggregateType atsBase;
-                if (!fImplicitOnly && (atsBase = typeDstBase.AsTypeParameterType().GetEffectiveBaseClass()).getAggregate().HasConversion(GetSymbolLoader()))
+                if (!fImplicitOnly && (atsBase = typeParamDst.GetEffectiveBaseClass()).getAggregate().HasConversion(GetSymbolLoader()))
                 {
                     rgats[cats++] = atsBase;
                 }

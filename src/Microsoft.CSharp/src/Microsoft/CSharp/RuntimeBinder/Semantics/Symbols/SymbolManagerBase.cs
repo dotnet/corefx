@@ -116,11 +116,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             LAgain:
                 if (type1.GetTypeKind() != type2.GetTypeKind())
                 {
-                    if (type1.IsTypeParameterType())
+                    if (type1 is TypeParameterType)
                     {
                         nParam = BetterType.Right;
                     }
-                    else if (type2.IsTypeParameterType())
+                    else if (type2 is TypeParameterType)
                     {
                         nParam = BetterType.Left;
                     }

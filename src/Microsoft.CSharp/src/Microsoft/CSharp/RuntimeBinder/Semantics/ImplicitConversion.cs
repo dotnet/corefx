@@ -207,7 +207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // If not, try user defined implicit conversions.
                         break;
                     case TypeKind.TK_TypeParameterType:
-                        if (bindImplicitConversionFromTypeVar(_typeSrc.AsTypeParameterType()))
+                        if (bindImplicitConversionFromTypeVar(_typeSrc as TypeParameterType))
                         {
                             return true;
                         }
@@ -450,7 +450,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 FUNDTYPE ftDest = _typeDest.fundType();
                 if (ftDest != FUNDTYPE.FT_REF && ftDest != FUNDTYPE.FT_PTR &&
-                    (ftDest != FUNDTYPE.FT_VAR || !_typeDest.AsTypeParameterType().IsReferenceType()) &&
+                    (ftDest != FUNDTYPE.FT_VAR || !((TypeParameterType)_typeDest).IsReferenceType()) &&
                     // null is convertible to System.Nullable<T>.
                     !_typeDest.isPredefType(PredefinedType.PT_G_OPTIONAL))
                 {
@@ -845,7 +845,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             return true;
                         }
-                        if (_typeDest.IsTypeParameterType())
+                        if (_typeDest is TypeParameterType)
                         {
                             // For a type var destination we need to cast to object then to the other type var.
                             Expr exprT;
@@ -867,7 +867,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         typeTmp = bnds[itype];
                     }
-                    while (!typeTmp.isInterfaceType() && !typeTmp.IsTypeParameterType());
+                    while (!typeTmp.isInterfaceType() && !(typeTmp is TypeParameterType));
                 }
             }
             private SymbolLoader GetSymbolLoader()

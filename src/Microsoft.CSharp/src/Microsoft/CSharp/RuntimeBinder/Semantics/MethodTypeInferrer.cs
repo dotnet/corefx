@@ -194,7 +194,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pFixedResults[iParam] = GetTypeManager().GetErrorType(
                                         null/*pParentType*/,
                                         null,
-                                        (_pMethodTypeParameters.ItemAsTypeParameterType(iParam)).GetName(),
+                                        ((TypeParameterType)_pMethodTypeParameters[iParam]).GetName(),
                                         BSYMMGR.EmptyTypeArray());
             }
             return GetGlobalSymbols().AllocParams(_pMethodTypeParameters.Count, _pFixedResults);
@@ -216,7 +216,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pParam != null);
             Debug.Assert(pParam.IsMethodTypeParameter());
             int iParam = pParam.GetIndexInTotalParameters();
-            Debug.Assert(_pMethodTypeParameters.ItemAsTypeParameterType(iParam) == pParam);
+            Debug.Assert(_pMethodTypeParameters[iParam] == pParam);
             return IsUnfixed(iParam);
         }
 
@@ -296,7 +296,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType[] ppMethodParameters = new CType[_pMethodTypeParameters.Count];
             for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
             {
-                TypeParameterType pParam = _pMethodTypeParameters.ItemAsTypeParameterType(iParam);
+                TypeParameterType pParam = (TypeParameterType)_pMethodTypeParameters[iParam];
                 ppMethodParameters[iParam] = IsUnfixed(iParam) ? pParam : _pFixedResults[iParam];
             }
             SubstContext subsctx = new SubstContext(_pClassTypeArguments.Items, _pClassTypeArguments.Count,
@@ -695,7 +695,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (IsUnfixed(iParam))
                 {
                     if (DoesInputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters.ItemAsTypeParameterType(iParam)))
+                        _pMethodTypeParameters[iParam] as TypeParameterType))
                     {
                         return true;
                     }
@@ -743,7 +743,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (IsUnfixed(iParam))
                 {
                     if (DoesOutputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters.ItemAsTypeParameterType(iParam)))
+                        _pMethodTypeParameters[iParam] as TypeParameterType))
                     {
                         return true;
                     }
@@ -786,9 +786,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
 
                 if (DoesInputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters.ItemAsTypeParameterType(jParam)) &&
+                        _pMethodTypeParameters[jParam] as TypeParameterType) &&
                     DoesOutputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters.ItemAsTypeParameterType(iParam)))
+                        _pMethodTypeParameters[iParam] as TypeParameterType))
                 {
                     return true;
                 }
@@ -1160,9 +1160,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of bounds
             // SPEC:   for Xi.
-            if (pDest.IsTypeParameterType())
+            if (pDest is TypeParameterType pTPType)
             {
-                TypeParameterType pTPType = pDest.AsTypeParameterType();
                 if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
                 {
                     AddExactBound(pTPType, pSource);
@@ -1330,9 +1329,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of bounds
             // SPEC:   for Xi.
-            if (pDest.IsTypeParameterType())
+            if (pDest is TypeParameterType pTPType)
             {
-                TypeParameterType pTPType = pDest.AsTypeParameterType();
                 if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
                 {
                     AddLowerBound(pTPType, pSource);
@@ -1362,9 +1360,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   public override M<U>(U u) { M(u); } // should infer M<int>
             // }
 
-            if (pSource.IsTypeParameterType())
+            if (pSource is TypeParameterType sourceParamType)
             {
-                pSource = pSource.AsTypeParameterType().GetEffectiveBaseClass();
+                pSource = sourceParamType.GetEffectiveBaseClass();
             }
 
             if (!pSource.IsArrayType())
@@ -1523,9 +1521,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 pSourceBase = pSource.AsAggregateType().GetBaseClass();
             }
-            else if (pSource.IsTypeParameterType())
+            else if (pSource is TypeParameterType sourceType)
             {
-                pSourceBase = pSource.AsTypeParameterType().GetEffectiveBaseClass();
+                pSourceBase = sourceType.GetEffectiveBaseClass();
             }
 
             while (pSourceBase != null)
@@ -1559,7 +1557,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //TypeArray pInterfaces = null;
 
             if (!pSource.isStructType() && !pSource.isClassType() &&
-                !pSource.isInterfaceType() && !pSource.IsTypeParameterType())
+                !pSource.isInterfaceType() && !(pSource is TypeParameterType))
             {
                 return false;
             }
@@ -1620,7 +1618,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int arg = 0; arg < pSourceArgs.Count; ++arg)
             {
-                TypeParameterType pTypeParam = pTypeParams.ItemAsTypeParameterType(arg);
+                TypeParameterType pTypeParam = (TypeParameterType)pTypeParams[arg];
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
@@ -1691,9 +1689,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of upper bounds
             // SPEC:   for Xi.
-            if (pDest.IsTypeParameterType())
+            if (pDest is TypeParameterType pTPType)
             {
-                TypeParameterType pTPType = pDest.AsTypeParameterType();
                 if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
                 {
                     AddUpperBound(pTPType, pSource);
@@ -1920,7 +1917,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int arg = 0; arg < pSourceArgs.Count; ++arg)
             {
-                TypeParameterType pTypeParam = pTypeParams.ItemAsTypeParameterType(arg);
+                TypeParameterType pTypeParam = (TypeParameterType)pTypeParams[arg];
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
@@ -2266,7 +2263,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // formal parameter CType was successfully inferred.
             for (int iParam = 0; iParam < _pMethodTypeParameters.Count; ++iParam)
             {
-                TypeParameterType pParam = _pMethodTypeParameters.ItemAsTypeParameterType(iParam);
+                TypeParameterType pParam = (TypeParameterType)_pMethodTypeParameters[iParam];
                 if (!TypeManager.TypeContainsType(pDest, pParam))
                 {
                     continue;

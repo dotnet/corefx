@@ -382,7 +382,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (int i = 0; i < genericArguments.Length; i++)
                 {
                     Type t = genericArguments[i];
-                    ctypes[i].AsTypeParameterType().GetTypeParameterSymbol().SetBounds(
+                    ((TypeParameterType)ctypes[i]).GetTypeParameterSymbol().SetBounds(
                         _bsymmgr.AllocParams(
                         GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                 }
@@ -436,7 +436,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     // We check to make sure we own the type parameter - this is because we're
                     // currently calculating TypeArgsThis, NOT TypeArgsAll.
-                    if (ctype.AsTypeParameterType().GetOwningSymbol() == agg)
+                    if (((TypeParameterType)ctype).GetOwningSymbol() == agg)
                     {
                         ctypes.Add(ctype);
                     }
@@ -1093,9 +1093,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (int i = 0; i < agg.GetTypeVars().Count; i++)
                 {
                     Type t = genericArguments[i];
-                    if (agg.GetTypeVars()[i].IsTypeParameterType())
+                    if (agg.GetTypeVars()[i] is TypeParameterType typeVar)
                     {
-                        agg.GetTypeVars()[i].AsTypeParameterType().GetTypeParameterSymbol().SetBounds(
+                        typeVar.GetTypeParameterSymbol().SetBounds(
                             _bsymmgr.AllocParams(
                             GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                     }
@@ -2048,10 +2048,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            if (t.IsTypeParameterType())
+            if (t is TypeParameterType paramType)
             {
                 // Add conversions for the bounds.
-                foreach (CType bound in t.AsTypeParameterType().GetBounds().Items)
+                foreach (CType bound in paramType.GetBounds().Items)
                 {
                     AddConversionsForType(bound.AssociatedSystemType);
                 }

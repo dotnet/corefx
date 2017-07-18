@@ -1024,9 +1024,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_REF:
                     break;
                 case FUNDTYPE.FT_VAR:
-                    if (type1.AsTypeParameterType().IsValueType() || (!type1.AsTypeParameterType().IsReferenceType() && !type2.IsNullType()))
+                    TypeParameterType parameterType1 = (TypeParameterType)type1;
+                    if (parameterType1.IsValueType() || (!parameterType1.IsReferenceType() && !type2.IsNullType()))
                         return false;
-                    type1 = type1.AsTypeParameterType().GetEffectiveBaseClass();
+                    type1 = parameterType1.GetEffectiveBaseClass();
                     break;
             }
             if (type2.IsNullType())
@@ -1045,9 +1046,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_REF:
                     break;
                 case FUNDTYPE.FT_VAR:
-                    if (type2.AsTypeParameterType().IsValueType() || (!type2.AsTypeParameterType().IsReferenceType() && !type1.IsNullType()))
+                    TypeParameterType typeParam2 = (TypeParameterType)type2;
+                    if (typeParam2.IsValueType() || (!typeParam2.IsReferenceType() && !type1.IsNullType()))
                         return false;
-                    type2 = type2.AsTypeParameterType().GetEffectiveBaseClass();
+                    type2 = typeParam2.GetEffectiveBaseClass();
                     break;
             }
             if (type1.IsNullType())
@@ -2555,7 +2557,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         type = type.StripNubs();
                         break;
                     case TypeKind.TK_TypeParameterType:
-                        type = type.AsTypeParameterType().GetEffectiveBaseClass();
+                        type = (type as TypeParameterType).GetEffectiveBaseClass();
                         break;
                     case TypeKind.TK_AggregateType:
                         if ((type.isClassType() || type.isStructType()) && !type.AsAggregateType().getAggregate().IsSkipUDOps())

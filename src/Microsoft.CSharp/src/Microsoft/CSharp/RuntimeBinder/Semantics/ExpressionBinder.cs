@@ -501,7 +501,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             CType type = pObject.Type;
 
-            if (!type.IsAggregateType() && !type.IsTypeParameterType())
+            if (!type.IsAggregateType() && !(type is TypeParameterType))
             {
                 ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
                 MethWithInst mwi = new MethWithInst(null, null);
@@ -956,7 +956,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeSrc = typeSrc.StripNubs();
                     goto LAgain;
                 case TypeKind.TK_TypeParameterType:
-                    typeSrc = typeSrc.AsTypeParameterType().GetEffectiveBaseClass();
+                    typeSrc = ((TypeParameterType)typeSrc).GetEffectiveBaseClass();
                     goto LAgain;
                 case TypeKind.TK_AggregateType:
                     if (!typeSrc.isClassType() && !typeSrc.isStructType() || typeSrc.AsAggregateType().getAggregate().IsSkipUDOps())
@@ -1562,7 +1562,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeObj = typeTmp;
             }
 
-            if (typeObj.IsTypeParameterType() || typeObj.IsAggregateType())
+            if (typeObj is TypeParameterType || typeObj.IsAggregateType())
             {
                 AggregateSymbol aggCalled = null;
                 aggCalled = swt.Sym.parent.AsAggregateSymbol();
@@ -1577,7 +1577,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 if (pfConstrained &&
-                    (typeObj.IsTypeParameterType() ||
+                    (typeObj is TypeParameterType ||
                      typeObj.isStructType() && swt.GetType().IsRefType() && swt.Sym.IsVirtual()))
                 {
                     // For calls on type parameters or virtual calls on struct types (not enums),

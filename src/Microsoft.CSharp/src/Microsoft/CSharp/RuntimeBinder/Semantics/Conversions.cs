@@ -90,11 +90,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // For a type-parameter T that is known to be a reference type (§25.7), the following explicit reference conversions exist:
                 // •    From any interface-type to T.
                 // •    From T to any interface-type I provided there isn’t already an implicit reference conversion from T to I.
-                if (typeSrc.isInterfaceType() && typeDst.IsTypeParameterType())
+                if (typeSrc.isInterfaceType() && typeDst is TypeParameterType)
                 {
                     return true;
                 }
-                if (typeSrc.IsTypeParameterType() && typeDst.isInterfaceType())
+                if (typeSrc is TypeParameterType && typeDst.isInterfaceType())
                 {
                     return true;
                 }
@@ -246,7 +246,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     continue;
                 }
-                TypeParameterType pParam = pTypeParams[iParam].AsTypeParameterType();
+                TypeParameterType pParam = (TypeParameterType)pTypeParams[iParam];
                 if (pParam.Invariant)
                 {
                     return false;

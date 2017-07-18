@@ -555,7 +555,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     {
-                        TypeParameterSymbol tvs = type.AsTypeParameterType().GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)type).GetTypeParameterSymbol();
                         int index = tvs.GetIndexInTotalParameters();
                         if (tvs.IsMethodTypeParameter())
                         {
@@ -735,7 +735,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     { // BLOCK
-                        TypeParameterSymbol tvs = typeSrc.AsTypeParameterType().GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).GetTypeParameterSymbol();
                         int index = tvs.GetIndexInTotalParameters();
 
                         if (tvs.IsMethodTypeParameter())
@@ -901,7 +901,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_TypeParameterType:
                     if (typeVars != null && typeVars.Count > 0)
                     {
-                        int ivar = type.AsTypeParameterType().GetIndexInTotalParameters();
+                        int ivar = ((TypeParameterType)type).GetIndexInTotalParameters();
                         return ivar < typeVars.Count && type == typeVars[ivar];
                     }
                     return true;
@@ -1062,7 +1062,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // These guys have no accessibility concerns.
-            Debug.Assert(!typeSrc.IsVoidType() && !typeSrc.IsErrorType() && !typeSrc.IsTypeParameterType());
+            Debug.Assert(!typeSrc.IsVoidType() && !typeSrc.IsErrorType() && !(typeSrc is TypeParameterType));
 
             if (typeSrc.IsParameterModifierType() || typeSrc.IsPointerType())
             {
@@ -1164,7 +1164,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     continue;
                 }
 
-                if (!typeArgs[i].IsRefType() || !typeParams[i].AsTypeParameterType().Covariant)
+                if (!typeArgs[i].IsRefType() || !((TypeParameterType)typeParams[i]).Covariant)
                 {
                     // This guy is inaccessible, and we are not going to be able to vary him, so we need to fail.
                     return false;
