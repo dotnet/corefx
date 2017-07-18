@@ -30,6 +30,8 @@ namespace System.IO.Tests
         public static TheoryData PathsWithReservedDeviceNames = IOInputs.GetPathsWithReservedDeviceNames().ToTheoryData();
         public static TheoryData PathsWithAlternativeDataStreams = IOInputs.GetPathsWithAlternativeDataStreams().ToTheoryData();
         public static TheoryData PathsWithComponentLongerThanMaxComponent = IOInputs.GetPathsWithComponentLongerThanMaxComponent().ToTheoryData();
+        public static TheoryData ControlWhiteSpace = IOInputs.GetControlWhiteSpace().ToTheoryData();
+        public static TheoryData NonControlWhiteSpace = IOInputs.GetNonControlWhiteSpace().ToTheoryData();
 
         /// <summary>
         /// In some cases (such as when running without elevated privileges),
@@ -57,24 +59,13 @@ namespace System.IO.Tests
             return success;
         });
 
-        /// <summary>
-        /// Runs the given command as sudo
-        /// </summary>
-        /// <param name="commandLine">The command line to run as sudo</param>
-        /// <returns> Returns the process exit code (0 typically means it is successful)</returns>
-        protected static int RunAsSudo(string commandLine)
+        protected string GetNamedPipeServerStreamName()
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo()
+            if (PlatformDetection.IsWinRT)
             {
-                FileName = "sudo",
-                Arguments = commandLine
-            };
-
-            using (Process process = Process.Start(startInfo))
-            {
-                Assert.True(process.WaitForExit(30000));
-                return process.ExitCode;
+                return @"LOCAL\" + Guid.NewGuid().ToString("N");
             }
+            return Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -101,17 +92,17 @@ namespace System.IO.Tests
             string readOnlyDirectory = GetTestFilePath();
             Directory.CreateDirectory(readOnlyDirectory);
 
-            Assert.Equal(0, RunAsSudo($"mount --bind {sourceDirectory} {readOnlyDirectory}"));
+            Assert.Equal(0, AdminHelpers.RunAsSudo($"mount --bind {sourceDirectory} {readOnlyDirectory}"));
 
             try
             {
-                Assert.Equal(0, RunAsSudo($"mount -o remount,ro,bind {sourceDirectory} {readOnlyDirectory}"));
+                Assert.Equal(0, AdminHelpers.RunAsSudo($"mount -o remount,ro,bind {sourceDirectory} {readOnlyDirectory}"));
                 testAction(readOnlyDirectory);
             }
             finally
             {
                 // Clean up test environment
-                Assert.Equal(0, RunAsSudo($"umount {readOnlyDirectory}"));
+                Assert.Equal(0, AdminHelpers.RunAsSudo($"umount {readOnlyDirectory}"));
             }
         }
     }
