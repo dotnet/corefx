@@ -414,12 +414,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 CType typeBool = GetReqPDT(PredefinedType.PT_BOOL);
                 ExprBinOp exprRes = null;
-                if (info.type1.IsNullableType() && info.type2.IsNullType())
+                if (info.type1.IsNullableType() && info.type2 is NullType)
                 {
                     arg2 = GetExprFactory().CreateZeroInit(info.type1);
                     exprRes = GetExprFactory().CreateBinop(ek, typeBool, arg1, arg2);
                 }
-                if (info.type1.IsNullType() && info.type2.IsNullableType())
+                if (info.type1 is NullType && info.type2.IsNullableType())
                 {
                     arg1 = GetExprFactory().CreateZeroInit(info.type2);
                     exprRes = GetExprFactory().CreateBinop(ek, typeBool, arg1, arg2);
@@ -922,7 +922,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (info.type1.IsPointerType())
             {
-                if (info.type2.IsNullType())
+                if (info.type2 is NullType)
                 {
                     if (!info.ValidForVoidPointer())
                     {
@@ -948,7 +948,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Debug.Assert(info.type2.IsPointerType());
-            if (info.type1.IsNullType())
+            if (info.type1 is NullType)
             {
                 if (!info.ValidForVoidPointer())
                 {
@@ -997,7 +997,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeObj = GetReqPDT(PredefinedType.PT_OBJECT);
             CType typeCls = null;
 
-            if (type1.IsNullType() && type2.IsNullType())
+            if (type1 is NullType && type2 is NullType)
             {
                 typeCls = typeObj;
                 fRet = true;
@@ -1025,12 +1025,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                 case FUNDTYPE.FT_VAR:
                     TypeParameterType parameterType1 = (TypeParameterType)type1;
-                    if (parameterType1.IsValueType() || (!parameterType1.IsReferenceType() && !type2.IsNullType()))
+                    if (parameterType1.IsValueType() || (!parameterType1.IsReferenceType() && !(type2 is NullType)))
                         return false;
                     type1 = parameterType1.GetEffectiveBaseClass();
                     break;
             }
-            if (type2.IsNullType())
+            if (type2 is NullType)
             {
                 fRet = true;
                 // We don't need to determine the actual best type since we're
@@ -1047,12 +1047,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                 case FUNDTYPE.FT_VAR:
                     TypeParameterType typeParam2 = (TypeParameterType)type2;
-                    if (typeParam2.IsValueType() || (!typeParam2.IsReferenceType() && !type1.IsNullType()))
+                    if (typeParam2.IsValueType() || (!typeParam2.IsReferenceType() && !(type1 is NullType)))
                         return false;
                     type2 = typeParam2.GetEffectiveBaseClass();
                     break;
             }
-            if (type1.IsNullType())
+            if (type1 is NullType)
             {
                 fRet = true;
                 // We don't need to determine the actual best type since we're
@@ -1613,7 +1613,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             NullableType type = uofs.GetType().AsNullableType();
             Debug.Assert(arg?.Type != null);
-            if (arg.Type.IsNullType())
+            if (arg.Type is NullType)
             {
                 return BadOperatorTypesError(ek, arg, null, type);
             }
@@ -2156,11 +2156,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
             CType nonNullableType1 = arg1.Type.IsNullableType() ? arg1.Type.AsNullableType().UnderlyingType : arg1.Type;
             CType nonNullableType2 = arg2.Type.IsNullableType() ? arg2.Type.AsNullableType().UnderlyingType : arg2.Type;
-            if (nonNullableType1.IsNullType())
+            if (nonNullableType1 is NullType)
             {
                 nonNullableType1 = nonNullableType2.underlyingEnumType();
             }
-            else if (nonNullableType2.IsNullType())
+            else if (nonNullableType2 is NullType)
             {
                 nonNullableType2 = nonNullableType1.underlyingEnumType();
             }

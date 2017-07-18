@@ -28,7 +28,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public NullableType AsNullableType() { return this as NullableType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
-        public bool IsNullType() { return this is NullType; }
         public bool IsOpenTypePlaceholderType() { return this is OpenTypePlaceholderType; }
         public bool IsBoundLambdaType() { return this is BoundLambdaType; }
         public bool IsMethodGroupType() { return this is MethodGroupType; }

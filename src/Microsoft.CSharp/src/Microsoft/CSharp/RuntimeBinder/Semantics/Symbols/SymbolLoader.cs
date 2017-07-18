@@ -431,13 +431,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // implementations have a "null type" which some expressions other than the
             // null literal may have. (For example, (null??null), which is also an
             // extension to the specification.)
-            if (pSource.IsNullType() && pDest.IsRefType())
+            if (pSource is NullType)
             {
-                return true;
-            }
-            if (pSource.IsNullType() && pDest.IsNullableType())
-            {
-                return true;
+                if (pDest.IsRefType() || pDest.IsNullableType())
+                {
+                    return true;
+                }
             }
 
             // * Implicit conversions involving type parameters that are known to be reference types.

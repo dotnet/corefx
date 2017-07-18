@@ -105,7 +105,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return true;
                     case TypeKind.TK_NullType:
                         // Can only convert to the null type if src is null.
-                        if (!_typeSrc.IsNullType())
+                        if (!(_typeSrc is NullType))
                         {
                             return false;
                         }
@@ -345,7 +345,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(_typeSrc == typeSrcBase);
 
                     // The null type can be implicitly converted to T? as the default value.
-                    if (_typeSrc.IsNullType())
+                    if (_typeSrc is NullType)
                     {
                         // If we have the constant null, generate it as a default value of T?.  If we have 
                         // some crazy expression which has been determined to be always null, like (null??null)

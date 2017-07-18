@@ -1032,7 +1032,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             AggregateType pObject = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
 
-            if (expr.Type.IsNullType())
+            if (expr.Type is NullType)
             {
                 ExprTypeOf pTypeOf = CreateTypeOf(pObject);
                 return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, expr, pTypeOf);
@@ -1147,13 +1147,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType nubfptype1 = GetSymbolLoader().GetTypeManager().GetNullable(fptype1);
             CType nubfptype2 = GetSymbolLoader().GetTypeManager().GetNullable(fptype2);
             // If we have null op X, or T1 op T2?, or T1 op null, lift first arg to T1?
-            if (aatype1.IsNullType() || aatype1 == fptype1 && (aatype2 == nubfptype2 || aatype2.IsNullType()))
+            if (aatype1 is NullType || aatype1 == fptype1 && (aatype2 == nubfptype2 || aatype2 is NullType))
             {
                 new1 = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, new1, CreateTypeOf(nubfptype1));
             }
 
             // If we have X op null, or T1? op T2, or null op T2, lift second arg to T2?
-            if (aatype2.IsNullType() || aatype2 == fptype2 && (aatype1 == nubfptype1 || aatype1.IsNullType()))
+            if (aatype2 is NullType || aatype2 == fptype2 && (aatype1 == nubfptype1 || aatype1 is NullType))
             {
                 new2 = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, new2, CreateTypeOf(nubfptype2));
             }
