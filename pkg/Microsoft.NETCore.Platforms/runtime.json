@@ -930,6 +930,41 @@
         "opensuse.42.1-x64-corert": {
             "#import": [ "opensuse.42.1-corert", "opensuse.13.2-x64-corert", "opensuse.42.1-x64" ]
         },
-
+        "amzn": {
+            "#import": [ "linux" ]
+        },
+        "amzn-x64": {
+            "#import": [ "amzn", "linux-x64" ]
+        },
+        "amzn.2015.03": {
+            "#import": [ "amzn" ]
+        },
+        "amzn.2015.03-x64": {
+            "#import": [ "amzn.2015.03", "amzn-x64" ]
+        },
+        "amzn.2015.09": {
+            "#import": [ "amzn.2015.03" ]
+        },
+        "amzn.2015.09-x64": {
+            "#import": [ "amzn.2015.09", "amzn.2015.03-x64" ]
+        },
+        "amzn.2016.03": {
+            "#import": [ "amzn.2015.09" ]
+        },
+        "amzn.2016.03-x64": {
+            "#import": [ "amzn.2016.03", "amzn.2015.09-x64" ]
+        },
+        "amzn.2016.09": {
+            "#import": [ "amzn.2016.03" ]
+        },
+        "amzn.2016.09-x64": {
+            "#import": [ "amzn.2016.09", "amzn.2016.03-x64" ]
+        },
+        "amzn.2017.03": {
+            "#import": [ "amzn.2016.09" ]
+        },
+        "amzn.2017.03-x64": {
+            "#import": [ "amzn.2017.03", "amzn.2016.09-x64" ]
+        },
     }
 }
