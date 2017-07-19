@@ -145,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_mask == symbmask_t.MASK_MethodSymbol && (
                         0 == (_flags & EXPRFLAG.EXF_CTOR) != !_pCurrentSym.AsMethodSymbol().IsConstructor() ||
                         0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !_pCurrentSym.AsMethodSymbol().isOperator) ||
-                    _mask == symbmask_t.MASK_PropertySymbol && !_pCurrentSym.AsPropertySymbol().isIndexer())
+                    _mask == symbmask_t.MASK_PropertySymbol && !((PropertySymbol)_pCurrentSym).isIndexer())
                 {
                     // Get the next symbol.
                     return false;

@@ -99,7 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public PropertySymbol CreateProperty(Name name, ParentSymbol parent)
         {
-            PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent).AsPropertySymbol();
+            PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent) as PropertySymbol;
             Debug.Assert(sym != null);
             return (sym);
         }

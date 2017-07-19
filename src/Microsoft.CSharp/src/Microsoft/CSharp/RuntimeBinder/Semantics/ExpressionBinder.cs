@@ -547,7 +547,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return rval;
             }
 
-            Debug.Assert(mem.SymFirst().IsPropertySymbol() && mem.SymFirst().AsPropertySymbol().isIndexer());
+            Debug.Assert(mem.SymFirst() is PropertySymbol prop && prop.isIndexer());
 
             ExprMemberGroup grp = GetExprFactory().CreateMemGroup((EXPRFLAG)mem.GetFlags(),
                 pName, BSYMMGR.EmptyTypeArray(), mem.SymFirst().getKind(), mem.GetSourceType(), null/*pMPS*/, mem.GetObject(), mem.GetResults());
@@ -776,7 +776,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 PropertySymbol invocationList =
                     GetSymbolLoader()
                         .LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
-                        .AsPropertySymbol();
+                         as PropertySymbol;
 
                 MethPropWithInst mpwi = new MethPropWithInst(invocationList, fieldType);
                 ExprMemberGroup memGroup = GetExprFactory().CreateMemGroup(getOrCreateCall, mpwi);
@@ -794,7 +794,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal Expr BindToProperty(Expr pObject, PropWithType pwt, BindingFlag bindFlags, Expr args, AggregateType pOtherType, ExprMemberGroup pMemGroup)
         {
             Debug.Assert(pwt.Sym != null &&
-                    pwt.Sym.IsPropertySymbol() &&
+                    pwt.Sym is PropertySymbol &&
                     pwt.GetType() != null &&
                     pwt.Prop().getClass() == pwt.GetType().getAggregate());
             Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop().isIndexer());

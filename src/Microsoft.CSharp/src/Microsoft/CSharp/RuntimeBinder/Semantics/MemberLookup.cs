@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _swtFirst.Set(sym, type);
                 Debug.Assert(_csym == 1);
                 Debug.Assert(_prgtype[0] == type);
-                _fMulti = sym.IsMethodSymbol() || sym.IsPropertySymbol() && sym.AsPropertySymbol().isIndexer();
+                _fMulti = sym.IsMethodSymbol() || sym is PropertySymbol prop && prop.isIndexer();
             }
         }
 
@@ -232,10 +232,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     continue;
                 }
 
+                PropertySymbol prop = symCur as PropertySymbol;
+
                 // Make sure that whether we're seeing a ctor, operator, or indexer is consistent with the flags.
                 if (((_flags & MemLookFlags.Ctor) == 0) != (!symCur.IsMethodSymbol() || !symCur.AsMethodSymbol().IsConstructor()) ||
                     ((_flags & MemLookFlags.Operator) == 0) != (!symCur.IsMethodSymbol() || !symCur.AsMethodSymbol().isOperator) ||
-                    ((_flags & MemLookFlags.Indexer) == 0) != (!symCur.IsPropertySymbol() || !symCur.AsPropertySymbol().isIndexer()))
+                    ((_flags & MemLookFlags.Indexer) == 0) != (prop == null || !prop.isIndexer()))
                 {
                     if (!_swtBad)
                     {
@@ -261,7 +263,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if ((_flags & MemLookFlags.MustBeInvocable) != 0)
                 {
                     if ((symCur.IsFieldSymbol() && !IsDelegateType(symCur.AsFieldSymbol().GetType(), typeCur) && !IsDynamicMember(symCur)) ||
-                        (symCur.IsPropertySymbol() && !IsDelegateType(symCur.AsPropertySymbol().RetType, typeCur) && !IsDynamicMember(symCur)))
+                        (prop != null && !IsDelegateType(prop.RetType, typeCur) && !IsDynamicMember(symCur)))
                     {
                         if (!_swtBad)
                         {
@@ -388,12 +390,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                Debug.Assert(sym.IsPropertySymbol());
-                if (!sym.AsPropertySymbol().getType().isPredefType(PredefinedType.PT_OBJECT))
+                Debug.Assert(sym is PropertySymbol);
+                PropertySymbol prop = (PropertySymbol)sym;
+                if (!prop.getType().isPredefType(PredefinedType.PT_OBJECT))
                 {
                     return false;
                 }
-                var o = sym.AsPropertySymbol().AssociatedPropertyInfo.GetCustomAttributes(typeof(System.Runtime.CompilerServices.DynamicAttribute), false).ToArray();
+                var o = prop.AssociatedPropertyInfo.GetCustomAttributes(typeof(System.Runtime.CompilerServices.DynamicAttribute), false).ToArray();
                 if (o.Length == 1)
                 {
                     da = o[0] as System.Runtime.CompilerServices.DynamicAttribute;

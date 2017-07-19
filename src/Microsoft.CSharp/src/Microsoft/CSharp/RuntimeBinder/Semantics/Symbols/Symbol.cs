@@ -222,7 +222,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
-        public bool IsPropertySymbol() { return _kind == SYMKIND.SK_PropertySymbol; }
 
         public CType getType()
         {
@@ -331,8 +330,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     MethodSymbol methAdd = ((EventSymbol)this).methAdd;
                     return methAdd != null && methAdd.isVirtual;
                 case SYMKIND.SK_PropertySymbol:
-                    return (this.AsPropertySymbol().methGet != null && this.AsPropertySymbol().methGet.isVirtual) ||
-                           (this.AsPropertySymbol().methSet != null && this.AsPropertySymbol().methSet.isVirtual);
+                    PropertySymbol prop = ((PropertySymbol)this);
+                    MethodSymbol meth = prop.methGet ?? prop.methSet;
+                    return meth != null && meth.isVirtual;
                 default:
                     return false;
             }
@@ -401,6 +401,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
-        internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }
     }
 }

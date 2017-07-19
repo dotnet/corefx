@@ -1404,7 +1404,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
 
                     prevProp = prop;
-                    prop = _semanticChecker.SymbolLoader.LookupNextSym(prop, prop.parent, symbmask_t.MASK_PropertySymbol).AsPropertySymbol();
+                    prop = _semanticChecker.SymbolLoader.LookupNextSym(prop, prop.parent, symbmask_t.MASK_PropertySymbol) as PropertySymbol;
                 }
 
                 prop = prevProp;

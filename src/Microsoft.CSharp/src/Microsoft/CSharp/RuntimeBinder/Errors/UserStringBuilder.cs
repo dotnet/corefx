@@ -440,7 +440,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case SYMKIND.SK_PropertySymbol:
-                    ErrAppendProperty(sym.AsPropertySymbol(), pctx);
+                    ErrAppendProperty((PropertySymbol)sym, pctx);
                     break;
 
                 case SYMKIND.SK_EventSymbol:

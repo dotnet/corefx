@@ -698,8 +698,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    PropertySymbol prop = pMethProp.AsPropertySymbol();
-                    method = prop.methGet != null ? prop.methGet : prop.methSet;
+                    PropertySymbol prop = (PropertySymbol)pMethProp;
+                    method = prop.methGet ?? prop.methSet;
                     if (method == null)
                     {
                         return null;
