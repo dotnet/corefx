@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeThru == null ||
                    typeThru.IsAggregateType() ||
                    typeThru is TypeParameterType ||
-                   typeThru.IsArrayType() ||
+                   typeThru is ArrayType ||
                    typeThru is NullableType ||
                    typeThru is ErrorType);
 
@@ -160,7 +160,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeThru == null ||
                    typeThru.IsAggregateType() ||
                    typeThru is TypeParameterType ||
-                   typeThru.IsArrayType() ||
+                   typeThru is ArrayType ||
                    typeThru is NullableType ||
                    typeThru is ErrorType);
 

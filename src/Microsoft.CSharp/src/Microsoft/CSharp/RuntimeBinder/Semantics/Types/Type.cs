@@ -21,10 +21,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // Is and As methods.
         public AggregateType AsAggregateType() { return this as AggregateType; }
-        public ArrayType AsArrayType() { return this as ArrayType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
-        public bool IsArrayType() { return this is ArrayType; }
 
         public bool IsWindowsRuntimeType()
         {
@@ -73,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (src.GetTypeKind())
             {
                 case TypeKind.TK_ArrayType:
-                    ArrayType a = src.AsArrayType();
+                    ArrayType a = (ArrayType)src;
                     Type elementType = a.GetElementType().AssociatedSystemType;
                     result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.rank);
                     break;
@@ -247,7 +245,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (GetTypeKind())
             {
                 case TypeKind.TK_ArrayType:
-                    return AsArrayType().GetElementType();
+                    return ((ArrayType)this).GetElementType();
 
                 case TypeKind.TK_PointerType:
                     return ((PointerType)this).GetReferentType();
@@ -517,7 +515,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // Pointer types are the only unsafe types.
             // Note that generics may not be instantiated with pointer types
-            return this is PointerType || IsArrayType() && AsArrayType().GetElementType().isUnsafe();
+            return this is PointerType || this is ArrayType arr && arr.GetElementType().isUnsafe();
         }
         public bool isPredefType(PredefinedType pt)
         {

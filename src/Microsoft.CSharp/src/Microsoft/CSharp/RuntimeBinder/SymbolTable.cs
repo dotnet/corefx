@@ -174,7 +174,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             CType type = callingObject.Type;
 
-            if (type.IsArrayType())
+            if (type is ArrayType)
             {
                 type = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ARRAY);
             }

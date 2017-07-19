@@ -149,7 +149,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeSym != null);
             Debug.Assert(typeSym.IsAggregateType() ||
                    typeSym is TypeParameterType ||
-                   typeSym.IsArrayType() ||
+                   typeSym is ArrayType ||
                    typeSym is NullableType);
 
             switch (typeSym.GetTypeKind())
@@ -373,28 +373,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            // * From an array type S with an element type SE to an array type T with element type TE
-            //   provided that all of the following are true:
-            //   * S and T differ only in element type. In other words, S and T have the same number of dimensions.
-            //   * Both SE and TE are reference types.
-            //   * An implicit reference conversion exists from SE to TE.
-            if (pSource.IsArrayType() && pDest.IsArrayType() &&
-                HasCovariantArrayConversion(pSource.AsArrayType(), pDest.AsArrayType()))
+            if (pSource is ArrayType arrSource)
             {
-                return true;
-            }
-            // * From any array type to System.Array or any interface implemented by System.Array.
-            if (pSource.IsArrayType() && (pDest.isPredefType(PredefinedType.PT_ARRAY) ||
-                IsBaseInterface(GetReqPredefType(PredefinedType.PT_ARRAY), pDest)))
-            {
-                return true;
-            }
-            // * From a single-dimensional array type S[] to IList<T> and its base
-            //   interfaces, provided that there is an implicit identity or reference
-            //   conversion from S to T.
-            if (pSource.IsArrayType() && HasArrayConversionToInterface(pSource.AsArrayType(), pDest))
-            {
-                return true;
+                // * From an array type S with an element type SE to an array type T with element type TE
+                //   provided that all of the following are true:
+                //   * S and T differ only in element type. In other words, S and T have the same number of dimensions.
+                //   * Both SE and TE are reference types.
+                //   * An implicit reference conversion exists from SE to TE.
+                if (pDest is ArrayType arrDest && HasCovariantArrayConversion(arrSource, arrDest))
+                {
+                    return true;
+                }
+
+                // * From any array type to System.Array or any interface implemented by System.Array.
+                if (pDest.isPredefType(PredefinedType.PT_ARRAY) || IsBaseInterface(GetReqPredefType(PredefinedType.PT_ARRAY), pDest))
+                {
+                    return true;
+                }
+
+                // * From a single-dimensional array type S[] to IList<T> and its base
+                //   interfaces, provided that there is an implicit identity or reference
+                //   conversion from S to T.
+                if (HasArrayConversionToInterface(arrSource, pDest))
+                {
+                    return true;
+                }
             }
 
             // * From any delegate type to System.Delegate

@@ -548,10 +548,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // including IList<T>, ICollection<T>, IEnumerable<T>, IReadOnlyList<T>, IReadOnlyCollection<T>
                 // and the non-generic versions.
 
-                if ((_typeDest.IsArrayType() ||
+                if ((_typeDest is ArrayType ||
                      (_typeDest.isInterfaceType() &&
                       _typeDest.AsAggregateType().GetTypeArgsAll().Count == 1 &&
-                      ((_typeDest.AsAggregateType().GetTypeArgsAll()[0] != _typeSrc.AsArrayType().GetElementType()) ||
+                      ((_typeDest.AsAggregateType().GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).GetElementType()) ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
                     &&
                     (0 != (_flags & CONVERTTYPE.FORCECAST) ||

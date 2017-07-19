@@ -1169,16 +1169,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // SPEC:  Otherwise, if U is an array CType UE[...] and V is an array CType VE[...]
             // SPEC:   of the same rank then an exact inference from UE to VE is made.
-            if (!pSource.IsArrayType() || !pDest.IsArrayType())
+            if (!(pSource is ArrayType pArraySource) || !(pDest is ArrayType pArrayDest))
             {
                 return false;
             }
-            ArrayType pArraySource = pSource.AsArrayType();
-            ArrayType pArrayDest = pDest.AsArrayType();
+
             if (pArraySource.rank != pArrayDest.rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
             {
                 return false;
             }
+
             ExactInference(pArraySource.GetElementType(), pArrayDest.GetElementType());
             return true;
         }
@@ -1357,17 +1357,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pSource = sourceParamType.GetEffectiveBaseClass();
             }
 
-            if (!pSource.IsArrayType())
+            if (!(pSource is ArrayType pArraySource))
             {
                 return false;
             }
-            ArrayType pArraySource = pSource.AsArrayType();
-            CType pElementSource = pArraySource.GetElementType();
-            CType pElementDest = null;
 
-            if (pDest.IsArrayType())
+            CType pElementSource = pArraySource.GetElementType();
+            CType pElementDest;
+
+            if (pDest is ArrayType pArrayDest)
             {
-                ArrayType pArrayDest = pDest.AsArrayType();
                 if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
@@ -1704,17 +1703,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:     from Ue to Ve is made.
             // SPEC:    otherwise an exact inference from Ue to Ve is made.
 
-            if (!pDest.IsArrayType())
+            if (!(pDest is ArrayType pArrayDest))
             {
                 return false;
             }
-            ArrayType pArrayDest = pDest.AsArrayType();
-            CType pElementDest = pArrayDest.GetElementType();
-            CType pElementSource = null;
 
-            if (pSource.IsArrayType())
+            CType pElementDest = pArrayDest.GetElementType();
+            CType pElementSource;
+
+            if (pSource is ArrayType pArraySource)
             {
-                ArrayType pArraySource = pSource.AsArrayType();
                 if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;

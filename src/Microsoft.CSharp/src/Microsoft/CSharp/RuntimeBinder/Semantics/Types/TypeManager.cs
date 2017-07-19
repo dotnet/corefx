@@ -512,8 +512,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, mod.isOut);
 
                 case TypeKind.TK_ArrayType:
-                    typeDst = SubstTypeCore(typeSrc = type.AsArrayType().GetElementType(), pctx);
-                    return (typeDst == typeSrc) ? type : GetArray(typeDst, type.AsArrayType().rank, type.AsArrayType().IsSZArray);
+                    var arr = (ArrayType)type;
+                    typeDst = SubstTypeCore(typeSrc = arr.GetElementType(), pctx);
+                    return (typeDst == typeSrc) ? type : GetArray(typeDst, arr.rank, arr.IsSZArray);
 
                 case TypeKind.TK_PointerType:
                     typeDst = SubstTypeCore(typeSrc = ((PointerType)type).GetReferentType(), pctx);
@@ -649,7 +650,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
 
                 case TypeKind.TK_ArrayType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_ArrayType || typeDst.AsArrayType().rank != typeSrc.AsArrayType().rank || typeDst.AsArrayType().IsSZArray != typeSrc.AsArrayType().IsSZArray)
+                    ArrayType arrSrc = (ArrayType)typeSrc;
+                    if (!(typeDst is ArrayType arrDst) || arrDst.rank != arrSrc.rank || arrDst.IsSZArray != arrSrc.IsSZArray)
                         return false;
                     goto LCheckBases;
 
@@ -1082,7 +1084,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (typeSrc.IsArrayType() && TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, typeSrc.AsArrayType(), out intermediateType))
+            if (typeSrc is ArrayType arrSrc && TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, arrSrc, out intermediateType))
             {
                 // Similarly to the interface and delegate case, arrays are covariant in their element type and
                 // so we can potentially produce an array type that is accessible.
@@ -1102,7 +1104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (typeSrc.IsArrayType())
+            if (typeSrc is ArrayType)
             {
                 // We have an inaccessible array type for which we could not earlier find a better array type
                 // with a covariant conversion, so the best we can do is System.Array.

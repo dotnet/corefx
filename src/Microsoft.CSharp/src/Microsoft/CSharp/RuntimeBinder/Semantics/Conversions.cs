@@ -115,21 +115,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                // *    From an array-type S with an element type SE to an array-type T with an element type TE, provided all of the following are true:
-                //     o    S and T differ only in element type. (In other words, S and T have the same number of dimensions.)
-                //     o    An explicit reference conversion exists from SE to TE.
-                if (typeSrc.IsArrayType() && typeDst.IsArrayType())
+                if (typeSrc is ArrayType arrSrc)
                 {
-                    return typeSrc.AsArrayType().rank == typeDst.AsArrayType().rank 
-                        && typeSrc.AsArrayType().IsSZArray == typeDst.AsArrayType().IsSZArray
-                        && FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsArrayType().GetElementType());
-                }
+                    // *    From an array-type S with an element type SE to an array-type T with an element type TE, provided all of the following are true:
+                    //     o    S and T differ only in element type. (In other words, S and T have the same number of dimensions.)
+                    //     o    An explicit reference conversion exists from SE to TE.
+                    if (typeDst is ArrayType arrDst)
+                    {
+                        return arrSrc.rank == arrDst.rank
+                               && arrSrc.IsSZArray == arrDst.IsSZArray
+                               && FExpRefConv(loader, arrSrc.GetElementType(), arrDst.GetElementType());
+                    }
 
-                // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
-                //      and their base interfaces, provided there is an explicit reference conversion from S to T.
-                if (typeSrc.IsArrayType())
-                {
-                    if (!typeSrc.AsArrayType().IsSZArray ||
+                    // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
+                    //      and their base interfaces, provided there is an explicit reference conversion from S to T.
+                    if (!arrSrc.IsSZArray ||
                         !typeDst.isInterfaceType() || typeDst.AsAggregateType().GetTypeArgsAll().Count != 1)
                     {
                         return false;
@@ -146,10 +146,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    return FExpRefConv(loader, typeSrc.AsArrayType().GetElementType(), typeDst.AsAggregateType().GetTypeArgsAll()[0]);
+                    return FExpRefConv(loader, arrSrc.GetElementType(), typeDst.AsAggregateType().GetTypeArgsAll()[0]);
                 }
 
-                if (typeDst.IsArrayType() && typeSrc.IsAggregateType())
+                if (typeDst is ArrayType arrayDest && typeSrc.IsAggregateType())
                 {
                     // * From System.Array and the interfaces it implements, to any array-type.
                     if (loader.HasIdentityOrImplicitReferenceConversion(loader.GetReqPredefType(PredefinedType.PT_ARRAY), typeSrc))
@@ -161,7 +161,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //      one-dimensional array-type S[], provided there is an implicit or explicit reference conversion from S[] to 
                     //      System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                     //      are the same type or there is an implicit or explicit reference conversion from S to T.
-                    ArrayType arrayDest = typeDst.AsArrayType();
                     AggregateType aggtypeSrc = typeSrc.AsAggregateType();
                     if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() ||
                         aggtypeSrc.GetTypeArgsAll().Count != 1)

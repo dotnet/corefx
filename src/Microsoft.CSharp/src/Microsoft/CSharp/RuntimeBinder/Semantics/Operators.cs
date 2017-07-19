@@ -1066,14 +1066,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (type1.isInterfaceType() || type1.isPredefType(PredefinedType.PT_STRING) || GetSymbolLoader().HasBaseConversion(type1, typeDel))
                 type1 = typeObj;
-            else if (type1.IsArrayType())
+            else if (type1 is ArrayType)
                 type1 = GetReqPDT(PredefinedType.PT_ARRAY);
             else if (!type1.isClassType())
                 return false;
 
             if (type2.isInterfaceType() || type2.isPredefType(PredefinedType.PT_STRING) || GetSymbolLoader().HasBaseConversion(type2, typeDel))
                 type2 = typeObj;
-            else if (type2.IsArrayType())
+            else if (type2 is ArrayType)
                 type2 = GetReqPDT(PredefinedType.PT_ARRAY);
             else if (!type2.isClassType())
                 return false;

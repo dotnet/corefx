@@ -376,7 +376,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            Debug.Assert(typeBnd.IsAggregateType() || typeBnd is TypeParameterType || typeBnd.IsArrayType());
+            Debug.Assert(typeBnd.IsAggregateType() || typeBnd is TypeParameterType || typeBnd is ArrayType);
 
             switch (arg.GetTypeKind())
             {

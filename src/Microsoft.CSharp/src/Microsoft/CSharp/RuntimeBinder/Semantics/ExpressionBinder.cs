@@ -439,7 +439,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType pIntType = GetReqPDT(PredefinedType.PT_INT);
 
             // Array indexing must occur on an array type.
-            if (!pOp1.Type.IsArrayType())
+            if (!(pOp1.Type is ArrayType pArrayType))
             {
                 Debug.Assert(!(pOp1.Type is PointerType));
                 pExpr = bindIndexer(pOp1, pOp2, bindFlags);
@@ -449,7 +449,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 return pExpr;
             }
-            ArrayType pArrayType = pOp1.Type.AsArrayType();
+
             checkUnsafe(pArrayType.GetElementType()); // added to the binder so we don't bind to pointer ops
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
@@ -1806,8 +1806,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // void Foo(int y, params int[] x);
                             // ...
                             // Foo(x:1, y:1);
-                            CType arrayType = GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
-                            CType elemType = arrayType.AsArrayType().GetElementType();
+                            CType arrayType = (ArrayType)GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
 
                             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
                             ExprArrayInit arrayInit = GetExprFactory().CreateArrayInit(arrayType, null, null, new[] { 0 }, 1);
@@ -1875,7 +1874,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // we need to create an array and put it as the last arg...
             CType substitutedArrayType = GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
-            if (!substitutedArrayType.IsArrayType() || !substitutedArrayType.AsArrayType().IsSZArray)
+            if (!(substitutedArrayType is ArrayType subArr) || !subArr.IsSZArray)
             {
                 // Invalid type for params array parameter. Happens in LAF scenarios, e.g.
                 //
@@ -1885,7 +1884,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return;
             }
 
-            CType elementType = substitutedArrayType.AsArrayType().GetElementType();
+            CType elementType = subArr.GetElementType();
 
             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
             ExprArrayInit exprArrayInit = GetExprFactory().CreateArrayInit(substitutedArrayType, null, null, new[] { 0 }, 1);
@@ -2057,7 +2056,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType type = @params[@params.Count - 1];
             CType elementType = null;
 
-            if (!type.IsArrayType())
+            if (!(type is ArrayType arr))
             {
                 ppExpandedParams = null;
                 // If we don't have an array sym, we don't have expanded parameters.
@@ -2065,7 +2064,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // At this point, we have an array sym.
-            elementType = type.AsArrayType().GetElementType();
+            elementType = arr.GetElementType();
 
             for (int itype = @params.Count - 1; itype < count; itype++)
             {

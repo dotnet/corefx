@@ -624,7 +624,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType callingType;
 
             CType callingObjectType = callingObject.Type;
-            if (callingObject.Type.IsArrayType())
+            if (callingObjectType is ArrayType)
             {
                 callingType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ARRAY);
             }

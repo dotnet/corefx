@@ -148,7 +148,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         break;
                     case TypeKind.TK_ArrayType:
-                        if (bindExplicitConversionToArray(_typeDest.AsArrayType()))
+                        if (bindExplicitConversionToArray((ArrayType)_typeDest))
                         {
                             return true;
                         }
@@ -234,7 +234,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(_typeDest != null);
 
-                if (!_typeSrc.IsArrayType() || !_typeSrc.AsArrayType().IsSZArray ||
+                if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray ||
                     !_typeDest.isInterfaceType() || _typeDest.AsAggregateType().GetTypeArgsAll().Count != 1)
                 {
                     return false;
@@ -251,7 +251,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                CType typeArr = _typeSrc.AsArrayType().GetElementType();
+                CType typeArr = arrSrc.GetElementType();
                 CType typeLst = _typeDest.AsAggregateType().GetTypeArgsAll()[0];
 
                 if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
@@ -383,9 +383,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(arrayDest != null);
 
-                if (_typeSrc.IsArrayType())
+                if (_typeSrc is ArrayType arrSrc)
                 {
-                    return bindExplicitConversionFromArrayToArray(_typeSrc.AsArrayType(), arrayDest);
+                    return bindExplicitConversionFromArrayToArray(arrSrc, arrayDest);
                 }
 
                 if (bindExplicitConversionFromIListToArray(arrayDest))
