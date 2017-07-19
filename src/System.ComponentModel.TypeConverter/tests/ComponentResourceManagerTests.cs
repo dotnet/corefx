@@ -42,7 +42,12 @@ namespace System.ComponentModel.Tests
 
             var value = new TestValue();
             resourceManager.ApplyResources(value, "Object");
-            Assert.Equal("One", value.GetSetProperty);
+            Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
+            Assert.Null(value.GetOnlyProperty);
+            Assert.Null(value.GetPrivateProperty());
+
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
             Assert.Null(value.GetOnlyProperty);
             Assert.Null(value.GetPrivateProperty());
         }
@@ -92,7 +97,12 @@ namespace System.ComponentModel.Tests
             resourceManager.ApplyResources(value, "Object");
 
             Assert.Null(value.GetSetProperty);
-            Assert.Equal("One", value.getsetproperty);
+            Assert.Equal("ObjectGetSetProperty", value.getsetproperty);
+
+            resourceManager.ApplyResources(value, "Default");
+
+            Assert.Null(value.GetSetProperty);
+            Assert.Equal("DefaultGetSetProperty", value.getsetproperty);
         }
 
         public class MulticaseBaseClass
@@ -117,7 +127,10 @@ namespace System.ComponentModel.Tests
 
             var value = new TestComponent();
             resourceManager.ApplyResources(value, "Object");
-            Assert.Equal("One", value.GetSetProperty);
+            Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
+
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         [Fact]
@@ -130,7 +143,10 @@ namespace System.ComponentModel.Tests
 
             var value = new TestComponent { Site = new TestSite { DesignMode = false } };
             resourceManager.ApplyResources(value, "Object");
-            Assert.Equal("One", value.GetSetProperty);
+            Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
+
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         [Fact]
@@ -144,7 +160,10 @@ namespace System.ComponentModel.Tests
 
             var value = new TestComponent { Site = new TestSite { DesignMode = true } };
             resourceManager.ApplyResources(value, "Object");
-            Assert.Equal("One", value.GetSetProperty);
+            Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
+
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         private class TestSite : ISite
