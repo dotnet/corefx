@@ -74,7 +74,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(name != null);
 
-            FieldSymbol sym = newBasicSym(SYMKIND.SK_FieldSymbol, name, parent).AsFieldSymbol();
+            FieldSymbol sym = newBasicSym(SYMKIND.SK_FieldSymbol, name, parent) as FieldSymbol;
 
             Debug.Assert(sym != null);
             return (sym);

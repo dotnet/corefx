@@ -1561,19 +1561,22 @@ namespace Microsoft.CSharp.RuntimeBinder
                     false,
                     false);
 
-            // If lookup returns an actual event, then this is an event.
-            if (swt != null && swt.Sym.getKind() == SYMKIND.SK_EventSymbol)
+            if (swt != null)
             {
-                result = true;
-            }
+                // If lookup returns an actual event, then this is an event.
+                if (swt.Sym.getKind() == SYMKIND.SK_EventSymbol)
+                {
+                    result = true;
+                }
 
-            // If lookup returns the backing field of a field-like event, then
-            // this is an event. This is due to the Dev10 design change around
-            // the binding of +=, and the fact that the "IsEvent" binding question
-            // is only ever asked about the LHS of a += or -=.
-            if (swt != null && swt.Sym.getKind() == SYMKIND.SK_FieldSymbol && swt.Sym.AsFieldSymbol().isEvent)
-            {
-                result = true;
+                // If lookup returns the backing field of a field-like event, then
+                // this is an event. This is due to the Dev10 design change around
+                // the binding of +=, and the fact that the "IsEvent" binding question
+                // is only ever asked about the LHS of a += or -=.
+                if (swt.Sym is FieldSymbol field && field.isEvent)
+                {
+                    result = true;
+                }
             }
 
             return _exprFactory.CreateConstant(boolType, ConstVal.Get(result));

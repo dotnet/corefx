@@ -645,7 +645,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                             AggregateSymbol agg = symbolLoader.GetOptPredefAgg(PredefinedType.PT_MISSING);
                             Name name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
-                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol).AsFieldSymbol();
+                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             ExprField exprField = exprFactory.CreateField(agg.getThisType(), null, fwt, false);
 

@@ -175,9 +175,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case SYMKIND.SK_FieldSymbol:
-                    if (this.AsFieldSymbol().GetType() != null)
+                    var fiType = ((FieldSymbol)this).GetType();
+                    if (fiType != null)
                     {
-                        fBogus = this.AsFieldSymbol().GetType().computeCurrentBogusState();
+                        fBogus = fiType.computeCurrentBogusState();
                     }
                     break;
 
@@ -219,8 +220,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return hasBogus() && checkBogus();
         }
 
-        public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
-
         public CType getType()
         {
             if (this is MethodOrPropertySymbol methProp)
@@ -228,9 +227,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return methProp.RetType;
             }
 
-            if (IsFieldSymbol())
+            if (this is FieldSymbol field)
             {
-                return this.AsFieldSymbol().GetType();
+                return field.GetType();
             }
 
             if (this is EventSymbol ev)
@@ -245,9 +244,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             get
             {
-                if (IsFieldSymbol())
+                if (this is FieldSymbol field)
                 {
-                    return this.AsFieldSymbol().isStatic;
+                    return field.isStatic;
                 }
 
                 if (this is EventSymbol ev)
@@ -381,17 +380,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return !(this is MethodSymbol methSym) || methSym.isUserCallable();
         }
-    }
-
-    /*
-     * We have member functions here to do casts that, in DEBUG, check the 
-     * symbol kind to make sure it is right. For example, the casting method
-     * for METHODSYM is called "asMETHODSYM". In retail builds, these 
-     * methods optimize away to nothing.
-     */
-
-    internal static class SymbolExtensions
-    {
-        internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
     }
 }

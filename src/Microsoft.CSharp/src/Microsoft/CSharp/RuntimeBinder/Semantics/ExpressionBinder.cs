@@ -1565,7 +1565,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
                 // avoid warning CS0649).
-                if (pObject is ExprField field && !field.FieldWithType.Field().isAssigned && !swt.Sym.IsFieldSymbol() &&
+                if (pObject is ExprField field && !field.FieldWithType.Field().isAssigned && !(swt.Sym is FieldSymbol) &&
                     typeObj.isStructType() && !typeObj.isPredefined())
                 {
                     field.FieldWithType.Field().isAssigned = true;
@@ -1956,8 +1956,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             agg.SetHasExternReference(true);
             for (Symbol sym = agg.firstChild; sym != null; sym = sym.nextChild)
             {
-                if (sym.IsFieldSymbol())
-                    SetExternalRef(sym.AsFieldSymbol().GetType());
+                if (sym is FieldSymbol field)
+                    SetExternalRef(field.GetType());
             }
         }
 

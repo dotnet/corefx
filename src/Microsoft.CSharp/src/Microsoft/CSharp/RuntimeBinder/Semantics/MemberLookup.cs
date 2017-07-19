@@ -257,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // if we are in a calling context then we should only find a property if it is delegate valued
                 if ((_flags & MemLookFlags.MustBeInvocable) != 0)
                 {
-                    if ((symCur.IsFieldSymbol() && !IsDelegateType(symCur.AsFieldSymbol().GetType(), typeCur) && !IsDynamicMember(symCur)) ||
+                    if ((symCur is FieldSymbol field && !IsDelegateType(field.GetType(), typeCur) && !IsDynamicMember(symCur)) ||
                         (prop != null && !IsDelegateType(prop.RetType, typeCur) && !IsDynamicMember(symCur)))
                     {
                         if (!_swtBad)
@@ -285,7 +285,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(_fMulti || typeCur == _prgtype[0]);
                         if (!_fMulti)
                         {
-                            if (_swtFirst.Sym.IsFieldSymbol() && symCur is EventSymbol
+                            if (_swtFirst.Sym is FieldSymbol && symCur is EventSymbol
                                 // The isEvent bit is only set on symbols which come from source...
                                 // This is not a problem for the compiler because the field is only
                                 // accessible in the scope in which it is declared,
@@ -296,7 +296,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // m_swtFirst is just the field behind the event symCur so ignore symCur.
                                 continue;
                             }
-                            else if (_swtFirst.Sym.IsFieldSymbol() && symCur is EventSymbol)
+                            else if (_swtFirst.Sym is FieldSymbol && symCur is EventSymbol)
                             {
                                 // symCur is the matching event.
                                 continue;
@@ -371,13 +371,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool IsDynamicMember(Symbol sym)
         {
             System.Runtime.CompilerServices.DynamicAttribute da = null;
-            if (sym.IsFieldSymbol())
+            if (sym is FieldSymbol field)
             {
-                if (!sym.AsFieldSymbol().getType().isPredefType(PredefinedType.PT_OBJECT))
+                if (!field.getType().isPredefType(PredefinedType.PT_OBJECT))
                 {
                     return false;
                 }
-                var o = sym.AsFieldSymbol().AssociatedFieldInfo.GetCustomAttributes(typeof(System.Runtime.CompilerServices.DynamicAttribute), false).ToArray();
+                var o = field.AssociatedFieldInfo.GetCustomAttributes(typeof(System.Runtime.CompilerServices.DynamicAttribute), false).ToArray();
                 if (o.Length == 1)
                 {
                     da = o[0] as System.Runtime.CompilerServices.DynamicAttribute;
