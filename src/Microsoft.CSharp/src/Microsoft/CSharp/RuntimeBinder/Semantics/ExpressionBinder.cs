@@ -1730,10 +1730,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             int paramCount = mp.Params.Count;
             TypeArray @params = mp.Params;
             int iDst = 0;
-            bool markTypeFromExternCall = mp.IsFMETHSYM() && mp.AsFMETHSYM().isExternal;
+            MethodSymbol m = mp as MethodSymbol;
+            bool markTypeFromExternCall = m != null && m.isExternal;
             int argCount = ExpressionIterator.Count(argsPtr);
 
-            if (mp.IsFMETHSYM() && mp.AsFMETHSYM().isVarargs)
+            if (m != null && m.isVarargs)
             {
                 paramCount--; // we don't care about the vararg sentinel
             }

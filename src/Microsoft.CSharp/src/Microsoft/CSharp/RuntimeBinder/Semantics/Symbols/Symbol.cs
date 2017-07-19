@@ -228,11 +228,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsPropertySymbol() { return _kind == SYMKIND.SK_PropertySymbol; }
         public bool IsEventSymbol() { return _kind == SYMKIND.SK_EventSymbol; }
 
-        public bool IsFMETHSYM()
-        {
-            return IsMethodSymbol();
-        }
-
         public CType getType()
         {
             CType type = null;
@@ -417,8 +412,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 current = current.nextChild;
             }
         }
-
-        internal static MethodSymbol AsFMETHSYM(this Symbol symbol) { return symbol as MethodSymbol; }
 
         internal static NamespaceOrAggregateSymbol AsNamespaceOrAggregateSymbol(this Symbol symbol) { return symbol as NamespaceOrAggregateSymbol; }
         internal static NamespaceSymbol AsNamespaceSymbol(this Symbol symbol) { return symbol as NamespaceSymbol; }
