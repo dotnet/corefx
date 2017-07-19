@@ -63,7 +63,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     This method examines all the resources for the provided culture.
         ///     When it finds a resource with a key in the format of 
-        ///     &quot[objectName].[property name]&quot or &quot[objectName]-[property name]&quot; it will apply that resource's value
+        ///     &quot;[objectName].[property name]&quot; or &quot;[objectName]-[property name]&quot; it will apply that resource's value
         ///     to the corresponding property on the object.  If there is no matching
         ///     property the resource will be ignored.
         /// </summary>
