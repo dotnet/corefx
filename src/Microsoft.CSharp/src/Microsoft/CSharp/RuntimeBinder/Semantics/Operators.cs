@@ -886,7 +886,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private bool GetPtrBinOpSigs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
         {
-            if (!info.type1.IsPointerType() && !info.type2.IsPointerType())
+            if (!(info.type1 is PointerType) && !(info.type2 is PointerType))
             {
                 return false;
             }
@@ -903,7 +903,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // (void,     void)      :                   == != < > <= >=
 
             // Check the common case first.
-            if (info.type1.IsPointerType() && info.type2.IsPointerType())
+            if (info.type1 is PointerType && info.type2 is PointerType)
             {
                 if (info.ValidForVoidPointer())
                 {
@@ -920,7 +920,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             CType typeT;
 
-            if (info.type1.IsPointerType())
+            if (info.type1 is PointerType)
             {
                 if (info.type2 is NullType)
                 {
@@ -947,7 +947,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            Debug.Assert(info.type2.IsPointerType());
+            Debug.Assert(info.type2 is PointerType);
             if (info.type1 is NullType)
             {
                 if (!info.ValidForVoidPointer())
@@ -1428,7 +1428,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 else if (unaryOpKind == UnaOpKind.IncDec)
                 {
                     // Check for pointers
-                    if (pArgumentType.IsPointerType())
+                    if (pArgumentType is PointerType)
                     {
                         pSignatures.Add(new UnaOpFullSig(
                                 pArgumentType,

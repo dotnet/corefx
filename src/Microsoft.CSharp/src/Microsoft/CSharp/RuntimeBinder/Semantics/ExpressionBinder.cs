@@ -441,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Array indexing must occur on an array type.
             if (!pOp1.Type.IsArrayType())
             {
-                Debug.Assert(!pOp1.Type.IsPointerType());
+                Debug.Assert(!(pOp1.Type is PointerType));
                 pExpr = bindIndexer(pOp1, pOp2, bindFlags);
                 if (bIsError)
                 {
@@ -708,7 +708,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             checkUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
 
-            bool isLValue = (pOptionalObject != null && pOptionalObject.Type.IsPointerType()) || objectIsLvalue(pOptionalObject);
+            bool isLValue = pOptionalObject?.Type is PointerType || objectIsLvalue(pOptionalObject);
 
             // Exception: a readonly field is not an lvalue unless we're in the constructor/static constructor appropriate
             // for the field.
@@ -1449,7 +1449,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         checkUnsafe(type);
                     }
-                    if (fCheckParams && type.IsParameterModifierType())
+                    if (fCheckParams && type is ParameterModifierType)
                     {
                         SetExternalRef(type);
                     }
@@ -1760,7 +1760,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr indir = it.Current();
                 // this will splice the optional arguments into the list
 
-                if (indir.Type.IsParameterModifierType())
+                if (indir.Type is ParameterModifierType)
                 {
                     if (paramCount != 0)
                         paramCount--;

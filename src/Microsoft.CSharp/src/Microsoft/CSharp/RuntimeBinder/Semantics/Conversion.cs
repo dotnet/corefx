@@ -929,7 +929,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // true exactly when both the source and destination types are nullable.
             bool fLiftSrc = typeSrcBase != typeSrc;
             bool fLiftDst = typeDstBase != typeDst;
-            bool fDstHasNull = fLiftDst || typeDst.IsRefType() || typeDst.IsPointerType();
+            bool fDstHasNull = fLiftDst || typeDst.IsRefType() || typeDst is PointerType;
             AggregateType[] rgats = new AggregateType[2];
             int cats = 0;
 
@@ -1082,7 +1082,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                                !canConvert(typeFrom, typeSrc, CONVERTTYPE.STANDARDANDNOUDC) &&
                                                // We allow IntPtr and UIntPtr to use non-standard explicit casts as long as they don't involve pointer types.
                                                // This is because the framework uses it and RTM allowed it.
-                                               (!fIntPtrStandard || typeSrc.IsPointerType() || typeFrom.IsPointerType() || !canCast(typeSrc, typeFrom, CONVERTTYPE.NOUDC))))
+                                               (!fIntPtrStandard || typeSrc is PointerType || typeFrom is PointerType || !canCast(typeSrc, typeFrom, CONVERTTYPE.NOUDC))))
                         {
                             continue;
                         }
@@ -1091,7 +1091,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                              !canConvert(typeDst, typeTo, CONVERTTYPE.STANDARDANDNOUDC) &&
                                              // We allow IntPtr and UIntPtr to use non-standard explicit casts as long as they don't involve pointer types.
                                              // This is because the framework uses it and RTM allowed it.
-                                             (!fIntPtrStandard || typeDst.IsPointerType() || typeTo.IsPointerType() || !canCast(typeTo, typeDst, CONVERTTYPE.NOUDC))))
+                                             (!fIntPtrStandard || typeDst is PointerType || typeTo is PointerType || !canCast(typeTo, typeDst, CONVERTTYPE.NOUDC))))
                         {
                             continue;
                         }

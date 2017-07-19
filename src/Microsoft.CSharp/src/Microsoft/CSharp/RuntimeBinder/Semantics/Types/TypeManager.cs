@@ -507,15 +507,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return type;
 
                 case TypeKind.TK_ParameterModifierType:
-                    typeDst = SubstTypeCore(typeSrc = type.AsParameterModifierType().GetParameterType(), pctx);
-                    return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, type.AsParameterModifierType().isOut);
+                    ParameterModifierType mod = (ParameterModifierType)type;
+                    typeDst = SubstTypeCore(typeSrc = mod.GetParameterType(), pctx);
+                    return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, mod.isOut);
 
                 case TypeKind.TK_ArrayType:
                     typeDst = SubstTypeCore(typeSrc = type.AsArrayType().GetElementType(), pctx);
                     return (typeDst == typeSrc) ? type : GetArray(typeDst, type.AsArrayType().rank, type.AsArrayType().IsSZArray);
 
                 case TypeKind.TK_PointerType:
-                    typeDst = SubstTypeCore(typeSrc = type.AsPointerType().GetReferentType(), pctx);
+                    typeDst = SubstTypeCore(typeSrc = ((PointerType)type).GetReferentType(), pctx);
                     return (typeDst == typeSrc) ? type : GetPointer(typeDst);
 
                 case TypeKind.TK_NullableType:
@@ -653,9 +654,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     goto LCheckBases;
 
                 case TypeKind.TK_ParameterModifierType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_ParameterModifierType ||
+                    if (!(typeDst is ParameterModifierType modDest) ||
                         ((pctx.grfst & SubstTypeFlags.NoRefOutDifference) == 0 &&
-                         typeDst.AsParameterModifierType().isOut != typeSrc.AsParameterModifierType().isOut))
+                         modDest.isOut != ((ParameterModifierType)typeSrc).isOut))
                         return false;
                     goto LCheckBases;
 
@@ -1064,7 +1065,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // These guys have no accessibility concerns.
             Debug.Assert(!(typeSrc is VoidType) && !typeSrc.IsErrorType() && !(typeSrc is TypeParameterType));
 
-            if (typeSrc.IsParameterModifierType() || typeSrc.IsPointerType())
+            if (typeSrc is ParameterModifierType || typeSrc is PointerType)
             {
                 // We cannot vary these.
                 return false;

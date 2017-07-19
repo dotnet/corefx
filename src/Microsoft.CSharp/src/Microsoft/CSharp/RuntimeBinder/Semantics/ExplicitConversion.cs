@@ -418,7 +418,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From any pointer-type to any other pointer-type.
                 // * From sbyte, byte, short, ushort, int, uint, long, or ulong to any pointer-type.
 
-                if (_typeSrc.IsPointerType() || _typeSrc.fundType() <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.isNumericType())
+                if (_typeSrc is PointerType || _typeSrc.fundType() <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.isNumericType())
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest);
@@ -752,7 +752,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to sbyte, byte, short, ushort, int, uint, long, or ulong.
 
-                if (!_typeSrc.IsPointerType() || aggTypeDest.fundType() > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.isNumericType())
+                if (!(_typeSrc is PointerType) || aggTypeDest.fundType() > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.isNumericType())
                 {
                     return AggCastResult.Failure;
                 }

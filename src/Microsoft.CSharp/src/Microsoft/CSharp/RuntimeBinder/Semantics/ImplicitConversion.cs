@@ -164,7 +164,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Get the fundamental types of destination.
                 FUNDTYPE ftDest = _typeDest.fundType();
-                Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest.IsParameterModifierType());
+                Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest is ParameterModifierType);
 
                 switch (_typeSrc.GetTypeKind())
                 {
@@ -576,7 +576,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to the type void*.
 
-                if (_typeDest.IsPointerType() && _typeDest.AsPointerType().GetReferentType() == _binder.getVoidType())
+                if (_typeDest is PointerType ptDest && ptDest.GetReferentType() == _binder.getVoidType())
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest);

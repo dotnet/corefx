@@ -23,12 +23,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateType AsAggregateType() { return this as AggregateType; }
         public ErrorType AsErrorType() { return this as ErrorType; }
         public ArrayType AsArrayType() { return this as ArrayType; }
-        public PointerType AsPointerType() { return this as PointerType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
         public bool IsErrorType() { return this is ErrorType; }
         public bool IsArrayType() { return this is ArrayType; }
-        public bool IsPointerType() { return this is PointerType; }
 
         public bool IsWindowsRuntimeType()
         {
@@ -89,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_PointerType:
-                    PointerType p = src.AsPointerType();
+                    PointerType p = (PointerType)src;
                     Type referentType = p.GetReferentType().AssociatedSystemType;
                     result = referentType.MakePointerType();
                     break;
@@ -254,7 +252,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AsArrayType().GetElementType();
 
                 case TypeKind.TK_PointerType:
-                    return AsPointerType().GetReferentType();
+                    return ((PointerType)this).GetReferentType();
 
                 case TypeKind.TK_ParameterModifierType:
                     return ((ParameterModifierType)this).GetParameterType();
@@ -468,7 +466,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool isPointerLike()
         {
-            return IsPointerType() || isPredefType(PredefinedType.PT_INTPTR) || isPredefType(PredefinedType.PT_UINTPTR);
+            return this is PointerType || isPredefType(PredefinedType.PT_INTPTR) || isPredefType(PredefinedType.PT_UINTPTR);
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -525,14 +523,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                return IsPointerType();
+                return this is PointerType;
             }
         }
         public bool isUnsafe()
         {
             // Pointer types are the only unsafe types.
             // Note that generics may not be instantiated with pointer types
-            return (this != null && (IsPointerType() || (IsArrayType() && AsArrayType().GetElementType().isUnsafe())));
+            return this is PointerType || IsArrayType() && AsArrayType().GetElementType().isUnsafe();
         }
         public bool isPredefType(PredefinedType pt)
         {

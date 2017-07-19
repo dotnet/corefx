@@ -377,14 +377,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
                 bool wasOutOrRef = false;
-                if (pDest.IsParameterModifierType())
+                if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = pDest.AsParameterModifierType().GetParameterType();
+                    pDest = modDest.GetParameterType();
                     wasOutOrRef = true;
                 }
-                if (pSource.IsParameterModifierType())
+                if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = pSource.AsParameterModifierType().GetParameterType();
+                    pSource = modSource.GetParameterType();
                 }
                 // If the argument is a TYPEORNAMESPACEERROR and the pSource is an
                 // error CType, then we want to set it to the generic error CType 
@@ -551,18 +551,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
             {
                 CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest.IsParameterModifierType())
+                if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = pDest.AsParameterModifierType().GetParameterType();
+                    pDest = modDest.GetParameterType();
                 }
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
                 if (HasUnfixedParamInOutputType(pExpr, pDest) &&
                     !HasUnfixedParamInInputType(pExpr, pDest))
                 {
                     CType pSource = _pMethodArguments.types[iArg];
-                    if (pSource.IsParameterModifierType())
+                    if (pSource is ParameterModifierType modSource)
                     {
-                        pSource = pSource.AsParameterModifierType().GetParameterType();
+                        pSource = modSource.GetParameterType();
                     }
                     OutputTypeInference(pExpr, pSource, pDest);
                 }
@@ -770,9 +770,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
             {
                 CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest.IsParameterModifierType())
+                if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = pDest.AsParameterModifierType().GetParameterType();
+                    pDest = modDest.GetParameterType();
                 }
 
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
@@ -2123,13 +2123,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 CType pDest = _pMethodFormalParameterTypes[iArg];
                 CType pSource = _pMethodArguments.types[iArg];
-                if (pDest.IsParameterModifierType())
+                if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = pDest.AsParameterModifierType().GetParameterType();
+                    pDest = modDest.GetParameterType();
                 }
-                if (pSource.IsParameterModifierType())
+                if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = pSource.AsParameterModifierType().GetParameterType();
+                    pSource = modSource.GetParameterType();
                 }
 
                 LowerBoundInference(pSource, pDest);
@@ -2235,15 +2235,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(_pMethodArguments.carg >= 1);
             CType pDest = _pMethodFormalParameterTypes[0];
             CType pSource = _pMethodArguments.types[0];
-            if (pDest.IsParameterModifierType())
+            if (pDest is ParameterModifierType modDest)
             {
-                pDest = pDest.AsParameterModifierType().GetParameterType();
+                pDest = modDest.GetParameterType();
             }
-            if (pSource.IsParameterModifierType())
+            if (pSource is ParameterModifierType modSource)
             {
                 // This seems impossible, but this is an error scenario, so
                 // who knows?  We'll err on the side of caution.
-                pSource = pSource.AsParameterModifierType().GetParameterType();
+                pSource = modSource.GetParameterType();
             }
             // Rule out lambdas, nulls, and so on.
             if (!IsReallyAType(pSource))

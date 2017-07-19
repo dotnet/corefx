@@ -169,7 +169,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (arg.IsPointerType())
+            if (arg is PointerType)
             {
                 if (fReportErrors)
                 {

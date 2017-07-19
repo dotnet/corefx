@@ -1917,9 +1917,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // Check if we have an out parameter.
-            if (ctype.IsParameterModifierType() && p.IsOut && !p.IsIn)
+            if (ctype is ParameterModifierType mod && p.IsOut && !p.IsIn)
             {
-                CType parameterType = ctype.AsParameterModifierType().GetParameterType();
+                CType parameterType = mod.GetParameterType();
                 ctype = _typeManager.GetParameterModifier(parameterType, true);
             }
 

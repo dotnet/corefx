@@ -1111,9 +1111,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // this is to eliminate the paranoid case of types that are equal but can't convert 
                                 // (think ErrorType != ErrorType)
                                 // See if they just differ in out / ref.
-                                CType argStripped = _pArguments.types[ivar].IsParameterModifierType() ?
-                                    _pArguments.types[ivar].AsParameterModifierType().GetParameterType() : _pArguments.types[ivar];
-                                CType varStripped = var.IsParameterModifierType() ? var.AsParameterModifierType().GetParameterType() : var;
+                                CType argStripped = _pArguments.types[ivar] is ParameterModifierType modArg ?
+                                    modArg.GetParameterType() : _pArguments.types[ivar];
+                                CType varStripped = var is ParameterModifierType modVar ? modVar.GetParameterType() : var;
 
                                 if (argStripped == varStripped)
                                 {
@@ -1496,22 +1496,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (!_pExprBinder.canConvert(_pArguments.prgexpr[ivar], var))
                     {
                         // See if they just differ in out / ref.
-                        CType argStripped = _pArguments.types[ivar].IsParameterModifierType() ?
-                            _pArguments.types[ivar].AsParameterModifierType().GetParameterType() : _pArguments.types[ivar];
-                        CType varStripped = var.IsParameterModifierType() ? var.AsParameterModifierType().GetParameterType() : var;
+                        CType argStripped = _pArguments.types[ivar] is ParameterModifierType modArg ? modArg.GetParameterType() : _pArguments.types[ivar];
+                        CType varStripped = var is ParameterModifierType modVar ? modVar.GetParameterType() : var;
                         if (argStripped == varStripped)
                         {
                             if (varStripped != var)
                             {
                                 // The argument is wrong in ref / out-ness.
-                                GetErrorContext().Error(ErrorCode.ERR_BadArgRef, ivar + 1, (var.IsParameterModifierType() && var.AsParameterModifierType().isOut) ? "out" : "ref");
+                                GetErrorContext().Error(ErrorCode.ERR_BadArgRef, ivar + 1, var is ParameterModifierType mod && mod.isOut ? "out" : "ref");
                             }
                             else
                             {
                                 CType argument = _pArguments.types[ivar];
 
                                 // the argument is decorated, but doesn't needs a 'ref' or 'out'
-                                GetErrorContext().Error(ErrorCode.ERR_BadArgExtraRef, ivar + 1, (argument.IsParameterModifierType() && argument.AsParameterModifierType().isOut) ? "out" : "ref");
+                                GetErrorContext().Error(ErrorCode.ERR_BadArgExtraRef, ivar + 1, argument is ParameterModifierType mod && mod.isOut ? "out" : "ref");
                             }
                         }
                         else
@@ -1541,7 +1540,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 for (int ivar = 0; ivar < _pArguments.carg; ivar++)
                 {
                     CType var = _pBestParameters[ivar];
-                    if (var.IsParameterModifierType())
+                    if (var is ParameterModifierType)
                     {
                         GetErrorContext().ErrorRef(ErrorCode.ERR_InitializerAddHasParamModifiers, _results.GetBestResult());
                         return true;

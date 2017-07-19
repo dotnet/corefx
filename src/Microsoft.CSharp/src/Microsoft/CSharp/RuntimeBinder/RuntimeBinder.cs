@@ -494,10 +494,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType ctype = _symbolTable.GetCTypeFromType(type);
             if (bIsOut)
             {
-                Debug.Assert(ctype.IsParameterModifierType());
-                ctype = _semanticChecker.GetTypeManager().GetParameterModifier(
-                    ctype.AsParameterModifierType().GetParameterType(),
-                    true);
+                Debug.Assert(ctype is ParameterModifierType);
+                ctype = _semanticChecker.GetTypeManager()
+                    .GetParameterModifier(((ParameterModifierType)ctype).GetParameterType(), true);
             }
 
             // If we can convert, do that. If not, cast it.
