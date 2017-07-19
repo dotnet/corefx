@@ -109,10 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public NamespaceOrAggregateSymbol Parent
-        {
-            get { return parent.AsNamespaceOrAggregateSymbol(); }
-        }
+        public NamespaceOrAggregateSymbol Parent => parent as NamespaceOrAggregateSymbol;
 
         public bool isNested()
         {
