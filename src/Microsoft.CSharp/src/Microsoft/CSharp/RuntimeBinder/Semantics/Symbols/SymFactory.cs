@@ -114,7 +114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateMethodTypeParameter(Name pName, MethodSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = (TypeParameterSymbol)newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent);
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 
@@ -126,7 +126,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateClassTypeParameter(Name pName, AggregateSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = (TypeParameterSymbol)newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent);
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 

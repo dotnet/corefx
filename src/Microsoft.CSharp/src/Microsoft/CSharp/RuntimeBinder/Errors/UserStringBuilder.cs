@@ -468,11 +468,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case SYMKIND.SK_TypeParameterSymbol:
                     if (null == sym.name)
                     {
+                        var parSym = (TypeParameterSymbol)sym;
                         // It's a standard type variable.
-                        if (sym.AsTypeParameterSymbol().IsMethodTypeParameter())
+                        if (parSym.IsMethodTypeParameter())
                             ErrAppendChar('!');
                         ErrAppendChar('!');
-                        ErrAppendPrintf("{0}", sym.AsTypeParameterSymbol().GetIndexInTotalParameters());
+                        ErrAppendPrintf("{0}", parSym.GetIndexInTotalParameters());
                     }
                     else
                         ErrAppendName(sym.name);

@@ -226,7 +226,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
         public bool IsPropertySymbol() { return _kind == SYMKIND.SK_PropertySymbol; }
-        public bool IsTypeParameterSymbol() { return _kind == SYMKIND.SK_TypeParameterSymbol; }
         public bool IsEventSymbol() { return _kind == SYMKIND.SK_EventSymbol; }
 
         public bool IsFMETHSYM()
@@ -430,7 +429,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
         internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }
-        internal static TypeParameterSymbol AsTypeParameterSymbol(this Symbol symbol) { return symbol as TypeParameterSymbol; }
         internal static EventSymbol AsEventSymbol(this Symbol symbol) { return symbol as EventSymbol; }
     }
 }

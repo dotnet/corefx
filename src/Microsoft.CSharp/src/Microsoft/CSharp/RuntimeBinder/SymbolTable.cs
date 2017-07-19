@@ -585,16 +585,18 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             for (Symbol sym = parent.firstChild; sym != null; sym = sym.nextChild)
             {
-                if (!sym.IsTypeParameterSymbol())
+                if (!(sym is TypeParameterSymbol parSym))
                 {
                     continue;
                 }
 
-                if (AreTypeParametersEquivalent(sym.AsTypeParameterSymbol().GetTypeParameterType().AssociatedSystemType, t))
+                TypeParameterType type = parSym.GetTypeParameterType();
+                if (AreTypeParametersEquivalent(type.AssociatedSystemType, t))
                 {
-                    return sym.AsTypeParameterSymbol().GetTypeParameterType();
+                    return type;
                 }
             }
+
             return AddTypeParameterToSymbolTable(null, parent, t, false);
         }
 
