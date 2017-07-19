@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -221,7 +220,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
-        public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
 
         public CType getType()
         {
@@ -325,14 +323,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (_kind)
             {
                 case SYMKIND.SK_MethodSymbol:
-                    return this.AsMethodSymbol().isVirtual;
+                    return ((MethodSymbol)this).isVirtual;
+
                 case SYMKIND.SK_EventSymbol:
                     MethodSymbol methAdd = ((EventSymbol)this).methAdd;
                     return methAdd != null && methAdd.isVirtual;
+
                 case SYMKIND.SK_PropertySymbol:
                     PropertySymbol prop = ((PropertySymbol)this);
                     MethodSymbol meth = prop.methGet ?? prop.methSet;
                     return meth != null && meth.isVirtual;
+
                 default:
                     return false;
             }
@@ -378,15 +379,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
          */
         public bool isUserCallable()
         {
-            switch (_kind)
-            {
-                case SYMKIND.SK_MethodSymbol:
-                    return this.AsMethodSymbol().isUserCallable();
-                default:
-                    break;
-            }
-
-            return true;
+            return !(this is MethodSymbol methSym) || methSym.isUserCallable();
         }
     }
 
@@ -400,6 +393,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal static class SymbolExtensions
     {
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
-        internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
     }
 }

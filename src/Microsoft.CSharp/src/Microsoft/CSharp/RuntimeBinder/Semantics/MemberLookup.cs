@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _swtFirst.Set(sym, type);
                 Debug.Assert(_csym == 1);
                 Debug.Assert(_prgtype[0] == type);
-                _fMulti = sym.IsMethodSymbol() || sym is PropertySymbol prop && prop.isIndexer();
+                _fMulti = sym is MethodSymbol || sym is PropertySymbol prop && prop.isIndexer();
             }
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // For non-zero arity, only methods of the correct arity are considered.
                         // For zero arity, don't filter out any methods since we do type argument
                         // inferencing.
-                        if (_arity > 0 && symCur.AsMethodSymbol().typeVars.Count != _arity)
+                        if (_arity > 0 && ((MethodSymbol)symCur).typeVars.Count != _arity)
                         {
                             if (!_swtBadArity)
                                 _swtBadArity.Set(symCur, typeCur);
@@ -196,19 +196,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 MethodOrPropertySymbol methProp = symCur as MethodOrPropertySymbol;
+                MethodSymbol meth = symCur as MethodSymbol;
                 if (methProp != null && (_flags & MemLookFlags.UserCallable) != 0 && !methProp.isUserCallable())
                 {
-                    bool bIsIndexedProperty = false;
                     // If its an indexed property method symbol, let it through.
-                    if (symCur.IsMethodSymbol() &&
-                        symCur.AsMethodSymbol().isPropertyAccessor() &&
-                        ((symCur.name.Text.StartsWith("set_", StringComparison.Ordinal) && symCur.AsMethodSymbol().Params.Count > 1) ||
-                        (symCur.name.Text.StartsWith("get_", StringComparison.Ordinal) && symCur.AsMethodSymbol().Params.Count > 0)))
-                    {
-                        bIsIndexedProperty = true;
-                    }
-
-                    if (!bIsIndexedProperty)
+                    if (meth != null &&
+                        meth.isPropertyAccessor() &&
+                        ((symCur.name.Text.StartsWith("set_", StringComparison.Ordinal) && meth.Params.Count > 1) ||
+                        (symCur.name.Text.StartsWith("get_", StringComparison.Ordinal) && meth.Params.Count > 0)))
                     {
                         if (!_swtInaccess)
                         {
@@ -235,8 +230,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 PropertySymbol prop = symCur as PropertySymbol;
 
                 // Make sure that whether we're seeing a ctor, operator, or indexer is consistent with the flags.
-                if (((_flags & MemLookFlags.Ctor) == 0) != (!symCur.IsMethodSymbol() || !symCur.AsMethodSymbol().IsConstructor()) ||
-                    ((_flags & MemLookFlags.Operator) == 0) != (!symCur.IsMethodSymbol() || !symCur.AsMethodSymbol().isOperator) ||
+                if (((_flags & MemLookFlags.Ctor) == 0) != (meth == null || !meth.IsConstructor()) ||
+                    ((_flags & MemLookFlags.Operator) == 0) != (meth == null || !meth.isOperator) ||
                     ((_flags & MemLookFlags.Indexer) == 0) != (prop == null || !prop.isIndexer()))
                 {
                     if (!_swtBad)
@@ -249,7 +244,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We can't call CheckBogus on methods or indexers because if the method has the wrong
                 // number of parameters people don't think they should have to /r the assemblies containing
                 // the parameter types and they complain about the resulting CS0012 errors.
-                if (!symCur.IsMethodSymbol() && (_flags & MemLookFlags.Indexer) == 0 && GetSemanticChecker().CheckBogus(symCur))
+                if (!(symCur is MethodSymbol) && (_flags & MemLookFlags.Indexer) == 0 && GetSemanticChecker().CheckBogus(symCur))
                 {
                     // A bogus member - we can't use these, so only record them for error reporting.
                     if (!_swtBogus)
@@ -328,7 +323,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     else if (!_fMulti)
                     {
                         // Give method groups priority.
-                        if ( /* !GetSymbolLoader().options.fLookupHack ||*/ !symCur.IsMethodSymbol())
+                        if (!(symCur is MethodSymbol))
                             goto LAmbig;
                         _swtAmbigWarn = _swtFirst;
                         // Erase previous results so we'll record this method as the first.
@@ -342,7 +337,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (!typeCur.fDiffHidden)
                         {
                             // Give method groups priority.
-                            if ( /*!GetSymbolLoader().options.fLookupHack ||*/ !_swtFirst.Sym.IsMethodSymbol())
+                            if (!(_swtFirst.Sym is MethodSymbol))
                                 goto LAmbig;
                             if (!_swtAmbigWarn)
                                 _swtAmbigWarn.Set(symCur, typeCur);
@@ -808,7 +803,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     case SYMKIND.SK_MethodSymbol:
                         Debug.Assert(_arity != 0);
-                        cvar = _swtBadArity.Sym.AsMethodSymbol().typeVars.Count;
+                        cvar = ((MethodSymbol)_swtBadArity.Sym).typeVars.Count;
                         GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
                     case SYMKIND.SK_AggregateSymbol:

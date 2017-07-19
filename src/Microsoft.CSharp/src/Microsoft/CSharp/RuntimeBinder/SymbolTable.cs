@@ -1865,14 +1865,14 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private MethodSymbol FindMatchingMethod(MemberInfo method, AggregateSymbol callingAggregate)
         {
-            MethodSymbol meth = _bsymmgr.LookupAggMember(GetName(method.Name), callingAggregate, symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+            MethodSymbol meth = _bsymmgr.LookupAggMember(GetName(method.Name), callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             while (meth != null)
             {
                 if (meth.AssociatedMemberInfo.IsEquivalentTo(method))
                 {
                     return meth;
                 }
-                meth = BSYMMGR.LookupNextSym(meth, callingAggregate, symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+                meth = BSYMMGR.LookupNextSym(meth, callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             }
             return null;
         }
@@ -2008,10 +2008,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             MethodSymbol meth = _semanticChecker.SymbolLoader.LookupAggMember(
                 GetName(baseMemberInfo.Name),
                 aggregate,
-                symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+                symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             for (;
                     meth != null && !meth.AssociatedMemberInfo.IsEquivalentTo(baseMemberInfo);
-                    meth = _semanticChecker.SymbolLoader.LookupNextSym(meth, aggregate, symbmask_t.MASK_MethodSymbol).AsMethodSymbol())
+                    meth = _semanticChecker.SymbolLoader.LookupNextSym(meth, aggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
                 ;
 
             return meth;

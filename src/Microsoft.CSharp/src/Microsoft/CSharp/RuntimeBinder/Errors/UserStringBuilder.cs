@@ -436,7 +436,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case SYMKIND.SK_MethodSymbol:
-                    ErrAppendMethod(sym.AsMethodSymbol(), pctx, fArgs);
+                    ErrAppendMethod((MethodSymbol)sym, pctx, fArgs);
                     break;
 
                 case SYMKIND.SK_PropertySymbol:

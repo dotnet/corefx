@@ -143,8 +143,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Make sure that whether we're seeing a ctor is consistent with the flag.
                 // The only properties we handle are indexers.
                 if (_mask == symbmask_t.MASK_MethodSymbol && (
-                        0 == (_flags & EXPRFLAG.EXF_CTOR) != !_pCurrentSym.AsMethodSymbol().IsConstructor() ||
-                        0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !_pCurrentSym.AsMethodSymbol().isOperator) ||
+                        0 == (_flags & EXPRFLAG.EXF_CTOR) != !((MethodSymbol)_pCurrentSym).IsConstructor() ||
+                        0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !((MethodSymbol)_pCurrentSym).isOperator) ||
                     _mask == symbmask_t.MASK_PropertySymbol && !((PropertySymbol)_pCurrentSym).isIndexer())
                 {
                     // Get the next symbol.
@@ -154,7 +154,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // If our arity is non-0, we must match arity with this symbol.
                 if (_nArity > 0)
                 {
-                    if (_mask == symbmask_t.MASK_MethodSymbol && _pCurrentSym.AsMethodSymbol().typeVars.Count != _nArity)
+                    if (_mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)_pCurrentSym).typeVars.Count != _nArity)
                     {
                         return false;
                     }
@@ -196,12 +196,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // if we are done checking all the instance types ensure that currentsym is an 
                 // extension method and not a simple static method
-                if (!_bIsCheckingInstanceMethods)
+                if (!_bIsCheckingInstanceMethods && !((MethodSymbol)_pCurrentSym).IsExtension())
                 {
-                    if (!_pCurrentSym.AsMethodSymbol().IsExtension())
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 return true;

@@ -626,7 +626,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprCall BindToMethod(MethWithInst mwi, Expr pArguments, ExprMemberGroup pMemGroup, MemLookFlags flags)
         {
-            Debug.Assert(mwi.Sym != null && mwi.Sym.IsMethodSymbol() && (!mwi.Meth().isOverride || mwi.Meth().isHideByName));
+            Debug.Assert(mwi.Sym is MethodSymbol && (!mwi.Meth().isOverride || mwi.Meth().isHideByName));
             Debug.Assert(pMemGroup != null);
 
             bool fConstrained;
@@ -758,7 +758,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 MethodSymbol getOrCreateMethod =
                     GetSymbolLoader()
                         .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
-                        .AsMethodSymbol();
+                         as MethodSymbol;
 
                 MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType);
                 ExprMemberGroup getOrCreateGrp = GetExprFactory().CreateMemGroup(null, getOrCreatempwi);
@@ -974,9 +974,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (; ;)
             {
                 // Find the next operator.
-                methCur = (methCur == null) ?
-                          GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol() :
-                          GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+                methCur = methCur == null
+                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol
+                    : GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
 
                 if (methCur == null)
                 {
@@ -1540,7 +1540,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // If we're in a constructor, then bail.
-            if (swt.Sym.IsMethodSymbol() && swt.Meth().IsConstructor())
+            if ((swt.Sym is MethodSymbol) && swt.Meth().IsConstructor())
             {
                 return pObject;
             }
@@ -1603,9 +1603,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Symbol pSym = swt.Sym;
 
             // Instance constructors are always ok, static constructors are never ok.
-            if (pSym.IsMethodSymbol() && pSym.AsMethodSymbol().IsConstructor())
+            if (pSym is MethodSymbol meth && meth.IsConstructor())
             {
-                return !pSym.AsMethodSymbol().isStatic;
+                return !meth.isStatic;
             }
 
             bool isStatic = swt.Sym.isStatic;
@@ -1667,7 +1667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // For a property/indexer we remap the accessors, not the property/indexer.
             // Since every event has both accessors we remap the event instead of the accessors.
-            Debug.Assert(pswt && (pswt.Sym.IsMethodSymbol() || pswt.Sym is EventSymbol || pswt.Sym is MethodOrPropertySymbol));
+            Debug.Assert(pswt && (pswt.Sym is MethodSymbol || pswt.Sym is EventSymbol || pswt.Sym is MethodOrPropertySymbol));
             Debug.Assert(typeObj != null);
 
             // Don't remap static or interface methods.

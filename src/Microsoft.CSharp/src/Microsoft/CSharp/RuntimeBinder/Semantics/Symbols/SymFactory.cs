@@ -90,12 +90,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return sym;
         }
 
-        public MethodSymbol CreateMethod(Name name, ParentSymbol parent)
-        {
-            MethodSymbol sym = newBasicSym(SYMKIND.SK_MethodSymbol, name, parent).AsMethodSymbol();
-
-            return sym;
-        }
+        public MethodSymbol CreateMethod(Name name, ParentSymbol parent) => 
+            newBasicSym(SYMKIND.SK_MethodSymbol, name, parent) as MethodSymbol;
 
         public PropertySymbol CreateProperty(Name name, ParentSymbol parent)
         {

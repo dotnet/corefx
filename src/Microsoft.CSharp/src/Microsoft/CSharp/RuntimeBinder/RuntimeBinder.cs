@@ -947,8 +947,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // Check if we have a potential call to an indexed property accessor.
             // If so, we'll flag overload resolution to let us call non-callables.
-            if ((payload.Name.StartsWith("set_", StringComparison.Ordinal) && swt.Sym.AsMethodSymbol().Params.Count > 1) ||
-                (payload.Name.StartsWith("get_", StringComparison.Ordinal) && swt.Sym.AsMethodSymbol().Params.Count > 0))
+            if ((payload.Name.StartsWith("set_", StringComparison.Ordinal) && ((MethodSymbol)swt.Sym).Params.Count > 1) ||
+                (payload.Name.StartsWith("get_", StringComparison.Ordinal) && ((MethodSymbol)swt.Sym).Params.Count > 0))
             {
                 memGroup.Flags &= ~EXPRFLAG.EXF_USERCALLABLE;
             }
