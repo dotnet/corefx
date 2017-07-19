@@ -469,9 +469,9 @@ namespace System.Xml.Tests
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
             // with XmlUrlResolver it should be able to open referenced file
-            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
+            LoadXSL("xmlResolver_document_function.xsl", inputType, readerType);
             xslt.XmlResolver = new XmlUrlResolver();
-            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            Transform("fruits.xml", transformType, docType);
             VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
 
@@ -488,47 +488,16 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "Absolute path is hard coded, it needs to be set dynamically")]
+        [Theory]
         public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // copy file on the local machine
-            try
+            TestUsingTemporaryCopyOfResolverDocument(() =>
             {
-                string tempDir = Path.GetTempPath();
-                if (!Directory.Exists(tempDir))
-                {
-                    Directory.CreateDirectory(tempDir);
-                }
-                string xmlFile = FullFilePath("xmlResolver_document_function.xml");
-                File.Copy(xmlFile, Path.Combine(tempDir, "xmlResolver_document_function.xml"), true);
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine(e.ToString());
-                _output.WriteLine("Could not copy file to local. Some other issues prevented this test from running");
-                throw;
-            }
-
-            const string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>";
-            if (LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType) == 1)
-            {
+                LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType);
                 xslt.XmlResolver = new XmlUrlResolver();
-                if (Transform("fruits.xml", transformType, docType) == 1)
-                {
-                    VerifyResult(expected);
-                    return;
-                }
-                else
-                {
-                    _output.WriteLine("Failed to resolve document function with absolute URI.");
-                    Assert.True(false);
-                }
-            }
-            else
-            {
-                _output.WriteLine("Failed to load style sheet!");
-                Assert.True(false);
-            }
+                Transform("fruits.xml", transformType, docType);
+                VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
+            });
         }
     }
 
@@ -1070,8 +1039,8 @@ namespace System.Xml.Tests
 		5.No Value Specified
 		6.No Value Specified</result>";
 
-            Assert.True(LoadXSL_Resolver("showParam.xsl", null, inputType, readerType) == 1);
-            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            LoadXSL_Resolver("showParam.xsl", null, inputType, readerType);
+            Transform("fruits.xml", transformType, docType);
             VerifyResult(expected);
         }
 
@@ -1103,11 +1072,15 @@ namespace System.Xml.Tests
                 var e = Assert.Throws<XsltCompileException>(() => LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType));
                 var xsltException = Assert.IsType<XsltException>(e.InnerException);
                 var absoluteUri = new Uri(Path.Combine(Environment.CurrentDirectory, FullFilePath("XmlResolver_Include.xsl"))).AbsoluteUri;
-                CheckExpectedError(xsltException, "System.Xml", "Xslt_CantResolve", new[] { absoluteUri });
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    // Exception message comes from a different resource on netfx
+                    CheckExpectedError(xsltException, "System.Xml", "Xslt_CantResolve", new[] { absoluteUri });
+                }
             }
 
-            Assert.True(LoadXSL_Resolver("XmlResolver_Main.xsl", new XmlUrlResolver(), inputType, readerType) == 1);
-            Assert.True(Transform("fruits.xml", transformType, docType) == 1);
+            LoadXSL_Resolver("XmlResolver_Main.xsl", new XmlUrlResolver(), inputType, readerType);
+            Transform("fruits.xml", transformType, docType);
             string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result><fruit>Apple</fruit><fruit>orange</fruit></result>";
             VerifyResult(expected);
         }
@@ -1125,6 +1098,7 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Only full framework implicit resolver works")]
         [Theory]
         public void TC_No_Explicit_Resolver_Prohibits_External_Url(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
@@ -1562,9 +1536,9 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Regression case for bug 80768")]
-        [InlineData(TransformType.Stream)]
-        [Theory]
-        public void TC_Ensure_Script_Not_Allowed(TransformType transformType)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework supports <msxml:script>")]
+        [Fact]
+        public void TC_Ensure_Script_Not_Allowed()
         {
 #pragma warning disable 0618
             xslt = new XslTransform();
@@ -2168,8 +2142,8 @@ namespace System.Xml.Tests
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
             // with XmlUrlResolver it should be able to open referenced file
-            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
-            Assert.True(TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver()) == 1);
+            LoadXSL("xmlResolver_document_function.xsl", inputType, readerType);
+            TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver());
             VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
 
@@ -2186,51 +2160,15 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
-        [Theory(Skip = "Absolute path is hard coded, it needs to be set dynamically")]
+        [Theory]
         public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
-            // Skip this test for Load(URI)
-            // Reason: When style sheet URI = Intranet zone, XmlSecureResolver does not resolve document function
-
-            //if (MyInputType() == InputType.URI)
-            //    return TEST_SKIPPED;
-
-            // copy file on the local machine
-
-            try
+            TestUsingTemporaryCopyOfResolverDocument(() =>
             {
-                string tempDir = Path.GetTempPath();
-                if (!Directory.Exists(tempDir))
-                {
-                    Directory.CreateDirectory(tempDir);
-                }
-                string xmlFile = FullFilePath("xmlResolver_document_function.xml");
-                File.Copy(xmlFile, Path.Combine(tempDir, "xmlResolver_document_function.xml"), true);
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine(e.ToString());
-                _output.WriteLine("Could not copy file to local. Some other issues prevented this test from running");
-                return; //return TEST_SKIPPED;
-            }
-
-            if (LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType) == 1)
-            {
-                if ((TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver()) == 1))
-                {
-                    return;
-                }
-                else
-                {
-                    _output.WriteLine("Failed to resolve document function with absolute URI.");
-                    Assert.True(false);
-                }
-            }
-            else
-            {
-                _output.WriteLine("Failed to load style sheet!");
-                Assert.True(false);
-            }
+                LoadXSL("xmlResolver_document_function_absolute_uri.xsl", inputType, readerType);
+                TransformResolver("fruits.xml", transformType, docType, new XmlUrlResolver());
+                VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
+            });
         }
     }
 
@@ -2707,7 +2645,7 @@ namespace System.Xml.Tests
             // "xmlResolver_document_function.xsl" contains
             // <xsl:for-each select="document('xmlResolver_document_function.xml')//elem">
             // with XmlUrlResolver it should be able to open referenced file
-            Assert.True(LoadXSL("xmlResolver_document_function.xsl", inputType, readerType) == 1);
+            LoadXSL("xmlResolver_document_function.xsl", inputType, readerType);
             CallTransform(xslt, FullFilePath("fruits.xml"), _strOutFile, new XmlUrlResolver());
             VerifyResult(@"<?xml version=""1.0"" encoding=""utf-8""?><result>123</result>");
         }
@@ -2779,8 +2717,8 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
         {
             m_xsltArg = new XsltArgumentList();
             m_xsltArg.AddExtensionObject("http://foo.com", new MyXsltExtension());
-            Assert.True(LoadXSL("Bug111075.xsl", inputType, readerType) == 1);
-            Assert.True(Transform_ArgList("Bug111075.xml", transformType, docType) == 1);
+            LoadXSL("Bug111075.xsl", inputType, readerType);
+            Transform_ArgList("Bug111075.xml", transformType, docType);
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><distinct-countries>France, Spain, Austria, Germany</distinct-countries>";
             VerifyResult(expected);
@@ -2811,15 +2749,9 @@ param2 (correct answer is 'local-param2-arg'): local-param2-arg
 
     internal sealed class AllowDefaultResolverContext : IDisposable
     {
-        public AllowDefaultResolverContext()
-        {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
-        }
-
-        public void Dispose()
-        {
-            AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", false);
-        }
+        private const string SwitchName = "Switch.System.Xml.AllowDefaultResolver";
+        public AllowDefaultResolverContext() => AppContext.SetSwitch(SwitchName, isEnabled: true);
+        public void Dispose() => AppContext.SetSwitch(SwitchName, isEnabled: false);
     }
 
     internal class MyArrayIterator : XPathNodeIterator

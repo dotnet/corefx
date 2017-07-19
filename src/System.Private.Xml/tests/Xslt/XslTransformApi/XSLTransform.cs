@@ -48,6 +48,10 @@ namespace System.Xml.Tests
     ////////////////////////////////////////////////////////////////
     public class XsltApiTestCaseBase : FileCleanupTestBase
     {
+        private const string XmlResolverDocumentName = "xmlResolver_document_function.xml";
+        private static readonly string s_temporaryResolverDocumentFullName = Path.Combine(Path.GetTempPath(), XmlResolverDocumentName);
+        private static readonly object s_temporaryResolverDocumentLock = new object();
+
         // Generic data for all derived test cases
         public String szXslNS = "http://www.w3.org/1999/XSL/Transform";
 
@@ -77,6 +81,18 @@ namespace System.Xml.Tests
         protected bool _isInProc;          // Is the current test run in proc or /Host None?
 
         private ITestOutputHelper _output;
+
+        static XsltApiTestCaseBase()
+        {
+            // Replace absolute URI in xmlResolver_document_function.xml based on the environment
+            string xslFile = Path.Combine("TestFiles", FilePathUtil.GetTestDataPath(), "XsltApi", "xmlResolver_document_function_absolute_uri.xsl");
+            XmlDocument doc = new XmlDocument();
+            doc.Load(xslFile);
+            string xslString = doc.OuterXml.Replace("ABSOLUTE_URI", s_temporaryResolverDocumentFullName);
+            doc.LoadXml(xslString);
+            doc.Save(xslFile);
+        }
+
         public XsltApiTestCaseBase(ITestOutputHelper output)
         {
             // Make sure that we don't cache the value of the switch to enable testing
@@ -84,6 +100,23 @@ namespace System.Xml.Tests
             _output = output;
             _strOutFile = GetTestFilePath();
             this.Init(null);
+        }
+
+        public void TestUsingTemporaryCopyOfResolverDocument(Action testAction)
+        {
+            lock (s_temporaryResolverDocumentLock)
+            {
+                try
+                {
+                    File.Copy(FullFilePath(XmlResolverDocumentName), s_temporaryResolverDocumentFullName, overwrite: true);
+                    testAction();
+                }
+                finally
+                {
+                    if (File.Exists(s_temporaryResolverDocumentFullName))
+                        File.Delete(s_temporaryResolverDocumentFullName);
+                }
+            }
         }
 
         public TransformType GetTransformType(String s)
