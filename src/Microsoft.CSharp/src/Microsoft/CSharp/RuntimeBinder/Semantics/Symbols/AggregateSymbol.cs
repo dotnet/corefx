@@ -113,12 +113,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool isNested()
         {
-            return parent != null && parent.IsAggregateSymbol();
+            return parent is AggregateSymbol;
         }
 
         public AggregateSymbol GetOuterAgg()
         {
-            return parent != null && parent.IsAggregateSymbol() ? parent.AsAggregateSymbol() : null;
+            return parent as AggregateSymbol;
         }
 
         public bool isPredefAgg(PredefinedType pt)

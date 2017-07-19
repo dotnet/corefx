@@ -27,7 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void AddDecl(AggregateDeclaration decl)
         {
             Debug.Assert(decl != null);
-            Debug.Assert(IsNamespaceSymbol() || IsAggregateSymbol());
+            Debug.Assert(IsNamespaceSymbol() || this is AggregateSymbol);
             Debug.Assert(decl.IsAggregateDeclaration());
             Debug.Assert(!IsNamespaceSymbol());
 

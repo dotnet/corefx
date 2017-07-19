@@ -155,7 +155,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     case SYMKIND.SK_AggregateSymbol:
                         // For types, always filter on arity.
-                        if (symCur.AsAggregateSymbol().GetTypeVars().Count != _arity)
+                        if (((AggregateSymbol)symCur).GetTypeVars().Count != _arity)
                         {
                             if (!_swtBadArity)
                                 _swtBadArity.Set(symCur, typeCur);
@@ -809,7 +809,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
                     case SYMKIND.SK_AggregateSymbol:
-                        cvar = _swtBadArity.Sym.AsAggregateSymbol().GetTypeVars().Count;
+                        cvar = ((AggregateSymbol)_swtBadArity.Sym).GetTypeVars().Count;
                         GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
                     default:

@@ -204,17 +204,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Should always have atsCheck for private and protected access check.
             // We currently don't need it since access doesn't respect instantiation.
-            // We just use symWhere.parent.AsAggregateSymbol() instead.
-            AggregateSymbol aggCheck = symCheck.parent.AsAggregateSymbol();
+            // We just use symWhere.parent as AggregateSymbol instead.
+            AggregateSymbol aggCheck = symCheck.parent as AggregateSymbol;
 
             // Find the inner-most enclosing AggregateSymbol.
             AggregateSymbol aggWhere = null;
 
             for (Symbol symT = symWhere; symT != null; symT = symT.parent)
             {
-                if (symT.IsAggregateSymbol())
+                if (symT is AggregateSymbol aggSym)
                 {
-                    aggWhere = symT.AsAggregateSymbol();
+                    aggWhere = aggSym;
                     break;
                 }
                 if (symT.IsAggregateDeclaration())

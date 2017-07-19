@@ -468,7 +468,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private TypeParameterType LoadClassTypeParameter(AggregateSymbol parent, Type t)
         {
-            for (AggregateSymbol p = parent; p != null; p = p.parent.IsAggregateSymbol() ? p.parent.AsAggregateSymbol() : null)
+            for (AggregateSymbol p = parent; p != null; p = p.parent as AggregateSymbol)
             {
                 for (TypeParameterSymbol typeParam = _bsymmgr.LookupAggMember(
                         GetName(t), p, symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol;
@@ -689,7 +689,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Type t = o as Type;
                     Name name = null;
                     name = GetName(t);
-                    next = _symbolTable.LookupSym(name, current, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol();
+                    next = _symbolTable.LookupSym(name, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
 
                     // Make sure we match arity as well when we find an aggregate.
                     if (next != null)
@@ -760,7 +760,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     if (t == type)
                     {
-                        ret = GetConstructedType(type, next.AsAggregateSymbol());
+                        ret = GetConstructedType(type, next as AggregateSymbol);
                         break;
                     }
                 }
@@ -868,7 +868,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // If the generic argument for nullable is our child, then we're
                     // declaring the initial Nullable<T>.
                     AggregateSymbol agg = _symbolTable.LookupSym(
-                        GetName(t), parent, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol();
+                        GetName(t), parent, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
                     if (agg != null)
                     {
                         agg = FindSymWithMatchingArity(agg, t);

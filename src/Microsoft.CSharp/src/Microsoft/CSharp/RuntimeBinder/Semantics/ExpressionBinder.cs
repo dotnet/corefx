@@ -1499,7 +1499,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr AdjustMemberObject(SymWithType swt, Expr pObject, out bool pfConstrained, out bool pIsMatchingStatic)
         {
             // Assert that the type is present and is an instantiation of the member's parent.
-            Debug.Assert(swt.GetType() != null && swt.GetType().getAggregate() == swt.Sym.parent.AsAggregateSymbol());
+            Debug.Assert(swt.GetType() != null && swt.GetType().getAggregate() == swt.Sym.parent as AggregateSymbol);
             bool bIsMatchingStatic = IsMatchingStatic(swt, pObject);
             pIsMatchingStatic = bIsMatchingStatic;
             pfConstrained = false;
@@ -1560,7 +1560,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeObj is TypeParameterType || typeObj is AggregateType)
             {
-                AggregateSymbol aggCalled = swt.Sym.parent.AsAggregateSymbol();
+                AggregateSymbol aggCalled = swt.Sym.parent as AggregateSymbol;
                 Debug.Assert(swt.GetType().getAggregate() == aggCalled);
 
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to

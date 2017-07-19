@@ -171,7 +171,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateSymbol getClass()
         {
-            return parent.AsAggregateSymbol();
+            return parent as AggregateSymbol;
         }
 
         public bool IsExpImpl()

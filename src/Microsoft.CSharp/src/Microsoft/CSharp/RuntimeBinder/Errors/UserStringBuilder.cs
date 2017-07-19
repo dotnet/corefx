@@ -187,9 +187,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             if (parent == getBSymmgr().GetRootNS())
                 return;
 
-            if (pctx != null && !pctx.FNop() && parent.IsAggregateSymbol() && 0 != parent.AsAggregateSymbol().GetTypeVarsAll().Count)
+            if (pctx != null && !pctx.FNop() && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
             {
-                CType pType = GetTypeManager().SubstType(parent.AsAggregateSymbol().getThisType(), pctx);
+                CType pType = GetTypeManager().SubstType(agg.getThisType(), pctx);
                 ErrAppendType(pType, null);
             }
             else
@@ -420,7 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     {
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
-                        string text = PredefinedTypes.GetNiceName(sym.AsAggregateSymbol());
+                        string text = PredefinedTypes.GetNiceName(sym as AggregateSymbol);
                         if (text != null)
                         {
                             // Found a nice name.
@@ -430,7 +430,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         {
                             ErrAppendParentSym(sym, pctx);
                             ErrAppendName(sym.name);
-                            ErrAppendTypeParameters(sym.AsAggregateSymbol().GetTypeVars(), pctx, true);
+                            ErrAppendTypeParameters(((AggregateSymbol)sym).GetTypeVars(), pctx, true);
                         }
                         break;
                     }

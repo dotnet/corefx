@@ -41,7 +41,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw Error.InternalCompilerError();
             }
 
-            AggregateSymbol sym = newBasicSym(SYMKIND.SK_AggregateSymbol, name, parent).AsAggregateSymbol();
+            AggregateSymbol sym = (AggregateSymbol)newBasicSym(SYMKIND.SK_AggregateSymbol, name, parent);
             sym.name = name;
             sym.SetTypeManager(typeManager);
             sym.SetSealed(false);

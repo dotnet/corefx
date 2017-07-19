@@ -221,7 +221,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsNamespaceSymbol() { return _kind == SYMKIND.SK_NamespaceSymbol; }
 
-        public bool IsAggregateSymbol() { return _kind == SYMKIND.SK_AggregateSymbol; }
         public bool IsAggregateDeclaration() { return _kind == SYMKIND.SK_AggregateDeclaration; }
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
@@ -250,24 +249,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             get
             {
-                bool fStatic = false;
                 if (IsFieldSymbol())
                 {
-                    fStatic = this.AsFieldSymbol().isStatic;
+                    return this.AsFieldSymbol().isStatic;
                 }
-                else if (IsEventSymbol())
+
+                if (IsEventSymbol())
                 {
-                    fStatic = this.AsEventSymbol().isStatic;
+                    return this.AsEventSymbol().isStatic;
                 }
-                else if (this is MethodOrPropertySymbol methProp)
+
+                if (this is MethodOrPropertySymbol methProp)
                 {
                     return methProp.isStatic;
                 }
-                else if (IsAggregateSymbol())
-                {
-                    fStatic = true;
-                }
-                return fStatic;
+
+                return this is AggregateSymbol;
             }
         }
 
@@ -280,12 +277,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_FieldSymbol:
                 case SYMKIND.SK_EventSymbol:
                 case SYMKIND.SK_TypeParameterSymbol:
-                    return parent.AsAggregateSymbol().AssociatedAssembly;
+                    return ((AggregateSymbol)parent).AssociatedAssembly;
 
                 case SYMKIND.SK_AggregateDeclaration:
                     return this.AsAggregateDeclaration().GetAssembly();
                 case SYMKIND.SK_AggregateSymbol:
-                    return this.AsAggregateSymbol().AssociatedAssembly;
+                    return ((AggregateSymbol)this).AssociatedAssembly;
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "GetAssemblyID called on bad sym kind");
@@ -305,12 +302,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_FieldSymbol:
                 case SYMKIND.SK_EventSymbol:
                 case SYMKIND.SK_TypeParameterSymbol:
-                    return parent.AsAggregateSymbol().InternalsVisibleTo(assembly);
+                    return (parent as AggregateSymbol).InternalsVisibleTo(assembly);
 
                 case SYMKIND.SK_AggregateDeclaration:
                     return this.AsAggregateDeclaration().Agg().InternalsVisibleTo(assembly);
                 case SYMKIND.SK_AggregateSymbol:
-                    return this.AsAggregateSymbol().InternalsVisibleTo(assembly);
+                    return ((AggregateSymbol)this).InternalsVisibleTo(assembly);
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "InternalsVisibleTo called on bad sym kind");
@@ -416,7 +413,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static NamespaceSymbol AsNamespaceSymbol(this Symbol symbol) { return symbol as NamespaceSymbol; }
         internal static AssemblyQualifiedNamespaceSymbol AsAssemblyQualifiedNamespaceSymbol(this Symbol symbol) { return symbol as AssemblyQualifiedNamespaceSymbol; }
 
-        internal static AggregateSymbol AsAggregateSymbol(this Symbol symbol) { return symbol as AggregateSymbol; }
         internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }

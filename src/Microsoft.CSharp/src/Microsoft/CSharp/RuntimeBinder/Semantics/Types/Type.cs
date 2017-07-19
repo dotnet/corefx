@@ -102,7 +102,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        Type parentType = t.GetOwningSymbol().AsAggregateSymbol().AssociatedSystemType;
+                        Type parentType = ((AggregateSymbol)t.GetOwningSymbol()).AssociatedSystemType;
                         result = parentType.GetGenericArguments()[t.GetIndexInOwnParameters()];
                     }
                     break;
