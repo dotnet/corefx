@@ -115,7 +115,7 @@ internal class IOServices
 
             // Continue adding unique path segments until the character count is hit
             int remainingChars = characterCount - path.Length;
-            string guid = Guid.NewGuid().ToString();
+            string guid = Guid.NewGuid().ToString("N"); // No dashes
             if (remainingChars < guid.Length)
             {
                 path.Append(guid.Substring(0, remainingChars));
