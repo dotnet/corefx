@@ -249,11 +249,8 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestMainModuleOnNonOSX()
+        public void TestMainModule()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return;
-
             Process p = Process.GetCurrentProcess();
 
             // On UAP casing may not match - we use Path.GetFileName(exePath) instead of kernel32!GetModuleFileNameEx which is not available on UAP
@@ -590,22 +587,33 @@ namespace System.Diagnostics.Tests
         public void TestProcessStartTime()
         {
             TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
-            var p = CreateProcessPortable(RemotelyInvokable.ReadLine);
 
-            DateTime testStartTime = DateTime.Now;
-            p.StartInfo.RedirectStandardInput = true;
-            p.Start();
-            Assert.Equal(p.StartTime, p.StartTime);
-            DateTime processStartTime = p.StartTime;
-            using (StreamWriter writer = p.StandardInput)
+            for (int i = 0; i < 2; i++)
             {
-                writer.WriteLine("start");
+                Process p = CreateProcessPortable(RemotelyInvokable.ReadLine);
+
+                Assert.Throws<InvalidOperationException>(() => p.StartTime);
+
+                DateTime testStartTime = DateTime.Now;
+                p.StartInfo.RedirectStandardInput = true;
+                p.Start();
+                Assert.Equal(p.StartTime, p.StartTime);
+                DateTime processStartTime = p.StartTime;
+                using (StreamWriter writer = p.StandardInput)
+                {
+                    writer.WriteLine("start");
+                }
+
+                Assert.True(p.WaitForExit(WaitInMS));
+                DateTime testEndTime = DateTime.Now;
+
+                bool hasTimeChanged = testEndTime < testStartTime;
+                if (i != 0 || !hasTimeChanged)
+                {
+                    Assert.InRange(processStartTime, testStartTime - allowedWindow, testEndTime + allowedWindow);
+                    break;
+                }
             }
-
-            Assert.True(p.WaitForExit(WaitInMS));
-            DateTime testEndTime = DateTime.Now;
-
-            Assert.InRange(processStartTime, testStartTime - allowedWindow, testEndTime + allowedWindow);
         }
 
         [Fact]
@@ -1235,11 +1243,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
         // CloseMainWindow is a no-op and always returns false on Unix or Uap.
-        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException_NonWindowsOrUap()
+        public void CloseMainWindow_NotStarted_ReturnsFalse_UapOrNonWindows()
         {
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsUap)
+                return;
+
             var process = new Process();
             Assert.False(process.CloseMainWindow());
         }
