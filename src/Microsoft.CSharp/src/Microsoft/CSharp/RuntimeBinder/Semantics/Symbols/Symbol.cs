@@ -219,8 +219,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return hasBogus() && checkBogus();
         }
 
-        public bool IsNamespaceSymbol() { return _kind == SYMKIND.SK_NamespaceSymbol; }
-
         public bool IsAggregateDeclaration() { return _kind == SYMKIND.SK_AggregateDeclaration; }
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
@@ -410,7 +408,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        internal static NamespaceSymbol AsNamespaceSymbol(this Symbol symbol) { return symbol as NamespaceSymbol; }
         internal static AssemblyQualifiedNamespaceSymbol AsAssemblyQualifiedNamespaceSymbol(this Symbol symbol) { return symbol as AssemblyQualifiedNamespaceSymbol; }
 
         internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }

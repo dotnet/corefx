@@ -16,7 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         public NamespaceSymbol GetNS()
         {
-            return parent.AsNamespaceSymbol();
+            return parent as NamespaceSymbol;
         }
     }
 }

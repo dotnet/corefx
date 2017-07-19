@@ -194,15 +194,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (iDot == -1) break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
                     Name nm = this.GetNameManager().Add(sub);
-                    NamespaceSymbol sym = this.LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
-                    if (sym == null)
-                    {
-                        ns = _symFactory.CreateNamespace(nm, ns);
-                    }
-                    else
-                    {
-                        ns = sym;
-                    }
+                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
                     start += sub.Length + 1;
                 }
             }

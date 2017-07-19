@@ -17,7 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Namespace
         public NamespaceSymbol CreateNamespace(Name name, NamespaceSymbol parent)
         {
-            NamespaceSymbol sym = newBasicSym(SYMKIND.SK_NamespaceSymbol, name, parent).AsNamespaceSymbol();
+            NamespaceSymbol sym = (NamespaceSymbol)newBasicSym(SYMKIND.SK_NamespaceSymbol, name, parent);
             sym.SetAccess(ACCESS.ACC_PUBLIC);
 
             return (sym);

@@ -973,13 +973,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         private NamespaceSymbol AddNamespaceToSymbolTable(NamespaceOrAggregateSymbol parent, string sz)
         {
             Name name = GetName(sz);
-            NamespaceSymbol ns = _symbolTable.LookupSym(name, parent, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
-            if (ns == null)
-            {
-                ns = _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
-            }
-
-            return ns;
+            return _symbolTable.LookupSym(name, parent, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol
+                ?? _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
         }
         #endregion
 
