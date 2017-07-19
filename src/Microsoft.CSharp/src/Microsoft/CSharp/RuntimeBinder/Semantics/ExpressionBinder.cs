@@ -1954,7 +1954,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return;
 
             agg.SetHasExternReference(true);
-            foreach (Symbol sym in agg.Children())
+            for (Symbol sym = agg.firstChild; sym != null; sym = sym.nextChild)
             {
                 if (sym.IsFieldSymbol())
                     SetExternalRef(sym.AsFieldSymbol().GetType());

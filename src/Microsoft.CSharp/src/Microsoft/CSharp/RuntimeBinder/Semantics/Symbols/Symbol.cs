@@ -396,18 +396,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal static class SymbolExtensions
     {
-        public static IEnumerable<Symbol> Children(this ParentSymbol symbol)
-        {
-            if (symbol == null)
-                yield break;
-            Symbol current = symbol.firstChild;
-            while (current != null)
-            {
-                yield return current;
-                current = current.nextChild;
-            }
-        }
-
         internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
