@@ -28,7 +28,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(decl != null);
             Debug.Assert(this is AggregateSymbol);
-            Debug.Assert(decl.IsAggregateDeclaration());
+            Debug.Assert(decl is AggregateDeclaration);
 
             // If parent is set it should be set to us!
             Debug.Assert(decl.bag == null || decl.bag == this);

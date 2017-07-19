@@ -219,7 +219,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return hasBogus() && checkBogus();
         }
 
-        public bool IsAggregateDeclaration() { return _kind == SYMKIND.SK_AggregateDeclaration; }
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
         public bool IsPropertySymbol() { return _kind == SYMKIND.SK_PropertySymbol; }
@@ -278,7 +277,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ((AggregateSymbol)parent).AssociatedAssembly;
 
                 case SYMKIND.SK_AggregateDeclaration:
-                    return this.AsAggregateDeclaration().GetAssembly();
+                    return ((AggregateDeclaration)this).GetAssembly();
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).AssociatedAssembly;
                 default:
@@ -300,10 +299,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_FieldSymbol:
                 case SYMKIND.SK_EventSymbol:
                 case SYMKIND.SK_TypeParameterSymbol:
-                    return (parent as AggregateSymbol).InternalsVisibleTo(assembly);
+                    return ((AggregateSymbol)parent).InternalsVisibleTo(assembly);
 
                 case SYMKIND.SK_AggregateDeclaration:
-                    return this.AsAggregateDeclaration().Agg().InternalsVisibleTo(assembly);
+                    return ((AggregateDeclaration)this).Agg().InternalsVisibleTo(assembly);
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).InternalsVisibleTo(assembly);
                 default:
@@ -396,7 +395,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal static class SymbolExtensions
     {
-        internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
         internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }

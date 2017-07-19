@@ -217,9 +217,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     aggWhere = aggSym;
                     break;
                 }
-                if (symT.IsAggregateDeclaration())
+                if (symT is AggregateDeclaration aggDec)
                 {
-                    aggWhere = symT.AsAggregateDeclaration().Agg();
+                    aggWhere = aggDec.Agg();
                     break;
                 }
             }
