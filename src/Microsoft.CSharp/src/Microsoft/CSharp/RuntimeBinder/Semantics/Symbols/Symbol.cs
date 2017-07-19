@@ -445,7 +445,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
         internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }
         internal static MethodOrPropertySymbol AsMethodOrPropertySymbol(this Symbol symbol) { return symbol as MethodOrPropertySymbol; }
-        internal static Scope AsScope(this Symbol symbol) { return symbol as Scope; }
         internal static TypeParameterSymbol AsTypeParameterSymbol(this Symbol symbol) { return symbol as TypeParameterSymbol; }
         internal static EventSymbol AsEventSymbol(this Symbol symbol) { return symbol as EventSymbol; }
     }
