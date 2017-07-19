@@ -224,7 +224,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsAggregateSymbol() { return _kind == SYMKIND.SK_AggregateSymbol; }
         public bool IsAggregateDeclaration() { return _kind == SYMKIND.SK_AggregateDeclaration; }
         public bool IsFieldSymbol() { return _kind == SYMKIND.SK_FieldSymbol; }
-        public bool IsLocalVariableSymbol() { return _kind == SYMKIND.SK_LocalVariableSymbol; }
         public bool IsMethodSymbol() { return _kind == SYMKIND.SK_MethodSymbol; }
         public bool IsPropertySymbol() { return _kind == SYMKIND.SK_PropertySymbol; }
         public bool IsTypeParameterSymbol() { return _kind == SYMKIND.SK_TypeParameterSymbol; }
@@ -441,7 +440,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static AggregateSymbol AsAggregateSymbol(this Symbol symbol) { return symbol as AggregateSymbol; }
         internal static AggregateDeclaration AsAggregateDeclaration(this Symbol symbol) { return symbol as AggregateDeclaration; }
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
-        internal static LocalVariableSymbol AsLocalVariableSymbol(this Symbol symbol) { return symbol as LocalVariableSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
         internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }
         internal static MethodOrPropertySymbol AsMethodOrPropertySymbol(this Symbol symbol) { return symbol as MethodOrPropertySymbol; }

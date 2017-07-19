@@ -82,7 +82,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public LocalVariableSymbol CreateLocalVar(Name name, ParentSymbol parent, CType type)
         {
-            LocalVariableSymbol sym = newBasicSym(SYMKIND.SK_LocalVariableSymbol, name, parent).AsLocalVariableSymbol();
+            LocalVariableSymbol sym = (LocalVariableSymbol)newBasicSym(SYMKIND.SK_LocalVariableSymbol, name, parent);
             sym.SetType(type);
             sym.SetAccess(ACCESS.ACC_UNKNOWN);    // required for Symbol::hasExternalAccess which is used by refactoring
             sym.wrap = null;
