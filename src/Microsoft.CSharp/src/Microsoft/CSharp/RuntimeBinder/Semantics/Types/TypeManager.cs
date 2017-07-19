@@ -535,9 +535,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return type;
 
                 case TypeKind.TK_ErrorType:
-                    if (type.AsErrorType().HasParent())
+                    ErrorType err = (ErrorType)type;
+                    if (err.HasParent())
                     {
-                        ErrorType err = type.AsErrorType();
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
                         CType pParentType = null;
@@ -691,11 +691,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return true;
 
                 case TypeKind.TK_ErrorType:
-                    if (!typeDst.IsErrorType() || !typeSrc.AsErrorType().HasParent() || !typeDst.AsErrorType().HasParent())
+                    ErrorType errSrc = (ErrorType)typeSrc;
+                    if (!(typeDst is ErrorType errDst) || !errSrc.HasParent() || !errDst.HasParent())
                         return false;
                     {
-                        ErrorType errSrc = typeSrc.AsErrorType();
-                        ErrorType errDst = typeDst.AsErrorType();
                         Debug.Assert(errSrc.nameText != null && errSrc.typeArgs != null);
                         Debug.Assert(errDst.nameText != null && errDst.typeArgs != null);
 
@@ -817,9 +816,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
 
                 case TypeKind.TK_ErrorType:
-                    if (type.AsErrorType().HasParent())
+                    ErrorType err = (ErrorType)type;
+                    if (err.HasParent())
                     {
-                        ErrorType err = type.AsErrorType();
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
                         for (int i = 0; i < err.typeArgs.Count; i++)
@@ -879,9 +878,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
 
                 case TypeKind.TK_ErrorType:
-                    if (type.AsErrorType().HasParent())
+                    ErrorType err = (ErrorType)type;
+                    if (err.HasParent())
                     {
-                        ErrorType err = type.AsErrorType();
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
                         for (int i = 0; i < err.typeArgs.Count; i++)
@@ -1063,7 +1062,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // These guys have no accessibility concerns.
-            Debug.Assert(!(typeSrc is VoidType) && !typeSrc.IsErrorType() && !(typeSrc is TypeParameterType));
+            Debug.Assert(!(typeSrc is VoidType) && !(typeSrc is ErrorType) && !(typeSrc is TypeParameterType));
 
             if (typeSrc is ParameterModifierType || typeSrc is PointerType)
             {

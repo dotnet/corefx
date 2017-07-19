@@ -744,7 +744,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pResult.SetMismatchedStaticBit();
             }
 
-            if (pFieldType.IsErrorType())
+            if (pFieldType is ErrorType)
             {
                 pResult.SetError();
             }
@@ -1240,14 +1240,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     pOperand2 = UnwrapExpression(pOperand2);
                     if (pOperand1.Type != null &&
-                            !pOperand1.Type.IsErrorType() &&
+                            !(pOperand1.Type is ErrorType) &&
                             pOperand2.Type != null &&
-                            !pOperand2.Type.IsErrorType())
+                            !(pOperand2.Type is ErrorType))
                     {
                         ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
                     }
                 }
-                else if (pOperand1.Type != null && !pOperand1.Type.IsErrorType())
+                else if (pOperand1.Type != null && !(pOperand1.Type is ErrorType))
                 {
                     ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
                 }
@@ -2377,7 +2377,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(arg != null);
 
-                if (arg.Type == null || arg.Type.IsErrorType())
+                if (arg.Type == null || arg.Type is ErrorType)
                 {
                     typeErrors = true;
                 }

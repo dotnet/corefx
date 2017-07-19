@@ -105,8 +105,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return true;
                 }
 
-                if (_typeSrc == null || _typeDest == null || _typeSrc.IsErrorType() ||
-                    _typeDest.IsErrorType() || _typeDest.IsNeverSameType())
+                if (_typeSrc == null || _typeDest == null || _typeSrc is ErrorType ||
+                    _typeDest is ErrorType || _typeDest.IsNeverSameType())
                 {
                     return false;
                 }

@@ -153,7 +153,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (arg.IsErrorType())
+            if (arg is ErrorType)
             {
                 // Error should have been reported previously.
                 return false;

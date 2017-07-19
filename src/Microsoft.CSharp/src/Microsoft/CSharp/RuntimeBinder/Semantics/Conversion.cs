@@ -373,7 +373,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return exprResult;
             }
 
-            if (expr.IsOK && !dest.IsErrorType())
+            if (expr.IsOK && !(dest is ErrorType))
             {
                 // don't report cascading error.
 

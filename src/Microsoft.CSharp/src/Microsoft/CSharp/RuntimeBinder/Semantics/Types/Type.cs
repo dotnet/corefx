@@ -21,11 +21,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // Is and As methods.
         public AggregateType AsAggregateType() { return this as AggregateType; }
-        public ErrorType AsErrorType() { return this as ErrorType; }
         public ArrayType AsArrayType() { return this as ArrayType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
-        public bool IsErrorType() { return this is ErrorType; }
         public bool IsArrayType() { return this is ArrayType; }
 
         public bool IsWindowsRuntimeType()
@@ -268,18 +266,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void InitFromParent()
         {
             Debug.Assert(!IsAggregateType());
-            CType typePar = null;
-
-            if (IsErrorType())
-            {
-                typePar = AsErrorType().GetTypeParent();
-            }
-            else
-            {
-                typePar = GetBaseOrParameterOrElementType();
-            }
-
-            _fHasErrors = typePar.HasErrors();
+            _fHasErrors = (this is ErrorType err ? err.GetTypeParent() : GetBaseOrParameterOrElementType()).HasErrors();
         }
 
         public bool HasErrors()
@@ -619,7 +606,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // be equivalent or convertible (like ANONMETHSYMs)
         public bool IsNeverSameType()
         {
-            return this is BoundLambdaType || this is MethodGroupType || (IsErrorType() && !AsErrorType().HasParent());
+            return this is BoundLambdaType || this is MethodGroupType || this is ErrorType err && !err.HasParent();
         }
     }
 }

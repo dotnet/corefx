@@ -242,7 +242,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // If they're identical then this one is automatically good, so skip it.
                 // If we have an error type, then we're in some fault tolerance. Let it through.
-                if (pSourceArg == pTargetArg || pTargetArg.IsErrorType() || pSourceArg.IsErrorType())
+                if (pSourceArg == pTargetArg || pTargetArg is ErrorType || pSourceArg is ErrorType)
                 {
                     continue;
                 }

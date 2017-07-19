@@ -179,12 +179,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // for a CType variable that we couldn't infer.
                 if (_pFixedResults[iParam] != null)
                 {
-                    if (!_pFixedResults[iParam].IsErrorType())
+                    if (!(_pFixedResults[iParam] is ErrorType err))
                     {
                         continue;
                     }
 
-                    Name pErrorTypeName = _pFixedResults[iParam].AsErrorType().nameText;
+                    Name pErrorTypeName = err.nameText;
                     if (pErrorTypeName != null)
                     {
                         continue;

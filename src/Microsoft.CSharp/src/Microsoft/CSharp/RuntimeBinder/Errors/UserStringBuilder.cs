@@ -156,16 +156,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendParentType(CType pType, SubstContext pctx)
         {
-            if (pType.IsErrorType())
+            if (pType is ErrorType err)
             {
-                if (pType.AsErrorType().HasTypeParent())
+                if (err.HasTypeParent())
                 {
-                    ErrAppendType(pType.AsErrorType().GetTypeParent(), null);
+                    ErrAppendType(err.GetTypeParent(), null);
                     ErrAppendChar('.');
                 }
                 else
                 {
-                    ErrAppendParentCore(pType.AsErrorType().GetNSParent(), pctx);
+                    ErrAppendParentCore(err.GetNSParent(), pctx);
                 }
             }
             else if (pType.IsAggregateType())
@@ -560,17 +560,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_ErrorType:
-                    if (pType.AsErrorType().HasParent())
+                    ErrorType err = (ErrorType)pType;
+                    if (err.HasParent())
                     {
-                        Debug.Assert(pType.AsErrorType().nameText != null && pType.AsErrorType().typeArgs != null);
+                        Debug.Assert(err.nameText != null && err.typeArgs != null);
                         ErrAppendParentType(pType, pctx);
-                        ErrAppendName(pType.AsErrorType().nameText);
-                        ErrAppendTypeParameters(pType.AsErrorType().typeArgs, pctx, true);
+                        ErrAppendName(err.nameText);
+                        ErrAppendTypeParameters(err.typeArgs, pctx, true);
                     }
                     else
                     {
                         // Load the string "<error>".
-                        Debug.Assert(null == pType.AsErrorType().typeArgs);
+                        Debug.Assert(null == err.typeArgs);
                         ErrAppendId(MessageID.ERRORSYM);
                     }
                     break;

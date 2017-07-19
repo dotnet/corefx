@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (_typeDest.GetTypeKind())
                 {
                     case TypeKind.TK_ErrorType:
-                        Debug.Assert(_typeDest.AsErrorType().HasTypeParent() || _typeDest.AsErrorType().HasNSParent());
+                        Debug.Assert(((ErrorType)_typeDest).HasParent());
                         if (_typeSrc != _typeDest)
                         {
                             return false;
@@ -126,9 +126,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         break;
                 }
 
-                if (_typeSrc.IsErrorType())
+                if (_typeSrc is ErrorType)
                 {
-                    Debug.Assert(!_typeDest.IsErrorType());
+                    Debug.Assert(!(_typeDest is ErrorType));
                     return false;
                 }
 
