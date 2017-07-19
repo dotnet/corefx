@@ -84,13 +84,17 @@ namespace System.Xml.Tests
 
         static XsltApiTestCaseBase()
         {
-            // Replace absolute URI in xmlResolver_document_function.xml based on the environment
-            string xslFile = Path.Combine("TestFiles", FilePathUtil.GetTestDataPath(), "XsltApi", "xmlResolver_document_function_absolute_uri.xsl");
-            XmlDocument doc = new XmlDocument();
-            doc.Load(xslFile);
-            string xslString = doc.OuterXml.Replace("ABSOLUTE_URI", s_temporaryResolverDocumentFullName);
-            doc.LoadXml(xslString);
-            doc.Save(xslFile);
+            // On uap access is denied to full path and the code below and related tests cannot run
+            if (!PlatformDetection.IsUap)
+            {
+                // Replace absolute URI in xmlResolver_document_function.xml based on the environment
+                string xslFile = Path.Combine("TestFiles", FilePathUtil.GetTestDataPath(), "XsltApi", "xmlResolver_document_function_absolute_uri.xsl");
+                XmlDocument doc = new XmlDocument();
+                doc.Load(xslFile);
+                string xslString = doc.OuterXml.Replace("ABSOLUTE_URI", s_temporaryResolverDocumentFullName);
+                doc.LoadXml(xslString);
+                doc.Save(xslFile);
+            }
         }
 
         public XsltApiTestCaseBase(ITestOutputHelper output)

@@ -3027,11 +3027,8 @@ namespace System.Xml.Tests
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             LoadXSL("MyObject_CaseSensitive.xsl", xslInputType, readerType);
             var e = Assert.ThrowsAny<XsltException>(() => Transform_ArgList("fruits.xml", outputType, navType));
-            if (!PlatformDetection.IsFullFramework)
-            {
-                // Exception message comes from a different resource on netfx
-                CheckExpectedError(e, "System.Xml", "XmlIl_NoExtensionMethod", new[] { "urn:my-object", "FN3", "0" });
-            }
+            var exceptionSourceAssembly = PlatformDetection.IsFullFramework ? "System.Data.SqlXml" : "System.Xml";
+            CheckExpectedError(e, exceptionSourceAssembly, "XmlIl_NoExtensionMethod", new[] { "urn:my-object", "FN3", "0" });
         }
 
         //[Variation("Object namespace System.Xml.Tests found")]

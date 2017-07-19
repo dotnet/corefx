@@ -488,6 +488,7 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Absolute path access is denied in uap")]
         [Theory]
         public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
@@ -1072,11 +1073,8 @@ namespace System.Xml.Tests
                 var e = Assert.Throws<XsltCompileException>(() => LoadXSL_Resolver("XmlResolver_Main.xsl", myResolver, inputType, readerType));
                 var xsltException = Assert.IsType<XsltException>(e.InnerException);
                 var absoluteUri = new Uri(Path.Combine(Environment.CurrentDirectory, FullFilePath("XmlResolver_Include.xsl"))).AbsoluteUri;
-                if (!PlatformDetection.IsFullFramework)
-                {
-                    // Exception message comes from a different resource on netfx
-                    CheckExpectedError(xsltException, "System.Xml", "Xslt_CantResolve", new[] { absoluteUri });
-                }
+                var exceptionSourceAssembly = PlatformDetection.IsFullFramework ? "System.Data.SqlXml" : "System.Xml";
+                CheckExpectedError(xsltException, exceptionSourceAssembly, "Xslt_CantResolve", new[] { absoluteUri });
             }
 
             LoadXSL_Resolver("XmlResolver_Main.xsl", new XmlUrlResolver(), inputType, readerType);
@@ -2160,6 +2158,7 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Absolute path access is denied in uap")]
         [Theory]
         public void TC_AbsolutePath_Transform(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
