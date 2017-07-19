@@ -248,12 +248,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = GetNameFromPtrs(0, 0);
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
-            if (nsa == null)
-            {
+            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol) as AssemblyQualifiedNamespaceSymbol
                 // Create a new one.
-                nsa = _symFactory.CreateNamespaceAid(name, ns);
-            }
+                ?? _symFactory.CreateNamespaceAid(name, ns);
 
             Debug.Assert(nsa.GetNS() == ns);
 
