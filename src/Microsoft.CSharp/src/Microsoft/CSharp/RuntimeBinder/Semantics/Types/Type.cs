@@ -24,13 +24,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ErrorType AsErrorType() { return this as ErrorType; }
         public ArrayType AsArrayType() { return this as ArrayType; }
         public PointerType AsPointerType() { return this as PointerType; }
-        public ParameterModifierType AsParameterModifierType() { return this as ParameterModifierType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
         public bool IsErrorType() { return this is ErrorType; }
         public bool IsArrayType() { return this is ArrayType; }
         public bool IsPointerType() { return this is PointerType; }
-        public bool IsParameterModifierType() { return this is ParameterModifierType; }
 
         public bool IsWindowsRuntimeType()
         {
@@ -97,7 +95,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
-                    ParameterModifierType r = src.AsParameterModifierType();
+                    ParameterModifierType r = (ParameterModifierType)src;
                     Type parameterType = r.GetParameterType().AssociatedSystemType;
                     result = parameterType.MakeByRefType();
                     break;
@@ -259,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AsPointerType().GetReferentType();
 
                 case TypeKind.TK_ParameterModifierType:
-                    return AsParameterModifierType().GetParameterType();
+                    return ((ParameterModifierType)this).GetParameterType();
 
                 case TypeKind.TK_NullableType:
                     return ((NullableType)this).GetUnderlyingType();
