@@ -444,7 +444,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case SYMKIND.SK_EventSymbol:
-                    ErrAppendEvent(sym.AsEventSymbol(), pctx);
+                    ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
                 case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:

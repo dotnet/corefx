@@ -1667,7 +1667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // For a property/indexer we remap the accessors, not the property/indexer.
             // Since every event has both accessors we remap the event instead of the accessors.
-            Debug.Assert(pswt && (pswt.Sym.IsMethodSymbol() || pswt.Sym.IsEventSymbol() || pswt.Sym is MethodOrPropertySymbol));
+            Debug.Assert(pswt && (pswt.Sym.IsMethodSymbol() || pswt.Sym is EventSymbol || pswt.Sym is MethodOrPropertySymbol));
             Debug.Assert(typeObj != null);
 
             // Don't remap static or interface methods.

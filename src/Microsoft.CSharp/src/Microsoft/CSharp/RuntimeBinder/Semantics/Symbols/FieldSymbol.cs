@@ -50,12 +50,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EventSymbol getEvent(SymbolLoader symbolLoader)
         {
-            Debug.Assert(this.isEvent == true);
-            EventSymbol evt = symbolLoader.LookupAggMember(this.name,
-                                                           this.getClass(),
-                                                           symbmask_t.MASK_EventSymbol).AsEventSymbol();
-
-            return evt;
+            Debug.Assert(isEvent);
+            return symbolLoader.LookupAggMember(name, getClass(), symbmask_t.MASK_EventSymbol) as EventSymbol;
         }
     }
 }

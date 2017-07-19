@@ -288,8 +288,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(_fMulti || typeCur == _prgtype[0]);
                         if (!_fMulti)
                         {
-                            if (_swtFirst.Sym.IsFieldSymbol() && symCur.IsEventSymbol()
-                               // The isEvent bit is only set on symbols which come from source...
+                            if (_swtFirst.Sym.IsFieldSymbol() && symCur is EventSymbol
+                                // The isEvent bit is only set on symbols which come from source...
                                 // This is not a problem for the compiler because the field is only
                                 // accessible in the scope in which it is declared,
                                 // but in the EE we ignore accessibility...
@@ -299,7 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // m_swtFirst is just the field behind the event symCur so ignore symCur.
                                 continue;
                             }
-                            else if (_swtFirst.Sym.IsFieldSymbol() && symCur.IsEventSymbol())
+                            else if (_swtFirst.Sym.IsFieldSymbol() && symCur is EventSymbol)
                             {
                                 // symCur is the matching event.
                                 continue;

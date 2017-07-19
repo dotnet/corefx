@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EventSymbol CreateEvent(Name name, ParentSymbol parent)
         {
-            EventSymbol sym = newBasicSym(SYMKIND.SK_EventSymbol, name, parent).AsEventSymbol();
+            EventSymbol sym = newBasicSym(SYMKIND.SK_EventSymbol, name, parent) as EventSymbol;
 
             Debug.Assert(sym != null);
             return (sym);
