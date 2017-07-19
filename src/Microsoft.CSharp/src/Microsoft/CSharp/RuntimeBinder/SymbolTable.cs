@@ -321,7 +321,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType ctype = GetCTypeFromType(type);
             if (ctype.IsWindowsRuntimeType())
             {
-                TypeArray collectioniFaces = ctype.AsAggregateType().GetWinRTCollectionIfacesAll(_semanticChecker.GetSymbolLoader());
+                TypeArray collectioniFaces = ((AggregateType)ctype).GetWinRTCollectionIfacesAll(_semanticChecker.GetSymbolLoader());
 
                 for (int i = 0; i < collectioniFaces.Count; i++)
                 {
@@ -721,9 +721,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                         {
                             // If we had an aggregate type, its possible we're not at the end.
                             // This will happen for nullable<T> for instance.
-                            if (ctype.IsAggregateType())
+                            if (ctype is AggregateType cat)
                             {
-                                next = ctype.AsAggregateType().GetOwningAggregate();
+                                next = cat.GetOwningAggregate();
                             }
                             else
                             {
@@ -1014,7 +1014,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             else if (type.IsEnum)
             {
                 kind = AggKindEnum.Enum;
-                agg.SetUnderlyingType(GetCTypeFromType(Enum.GetUnderlyingType(type)).AsAggregateType());
+                agg.SetUnderlyingType((AggregateType)GetCTypeFromType(Enum.GetUnderlyingType(type)));
             }
             else if (type.IsValueType)
             {
@@ -1128,7 +1128,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     t = t.GetGenericTypeDefinition();
                 }
-                agg.SetBaseClass(GetCTypeFromType(t).AsAggregateType());
+                agg.SetBaseClass((AggregateType)GetCTypeFromType(t));
             }
             agg.SetTypeManager(_typeManager);
             agg.SetFirstUDConversion(null);
@@ -1986,7 +1986,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private MethodSymbol FindMethodFromMemberInfo(MemberInfo baseMemberInfo)
         {
             CType t = GetCTypeFromType(baseMemberInfo.DeclaringType);
-            Debug.Assert(t.IsAggregateType());
+            Debug.Assert(t is AggregateType);
             AggregateSymbol aggregate = t.getAggregate();
             Debug.Assert(aggregate != null);
 
@@ -2039,7 +2039,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // there are any conversions.
             CType t = GetCTypeFromType(type);
 
-            if (!t.IsAggregateType())
+            if (!(t is AggregateType))
             {
                 CType endT;
                 while ((endT = t.GetBaseOrParameterOrElementType()) != null)
@@ -2059,7 +2059,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             Debug.Assert(t is AggregateType);
-            AggregateSymbol aggregate = t.AsAggregateType().getAggregate();
+            AggregateSymbol aggregate = ((AggregateType)t).getAggregate();
 
             // Now find all the conversions and make them.
             IEnumerable<MethodInfo> conversions = Enumerable.Where(type.GetRuntimeMethods(),

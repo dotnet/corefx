@@ -19,11 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool _isBogus;     // can't be used in our language -- unsupported type(s)
         private bool _checkedBogus; // Have we checked a method args/return for bogus types
 
-        // Is and As methods.
-        public AggregateType AsAggregateType() { return this as AggregateType; }
-
-        public bool IsAggregateType() { return this is AggregateType; }
-
         public bool IsWindowsRuntimeType()
         {
             return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
@@ -95,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_AggregateType:
-                    result = CalculateAssociatedSystemTypeForAggregate(src.AsAggregateType());
+                    result = CalculateAssociatedSystemTypeForAggregate((AggregateType)src);
                     break;
 
                 case TypeKind.TK_TypeParameterType:
@@ -206,10 +201,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_AggregateType:
-                    fBogus = AsAggregateType().getAggregate().computeCurrentBogusState();
-                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().Count; i++)
+                    AggregateType aggThis = (AggregateType)this;
+                    fBogus = aggThis.getAggregate().computeCurrentBogusState();
+                    for (int i = 0; !fBogus && i < aggThis.GetTypeArgsAll().Count; i++)
                     {
-                        fBogus |= AsAggregateType().GetTypeArgsAll()[i].computeCurrentBogusState();
+                        fBogus |= aggThis.GetTypeArgsAll()[i].computeCurrentBogusState();
                     }
                     break;
 
@@ -263,7 +259,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public void InitFromParent()
         {
-            Debug.Assert(!IsAggregateType());
+            Debug.Assert(!(this is AggregateType));
             _fHasErrors = (this is ErrorType err ? err.GetTypeParent() : GetBaseOrParameterOrElementType()).HasErrors();
         }
 
@@ -289,7 +285,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case TypeKind.TK_AggregateType:
                     {
-                        AggregateSymbol sym = AsAggregateType().getAggregate();
+                        AggregateSymbol sym = ((AggregateType)this).getAggregate();
 
                         // Treat enums like their underlying types.
                         if (sym.IsEnum())
@@ -370,7 +366,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public CType underlyingType()
         {
-            if (IsAggregateType() && getAggregate().IsEnum())
+            if (this is AggregateType && getAggregate().IsEnum())
                 return getAggregate().GetUnderlyingType();
             return this;
         }
@@ -405,17 +401,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetNakedAgg(false);
         }
 
-        private AggregateSymbol GetNakedAgg(bool fStripNub)
-        {
-            CType type = GetNakedType(fStripNub);
-            if (type != null && type.IsAggregateType())
-                return type.AsAggregateType().getAggregate();
-            return null;
-        }
+        private AggregateSymbol GetNakedAgg(bool fStripNub) =>
+            (GetNakedType(fStripNub) as AggregateType)?.getAggregate();
+
         public AggregateSymbol getAggregate()
         {
-            Debug.Assert(IsAggregateType());
-            return AsAggregateType().GetOwningAggregate();
+            Debug.Assert(this is AggregateType);
+            return ((AggregateType)this).GetOwningAggregate();
         }
 
         public virtual CType StripNubs() => this;
@@ -428,7 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool isDelegateType()
         {
-            return (IsAggregateType() && getAggregate().IsDelegate());
+            return this is AggregateType && getAggregate().IsDelegate();
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -464,23 +456,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isStructOrEnum()
         {
-            return (IsAggregateType() && (getAggregate().IsStruct() || getAggregate().IsEnum())) || this is NullableType;
+            return this is AggregateType && (getAggregate().IsStruct() || getAggregate().IsEnum()) || this is NullableType;
         }
         public bool isStructType()
         {
-            return IsAggregateType() && getAggregate().IsStruct() || this is NullableType;
+            return this is AggregateType && getAggregate().IsStruct() || this is NullableType;
         }
         public bool isEnumType()
         {
-            return (IsAggregateType() && getAggregate().IsEnum());
+            return this is AggregateType && getAggregate().IsEnum();
         }
         public bool isInterfaceType()
         {
-            return (IsAggregateType() && getAggregate().IsInterface());
+            return this is AggregateType && getAggregate().IsInterface();
         }
         public bool isClassType()
         {
-            return (IsAggregateType() && getAggregate().IsClass());
+            return this is AggregateType && getAggregate().IsClass();
         }
         public AggregateType underlyingEnumType()
         {
@@ -489,9 +481,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isUnsigned()
         {
-            if (IsAggregateType())
+            if (this is AggregateType sym)
             {
-                AggregateType sym = AsAggregateType();
                 if (sym.isEnumType())
                 {
                     sym = sym.underlyingEnumType();
@@ -519,13 +510,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isPredefType(PredefinedType pt)
         {
-            if (IsAggregateType())
-                return AsAggregateType().getAggregate().IsPredefined() && AsAggregateType().getAggregate().GetPredefType() == pt;
+            if (this is AggregateType ats)
+                return ats.getAggregate().IsPredefined() && ats.getAggregate().GetPredefType() == pt;
             return (this is VoidType && pt == PredefinedType.PT_VOID);
         }
         public bool isPredefined()
         {
-            return IsAggregateType() && getAggregate().IsPredefined();
+            return this is AggregateType && getAggregate().IsPredefined();
         }
         public PredefinedType getPredefType()
         {
@@ -549,7 +540,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (isPredefType(PredefinedType.PT_G_EXPRESSION))
             {
-                return AsAggregateType().GetTypeArgsThis()[0];
+                return ((AggregateType)this).GetTypeArgsThis()[0];
             }
 
             return this;
@@ -561,9 +552,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (GetTypeKind())
             {
                 case TypeKind.TK_TypeParameterType:
-                    return (this as TypeParameterType).IsValueType();
+                    return ((TypeParameterType)this).IsValueType();
                 case TypeKind.TK_AggregateType:
-                    return AsAggregateType().getAggregate().IsValueType();
+                    return ((AggregateType)this).getAggregate().IsValueType();
                 case TypeKind.TK_NullableType:
                     return true;
                 default:
@@ -575,9 +566,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (GetTypeKind())
             {
                 case TypeKind.TK_TypeParameterType:
-                    return (this as TypeParameterType).IsNonNullableValueType();
+                    return ((TypeParameterType)this).IsNonNullableValueType();
                 case TypeKind.TK_AggregateType:
-                    return AsAggregateType().getAggregate().IsValueType();
+                    return ((AggregateType)this).getAggregate().IsValueType();
                 case TypeKind.TK_NullableType:
                     return false;
                 default:
@@ -592,9 +583,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullType:
                     return true;
                 case TypeKind.TK_TypeParameterType:
-                    return (this as TypeParameterType).IsReferenceType();
+                    return ((TypeParameterType)this).IsReferenceType();
                 case TypeKind.TK_AggregateType:
-                    return AsAggregateType().getAggregate().IsRefType();
+                    return ((AggregateType)this).getAggregate().IsRefType();
                 default:
                     return false;
             }

@@ -1139,13 +1139,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType aatype1 = orig1.Type;
             CType aatype2 = orig2.Type;
             // Is the operator even a candidate for lifting?
-            if (fptype1 is NullableType || fptype2 is NullableType ||
-                !fptype1.IsAggregateType() || !fptype2.IsAggregateType() ||
-                !fptype1.AsAggregateType().getAggregate().IsValueType() ||
-                !fptype2.AsAggregateType().getAggregate().IsValueType())
+            if (!(fptype1 is AggregateType fat1)
+                || !fat1.getAggregate().IsValueType()
+                || !(fptype2 is AggregateType fat2)
+                || !fat2.getAggregate().IsValueType())
             {
                 return;
             }
+
             CType nubfptype1 = GetSymbolLoader().GetTypeManager().GetNullable(fptype1);
             CType nubfptype2 = GetSymbolLoader().GetTypeManager().GetNullable(fptype2);
             // If we have null op X, or T1 op T2?, or T1 op null, lift first arg to T1?
@@ -1163,15 +1164,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pp2 = new2;
         }
 
-        private bool IsNullableValueType(CType pType)
-        {
-            if (pType is NullableType)
-            {
-                CType pStrippedType = pType.StripNubs();
-                return pStrippedType.IsAggregateType() && pStrippedType.AsAggregateType().getAggregate().IsValueType();
-            }
-            return false;
-        }
+        private bool IsNullableValueType(CType pType) =>
+            pType is NullableType && pType.StripNubs() is AggregateType agg && agg.getAggregate().IsValueType();
 
         private bool IsNullableValueAccess(Expr pExpr, Expr pObject)
         {

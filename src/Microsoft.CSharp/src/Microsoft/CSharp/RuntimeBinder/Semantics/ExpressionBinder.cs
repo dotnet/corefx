@@ -501,7 +501,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             CType type = pObject.Type;
 
-            if (!type.IsAggregateType() && !(type is TypeParameterType))
+            if (!(type is AggregateType) && !(type is TypeParameterType))
             {
                 ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
                 MethWithInst mwi = new MethWithInst(null, null);
@@ -717,23 +717,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 isLValue = false;
             }
 
-            CType fieldType = null;
+            AggregateType fieldType = null;
             // If this field is the backing field of a WindowsRuntime event then we need to bind to its
             // invocationlist property which is a delegate containing all the handlers.
             if (fwt.Field().isEvent && fwt.Field().getEvent(GetSymbolLoader()) != null
                 && fwt.Field().getEvent(GetSymbolLoader()).IsWindowsRuntimeEvent)
             {
-                fieldType = fwt.Field().GetType();
-                if (fieldType.IsAggregateType())
+                fieldType = fwt.Field().GetType() as AggregateType;
+                if (fieldType != null)
                 {
                     // Access event backing field (EventRegistrationTokenTable<T>) using
                     // EventRegistrationTokenTable<T>.GetOrCreateEventRegistrationTokenTable()
                     // to ensure non-null
                     pFieldType = GetTypes().GetParameterModifier(pFieldType, false);
-                }
-                else
-                {
-                    fieldType = null;
                 }
             }
 
@@ -764,13 +760,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
                         .AsMethodSymbol();
 
-                MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType.AsAggregateType());
+                MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType);
                 ExprMemberGroup getOrCreateGrp = GetExprFactory().CreateMemGroup(null, getOrCreatempwi);
 
                 Expr getOrCreateCall = BindToMethod(
                     new MethWithInst(getOrCreatempwi), pResult, getOrCreateGrp, (MemLookFlags)MemLookFlags.None);
 
-                AggregateSymbol fieldTypeSymbol = fieldType.AsAggregateType().GetOwningAggregate();
+                AggregateSymbol fieldTypeSymbol = fieldType.GetOwningAggregate();
                 Name invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.
@@ -782,10 +778,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         .LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
                         .AsPropertySymbol();
 
-                MethPropWithInst mpwi = new MethPropWithInst(invocationList, fieldType.AsAggregateType());
+                MethPropWithInst mpwi = new MethPropWithInst(invocationList, fieldType);
                 ExprMemberGroup memGroup = GetExprFactory().CreateMemGroup(getOrCreateCall, mpwi);
 
-                PropWithType pwt = new PropWithType(invocationList, fieldType.AsAggregateType());
+                PropWithType pwt = new PropWithType(invocationList, fieldType);
                 Expr propertyExpr = BindToProperty(getOrCreateCall, pwt, bindFlags, null, null, memGroup);
                 return propertyExpr;
             }
@@ -959,7 +955,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeSrc = ((TypeParameterType)typeSrc).GetEffectiveBaseClass();
                     goto LAgain;
                 case TypeKind.TK_AggregateType:
-                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || typeSrc.AsAggregateType().getAggregate().IsSkipUDOps())
+                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).getAggregate().IsSkipUDOps())
                         return null;
                     break;
                 default:
@@ -973,7 +969,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             List<CandidateFunctionMember> methFirstList = new List<CandidateFunctionMember>();
             MethodSymbol methCur = null;
-            AggregateType atsCur = typeSrc.AsAggregateType();
+            AggregateType atsCur = (AggregateType)typeSrc;
 
             for (; ;)
             {
@@ -1562,10 +1558,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeObj = typeTmp;
             }
 
-            if (typeObj is TypeParameterType || typeObj.IsAggregateType())
+            if (typeObj is TypeParameterType || typeObj is AggregateType)
             {
-                AggregateSymbol aggCalled = null;
-                aggCalled = swt.Sym.parent.AsAggregateSymbol();
+                AggregateSymbol aggCalled = swt.Sym.parent.AsAggregateSymbol();
                 Debug.Assert(swt.GetType().getAggregate() == aggCalled);
 
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
@@ -1687,14 +1682,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Don't remap non-virtual members
-            if (!typeObj.IsAggregateType() || typeObj.isInterfaceType() || !pswt.Sym.IsVirtual())
+            if (!(typeObj is AggregateType atsObj) || atsObj.isInterfaceType() || !pswt.Sym.IsVirtual())
             {
                 return;
             }
 
             symbmask_t mask = pswt.Sym.mask();
-
-            AggregateType atsObj = typeObj.AsAggregateType();
 
             // Search for an override version of the method.
             while (atsObj != null && atsObj.getAggregate() != pswt.Sym.parent)

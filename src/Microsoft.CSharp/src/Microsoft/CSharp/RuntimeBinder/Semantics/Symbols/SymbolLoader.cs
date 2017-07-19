@@ -147,7 +147,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateType GetAggTypeSym(CType typeSym)
         {
             Debug.Assert(typeSym != null);
-            Debug.Assert(typeSym.IsAggregateType() ||
+            Debug.Assert(typeSym is AggregateType ||
                    typeSym is TypeParameterType ||
                    typeSym is ArrayType ||
                    typeSym is NullableType);
@@ -155,7 +155,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (typeSym.GetTypeKind())
             {
                 case TypeKind.TK_AggregateType:
-                    return typeSym.AsAggregateType();
+                    return (AggregateType)typeSym;
                 case TypeKind.TK_ArrayType:
                     return GetReqPredefType(PredefinedType.PT_ARRAY);
                 case TypeKind.TK_TypeParameterType:
@@ -175,11 +175,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            if (!pDerived.IsAggregateType())
+            if (!(pDerived is AggregateType atsDer))
             {
                 return false;
             }
-            AggregateType atsDer = pDerived.AsAggregateType();
+
             while (atsDer != null)
             {
                 TypeArray ifacesAll = atsDer.GetIfacesAll();
@@ -215,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pBase != null);
             // A base class has got to be a class. The derived type might be a struct.
 
-            if (!pBase.isClassType())
+            if (!(pBase is AggregateType atsBase && atsBase.isClassType()))
             {
                 return false;
             }
@@ -228,13 +228,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            if (!pDerived.IsAggregateType())
+            if (!(pDerived is AggregateType atsDer))
             {
                 return false;
             }
 
-            AggregateType atsDer = pDerived.AsAggregateType();
-            AggregateType atsBase = pBase.AsAggregateType();
             AggregateType atsCur = atsDer.GetBaseClass();
             while (atsCur != null)
             {
@@ -304,7 +302,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            AggregateType atsDest = pDest.AsAggregateType();
+            AggregateType atsDest = pDest as AggregateType;
             AggregateSymbol aggDest = pDest.getAggregate();
             if (!aggDest.isPredefAgg(PredefinedType.PT_G_ILIST) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_ICOLLECTION) &&
@@ -368,7 +366,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
             if (pSource.isInterfaceType() && pDest.isInterfaceType() && pSource != pDest &&
-                HasInterfaceConversion(pSource.AsAggregateType(), pDest.AsAggregateType()))
+                HasInterfaceConversion(pSource as AggregateType, pDest as AggregateType))
             {
                 return true;
             }
@@ -422,7 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   S is a delegate convertible to T
 
             if (pSource.isDelegateType() && pDest.isDelegateType() &&
-                HasDelegateConversion(pSource.AsAggregateType(), pDest.AsAggregateType()))
+                HasDelegateConversion(pSource as AggregateType, pDest as AggregateType))
             {
                 return true;
             }
@@ -496,23 +494,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            if (!pDerived.IsAggregateType())
+            if (!(pDerived is AggregateType atsDer))
             {
                 return false;
             }
-            AggregateType atsDer = pDerived.AsAggregateType();
+
+            AggregateType atsBase = (AggregateType)pBase;
             while (atsDer != null)
             {
-                TypeArray ifacesAll = atsDer.GetIfacesAll();
-                for (int i = 0; i < ifacesAll.Count; i++)
+                foreach (AggregateType iface in atsDer.GetIfacesAll().Items)
                 {
-                    if (HasInterfaceConversion(ifacesAll[i].AsAggregateType(), pBase.AsAggregateType()))
+                    if (HasInterfaceConversion(iface, atsBase))
                     {
                         return true;
                     }
                 }
+
                 atsDer = atsDer.GetBaseClass();
             }
+
             return false;
         }
 
@@ -734,7 +734,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //
             // This notion is not found in the spec but it is useful in the implementation.
 
-            if (pSource.IsAggregateType() && pDest.isPredefType(PredefinedType.PT_OBJECT))
+            if (pSource is AggregateType && pDest.isPredefType(PredefinedType.PT_OBJECT))
             {
                 // If we are going from any aggregate type (class, struct, interface, enum or delegate)
                 // to object, we immediately return true. This may seem like a mere optimization --
@@ -786,9 +786,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 while (derived != null)
                 {
-                    for (int i = 0; i < derived.GetIfacesAll().Count; i++)
+                    foreach (AggregateType iface in derived.GetIfacesAll().Items)
                     {
-                        AggregateType iface = derived.GetIfacesAll()[i].AsAggregateType();
                         if (iface.getAggregate() == @base)
                             return true;
                     }

@@ -161,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         break;
                     case TypeKind.TK_AggregateType:
                         {
-                            AggCastResult result = bindExplicitConversionToAggregate(_typeDest.AsAggregateType());
+                            AggCastResult result = bindExplicitConversionToAggregate(_typeDest as AggregateType);
 
                             if (result == AggCastResult.Success)
                             {
@@ -234,8 +234,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(_typeDest != null);
 
-                if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray ||
-                    !_typeDest.isInterfaceType() || _typeDest.AsAggregateType().GetTypeArgsAll().Count != 1)
+                if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray || !(_typeDest is AggregateType aggDest)
+                    || !aggDest.isInterfaceType() || aggDest.GetTypeArgsAll().Count != 1)
                 {
                     return false;
                 }
@@ -244,15 +244,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetOptPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, _typeDest.AsAggregateType().getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggDest.getAggregate())) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, _typeDest.AsAggregateType().getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggDest.getAggregate())))
                 {
                     return false;
                 }
 
                 CType typeArr = arrSrc.GetElementType();
-                CType typeLst = _typeDest.AsAggregateType().GetTypeArgsAll()[0];
+                CType typeLst = aggDest.GetTypeArgsAll()[0];
 
                 if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
                 {
@@ -319,8 +319,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //   S[] to System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                 //   are the same type or there is an implicit or explicit reference conversion from S to T.
 
-                if (!arrayDest.IsSZArray || !_typeSrc.isInterfaceType() ||
-                    _typeSrc.AsAggregateType().GetTypeArgsAll().Count != 1)
+                if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.isInterfaceType() ||
+                    aggSrc.GetTypeArgsAll().Count != 1)
                 {
                     return false;
                 }
@@ -329,15 +329,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetOptPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, _typeSrc.AsAggregateType().getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggSrc.getAggregate())) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, _typeSrc.AsAggregateType().getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggSrc.getAggregate())))
                 {
                     return false;
                 }
 
                 CType typeArr = arrayDest.GetElementType();
-                CType typeLst = _typeSrc.AsAggregateType().GetTypeArgsAll()[0];
+                CType typeLst = aggSrc.GetTypeArgsAll()[0];
 
                 Debug.Assert(!typeArr.IsNeverSameType());
                 if (typeArr != typeLst && !CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
@@ -531,7 +531,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(aggTypeDest != null);
                 Debug.Assert(aggTypeDest.isPredefType(PredefinedType.PT_DECIMAL));
 
-                AggregateType underlyingType = _typeSrc.underlyingType().AsAggregateType();
+                AggregateType underlyingType = _typeSrc.underlyingType() as AggregateType;
 
                 // Need to first cast the source expr to its underlying type.
 
@@ -708,15 +708,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
 
-                if (!_typeSrc.IsAggregateType())
+                if (!(_typeSrc is AggregateType atSrc))
                 {
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggSrc = _typeSrc.AsAggregateType().getAggregate();
+                AggregateSymbol aggSrc = atSrc.getAggregate();
                 AggregateSymbol aggDest = aggTypeDest.getAggregate();
 
-                if (GetSymbolLoader().HasBaseConversion(aggTypeDest, _typeSrc.AsAggregateType()))
+                if (GetSymbolLoader().HasBaseConversion(aggTypeDest, atSrc))
                 {
                     if (_needsExprDest)
                     {

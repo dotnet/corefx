@@ -214,7 +214,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // If not, try user defined implicit conversions.
                         break;
                     case TypeKind.TK_AggregateType:
-                        if (bindImplicitConversionFromAgg(_typeSrc.AsAggregateType()))
+                        if (bindImplicitConversionFromAgg(_typeSrc as AggregateType))
                         {
                             return true;
                         }
@@ -549,9 +549,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // and the non-generic versions.
 
                 if ((_typeDest is ArrayType ||
-                     (_typeDest.isInterfaceType() &&
-                      _typeDest.AsAggregateType().GetTypeArgsAll().Count == 1 &&
-                      ((_typeDest.AsAggregateType().GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).GetElementType()) ||
+                     (_typeDest is AggregateType aggDest && aggDest.isInterfaceType() &&
+                      aggDest.GetTypeArgsAll().Count == 1 &&
+                      ((aggDest.GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).GetElementType()) ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
                     &&
                     (0 != (_flags & CONVERTTYPE.FORCECAST) ||
@@ -630,7 +630,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // *   From any delegate-type to System.Delegate.
                 // *   From any delegate-type to System.ICloneable.
 
-                if (!_typeDest.IsAggregateType() || !GetSymbolLoader().HasBaseConversion(pSource, _typeDest))
+                if (!(_typeDest is AggregateType) || !GetSymbolLoader().HasBaseConversion(pSource, _typeDest))
                 {
                     return false;
                 }
@@ -660,7 +660,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // base class for all enums (21.4). A struct or enum can be boxed to the type System.ValueType, 
                 // since that is the direct base class for all structs (18.3.2) and a base class for all enums.
 
-                if (_typeDest.IsAggregateType() && GetSymbolLoader().HasBaseConversion(aggTypeSrc, _typeDest.AsAggregateType()))
+                if (_typeDest is AggregateType aggDest && GetSymbolLoader().HasBaseConversion(aggTypeSrc, aggDest))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL);

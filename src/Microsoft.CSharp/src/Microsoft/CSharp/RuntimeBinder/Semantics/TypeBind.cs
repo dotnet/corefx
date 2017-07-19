@@ -45,10 +45,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     type = type.GetNakedType(true);
             }
 
-            if (!type.IsAggregateType())
+            if (!(type is AggregateType ats))
                 return true;
-
-            AggregateType ats = type.AsAggregateType();
 
             if (ats.GetTypeArgsAll().Count == 0)
             {
@@ -95,10 +93,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int i = 0; i < typeArgsThis.Count; i++)
             {
                 CType arg = typeArgsThis[i].GetNakedType(true);
-                if (arg.IsAggregateType() && !arg.AsAggregateType().fConstraintsChecked)
+                if (arg is AggregateType atArg && !atArg.fConstraintsChecked)
                 {
-                    CheckConstraints(checker, errHandling, arg.AsAggregateType(), flags | CheckConstraintsFlags.Outer);
-                    if (arg.AsAggregateType().fConstraintError)
+                    CheckConstraints(checker, errHandling, atArg, flags | CheckConstraintsFlags.Outer);
+                    if (atArg.fConstraintError)
                         ats.fConstraintError = true;
                 }
             }
@@ -315,7 +313,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (arg.isClassType())
             {
-                AggregateSymbol agg = arg.AsAggregateType().getAggregate();
+                AggregateSymbol agg = ((AggregateType)arg).getAggregate();
 
                 // Due to late binding nature of IDE created symbols, the AggregateSymbol might not
                 // have all the information necessary yet, if it is not fully bound.
@@ -376,7 +374,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            Debug.Assert(typeBnd.IsAggregateType() || typeBnd is TypeParameterType || typeBnd is ArrayType);
+            Debug.Assert(typeBnd is AggregateType || typeBnd is TypeParameterType || typeBnd is ArrayType);
 
             switch (arg.GetTypeKind())
             {

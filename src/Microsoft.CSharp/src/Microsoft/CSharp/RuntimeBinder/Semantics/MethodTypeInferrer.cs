@@ -302,7 +302,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             SubstContext subsctx = new SubstContext(_pClassTypeArguments.Items, _pClassTypeArguments.Count,
                 ppMethodParameters, _pMethodTypeParameters.Count);
             AggregateType pFixedDelegateType =
-                GetTypeManager().SubstType(pDelegateType, subsctx).AsAggregateType();
+                GetTypeManager().SubstType(pDelegateType, subsctx) as AggregateType;
             TypeArray pFixedDelegateParams =
                 pFixedDelegateType.GetDelegateParameters(GetSymbolLoader());
             return pFixedDelegateParams;
@@ -665,7 +665,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     case ExpressionKind.MemberGroup:
                     case ExpressionKind.BoundLambda:
-                        TypeArray pDelegateParameters = pDest.AsAggregateType().GetDelegateParameters(GetSymbolLoader());
+                        TypeArray pDelegateParameters = (pDest as AggregateType).GetDelegateParameters(GetSymbolLoader());
                         if (pDelegateParameters != null)
                         {
                             return TypeManager.ParametersContainTyVar(pDelegateParameters, pParam);
@@ -713,7 +713,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     case ExpressionKind.MemberGroup:
                     case ExpressionKind.BoundLambda:
-                        CType pDelegateReturn = pDest.AsAggregateType().GetDelegateReturnType(GetSymbolLoader());
+                        CType pDelegateReturn = ((AggregateType)pDest).GetDelegateReturnType(GetSymbolLoader());
                         if (pDelegateReturn != null)
                         {
                             return TypeManager.TypeContainsType(pDelegateReturn, pParam);
@@ -1064,7 +1064,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            AggregateType pDelegateType = pType.AsAggregateType();
+            AggregateType pDelegateType = pType as AggregateType;
             CType pDelegateReturnType = pDelegateType.GetDelegateReturnType(GetSymbolLoader());
             if (pDelegateReturnType == null)
             {
@@ -1206,16 +1206,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   CType C<U1...Uk> then an exact inference 
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (!pSource.IsAggregateType() || !pDest.IsAggregateType())
+            if (!(pSource is AggregateType pConstructedSource) || !(pDest is AggregateType pConstructedDest)
+                || pConstructedSource.GetOwningAggregate() != pConstructedDest.GetOwningAggregate())
             {
                 return false;
             }
-            AggregateType pConstructedSource = pSource.AsAggregateType();
-            AggregateType pConstructedDest = pDest.AsAggregateType();
-            if (pConstructedSource.GetOwningAggregate() != pConstructedDest.GetOwningAggregate())
-            {
-                return false;
-            }
+
             ExactTypeArgumentInference(pConstructedSource, pConstructedDest);
             return true;
         }
@@ -1383,7 +1379,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return false;
                 }
-                AggregateType pAggregateDest = pDest.AsAggregateType();
+                AggregateType pAggregateDest = (AggregateType)pDest;
                 pElementDest = pAggregateDest.GetTypeArgsThis()[0];
             }
             else
@@ -1427,12 +1423,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool LowerBoundConstructedInference(CType pSource, CType pDest)
         {
-            if (!pDest.IsAggregateType())
+            if (!(pDest is AggregateType pConstructedDest))
             {
                 return false;
             }
 
-            AggregateType pConstructedDest = pDest.AsAggregateType();
             TypeArray pDestArgs = pConstructedDest.GetTypeArgsAll();
             if (pDestArgs.Count == 0)
             {
@@ -1448,16 +1443,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pSource.IsAggregateType() &&
-                pSource.AsAggregateType().GetOwningAggregate() == pConstructedDest.GetOwningAggregate())
+            if (pSource is AggregateType aggSource &&
+                aggSource.GetOwningAggregate() == pConstructedDest.GetOwningAggregate())
             {
-                if (pSource.isInterfaceType() || pSource.isDelegateType())
+                if (aggSource.isInterfaceType() || aggSource.isDelegateType())
                 {
-                    LowerBoundTypeArgumentInference(pSource.AsAggregateType(), pConstructedDest);
+                    LowerBoundTypeArgumentInference(aggSource, pConstructedDest);
                 }
                 else
                 {
-                    ExactTypeArgumentInference(pSource.AsAggregateType(), pConstructedDest);
+                    ExactTypeArgumentInference(aggSource, pConstructedDest);
                 }
                 return true;
             }
@@ -1510,7 +1505,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource.isClassType())
             {
-                pSourceBase = pSource.AsAggregateType().GetBaseClass();
+                pSourceBase = (pSource as AggregateType).GetBaseClass();
             }
             else if (pSource is TypeParameterType sourceType)
             {
@@ -1729,7 +1724,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return false;
                 }
-                AggregateType pAggregateSource = pSource.AsAggregateType();
+                AggregateType pAggregateSource = (AggregateType)pSource;
                 pElementSource = pAggregateSource.GetTypeArgsThis()[0];
             }
             else
@@ -1752,12 +1747,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool UpperBoundConstructedInference(CType pSource, CType pDest)
         {
-            if (!pSource.IsAggregateType())
+            if (!(pSource is AggregateType pConstructedSource))
             {
                 return false;
             }
 
-            AggregateType pConstructedSource = pSource.AsAggregateType();
             TypeArray pSourceArgs = pConstructedSource.GetTypeArgsAll();
             if (pSourceArgs.Count == 0)
             {
@@ -1769,16 +1763,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pDest.IsAggregateType() &&
-                pConstructedSource.GetOwningAggregate() == pDest.AsAggregateType().GetOwningAggregate())
+            if (pDest is AggregateType aggDest &&
+                pConstructedSource.GetOwningAggregate() == aggDest.GetOwningAggregate())
             {
-                if (pDest.isInterfaceType() || pDest.isDelegateType())
+                if (aggDest.isInterfaceType() || aggDest.isDelegateType())
                 {
-                    UpperBoundTypeArgumentInference(pConstructedSource, pDest.AsAggregateType());
+                    UpperBoundTypeArgumentInference(pConstructedSource, aggDest);
                 }
                 else
                 {
-                    ExactTypeArgumentInference(pConstructedSource, pDest.AsAggregateType());
+                    ExactTypeArgumentInference(pConstructedSource, aggDest);
                 }
                 return true;
             }
@@ -1817,7 +1811,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   inherits directly or indirectly from C<V1...Vk> then an exact 
             // SPEC:   inference is made from each Ui to the corresponding Vi.
 
-            AggregateType pDestBase = pDest.AsAggregateType().GetBaseClass();
+            AggregateType pDestBase = ((AggregateType)pDest).GetBaseClass();
 
             while (pDestBase != null)
             {
@@ -1872,7 +1866,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            UpperBoundTypeArgumentInference(pInterface, pDest.AsAggregateType());
+            UpperBoundTypeArgumentInference(pInterface, pDest as AggregateType);
             return true;
         }
 

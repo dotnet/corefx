@@ -477,7 +477,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int i = 0; i < types.Count; i++)
             {
-                AggregateType type = types[i].AsAggregateType();
+                AggregateType type = (AggregateType)types[i];
                 Debug.Assert(type.isInterfaceType());
                 type.fAllHidden = false;
                 type.fDiffHidden = !!_swtFirst;
@@ -489,7 +489,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeCur == null)
             {
-                typeCur = types[itypeNext++].AsAggregateType();
+                typeCur = types[itypeNext++] as AggregateType;
             }
             Debug.Assert(typeCur != null);
 
@@ -508,7 +508,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     TypeArray ifaces = typeCur.GetIfacesAll();
                     for (int i = 0; i < ifaces.Count; i++)
                     {
-                        AggregateType type = ifaces[i].AsAggregateType();
+                        AggregateType type = ifaces[i] as AggregateType;
                         Debug.Assert(type.isInterfaceType());
                         if (fHideByName)
                             type.fAllHidden = true;
@@ -525,7 +525,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return !fHideObject;
 
                 // Substitution has already been done.
-                typeCur = types[itypeNext++].AsAggregateType();
+                typeCur = types[itypeNext++] as AggregateType;
             }
         }
 
@@ -626,7 +626,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert((flags & ~MemLookFlags.All) == 0);
             Debug.Assert(obj == null || obj.Type != null);
-            Debug.Assert(typeSrc.IsAggregateType() || typeSrc is TypeParameterType);
+            Debug.Assert(typeSrc is AggregateType || typeSrc is TypeParameterType);
             Debug.Assert(checker != null);
 
             _prgtype = _rgtypeStart;
@@ -667,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else if (!typeSrc.isInterfaceType())
             {
-                typeCls1 = typeSrc.AsAggregateType();
+                typeCls1 = (AggregateType)typeSrc;
 
                 if (typeCls1.IsWindowsRuntimeType())
                 {
@@ -678,7 +678,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(typeSrc.isInterfaceType());
                 Debug.Assert((_flags & (MemLookFlags.Ctor | MemLookFlags.NewObj | MemLookFlags.Operator | MemLookFlags.BaseCall)) == 0);
-                typeIface = typeSrc.AsAggregateType();
+                typeIface = (AggregateType)typeSrc;
                 ifaces = typeIface.GetIfacesAll();
             }
 

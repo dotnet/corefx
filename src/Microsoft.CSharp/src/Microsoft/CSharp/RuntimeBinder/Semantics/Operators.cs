@@ -2560,9 +2560,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         type = (type as TypeParameterType).GetEffectiveBaseClass();
                         break;
                     case TypeKind.TK_AggregateType:
-                        if ((type.isClassType() || type.isStructType()) && !type.AsAggregateType().getAggregate().IsSkipUDOps())
+                        AggregateType ats = (AggregateType)type;
+                        if ((ats.isClassType() || ats.isStructType()) && !ats.getAggregate().IsSkipUDOps())
                         {
-                            return type.AsAggregateType();
+                            return ats;
                         }
                         return null;
                     default:
@@ -2887,8 +2888,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(argType1.isEnumType() || argType2.isEnumType());
 
-            AggregateType type1 = argType1.AsAggregateType();
-            AggregateType type2 = argType2.AsAggregateType();
+            AggregateType type1 = argType1 as AggregateType;
+            AggregateType type2 = argType2 as AggregateType;
 
             AggregateType typeEnum = type1.isEnumType() ? type1 : type2;
 

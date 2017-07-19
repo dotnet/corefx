@@ -13,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Represents a generic constructed (or instantiated) type. Parent is the AggregateSymbol.
     // ----------------------------------------------------------------------------
 
-    internal partial class AggregateType : CType
+    internal sealed class AggregateType : CType
     {
         private TypeArray _pTypeArgsThis;
         private TypeArray _pTypeArgsAll;         // includes args from outer types
@@ -156,7 +156,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 for (int i = 0; i < ifaces.Count; i++)
                 {
-                    AggregateType type = ifaces[i].AsAggregateType();
+                    AggregateType type = ifaces[i] as AggregateType;
                     Debug.Assert(type.isInterfaceType());
 
                     if (type.IsCollectionType())

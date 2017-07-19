@@ -325,7 +325,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             TypeArray ifaces = _pCurrentType.GetIfacesAll();
                             for (int i = 0; i < ifaces.Count; i++)
                             {
-                                AggregateType type = ifaces[i].AsAggregateType();
+                                AggregateType type = ifaces[i] as AggregateType;
 
                                 Debug.Assert(type.isInterfaceType());
                                 _HiddenTypes.Add(type);
@@ -725,14 +725,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     method = slotMethod;
                 }
 
-                if (!pType.IsAggregateType())
+                if (!(pType is AggregateType agg))
                 {
                     // Not something that can have overrides anyway.
                     return method;
                 }
 
-                for (AggregateSymbol pAggregate = pType.AsAggregateType().GetOwningAggregate();
-                        pAggregate != null && pAggregate.GetBaseAgg() != null;
+                for (AggregateSymbol pAggregate = agg.GetOwningAggregate();
+                        pAggregate?.GetBaseAgg() != null;
                         pAggregate = pAggregate.GetBaseAgg())
                 {
                     for (MethodOrPropertySymbol meth = symbolLoader.LookupAggMember(method.name, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol).AsMethodOrPropertySymbol();
@@ -1237,12 +1237,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool DoesTypeArgumentsContainErrorSym(CType var)
             {
-                if (!var.IsAggregateType())
+                if (!(var is AggregateType varAgg))
                 {
                     return false;
                 }
 
-                TypeArray typeVars = var.AsAggregateType().GetTypeArgsAll();
+                TypeArray typeVars = varAgg.GetTypeArgsAll();
                 for (int i = 0; i < typeVars.Count; i++)
                 {
                     CType type = typeVars[i];
@@ -1250,7 +1250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         return true;
                     }
-                    else if (type.IsAggregateType())
+                    else if (type is AggregateType)
                     {
                         // If we have an agg type sym, check if its type args have errors.
                         if (DoesTypeArgumentsContainErrorSym(type))
@@ -1259,6 +1259,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                     }
                 }
+
                 return false;
             }
 
@@ -1385,10 +1386,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Give a better message for delegate invoke.
                     if (_pGroup.OptionalObject != null &&
-                            _pGroup.OptionalObject.Type.IsAggregateType() &&
-                            _pGroup.OptionalObject.Type.AsAggregateType().GetOwningAggregate().IsDelegate())
+                            _pGroup.OptionalObject.Type is AggregateType agg &&
+                            agg.GetOwningAggregate().IsDelegate())
                     {
-                        GetErrorContext().Error(ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, _pGroup.OptionalObject.Type.AsAggregateType().GetOwningAggregate().name, _pInvalidSpecifiedName);
+                        GetErrorContext().Error(ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.GetOwningAggregate().name, _pInvalidSpecifiedName);
                     }
                     else
                     {

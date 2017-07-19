@@ -145,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:
-                            nParam = CompareTypes(type1.AsAggregateType().GetTypeArgsAll(), type2.AsAggregateType().GetTypeArgsAll());
+                            nParam = CompareTypes(((AggregateType)type1).GetTypeArgsAll(), ((AggregateType)type2).GetTypeArgsAll());
                             break;
                     }
                 }

@@ -102,10 +102,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From any class-type S to any interface-type T, provided S is not sealed
                 // * From any interface-type S to any class-type T, provided T is not sealed
                 // * From any interface-type S to any interface-type T, provided S is not derived from T.
-                if (typeSrc.IsAggregateType() && typeDst.IsAggregateType())
+                if (typeSrc is AggregateType atSrc && typeDst is AggregateType atDst)
                 {
-                    AggregateSymbol aggSrc = typeSrc.AsAggregateType().getAggregate();
-                    AggregateSymbol aggDest = typeDst.AsAggregateType().getAggregate();
+                    AggregateSymbol aggSrc = atSrc.getAggregate();
+                    AggregateSymbol aggDest = atDst.getAggregate();
 
                     if ((aggSrc.IsClass() && !aggSrc.IsSealed() && aggDest.IsInterface()) ||
                         (aggSrc.IsInterface() && aggDest.IsClass() && !aggDest.IsSealed()) ||
@@ -130,7 +130,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
                     //      and their base interfaces, provided there is an explicit reference conversion from S to T.
                     if (!arrSrc.IsSZArray ||
-                        !typeDst.isInterfaceType() || typeDst.AsAggregateType().GetTypeArgsAll().Count != 1)
+                        !typeDst.isInterfaceType())
+                    {
+                        return false;
+                    }
+
+                    AggregateType aggDst = (AggregateType)typeDst;
+                    TypeArray typeArgsAll = aggDst.GetTypeArgsAll();
+
+                    if (typeArgsAll.Count != 1)
                     {
                         return false;
                     }
@@ -139,17 +147,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     AggregateSymbol aggIReadOnlyList = loader.GetOptPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                     if ((aggIList == null ||
-                        !loader.IsBaseAggregate(aggIList, typeDst.AsAggregateType().getAggregate())) &&
+                        !loader.IsBaseAggregate(aggIList, aggDst.getAggregate())) &&
                         (aggIReadOnlyList == null ||
-                        !loader.IsBaseAggregate(aggIReadOnlyList, typeDst.AsAggregateType().getAggregate())))
+                        !loader.IsBaseAggregate(aggIReadOnlyList, aggDst.getAggregate())))
                     {
                         return false;
                     }
 
-                    return FExpRefConv(loader, arrSrc.GetElementType(), typeDst.AsAggregateType().GetTypeArgsAll()[0]);
+                    return FExpRefConv(loader, arrSrc.GetElementType(), typeArgsAll[0]);
                 }
 
-                if (typeDst is ArrayType arrayDest && typeSrc.IsAggregateType())
+                if (typeDst is ArrayType arrayDest && typeSrc is AggregateType aggtypeSrc)
                 {
                     // * From System.Array and the interfaces it implements, to any array-type.
                     if (loader.HasIdentityOrImplicitReferenceConversion(loader.GetReqPredefType(PredefinedType.PT_ARRAY), typeSrc))
@@ -161,7 +169,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //      one-dimensional array-type S[], provided there is an implicit or explicit reference conversion from S[] to 
                     //      System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                     //      are the same type or there is an implicit or explicit reference conversion from S to T.
-                    AggregateType aggtypeSrc = typeSrc.AsAggregateType();
                     if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() ||
                         aggtypeSrc.GetTypeArgsAll().Count != 1)
                     {
@@ -228,8 +235,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             TypeArray pTypeParams = pSource.getAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.AsAggregateType().GetTypeArgsAll();
-            TypeArray pTargetArgs = pTarget.AsAggregateType().GetTypeArgsAll();
+            TypeArray pSourceArgs = ((AggregateType)pSource).GetTypeArgsAll();
+            TypeArray pTargetArgs = ((AggregateType)pTarget).GetTypeArgsAll();
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pTargetArgs.Count);

@@ -168,14 +168,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendParentCore(err.GetNSParent(), pctx);
                 }
             }
-            else if (pType.IsAggregateType())
+            else if (pType is AggregateType agg)
             {
-                ErrAppendParentCore(pType.AsAggregateType().GetOwningAggregate(), pctx);
+                ErrAppendParentCore(agg.GetOwningAggregate(), pctx);
             }
-            else if (pType.GetBaseOrParameterOrElementType() != null)
+            else
             {
-                ErrAppendType(pType.GetBaseOrParameterOrElementType(), null);
-                ErrAppendChar('.');
+                var part = pType.GetBaseOrParameterOrElementType();
+                if (part != null)
+                {
+                    ErrAppendType(part, null);
+                    ErrAppendChar('.');
+                }
             }
         }
 
@@ -221,7 +225,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendParentSym(meth, pctx);
 
                 // Get the type args from the explicit impl type and substitute using pctx (if there is one).
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx).AsAggregateType());
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx) as AggregateType);
                 ErrAppendSym(meth.swtSlot.Sym, ctx, fArgs);
 
                 // args already added
@@ -366,7 +370,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             ErrAppendParentSym(prop, pctx);
             if (prop.IsExpImpl() && prop.swtSlot.Sym != null)
             {
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx).AsAggregateType());
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx) as AggregateType);
                 ErrAppendSym(prop.swtSlot.Sym, ctx);
             }
             else if (prop.IsExpImpl())
@@ -513,7 +517,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 case TypeKind.TK_AggregateType:
                     {
-                        AggregateType pAggType = pType.AsAggregateType();
+                        AggregateType pAggType = (AggregateType)pType;
 
                         // Check for a predefined class with a special "nice" name for
                         // error reported.

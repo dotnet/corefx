@@ -659,7 +659,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ErrorContext.Error(ErrorCode.ERR_MethGrpToNonDel, grp.Name, typeDst);
                 return false;
             }
-            AggregateType type = typeDst.AsAggregateType();
+            AggregateType type = typeDst as AggregateType;
             MethodSymbol methCtor = SymbolLoader.PredefinedMembers.FindDelegateConstructor(type.getAggregate(), fReportErrors);
             if (methCtor == null)
                 return false;
@@ -958,10 +958,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // nullable of it) as its from-type.
                 fImplicitOrExactSrc = true;
             }
-            else if (typeSrcBase.IsAggregateType() && typeSrcBase.getAggregate().HasConversion(GetSymbolLoader()))
+            else if (typeSrcBase is AggregateType atSrcBase && atSrcBase.getAggregate().HasConversion(GetSymbolLoader()))
             {
-                rgats[cats++] = typeSrcBase.AsAggregateType();
-                fIntPtrOverride2 = typeSrcBase.isPredefType(PredefinedType.PT_INTPTR) || typeSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
+                rgats[cats++] = atSrcBase;
+                fIntPtrOverride2 = atSrcBase.isPredefType(PredefinedType.PT_INTPTR) || atSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
             }
 
             // Get the list of operators from the destination.
@@ -976,11 +976,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     rgats[cats++] = atsBase;
                 }
             }
-            else if (typeDstBase.IsAggregateType())
+            else if (typeDstBase is AggregateType atDstBase)
             {
                 if (typeDstBase.getAggregate().HasConversion(GetSymbolLoader()))
                 {
-                    rgats[cats++] = typeDstBase.AsAggregateType();
+                    rgats[cats++] = atDstBase;
                 }
 
                 if (fIntPtrOverride2 && !typeDstBase.isPredefType(PredefinedType.PT_LONG) && !typeDstBase.isPredefType(PredefinedType.PT_ULONG))

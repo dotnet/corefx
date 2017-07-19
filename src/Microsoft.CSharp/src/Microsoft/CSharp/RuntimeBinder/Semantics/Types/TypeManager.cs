@@ -214,7 +214,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Store the old base class.
 
                     AggregateType oldBaseType = agg.GetBaseClass();
-                    agg.SetBaseClass(_symbolTable.GetCTypeFromType(baseType).AsAggregateType());
+                    agg.SetBaseClass(_symbolTable.GetCTypeFromType(baseType) as AggregateType);
                     pAggregate.GetBaseClass(); // Get the base type for the new agg type we're making.
 
                     agg.SetBaseClass(oldBaseType);
@@ -525,10 +525,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (typeDst == typeSrc) ? type : GetNullable(typeDst);
 
                 case TypeKind.TK_AggregateType:
-                    if (type.AsAggregateType().GetTypeArgsAll().Count > 0)
+                    AggregateType ats = (AggregateType)type;
+                    if (ats.GetTypeArgsAll().Count > 0)
                     {
-                        AggregateType ats = type.AsAggregateType();
-
                         TypeArray typeArgs = SubstTypeArray(ats.GetTypeArgsAll(), pctx);
                         if (ats.GetTypeArgsAll() != typeArgs)
                             return GetAggregate(ats.getAggregate(), typeArgs);
@@ -672,11 +671,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     goto LRecurse;
 
                 case TypeKind.TK_AggregateType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_AggregateType)
+                    if (!(typeDst is AggregateType atsDst))
                         return false;
                     { // BLOCK
-                        AggregateType atsSrc = typeSrc.AsAggregateType();
-                        AggregateType atsDst = typeDst.AsAggregateType();
+                        AggregateType atsSrc = (AggregateType)typeSrc;
 
                         if (atsSrc.getAggregate() != atsDst.getAggregate())
                             return false;
@@ -807,7 +805,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_AggregateType:
                     { // BLOCK
-                        AggregateType ats = type.AsAggregateType();
+                        AggregateType ats = (AggregateType)type;
 
                         for (int i = 0; i < ats.GetTypeArgsAll().Count; i++)
                         {
@@ -867,7 +865,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_AggregateType:
                     { // BLOCK
-                        AggregateType ats = type.AsAggregateType();
+                        AggregateType ats = (AggregateType)type;
 
                         for (int i = 0; i < ats.GetTypeArgsAll().Count; i++)
                         {
@@ -979,7 +977,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public CType SubstType(CType typeSrc, CType typeCls, TypeArray typeArgsMeth)
         {
-            return SubstType(typeSrc, typeCls.IsAggregateType() ? typeCls.AsAggregateType().GetTypeArgsAll() : null, typeArgsMeth);
+            return SubstType(typeSrc, (typeCls as AggregateType)?.GetTypeArgsAll(), typeArgsMeth);
         }
 
         public TypeArray SubstTypeArray(TypeArray taSrc, AggregateType atsCls, TypeArray typeArgsMeth)
@@ -994,7 +992,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls, TypeArray typeArgsMeth)
         {
-            return SubstEqualTypes(typeDst, typeSrc, typeCls.IsAggregateType() ? typeCls.AsAggregateType().GetTypeArgsAll() : null, typeArgsMeth, SubstTypeFlags.NormNone);
+            return SubstEqualTypes(typeDst, typeSrc, (typeCls as AggregateType)?.GetTypeArgsAll(), typeArgsMeth, SubstTypeFlags.NormNone);
         }
 
         public bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls)
@@ -1073,7 +1071,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             CType intermediateType;
-            if ((typeSrc.isInterfaceType() || typeSrc.isDelegateType()) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, typeSrc.AsAggregateType(), out intermediateType))
+            if (typeSrc is AggregateType aggSrc && (aggSrc.isInterfaceType() || aggSrc.isDelegateType()) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, aggSrc, out intermediateType))
             {
                 // If we have an interface or delegate type, then it can potentially be varied by its type arguments
                 // to produce an accessible type, and if that's the case, then return that.
@@ -1114,12 +1112,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            Debug.Assert(typeSrc.IsAggregateType());
+            Debug.Assert(typeSrc is AggregateType);
 
-            if (typeSrc.IsAggregateType())
+            if (typeSrc is AggregateType aggType)
             {
                 // We have an AggregateType, so recurse on its base class.
-                AggregateType aggType = typeSrc.AsAggregateType();
                 AggregateType baseType = aggType.GetBaseClass();
 
                 if (baseType == null)
