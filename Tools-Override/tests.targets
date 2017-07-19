@@ -240,7 +240,13 @@
       <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="$(TestCommandLine)"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Performance)'=='true'">
+    <ItemGroup Condition="'$(Performance)'=='true' and '$(IncludePerformanceTests)'!='true'">
+      <!-- On Windows, call prevents the test command from making execution end prematurely -->
+      <TestCommandLines  Condition="'$(TargetOS)'=='Windows_NT'" Include="call $(TestCommandLine)"/>
+      <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="$(TestCommandLine)"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Performance)'=='true' and '$(IncludePerformanceTests)'=='true'">
       <TestCommandLines Include="@(PerfTestCommandLines)" />
     </ItemGroup>
 
