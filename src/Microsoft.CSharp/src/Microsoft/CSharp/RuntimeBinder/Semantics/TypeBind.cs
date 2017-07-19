@@ -148,7 +148,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
-            if (arg.IsOpenTypePlaceholderType())
+            if (arg is OpenTypePlaceholderType)
             {
                 return true;
             }

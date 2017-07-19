@@ -116,19 +116,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool AreAllTypeArgumentsUnitTypes(TypeArray typeArray)
         {
-            if (typeArray.Count == 0)
+            foreach (CType type in typeArray.Items)
             {
-                return true;
-            }
-
-            for (int i = 0; i < typeArray.Count; i++)
-            {
-                Debug.Assert(typeArray[i] != null);
-                if (!typeArray[i].IsOpenTypePlaceholderType())
+                Debug.Assert(type != null);
+                if (!(type is OpenTypePlaceholderType))
                 {
                     return false;
                 }
             }
+
             return true;
         }
 
