@@ -523,7 +523,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if (mem.SwtInaccessible().Sym != null)
                 {
-                    Debug.Assert(mem.SwtInaccessible().Sym.IsMethodOrPropertySymbol());
+                    Debug.Assert(mem.SwtInaccessible().Sym is MethodOrPropertySymbol);
                     type = mem.SwtInaccessible().MethProp().RetType;
                     pSymbol = mem.SwtInaccessible().Sym;
                 }
@@ -1667,7 +1667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // For a property/indexer we remap the accessors, not the property/indexer.
             // Since every event has both accessors we remap the event instead of the accessors.
-            Debug.Assert(pswt && (pswt.Sym.IsMethodSymbol() || pswt.Sym.IsEventSymbol() || pswt.Sym.IsMethodOrPropertySymbol()));
+            Debug.Assert(pswt && (pswt.Sym.IsMethodSymbol() || pswt.Sym.IsEventSymbol() || pswt.Sym is MethodOrPropertySymbol));
             Debug.Assert(typeObj != null);
 
             // Don't remap static or interface methods.
@@ -1711,7 +1711,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(call != null);
             Expr argsPtr = call.OptionalArguments;
             SymWithType swt = call.GetSymWithType();
-            MethodOrPropertySymbol mp = swt.Sym.AsMethodOrPropertySymbol();
+            MethodOrPropertySymbol mp = swt.Sym as MethodOrPropertySymbol;
             TypeArray pTypeArgs = (call as ExprCall)?.MethWithInst.TypeArgs;
             Expr newArgs;
             AdjustCallArgumentsForParams(callingObjectType, swt.GetType(), mp, pTypeArgs, argsPtr, out newArgs);

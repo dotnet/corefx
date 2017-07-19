@@ -137,7 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_PropertySymbol:
                 case SYMKIND.SK_MethodSymbol:
                     {
-                        MethodOrPropertySymbol meth = this.AsMethodOrPropertySymbol();
+                        MethodOrPropertySymbol meth = (MethodOrPropertySymbol)this;
 
                         if (meth.RetType != null)
                         {
@@ -229,11 +229,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsTypeParameterSymbol() { return _kind == SYMKIND.SK_TypeParameterSymbol; }
         public bool IsEventSymbol() { return _kind == SYMKIND.SK_EventSymbol; }
 
-        public bool IsMethodOrPropertySymbol()
-        {
-            return IsMethodSymbol() || IsPropertySymbol();
-        }
-
         public bool IsFMETHSYM()
         {
             return IsMethodSymbol();
@@ -242,9 +237,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public CType getType()
         {
             CType type = null;
-            if (IsMethodOrPropertySymbol())
+            if (this is MethodOrPropertySymbol methProp)
             {
-                type = this.AsMethodOrPropertySymbol().RetType;
+                return methProp.RetType;
             }
             else if (IsFieldSymbol())
             {
@@ -270,9 +265,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     fStatic = this.AsEventSymbol().isStatic;
                 }
-                else if (IsMethodOrPropertySymbol())
+                else if (this is MethodOrPropertySymbol methProp)
                 {
-                    fStatic = this.AsMethodOrPropertySymbol().isStatic;
+                    return methProp.isStatic;
                 }
                 else if (IsAggregateSymbol())
                 {
@@ -358,7 +353,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case SYMKIND.SK_MethodSymbol:
                 case SYMKIND.SK_PropertySymbol:
-                    return this.AsMethodOrPropertySymbol().isOverride;
+                    return ((MethodOrPropertySymbol)this).isOverride;
                 case SYMKIND.SK_EventSymbol:
                     return this.AsEventSymbol().isOverride;
                 default:
@@ -372,7 +367,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case SYMKIND.SK_MethodSymbol:
                 case SYMKIND.SK_PropertySymbol:
-                    return this.AsMethodOrPropertySymbol().isHideByName;
+                    return ((MethodOrPropertySymbol)this).isHideByName;
                 case SYMKIND.SK_EventSymbol:
                     return this.AsEventSymbol().methAdd != null && this.AsEventSymbol().methAdd.isHideByName;
                 default:
@@ -383,14 +378,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Returns the virtual that this sym overrides (if IsOverride() is true), null otherwise.
         public Symbol SymBaseVirtual()
         {
-            switch (_kind)
-            {
-                case SYMKIND.SK_MethodSymbol:
-                case SYMKIND.SK_PropertySymbol:
-                    return this.AsMethodOrPropertySymbol().swtSlot.Sym;
-                default:
-                    return null;
-            }
+            return (this as MethodOrPropertySymbol)?.swtSlot.Sym;
         }
 
         /*
@@ -442,7 +430,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal static FieldSymbol AsFieldSymbol(this Symbol symbol) { return symbol as FieldSymbol; }
         internal static MethodSymbol AsMethodSymbol(this Symbol symbol) { return symbol as MethodSymbol; }
         internal static PropertySymbol AsPropertySymbol(this Symbol symbol) { return symbol as PropertySymbol; }
-        internal static MethodOrPropertySymbol AsMethodOrPropertySymbol(this Symbol symbol) { return symbol as MethodOrPropertySymbol; }
         internal static TypeParameterSymbol AsTypeParameterSymbol(this Symbol symbol) { return symbol as TypeParameterSymbol; }
         internal static EventSymbol AsEventSymbol(this Symbol symbol) { return symbol as EventSymbol; }
     }

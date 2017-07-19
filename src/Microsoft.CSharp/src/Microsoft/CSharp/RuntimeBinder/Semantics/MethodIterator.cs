@@ -214,12 +214,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_pCurrentSym == null)
                     {
                         _pCurrentSym = GetSymbolLoader().LookupAggMember(
-                                _pName, _pCurrentType.getAggregate(), _mask).AsMethodOrPropertySymbol();
+                                _pName, _pCurrentType.getAggregate(), _mask) as MethodOrPropertySymbol;
                     }
                     else
                     {
                         _pCurrentSym = GetSymbolLoader().LookupNextSym(
-                                _pCurrentSym, _pCurrentType.getAggregate(), _mask).AsMethodOrPropertySymbol();
+                                _pCurrentSym, _pCurrentType.getAggregate(), _mask) as MethodOrPropertySymbol;
                     }
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.

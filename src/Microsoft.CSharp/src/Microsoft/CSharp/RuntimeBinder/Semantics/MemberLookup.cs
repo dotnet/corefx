@@ -194,7 +194,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     continue;
                 }
-                if ((_flags & MemLookFlags.UserCallable) != 0 && symCur.IsMethodOrPropertySymbol() && !symCur.AsMethodOrPropertySymbol().isUserCallable())
+
+                MethodOrPropertySymbol methProp = symCur as MethodOrPropertySymbol;
+                if (methProp != null && (_flags & MemLookFlags.UserCallable) != 0 && !methProp.isUserCallable())
                 {
                     bool bIsIndexedProperty = false;
                     // If its an indexed property method symbol, let it through.
@@ -269,9 +271,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                if (symCur.IsMethodOrPropertySymbol())
+                if (methProp != null)
                 {
-                    MethPropWithType mwpInsert = new MethPropWithType(symCur.AsMethodOrPropertySymbol(), typeCur);
+                    MethPropWithType mwpInsert = new MethPropWithType(methProp, typeCur);
                     _methPropWithTypeList.Add(mwpInsert);
                 }
 
@@ -351,7 +353,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 RecordType(typeCur, symCur);
 
-                if (symCur.IsMethodOrPropertySymbol() && symCur.AsMethodOrPropertySymbol().isHideByName)
+                if (methProp != null && methProp.isHideByName)
                     pfHideByName = true;
                 // We've found a symbol in this type but need to make sure there aren't any conflicting
                 // syms here, so keep searching the type.
