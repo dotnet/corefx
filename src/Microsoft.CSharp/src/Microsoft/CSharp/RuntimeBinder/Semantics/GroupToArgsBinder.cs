@@ -575,7 +575,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     int index)
             {
                 CType pParamType = type;
-                CType pRawParamType = type.IsNullableType() ? type.AsNullableType().GetUnderlyingType() : type;
+                CType pRawParamType = type.StripNubs();
 
                 Expr optionalArgument = null;
                 if (methprop.HasDefaultParameterValue(index))
@@ -610,7 +610,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             optionalArgument = exprFactory.CreateConstant(pConstValType, cv);
                         }
                     }
-                    else if ((pParamType.IsRefType() || pParamType.IsNullableType()) && cv.IsNullRef)
+                    else if ((pParamType.IsRefType() || pParamType is NullableType) && cv.IsNullRef)
                     {
                         // We have an "= null" default value with a reference type or a nullable type.
 

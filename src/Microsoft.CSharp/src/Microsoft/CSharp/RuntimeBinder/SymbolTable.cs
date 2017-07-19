@@ -178,9 +178,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 type = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ARRAY);
             }
-            if (type.IsNullableType())
+            if (type is NullableType nub)
             {
-                type = type.AsNullableType().GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
+                type = nub.GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
             }
 
             if (!mem.Lookup(

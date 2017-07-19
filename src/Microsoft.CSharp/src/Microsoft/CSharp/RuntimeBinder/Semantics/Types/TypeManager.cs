@@ -519,7 +519,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (typeDst == typeSrc) ? type : GetPointer(typeDst);
 
                 case TypeKind.TK_NullableType:
-                    typeDst = SubstTypeCore(typeSrc = type.AsNullableType().GetUnderlyingType(), pctx);
+                    typeDst = SubstTypeCore(typeSrc = ((NullableType)type).GetUnderlyingType(), pctx);
                     return (typeDst == typeSrc) ? type : GetNullable(typeDst);
 
                 case TypeKind.TK_AggregateType:
@@ -1093,7 +1093,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (typeSrc.IsNullableType())
+            if (typeSrc is NullableType)
             {
                 // We have an inaccessible nullable type, which means that the best we can do is System.ValueType.
                 typeDst = this.GetOptPredefAgg(PredefinedType.PT_VALUE).getThisType();

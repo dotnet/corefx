@@ -1189,12 +1189,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // SPEC:  Otherwise, if U is the CType U1? and V is the CType V1? 
             // SPEC:   then an exact inference is made from U to V.
-            if (!pSource.IsNullableType() || !pDest.IsNullableType())
+            if (!(pSource is NullableType nubSource) || !(pDest is NullableType nubDest))
             {
                 return false;
             }
-            ExactInference(pSource.AsNullableType().GetUnderlyingType(),
-                pDest.AsNullableType().GetUnderlyingType());
+
+            ExactInference(nubSource.GetUnderlyingType(), nubDest.GetUnderlyingType());
             return true;
         }
 

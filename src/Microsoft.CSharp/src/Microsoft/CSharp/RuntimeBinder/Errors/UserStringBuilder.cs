@@ -664,7 +664,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_NullableType:
-                    ErrAppendType(pType.AsNullableType().GetUnderlyingType(), pctx);
+                    ErrAppendType(((NullableType)pType).GetUnderlyingType(), pctx);
                     ErrAppendChar('?');
                     break;
 

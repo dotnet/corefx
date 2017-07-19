@@ -25,14 +25,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ArrayType AsArrayType() { return this as ArrayType; }
         public PointerType AsPointerType() { return this as PointerType; }
         public ParameterModifierType AsParameterModifierType() { return this as ParameterModifierType; }
-        public NullableType AsNullableType() { return this as NullableType; }
 
         public bool IsAggregateType() { return this is AggregateType; }
         public bool IsErrorType() { return this is ErrorType; }
         public bool IsArrayType() { return this is ArrayType; }
         public bool IsPointerType() { return this is PointerType; }
         public bool IsParameterModifierType() { return this is ParameterModifierType; }
-        public bool IsNullableType() { return this is NullableType; }
 
         public bool IsWindowsRuntimeType()
         {
@@ -87,7 +85,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_NullableType:
-                    NullableType n = src.AsNullableType();
+                    NullableType n = (NullableType)src;
                     Type underlyingType = n.GetUnderlyingType().AssociatedSystemType;
                     result = typeof(Nullable<>).MakeGenericType(underlyingType);
                     break;
@@ -264,7 +262,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AsParameterModifierType().GetParameterType();
 
                 case TypeKind.TK_NullableType:
-                    return AsNullableType().GetUnderlyingType();
+                    return ((NullableType)this).GetUnderlyingType();
 
                 default:
                     return null;
@@ -485,11 +483,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isStructOrEnum()
         {
-            return (IsAggregateType() && (getAggregate().IsStruct() || getAggregate().IsEnum())) || IsNullableType();
+            return (IsAggregateType() && (getAggregate().IsStruct() || getAggregate().IsEnum())) || this is NullableType;
         }
         public bool isStructType()
         {
-            return IsAggregateType() && getAggregate().IsStruct() || IsNullableType();
+            return IsAggregateType() && getAggregate().IsStruct() || this is NullableType;
         }
         public bool isEnumType()
         {

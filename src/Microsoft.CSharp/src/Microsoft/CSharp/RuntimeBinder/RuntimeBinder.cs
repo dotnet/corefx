@@ -624,13 +624,14 @@ namespace Microsoft.CSharp.RuntimeBinder
             Name name = _semanticChecker.GetNameManager().Add(Name);
             AggregateType callingType;
 
+            CType callingObjectType = callingObject.Type;
             if (callingObject.Type.IsArrayType())
             {
                 callingType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ARRAY);
             }
-            else if (callingObject.Type.IsNullableType())
+            else if (callingObjectType is NullableType callingNub)
             {
-                callingType = callingObject.Type.AsNullableType().GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
+                callingType = callingNub.GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
             }
             else if (callingObject.Type.IsAggregateType())
             {

@@ -1068,15 +1068,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprCall BindLiftedUDUnop(Expr arg, CType typeArg, MethPropWithInst mpwi)
         {
             CType typeRaw = typeArg.StripNubs();
-            if (!arg.Type.IsNullableType() || !canConvert(arg.Type.StripNubs(), typeRaw, CONVERTTYPE.NOUDC))
+            if (!(arg.Type is NullableType) || !canConvert(arg.Type.StripNubs(), typeRaw, CONVERTTYPE.NOUDC))
             {
                 // Convert then lift.
                 arg = mustConvert(arg, typeArg);
             }
-            Debug.Assert(arg.Type.IsNullableType());
+            Debug.Assert(arg.Type is NullableType);
 
             CType typeRet = GetTypes().SubstType(mpwi.Meth().RetType, mpwi.GetType());
-            if (!typeRet.IsNullableType())
+            if (!(typeRet is NullableType))
             {
                 typeRet = GetTypes().GetNullable(typeRet);
             }
@@ -1557,7 +1557,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeObj = pObject.Type;
             CType typeTmp;
 
-            if (typeObj.IsNullableType() && (typeTmp = typeObj.AsNullableType().GetAts(GetErrorContext())) != null && typeTmp != swt.GetType())
+            if (typeObj is NullableType nubTypeObj && (typeTmp = nubTypeObj.GetAts(GetErrorContext())) != null && typeTmp != swt.GetType())
             {
                 typeObj = typeTmp;
             }
@@ -1676,9 +1676,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeObj != null);
 
             // Don't remap static or interface methods.
-            if (typeObj.IsNullableType())
+            if (typeObj is NullableType nubTypeObj)
             {
-                typeObj = typeObj.AsNullableType().GetAts(symbolLoader.GetErrorContext());
+                typeObj = nubTypeObj.GetAts(symbolLoader.GetErrorContext());
                 if (typeObj == null)
                 {
                     VSFAIL("Why did GetAts return null?");

@@ -311,9 +311,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return f12 ? BetterType.Left : BetterType.Right;
             }
 
-            if (!type1.IsNullableType() || !type2.IsNullableType() ||
-                !type1.AsNullableType().UnderlyingType.isPredefined() ||
-                !type2.AsNullableType().UnderlyingType.isPredefined())
+            if (!(type1 is NullableType nub1) || !(type2 is NullableType nub2) ||
+                !nub1.UnderlyingType.isPredefined() ||
+                !nub2.UnderlyingType.isPredefined())
             {
                 return BetterType.Neither;
             }
@@ -1308,7 +1308,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr exprDst;
             Expr pTransformedArgument = exprSrc;
 
-            if (ctypeLiftBest > 0 && !typeFrom.IsNullableType() && fDstHasNull)
+            if (ctypeLiftBest > 0 && !(typeFrom is NullableType) && fDstHasNull)
             {
                 // Create the memgroup.
                 ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
@@ -1341,7 +1341,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        if (typeTo.IsNullableType())
+                        if (typeTo is NullableType)
                         {
                             // We need to generate a nullable value access, the conversion will be used without lifting.
                             pConversionArgument = mustCast(exprSrc, typeFrom);

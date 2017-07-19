@@ -147,14 +147,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return true;
                 }
 
-                if (_typeDest.IsNullableType())
+                if (_typeDest is NullableType nubDest)
                 {
-                    return BindNubConversion(_typeDest.AsNullableType());
+                    return BindNubConversion(nubDest);
                 }
 
-                if (_typeSrc.IsNullableType())
+                if (_typeSrc is NullableType nubSrc)
                 {
-                    return bindImplicitConversionFromNullable(_typeSrc.AsNullableType());
+                    return bindImplicitConversionFromNullable(nubSrc);
                 }
 
                 if ((_flags & CONVERTTYPE.ISEXPLICIT) != 0)

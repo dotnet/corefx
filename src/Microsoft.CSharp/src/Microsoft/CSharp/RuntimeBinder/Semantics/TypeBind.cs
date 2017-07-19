@@ -36,9 +36,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             type = type.GetNakedType(false);
 
-            if (type.IsNullableType())
+            if (type is NullableType nub)
             {
-                CType typeT = type.AsNullableType().GetAts(checker.GetErrorContext());
+                CType typeT = nub.GetAts(checker.GetErrorContext());
                 if (typeT != null)
                     type = typeT;
                 else
@@ -214,13 +214,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // bound from the type argument and check against that.
 
                 bool bIsValueType = arg.IsValType();
-                bool bIsNullable = arg.IsNullableType();
+                bool bIsNullable = arg is NullableType;
                 if (bIsValueType && arg is TypeParameterType typeArg)
                 {
                     TypeArray pArgBnds = typeArg.GetBounds();
                     if (pArgBnds.Count > 0)
                     {
-                        bIsNullable = pArgBnds[0].IsNullableType();
+                        bIsNullable = pArgBnds[0] is NullableType;
                     }
                 }
 
@@ -265,11 +265,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // to which they have an implicit reference conversion
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedRefType;
                         }
-                        else if (arg.IsNullableType() && checker.GetSymbolLoader().HasBaseConversion(arg.AsNullableType().GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
+                        else if (arg is NullableType nubArg && checker.GetSymbolLoader().HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
-                            if (typeBnd.isPredefType(PredefinedType.PT_ENUM) || arg.AsNullableType().GetUnderlyingType() == typeBnd)
+                            if (typeBnd.isPredefType(PredefinedType.PT_ENUM) || nubArg.GetUnderlyingType() == typeBnd)
                             {
                                 // Nullable types don't satisfy bounds of EnumType, or the underlying type of the enum
                                 // even though the conversion from Nullable to these types is a boxing conversion
@@ -367,7 +367,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_NullableType:
-                    typeBnd = typeBnd.AsNullableType().GetAts(checker.GetErrorContext());
+                    typeBnd = ((NullableType)typeBnd).GetAts(checker.GetErrorContext());
                     if (null == typeBnd)
                         return true;
                     break;
@@ -386,7 +386,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_PointerType:
                     return false;
                 case TypeKind.TK_NullableType:
-                    arg = arg.AsNullableType().GetAts(checker.GetErrorContext());
+                    arg = ((NullableType)arg).GetAts(checker.GetErrorContext());
                     if (null == arg)
                         return true;
                     // Fall through.

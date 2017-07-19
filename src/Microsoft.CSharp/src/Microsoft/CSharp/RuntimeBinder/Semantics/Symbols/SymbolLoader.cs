@@ -150,7 +150,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeSym.IsAggregateType() ||
                    typeSym is TypeParameterType ||
                    typeSym.IsArrayType() ||
-                   typeSym.IsNullableType());
+                   typeSym is NullableType);
 
             switch (typeSym.GetTypeKind())
             {
@@ -159,9 +159,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ArrayType:
                     return GetReqPredefType(PredefinedType.PT_ARRAY);
                 case TypeKind.TK_TypeParameterType:
-                    return (typeSym as TypeParameterType).GetEffectiveBaseClass();
+                    return ((TypeParameterType)typeSym).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
-                    return typeSym.AsNullableType().GetAts(ErrorContext);
+                    return ((NullableType)typeSym).GetAts(ErrorContext);
             }
             Debug.Assert(false, "Bad typeSym!");
             return null;
@@ -219,9 +219,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            if (pDerived.IsNullableType())
+            if (pDerived is NullableType derivedNub)
             {
-                pDerived = pDerived.AsNullableType().GetAts(ErrorContext);
+                pDerived = derivedNub.GetAts(ErrorContext);
                 if (pDerived == null)
                 {
                     return false;
@@ -433,7 +433,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // extension to the specification.)
             if (pSource is NullType)
             {
-                if (pDest.IsRefType() || pDest.IsNullableType())
+                if (pDest.IsRefType() || pDest is NullableType)
                 {
                     return true;
                 }
@@ -686,9 +686,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // A boxing conversion exists from a nullable type to a reference type
             // if and only if a boxing conversion exists from the underlying type.
 
-            if (pSource.IsNullableType())
+            if (pSource is NullableType nubSource)
             {
-                return HasImplicitBoxingConversion(pSource.AsNullableType().GetUnderlyingType(), pDest);
+                return HasImplicitBoxingConversion(nubSource.GetUnderlyingType(), pDest);
             }
 
             // A boxing conversion exists from any non-nullable value type to object,

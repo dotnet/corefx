@@ -111,13 +111,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                if (_typeDest.IsNullableType())
+                if (_typeDest is NullableType)
                 {
                     // This is handled completely by BindImplicitConversion.
                     return false;
                 }
 
-                if (_typeSrc.IsNullableType())
+                if (_typeSrc is NullableType)
                 {
                     return bindExplicitConversionFromNub();
                 }
@@ -197,7 +197,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Expr valueSrc = _exprSrc;
                         // This is a holdover from the days when you could have nullable of nullable.
                         // Can we remove this loop?
-                        while (valueSrc.Type.IsNullableType())
+                        while (valueSrc.Type is NullableType)
                         {
                             valueSrc = _binder.BindNubValue(valueSrc);
                         }
