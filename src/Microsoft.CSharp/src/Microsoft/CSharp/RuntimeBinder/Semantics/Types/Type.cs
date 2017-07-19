@@ -29,7 +29,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsAggregateType() { return this is AggregateType; }
         public bool IsOpenTypePlaceholderType() { return this is OpenTypePlaceholderType; }
-        public bool IsMethodGroupType() { return this is MethodGroupType; }
         public bool IsErrorType() { return this is ErrorType; }
         public bool IsArrayType() { return this is ArrayType; }
         public bool IsPointerType() { return this is PointerType; }
@@ -627,7 +626,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // be equivalent or convertible (like ANONMETHSYMs)
         public bool IsNeverSameType()
         {
-            return this is BoundLambdaType || IsMethodGroupType() || (IsErrorType() && !AsErrorType().HasParent());
+            return this is BoundLambdaType || this is MethodGroupType || (IsErrorType() && !AsErrorType().HasParent());
         }
     }
 }

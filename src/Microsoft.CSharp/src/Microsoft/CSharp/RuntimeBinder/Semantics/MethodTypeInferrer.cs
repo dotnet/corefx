@@ -326,16 +326,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        private static bool IsReallyAType(CType pType)
-        {
-            if (pType is NullType || pType is BoundLambdaType ||
-                pType is VoidType ||
-                pType.IsMethodGroupType())
-            {
-                return false;
-            }
-            return true;
-        }
+        private static bool IsReallyAType(CType pType) =>
+            !(pType is NullType) && !(pType is BoundLambdaType) && !(pType is VoidType) && !(pType is MethodGroupType);
 
         ////////////////////////////////////////////////////////////////////////////////
         //
