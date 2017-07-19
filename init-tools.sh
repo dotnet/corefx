@@ -40,6 +40,12 @@ case $OSName in
         ;;
 esac
 
+display_error_message()
+{
+    echo "Please check the detailed log that follows." 1>&2
+    cat "$__init_tools_log" 1>&2
+}
+
 if [ ! -e $__PROJECT_JSON_FILE ]; then
     if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
@@ -68,15 +74,18 @@ if [ ! -e $__PROJECT_JSON_FILE ]; then
         echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
         echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE" >> $__init_tools_log
         $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE >> $__init_tools_log
-        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; fi
+        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then 
+            echo "ERROR: Could not restore build tools correctly." 1>&2
+            display_error_message
+        fi
     fi
 
     echo "Initializing BuildTools..."
     echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR" >> $__init_tools_log
     $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
     if [ "$?" != "0" ]; then
-        echo "ERROR: An error occured when trying to initialize the tools. Please check '$__init_tools_log' for more details."
-        exit 1
+        echo "ERROR: An error occured when trying to initialize the tools." 1>&2
+        display_error_message
     fi
     echo "Done initializing tools."
 else
