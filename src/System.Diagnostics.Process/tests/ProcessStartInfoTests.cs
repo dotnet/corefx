@@ -196,6 +196,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Retrieving information about local processes is not supported on uap")]
         public void TestEnvironmentOfChildProcess()
         {
             const string ItemSeparator = "CAFF9451396B4EEF8A5155A15BDC2080"; // random string that shouldn't be in any env vars; used instead of newline to separate env var strings
@@ -471,7 +472,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(2, psi.EnvironmentVariables.Count);
             Assert.Equal(psi.Environment.Count, psi.EnvironmentVariables.Count);
 
-            Assert.Throws<ArgumentException>(null, () => psi.EnvironmentVariables.Add("NewKey2", "NewValue2"));
+            AssertExtensions.Throws<ArgumentException>(null, () => psi.EnvironmentVariables.Add("NewKey2", "NewValue2"));
             psi.EnvironmentVariables.Add("NewKey3", "NewValue3");
 
             psi.Environment.Add("NewKey3", "NewValue3Overridden");
@@ -500,8 +501,9 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Verbs_GetWithExeExtension_ReturnsExpected()
         {
             var psi = new ProcessStartInfo { FileName = $"{Process.GetCurrentProcess().ProcessName}.exe" };
@@ -672,7 +674,8 @@ namespace System.Diagnostics.Tests
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Test case is specific to Unix
         [Fact]
-        public void TestEnvironmentVariablesPropertyUnix(){
+        public void TestEnvironmentVariablesPropertyUnix()
+        {
             ProcessStartInfo psi = new ProcessStartInfo();
 
             // Creating a detached ProcessStartInfo will pre-populate the environment
@@ -958,6 +961,7 @@ namespace System.Diagnostics.Tests
         [MemberData(nameof(UseShellExecute))]
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WaitForInputIdle, ProcessName, and MainWindowTitle are not supported on UAP")]
         public void StartInfo_NotepadWithContent(bool useShellExecute)
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -980,15 +984,8 @@ namespace System.Diagnostics.Tests
                     process.WaitForInputIdle(); // Give the file a chance to load
                     Assert.Equal("notepad", process.ProcessName);
 
-                    if (PlatformDetection.IsUap)
-                    {
-                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
-                    }
-                    else
-                    {
-                        // On some Windows versions, the file extension is not included in the title
-                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
-                    }
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
                 }
                 finally
                 {

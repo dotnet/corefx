@@ -1194,10 +1194,19 @@ namespace System.Xml.Serialization
                             replacedInfo = info;
                             if (replacedInfo != memberInfoToBeReplaced)
                             {
+                                if (!info.GetMethod.IsPublic
+                                    && memberInfoToBeReplaced is PropertyInfo
+                                    && ((PropertyInfo)memberInfoToBeReplaced).GetMethod.IsPublic
+                                   )
+                                {
+                                    break;
+                                }
+
                                 return true;
                             }
                         }
                     }
+
                     foreach (FieldInfo info in currentInfo.DeclaredFields)
                     {
                         if (info.Name == memberInfoToBeReplaced.Name)
@@ -1390,8 +1399,8 @@ namespace System.Xml.Serialization
             {
                 if (parent.Namespaces != null)
                 {
-                    string wsdlNs = (string)parent.Namespaces.Namespaces[ns];
-                    if (wsdlNs != null)
+                    string wsdlNs;
+                    if (parent.Namespaces.Namespaces.TryGetValue(ns, out wsdlNs) && wsdlNs != null)
                     {
                         ns = wsdlNs;
                         break;

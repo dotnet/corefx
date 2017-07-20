@@ -75,7 +75,7 @@ namespace System.Net.Http
 
             try
             {
-                // TODO: No cancellationToken?
+                // TODO #21452: No cancellationToken?
                 await sslStream.AuthenticateAsClientAsync(host, _clientCertificates, _sslProtocols, _checkCertificateRevocationList).ConfigureAwait(false);
             }
             catch (Exception e)
@@ -83,7 +83,7 @@ namespace System.Net.Http
                 sslStream.Dispose();
                 if (e is AuthenticationException || e is IOException)
                 {
-                    // TODO: Tests expect HttpRequestException here.  Is that correct behavior?
+                    // TODO #21452: Tests expect HttpRequestException here.  Is that correct behavior?
                     throw new HttpRequestException("could not establish SSL connection", e);
                 }
                 throw;
@@ -96,13 +96,13 @@ namespace System.Net.Http
         {
             Uri uri = request.RequestUri;
 
-            Stream stream = await ConnectHelper.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
+            Stream stream = await ConnectHelper.ConnectAsync(uri.IdnHost, uri.Port).ConfigureAwait(false);
 
             TransportContext transportContext = null;
 
             if (uri.Scheme == UriScheme.Https)
             {
-                SslStream sslStream = await EstablishSslConnection(uri.Host, request, stream).ConfigureAwait(false);
+                SslStream sslStream = await EstablishSslConnection(uri.IdnHost, request, stream).ConfigureAwait(false);
 
                 stream = sslStream;
                 transportContext = sslStream.TransportContext;
@@ -113,7 +113,7 @@ namespace System.Net.Http
                 pool = _connectionPoolTable.GetOrAdd(key, _ => new HttpConnectionPool());
             }
 
-            var connection = new HttpConnection(pool, key, stream, transportContext, false);
+            var connection = new HttpConnection(pool, key, uri.IdnHost, stream, transportContext, false);
 
             return connection;
         }
@@ -125,7 +125,7 @@ namespace System.Net.Http
                 _disposed = true;
 
                 // Close all open connections
-                // TODO: There's a timing issue here
+                // TODO #21452: There's a timing issue here
                 // Revisit when we improve the connection pooling implementation
                 foreach (HttpConnectionPool connectionPool in _connectionPoolTable.Values)
                 {

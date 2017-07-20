@@ -44,7 +44,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 |-----------------------------------------------------------------------------------------------|------------------|-------------|
 | [area-Infrastructure](https://github.com/dotnet/corefx/labels/area-Infrastructure)                      | [@mellinoe](https://github.com/mellinoe), [@ericstj](https://github.com/ericstj), [@weshaggard](https://github.com/weshaggard) |Covers:<ul><li>Packaging</li><li>Build and test infra for CoreFX repo</li><li>VS integration</li></ul><br/> |
 | [area-Meta](https://github.com/dotnet/corefx/labels/area-Meta)                                | [@tarekgh](https://github.com/tarekgh) | Issues without clear association to any specific API/contract, e.g. <ul><li>new contract proposals</li><li>cross-cutting code/test pattern changes (e.g. FxCop failures)</li><li>project-wide docs</li></ul><br/> |
-| [area-Serialization](https://github.com/dotnet/corefx/labels/area-Serialization)              | [@shmao](https://github.com/shmao), [@zhenlan](https://github.com/zhenlan) | Packages:<ul><li>System.Runtime.Serialization.Xml</li><li>System.Runtime.Serialization.Json</li><li>System.Private.DataContractSerialization</li><li>System.Xml.XmlSerialization</li></ul> Excluded:<ul><li>System.Runtime.Serialization.Formatters</li></ul> |
+| [area-Serialization](https://github.com/dotnet/corefx/labels/area-Serialization)              | [@shmao](https://github.com/shmao), [@zhenlan](https://github.com/zhenlan) | Packages:<ul><li>System.Runtime.Serialization.Xml</li><li>System.Runtime.Serialization.Json</li><li>System.Private.DataContractSerialization</li><li>System.Xml.XmlSerializer</li></ul> Excluded:<ul><li>System.Runtime.Serialization.Formatters</li></ul> |
 | **System contract assemblies** | | |
 | [System.AppContext](https://github.com/dotnet/corefx/labels/area-System.AppContext)           | [@AlexGhiondea](https://github.com/AlexGhiondea) |  |  |
 | [System.Buffers](https://github.com/dotnet/corefx/labels/area-System.Buffers)                 | [@safern](https://github.com/safern) |  |
@@ -88,7 +88,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.ServiceProcess](https://github.com/dotnet/corefx/labels/area-System.ServiceProcess)   | [@Priya91](https://github.com/Priya91) |  |
 | [System.Text.Encoding](https://github.com/dotnet/corefx/labels/area-System.Text.Encoding)     | [@krwq](https://github.com/krwq), [@tarekgh](https://github.com/tarekgh) | Included:<ul><li>System.Text.Encoding**s**.Web</li></ul> |
 | [System.Text.RegularExpressions](https://github.com/dotnet/corefx/labels/area-System.Text.RegularExpressions) | [@Priya91](https://github.com/Priya91) |  |
-| [System.Threading](https://github.com/dotnet/corefx/labels/area-System.Threading)             | [@kouvel](https://github.com/kouvel), [@alexperovich](https://github.com/alexperovich) |  |
+| [System.Threading](https://github.com/dotnet/corefx/labels/area-System.Threading)             | [@kouvel](https://github.com/kouvel) |  |
 | [System.Transactions](https://github.com/dotnet/corefx/labels/area-System.Transactions)       | [@jimcarley](https://github.com/jimcarley), [@qizhanMS](https://github.com/qizhanMS), [@dmetzgar](https://github.com/dmetzgar) |  |
 | [System.Xml](https://github.com/dotnet/corefx/labels/area-System.Xml)                         | [@sepidehMS](https://github.com/sepidehMS), [@krwq](https://github.com/krwq) |  |
 | **Microsoft contract assemblies** | | |

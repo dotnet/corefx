@@ -31,7 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private readonly CSemanticChecker _semanticChecker;
 
         private NamespaceSymbol _rootNamespace;
-        private readonly InputFile _infile;
 
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -71,9 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             NameManager nameManager,
             TypeManager typeManager,
             BSYMMGR bsymmgr,
-            CSemanticChecker semanticChecker,
-
-            InputFile infile)
+            CSemanticChecker semanticChecker)
         {
             _symbolTable = symTable;
             _symFactory = symFactory;
@@ -81,8 +78,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
             _semanticChecker = semanticChecker;
-
-            _infile = infile;
 
             ClearCache();
         }
@@ -954,9 +949,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 ns = _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
             }
-            ns.AddAid(KAID.kaidGlobal);
-            ns.AddAid(KAID.kaidThisAssembly);
-            ns.AddAid(_infile.GetAssemblyID());
 
             return ns;
         }
@@ -999,7 +991,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             NamespaceOrAggregateSymbol parent,
             Type type)
         {
-            AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _infile, _typeManager);
+            AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _typeManager);
             agg.AssociatedSystemType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
             agg.AssociatedAssembly = type.Assembly;
 
@@ -1101,7 +1093,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            agg.SetAnonymousType(false);
             agg.SetAbstract(type.IsAbstract);
 
             {
@@ -1133,7 +1124,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             agg.SetTypeManager(_typeManager);
             agg.SetFirstUDConversion(null);
             SetInterfacesOnAggregate(agg, type);
-            agg.SetHasPubNoArgCtor(Enumerable.Any(type.GetConstructors(), c => c.GetParameters().Length == 0));
+            agg.SetHasPubNoArgCtor(type.GetConstructor(Type.EmptyTypes) != null);
 
             // If we have a delegate, get its invoke and constructor methods as well.
             if (agg.IsDelegate())
@@ -1513,9 +1504,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // Check if we have constructors or not.
             if (methodName == NameManager.GetPredefinedName(PredefinedName.PN_CTOR))
             {
-                var ctors = Enumerable.Where(t.GetConstructors(), m => m.Name == methodName.Text);
-
-                foreach (ConstructorInfo c in ctors)
+                foreach (ConstructorInfo c in t.GetConstructors())
                 {
                     AddMethodToSymbolTable(
                         c,

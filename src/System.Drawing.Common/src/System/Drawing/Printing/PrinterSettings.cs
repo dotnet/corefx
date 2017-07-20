@@ -132,17 +132,19 @@ namespace System.Drawing.Printing
             get
             {
                 if (_duplex != Duplex.Default)
+                {
                     return _duplex;
-                else
-                    return (Duplex)GetModeField(ModeField.Duplex, SafeNativeMethods.DMDUP_SIMPLEX);
+                }
+
+                return (Duplex)GetModeField(ModeField.Duplex, SafeNativeMethods.DMDUP_SIMPLEX);
             }
             set
             {
-                //valid values are 0xffffffff to 0x3
-                if (!ClientUtils.IsEnumValid(value, unchecked((int)value), unchecked((int)Duplex.Default), unchecked((int)Duplex.Horizontal)))
+                if (value < Duplex.Default || value > Duplex.Horizontal)
                 {
-                    throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(Duplex));
+                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(Duplex));
                 }
+
                 _duplex = value;
             }
         }
@@ -895,7 +897,7 @@ namespace System.Drawing.Printing
                 }
             }
 
-            SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)UnsafeNativeMethods.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
+            SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
 
 
             if (_extrainfo != null)
@@ -1015,7 +1017,7 @@ namespace System.Drawing.Printing
                 }
 
                 IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
-                SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)UnsafeNativeMethods.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
+                SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
                 switch (field)
                 {
                     case ModeField.Orientation:
@@ -1208,7 +1210,7 @@ namespace System.Drawing.Printing
                 throw new ArgumentException(SR.Format(SR.InvalidPrinterHandle, hdevmode));
 
             IntPtr pointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevmode));
-            SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)UnsafeNativeMethods.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
+            SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
 
             //Copy entire public devmode as a byte array...
             _devmodebytes = mode.dmSize;
