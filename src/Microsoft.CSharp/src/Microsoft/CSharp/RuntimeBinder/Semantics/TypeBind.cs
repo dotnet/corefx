@@ -92,9 +92,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 ats.fConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.getAggregate(), typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
 
             // Now check type args themselves.
-            for (int i = 0; i < typeArgsThis.Count; i++)
+            foreach (CType typeArg in typeArgsThis.Items)
             {
-                CType arg = typeArgsThis[i].GetNakedType(true);
+                CType arg = typeArg.GetNakedType(true);
                 if (arg.IsAggregateType() && !arg.AsAggregateType().fConstraintsChecked)
                 {
                     CheckConstraints(checker, errHandling, arg.AsAggregateType(), flags | CheckConstraintsFlags.Outer);

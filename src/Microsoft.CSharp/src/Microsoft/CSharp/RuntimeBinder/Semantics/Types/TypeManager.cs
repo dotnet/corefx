@@ -807,9 +807,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     { // BLOCK
                         AggregateType ats = type.AsAggregateType();
 
-                        for (int i = 0; i < ats.GetTypeArgsAll().Count; i++)
+                        foreach (CType typeArg in ats.GetTypeArgsAll().Items)
                         {
-                            if (TypeContainsType(ats.GetTypeArgsAll()[i], typeFind))
+                            if (TypeContainsType(typeArg, typeFind))
                                 return true;
                         }
                     }
@@ -821,9 +821,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         ErrorType err = type.AsErrorType();
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
-                        for (int i = 0; i < err.typeArgs.Count; i++)
+                        foreach (CType errTypeArg in err.typeArgs.Items)
                         {
-                            if (TypeContainsType(err.typeArgs[i], typeFind))
+                            if (TypeContainsType(errTypeArg, typeFind))
                                 return true;
                         }
                         if (err.HasTypeParent())
@@ -867,9 +867,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     { // BLOCK
                         AggregateType ats = type.AsAggregateType();
 
-                        for (int i = 0; i < ats.GetTypeArgsAll().Count; i++)
+                        foreach (CType typeArg in ats.GetTypeArgsAll().Items)
                         {
-                            if (TypeContainsTyVars(ats.GetTypeArgsAll()[i], typeVars))
+                            if (TypeContainsTyVars(typeArg, typeVars))
                             {
                                 return true;
                             }
@@ -883,9 +883,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         ErrorType err = type.AsErrorType();
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
-                        for (int i = 0; i < err.typeArgs.Count; i++)
+                        foreach (CType errTypeArg in err.typeArgs.Items)
                         {
-                            if (TypeContainsTyVars(err.typeArgs[i], typeVars))
+                            if (TypeContainsTyVars(errTypeArg, typeVars))
                             {
                                 return true;
                             }
@@ -912,9 +912,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(@params != null);
             Debug.Assert(typeFind != null);
-            for (int p = 0; p < @params.Count; p++)
+            foreach (CType sym in @params.Items)
             {
-                CType sym = @params[p];
                 if (TypeContainsType(sym, typeFind))
                 {
                     return true;

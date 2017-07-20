@@ -688,11 +688,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             // as well so that overload resolution can find them.
             if (callingType.IsWindowsRuntimeType())
             {
-                TypeArray collectioniFaces = callingType.GetWinRTCollectionIfacesAll(SymbolLoader);
-
-                for (int i = 0; i < collectioniFaces.Count; i++)
+                foreach (CType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    CType t = collectioniFaces[i];
                     // Collection interfaces will be aggregates.
                     Debug.Assert(t.IsAggregateType());
 

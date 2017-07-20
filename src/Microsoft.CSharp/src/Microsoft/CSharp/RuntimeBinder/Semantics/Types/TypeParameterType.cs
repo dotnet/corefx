@@ -25,10 +25,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * If a type parameter S depends on a type parameter T and T depends on
             //   U then S depends on U.
 
-            TypeArray pConstraints = GetBounds();
-            for (int iConstraint = 0; iConstraint < pConstraints.Count; ++iConstraint)
+            foreach (CType pConstraint in GetBounds().Items)
             {
-                CType pConstraint = pConstraints[iConstraint];
                 if (pConstraint == pType)
                 {
                     return true;

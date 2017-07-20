@@ -116,19 +116,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool AreAllTypeArgumentsUnitTypes(TypeArray typeArray)
         {
-            if (typeArray.Count == 0)
+            foreach (CType type in typeArray.Items)
             {
-                return true;
-            }
-
-            for (int i = 0; i < typeArray.Count; i++)
-            {
-                Debug.Assert(typeArray[i] != null);
-                if (!typeArray[i].IsOpenTypePlaceholderType())
+                Debug.Assert(type != null);
+                if (!type.IsOpenTypePlaceholderType())
                 {
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -155,12 +151,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (_winrtifacesAll == null)
             {
-                TypeArray ifaces = GetIfacesAll();
                 System.Collections.Generic.List<CType> typeList = new System.Collections.Generic.List<CType>();
 
-                for (int i = 0; i < ifaces.Count; i++)
+                foreach (AggregateType type in GetIfacesAll().Items)
                 {
-                    AggregateType type = ifaces[i].AsAggregateType();
                     Debug.Assert(type.isInterfaceType());
 
                     if (type.IsCollectionType())

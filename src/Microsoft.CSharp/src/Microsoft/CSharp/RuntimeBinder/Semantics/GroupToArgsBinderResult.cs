@@ -56,9 +56,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private static int NumberOfErrorTypes(TypeArray pTypeArgs)
             {
                 int nCount = 0;
-                for (int i = 0; i < pTypeArgs.Count; i++)
+                foreach (CType typeArg in pTypeArgs.Items)
                 {
-                    if (pTypeArgs[i].IsErrorType())
+                    if (typeArg.IsErrorType())
                     {
                         nCount++;
                     }

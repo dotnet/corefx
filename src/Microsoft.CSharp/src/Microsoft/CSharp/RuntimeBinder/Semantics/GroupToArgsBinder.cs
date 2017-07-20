@@ -322,11 +322,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (_pCurrentType.isInterfaceType())
                         {
-                            TypeArray ifaces = _pCurrentType.GetIfacesAll();
-                            for (int i = 0; i < ifaces.Count; i++)
+                            foreach (AggregateType type in _pCurrentType.GetIfacesAll().Items)
                             {
-                                AggregateType type = ifaces[i].AsAggregateType();
-
                                 Debug.Assert(type.isInterfaceType());
                                 _HiddenTypes.Add(type);
                             }
@@ -1242,10 +1239,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                TypeArray typeVars = var.AsAggregateType().GetTypeArgsAll();
-                for (int i = 0; i < typeVars.Count; i++)
+                foreach (CType type in var.AsAggregateType().GetTypeArgsAll().Items)
                 {
-                    CType type = typeVars[i];
                     if (type.IsErrorType())
                     {
                         return true;

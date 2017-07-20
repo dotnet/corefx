@@ -143,11 +143,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             fBogus = meth.RetType.computeCurrentBogusState();
                         }
-                        if (meth.Params != null)
+                        if (!fBogus && meth.Params != null)
                         {
-                            for (int i = 0; !fBogus && i < meth.Params.Count; i++)
+                            foreach (CType methParam in meth.Params.Items)
                             {
-                                fBogus |= meth.Params[i].computeCurrentBogusState();
+                                if (methParam.computeCurrentBogusState())
+                                {
+                                    fBogus = true;
+                                    break;
+                                }
                             }
                         }
                     }

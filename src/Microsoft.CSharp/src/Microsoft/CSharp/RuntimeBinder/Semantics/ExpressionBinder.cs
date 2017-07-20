@@ -1438,13 +1438,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // We need to check unsafe on the parameters as well, since we cannot check in conversion.
-                TypeArray pParams = pMWI.Meth().Params;
-
-                for (int i = 0; i < pParams.Count; i++)
+                foreach (CType type in pMWI.Meth().Params.Items)
                 {
                     // This is an optimization: don't call this in the vast majority of cases
-                    CType type = pParams[i];
-
                     if (type.isUnsafe())
                     {
                         checkUnsafe(type);

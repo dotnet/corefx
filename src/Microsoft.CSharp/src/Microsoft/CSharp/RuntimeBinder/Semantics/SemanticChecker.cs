@@ -102,10 +102,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            TypeArray typeArgs = type.AsAggregateType().GetTypeArgsAll();
-            for (int i = 0; i < typeArgs.Count; i++)
+            foreach (CType typeArg in type.AsAggregateType().GetTypeArgsAll().Items)
             {
-                if (!CheckTypeAccess(typeArgs[i], symWhere))
+                if (!CheckTypeAccess(typeArg, symWhere))
                     return false;
             }
 
