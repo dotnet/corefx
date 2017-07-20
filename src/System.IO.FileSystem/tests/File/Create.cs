@@ -152,7 +152,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
         public void LongPathSegment()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());

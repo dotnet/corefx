@@ -198,7 +198,6 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(PathsWithComponentLongerThanMaxComponent))]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
         public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsException(string path)
         {
             // While paths themselves can be up to 260 characters including trailing null, file systems
