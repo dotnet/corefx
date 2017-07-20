@@ -208,7 +208,7 @@ namespace System.IO.Tests
             }
             else
             {
-                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException>(() => Create(path));
+                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() => Create(path));
             }
         }
 

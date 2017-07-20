@@ -165,7 +165,7 @@ namespace System.IO.Tests
             }
             else
             {
-                Assert.Throws<IOException>(
+                AssertExtensions.ThrowsAny<IOException, PathTooLongException>(
                     () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
             }
 
