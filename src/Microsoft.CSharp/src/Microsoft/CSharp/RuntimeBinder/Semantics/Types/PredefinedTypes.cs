@@ -71,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal static Type GetAssociatedSystemType(PredefinedType type) => s_types[(int)type].AssociatedSystemType;
 
-        internal static bool IsSimpleType(PredefinedType type) => type <= PredefinedType.PT_ULONG;
+        internal static bool IsSimpleType(PredefinedType type) => type < PredefinedType.FirstNonSimpleType;
 
         internal static bool IsNumericType(PredefinedType type)
         {
