@@ -100,28 +100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return s_pdTypes[(int)type].AssociatedSystemType;
         }
 
-        internal static bool IsSimpleType(PredefinedType type)
-        {
-            switch (type)
-            {
-                case PredefinedType.PT_BYTE:
-                case PredefinedType.PT_SHORT:
-                case PredefinedType.PT_INT:
-                case PredefinedType.PT_LONG:
-                case PredefinedType.PT_FLOAT:
-                case PredefinedType.PT_DOUBLE:
-                case PredefinedType.PT_DECIMAL:
-                case PredefinedType.PT_CHAR:
-                case PredefinedType.PT_BOOL:
-                case PredefinedType.PT_SBYTE:
-                case PredefinedType.PT_USHORT:
-                case PredefinedType.PT_UINT:
-                case PredefinedType.PT_ULONG:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        internal static bool IsSimpleType(PredefinedType type) => type <= PredefinedType.PT_ULONG;
 
         internal static bool IsNumericType(PredefinedType type)
         {
