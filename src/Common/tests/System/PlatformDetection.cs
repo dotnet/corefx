@@ -21,6 +21,7 @@ namespace System
         public static bool IsUap => IsWinRT || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
         public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
+        public static bool IsNetCore => RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
@@ -36,6 +37,10 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
+        public static bool IsWindows10InsiderPreviewBuild16215OrGreater => IsWindows &&
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16215;
+        public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
+        public static bool IsNotArmProcess => !IsArmProcess;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
@@ -192,6 +197,10 @@ namespace System
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
         public static bool IsTizen => IsDistroAndVersion("tizen");
+
+        // If we need this long-term hopefully we can come up with a better detection than the kernel verison.
+        public static bool IsMacOsHighSierra { get; } =
+            IsOSX && RuntimeInformation.OSDescription.StartsWith("Darwin 17.0.0");
 
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.

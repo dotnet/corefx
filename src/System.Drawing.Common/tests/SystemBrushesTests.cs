@@ -47,23 +47,23 @@ namespace System.Drawing.Tests
             yield return Brush(() => SystemBrushes.WindowText, SystemColors.WindowText);
         }
 
-        public static object[] Brush(Func<Brush> brushThunk, Color expectedColor) => new object[] { brushThunk, expectedColor };
+        public static object[] Brush(Func<Brush> getBrush, Color expectedColor) => new object[] { getBrush, expectedColor };
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(SystemBrushes_TestData))]
-        public void SystemBrushes_Get_ReturnsExpected(Func<Brush> brushThunk, Color expectedColor)
+        public void SystemBrushes_Get_ReturnsExpected(Func<Brush> getBrush, Color expectedColor)
         {
-            SolidBrush brush = Assert.IsType<SolidBrush>(brushThunk());
+            SolidBrush brush = Assert.IsType<SolidBrush>(getBrush());
             Assert.Equal(expectedColor, brush.Color);
-            Assert.Throws<ArgumentException>(null, () => brush.Color = Color.Red);
+            AssertExtensions.Throws<ArgumentException>(null, () => brush.Color = Color.Red);
 
-            Assert.Same(brush, brushThunk());
+            Assert.Same(brush, getBrush());
         }
 
         [Fact]
         public void FromSystemColor_NotSystemColor_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => SystemBrushes.FromSystemColor(Color.Blue));
+            AssertExtensions.Throws<ArgumentException>(null, () => SystemBrushes.FromSystemColor(Color.Blue));
         }
     }
 }

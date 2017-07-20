@@ -15,6 +15,9 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test
     {
+        // TODO: https://github.com/dotnet/corefx/issues/7812
+        private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
+
         [Fact]
         public void SingletonReturnsTrue()
         {
@@ -35,7 +38,11 @@ namespace System.Net.Http.Functional.Tests
             using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator })
             using (var client = new HttpClient(handler))
             {
-                if (requestOnlyThisProtocol)
+                // Refer issue: #22089
+                // When the server uses SslProtocols.Tls, on MacOS, SecureTransport ends up picking a cipher suite
+                // for TLS1.2, even though server said it was only using TLS1.0. LibreSsl throws error that
+                // wrong cipher is used for TLs1.0.
+                if (requestOnlyThisProtocol || (PlatformDetection.IsMacOsHighSierra && acceptedProtocol == SslProtocols.Tls))
                 {
                     handler.SslProtocols = acceptedProtocol;
                 }
@@ -57,9 +64,8 @@ namespace System.Net.Http.Functional.Tests
             new object[] { Configuration.Http.WrongHostNameCertRemoteServer },
         };
 
-        [ActiveIssue(7812, TestPlatforms.Windows)]
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
+        [ConditionalTheory(nameof(ClientSupportsDHECipherSuites))]
         [MemberData(nameof(InvalidCertificateServers))]
         public async Task InvalidCertificateServers_CertificateValidationDisabled_Succeeds(string url)
         {
