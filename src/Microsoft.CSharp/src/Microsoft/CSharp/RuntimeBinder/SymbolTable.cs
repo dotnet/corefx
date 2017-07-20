@@ -1108,9 +1108,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     typeName = type.GetGenericTypeDefinition().FullName;
                 }
-                if (typeName != null && PredefinedTypeFacts.IsPredefinedType(typeName))
+                if (typeName != null)
                 {
-                    PredefinedTypes.InitializePredefinedType(agg, PredefinedTypeFacts.GetPredefTypeIndex(typeName));
+                    PredefinedType predefinedType = PredefinedTypeFacts.TryGetPredefTypeIndex(typeName);
+                    if (predefinedType != PredefinedType.PT_UNDEFINEDINDEX)
+                    {
+                        PredefinedTypes.InitializePredefinedType(agg, predefinedType);
+                    }
                 }
             }
 

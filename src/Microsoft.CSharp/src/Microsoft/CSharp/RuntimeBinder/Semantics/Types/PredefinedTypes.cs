@@ -162,15 +162,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        internal static bool IsPredefinedType(string name)
-        {
-            return s_pdTypeNames.ContainsKey(name);
-        }
-
-        internal static PredefinedType GetPredefTypeIndex(string name)
-        {
-            return s_pdTypeNames[name];
-        }
+        public static PredefinedType TryGetPredefTypeIndex(string name) =>
+            s_pdTypeNames.TryGetValue(name, out PredefinedType type) ? type : PredefinedType.PT_UNDEFINEDINDEX;
 
         private sealed class PredefinedTypeInfo
         {
