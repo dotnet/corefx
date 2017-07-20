@@ -66,7 +66,6 @@ namespace System.Runtime.InteropServices.Tests
 
         public static IEnumerable<object[]> InvalidPinnedObject_TestData()
         {
-            yield return new object[] { new object() };
             yield return new object[] { new NonBlittable() };
             yield return new object[] { new object[0] };
             yield return new object[] { new NonBlittable[0] };
@@ -147,7 +146,7 @@ namespace System.Runtime.InteropServices.Tests
             finally
             {
                 handle.Free();
-                if (other is GCHandle otherHandle)
+                if (other is GCHandle otherHandle && !expected)
                 {
                     otherHandle.Free();
                 }

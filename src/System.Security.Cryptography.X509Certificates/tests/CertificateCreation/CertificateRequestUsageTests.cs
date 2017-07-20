@@ -431,23 +431,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     request.Create(issuer, notBefore, notAfter.AddMilliseconds(1), serial).Dispose();//);
 
                     // The notBefore value a whole second earlier:
-                    Assert.Throws<ArgumentException>(
-                        "notBefore",
-                        () => request.Create(issuer, notBefore.AddSeconds(-1), notAfter, serial).Dispose());
+                    AssertExtensions.Throws<ArgumentException>("notBefore", () =>
+                    {
+                        request.Create(issuer, notBefore.AddSeconds(-1), notAfter, serial).Dispose();
+                    });
 
                     // The notAfter value bumped past the second mark:
                     DateTimeOffset tooLate = notAfter.AddMilliseconds(1000 - notAfter.Millisecond);
-                    Assert.Throws<ArgumentException>(
-                        "notAfter",
-                        () =>
-                        {
-                            request.Create(issuer, notBefore, tooLate, serial).Dispose();
-                        });
+                    AssertExtensions.Throws<ArgumentException>( "notAfter", () =>
+                    {
+                        request.Create(issuer, notBefore, tooLate, serial).Dispose();
+                    });
 
                     // And ensure that both out of range isn't magically valid again
-                    Assert.Throws<ArgumentException>(
-                        "notBefore",
-                        () => request.Create(issuer, notBefore.AddDays(-1), notAfter.AddDays(1), serial).Dispose());
+                    AssertExtensions.Throws<ArgumentException>("notBefore", () =>
+                    {
+                        request.Create(issuer, notBefore.AddDays(-1), notAfter.AddDays(1), serial).Dispose();
+                    });
                 }
             }
         }
@@ -519,11 +519,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             Exception exception = Assert.Throws<CryptographicException>(
                 () =>
                 request.Create(request.SubjectName, generator, now, now.AddDays(1), new byte[1]));
-
+#if netcoreapp
             if (CultureInfo.CurrentCulture.Name == "en-US")
             {
                 Assert.Contains("ASN1", exception.Message);
             }
+#endif
         }
 
         [Fact]
@@ -555,8 +556,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                     byte[] serialNumber = { 1, 1, 2, 3, 5, 8, 13 };
 
-                    Assert.Throws<ArgumentException>(
-                        () => request.Create(cert, now, now.AddHours(3), serialNumber));
+                    AssertExtensions.Throws<ArgumentException>("issuerCertificate", () => request.Create(cert, now, now.AddHours(3), serialNumber));
 
 
                     // Passes with the generator
@@ -595,8 +595,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                     byte[] serialNumber = { 1, 1, 2, 3, 5, 8, 13 };
 
-                    Assert.Throws<ArgumentException>(
-                        () => request.Create(cert, now, now.AddHours(3), serialNumber));
+                    AssertExtensions.Throws<ArgumentException>("issuerCertificate", () => request.Create(cert, now, now.AddHours(3), serialNumber));
 
                     X509SignatureGenerator ecdsaGenerator =
                         X509SignatureGenerator.CreateForECDsa(ecdsa);
@@ -635,8 +634,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                     byte[] serialNumber = { 1, 1, 2, 3, 5, 8, 13 };
 
-                    Assert.Throws<ArgumentException>(
-                        () => request.Create(cert, now, now.AddHours(3), serialNumber));
+                    AssertExtensions.Throws<ArgumentException>("issuerCertificate", () => request.Create(cert, now, now.AddHours(3), serialNumber));
 
                     X509SignatureGenerator generator =
                         X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);

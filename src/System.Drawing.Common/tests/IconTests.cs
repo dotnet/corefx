@@ -96,15 +96,15 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullFilePath_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null));
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null, new Size(32, 32)));
-            Assert.Throws<ArgumentNullException>("path", () => new Icon((string)null, 32, 32));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null, new Size(32, 32)));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new Icon((string)null, 32, 32));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Stream()
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico"), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico")))
             {
                 var icon = new Icon(stream);
                 Assert.Equal(32, icon.Width);
@@ -117,7 +117,7 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Width_Height(string fileName, Size size, Size expectedSize)
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath(fileName), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath(fileName)))
             using (var icon = new Icon(stream, size.Width, size.Height))
             {
                 Assert.Equal(expectedSize.Width, icon.Width);
@@ -130,7 +130,7 @@ namespace System.Drawing.Tests
         [MemberData(nameof(Size_TestData))]
         public void Ctor_Stream_Size(string fileName, Size size, Size expectedSize)
         {
-            using (var stream = new FileStream(Helpers.GetTestBitmapPath(fileName), FileMode.Open))
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath(fileName)))
             using (var icon = new Icon(stream, size))
             {
                 Assert.Equal(expectedSize.Width, icon.Width);
@@ -248,7 +248,7 @@ namespace System.Drawing.Tests
                 Exception ex = Assert.ThrowsAny<Exception>(() => icon.Save(stream));
                 Assert.True(ex is COMException || ex is ObjectDisposedException, $"{ex.GetType().ToString()} was thrown.");
 
-                Assert.Throws<ArgumentException>(null, () => icon.ToBitmap());
+                AssertExtensions.Throws<ArgumentException>(null, () => icon.ToBitmap());
                 Assert.Equal(Size.Empty, icon.Size);
 
                 using (var newIcon = new Icon(icon, 10, 10))
@@ -281,7 +281,7 @@ namespace System.Drawing.Tests
         [InlineData(typeof(IconTests), "48x48_MULTIPLE_entries_4bit.ico")]
         public void Ctor_InvalidResource_ThrowsArgumentException(Type type, string resource)
         {
-            Assert.Throws<ArgumentException>(null, () => new Icon(type, resource));
+            AssertExtensions.Throws<ArgumentException>(null, () => new Icon(type, resource));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -455,7 +455,7 @@ namespace System.Drawing.Tests
                 var icon = Icon.FromHandle(source.Handle);
                 icon.Dispose();
 
-                Assert.Throws<ArgumentNullException>("dataStream", () => icon.Save(null));
+                AssertExtensions.Throws<ArgumentNullException>("dataStream", () => icon.Save(null));
             }
         }
 
@@ -704,7 +704,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FromHandle_Zero_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Icon.FromHandle(IntPtr.Zero));
+            AssertExtensions.Throws<ArgumentException>(null, () => Icon.FromHandle(IntPtr.Zero));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
