@@ -12,16 +12,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class PredefinedTypes
     {
         private SymbolTable _runtimeBinderSymbolTable;
-        private readonly BSYMMGR _pBSymmgr;
+        private readonly BSYMMGR _symbolManager;
         private AggregateSymbol[] _predefSyms;    // array of predefined symbol types.
 
-        public PredefinedTypes(BSYMMGR pBSymmgr)
+        public PredefinedTypes(BSYMMGR symbolManager)
         {
-            _pBSymmgr = pBSymmgr;
+            _symbolManager = symbolManager;
             _runtimeBinderSymbolTable = null;
         }
 
-        // We want to delay load the predef syms as needed.
+        // We want to delay load the predefined symbols as needed.
         private AggregateSymbol DelayLoadPredefSym(PredefinedType pt)
         {
             CType type = _runtimeBinderSymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
@@ -47,57 +47,35 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void Init(SymbolTable symtable)
         {
             _runtimeBinderSymbolTable = symtable;
-            Debug.Assert(_pBSymmgr != null);
+            Debug.Assert(_symbolManager != null);
             Debug.Assert(_predefSyms == null);
 
             _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
         }
 
-        public AggregateSymbol GetPredefAgg(PredefinedType pt)
-        {
-            return _predefSyms[(int)pt] ?? (_predefSyms[(int)pt] = DelayLoadPredefSym(pt));
-        }
+        public AggregateSymbol GetPredefAgg(PredefinedType pt) =>
+            _predefSyms[(int)pt] ?? (_predefSyms[(int)pt] = DelayLoadPredefSym(pt));
 
         ////////////////////////////////////////////////////////////////////////////////
         // Some of the predefined types have built-in names, like "int" or "string" or
         // "object". This return the nice name if one exists; otherwise null is 
         // returned.
 
-        private static string GetNiceName(PredefinedType pt)
-        {
-            return PredefinedTypeFacts.GetNiceName(pt);
-        }
+        private static string GetNiceName(PredefinedType pt) => PredefinedTypeFacts.GetNiceName(pt);
 
-        public static string GetNiceName(AggregateSymbol type)
-        {
-            if (type.IsPredefined())
-                return GetNiceName(type.GetPredefType());
-            else
-                return null;
-        }
+        public static string GetNiceName(AggregateSymbol type) =>
+            type.IsPredefined() ? GetNiceName(type.GetPredefType()) : null;
 
-        public static string GetFullName(PredefinedType pt)
-        {
-            return PredefinedTypeFacts.GetName(pt);
-        }
+        public static string GetFullName(PredefinedType pt) => PredefinedTypeFacts.GetName(pt);
     }
 
     internal static class PredefinedTypeFacts
     {
-        internal static string GetName(PredefinedType type)
-        {
-            return s_pdTypes[(int)type].name;
-        }
+        internal static string GetName(PredefinedType type) => s_types[(int)type].Name;
 
-        internal static FUNDTYPE GetFundType(PredefinedType type)
-        {
-            return s_pdTypes[(int)type].fundType;
-        }
+        internal static FUNDTYPE GetFundType(PredefinedType type) => s_types[(int)type].FundType;
 
-        internal static Type GetAssociatedSystemType(PredefinedType type)
-        {
-            return s_pdTypes[(int)type].AssociatedSystemType;
-        }
+        internal static Type GetAssociatedSystemType(PredefinedType type) => s_types[(int)type].AssociatedSystemType;
 
         internal static bool IsSimpleType(PredefinedType type) => type <= PredefinedType.PT_ULONG;
 
@@ -162,24 +140,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public static PredefinedType TryGetPredefTypeIndex(string name) =>
-            s_pdTypeNames.TryGetValue(name, out PredefinedType type) ? type : PredefinedType.PT_UNDEFINEDINDEX;
+            s_typesByName.TryGetValue(name, out PredefinedType type) ? type : PredefinedType.PT_UNDEFINEDINDEX;
 
         private sealed class PredefinedTypeInfo
         {
 #if DEBUG
-            internal readonly PredefinedType type;
+            public readonly PredefinedType Type;
 #endif
-            internal readonly string name;
-            internal readonly FUNDTYPE fundType;
-            internal readonly Type AssociatedSystemType;
+            public readonly string Name;
+            public readonly FUNDTYPE FundType;
+            public readonly Type AssociatedSystemType;
 
             internal PredefinedTypeInfo(PredefinedType type, Type associatedSystemType, string name, FUNDTYPE fundType)
             {
 #if DEBUG
-                this.type = type;
+                Type = type;
 #endif
-                this.name = name;
-                this.fundType = fundType;
+                Name = name;
+                FundType = fundType;
                 AssociatedSystemType = associatedSystemType;
             }
 
@@ -189,7 +167,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private static readonly PredefinedTypeInfo[] s_pdTypes = {
+        private static readonly PredefinedTypeInfo[] s_types = {
             new PredefinedTypeInfo(PredefinedType.PT_BYTE,   typeof(byte), "System.Byte", FUNDTYPE.FT_U1),
             new PredefinedTypeInfo(PredefinedType.PT_SHORT,  typeof(short), "System.Int16", FUNDTYPE.FT_I2),
             new PredefinedTypeInfo(PredefinedType.PT_INT,    typeof(int), "System.Int32", FUNDTYPE.FT_I4),
@@ -318,22 +296,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new PredefinedTypeInfo(PredefinedType.PT_G_IREADONLYCOLLECTION, typeof(IReadOnlyCollection<>), "System.Collections.Generic.IReadOnlyCollection`1"),
         };
 
-        private static readonly Dictionary<string, PredefinedType> s_pdTypeNames = CreatePredefinedTypeFacts();
+        private static readonly Dictionary<string, PredefinedType> s_typesByName = CreatePredefinedTypeFacts();
 
         private static Dictionary<string, PredefinedType> CreatePredefinedTypeFacts()
         {
-            var pdTypeNames = new Dictionary<string, PredefinedType>((int)PredefinedType.PT_COUNT);
+            var typesByName = new Dictionary<string, PredefinedType>((int)PredefinedType.PT_COUNT);
+            for (int i = 0; i < (int)PredefinedType.PT_COUNT; i++)
+            {
 #if DEBUG
-            for (int i = 0; i < (int)PredefinedType.PT_COUNT; i++)
-            {
-                Debug.Assert(s_pdTypes[i].type == (PredefinedType)i);
-            }
+                Debug.Assert(s_types[i].Type == (PredefinedType)i);
 #endif
-            for (int i = 0; i < (int)PredefinedType.PT_COUNT; i++)
-            {
-                pdTypeNames.Add(s_pdTypes[i].name, (PredefinedType)i);
+                typesByName.Add(s_types[i].Name, (PredefinedType)i);
             }
-            return pdTypeNames;
+
+            return typesByName;
         }
     }
 }
