@@ -26,12 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             CType type = _runtimeBinderSymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
             AggregateSymbol sym = type.getAggregate();
-
-            // If we failed to load this thing, we have problems.
-            if (sym == null)
-            {
-                return null;
-            }
             return InitializePredefinedType(sym, pt);
         }
 
