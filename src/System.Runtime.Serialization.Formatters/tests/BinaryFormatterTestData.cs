@@ -98,7 +98,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             object byteEqualityComparer;
 
             // .NET Native doesn't create ByteEqualityComparer with EqualityComparer.Default, so create it through reflection
-            if(PlatformDetection.IsNetNative)
+            if (PlatformDetection.IsNetNative)
             {
                 Type byteEqualityComparerType = Type.GetType("System.Collections.Generic.ByteEqualityComparer", true);
                 byteEqualityComparer = Activator.CreateInstance(byteEqualityComparerType);
