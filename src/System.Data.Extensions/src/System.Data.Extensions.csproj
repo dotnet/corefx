@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{C7CB4B69-2A11-4A20-A21E-5C954855AE5A}</ProjectGuid>
+    <AssemblyName>System.IO.FileSystem</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <!--
+      Currently the uap build is broken so forcing UWPCompatible = false to use Win32 code
+      https://github.com/dotnet/corefx/issues/16422
+    -->
+    <UWPCompatible>false</UWPCompatible>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
+    <NoWarn>$(NoWarn);414</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <!-- Unix -->
+  <ItemGroup>
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Threading.Overlapped" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Data.Common" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UWPCompatible)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Data\DataRowComparer.cs" />
+    <Compile Include="System\Data\DataRowExtensions.cs" />
+    <Compile Include="System\Data\DataSetUtil.cs" />
+    <Compile Include="System\Data\DataTableExtensions.cs" />
+    <Compile Include="System\Data\EnumerableRowCollection.cs" />
+    <Compile Include="System\Data\EnumerableRowCollectionExtensions.cs" />
+    <Compile Include="System\Data\LinqDataView.cs" />
+    <Compile Include="System\Data\OrderedEnumerableRowCollection.cs" />
+    <Compile Include="System\Data\ShippingAssemblyAttribute.cs" />
+    <Compile Include="System\Data\SortExpressionBuilder.cs" />
+    <Compile Include="System\Data\TypedTableBase.cs" />
+    <Compile Include="System\Data\TypedTableBaseExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="System.Data.Extensions.txt" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

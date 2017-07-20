@@ -1,0 +1,21 @@
+﻿; These are the managed resources for System.Data.DataSetExtensions.dll.  See
+; ResourceManager documentation and the ResGen tool, which is
+; a managed app built from \com99\src\toolbox\resgen.
+
+
+DataSetLinq_InvalidEnumerationValue=The {0} enumeration value, {1}, is not valid.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; System.Data.DataSetLinq error messages
+DataSetLinq_EmptyDataRowSource=The source contains no DataRows.
+DataSetLinq_NullDataRow=The source contains a DataRow reference that is null.
+DataSetLinq_CannotLoadDeletedRow=The source contains a deleted DataRow that cannot be copied to the DataTable.
+DataSetLinq_CannotLoadDetachedRow=The source contains a detached DataRow that cannot be copied to the DataTable.
+DataSetLinq_CannotCompareDeletedRow=The DataRowComparer does not work with DataRows that have been deleted since it only compares current values.
+DataSetLinq_NonNullableCast=Cannot cast DBNull.Value to type '{0}'. Please use a nullable type.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; System.Data.LinqDataView Error Messages
+ToLDVUnsupported=Can not create DataView after using projection
+LDV_InvalidNumOfKeys=Must provide '{0}' keys to find
+LDVRowStateError=DataViewRowState must be DataViewRowState.CurrentRows
