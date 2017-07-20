@@ -85,8 +85,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 this.grfos = bos.grfos;
                 this.fnkind = bos.fnkind;
 
-                _type1 = pt1 != PredefinedType.PT_UNDEFINEDINDEX ? fnc.GetOptPDT(pt1) : null;
-                _type2 = pt2 != PredefinedType.PT_UNDEFINEDINDEX ? fnc.GetOptPDT(pt2) : null;
+                _type1 = pt1 != PredefinedType.PT_UNDEFINEDINDEX ? fnc.GetPDT(pt1) : null;
+                _type2 = pt2 != PredefinedType.PT_UNDEFINEDINDEX ? fnc.GetPDT(pt2) : null;
                 _grflt = LiftFlags.None;
             }
 

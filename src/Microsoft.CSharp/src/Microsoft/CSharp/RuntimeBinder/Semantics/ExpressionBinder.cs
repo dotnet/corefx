@@ -358,33 +358,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
 
-        private AggregateType GetReqPDT(PredefinedType pt)
+        private AggregateType GetPDT(PredefinedType pt)
         {
-            return GetReqPDT(pt, GetSymbolLoader());
-        }
+            Debug.Assert(pt != PredefinedType.PT_VOID); // use getVoidType()
 
-        private static AggregateType GetReqPDT(PredefinedType pt, SymbolLoader symbolLoader)
-        {
-            Debug.Assert(pt != PredefinedType.PT_VOID);  // use getVoidType()
-            return symbolLoader.GetReqPredefType(pt);
-        }
-
-        private AggregateType GetOptPDT(PredefinedType pt)
-        {
-            return GetOptPDT(pt, true);
-        }
-
-        private AggregateType GetOptPDT(PredefinedType pt, bool WarnIfNotFound)
-        {
-            Debug.Assert(pt != PredefinedType.PT_VOID);  // use getVoidType()
-            if (WarnIfNotFound)
-            {
-                return GetSymbolLoader().GetOptPredefTypeErr(pt);
-            }
-            else
-            {
-                return GetSymbolLoader().GetOptPredefType(pt);
-            }
+            return GetSymbolLoader().GetPredefType(pt);
         }
 
         private CType VoidType { get { return GetSymbolLoader().GetTypeManager().GetVoid(); } }
@@ -435,7 +413,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bIsError = true;
             }
 
-            CType pIntType = GetReqPDT(PredefinedType.PT_INT);
+            CType pIntType = GetPDT(PredefinedType.PT_INT);
 
             // Array indexing must occur on an array type.
             if (!(pOp1.Type is ArrayType pArrayType))
@@ -1250,7 +1228,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pTypeErr == null)
             {
-                pTypeErr = GetReqPDT(PredefinedType.PT_OBJECT);
+                pTypeErr = GetPDT(PredefinedType.PT_OBJECT);
             }
 
             ExprOperator rval = GetExprFactory().CreateOperator(ek, pTypeErr, pOperand1, pOperand2);
@@ -1976,7 +1954,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // first, select the allowable types
             for (int ipt = 0; ipt < s_rgptIntOp.Length; ipt++)
             {
-                CType type = GetReqPDT(s_rgptIntOp[ipt]);
+                CType type = GetPDT(s_rgptIntOp[ipt]);
                 foreach (Expr arg in args.ToEnumerable())
                 {
                     if (!canConvert(arg, type))
