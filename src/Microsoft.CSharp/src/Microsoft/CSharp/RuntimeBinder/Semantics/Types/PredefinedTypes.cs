@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -167,14 +166,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private sealed class PredefinedTypeInfo
         {
+#if DEBUG
             internal readonly PredefinedType type;
+#endif
             internal readonly string name;
             internal readonly FUNDTYPE fundType;
             internal readonly Type AssociatedSystemType;
 
             internal PredefinedTypeInfo(PredefinedType type, Type associatedSystemType, string name, FUNDTYPE fundType)
             {
+#if DEBUG
                 this.type = type;
+#endif
                 this.name = name;
                 this.fundType = fundType;
                 AssociatedSystemType = associatedSystemType;
