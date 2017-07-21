@@ -1273,7 +1273,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return cachedResult;
         }
 
-        private EventSymbol AddEventToSymbolTable(EventInfo eventInfo, AggregateSymbol aggregate, FieldSymbol addedField)
+        private void AddEventToSymbolTable(EventInfo eventInfo, AggregateSymbol aggregate, FieldSymbol addedField)
         {
             EventSymbol ev = _symbolTable.LookupSym(
                 GetName(eventInfo.Name),
@@ -1282,7 +1282,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (ev != null)
             {
                 Debug.Assert(ev.AssociatedEventInfo == eventInfo);
-                return ev;
+                return;
             }
 
             ev = _symFactory.CreateEvent(GetName(eventInfo.Name), aggregate);
@@ -1344,8 +1344,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
                 }
             }
-
-            return ev;
         }
         #endregion
 
@@ -1367,7 +1365,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private PropertySymbol AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
+        private void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
             Name name;
             bool isIndexer = property.GetIndexParameters() != null && property.GetIndexParameters().Length != 0;
@@ -1397,7 +1395,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     if (prop.AssociatedPropertyInfo.IsEquivalentTo(property))
                     {
-                        return prop;
+                        return;
                     }
 
                     prevProp = prop;
@@ -1507,8 +1505,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // The access of the property is the least restrictive access of its getter/setter.
             prop.SetAccess(access);
-
-            return prop;
         }
 
         #endregion
