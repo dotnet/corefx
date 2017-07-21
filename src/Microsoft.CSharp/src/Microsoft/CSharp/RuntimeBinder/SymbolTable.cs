@@ -214,9 +214,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (memberEn.MoveNext())
                 {
                     CType cType = GetCTypeFromType(type);
-                    if (!(cType is AggregateType))
+                    if (!(cType is AggregateType aggType))
                         continue;
-                    AggregateSymbol aggregate = (cType as AggregateType).getAggregate();
+                    AggregateSymbol aggregate = aggType.getAggregate();
                     FieldSymbol addedField = null;
 
                     // We need to add fields before the actual events, so do the first iteration
@@ -248,16 +248,16 @@ namespace Microsoft.CSharp.RuntimeBinder
                             AddMethodToSymbolTable(member, aggregate, MethodKindEnum.Constructor);
                             AddParameterConversions(ctor);
                         }
-                        else if (member is PropertyInfo)
+                        else if (member is PropertyInfo prop)
                         {
-                            AddPropertyToSymbolTable(member as PropertyInfo, aggregate);
+                            AddPropertyToSymbolTable(prop, aggregate);
                         }
-                        else if (member is FieldInfo)
+                        else if (member is FieldInfo field)
                         {
                             // Store this field so that if we also find an event, we can
                             // mark it as the backing field of the event.
                             Debug.Assert(addedField == null);
-                            addedField = AddFieldToSymbolTable(member as FieldInfo, aggregate);
+                            addedField = AddFieldToSymbolTable(field, aggregate);
                         }
                     } while (memberEn.MoveNext());
 
