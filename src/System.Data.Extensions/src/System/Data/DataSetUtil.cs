@@ -8,7 +8,6 @@ using System.Diagnostics;
 
 internal static class DataSetUtil
 {
-    #region CheckArgument
     internal static void CheckArgumentNull<T>(T argumentValue, string argumentName) where T : class
     {
         if (null == argumentValue)
@@ -16,16 +15,10 @@ internal static class DataSetUtil
             throw ArgumentNull(argumentName);
         }
     }
-    #endregion
 
-    #region Trace
     private static T TraceException<T>(string trace, T e)
     {
         Debug.Assert(null != e, "TraceException: null Exception");
-        if (null != e)
-        {
-            //Bid.Trace(trace, e.ToString()); // will include callstack if permission is available
-        }
         return e;
     }
 
@@ -33,9 +26,7 @@ internal static class DataSetUtil
     {
         return TraceException("<comm.ADP.TraceException|ERR|THROW> '%ls'\n", e);
     }
-    #endregion
 
-    #region new Exception
     internal static ArgumentException Argument(string message)
     {
         return TraceExceptionAsReturnValue(new ArgumentException(message));
@@ -65,12 +56,10 @@ internal static class DataSetUtil
     {
         return TraceExceptionAsReturnValue(new NotSupportedException(message));
     }
-    #endregion
 
-    #region new EnumerationValueNotValid
     static internal ArgumentOutOfRangeException InvalidEnumerationValue(Type type, int value)
     {
-        return ArgumentOutOfRange(Strings.DataSetLinq_InvalidEnumerationValue(type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
+        return ArgumentOutOfRange(string.Format(SR.DataSetLinq_InvalidEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
     }
 
     static internal ArgumentOutOfRangeException InvalidDataRowState(DataRowState value)
@@ -104,26 +93,25 @@ internal static class DataSetUtil
 #endif
         return InvalidEnumerationValue(typeof(LoadOption), (int)value);
     }
-    #endregion
 
     // only StackOverflowException & ThreadAbortException are sealed classes
-    static private readonly Type StackOverflowType = typeof(System.StackOverflowException);
-    static private readonly Type OutOfMemoryType = typeof(System.OutOfMemoryException);
-    static private readonly Type ThreadAbortType = typeof(System.Threading.ThreadAbortException);
-    static private readonly Type NullReferenceType = typeof(System.NullReferenceException);
-    static private readonly Type AccessViolationType = typeof(System.AccessViolationException);
-    static private readonly Type SecurityType = typeof(System.Security.SecurityException);
+    static private readonly Type s_stackOverflowType = typeof(StackOverflowException);
+    static private readonly Type s_outOfMemoryType = typeof(OutOfMemoryException);
+    static private readonly Type s_threadAbortType = typeof(System.Threading.ThreadAbortException);
+    static private readonly Type s_nullReferenceType = typeof(NullReferenceException);
+    static private readonly Type s_accessViolationType = typeof(AccessViolationException);
+    static private readonly Type s_securityType = typeof(System.Security.SecurityException);
 
     static internal bool IsCatchableExceptionType(Exception e)
     {
         // a 'catchable' exception is defined by what it is not.
         Type type = e.GetType();
 
-        return ((type != StackOverflowType) &&
-                 (type != OutOfMemoryType) &&
-                 (type != ThreadAbortType) &&
-                 (type != NullReferenceType) &&
-                 (type != AccessViolationType) &&
-                 !SecurityType.IsAssignableFrom(type));
+        return ((type != s_stackOverflowType) &&
+                 (type != s_outOfMemoryType) &&
+                 (type != s_threadAbortType) &&
+                 (type != s_nullReferenceType) &&
+                 (type != s_accessViolationType) &&
+                 !s_securityType.IsAssignableFrom(type));
     }
 }

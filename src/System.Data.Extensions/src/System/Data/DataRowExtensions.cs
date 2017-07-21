@@ -13,152 +13,104 @@ namespace System.Data
     {
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="columnName">
-        ///   The input column name specificy which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="columnName">The input column name specificy which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, string columnName)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[columnName]);
+            return UnboxT<T>.s_unbox(row[columnName]);
         }
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="column">
-        ///   The input DataColumn specificy which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="column">The input DataColumn specificy which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, DataColumn column)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[column]);
+            return UnboxT<T>.s_unbox(row[column]);
         }
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="columnIndex">
-        ///   The input ordinal specificy which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="columnIndex">The input ordinal specificy which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, int columnIndex)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[columnIndex]);
+            return UnboxT<T>.s_unbox(row[columnIndex]);
         }
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="columnIndex">
-        ///   The input ordinal specificy which row value to retrieve.
-        /// </param>
-        /// <param name="version">
-        ///   The DataRow version for which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="columnIndex">The input ordinal specificy which row value to retrieve.</param>
+        /// <param name="version">The DataRow version for which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, int columnIndex, DataRowVersion version)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[columnIndex, version]);
+            return UnboxT<T>.s_unbox(row[columnIndex, version]);
         }
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="columnName">
-        ///   The input column name specificy which row value to retrieve.
-        /// </param>
-        /// <param name="version">
-        ///   The DataRow version for which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="columnName">The input column name specificy which row value to retrieve.</param>
+        /// <param name="version">The DataRow version for which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, string columnName, DataRowVersion version)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[columnName, version]);
+            return UnboxT<T>.s_unbox(row[columnName, version]);
         }
 
         /// <summary>
-        ///  This method provides access to the values in each of the columns in a given row. 
-        ///  This method makes casts unnecessary when accessing columns. 
-        ///  Additionally, Field supports nullable types and maps automatically between DBNull and 
-        ///  Nullable when the generic type is nullable. 
+        /// This method provides access to the values in each of the columns in a given row. 
+        /// This method makes casts unnecessary when accessing columns. 
+        /// Additionally, Field supports nullable types and maps automatically between DBNull and 
+        /// Nullable when the generic type is nullable. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow
-        /// </param>
-        /// <param name="column">
-        ///   The input DataColumn specificy which row value to retrieve.
-        /// </param>
-        /// <param name="version">
-        ///   The DataRow version for which row value to retrieve.
-        /// </param>
-        /// <returns>
-        ///   The DataRow value for the column specified.
-        /// </returns> 
+        /// <param name="row">The input DataRow</param>
+        /// <param name="column">The input DataColumn specificy which row value to retrieve.</param>
+        /// <param name="version">The DataRow version for which row value to retrieve.</param>
+        /// <returns>The DataRow value for the column specified.</returns> 
         public static T Field<T>(this DataRow row, DataColumn column, DataRowVersion version)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
-            return UnboxT<T>.Unbox(row[column, version]);
+            return UnboxT<T>.s_unbox(row[column, version]);
         }
 
         /// <summary>
-        ///  This method sets a new value for the specified column for the DataRow it�s called on. 
+        /// This method sets a new value for the specified column for the DataRow it�s called on. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow.
-        /// </param>
-        /// <param name="columnIndex">
-        ///   The input ordinal specifying which row value to set.
-        /// </param>
-        /// <param name="value">
-        ///   The new row value for the specified column.
-        /// </param>
+        /// <param name="row">The input DataRow.</param>
+        /// <param name="columnIndex">The input ordinal specifying which row value to set.</param>
+        /// <param name="value">The new row value for the specified column.</param>
         public static void SetField<T>(this DataRow row, int columnIndex, T value)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
@@ -166,17 +118,11 @@ namespace System.Data
         }
 
         /// <summary>
-        ///  This method sets a new value for the specified column for the DataRow it�s called on. 
+        /// This method sets a new value for the specified column for the DataRow it�s called on. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow.
-        /// </param>
-        /// <param name="columnName">
-        ///   The input column name specificy which row value to retrieve.
-        /// </param>
-        /// <param name="value">
-        ///   The new row value for the specified column.
-        /// </param>
+        /// <param name="row">The input DataRow.</param>
+        /// <param name="columnName">The input column name specificy which row value to retrieve.</param>
+        /// <param name="value">The new row value for the specified column.</param>
         public static void SetField<T>(this DataRow row, string columnName, T value)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
@@ -184,17 +130,11 @@ namespace System.Data
         }
 
         /// <summary>
-        ///  This method sets a new value for the specified column for the DataRow it�s called on. 
+        /// This method sets a new value for the specified column for the DataRow it�s called on. 
         /// </summary>
-        /// <param name="row">
-        ///   The input DataRow.
-        /// </param>
-        /// <param name="column">
-        ///   The input DataColumn specificy which row value to retrieve.
-        /// </param>
-        /// <param name="value">
-        ///   The new row value for the specified column.
-        /// </param>
+        /// <param name="row">The input DataRow.</param>
+        /// <param name="column">The input DataColumn specificy which row value to retrieve.</param>
+        /// <param name="value">The new row value for the specified column.</param>
         public static void SetField<T>(this DataRow row, DataColumn column, T value)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
@@ -203,7 +143,7 @@ namespace System.Data
 
         private static class UnboxT<T>
         {
-            internal static readonly Converter<object, T> Unbox = Create(typeof(T));
+            internal static readonly Converter<object, T> s_unbox = Create(typeof(T));
 
             private static Converter<object, T> Create(Type type)
             {
@@ -214,7 +154,7 @@ namespace System.Data
                         return (Converter<object, T>)Delegate.CreateDelegate(
                             typeof(Converter<object, T>),
                                 typeof(UnboxT<T>)
-                                    .GetMethod("NullableField", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                                    .GetMethod("NullableField", Reflection.BindingFlags.Static | Reflection.BindingFlags.NonPublic)
                                     .MakeGenericMethod(type.GetGenericArguments()[0]));
                     }
                     return ValueField;
@@ -231,18 +171,18 @@ namespace System.Data
             {
                 if (DBNull.Value == value)
                 {
-                    throw DataSetUtil.InvalidCast(Strings.DataSetLinq_NonNullableCast(typeof(T).ToString()));
+                    throw DataSetUtil.InvalidCast(string.Format(SR.DataSetLinq_NonNullableCast, typeof(T).ToString()));
                 }
                 return (T)value;
             }
 
-            private static Nullable<TElem> NullableField<TElem>(object value) where TElem : struct
+            private static TElem? NullableField<TElem>(object value) where TElem : struct
             {
                 if (DBNull.Value == value)
                 {
-                    return default(Nullable<TElem>);
+                    return default(TElem?);
                 }
-                return new Nullable<TElem>((TElem)value);
+                return new TElem?((TElem)value);
             }
         }
     }

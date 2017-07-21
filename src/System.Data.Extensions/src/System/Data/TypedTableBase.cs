@@ -22,29 +22,23 @@ namespace System.Data
         protected TypedTableBase() : base() { }
 
         /// <summary>
-        ///   Constructor for the generic TypedTableBase with takes SerializationInfo and StreamingContext.
-        ///   Will be called by generated Typed DataSet classes and
-        ///   is not for public use.
+        /// Constructor for the generic TypedTableBase with takes SerializationInfo and StreamingContext.
+        /// Will be called by generated Typed DataSet classes and
+        /// is not for public use.
         /// </summary>
-        /// <param name="info">
-        ///   SerializationInfo containing data to construct the object.
-        /// </param>
-        /// <param name="context">
-        ///   The streaming context for the object being deserializad.
-        /// </param>
+        /// <param name="info">SerializationInfo containing data to construct the object.</param>
+        /// <param name="context">The streaming context for the object being deserializad.</param>
         protected TypedTableBase(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
 
         /// <summary>
-        ///   This property returns a enumerator of T for the TypedTable.  Note, this could
-        ///   execute the underlying Linq expression.
+        /// This property returns a enumerator of T for the TypedTable.  Note, this could
+        /// execute the underlying Linq expression.
         /// </summary>
-        /// <returns>
-        ///   IEnumerable of T.
-        /// </returns>
+        /// <returns>IEnumerable of T.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return this.Rows.Cast<T>().GetEnumerator();
+            return Rows.Cast<T>().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -57,7 +51,7 @@ namespace System.Data
         /// </summary>
         public EnumerableRowCollection<TResult> Cast<TResult>()
         {
-            EnumerableRowCollection<T> erc = new EnumerableRowCollection<T>((DataTable)this);
+            EnumerableRowCollection<T> erc = new EnumerableRowCollection<T>(this);
             return erc.Cast<TResult>();
         }
 

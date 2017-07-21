@@ -20,13 +20,15 @@ namespace System.Data
 
         internal static bool AreEqual(object a, object b)
         {
-            if (object.ReferenceEquals(a, b))
-            {   // same reference or (null, null) or (DBNull.Value, DBNull.Value)
+            if (ReferenceEquals(a, b))
+            {
+                // same reference or (null, null) or (DBNull.Value, DBNull.Value)
                 return true;
             }
-            if (object.ReferenceEquals(a, null) || object.ReferenceEquals(a, DBNull.Value) ||
-                object.ReferenceEquals(b, null) || object.ReferenceEquals(b, DBNull.Value))
-            {   // (null, non-null) or (null, DBNull.Value) or vice versa
+            if (ReferenceEquals(a, null) || ReferenceEquals(a, DBNull.Value) ||
+                ReferenceEquals(b, null) || ReferenceEquals(b, DBNull.Value))
+            {
+                // (null, non-null) or (null, DBNull.Value) or vice versa
                 return false;
             }
             return (a.Equals(b) || (a.GetType().IsArray && CompareArray((Array)a, b as Array)));
@@ -34,13 +36,15 @@ namespace System.Data
 
         private static bool AreElementEqual(object a, object b)
         {
-            if (object.ReferenceEquals(a, b))
-            {   // same reference or (null, null) or (DBNull.Value, DBNull.Value)
+            if (ReferenceEquals(a, b))
+            {
+                // same reference or (null, null) or (DBNull.Value, DBNull.Value)
                 return true;
             }
-            if (object.ReferenceEquals(a, null) || object.ReferenceEquals(a, DBNull.Value) ||
-                object.ReferenceEquals(b, null) || object.ReferenceEquals(b, DBNull.Value))
-            {   // (null, non-null) or (null, DBNull.Value) or vice versa
+            if (ReferenceEquals(a, null) || ReferenceEquals(a, DBNull.Value) ||
+                ReferenceEquals(b, null) || ReferenceEquals(b, DBNull.Value))
+            {
+                // (null, non-null) or (null, DBNull.Value) or vice versa
                 return false;
             }
             return a.Equals(b);
@@ -52,7 +56,8 @@ namespace System.Data
                 (1 != a.Rank) ||
                 (1 != b.Rank) ||
                 (a.Length != b.Length))
-            {   // automatically consider array's with Rank>1 not-equal
+            {
+                // automatically consider array's with Rank>1 not-equal
                 return false;
             }
 
@@ -63,19 +68,19 @@ namespace System.Data
                 switch (Type.GetTypeCode(a.GetType().GetElementType()))
                 {
                     case TypeCode.Byte:
-                        return DataRowComparer.CompareEquatableArray<Byte>((Byte[])a, (Byte[])b);
+                        return CompareEquatableArray((byte[])a, (byte[])b);
                     case TypeCode.Int16:
-                        return DataRowComparer.CompareEquatableArray<Int16>((Int16[])a, (Int16[])b);
+                        return CompareEquatableArray((short[])a, (short[])b);
                     case TypeCode.Int32:
-                        return DataRowComparer.CompareEquatableArray<Int32>((Int32[])a, (Int32[])b);
+                        return CompareEquatableArray((int[])a, (int[])b);
                     case TypeCode.Int64:
-                        return DataRowComparer.CompareEquatableArray<Int64>((Int64[])a, (Int64[])b);
+                        return CompareEquatableArray((long[])a, (long[])b);
                     case TypeCode.String:
-                        return DataRowComparer.CompareEquatableArray<String>((String[])a, (String[])b);
+                        return CompareEquatableArray((string[])a, (string[])b);
                 }
             }
 
-            //Compare every element. But don't recurse if we have Array of array.
+            // Compare every element. But don't recurse if we have Array of array.
             int length = index1 + a.Length;
             for (; index1 < length; ++index1, ++index2)
             {
@@ -89,15 +94,17 @@ namespace System.Data
 
         private static bool CompareEquatableArray<TElem>(TElem[] a, TElem[] b) where TElem : IEquatable<TElem>
         {
-            if (object.ReferenceEquals(a, b))
+            if (ReferenceEquals(a, b))
             {
                 return true;
             }
-            if (object.ReferenceEquals(a, null) ||
-                object.ReferenceEquals(b, null))
+
+            if (ReferenceEquals(a, null) ||
+                ReferenceEquals(b, null))
             {
                 return false;
             }
+
             if (a.Length != b.Length)
             {
                 return false;
@@ -125,41 +132,36 @@ namespace System.Data
         /// </summary>
         private DataRowComparer() { }
 
-        private static DataRowComparer<TRow> _instance = new DataRowComparer<TRow>();
+        private static DataRowComparer<TRow> s_instance = new DataRowComparer<TRow>();
 
         /// <summary>
         /// Gets the singleton instance of the data row comparer.
         /// </summary>
-        public static DataRowComparer<TRow> Default { get { return _instance; } }
+        public static DataRowComparer<TRow> Default { get { return s_instance; } }
 
         /// <summary>
         /// This method compares to DataRows by doing a column by column value based
         /// comparision.
         /// </summary>
-        /// <param name="leftRow">
-        ///   The first input DataRow
-        /// </param>
-        /// <param name="rightRow">
-        ///   The second input DataRow
-        /// </param>
-        /// <returns>
-        ///   True if rows are equal, false if not.
-        /// </returns>
+        /// <param name="leftRow">The first input DataRow</param>
+        /// <param name="rightRow">The second input DataRow</param>
+        /// <returns>True if rows are equal, false if not.</returns>
         public bool Equals(TRow leftRow, TRow rightRow)
         {
-            if (object.ReferenceEquals(leftRow, rightRow))
+            if (ReferenceEquals(leftRow, rightRow))
             {
                 return true;
             }
-            if (object.ReferenceEquals(leftRow, null) ||
-                object.ReferenceEquals(rightRow, null))
+
+            if (ReferenceEquals(leftRow, null) ||
+                ReferenceEquals(rightRow, null))
             {
                 return false;
             }
 
             if (leftRow.RowState == DataRowState.Deleted || rightRow.RowState == DataRowState.Deleted)
             {
-                throw DataSetUtil.InvalidOperation(Strings.DataSetLinq_CannotCompareDeletedRow);
+                throw DataSetUtil.InvalidOperation(SR.DataSetLinq_CannotCompareDeletedRow);
             }
 
             int count = leftRow.Table.Columns.Count;
@@ -179,21 +181,17 @@ namespace System.Data
         }
 
         /// <summary>
-        /// This mtheod retrieves a hash code for the source row.
+        /// This method retrieves a hash code for the source row.
         /// </summary>
-        /// <param name="row">
-        ///   The source DataRow
-        /// </param>
-        /// <returns>
-        ///   HashCode for row based on values in the row.
-        /// </returns>
+        /// <param name="row">The source DataRow</param>
+        /// <returns>HashCode for row based on values in the row.</returns>
         public int GetHashCode(TRow row)
         {
             DataSetUtil.CheckArgumentNull(row, "row");
 
             if (row.RowState == DataRowState.Deleted)
             {
-                throw DataSetUtil.InvalidOperation(Strings.DataSetLinq_CannotCompareDeletedRow);
+                throw DataSetUtil.InvalidOperation(SR.DataSetLinq_CannotCompareDeletedRow);
             }
 
             int hash = 0;
@@ -219,7 +217,7 @@ namespace System.Data
                 }
                 else
                 {
-                    System.ValueType vt = value as System.ValueType;
+                    ValueType vt = value as ValueType;
 
                     // have to unbox value types.
                     if (vt != null)
@@ -232,6 +230,7 @@ namespace System.Data
                     }
                 }
             }
+
             // if table has no columns, the hash code is 0
             return hash;
         }

@@ -39,15 +39,14 @@ namespace System.Data
          * 
          **/
 
-        //Selectors and comparers are mapped using the index in the list.
-        //E.g: _comparers[i] is used with _selectors[i]
+        // Selectors and comparers are mapped using the index in the list.
+        // E.g: _comparers[i] is used with _selectors[i]
 
         LinkedList<Func<T, object>> _selectors = new LinkedList<Func<T, object>>();
         LinkedList<Comparison<object>> _comparers = new LinkedList<Comparison<object>>();
 
         LinkedListNode<Func<T, object>> _currentSelector = null;
         LinkedListNode<Comparison<object>> _currentComparer = null;
-
 
         /// <summary>
         /// Adds a sorting selector/comparer in the correct order
@@ -56,7 +55,7 @@ namespace System.Data
         {
             Debug.Assert(keySelector != null);
             Debug.Assert(compare != null);
-            //Inputs are assumed to be valid. The burden for ensuring it is on the caller.
+            // Inputs are assumed to be valid. The burden for ensuring it is on the caller.
 
             if (isOrderBy)
             {
@@ -65,7 +64,7 @@ namespace System.Data
             }
             else
             {
-                //ThenBy can only be called after OrderBy
+                // ThenBy can only be called after OrderBy
                 Debug.Assert(_currentSelector != null);
                 Debug.Assert(_currentComparer != null);
 
@@ -73,8 +72,6 @@ namespace System.Data
                 _currentComparer = _comparers.AddAfter(_currentComparer, compare);
             }
         }
-
-
 
         /// <summary>
         /// Represents a Combined selector of all selectors added thusfar.
@@ -91,7 +88,6 @@ namespace System.Data
 
             return result;
         }
-
 
 
         /// <summary>
@@ -123,7 +119,8 @@ namespace System.Data
         {
             get
             {
-                Debug.Assert(_selectors.Count == _comparers.Count); //weak now that we have two dimensions
+                //weak now that we have two dimensions
+                Debug.Assert(_selectors.Count == _comparers.Count);
                 return _selectors.Count;
             }
         }
@@ -132,7 +129,6 @@ namespace System.Data
         /// Clones the SortexpressionBuilder and returns a new object 
         /// that points to same comparer and selectors (in the same order).
         /// </summary>
-        /// <returns></returns>
         internal SortExpressionBuilder<T> Clone()
         {
             SortExpressionBuilder<T> builder = new SortExpressionBuilder<T>();
@@ -200,5 +196,5 @@ namespace System.Data
             return builder;
         }
 
-    } //end SortExpressionBuilder<T>
+    }
 }
