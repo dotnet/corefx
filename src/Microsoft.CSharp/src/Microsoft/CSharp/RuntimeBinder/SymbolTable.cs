@@ -205,8 +205,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // Now loop over all methods and add them.
                 IEnumerable<MemberInfo> members = Enumerable.Where(type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static),
                                                                    member => member.Name == name && member.DeclaringType == type);
-                IEnumerable<MemberInfo> events = Enumerable.Where(type.GetRuntimeEvents(),
-                                                                  member => member.Name == name && member.DeclaringType == type);
 
                 if (members.Any())
                 {
@@ -217,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     FieldSymbol addedField = null;
 
                     // We need to add fields before the actual events, so do the first iteration
-                    // excludint events.
+                    // excluding events.
                     foreach (MemberInfo member in members)
                     {
                         if (member is MethodInfo method)
@@ -256,7 +254,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                             addedField = AddFieldToSymbolTable(member as FieldInfo, aggregate);
                         }
                     }
-                    foreach (EventInfo e in events)
+
+                    foreach (EventInfo e in type.GetRuntimeEvents()
+                        .Where(member => member.DeclaringType == type && member.Name == name))
                     {
                         AddEventToSymbolTable(e, aggregate, addedField);
                     }
