@@ -200,13 +200,15 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     type = type.GetGenericTypeDefinition();
                 }
+
                 NameHashKey key = new NameHashKey(type, name);
 
                 // Now loop over all methods and add them.
-                IEnumerable<MemberInfo> members = Enumerable.Where(type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static),
-                                                                   member => member.Name == name && member.DeclaringType == type);
-
-                if (members.Any())
+                IEnumerator<MemberInfo> memberEn = type
+                    .GetMembers(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                    .Where(member => member.DeclaringType == type && member.Name == name).GetEnumerator();
+                if (memberEn.MoveNext())
                 {
                     CType cType = GetCTypeFromType(type);
                     if (!(cType is AggregateType))
@@ -216,8 +218,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     // We need to add fields before the actual events, so do the first iteration
                     // excluding events.
-                    foreach (MemberInfo member in members)
+                    do
                     {
+                        MemberInfo member = memberEn.Current;
                         if (member is MethodInfo method)
                         {
                             MethodKindEnum kind = MethodKindEnum.Actual;
@@ -253,7 +256,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                             Debug.Assert(addedField == null);
                             addedField = AddFieldToSymbolTable(member as FieldInfo, aggregate);
                         }
-                    }
+                    } while (memberEn.MoveNext());
 
                     foreach (EventInfo e in type.GetRuntimeEvents()
                         .Where(member => member.DeclaringType == type && member.Name == name))
