@@ -201,7 +201,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                     type = type.GetGenericTypeDefinition();
                 }
 
-                NameHashKey key = new NameHashKey(type, name);
+                if (!_namesLoadedForEachType.Add(new NameHashKey(type, name)))
+                {
+                    continue;
+                }
 
                 // Now loop over all methods and add them.
                 IEnumerator<MemberInfo> memberEn = type
@@ -264,8 +267,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                         AddEventToSymbolTable(e, aggregate, addedField);
                     }
                 }
-
-                _namesLoadedForEachType.Add(key);
             }
         }
 
