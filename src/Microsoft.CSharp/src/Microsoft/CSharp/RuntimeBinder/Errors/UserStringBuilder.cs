@@ -68,10 +68,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case SYMKIND.SK_TypeParameterSymbol:
                     id = MessageID.SK_TYVAR;
                     break;
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
-                    Debug.Assert(false, "Illegal sk");
-                    id = MessageID.SK_ALIAS;
-                    break;
                 default:
                     Debug.Assert(false, "impossible sk");
                     id = MessageID.SK_UNKNOWN;
