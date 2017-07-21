@@ -178,7 +178,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         }
 
         #region InheritanceHierarchy
-        private IEnumerable<MemberInfo> AddNamesOnType(NameHashKey key)
+        private void AddNamesOnType(NameHashKey key)
         {
             Debug.Assert(!_namesLoadedForEachType.Contains(key));
 
@@ -186,15 +186,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             List<Type> inheritance = CreateInheritanceHierarchyList(key.type);
 
             // Now add every method as it appears in the inheritance hierarchy.
-            return AddNamesInInheritanceHierarchy(key.name, inheritance);
+            AddNamesInInheritanceHierarchy(key.name, inheritance);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private IEnumerable<MemberInfo> AddNamesInInheritanceHierarchy(string name, List<Type> inheritance)
+        private void AddNamesInInheritanceHierarchy(string name, List<Type> inheritance)
         {
-            IEnumerable<MemberInfo> result = Array.Empty<MemberInfo>();
-
             for (int i = inheritance.Count - 1; i >= 0; --i)
             {
                 Type type = inheritance[i];
@@ -262,14 +260,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         AddEventToSymbolTable(e, aggregate, addedField);
                     }
-
-                    result = result.Concat(members);
                 }
 
                 _namesLoadedForEachType.Add(key);
             }
-
-            return result;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
