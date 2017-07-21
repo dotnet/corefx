@@ -2078,21 +2078,26 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateSymbol aggregate = t.AsAggregateType().getAggregate();
 
             // Now find all the conversions and make them.
-            IEnumerable<MethodInfo> conversions = Enumerable.Where(type.GetRuntimeMethods(),
-                                                    conversion => (conversion.IsPublic && conversion.IsStatic)
-                                                      && (conversion.Name == SpecialNames.ImplicitConversion || conversion.Name == SpecialNames.ExplicitConversion)
-                                                      && conversion.DeclaringType == type
-                                                      && conversion.IsSpecialName
-                                                      && !conversion.IsGenericMethod);
-
-            foreach (MethodInfo conversion in conversions)
+            foreach (MethodInfo conversion in type.GetRuntimeMethods())
             {
-                MethodSymbol method = AddMethodToSymbolTable(
-                    conversion,
-                    aggregate,
-                    conversion.Name == SpecialNames.ImplicitConversion ?
-                        MethodKindEnum.ImplicitConv :
-                        MethodKindEnum.ExplicitConv);
+                if (conversion.IsPublic && conversion.IsStatic && conversion.DeclaringType == type
+                    && conversion.IsSpecialName && !conversion.IsGenericMethod)
+                {
+                    MethodKindEnum methodKind;
+                    switch (conversion.Name)
+                    {
+                        case SpecialNames.ImplicitConversion:
+                            methodKind = MethodKindEnum.ImplicitConv;
+                            break;
+                        case SpecialNames.ExplicitConversion:
+                            methodKind = MethodKindEnum.ExplicitConv;
+                            break;
+                        default:
+                            continue;
+                    }
+
+                    AddMethodToSymbolTable(conversion, aggregate, methodKind);
+                }
             }
         }
         #endregion
