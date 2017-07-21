@@ -117,29 +117,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // Add the names.
-            IEnumerable<MemberInfo> members = AddNamesOnType(key);
-
-            // Take each member and load each type's conversions into the symbol table.
-            if (members != null)
-            {
-                foreach (MemberInfo member in members)
-                {
-                    if (member is MethodInfo)
-                    {
-                        foreach (ParameterInfo param in (member as MethodInfo).GetParameters())
-                        {
-                            AddConversionsForType(param.ParameterType);
-                        }
-                    }
-                    else if (member is ConstructorInfo)
-                    {
-                        foreach (ParameterInfo param in (member as ConstructorInfo).GetParameters())
-                        {
-                            AddConversionsForType(param.ParameterType);
-                        }
-                    }
-                }
-            }
+            AddNamesOnType(key);
 
             // Take each type argument and load its conversions into the symbol table.
             if (typeArguments != null)
@@ -191,7 +169,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             return mem.SwtFirst();
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
+        private void AddParameterConversions(MethodBase method)
+        {
+            foreach (ParameterInfo param in method.GetParameters())
+            {
+                AddConversionsForType(param.ParameterType);
+            }
+        }
 
         #region InheritanceHierarchy
         private IEnumerable<MemberInfo> AddNamesOnType(NameHashKey key)
@@ -238,7 +222,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // excludint events.
                     foreach (MemberInfo member in members)
                     {
-                        if (member is MethodInfo)
+                        if (member is MethodInfo method)
                         {
                             MethodKindEnum kind = MethodKindEnum.Actual;
                             if (member.Name == SpecialNames.Invoke)
@@ -253,17 +237,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                             {
                                 kind = MethodKindEnum.ExplicitConv;
                             }
-                            AddMethodToSymbolTable(
-                                member,
-                                aggregate,
-                                kind);
+
+                            AddMethodToSymbolTable(member, aggregate, kind);
+                            AddParameterConversions(method);
                         }
-                        else if (member is ConstructorInfo)
+                        else if (member is ConstructorInfo ctor)
                         {
-                            AddMethodToSymbolTable(
-                                member,
-                                aggregate,
-                                MethodKindEnum.Constructor);
+                            AddMethodToSymbolTable(member, aggregate, MethodKindEnum.Constructor);
+                            AddParameterConversions(ctor);
                         }
                         else if (member is PropertyInfo)
                         {
