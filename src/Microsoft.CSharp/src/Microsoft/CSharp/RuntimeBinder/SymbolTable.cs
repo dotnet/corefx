@@ -19,8 +19,8 @@ namespace Microsoft.CSharp.RuntimeBinder
     {
         /////////////////////////////////////////////////////////////////////////////////
         // Members
-        private HashSet<Type> _typesWithConversionsLoaded;
-        private HashSet<NameHashKey> _namesLoadedForEachType;
+        private readonly HashSet<Type> _typesWithConversionsLoaded = new HashSet<Type>();
+        private readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
 
         // Members from the managed binder.
         private readonly SYMTBL _symbolTable;
@@ -78,16 +78,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
             _semanticChecker = semanticChecker;
-
-            ClearCache();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
-
-        private void ClearCache()
-        {
-            _typesWithConversionsLoaded = new HashSet<Type>();
-            _namesLoadedForEachType = new HashSet<NameHashKey>();
             _rootNamespace = _bsymmgr.GetRootNS();
 
             // Now populate object.
