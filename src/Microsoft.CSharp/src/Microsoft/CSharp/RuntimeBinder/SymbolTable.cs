@@ -2100,56 +2100,45 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Operators
         /////////////////////////////////////////////////////////////////////////////////
 
-        private bool IsOperator(MethodInfo method)
+        private static bool IsOperator(MethodInfo method)
         {
-            return method.IsSpecialName &&
-                method.IsStatic &&
-                (method.Name == SpecialNames.ImplicitConversion ||
-                method.Name == SpecialNames.ExplicitConversion ||
+            if (method.IsSpecialName && method.IsStatic)
+            {
+                switch (method.Name)
+                {
+                    case SpecialNames.ImplicitConversion:
+                    case SpecialNames.ExplicitConversion:
+                    case SpecialNames.CLR_Add:
+                    case SpecialNames.CLR_Subtract:
+                    case SpecialNames.CLR_Multiply:
+                    case SpecialNames.CLR_Division:
+                    case SpecialNames.CLR_Modulus:
+                    case SpecialNames.CLR_LShift:
+                    case SpecialNames.CLR_RShift:
+                    case SpecialNames.CLR_LT:
+                    case SpecialNames.CLR_GT:
+                    case SpecialNames.CLR_LTE:
+                    case SpecialNames.CLR_GTE:
+                    case SpecialNames.CLR_Equality:
+                    case SpecialNames.CLR_Inequality:
+                    case SpecialNames.CLR_BitwiseAnd:
+                    case SpecialNames.CLR_ExclusiveOr:
+                    case SpecialNames.CLR_BitwiseOr:
+                    case SpecialNames.CLR_LogicalNot:
+                    case SpecialNames.CLR_UnaryNegation:
+                    case SpecialNames.CLR_UnaryPlus:
+                    case SpecialNames.CLR_OnesComplement:
+                    case SpecialNames.CLR_True:
+                    case SpecialNames.CLR_False:
+                    case SpecialNames.CLR_PreIncrement:
+                    case SpecialNames.CLR_PreDecrement:
+                        return true;
+                }
+            }
 
-                // Binary Operators
-                method.Name == SpecialNames.CLR_Add ||
-                method.Name == SpecialNames.CLR_Subtract ||
-                method.Name == SpecialNames.CLR_Multiply ||
-                method.Name == SpecialNames.CLR_Division ||
-                method.Name == SpecialNames.CLR_Modulus ||
-                method.Name == SpecialNames.CLR_LShift ||
-                method.Name == SpecialNames.CLR_RShift ||
-                method.Name == SpecialNames.CLR_LT ||
-                method.Name == SpecialNames.CLR_GT ||
-                method.Name == SpecialNames.CLR_LTE ||
-                method.Name == SpecialNames.CLR_GTE ||
-                method.Name == SpecialNames.CLR_Equality ||
-                method.Name == SpecialNames.CLR_Inequality ||
-                method.Name == SpecialNames.CLR_BitwiseAnd ||
-                method.Name == SpecialNames.CLR_ExclusiveOr ||
-                method.Name == SpecialNames.CLR_BitwiseOr ||
-                method.Name == SpecialNames.CLR_LogicalNot ||
-
-                // Binary inplace operators.
-                method.Name == SpecialNames.CLR_InPlaceAdd ||
-                method.Name == SpecialNames.CLR_InPlaceSubtract ||
-                method.Name == SpecialNames.CLR_InPlaceMultiply ||
-                method.Name == SpecialNames.CLR_InPlaceDivide ||
-                method.Name == SpecialNames.CLR_InPlaceModulus ||
-                method.Name == SpecialNames.CLR_InPlaceBitwiseAnd ||
-                method.Name == SpecialNames.CLR_InPlaceExclusiveOr ||
-                method.Name == SpecialNames.CLR_InPlaceBitwiseOr ||
-                method.Name == SpecialNames.CLR_InPlaceLShift ||
-                method.Name == SpecialNames.CLR_InPlaceRShift ||
-
-                // Unary Operators
-                method.Name == SpecialNames.CLR_UnaryNegation ||
-                method.Name == SpecialNames.CLR_UnaryPlus ||
-                method.Name == SpecialNames.CLR_OnesComplement ||
-                method.Name == SpecialNames.CLR_True ||
-                method.Name == SpecialNames.CLR_False ||
-
-                method.Name == SpecialNames.CLR_PreIncrement ||
-                method.Name == SpecialNames.CLR_PostIncrement ||
-                method.Name == SpecialNames.CLR_PreDecrement ||
-                method.Name == SpecialNames.CLR_PostDecrement);
+            return false;
         }
+
         #endregion
     }
 }
