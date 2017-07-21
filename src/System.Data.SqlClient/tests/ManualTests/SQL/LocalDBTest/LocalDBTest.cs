@@ -54,8 +54,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsUap))]
-        public static void VerifyLocalDBNotSupportedTest()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public static void LocalDBNotSupportedOnUapTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB");
             builder.IntegratedSecurity = true;
