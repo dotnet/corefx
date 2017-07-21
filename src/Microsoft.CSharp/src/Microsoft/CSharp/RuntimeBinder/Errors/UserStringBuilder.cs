@@ -483,8 +483,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_Scope:
-                case SYMKIND.SK_LambdaScope:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, $"Bad symbol kind: {sym.getKind()}");
