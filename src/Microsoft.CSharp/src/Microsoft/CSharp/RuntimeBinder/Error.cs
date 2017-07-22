@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -71,9 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new RuntimeBinderException(SR.Format(SR.BindCallToConditionalMethod, p0));
         }
 
-        internal static Exception BindToVoidMethodButExpectResult()
-        {
-            return new RuntimeBinderException(SR.BindToVoidMethodButExpectResult);
-        }
+        internal static Exception BindToVoidMethodButExpectResult() =>
+            new RuntimeBinderException(ErrorCode.ERR_NoImplicitConv, SR.BindToVoidMethodButExpectResult);
     }
 }

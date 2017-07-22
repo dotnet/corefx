@@ -129,11 +129,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void CannotConvertVoid()
         {
             dynamic d = new List<int>();
-            Assert.Throws<RuntimeBinderException>(() => d.Add(1).ToString()).VerifyHelpLink(0);
+            Assert.Throws<RuntimeBinderException>(() => d.Add(1).ToString()).VerifyHelpLink(29);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int i = d.Add(1);
-            }).VerifyHelpLink(0);
+            }).VerifyHelpLink(29);
         }
 
         [Fact]
