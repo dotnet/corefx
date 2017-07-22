@@ -1104,7 +1104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Given a method group or indexer group, bind it to the arguments for an 
         // invocation. This method can change the arguments to bind with Extension 
         // Methods
-        private bool BindMethodGroupToArgumentsCore(out GroupToArgsBinderResult pResults, BindingFlag bindFlags, ExprMemberGroup grp, ref Expr args, int carg, bool bindingCollectionAdd, bool bHasNamedArgumentSpecifiers)
+        private bool BindMethodGroupToArgumentsCore(out GroupToArgsBinderResult pResults, BindingFlag bindFlags, ExprMemberGroup grp, ref Expr args, int carg, bool bHasNamedArgumentSpecifiers)
         {
             ArgInfos pargInfo = new ArgInfos {carg = carg};
             FillInArgInfoFromArgList(pargInfo, args);
@@ -1113,7 +1113,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             FillInArgInfoFromArgList(pOriginalArgInfo, args);
 
             GroupToArgsBinder binder = new GroupToArgsBinder(this, bindFlags, grp, pargInfo, pOriginalArgInfo, bHasNamedArgumentSpecifiers, null/*atsDelegate*/);
-            bool retval = bindingCollectionAdd ? binder.BindCollectionAddArgs() : binder.Bind(true /*ReportErrors*/);
+            bool retval = binder.Bind(bReportErrors: true);
 
             pResults = binder.GetResultsOfBind();
             return retval;
@@ -1155,7 +1155,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             GroupToArgsBinderResult result;
-            if (!BindMethodGroupToArgumentsCore(out result, bindFlags, grp, ref args, carg, false, bSeenNamed))
+            if (!BindMethodGroupToArgumentsCore(out result, bindFlags, grp, ref args, carg, bSeenNamed))
             {
                 Debug.Assert(false, "Why didn't BindMethodGroupToArgumentsCore throw an error?");
                 return null;
