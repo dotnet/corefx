@@ -165,7 +165,7 @@ namespace System.IO.Tests
             }
             else
             {
-                AssertExtensions.ThrowsAny<DirectoryNotFoundException, FileNotFoundException, PathTooLongException>(
+                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(
                     () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
             }
         }
