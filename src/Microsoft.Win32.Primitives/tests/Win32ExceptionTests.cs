@@ -100,9 +100,9 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public static void Deserialize_NetCore_ThrowsPlatformNotSupportedException()
+        public static void DeserializeNetCoreThrowsPlatformNotSupportedExceptionNetFXRoundTrips()
         {
-            BinaryFormatterHelpers.AssertExceptionDeserializationFails<Win32Exception>();
+            BinaryFormatterHelpers.AssertExceptionDeserializationFailsOrRoundtrips(new Win32Exception(0x268));
         }
     }
 }
