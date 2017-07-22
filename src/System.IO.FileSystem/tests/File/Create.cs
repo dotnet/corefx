@@ -58,7 +58,6 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(UsingNewNormalization))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         public void ValidCreation_ExtendedSyntax()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + GetTestFilePath());
@@ -74,10 +73,9 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix, long path
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         public void ValidCreation_LongPathExtendedSyntax()
         {
-            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500).FullPath);
+            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500));
             Assert.StartsWith(IOInputs.ExtendedPrefix, testDir.FullName);
             string testFile = Path.Combine(testDir.FullName, GetTestFileName());
             using (FileStream stream = Create(testFile))
@@ -152,7 +150,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
         public void LongPathSegment()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -166,7 +163,7 @@ namespace System.IO.Tests
             }
             else
             {
-                Assert.Throws<IOException>(
+                AssertExtensions.ThrowsAny<IOException, PathTooLongException>(
                     () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
             }
 

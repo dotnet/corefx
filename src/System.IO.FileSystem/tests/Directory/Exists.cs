@@ -174,7 +174,6 @@ namespace System.IO.Tests
 
         [ConditionalTheory(nameof(UsingNewNormalization)),
             MemberData(nameof(ValidPathComponentNames))]
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Extended path exists
         public void ValidExtendedPathExists_ReturnsTrue(string component)
         {
@@ -184,7 +183,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Extended path already exists as file
         public void ExtendedPathAlreadyExistsAsFile()
         {
@@ -197,7 +195,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Extended path already exists as directory
         public void ExtendedPathAlreadyExistsAsDirectory()
         {
@@ -210,7 +207,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Long directory path doesn't throw on Exists
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
         {
@@ -252,7 +248,6 @@ namespace System.IO.Tests
 
         [ConditionalTheory(nameof(UsingNewNormalization)),
             MemberData(nameof(SimpleWhiteSpace))]
-        [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
         public void TrailingWhitespaceExistence_SimpleWhiteSpace(string component)
         {
@@ -280,7 +275,6 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(NonControlWhiteSpace))]
-        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // not NetFX
         public void NonControlWhiteSpaceExists(string component)
@@ -334,9 +328,9 @@ namespace System.IO.Tests
         {
             // Creates directories up to the maximum directory length all at once
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, maxComponent: 10);
-            Directory.CreateDirectory(path.FullPath);
-            Assert.True(Exists(path.FullPath));
+            string path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory);
+            Directory.CreateDirectory(path);
+            Assert.True(Exists(path));
         }
 
         [Theory,
