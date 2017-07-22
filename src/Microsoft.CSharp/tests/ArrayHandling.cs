@@ -71,14 +71,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         {
             dynamic d = new int[2, 2, 2];
             RuntimeBinderException ex = Assert.Throws<RuntimeBinderException>(() => d[1] = 0);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);
                 Assert.Contains("'3'", ex.Message);
             }
 
-
             ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4] = 0);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);
@@ -86,6 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             }
 
             ex = Assert.Throws<RuntimeBinderException>(() => d[1]);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);
@@ -93,6 +95,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             }
 
             ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4]);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);
@@ -101,6 +104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
             d = new int[2];
             ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4] = 0);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);
@@ -108,6 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             }
 
             ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4]);
+            ex.VerifyHelpLink(22);
             if (!PlatformDetection.IsNetNative) // .NET Native toolchain optimizes away Exception messages.
             {
                 Assert.Contains("[]", ex.Message);

@@ -14,7 +14,7 @@ namespace Microsoft.CSharp.RuntimeBinder
     {
         public override void SubmitError(CError pError)
         {
-            throw new RuntimeBinderException(pError.Text);
+            throw new RuntimeBinderException(pError.Code, pError.Text);
         }
     }
 }

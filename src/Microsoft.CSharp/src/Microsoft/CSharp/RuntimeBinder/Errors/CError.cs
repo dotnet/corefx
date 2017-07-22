@@ -23,9 +23,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         public void Initialize(ErrorCode code, string[] args)
         {
+            Code = code;
             _text = ComputeString(code, args);
         }
 
         public string Text { get { return _text; } }
+
+        public ErrorCode Code { get; private set; }
     }
 }
