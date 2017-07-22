@@ -118,5 +118,19 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Exception ex = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] { info, new StreamingContext() }));
             Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
         }
+
+        public static void AssertExceptionDeserializationFailsOrRoundtrips<T>(T exception) where T : Exception
+        {
+            // .NET Core and .NET Native throw PlatformNotSupportedExceptions when deserializing many exceptions.
+            // The .NET Framework has full serialization support. Test whichever is available.
+            if (PlatformDetection.IsFullFramework)
+            {
+                AssertRoundtrips(exception);
+            }
+            else
+            {
+                AssertExceptionDeserializationFails<T>();
+            }
+        }
     }
 }
