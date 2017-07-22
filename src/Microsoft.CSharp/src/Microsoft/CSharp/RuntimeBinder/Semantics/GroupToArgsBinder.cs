@@ -143,25 +143,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(pGroup != null);
 
-                CType rval = null;
 
-                if (0 != (pGroup.Flags & EXPRFLAG.EXF_BASECALL))
-                {
-                    rval = null;
-                }
-                else if (0 != (pGroup.Flags & EXPRFLAG.EXF_CTOR))
-                {
-                    rval = pGroup.ParentType;
-                }
-                else if (pGroup.OptionalObject != null)
-                {
-                    rval = pGroup.OptionalObject.Type;
-                }
-                else
-                {
-                    rval = null;
-                }
-                return rval;
+                return (pGroup.Flags & EXPRFLAG.EXF_CTOR) != 0 ? pGroup.ParentType : pGroup.OptionalObject?.Type;
             }
 
             private void LookForCandidates()
@@ -1274,11 +1257,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_results.GetBestResult().MethProp().name == NameManager.GetPredefinedName(PredefinedName.PN_DTOR) &&
                     _results.GetBestResult().MethProp().getClass().isPredefAgg(PredefinedType.PT_OBJECT))
                 {
-                    if (0 != (_pGroup.Flags & EXPRFLAG.EXF_BASECALL))
-                    {
-                        GetErrorContext().Error(ErrorCode.ERR_CallingBaseFinalizeDeprecated);
-                    }
-                    else
                     {
                         GetErrorContext().Error(ErrorCode.ERR_CallingFinalizeDepracated);
                     }
