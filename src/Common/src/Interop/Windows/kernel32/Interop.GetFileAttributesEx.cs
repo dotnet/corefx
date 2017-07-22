@@ -57,7 +57,6 @@ internal partial class Interop
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        [BestFitMapping(false)]
         internal unsafe struct WIN32_FIND_DATA
         {
             internal uint dwFileAttributes;
@@ -68,10 +67,8 @@ internal partial class Interop
             internal uint nFileSizeLow;
             internal uint dwReserved0;
             internal uint dwReserved1;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            internal string cFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
-            internal string cAlternateFileName;
+            internal FixedString.Size260 cFileName;
+            internal FixedString.Size14 cAlternateFileName;
         }
 
         internal struct FILE_TIME
