@@ -26,6 +26,7 @@
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Tests;
+using System.IO;
 using Xunit;
 
 namespace System.Drawing.Imaging.Tests
@@ -1215,19 +1216,37 @@ namespace System.Drawing.Imaging.Tests
                 Assert.Throws<ArgumentNullException>(() => imageAttr.SetOutputChannelColorProfile(null, ColorAdjustType.Default));
             }
         }
-        
+
+        [ActiveIssue(22309)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void SetOutputChannelColorProfile_InvalidPath_ThrowsArgumentException()
+        {
+            using (var imageAttr = new ImageAttributes())
+            {
+                Assert.Throws<ArgumentException>(() => imageAttr.SetOutputChannelColorProfile(string.Empty));
+                Assert.Throws<ArgumentException>(() => imageAttr.SetOutputChannelColorProfile(string.Empty, ColorAdjustType.Default));
+            }
+        }
+
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void SetOutputChannelColorProfile_InvalidPath_ThrowsOutOfMemoryException()
+        {
+            using (var imageAttr = new ImageAttributes())
+            {
+                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile("invalidPath"));
+                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile("invalidPath", ColorAdjustType.Default));
+            }
+        }
+
+        [ActiveIssue(22309)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void SetOutputChannelColorProfile_InvalidPath_ThrowsPathTooLongException()
         {
             string fileNameTooLong = new string('a', 261);
             using (var imageAttr = new ImageAttributes())
             {
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile("invalidPath"));
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile(string.Empty));
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile("invalidPath", ColorAdjustType.Default));
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile(string.Empty, ColorAdjustType.Default));
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong));
-                Assert.Throws<OutOfMemoryException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong, ColorAdjustType.Default));
+                Assert.Throws<PathTooLongException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong));
+                Assert.Throws<PathTooLongException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong, ColorAdjustType.Default));
             }
         }
 
