@@ -311,6 +311,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public static string GetIndexerName(this Type type)
         {
+            Debug.Assert(type != null);
             string name = GetTypeIndexerName(type);
             if (name == null && type.IsInterface)
             {
@@ -329,19 +330,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static string GetTypeIndexerName(Type type)
         {
-            string name = (type.GetCustomAttribute(typeof(DefaultMemberAttribute)) as DefaultMemberAttribute)
-                ?.MemberName;
-            if (name != null)
-            {
-                if (!type.GetProperties(
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-                    .Any(p => p.Name == name && p.GetIndexParameters().Length != 0))
-                {
-                    name = null;
-                }
-            }
-
-            return name;
+            Debug.Assert(type != null);
+            string name = (type.GetCustomAttribute(typeof(DefaultMemberAttribute)) as DefaultMemberAttribute)?.MemberName;
+            return name == null || !type.GetProperties(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+                .Any(p => p.Name == name && p.GetIndexParameters().Length != 0) ? null : name;
         }
     }
 }
