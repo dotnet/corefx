@@ -1354,7 +1354,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         private void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
             Name name;
-            bool isIndexer = property.GetIndexParameters() != null && property.GetIndexParameters().Length != 0;
+            bool isIndexer = property.GetIndexParameters().Length != 0
+                             && (property.DeclaringType?.GetCustomAttribute(typeof(DefaultMemberAttribute)) as DefaultMemberAttribute)
+                             ?.MemberName == property.Name;
 
             if (isIndexer)
             {
