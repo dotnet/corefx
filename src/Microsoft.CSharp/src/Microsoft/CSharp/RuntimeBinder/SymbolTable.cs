@@ -1655,7 +1655,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);
 
-            methodSymbol.useMethInstead = false;
             methodSymbol.isParamArray = DoesMethodHaveParameterArray(parameters);
             methodSymbol.isHideByName = false;
 
