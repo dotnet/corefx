@@ -134,20 +134,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return onBindingError;
                 }
 
-                if (e.ErrorCode == 0)
-                { 
-                    return new DynamicMetaObject(
-                        Expression.Throw(
-                            Expression.New(
-                                typeof(RuntimeBinderException).GetConstructor(new [] { typeof(string) }),
-                                Expression.Constant(e.Message)
-                            ),
-                            GetTypeForErrorMetaObject(action, args.Length == 0 ? null : args[0])
-                        ),
-                        restrictions
-                    );
-                }
-
                 return new DynamicMetaObject(
                     Expression.Throw(
                         Expression.New(
