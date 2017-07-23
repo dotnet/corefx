@@ -236,7 +236,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (!bFoundExpanded)
                     {
                         lookedAtCandidates = true;
-                        allCandidatesUnsupported &= _pCurrentSym.getBogus();
+                        allCandidatesUnsupported &= (_pCurrentSym is PropertySymbol prop && prop.Bogus);
 
                         // If we have the wrong number of arguments and still have room in our cache of 20,
                         // then store it in our cache and go to the next sym.
@@ -1512,10 +1512,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             if (ivar == 0 && sym is MethodSymbol meth && meth.IsExtension() && _pGroup.OptionalObject != null &&
                                 !_pExprBinder.canConvertInstanceParamForExtension(_pGroup.OptionalObject, meth.Params[0]))
                             {
-                                if (!_pGroup.OptionalObject.Type.getBogus())
-                                {
-                                    GetErrorContext().Error(ErrorCode.ERR_BadInstanceArgType, _pGroup.OptionalObject.Type, var);
-                                }
+                                GetErrorContext().Error(ErrorCode.ERR_BadInstanceArgType, _pGroup.OptionalObject.Type, var);
                             }
                             else
                             {

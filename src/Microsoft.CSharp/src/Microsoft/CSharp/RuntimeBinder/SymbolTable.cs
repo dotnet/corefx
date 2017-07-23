@@ -1458,7 +1458,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else
                 {
-                    prop.setBogus(true);
+                    prop.Bogus = true;
                     prop.methGet.SetMethKind(MethodKindEnum.Actual);
                 }
 
@@ -1479,7 +1479,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else
                 {
-                    prop.setBogus(true);
+                    prop.Bogus = true;
                     prop.methSet.SetMethKind(MethodKindEnum.Actual);
                 }
 

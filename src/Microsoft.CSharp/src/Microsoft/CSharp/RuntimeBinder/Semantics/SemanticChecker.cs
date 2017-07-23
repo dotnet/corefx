@@ -288,46 +288,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool CheckBogus(Symbol sym)
         {
-            if (sym == null)
-            {
-                return false;
-            }
-
-            if (!sym.hasBogus())
-            {
-                bool fBogus = sym.computeCurrentBogusState();
-
-                if (fBogus)
-                {
-                    // Only set this if everything is declared or
-                    // at least 1 declared thing is bogus
-                    sym.setBogus(fBogus);
-                }
-            }
-
-            return sym.hasBogus() && sym.checkBogus();
-        }
-
-        public bool CheckBogus(CType pType)
-        {
-            if (pType == null)
-            {
-                return false;
-            }
-
-            if (!pType.hasBogus())
-            {
-                bool fBogus = pType.computeCurrentBogusState();
-
-                if (fBogus)
-                {
-                    // Only set this if everything is declared or
-                    // at least 1 declared thing is bogus
-                    pType.setBogus(fBogus);
-                }
-            }
-
-            return pType.hasBogus() && pType.checkBogus();
+            return sym is PropertySymbol prop && prop.Bogus;
         }
 
         public void ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)

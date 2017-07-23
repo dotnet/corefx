@@ -535,45 +535,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void ReportBogus(SymWithType swt)
         {
-            Debug.Assert(swt.Sym.hasBogus() && swt.Sym.checkBogus());
-
-            switch (swt.Sym.getKind())
+            Debug.Assert(swt.Sym is PropertySymbol propAssert && propAssert.Bogus);
+            MethodSymbol meth1 = swt.Prop().methGet;
+            MethodSymbol meth2 = swt.Prop().methSet;
+            Debug.Assert((meth1 ?? meth2) != null);
+            if (meth1 == null | meth2 == null)
             {
-                case SYMKIND.SK_PropertySymbol:
-                    if (swt.Prop().useMethInstead)
-                    {
-                        MethodSymbol meth1 = swt.Prop().methGet;
-                        MethodSymbol meth2 = swt.Prop().methSet;
-                        ReportBogusForEventsAndProperties(swt, meth1, meth2);
-                        return;
-                    }
-                    break;
-
-                case SYMKIND.SK_MethodSymbol:
-                    if (swt.Meth().name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE) && swt.Meth().getClass().IsDelegate())
-                    {
-                        swt.Set(swt.Meth().getClass(), swt.GetType());
-                    }
-                    break;
+                GetErrorContext().Error(
+                    ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 ?? meth2, swt.GetType()),
+                    new ErrArgRefOnly(swt.Sym));
             }
-
-            // Generic bogus error.
-            GetErrorContext().ErrorRef(ErrorCode.ERR_BindToBogus, swt);
-        }
-
-        private void ReportBogusForEventsAndProperties(SymWithType swt, MethodSymbol meth1, MethodSymbol meth2)
-        {
-            if (meth1 != null && meth2 != null)
+            else
             {
-                GetErrorContext().Error(ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()), new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
-                return;
+                GetErrorContext().Error(
+                    ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()),
+                    new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
             }
-            if (meth1 != null || meth2 != null)
-            {
-                GetErrorContext().Error(ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 != null ? meth1 : meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
-                return;
-            }
-            throw Error.InternalCompilerError();
         }
 
         private bool IsDelegateType(CType pSrcType, AggregateType pAggType)

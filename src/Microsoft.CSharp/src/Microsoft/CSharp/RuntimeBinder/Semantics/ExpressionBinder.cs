@@ -1036,16 +1036,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return rval;
             }
 
-            if (SemanticChecker.CheckBogus(pmethBest.mpwi.Meth()))
-            {
-                ErrorContext.ErrorRef(ErrorCode.ERR_BindToBogus, pmethBest.mpwi);
-
-                ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, pmethBest.mpwi);
-                ExprCall rval = GetExprFactory().CreateCall(0, null, arg, pMemGroup, null);
-                rval.SetError();
-                return rval;
-            }
-
             ExprCall call;
 
             if (pmethBest.ctypeLift != 0)

@@ -31,5 +31,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(isIndexer());
             return (IndexerSymbol)this;
         }
+
+        public bool Bogus { get; set; }
     }
 }
