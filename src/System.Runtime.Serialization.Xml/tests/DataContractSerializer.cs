@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1055,7 +1055,7 @@ public static partial class DataContractSerializerTests
     public static void DCS_DerivedTypeWithDifferentOverrides()
     {
         var x = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
-        var y = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(x, @"<DerivedTypeWithDifferentOverrides xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name1>Name1</Name1><Name2 i:nil=""true""/><Name3 i:nil=""true""/><Name4 i:nil=""true""/><Name5 i:nil=""true""/><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
+        var y = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(x, @"<DerivedTypeWithDifferentOverrides xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name1>Name1</Name1><Name2 i:nil=""true""/><Name3 i:nil=""true""/><Name4 i:nil=""true""/><Name5 i:nil=""true""/><Name6 i:nil=""true""/><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
 
         Assert.StrictEqual(x.Name1, y.Name1);
         Assert.StrictEqual(x.Name2, y.Name2);
@@ -1312,7 +1312,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(deserializedValue.GetPrivatePropertyValue(), value.GetPrivatePropertyValue());
     }
 
-    #region private type has to be in with in the class
+#region private type has to be in with in the class
     [DataContract]
     private class PrivateType
     {
@@ -1338,7 +1338,7 @@ public static partial class DataContractSerializerTests
             return PrivateProperty;
         }
     }
-    #endregion
+#endregion
 
     [Fact]
     public static void DCS_RootNameAndNamespaceThroughConstructorAsString()
@@ -1436,7 +1436,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionObject()
     {
         var value = new Exception("Test Exception");
@@ -1450,7 +1449,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_MyArgumentExceptionObject()
     {
         var value = new MyArgumentException("Test Exception", "paramName");
@@ -1465,7 +1463,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ExceptionMessageWithSpecialChars()
     {
         var value = new Exception("Test Exception<>&'\"");
@@ -1479,7 +1476,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_InnerExceptionMessageWithSpecialChars()
     {
         var value = new Exception("", new Exception("Test Exception<>&'\""));
@@ -2773,7 +2769,7 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.IntProperty, actual.IntProperty);
     }
 
-    #region DesktopTest
+#region DesktopTest
 
     [Fact]
     public static void DCS_ResolveNameReturnsEmptyNamespace()
@@ -3055,7 +3051,21 @@ public static partial class DataContractSerializerTests
         SerializationTestTypes.ComparisonHelper.CompareRecursively(defaultCollections, actual);
     }
 
-    #endregion
+#endregion
+
+    [Fact]
+    public static void DCS_TypeWithVirtualGenericProperty()
+    {
+        var value1 = new TypeWithVirtualGenericProperty<int>() { Value = 1 };
+        var actual1 = SerializeAndDeserialize(value1, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual1);
+        Assert.Equal(value1.Value, actual1.Value);
+
+        var value2 = new TypeWithVirtualGenericPropertyDerived<int>() { Value = 2 };
+        var actual2 = SerializeAndDeserialize(value2, string.Empty, skipStringCompare: true);
+        Assert.NotNull(actual2);
+        Assert.Equal(value2.Value, actual2.Value);
+    }
 
     [Fact]
     public static void DCS_MyPersonSurrogate()
@@ -3138,6 +3148,79 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.emps[0].Name, actual.emps[0].Name);
         Assert.Equal(value.emps[1].Name, actual.emps[1].Name);
     }
+
+    [Fact]
+    public static void DCS_SampleICollectionTExplicitWithoutDC()
+    {
+        var value = new SampleICollectionTExplicitWithoutDC(true);
+        SampleICollectionTExplicitWithoutDC roundtripObject = SerializeAndDeserialize(value, string.Empty, skipStringCompare: true);
+        Assert.NotNull(roundtripObject);
+        ComparisonHelper.CompareRecursively(value, roundtripObject);
+
+        string netcorePayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedNetcoreObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(netcorePayload);
+        Assert.NotNull(deserializedNetcoreObject);
+        ComparisonHelper.CompareRecursively(value, deserializedNetcoreObject);
+
+        string desktopPayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>Monday, January 1, 0001</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        var deserializedDesktopObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(desktopPayload);
+        Assert.NotNull(deserializedDesktopObject);
+        ComparisonHelper.CompareRecursively(value, deserializedDesktopObject);
+    }
+
+    [Fact]
+    public static void DCS_InvalidDataContract_Write_Invalid_Types_Throws()
+    {
+        // Attempting to serialize any invalid type should create an InvalidDataContract that throws 
+        foreach (NetNativeTestData td in NetNativeTestData.InvalidTypes) 
+        {
+            object o = td.Instantiate();
+            DataContractSerializer dcs = new DataContractSerializer(o.GetType());
+            MemoryStream ms = new MemoryStream();
+            Assert.Throws<InvalidDataContractException>(() =>
+            {
+                dcs.WriteObject(ms, o);
+            });
+        }
+    }
+
+    [Fact]
+    public static void DCS_InvalidDataContract_Read_Invalid_Types_Throws()
+    {
+        // Attempting to deserialize any invalid type should create an InvalidDataContract that throws
+        foreach (NetNativeTestData td in NetNativeTestData.InvalidTypes)
+        {
+            DataContractSerializer dcs = new DataContractSerializer(td.Type);
+            MemoryStream ms = new MemoryStream();
+            new DataContractSerializer(typeof(string)).WriteObject(ms, "test");
+            ms.Seek(0L, SeekOrigin.Begin);
+            if (td.Type.Equals(typeof(Invalid_Class_KnownType_Invalid_Type)))
+            {
+                Assert.Throws<SerializationException>(() =>
+                {
+                    dcs.ReadObject(ms);
+                });
+            }
+            else
+            {
+                Assert.Throws<InvalidDataContractException>(() =>
+                {
+                    dcs.ReadObject(ms);
+                });
+            }
+        }
+    }
+
+    [Fact]
+    public static void DCS_ValidateExceptionOnUnspecifiedRootSerializationType()
+    {
+        var value = new UnspecifiedRootSerializationType();
+        string baseline = @"<UnspecifiedRootSerializationType xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><MyIntProperty>0</MyIntProperty><MyStringProperty i:nil=""true""/></UnspecifiedRootSerializationType>";
+        var actual = SerializeAndDeserialize(value, baseline);
+        
+        Assert.Equal(value.MyIntProperty, actual.MyIntProperty);
+        Assert.Equal(value.MyStringProperty, actual.MyStringProperty);
+    } 
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {

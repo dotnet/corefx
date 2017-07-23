@@ -10,6 +10,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private static bool IsLocalDBEnvironmentSet() => DataTestUtility.IsLocalDBInstalled();
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
         [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void LocalDBConnectionTest()
         {
@@ -19,6 +20,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             OpenConnection(builder.ConnectionString);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
         [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void LocalDBMarsTest()
         {
@@ -29,6 +31,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             OpenConnection(builder.ConnectionString);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
         [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void InvalidDBTest()
         {
@@ -49,6 +52,17 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     Assert.NotNull(result);
                 }
             }
+        }
+
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public static void LocalDBNotSupportedOnUapTest()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB");
+            builder.IntegratedSecurity = true;
+            builder.ConnectTimeout = 2;
+
+            DataTestUtility.AssertThrowsWrapper<PlatformNotSupportedException>(() => OpenConnection(builder.ConnectionString));
         }
     }
 }

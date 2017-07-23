@@ -55,14 +55,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
         public static void Validate_Indexer_ThrowsArgumentException_Netcoreapp()
         {
             CompareAttribute attribute = new CompareAttribute("Item");
-            Assert.Throws<ArgumentException>(null, () => attribute.Validate("b", s_context));
+            AssertExtensions.Throws<ArgumentException>(null, () => attribute.Validate("b", s_context));
         }
 
         [Fact]
         public static void Validate_SetOnlyProperty_ThrowsArgumentException()
         {
             CompareAttribute attribute = new CompareAttribute(nameof(CompareObject.SetOnlyProperty));
-            Assert.Throws<ArgumentException>(null, () => attribute.Validate("b", s_context));
+            AssertExtensions.Throws<ArgumentException>(null, () => attribute.Validate("b", s_context));
         }
 
         [Fact]
@@ -72,6 +72,13 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.NotNull(attribute.GetValidationResult("b", s_context).ErrorMessage);
             Assert.Equal(ValidationResult.Success, attribute.GetValidationResult(null, s_context));
             Assert.Equal(nameof(CompareObject.comparepropertycased), attribute.OtherPropertyDisplayName);
+        }
+
+        [Fact]
+        public static void Validate_PrivateProperty_ThrowsArgumentException()
+        {
+            CompareAttribute attribute = new CompareAttribute("PrivateProperty");
+            Assert.Throws<ValidationException>(() => attribute.Validate("b", s_context));
         }
 
         [Fact]
@@ -105,6 +112,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             public string this[int index] { get { return "abc"; } set { } }
             public string SetOnlyProperty { set { } }
+            private string PrivateProperty { get; set; }
 
             public string ComparePropertyCased { get; set; }
             public string comparepropertycased { get; set; }

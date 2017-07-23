@@ -9,6 +9,7 @@ namespace System.IO.Tests
 {
     public class Directory_CreateDirectory : FileSystemTest
     {
+        public static TheoryData ReservedDeviceNames = IOInputs.GetReservedDeviceNames().ToTheoryData(); 
         #region Utilities
 
         public virtual DirectoryInfo Create(string path)
@@ -110,54 +111,46 @@ namespace System.IO.Tests
             Assert.Equal(IOServices.AddTrailingSlashIfNeeded(TestDirectory), result.FullName);
         }
 
-        [Fact]
-        public void ValidPathWithTrailingSlash()
+        [Theory, MemberData(nameof(ValidPathComponentNames))]
+        public void ValidPathWithTrailingSlash(string component)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
-            var components = IOInputs.GetValidPathComponentNames();
-            Assert.All(components, (component) =>
-            {
-                string path = IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
-                DirectoryInfo result = Create(path);
+            string path = IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
+            DirectoryInfo result = Create(path);
 
-                Assert.Equal(path, result.FullName);
-                Assert.True(result.Exists);
-            });
+            Assert.Equal(path, result.FullName);
+            Assert.True(result.Exists);
         }
 
-        [ConditionalFact(nameof(UsingNewNormalization))]
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            MemberData(nameof(ValidPathComponentNames))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing slash
-        public void ValidExtendedPathWithTrailingSlash()
+        public void ValidExtendedPathWithTrailingSlash(string component)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
-            var components = IOInputs.GetValidPathComponentNames();
-            Assert.All(components, (component) =>
-            {
-                string path = IOInputs.ExtendedPrefix + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
-                DirectoryInfo result = Create(path);
+            string path = IOInputs.ExtendedPrefix + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
+            DirectoryInfo result = Create(path);
 
-                Assert.Equal(path, result.FullName);
-                Assert.True(result.Exists);
-            });
+            Assert.Equal(path, result.FullName);
+            Assert.True(result.Exists);
+
         }
 
-        [Fact]
-        public void ValidPathWithoutTrailingSlash()
+        [Theory,
+            MemberData(nameof(ValidPathComponentNames))]
+        public void ValidPathWithoutTrailingSlash(string component)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
-            var components = IOInputs.GetValidPathComponentNames();
-            Assert.All(components, (component) =>
-            {
-                string path = testDir.FullName + Path.DirectorySeparatorChar + component;
-                DirectoryInfo result = Create(path);
+            string path = testDir.FullName + Path.DirectorySeparatorChar + component;
+            DirectoryInfo result = Create(path);
 
-                Assert.Equal(path, result.FullName);
-                Assert.True(Directory.Exists(result.FullName));
-            });
+            Assert.Equal(path, result.FullName);
+            Assert.True(Directory.Exists(result.FullName));
+
         }
 
         [Fact]
@@ -179,41 +172,30 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void DirectoryEqualToMaxDirectory_CanBeCreated()
-        {
-            DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, IOInputs.MaxComponent);
-            Assert.All(path.SubPaths, (subpath) =>
-            {
-                DirectoryInfo result = Create(subpath);
-
-                Assert.Equal(subpath, result.FullName);
-                Assert.True(Directory.Exists(result.FullName));
-            });
-        }
-
-        [Fact]
         public void DirectoryEqualToMaxDirectory_CanBeCreatedAllAtOnce()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, maxComponent: 10);
-            DirectoryInfo result = Create(path.FullPath);
+            string path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory);
+            DirectoryInfo result = Create(path);
 
-            Assert.Equal(path.FullPath, result.FullName);
+            Assert.Equal(path, result.FullName);
             Assert.True(Directory.Exists(result.FullName));
         }
 
-        [Fact]
-        public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsPathTooLongException()
+        [Theory,
+            MemberData(nameof(PathsWithComponentLongerThanMaxComponent))]
+        public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsException(string path)
         {
             // While paths themselves can be up to 260 characters including trailing null, file systems
-            // limit each components of the path to a total of 255 characters.
-            var paths = IOInputs.GetPathsWithComponentLongerThanMaxComponent();
-
-            Assert.All(paths, (path) =>
+            // limit each components of the path to a total of 255 characters on Desktop.
+            if (PlatformDetection.IsFullFramework)
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
-            });
+            }
+            else
+            {
+                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() => Create(path));
+            }
         }
 
         #endregion
@@ -254,14 +236,27 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // long directory path with extended syntax throws PathTooLongException
-        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsException()
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
-            Assert.All(paths, (path) =>
+
+            // Long directory path with extended syntax throws PathTooLongException on Desktop.
+            // Everywhere else, it may be either PathTooLongException or DirectoryNotFoundException
+            if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-            });
+                Assert.All(paths, path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
+            }
+            else
+            {
+                Assert.All(paths,
+                    path =>
+                    {
+                        AssertExtensions
+                            .ThrowsAny<PathTooLongException, DirectoryNotFoundException>(
+                                () => Create(path));
+                    });
+            }
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
@@ -294,9 +289,9 @@ namespace System.IO.Tests
         public void UnixPathLongerThan256_Allowed()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, 257, IOInputs.MaxComponent);
-            DirectoryInfo result = Create(path.FullPath);
-            Assert.Equal(path.FullPath, result.FullName);
+            string path = IOServices.GetPath(testDir.FullName, 257);
+            DirectoryInfo result = Create(path);
+            Assert.Equal(path, result.FullName);
             Assert.True(Directory.Exists(result.FullName));
         }
 
@@ -312,122 +307,127 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]  // whitespace as path throws ArgumentException on Windows
-        public void WindowsWhiteSpaceAsPath_ThrowsArgumentException()
+        public void WindowsWhiteSpaceAsPath_ThrowsArgumentException(string path)
         {
-            var paths = IOInputs.GetWhiteSpace();
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<ArgumentException>(() => Create(path));
-            });
+            Assert.Throws<ArgumentException>(() => Create(path));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // whitespace as path allowed
-        public void UnixWhiteSpaceAsPath_Allowed()
+        public void UnixWhiteSpaceAsPath_Allowed(string path)
         {
-            var paths = IOInputs.GetWhiteSpace();
-            Assert.All(paths, (path) =>
-            {
-                Create(Path.Combine(TestDirectory, path));
-                Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
-            });
+            Create(Path.Combine(TestDirectory, path));
+            Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
+
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(ControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
-        public void WindowsTrailingWhiteSpace()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // e.g. NetFX only
+        public void TrailingWhiteSpace_Trimmed(string component)
         {
-            // Windows will remove all non-significant whitespace in a path
+            // On desktop, we trim a number of whitespace characters 
             DirectoryInfo testDir = Create(GetTestFilePath());
-            var components = IOInputs.GetWhiteSpace();
+            string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
+            DirectoryInfo result = Create(path);
 
-            Assert.All(components, (component) =>
-            {
-                string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
-                DirectoryInfo result = Create(path);
-
-                Assert.True(Directory.Exists(result.FullName));
-                Assert.Equal(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
-            });
+            Assert.True(Directory.Exists(result.FullName));
+            Assert.Equal(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
         }
 
-        [ConditionalFact(nameof(UsingNewNormalization))]
+        [Theory,
+            MemberData(nameof(NonControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Not NetFX
+        public void TrailingWhiteSpace_NotTrimmed(string component)
+        {
+            // In CoreFX we don't trim anything other than space (' ')
+            DirectoryInfo testDir = Create(GetTestFilePath() + component);
+            string path = IOServices.RemoveTrailingSlash(testDir.FullName);
+            DirectoryInfo result = Create(path);
+
+            Assert.True(Directory.Exists(result.FullName));
+            Assert.Equal(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
+        }
+
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))] //*Just Spaces*
+        [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Not NetFX
+        public void TrailingSpace_NotTrimmed(string component)
+        {
+            DirectoryInfo testDir = Create(GetTestFilePath());
+            string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
+            DirectoryInfo result = Create(path);
+
+            Assert.True(Directory.Exists(result.FullName));
+            Assert.Equal(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
+        }
+
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            MemberData(nameof(SimpleWhiteSpace))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)]  // extended syntax with whitespace
-        public void WindowsExtendedSyntaxWhiteSpace()
+        public void WindowsExtendedSyntaxWhiteSpace(string path)
         {
-            var paths = IOInputs.GetSimpleWhiteSpace();
-            foreach (var path in paths)
-            {
-                string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + TestDirectory, path);
-                Directory.CreateDirectory(extendedPath);
-                Assert.True(Directory.Exists(extendedPath), extendedPath);
-            }
+            string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + TestDirectory, path);
+            Directory.CreateDirectory(extendedPath);
+            Assert.True(Directory.Exists(extendedPath), extendedPath);
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // trailing whitespace in path treated as significant on Unix
-        public void UnixNonSignificantTrailingWhiteSpace()
+        public void UnixNonSignificantTrailingWhiteSpace(string component)
         {
             // Unix treats trailing/prename whitespace as significant and a part of the name.
             DirectoryInfo testDir = Create(GetTestFilePath());
-            var components = IOInputs.GetWhiteSpace();
 
-            Assert.All(components, (component) =>
-            {
-                string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
-                DirectoryInfo result = Create(path);
+            string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
+            DirectoryInfo result = Create(path);
 
-                Assert.True(Directory.Exists(result.FullName));
-                Assert.NotEqual(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
-            });
+            Assert.True(Directory.Exists(result.FullName));
+            Assert.NotEqual(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
+
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(PathsWithAlternativeDataStreams))]
         [PlatformSpecific(TestPlatforms.Windows)] // alternate data streams
-        public void PathWithAlternateDataStreams_ThrowsNotSupportedException()
+        public void PathWithAlternateDataStreams_ThrowsNotSupportedException(string path)
         {
-            var paths = IOInputs.GetPathsWithAlternativeDataStreams();
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<NotSupportedException>(() => Create(path));
-            });
+            Assert.Throws<NotSupportedException>(() => Create(path));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(PathsWithReservedDeviceNames))]
         [PlatformSpecific(TestPlatforms.Windows)] // device name prefixes
-        public void PathWithReservedDeviceNameAsPath_ThrowsDirectoryNotFoundException()
-        {   // Throws DirectoryNotFoundException, when the behavior really should be an invalid path
-            var paths = IOInputs.GetPathsWithReservedDeviceNames();
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<DirectoryNotFoundException>(() => Create(path));
-            });
+        public void PathWithReservedDeviceNameAsPath_ThrowsDirectoryNotFoundException(string path)
+        {
+            // Throws DirectoryNotFoundException, when the behavior really should be an invalid path
+            Assert.Throws<DirectoryNotFoundException>(() => Create(path));
         }
 
-        [ConditionalFact(nameof(UsingNewNormalization))]
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            MemberData(nameof(ReservedDeviceNames))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)] // device name prefixes
-        public void PathWithReservedDeviceNameAsExtendedPath()
+        public void PathWithReservedDeviceNameAsExtendedPath(string path)
         {
-            var paths = IOInputs.GetReservedDeviceNames();
-            Assert.All(paths, (path) =>
-            {
-                Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, path)).Exists, path);
-            });
+            Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, path)).Exists, path);
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(UncPathsWithoutShareName))]
         [PlatformSpecific(TestPlatforms.Windows)] // UNC shares
-        public void UncPathWithoutShareNameAsPath_ThrowsArgumentException()
+        public void UncPathWithoutShareNameAsPath_ThrowsArgumentException(string path)
         {
-            var paths = IOInputs.GetUncPathsWithoutShareName();
-            foreach (var path in paths)
-            {
-                Assert.Throws<ArgumentException>(() => Create(path));
-            }
+            Assert.Throws<ArgumentException>(() => Create(path));
         }
 
         [Fact]

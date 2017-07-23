@@ -21,10 +21,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            var firstConcat = first as ConcatIterator<TSource>;
-            return firstConcat != null ?
-                firstConcat.Concat(second) :
-                new Concat2Iterator<TSource>(first, second);
+            return first is ConcatIterator<TSource> firstConcat
+                ? firstConcat.Concat(second)
+                : new Concat2Iterator<TSource>(first, second);
         }
 
         /// <summary>
@@ -61,9 +60,9 @@ namespace System.Linq
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
             {
-                bool hasOnlyCollections = _first is ICollection<TSource> &&
-                                          _second is ICollection<TSource> &&
-                                          next is ICollection<TSource>;
+                bool hasOnlyCollections = next is ICollection<TSource> &&
+                                          _first is ICollection<TSource> &&
+                                          _second is ICollection<TSource>;
                 return new ConcatNIterator<TSource>(this, next, 2, hasOnlyCollections);
             }
 
@@ -138,7 +137,7 @@ namespace System.Linq
         /// <remarks>
         /// To handle chains of >= 3 sources, we chain the <see cref="Concat"/> iterators together and allow
         /// <see cref="GetEnumerable"/> to fetch enumerables from the previous sources.  This means that rather
-        /// than each <see cref="MoveNext"/> and <see cref="Current"/> calls having to traverse all of the previous
+        /// than each <see cref="IEnumerator{T}.MoveNext"/> and <see cref="IEnumerator{T}.Current"/> calls having to traverse all of the previous
         /// sources, we only have to traverse all of the previous sources once per chained enumerable.  An alternative
         /// would be to use an array to store all of the enumerables, but this has a much better memory profile and
         /// without much additional run-time cost.
@@ -166,7 +165,7 @@ namespace System.Linq
             /// </summary>
             /// <remarks>
             /// This flag allows us to determine in O(1) time whether we can preallocate for <see cref="ToArray"/>
-            /// and <see cref="ToList"/>, and whether we can get the count of the iterator cheaply.
+            /// and <see cref="ConcatIterator{TSource}.ToList"/>, and whether we can get the count of the iterator cheaply.
             /// </remarks>
             private readonly bool _hasOnlyCollections;
 

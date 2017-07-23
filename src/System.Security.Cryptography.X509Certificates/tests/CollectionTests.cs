@@ -468,10 +468,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 string bogus = "Bogus";
 
-                Assert.Throws<ArgumentException>(() => il[0] = bogus);
-                Assert.Throws<ArgumentException>(() => il.Add(bogus));
-                Assert.Throws<ArgumentException>(() => il.Remove(bogus));
-                Assert.Throws<ArgumentException>(() => il.Insert(0, bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il[0] = bogus);
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Add(bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Remove(bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Insert(0, bogus));
             }
         }
 
@@ -653,14 +653,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             TestExportSingleCert(X509ContentType.Cert);
         }
-
-#if netcoreapp
+        
         [Fact]
         public static void ExportCert_SecureString()
         {
             TestExportSingleCert_SecureStringPassword(X509ContentType.Cert);
         }
-#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // SerializedCert not supported on Unix
@@ -912,6 +910,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Arrays with non-zero lower bounds are not supported.")]
         public static void X509ExtensionCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
         {
             using (X509Certificate2 cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
@@ -953,7 +952,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 cc.Remove(c2);
                 Assert.Equal(0, cc.Count);
 
-                Assert.Throws<ArgumentException>(() => cc.Remove(c2));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.Remove(c2));
 
                 IList il = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
 
@@ -964,7 +963,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 il.Remove(c2);
                 Assert.Equal(0, il.Count);
 
-                Assert.Throws<ArgumentException>(() => il.Remove(c2));
+                AssertExtensions.Throws<ArgumentException>(null, () => il.Remove(c2));
             }
         }
 
@@ -1045,7 +1044,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Add c1Clone back
                 // End state: { c1, c2 } => { c2, c1Clone }
                 cc = new X509Certificate2Collection(array);
-                Assert.Throws<ArgumentException>(() => cc.RemoveRange(new X509Certificate2[] { c1Clone, c1, c2 }));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.RemoveRange(new X509Certificate2[] { c1Clone, c1, c2 }));
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1Clone, cc[1]);
@@ -1106,7 +1105,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     c1,
                     c2,
                 };
-                Assert.Throws<ArgumentException>(() => cc.RemoveRange(collection));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.RemoveRange(collection));
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1Clone, cc[1]);
@@ -1405,8 +1404,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(byFriendlyName);
             }
         }
-
-#if netcoreapp
+        
         private static void TestExportSingleCert_SecureStringPassword(X509ContentType ct)
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.CreatePfxDataPasswordSecureString(), Cert.EphemeralIfPossible))
@@ -1414,7 +1412,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 TestExportSingleCert(ct, pfxCer);
             }
         }
-#endif
 
         private static void TestExportSingleCert(X509ContentType ct)
         {

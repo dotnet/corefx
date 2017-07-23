@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace System.Net
 {
@@ -24,7 +25,8 @@ namespace System.Net
 
         private readonly ArrayList m_list = new ArrayList();
 
-        private DateTime m_timeStamp = DateTime.MinValue; // Do not rename (binary serialization)
+        private int m_version; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
+        private DateTime m_TimeStamp = DateTime.MinValue; // Do not rename (binary serialization)
         private bool m_has_other_versions; // Do not rename (binary serialization)
 
         public CookieCollection()
@@ -56,6 +58,12 @@ namespace System.Net
                 }
                 return null;
             }
+        }
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            m_version = m_list.Count;
         }
 
         public void Add(Cookie cookie)
@@ -134,19 +142,19 @@ namespace System.Net
             switch (how)
             {
                 case Stamp.Set:
-                    m_timeStamp = DateTime.Now;
+                    m_TimeStamp = DateTime.Now;
                     break;
                 case Stamp.SetToMaxUsed:
-                    m_timeStamp = DateTime.MaxValue;
+                    m_TimeStamp = DateTime.MaxValue;
                     break;
                 case Stamp.SetToUnused:
-                    m_timeStamp = DateTime.MinValue;
+                    m_TimeStamp = DateTime.MinValue;
                     break;
                 case Stamp.Check:
                 default:
                     break;
             }
-            return m_timeStamp;
+            return m_TimeStamp;
         }
 
 
@@ -160,10 +168,24 @@ namespace System.Net
             }
         }
 
+
         // If isStrict == false, assumes that incoming cookie is unique.
         // If isStrict == true, replace the cookie if found same with newest Variant.
         // Returns 1 if added, 0 if replaced or rejected.
-        internal int InternalAdd(Cookie cookie, bool isStrict)
+
+/* 
+    TODO: #13607
+    VSO 449560
+    Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
+    block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
+    public, this is a temporary workaround till that happens. 
+*/
+#if uap 
+        public
+#else 
+        internal
+#endif
+        int InternalAdd(Cookie cookie, bool isStrict)
         {
             int ret = 1;
             if (isStrict)

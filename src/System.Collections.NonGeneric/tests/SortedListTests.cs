@@ -307,7 +307,7 @@ namespace System.Collections.Tests
             {
                 AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
 
-                Assert.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
             });
         }
 
@@ -483,10 +483,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 AssertExtensions.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentException>("array", null, () => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
             });
         }
 

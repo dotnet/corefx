@@ -237,12 +237,12 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllStackWrappers(stack1, stack2 =>
             {
                 AssertExtensions.Throws<ArgumentNullException>("array", () => stack2.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => stack2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentException>("array", null, () => stack2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => stack2.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[0], 0)); // Index >= array.Count
-                Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[100], 1)); // Index + array.Count > stack.Count
-                Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[150], 51)); // Index + array.Count > stack.Count
+                AssertExtensions.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[0], 0)); // Index >= array.Count
+                AssertExtensions.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[100], 1)); // Index + array.Count > stack.Count
+                AssertExtensions.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[150], 51)); // Index + array.Count > stack.Count
             });
         }
 

@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Net.Security;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -25,8 +26,7 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public class HttpClientHandlerTest
+    public class HttpClientHandlerTest : RemoteExecutorTestBase
     {
         readonly ITestOutputHelper _output;
         private const string ExpectedContent = "Test contest";
@@ -42,12 +42,14 @@ namespace System.Net.Http.Functional.Tests
         public static readonly object[][] CompressedServers = Configuration.Http.CompressedServers;
         public static readonly object[][] HeaderValueAndUris = {
             new object[] { "X-CustomHeader", "x-value", Configuration.Http.RemoteEchoServer },
-            new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RemoteEchoServer },
             new object[] { "X-CustomHeader", "x-value", Configuration.Http.RedirectUriForDestinationUri(
                 secure:false,
                 statusCode:302,
                 destinationUri:Configuration.Http.RemoteEchoServer,
                 hops:1) },
+        };
+        public static readonly object[][] HeaderWithEmptyValueAndUris = {
+            new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RemoteEchoServer },
             new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RedirectUriForDestinationUri(
                 secure:false,
                 statusCode:302,
@@ -99,9 +101,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [Fact]
-        public void Ctor_ExpectedDefaultPropertyValues()
+        public void Ctor_ExpectedDefaultPropertyValues_CommonPlatform()
         {
             using (var handler = new HttpClientHandler())
             {
@@ -113,47 +114,84 @@ namespace System.Net.Http.Functional.Tests
                 Assert.NotNull(cookies);
                 Assert.Equal(0, cookies.Count);
                 Assert.Null(handler.Credentials);
-                Assert.Equal(50, handler.MaxAutomaticRedirections);
-                Assert.False(handler.PreAuthenticate);
+                Assert.NotNull(handler.Properties);
                 Assert.Equal(null, handler.Proxy);
                 Assert.True(handler.SupportsAutomaticDecompression);
-                Assert.True(handler.SupportsProxy);
-                Assert.True(handler.SupportsRedirectConfiguration);
                 Assert.True(handler.UseCookies);
                 Assert.False(handler.UseDefaultCredentials);
                 Assert.True(handler.UseProxy);
+            }
+        }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void Ctor_ExpectedDefaultPropertyValues_NotUapPlatform()
+        {
+            using (var handler = new HttpClientHandler())
+            {
+                // Same as .NET Framework (Desktop).
+                Assert.Equal(50, handler.MaxAutomaticRedirections);
+                Assert.Equal(64, handler.MaxResponseHeadersLength);
+                Assert.False(handler.PreAuthenticate);
+                Assert.True(handler.SupportsProxy);
+                Assert.True(handler.SupportsRedirectConfiguration);
+                
                 // Changes from .NET Framework (Desktop).
-                if (!PlatformDetection.IsFullFramework) // TODO Issue #17691
+                if (!PlatformDetection.IsFullFramework)
                 {
+                    Assert.False(handler.CheckCertificateRevocationList);
                     Assert.Equal(0, handler.MaxRequestContentBufferSize);
+                    Assert.Equal(SslProtocols.None, handler.SslProtocols);
                 }
-                Assert.NotNull(handler.Properties);
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
-        [Fact]
-        public void MaxRequestContentBufferSize_Get_ReturnsZero()
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsUap))]
+        public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
         {
             using (var handler = new HttpClientHandler())
             {
+                Assert.True(handler.CheckCertificateRevocationList);
+                Assert.Equal(10, handler.MaxAutomaticRedirections);
                 Assert.Equal(0, handler.MaxRequestContentBufferSize);
+                Assert.Equal(-1, handler.MaxResponseHeadersLength);
+                Assert.True(handler.PreAuthenticate);
+                Assert.Equal(SslProtocols.None, handler.SslProtocols);
+                Assert.False(handler.SupportsProxy);
+                Assert.False(handler.SupportsRedirectConfiguration);
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
         [Fact]
-        public void MaxRequestContentBufferSize_Set_ThrowsPlatformNotSupportedException()
+        public void Credentials_SetGet_Roundtrips()
         {
             using (var handler = new HttpClientHandler())
             {
-                Assert.Throws<PlatformNotSupportedException>(() => handler.MaxRequestContentBufferSize = 1024);
+                var creds = new NetworkCredential("username", "password", "domain");
+
+                handler.Credentials = null;
+                Assert.Null(handler.Credentials);
+
+                handler.Credentials = creds;
+                Assert.Same(creds, handler.Credentials);
+
+                handler.Credentials = CredentialCache.DefaultCredentials;
+                Assert.Same(CredentialCache.DefaultCredentials, handler.Credentials);
             }
         }
 
+        [Theory]
+        [InlineData(-1)]
+        [InlineData((long)int.MaxValue + (long)1)]
+        public void MaxRequestContentBufferSize_SetInvalidValue_ThrowsArgumentOutOfRangeException(long value)
+        {
+            using (var handler = new HttpClientHandler())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => handler.MaxRequestContentBufferSize = value);
+            }
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP will send default credentials based on other criteria.")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -217,6 +255,24 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(22158, TargetFrameworkMonikers.Uap)] 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
+        {
+            using (var client = new HttpClient())
+            {
+                var options = new LoopbackServer.Options { Address = LoopbackServer.GetIPv6LinkLocalAddress() };
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    _output.WriteLine(url.ToString());
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        client.GetAsync(url));
+                }, options);
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
@@ -227,6 +283,7 @@ namespace System.Net.Http.Functional.Tests
                 var options = new LoopbackServer.Options { Address = address };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
+                    _output.WriteLine(url.ToString());
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
                         client.GetAsync(url));
@@ -236,7 +293,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static IEnumerable<object[]> GetAsync_IPBasedUri_Success_MemberData()
         {
-            foreach (var addr in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback, LoopbackServer.GetIPv6LinkLocalAddress() })
+            foreach (var addr in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback })
             {
                 if (addr != null)
                 {
@@ -285,7 +342,7 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
                     client.SendAsync(request, cts.Token));
                 Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
                 if (!PlatformDetection.IsFullFramework)
@@ -368,16 +425,24 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public async Task GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
+        public void GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
         {
-            using (var client = new HttpClient())
+            // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
+            // the same process as the other tests. Each test needs to be isolated to its own process.
+            // See dicussion: https://github.com/dotnet/corefx/issues/21945
+            RemoteInvoke(async () =>
             {
-                Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                using (var client = new HttpClient())
                 {
-                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                    Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                    }
+
+                    return SuccessExitCode;
                 }
-            }
+            }).Dispose();
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -473,7 +538,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
@@ -489,10 +553,23 @@ namespace System.Net.Http.Functional.Tests
                     destinationUri: Configuration.Http.RemoteEchoServer,
                     hops: 1);
                 _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                
+                if (PlatformDetection.IsUap)
                 {
-                    Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-                    Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    // UAP platform does not allow redirecting from HTTPS to HTTP (same as .NET Core).
+                    // But in addition, it will throw an exception
+                    //
+                    // HttpRequestException: "An error occurred while sending the request."
+                    //  COMException: "A redirect request will change a secure to a non-secure connection"
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                }
+                else
+                {
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+                        Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    }
                 }
             }
         }
@@ -520,7 +597,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(3, 2)]
@@ -671,6 +748,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is currently getting Ok when it should be getting Unauthorized.
+                return;
+            }
+
             var handler = new HttpClientHandler();
             handler.Credentials = _credential;
             using (var client = new HttpClient(handler))
@@ -703,13 +786,21 @@ namespace System.Net.Http.Functional.Tests
             credentialCache.Add(uri, "Basic", _credential);
 
             var handler = new HttpClientHandler();
-            handler.Credentials = credentialCache;
-            using (var client = new HttpClient(handler))
+            if (PlatformDetection.IsUap)
             {
-                using (HttpResponseMessage response = await client.GetAsync(redirectUri))
+                // UAP does not support CredentialCache for Credentials.
+                Assert.Throws<PlatformNotSupportedException>(() => handler.Credentials = credentialCache);
+            }
+            else
+            {
+                handler.Credentials = credentialCache;
+                using (var client = new HttpClient(handler))
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    using (HttpResponseMessage response = await client.GetAsync(redirectUri))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(uri, response.RequestMessage.RequestUri);
+                    }
                 }
             }
         }
@@ -750,7 +841,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(9003, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("cookieName1", "cookieValue1")]
@@ -775,17 +866,38 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(22187, TargetFrameworkMonikers.Uap)]
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(HeaderWithEmptyValueAndUris))]
+        public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(string name, string value, Uri uri)
+        {
+            using (var client = new HttpClient())
+            {
+                _output.WriteLine($"name={name}, value={value}");
+                client.DefaultRequestHeaders.Add(name, value);
+                using (HttpResponseMessage httpResponse = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+                    string responseText = await httpResponse.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseText);
+                    Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, name, value));
+                }
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HeaderValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndValueSent(string name, string value, Uri uri)
         {
             using (var client = new HttpClient())
             {
+                _output.WriteLine($"name={name}, value={value}");
                 client.DefaultRequestHeaders.Add(name, value);
                 using (HttpResponseMessage httpResponse = await client.GetAsync(uri))
                 {
                     Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
                     string responseText = await httpResponse.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseText);
                     Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, name, value));
                 }
             }
@@ -881,6 +993,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public async Task GetAsync_TrailingHeaders_Ignored(bool includeTrailerHeader)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler isn't correctly handling trailing headers.
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (var handler = new HttpClientHandler())
@@ -999,6 +1117,14 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The ManagedHandler isn't correctly handling disposal of the handler.
+                // It should cause the outstanding requests to be canceled with OperationCanceledExceptions,
+                // whereas currently it's resulting in ObjectDisposedExceptions.
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (socket1, url1) =>
             {
                 await LoopbackServer.CreateServerAsync(async (socket2, url2) =>
@@ -1043,7 +1169,7 @@ namespace System.Net.Http.Functional.Tests
                             get1 = client.GetAsync(url1, HttpCompletionOption.ResponseHeadersRead);
                             get2 = client.GetAsync(url2, HttpCompletionOption.ResponseHeadersRead);
                             response3 = await client.GetAsync(url3, HttpCompletionOption.ResponseHeadersRead);
-                        }
+                        } // Dispose the handler while requests are still outstanding
 
                         // Requests 1 and 2 should be canceled as we haven't finished receiving their headers
                         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get1);
@@ -1086,13 +1212,18 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(99)]
         [InlineData(1000)]
         public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
         {
+            if (PlatformDetection.IsUap && statusCode == 99)
+            {
+                // UAP platform allows this status code due to historical reasons.
+                return;
+            }
+            
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (var client = new HttpClient())
@@ -1360,11 +1491,22 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // takes several seconds
-        [Theory]
-        [InlineData(302, false)]
-        [InlineData(307, true)]
-        public async Task PostAsync_Redirect_LargePayload(int statusCode, bool expectRedirectToPost)
+        [Fact]
+        public async Task PostAsync_RedirectWith307_LargePayload()
+        {
+            await PostAsync_Redirect_LargePayload_Helper(307, true);
+        }
+
+        [OuterLoop] // takes several seconds
+        [Fact]
+        public async Task PostAsync_RedirectWith302_LargePayload()
+        {
+            await PostAsync_Redirect_LargePayload_Helper(302, false);
+        }
+
+        public async Task PostAsync_Redirect_LargePayload_Helper(int statusCode, bool expectRedirectToPost)
         {
             using (var fs = new FileStream(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
             {
@@ -1387,8 +1529,6 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
-
-
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))] // NOTE: will not work for in-box System.Net.Http.dll due to disposal of request content
@@ -1428,30 +1568,11 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [PlatformSpecific(TestPlatforms.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
-        [Fact]
-        public async Task PostAsync_Post_ChannelBindingHasExpectedValue()
-        {
-            using (var client = new HttpClient())
-            {
-                string expectedContent = "Test contest";
-                var content = new ChannelBindingAwareContent(expectedContent);
-                using (HttpResponseMessage response = await client.PostAsync(Configuration.Http.SecureRemoteEchoServer, content))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                    ChannelBinding channelBinding = content.ChannelBinding;
-                    Assert.NotNull(channelBinding);
-                    _output.WriteLine("Channel Binding: {0}", channelBinding);
-                }
-            }
-        }
-
         #endregion
 
         #region Various HTTP Method Tests
 
+        [ActiveIssue(22161, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
@@ -1477,14 +1598,11 @@ namespace System.Net.Http.Functional.Tests
             string method,
             bool secureServer)
         {
-            if (PlatformDetection.IsFullFramework)
+            if (PlatformDetection.IsFullFramework && method == "GET")
             {
                 // .NET Framework doesn't allow a content body with this HTTP verb.
                 // It will throw a System.Net.ProtocolViolation exception.
-                if (method == "GET")
-                {
-                    return;
-                }
+                return;
             }
 
             using (var client = new HttpClient())
@@ -1510,6 +1628,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)] // Test hangs. But this test seems invalid. An HttpRequestMessage can only be sent once.
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("12345678910", 0)]
@@ -1550,14 +1669,19 @@ namespace System.Net.Http.Functional.Tests
             string method,
             bool secureServer)
         {
-            if (PlatformDetection.IsFullFramework)
+            if (PlatformDetection.IsFullFramework && method == "HEAD")
             {
                 // .NET Framework doesn't allow a content body with this HTTP verb.
                 // It will throw a System.Net.ProtocolViolation exception.
-                if (method == "HEAD")
-                {
-                    return;
-                }
+                return;
+            }
+
+            if (PlatformDetection.IsUap && method == "TRACE")
+            {
+                // UAP platform doesn't allow a content body with this HTTP verb.
+                // It will throw an exception HttpRequestException/COMException
+                // with "The requested operation is invalid" message.
+                return;
             }
 
             using (var client = new HttpClient())
@@ -1571,7 +1695,7 @@ namespace System.Net.Http.Functional.Tests
 
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && method == "TRACE")
+                    if (method == "TRACE" && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || ManagedHandlerTestHelpers.IsEnabled))
                     {
                         // .NET Framework also allows the HttpWebRequest and HttpClient APIs to send a request using 'TRACE' 
                         // verb and a request body. The usual response from a server is "400 Bad Request".
@@ -1591,11 +1715,17 @@ namespace System.Net.Http.Functional.Tests
         #endregion
 
         #region Version tests
-        [ActiveIssue("dotnet/corefx #20010", TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersion10_ServerReceivesVersion10Request()
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The test is hanging with the managed handler.
+                return;
+            }
+
             Version receivedRequestVersion = await SendRequestAndGetRequestVersionAsync(new Version(1, 0));
             Assert.Equal(new Version(1, 0), receivedRequestVersion);
         }
@@ -1613,6 +1743,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The test is hanging with the managed handler.
+                return;
+            }
+
             // The default value for HttpRequestMessage.Version is Version(1,1).
             // So, we need to set something different (0,0), to test the "unknown" version.
             Version receivedRequestVersion = await SendRequestAndGetRequestVersionAsync(new Version(0, 0));
@@ -1629,6 +1765,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
                 _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
+                return;
+            }
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler doesn't yet support HTTP/2.
                 return;
             }
 
@@ -1678,6 +1819,12 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20(Uri server)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler doesn't yet support HTTP/2.
+                return;
+            }
+
             _output.WriteLine(server.AbsoluteUri.ToString());
             var request = new HttpRequestMessage(HttpMethod.Get, server);
             request.Version = new Version(2, 0);
@@ -1735,11 +1882,18 @@ namespace System.Net.Http.Functional.Tests
         #endregion
 
         #region Proxy tests
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CredentialsForProxy))]
         public void Proxy_BypassFalse_GetRequestGoesThroughCustomProxy(ICredentials creds, bool wrapCredsInCache)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The test is hanging with the managed handler for some of the theory inputs.
+                return;
+            }
+
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
                 out port,
@@ -1778,6 +1932,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(BypassedProxies))]
@@ -1794,6 +1949,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()

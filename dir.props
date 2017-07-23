@@ -9,6 +9,13 @@
     <MinorVersion>6</MinorVersion>
   </PropertyGroup>
 
+  <!-- Define vNext UAP Moniker -->
+  <PropertyGroup>
+    <UAPvNextVersion>10.0.15138</UAPvNextVersion>
+    <UAPvNextTFMFull>UAP,Version=v$(UAPvNextVersion)</UAPvNextTFMFull>
+    <UAPvNextTFM>uap$(UAPvNextVersion)</UAPvNextTFM>
+  </PropertyGroup>
+
   <Import Condition="Exists('$(MSBuildProjectDirectory)/Configurations.props')" Project="$(MSBuildProjectDirectory)/Configurations.props" />
 
   <!-- Informs build tools to apply .NET Framework metadata if not a test project -->
@@ -117,6 +124,29 @@
   </PropertyGroup>
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
+  <PropertyGroup>
+    <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
+    <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
+    <_portableOS>linux</_portableOS>
+    <_portableOS Condition="'$(_runtimeOSFamily)' == 'win'">win</_portableOS>
+    <_portableOS Condition="'$(_runtimeOSFamily)' == 'osx'">osx</_portableOS>
+
+    <_runtimeOS>$(RuntimeOS)</_runtimeOS>
+    <_runtimeOS Condition="'$(_runtimeOS)' == 'tizen.4.0.0'">ubuntu.14.04</_runtimeOS>
+    <_runtimeOS Condition="'$(PortableBuild)' == 'true'">$(_portableOS)</_runtimeOS>
+    <ToolRuntimeRID>$(_runtimeOS)-x64</ToolRuntimeRID>
+
+    <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
+    <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx'">linux</_portableOS>
+    <_portableOS Condition="'$(OSGroup)' == 'Windows_NT'">win</_portableOS>
+
+    <_packageRID/>
+    <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
+    <_packageRID Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</_packageRID>
+    <_packageRID Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</_packageRID>
+    <PackageRID Condition="'$(PackageRID)' == ''">$(_packageRID)</PackageRID>
+    <PackageRID Condition="'$(PackageRID)' == ''">$(RuntimeOS)-$(ArchGroup)</PackageRID>
+  </PropertyGroup>
 
   <!-- Import packaging props -->
   <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
@@ -243,6 +273,12 @@
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
     <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Properties related to multi-file mode for ILC tests -->
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
+    <!-- Only enable multi-file for Release-x64 and Debug-x86 for now -->
+    <EnableMultiFileILCTests Condition="'$(ConfigurationGroup)|$(ArchGroup)' == 'Release|x64' Or '$(ConfigurationGroup)|$(ArchGroup)' == 'Debug|x86' Or '$(ConfigurationGroup)|$(ArchGroup)' == 'Release|arm'">true</EnableMultiFileILCTests>
   </PropertyGroup>
 
   <PropertyGroup>

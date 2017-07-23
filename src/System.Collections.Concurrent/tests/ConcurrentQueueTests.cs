@@ -19,6 +19,8 @@ namespace System.Collections.Concurrent.Tests
         protected override bool ResetImplemented => false;
         protected override IProducerConsumerCollection<int> CreateOracle(IEnumerable<int> collection) => new QueueOracle(collection);
 
+        protected override string CopyToNoLengthParamName => null;
+
         [Fact]
         public void Concurrent_Enqueue_TryDequeue_AllItemsReceived()
         {
@@ -95,6 +97,10 @@ namespace System.Collections.Concurrent.Tests
         [InlineData(3, 3, 1024)]
         public void MultipleProducerConsumer_AllItemsTransferred(int producers, int consumers, int itemsPerProducer)
         {
+            //ActiveIssue("https://github.com/dotnet/corefx/issues/22385 - Never terminates on Win10 RS3 - when built using CHK framework on ILC", TargetFrameworkMonikers.UapAot)
+            if (PlatformDetection.IsNetNative && PlatformDetection.IsWindows10InsiderPreviewBuild16215OrGreater)
+                return;
+
             var cq = new ConcurrentQueue<int>();
             var tasks = new List<Task>();
 

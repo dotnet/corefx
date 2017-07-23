@@ -10,6 +10,7 @@
 //
 
 using System.IO;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -89,7 +90,7 @@ namespace System.Net.Mail.Tests
         public void InvalidHostTest()
         {
             Assert.Throws<ArgumentNullException>(() => Smtp.Host = null);
-            Assert.Throws<ArgumentException>(() => Smtp.Host = "");
+            AssertExtensions.Throws<ArgumentException>("value", () => Smtp.Host = "");
         }
 
         [Fact]
@@ -277,6 +278,7 @@ namespace System.Net.Mail.Tests
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             client.Credentials = new NetworkCredential("user", "password");
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             try
             {
@@ -289,6 +291,7 @@ namespace System.Net.Mail.Tests
                 Assert.Equal("<bar@example.com>", server.MailTo);
                 Assert.Equal("hello", server.Subject);
                 Assert.Equal("howdydoo", server.Body);
+                Assert.Equal(clientDomain, server.ClientDomain);
             }
             finally
             {
@@ -297,12 +300,12 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
         public async Task TestMailDeliveryAsync()
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             try
             {
@@ -315,6 +318,7 @@ namespace System.Net.Mail.Tests
                 Assert.Equal("<bar@example.com>", server.MailTo);
                 Assert.Equal("hello", server.Subject);
                 Assert.Equal("howdydoo", server.Body);
+                Assert.Equal(clientDomain, server.ClientDomain);
             }
             finally
             {
@@ -323,12 +327,12 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Crashes or hangs: https://github.com/dotnet/corefx/issues/19604")]
         public async Task TestCredentialsCopyInAsyncContext()
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
             MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "hello", "howdydoo");
+            string clientDomain = IPGlobalProperties.GetIPGlobalProperties().HostName.Trim().ToLower();
 
             CredentialCache cache = new CredentialCache();
             cache.Add("localhost", server.EndPoint.Port, "NTLM", CredentialCache.DefaultNetworkCredentials);
@@ -346,6 +350,7 @@ namespace System.Net.Mail.Tests
                 Assert.Equal("<bar@example.com>", server.MailTo);
                 Assert.Equal("hello", server.Subject);
                 Assert.Equal("howdydoo", server.Body);
+                Assert.Equal(clientDomain, server.ClientDomain);
             }
             finally
             {

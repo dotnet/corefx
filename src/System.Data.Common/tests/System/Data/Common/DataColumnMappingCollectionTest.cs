@@ -372,7 +372,7 @@ namespace System.Data.Tests.Common
         [Fact]
         public void RemoveException2()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 _columnMapCollection.AddRange(_cols);
                 DataColumnMapping mymap = new DataColumnMapping("sourceAge", "dataSetAge");
@@ -464,6 +464,26 @@ namespace System.Data.Tests.Common
         public void GetColumnMappingBySchemaAction_DataColumnMappingCollection_String_MissingMappingAction_MissingMappingActionNotFoundThrowsException()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("MissingMappingAction", () => DataColumnMappingCollection.GetColumnMappingBySchemaAction((DataColumnMappingCollection)null, "not null", new MissingMappingAction()));
+        }
+
+        [Fact]
+        public void AddRange_Array_PassingNullThrowsException()
+        {
+            Array array = null;
+            DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
+
+            Assert.Throws<ArgumentNullException>(() => dataColumnMappingCollection.AddRange(array));
+        }
+
+        [Fact]
+        public void This_String_SetAndGetOK()
+        {
+            DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
+            dataColumnMappingCollection.Add(new DataColumnMapping("sourcePIN", "dataSetPIN"));
+
+            dataColumnMappingCollection["sourcePIN"] = new DataColumnMapping("sourcePIN", "dataSetPINSet");
+            DataColumnMapping dataColumnMapping = dataColumnMappingCollection["sourcePIN"];
+            Assert.Equal("dataSetPINSet", dataColumnMapping.DataSetColumn);
         }
     }
 }

@@ -133,16 +133,20 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Get_Windows()
     {
         Assert.NotNull(Console.Title);
     }
 
     [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
-    [InlineData(10)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(255)]
     [InlineData(256)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows(int lengthOfTitle)
     {
         // Try to set the title to some other value.
@@ -153,6 +157,18 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
             Assert.Equal(newTitle, Console.Title);
             return SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
+    }
+
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
+    public static void Title_Get_Windows_Uap()
+    {
+        Assert.Throws<IOException>(() => Console.Title);
+    }
+
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
+    public static void Title_Set_Windows_Uap(int lengthOfTitle)
+    {
+        Assert.Throws<IOException>(() => Console.Title = "x");
     }
 
     [Fact]
@@ -339,11 +355,11 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
         Assert.Throws<PlatformNotSupportedException>(() => Console.SetWindowPosition(50, 50));
     }
 
-    [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]
+    [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void SetWindowSize_GetWindowSize_ReturnsExpected()
     {
-        if (PlatformDetection.IsNotWindowsNanoServer && !Console.IsInputRedirected && !Console.IsOutputRedirected)
+        if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("width", () => Console.SetWindowSize(-1, Console.WindowHeight));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("height", () => Console.SetWindowSize(Console.WindowHeight, -1));

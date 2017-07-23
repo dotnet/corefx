@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using Xunit;
 
@@ -1219,6 +1220,35 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void XML_TypeWithMemberWithXmlNamespaceDeclarationsAttribute_WithInitialValue()
+    {
+        var ns = new XmlQualifiedName("ns", "http://tempuri.org");
+        var original = new TypeWithMemberWithXmlNamespaceDeclarationsAttribute() { header = "foo", body = "bar", xmlns = new XmlSerializerNamespaces(new[] { ns }) };
+
+        var actual = SerializeAndDeserialize<TypeWithMemberWithXmlNamespaceDeclarationsAttribute>(original,
+            @"<?xml version=""1.0""?>
+<Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://www.w3.org/2003/05/soap-envelope"" xmlns:ns=""http://tempuri.org"">
+  <header>foo</header>
+  <body>bar</body>
+</Envelope>");
+
+        Assert.StrictEqual(original.header, actual.header);
+        Assert.StrictEqual(original.body, actual.body);
+        Assert.NotNull(actual.xmlns);
+        Assert.Contains(ns, actual.xmlns.ToArray());
+    }
+
+    [Fact]
+    public static void XML_XmlSchemaWithNamespacesWriteWithNamespaceManager()
+    {
+        var schema = new XmlSchema();
+        schema.Namespaces = new XmlSerializerNamespaces();
+
+        using (var memStream = new MemoryStream())
+            schema.Write(memStream, new XmlNamespaceManager(new NameTable()));
+    }
+
+    [Fact]
     public static void XML_TypeWithXmlTextAttributeOnArray()
     {
         var original = new TypeWithXmlTextAttributeOnArray() { Text = new string[] { "val1", "val2" } };
@@ -1737,7 +1767,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlElements.Remove(item2);
         Assert.False(attrs.XmlElements.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlElements.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlElements.Remove(item2); });
     }
 
     [Fact]
@@ -1769,7 +1799,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlArrayItems.Remove(item2);
         Assert.False(attrs.XmlArrayItems.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlArrayItems.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlArrayItems.Remove(item2); });
     }
 
     [Fact]
@@ -1801,7 +1831,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         attrs.XmlAnyElements.Remove(item2);
         Assert.False(attrs.XmlAnyElements.Contains(item2));
 
-        Assert.Throws<ArgumentException>(() => { attrs.XmlAnyElements.Remove(item2); });
+        AssertExtensions.Throws<ArgumentException>(null, () => { attrs.XmlAnyElements.Remove(item2); });
     }
 
     [Fact]
@@ -3279,7 +3309,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.value, ((DerivedClass)actual).value);
     }
 
-#if !uap
     [Fact]
     public static void Xml_DefaultValueAttributeSetToNaNTest()
     {
@@ -3295,7 +3324,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
     }
-#endif
 
     [Fact]
     public static void Xml_NullRefInXmlSerializerCtorTest()
@@ -4380,6 +4408,109 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.StrictEqual(deserializedValue.IsFirstRun, value.IsFirstRun);
     }
 
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
+    public static void DerivedTypeWithDifferentOverrides()
+    {
+        DerivedTypeWithDifferentOverrides value = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
+        DerivedTypeWithDifferentOverrides actual = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(value, @"<?xml version=""1.0""?><DerivedTypeWithDifferentOverrides xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Name1>Name1</Name1><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
+        Assert.StrictEqual(value.Name1, actual.Name1);
+        Assert.StrictEqual(value.Name2, actual.Name2);
+        Assert.StrictEqual(value.Name3, actual.Name3);
+        Assert.Null(actual.Name4);
+        Assert.StrictEqual(value.Name5, actual.Name5);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
+    public static void DerivedTypeWithDifferentOverrides2()
+    {
+        DerivedTypeWithDifferentOverrides2 value = new DerivedTypeWithDifferentOverrides2() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5", Name6 = "Name6" };
+        ((DerivedTypeWithDifferentOverrides)value).Name5 = "MidLevelName5";
+        ((DerivedTypeWithDifferentOverrides)value).Name4 = "MidLevelName4";
+        ((SerializationTypes.BaseType)value).Name4 = "BaseLevelName4";
+        ((DerivedTypeWithDifferentOverrides)value).Name6 = "MidLevelName6";
+        ((SerializationTypes.BaseType)value).Name6 = "BaseLevelName6";
+        DerivedTypeWithDifferentOverrides2 actual = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides2>(value, @"<?xml version=""1.0""?><DerivedTypeWithDifferentOverrides2 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Name1>Name1</Name1><Name2>Name2</Name2><Name3>Name3</Name3><Name4>BaseLevelName4</Name4><Name5>MidLevelName5</Name5><Name6>BaseLevelName6</Name6></DerivedTypeWithDifferentOverrides2>");
+        Assert.StrictEqual(value.Name1, actual.Name1);
+        Assert.StrictEqual(value.Name2, actual.Name2);
+        Assert.StrictEqual(value.Name3, actual.Name3);
+        Assert.Null(actual.Name4);
+        Assert.Null(((DerivedTypeWithDifferentOverrides)actual).Name4);
+        Assert.StrictEqual(((SerializationTypes.BaseType)value).Name4, ((SerializationTypes.BaseType)actual).Name4);
+        Assert.Null(actual.Name5);
+        Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)value).Name5, ((DerivedTypeWithDifferentOverrides)actual).Name5);
+        Assert.Null(((SerializationTypes.BaseType)actual).Name5);
+        Assert.Null(actual.Name6);
+        Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+        Assert.StrictEqual(((SerializationTypes.BaseType)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+    }
+
+    [Fact]
+    public static void Xml_DefaultNamespaceChange_SimpleArray_ObjectAsRoot()
+    {
+        SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(SimpleType[]) }); };
+
+        SimpleType[] y = SerializeAndDeserialize(x,
+@"<?xml version=""1.0""?>
+<anyType d1p1:type=""ArrayOfSimpleType"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"" >
+  <SimpleType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+    <P1>abc</P1>
+    <P2>11</P2>
+  </SimpleType>
+  <SimpleType>
+    <P1>def</P1>
+    <P2>12</P2>
+  </SimpleType>
+</anyType>", serializerFactory);
+
+        Utils.Equal(x, y, (a, b) => { return SimpleType.AreEqual(a, b); });
+    }
+
+    [Fact]
+    public static void Xml_ValidateExceptionOnUnspecifiedRootSerializationType()
+    {
+        var value = new UnspecifiedRootSerializationType();
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<UnspecifiedRootSerializationType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <MyIntProperty>0</MyIntProperty>\r\n</UnspecifiedRootSerializationType>", () => { return new XmlSerializer(Type.GetType(typeof(UnspecifiedRootSerializationType).FullName)); });
+        Assert.StrictEqual(value.MyIntProperty, actual.MyIntProperty);
+        Assert.StrictEqual(value.MyStringProperty, actual.MyStringProperty);     
+    }
+
+    [Fact]
+    public static void Xml_VerifyCompilationIssueOnly()
+    {
+        AssertSerializationFailure<TypeWithEnumerableMembers, InvalidOperationException>();
+        AssertSerializationFailure<TypeWithoutPublicSetter, InvalidOperationException>();
+        AssertSerializationFailure<TypeWithCompilerGeneratedAttributeButWithoutPublicSetter, InvalidOperationException>();
+        AssertSerializationFailure<InvalidDerivedClass, InvalidOperationException>();
+        AssertSerializationFailure<AnotherInvalidDerivedClass, InvalidOperationException>();
+        AssertSerializationFailure<InternalTypeWithNestedPublicType.LevelData, InvalidOperationException>();
+        AssertSerializationFailure<InternalTypeWithNestedPublicTypeWithNestedPublicType.NestedPublicType.LevelData, InvalidOperationException>();
+
+        var value1 = new DuplicateTypeNamesTest.ns1.ClassA();
+        var actual = SerializeAndDeserialize(value1, "<?xml version=\"1.0\"?>\r\n<ClassA xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />");
+        Assert.Equal(value1.Name, actual.Name);
+
+        var value2 = new DuplicateTypeNamesTest.ns2.ClassA();
+        var actual2 = SerializeAndDeserialize(value2, "<?xml version=\"1.0\"?>\r\n<ClassA xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />");
+        Assert.Equal(value2.Nombre, actual2.Nombre);
+    }
+
+    [Fact]
+    public static void Xml_DefaultNamespaceChange_ObjectAsRoot()
+    {
+        object value = ItemChoiceType.DecimalNumber;
+        Func<XmlSerializer> serializerFactory = () => { return new XmlSerializer(typeof(object), new Type[] { typeof(ItemChoiceType[]) }); };
+
+        var actual = SerializeAndDeserialize(value,
+            @"<?xml version=""1.0""?>
+<anyType d1p1:type=""ItemChoiceType"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">DecimalNumber</anyType>", 
+            serializerFactory);
+
+        Assert.StrictEqual(value, actual);
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
@@ -4561,5 +4692,18 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
 
         return actual;
+    }
+
+    private static void AssertSerializationFailure<T, ExceptionType>() where T : new() where ExceptionType : Exception
+    {
+        try
+        {
+            SerializeAndDeserialize(new T(), string.Empty, skipStringCompare: true);
+            Assert.True(false, $"Assert.True failed for {typeof(T)}. The above operation should have thrown, but it didn't.");
+        }
+        catch(Exception e)
+        {
+            Assert.True(e is ExceptionType, $"Assert.True failed for {typeof(T)}. Expected: {typeof(ExceptionType)}; Actual: {e.GetType()}");
+        }
     }
 }

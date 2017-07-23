@@ -16,7 +16,8 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.NetFramework, "netfx: dotnet/corefx #16805, uap: dotnet/corefx #20010")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16805")]
     public partial class HttpClientHandler_SslProtocols_Test
     {
         [Fact]
@@ -90,6 +91,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.Tls12, true)]
         public async Task GetAsync_AllowedSSLVersion_Succeeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is failing.
+                return;
+            }
+
             using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
             using (var client = new HttpClient(handler))
             {
@@ -123,6 +130,12 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is failing.
+                return;
+            }
+
             using (HttpClientHandler handler = new HttpClientHandler())
             {
                 if (PlatformDetection.IsCentos7)
@@ -153,6 +166,13 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(NotSupportedSSLVersionServers))]
         public async Task GetAsync_UnsupportedSSLVersion_Throws(string name, string url)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled && !PlatformDetection.IsWindows10Version1607OrGreater)
+            {
+                // On Windows, https://github.com/dotnet/corefx/issues/21925#issuecomment-313408314
+                // On Linux, an older version of OpenSSL may permit negotiating SSLv3.
+                return;
+            }
+
             using (var client = new HttpClient())
             {
                 await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));

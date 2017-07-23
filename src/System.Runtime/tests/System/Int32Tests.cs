@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class Int32Tests
+    public class Int32Tests
     {
         [Fact]
         public static void Ctor_Empty()
@@ -48,22 +48,22 @@ namespace System.Tests
         [InlineData(-234, 234, -1)]
         [InlineData(-234, -432, 1)]
         [InlineData(234, null, 1)]
-        public static void CompareTo(int i, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(int i, object value, int expected)
         {
-            if (value is int)
+            if (value is int intValue)
             {
-                Assert.Equal(expected, Math.Sign(i.CompareTo((int)value)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(intValue)));
             }
-            IComparable comparable = i;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotInt_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData((long)234)]
+        public void CompareTo_ObjectNotInt_ThrowsArgumentException(object value)
         {
-            IComparable comparable = 234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not an int
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo((long)234)); // Obj is not an int
+            AssertExtensions.Throws<ArgumentException>(null, () => 123.CompareTo(value));
         }
 
         [Theory]
@@ -85,6 +85,12 @@ namespace System.Tests
                 Assert.Equal(expected, i1.GetHashCode().Equals(i2.GetHashCode()));
             }
             Assert.Equal(expected, i1.Equals(obj));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsInt32()
+        {
+            Assert.Equal(TypeCode.Int32, 1.GetTypeCode());
         }
 
         public static IEnumerable<object[]> ToString_TestData()
@@ -475,16 +481,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             int result = 0;
-            Assert.Throws<ArgumentException>(() => int.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.TryParse("1", style, null, out result));
             Assert.Equal(default(int), result);
 
-            Assert.Throws<ArgumentException>(() => int.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => int.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => int.Parse("1", style, null));
         }
     }
 }
