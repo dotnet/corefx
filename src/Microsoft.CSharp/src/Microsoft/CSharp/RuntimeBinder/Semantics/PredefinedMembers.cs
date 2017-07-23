@@ -353,13 +353,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 property = getter.getProperty();
                 Debug.Assert(property != null);
 
-                if (property.name != propertyName ||
-                    (propertySetter != PREDEFMETH.PM_COUNT &&
-                        (setter == null ||
-                         !setter.isPropertyAccessor() ||
-                         setter.getProperty() != property)) ||
-                    property.Bogus)
+                if (property.name != propertyName || propertySetter != PREDEFMETH.PM_COUNT
+                    && (setter == null || !setter.isPropertyAccessor() || setter.getProperty() != property))
                 {
+                    Debug.Assert(!property.Bogus);
                     property = null;
                 }
             }
