@@ -257,17 +257,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ctor;
         }
 
-        // property specific helpers
-        private PropertySymbol EnsureProperty(PREDEFPROP property)
-        {
-            Debug.Assert((int)property > (int)PREDEFMETH.PM_FIRST && (int)property < (int)PREDEFMETH.PM_COUNT);
-
-            if (_properties[(int)property] == null)
-            {
-                _properties[(int)property] = LoadProperty(property);
-            }
-            return _properties[(int)property];
-        }
         private PropertySymbol LoadProperty(PREDEFPROP property)
         {
             return LoadProperty(
@@ -447,15 +436,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 #endif
         }
 
-        public PropertySymbol GetProperty(PREDEFPROP property)  // Reports an error if the property is not found.
+        public PropertySymbol GetProperty(PREDEFPROP property)
         {
-            PropertySymbol result = EnsureProperty(property);
-            if (result == null)
-            {
-                ReportError(property);
-            }
-
-            return result;
+            Debug.Assert(property > PREDEFPROP.PP_FIRST && property < PREDEFPROP.PP_COUNT);
+            return _properties[(int)property] ?? (_properties[(int)property] = LoadProperty(property));
         }
 
         public MethodSymbol GetMethod(PREDEFMETH method)
@@ -568,11 +552,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static PredefinedType GetPropPredefType(PREDEFPROP property)
         {
             return GetMethInfo(GetPropGetter(property)).type;
-        }
-
-        private void ReportError(PREDEFPROP property)
-        {
-            ReportError(GetPropPredefType(property), GetPropPredefName(property));
         }
 
         // the list of predefined property definitions.
