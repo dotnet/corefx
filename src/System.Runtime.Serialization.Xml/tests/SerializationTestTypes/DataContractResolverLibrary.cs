@@ -386,7 +386,17 @@ namespace SerializationTestTypes
             }
             if (null == result)
             {
-                result = Type.GetType(String.Format("{0}, {1}", typeName, typeNamespace));
+                try
+                {
+                    result = Type.GetType(String.Format("{0}, {1}", typeName, typeNamespace));
+                }
+                catch (System.IO.FileLoadException)
+                {
+                    //Type.GetType throws exception on netfx if it cannot find a type while it just returns null on NetCore. 
+                    //The behavior difference of Type.GetType is a known issue. 
+                    //Catch the exception so that test case can pass on netfx.
+                    return null;
+                }
             }
             return result;
         }

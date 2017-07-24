@@ -3900,20 +3900,10 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_SampleICollectionTExplicitWithoutDC()
     {
-        var value = new SampleICollectionTExplicitWithoutDC(true);
-        SampleICollectionTExplicitWithoutDC roundtripObject = SerializeAndDeserialize(value, string.Empty, skipStringCompare: true);
-        Assert.NotNull(roundtripObject);
-        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, roundtripObject);
-
-        string netcorePayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
-        var deserializedNetcoreObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(netcorePayload);
-        Assert.NotNull(deserializedNetcoreObject);
-        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, deserializedNetcoreObject);
-
-        string desktopPayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
-        var deserializedDesktopObject = DeserializeString<SampleICollectionTExplicitWithoutDC>(desktopPayload);
-        Assert.NotNull(deserializedDesktopObject);
-        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, deserializedDesktopObject);
+        var value = new SerializationTestTypes.SampleICollectionTExplicitWithoutDC(true);
+        string netcorePayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/SerializationTestTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        string desktopPayload = "<SampleICollectionTExplicitWithoutDC xmlns=\"http://schemas.datacontract.org/2004/07/SerializationTestTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><DC z:Id=\"i1\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Id=\"i2\" i:type=\"DC\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><Data>TestData</Data><Next i:nil=\"true\"/></DC><DC z:Ref=\"i1\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"/></SampleICollectionTExplicitWithoutDC>";
+        TestObjectWithDifferentPayload(value, netcorePayload, desktopPayload);
     }
 
     [Fact]
@@ -4046,6 +4036,7 @@ public static partial class DataContractSerializerTests
     private static void TestObjectWithDifferentPayload<T>(T value, string netcorePayload, string desktopPayload, DataContractSerializerSettings settings = null)
     {
         var roundtripObject = SerializeAndDeserialize(value, string.Empty, settings, skipStringCompare: true);
+        Assert.NotNull(roundtripObject);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(value, roundtripObject);
 
         //netcorePayload
