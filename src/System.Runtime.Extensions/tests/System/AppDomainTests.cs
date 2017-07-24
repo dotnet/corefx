@@ -644,34 +644,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom is not supported on uapaot")]
-        public void AssemblyResolve_LoadFromHandlerChecksForNullRequestingAssembly()
-        {
-            RemoteInvoke(() =>
-            {
-                Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("nonexistent.dll"));
-
-                CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
-                CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
-                try
-                {
-                    // The resource lookup for NullReferenceException (generally for CoreLib resources) should not raise the
-                    // AssemblyResolve event because a misbehaving handler could cause an infinite recursion check and fail-fast to
-                    // be triggered when the resource is not found, as the issue would repeat when reporting that error. In this
-                    // case, if the handler registered by LoadFrom does not check for a null requesting assembly, it would misbehave
-                    // and throw ArgumentNullException, leading to this issue.
-                    Assert.Throws<NullReferenceException>(() => ((string)null).Contains("a"));
-                }
-                finally
-                {
-                    CultureInfo.CurrentUICulture = previousUICulture;
-                }
-
-                return SuccessExitCode;
-            }).Dispose();
-        }
-
-        [Fact]
         [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void TypeResolve()
         {
