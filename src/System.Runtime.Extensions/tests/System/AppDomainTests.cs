@@ -610,6 +610,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.Uap)]
         public void AssemblyResolve_IsNotCalledForCoreLibResources()
         {
             bool assemblyResolveHandlerCalled = false;
@@ -639,6 +640,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.Uap)]
         public void AssemblyResolve_LoadFromHandlerChecksForNullRequestingAssembly()
         {
             Assert.ThrowsAny<Exception>(() => Assembly.LoadFrom(@"nonexistent.dll"));
