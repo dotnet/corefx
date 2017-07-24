@@ -610,56 +610,66 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.UapAot)]
         public void AssemblyResolve_IsNotCalledForCoreLibResources()
         {
-            bool assemblyResolveHandlerCalled = false;
-            AppDomain.CurrentDomain.AssemblyResolve +=
-                (sender, e) =>
-                {
-                    // This implementation violates the contract. AssemblyResolve event handler is supposed to return an assembly
-                    // that matches the requested identity and that is not the case here.
-                    assemblyResolveHandlerCalled = true;
-                    return typeof(AppDomainTests).Assembly;
-                };
+            RemoteInvoke(() =>
+            {
+                bool assemblyResolveHandlerCalled = false;
+                AppDomain.CurrentDomain.AssemblyResolve +=
+                    (sender, e) =>
+                    {
+                        // This implementation violates the contract. AssemblyResolve event handler is supposed to return an assembly
+                        // that matches the requested identity and that is not the case here.
+                        assemblyResolveHandlerCalled = true;
+                        return typeof(AppDomainTests).Assembly;
+                    };
 
-            CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
-            try
-            {
-                // The resource lookup for NullReferenceException (generally for CoreLib resources) should not raise the
-                // AssemblyResolve event because a misbehaving handler could cause an infinite recursion check and fail-fast to
-                // be triggered when the resource is not found, as the issue would repeat when reporting that error.
-                Assert.Throws<NullReferenceException>(() => ((string)null).Contains("a"));
-                Assert.False(assemblyResolveHandlerCalled);
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = previousUICulture;
-            }
+                CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
+                CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
+                try
+                {
+                    // The resource lookup for NullReferenceException (generally for CoreLib resources) should not raise the
+                    // AssemblyResolve event because a misbehaving handler could cause an infinite recursion check and fail-fast to
+                    // be triggered when the resource is not found, as the issue would repeat when reporting that error.
+                    Assert.Throws<NullReferenceException>(() => ((string)null).Contains("a"));
+                    Assert.False(assemblyResolveHandlerCalled);
+                }
+                finally
+                {
+                    CultureInfo.CurrentUICulture = previousUICulture;
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.UapAot)]
         public void AssemblyResolve_LoadFromHandlerChecksForNullRequestingAssembly()
         {
-            Assert.ThrowsAny<Exception>(() => Assembly.LoadFrom(@"nonexistent.dll"));
+            RemoteInvoke(() =>
+            {
+                Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("nonexistent.dll"));
 
-            CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
-            try
-            {
-                // The resource lookup for NullReferenceException (generally for CoreLib resources) should not raise the
-                // AssemblyResolve event because a misbehaving handler could cause an infinite recursion check and fail-fast to
-                // be triggered when the resource is not found, as the issue would repeat when reporting that error. In this
-                // case, if the handler registered by LoadFrom does not check for a null requesting assembly, it would misbehave
-                // and throw NullReferenceException, leading to this issue.
-                Assert.Throws<NullReferenceException>(() => ((string)null).Contains("a"));
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = previousUICulture;
-            }
+                CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
+                CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
+                try
+                {
+                    // The resource lookup for NullReferenceException (generally for CoreLib resources) should not raise the
+                    // AssemblyResolve event because a misbehaving handler could cause an infinite recursion check and fail-fast to
+                    // be triggered when the resource is not found, as the issue would repeat when reporting that error. In this
+                    // case, if the handler registered by LoadFrom does not check for a null requesting assembly, it would misbehave
+                    // and throw ArgumentNullException, leading to this issue.
+                    Assert.Throws<NullReferenceException>(() => ((string)null).Contains("a"));
+                }
+                finally
+                {
+                    CultureInfo.CurrentUICulture = previousUICulture;
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]
