@@ -288,29 +288,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(propertyName != null);
             Debug.Assert(propertyGetter > PREDEFMETH.PM_FIRST && propertyGetter < PREDEFMETH.PM_COUNT);
 
+            RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(
+                GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
             MethodSymbol getter = GetMethod(propertyGetter);
 
-            if (getter == null)
-            {
-                RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
-                getter = GetMethod(propertyGetter);
-            }
-
-            PropertySymbol property = null;
-            if (getter != null)
-            {
-                getter.SetMethKind(MethodKindEnum.PropAccessor);
-                property = getter.getProperty();
-
-                // Didn't find it, so load it.
-                if (property == null)
-                {
-                    RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
-                }
-                property = getter.getProperty();
-                Debug.Assert(property != null);
-            }
-
+            getter.SetMethKind(MethodKindEnum.PropAccessor);
+            PropertySymbol property = getter.getProperty();
+            Debug.Assert(property != null);
             return property;
         }
 
