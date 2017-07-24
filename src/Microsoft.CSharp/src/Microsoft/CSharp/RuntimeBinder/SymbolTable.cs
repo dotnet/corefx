@@ -110,7 +110,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (name == SpecialNames.Indexer)
             {
                 // If we don't find an indexer name for this type, use SpecialNames.Indexer as a key on the
-                // empty results we'll get, so that that gets cached.
+                // empty results we'll get, so that those empty results gets cached.
                 name = callingType.GetIndexerName() ?? SpecialNames.Indexer;
             }
 

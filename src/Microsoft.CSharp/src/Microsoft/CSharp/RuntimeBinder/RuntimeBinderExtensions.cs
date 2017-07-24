@@ -332,9 +332,17 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Debug.Assert(type != null);
             string name = (type.GetCustomAttribute(typeof(DefaultMemberAttribute)) as DefaultMemberAttribute)?.MemberName;
-            return name == null || !type.GetProperties(
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-                .Any(p => p.Name == name && p.GetIndexParameters().Length != 0) ? null : name;
+            if (name != null)
+            {
+                if (type.GetProperties(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+                    .Any(p => p.Name == name && p.GetIndexParameters().Length != 0))
+                {
+                    return name;
+                }
+            }
+
+            return null;
         }
     }
 }
