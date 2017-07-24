@@ -489,7 +489,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeCur == null)
             {
-                typeCur = types[itypeNext++] as AggregateType;
+                typeCur = (AggregateType)types[itypeNext++];
             }
             Debug.Assert(typeCur != null);
 
@@ -508,7 +508,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     TypeArray ifaces = typeCur.GetIfacesAll();
                     for (int i = 0; i < ifaces.Count; i++)
                     {
-                        AggregateType type = ifaces[i] as AggregateType;
+                        AggregateType type = (AggregateType)ifaces[i];
                         Debug.Assert(type.isInterfaceType());
                         if (fHideByName)
                             type.fAllHidden = true;
