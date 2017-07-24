@@ -213,6 +213,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     .Where(member => member.DeclaringType == type && member.Name == name).GetEnumerator();
                 if (memberEn.MoveNext())
                 {
+                    List<EventInfo> events = null;
                     CType cType = GetCTypeFromType(type);
                     if (!(cType is AggregateType aggType))
                         continue;
@@ -259,12 +260,19 @@ namespace Microsoft.CSharp.RuntimeBinder
                             Debug.Assert(addedField == null);
                             addedField = AddFieldToSymbolTable(field, aggregate);
                         }
+                        else if (member is EventInfo e)
+                        {
+                            // Store events until after all fields
+                            (events = events ?? new List<EventInfo>()).Add(e);
+                        }
                     } while (memberEn.MoveNext());
 
-                    foreach (EventInfo e in type.GetRuntimeEvents()
-                        .Where(member => member.DeclaringType == type && member.Name == name))
+                    if (events != null)
                     {
-                        AddEventToSymbolTable(e, aggregate, addedField);
+                        foreach (EventInfo e in events)
+                        {
+                            AddEventToSymbolTable(e, aggregate, addedField);
+                        }
                     }
                 }
             }
