@@ -750,10 +750,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Check method type variable constraints.
                 TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), mwiWrap);
             }
-            if (mwiWrap.Meth().MethKind() == MethodKindEnum.Latent)
-            {
-                ErrorContext.ErrorRef(ErrorCode.ERR_PartialMethodToDelegate, mwiWrap);
-            }
 
             if (!needDest)
                 return true;
