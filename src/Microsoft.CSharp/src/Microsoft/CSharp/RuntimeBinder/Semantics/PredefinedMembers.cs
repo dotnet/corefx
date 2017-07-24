@@ -526,11 +526,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         IsMethVirtual(method));
         }
 
-        private void ReportError(PredefinedType type, PredefinedName name)
-        {
-            GetErrorContext().Error(ErrorCode.ERR_MissingPredefinedMember, PredefinedTypes.GetFullName(type), GetPredefName(name));
-        }
-
         private static readonly int[] s_DelegateCtorSignature1 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_INTPTR };
         private static readonly int[] s_DelegateCtorSignature2 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_UINTPTR };
 
