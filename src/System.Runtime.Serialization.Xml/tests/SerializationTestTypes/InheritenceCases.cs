@@ -585,7 +585,6 @@ namespace SerializationTestTypes
         [DataMember]
         public Derived2DC derived2DC;
 
-
         public TestInheritence6()
         {
         }
@@ -650,8 +649,7 @@ namespace SerializationTestTypes
 
         [DataMember]
         public Derived2DC derived2DC;
-
-
+        
         public TestInheritence7()
         {
         }
