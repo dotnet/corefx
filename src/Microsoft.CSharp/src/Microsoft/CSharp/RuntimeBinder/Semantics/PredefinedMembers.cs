@@ -17,8 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Keep this list sorted by containing type and name.
     internal enum PREDEFMETH
     {
-        PM_FIRST = 0,
-
         PM_DECIMAL_OPDECREMENT,
         PM_DECIMAL_OPINCREMENT,
         PM_DECIMAL_OPUNARYMINUS,
@@ -274,7 +272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PREDEFMETH propertyGetter)
         {
             Debug.Assert(propertyName != null);
-            Debug.Assert(propertyGetter > PREDEFMETH.PM_FIRST && propertyGetter < PREDEFMETH.PM_COUNT);
+            Debug.Assert(propertyGetter >= 0 && propertyGetter < PREDEFMETH.PM_COUNT);
 
             RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(
                 GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
@@ -424,7 +422,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 #if DEBUG
             // validate the tables
-            for (int i = (int)PREDEFMETH.PM_FIRST + 1; i < (int)PREDEFMETH.PM_COUNT; i++)
+            for (int i = 0; i < (int)PREDEFMETH.PM_COUNT; i++)
             {
                 Debug.Assert((int)GetMethInfo((PREDEFMETH)i).method == i);
             }
@@ -443,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol GetMethod(PREDEFMETH method)
         {
-            Debug.Assert(method > PREDEFMETH.PM_FIRST && method < PREDEFMETH.PM_COUNT);
+            Debug.Assert(method >= 0 && method < PREDEFMETH.PM_COUNT);
             return _methods[(int)method] ?? (_methods[(int)method] = LoadMethod(method));
         }
 
@@ -538,7 +536,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PREDEFMETH result = GetPropInfo(property).getter;
 
             // getters are MethodRequiredEnum.Required
-            Debug.Assert(result > PREDEFMETH.PM_FIRST && result < PREDEFMETH.PM_COUNT);
+            Debug.Assert(result >= 0 && result < PREDEFMETH.PM_COUNT);
 
             return result;
         }
@@ -564,7 +562,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static PredefinedMethodInfo GetMethInfo(PREDEFMETH method)
         {
-            Debug.Assert(method > PREDEFMETH.PM_FIRST && method < PREDEFMETH.PM_COUNT);
+            Debug.Assert(method >= 0 && method < PREDEFMETH.PM_COUNT);
             Debug.Assert(s_predefinedMethods[(int)method].method == method);
 
             return s_predefinedMethods[(int)method];
@@ -608,7 +606,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // the list of predefined method definitions.
         // This list must be in the same order as the PREDEFMETH enum.
         private static readonly PredefinedMethodInfo[] s_predefinedMethods = new PredefinedMethodInfo[(int)PREDEFMETH.PM_COUNT] {
-            new PredefinedMethodInfo(   PREDEFMETH.PM_FIRST,                                           PredefinedType.PT_COUNT,               PredefinedName.PN_COUNT,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 0  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDECREMENT,                             PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDECREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPINCREMENT,                             PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPINCREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPUNARYMINUS,                            PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPUNARYMINUS,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
