@@ -227,18 +227,24 @@ namespace Microsoft.CSharp.RuntimeBinder
                         MemberInfo member = memberEn.Current;
                         if (member is MethodInfo method)
                         {
-                            MethodKindEnum kind = MethodKindEnum.Actual;
-                            if (member.Name == SpecialNames.Invoke)
+                            MethodKindEnum kind;
+                            switch (member.Name)
                             {
-                                kind = MethodKindEnum.Invoke;
-                            }
-                            else if (member.Name == SpecialNames.ImplicitConversion)
-                            {
-                                kind = MethodKindEnum.ImplicitConv;
-                            }
-                            else if (member.Name == SpecialNames.ExplicitConversion)
-                            {
-                                kind = MethodKindEnum.ExplicitConv;
+                                case SpecialNames.Invoke:
+                                    kind = MethodKindEnum.Invoke;
+                                    break;
+
+                                case SpecialNames.ImplicitConversion:
+                                    kind = MethodKindEnum.ImplicitConv;
+                                    break;
+
+                                case SpecialNames.ExplicitConversion:
+                                    kind = MethodKindEnum.ExplicitConv;
+                                    break;
+
+                                default:
+                                    kind = MethodKindEnum.Actual;
+                                    break;
                             }
 
                             AddMethodToSymbolTable(member, aggregate, kind);
