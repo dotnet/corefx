@@ -610,7 +610,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.UapAot)]
         public void AssemblyResolve_IsNotCalledForCoreLibResources()
         {
             RemoteInvoke(() =>
@@ -645,7 +644,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/22555", TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom is not supported on uapaot")]
         public void AssemblyResolve_LoadFromHandlerChecksForNullRequestingAssembly()
         {
             RemoteInvoke(() =>
