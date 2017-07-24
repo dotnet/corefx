@@ -302,8 +302,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            AggregateType atsDest = pDest as AggregateType;
-            AggregateSymbol aggDest = pDest.getAggregate();
+            AggregateType atsDest = (AggregateType)pDest;
+            AggregateSymbol aggDest = atsDest.getAggregate();
             if (!aggDest.isPredefAgg(PredefinedType.PT_G_ILIST) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_ICOLLECTION) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_IENUMERABLE) &&
