@@ -155,7 +155,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 Debug.Assert(pArray.HasErrors() == elementType.HasErrors());
-                Debug.Assert(pArray.IsUnresolved() == elementType.IsUnresolved());
             }
 
             Debug.Assert(pArray.rank == args);
@@ -271,7 +270,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 Debug.Assert(pPointer.HasErrors() == baseType.HasErrors());
-                Debug.Assert(pPointer.IsUnresolved() == baseType.IsUnresolved());
             }
 
             Debug.Assert(pPointer.GetReferentType() == baseType);
@@ -324,7 +322,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 Debug.Assert(pParamModifier.HasErrors() == paramType.HasErrors());
-                Debug.Assert(pParamModifier.IsUnresolved() == paramType.IsUnresolved());
             }
 
             Debug.Assert(pParamModifier.GetParameterType() == paramType);
@@ -343,7 +340,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParentType == null && pParentNS == null)
             {
                 // Use the root namespace as the parent.
-                pParentNS = _BSymmgr.GetRootNsAid(KAID.kaidGlobal);
+                pParentNS = _BSymmgr.GetRootNsAid();
             }
             if (typeArgs == null)
             {
@@ -384,7 +381,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(pError.nameText == nameText);
                 Debug.Assert(pError.typeArgs == typeArgs);
             }
-            Debug.Assert(!pError.IsUnresolved());
 
             return pError;
         }
@@ -1234,6 +1230,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return false;
         }
+
+        public AggregateType ObjectAggregateType => (AggregateType)_symbolTable.GetCTypeFromType(typeof(object));
 
         private readonly Dictionary<Tuple<Assembly, Assembly>, bool> _internalsVisibleToCalculated
             = new Dictionary<Tuple<Assembly, Assembly>, bool>();

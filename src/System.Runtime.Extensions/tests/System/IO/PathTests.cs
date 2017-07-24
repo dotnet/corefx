@@ -35,20 +35,33 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.ChangeExtension(path, newExtension));
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData("\r\n")]
-        public static void GetDirectoryName_EmptyOrWhitespace_Throws(string path)
+        [Fact]
+        public static void GetDirectoryName_EmptyThrows()
         {
-            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(string.Empty));
+        }
+
+        [Theory,
+            InlineData(" "),
+            InlineData("\r\n")]
+        public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows(string path)
+        {
+            Action action = () => Path.GetDirectoryName(path);
+            if (PlatformDetection.IsWindows)
+            {
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
+            }
+            else
+            {
+                // These are valid paths on Unix
+                action();
+            }
         }
 
         [Theory]
         [InlineData("\u00A0")] // Non-breaking Space
         [InlineData("\u2028")] // Line separator
         [InlineData("\u2029")] // Paragraph separator
-        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         public static void GetDirectoryName_NonControl(string path)
         {
             Assert.Equal(string.Empty, Path.GetDirectoryName(path));
@@ -58,7 +71,6 @@ namespace System.IO.Tests
         [InlineData("\u00A0")] // Non-breaking Space
         [InlineData("\u2028")] // Line separator
         [InlineData("\u2029")] // Paragraph separator
-        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         public static void GetDirectoryName_NonControlWithSeparator(string path)
         {
             Assert.Equal(path, Path.GetDirectoryName(Path.Combine(path, path)));
@@ -201,12 +213,20 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void GetPathRoot()
+        public static void GetPathRoot_NullReturnsNull()
         {
             Assert.Null(Path.GetPathRoot(null));
-            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot("\r\n"));
+        }
 
+        [Fact]
+        public static void GetPathRoot_EmptyThrows()
+        {
+            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(string.Empty));
+        }
+
+        [Fact]
+        public static void GetPathRoot_Basic()
+        {
             string cwd = Directory.GetCurrentDirectory();
             Assert.Equal(cwd.Substring(0, cwd.IndexOf(Path.DirectorySeparatorChar) + 1), Path.GetPathRoot(cwd));
             Assert.True(Path.IsPathRooted(cwd));
@@ -441,7 +461,6 @@ namespace System.IO.Tests
         [InlineData("\u00A0")] // Non breaking space
         [InlineData("\u2028")] // Line separator
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // not NetFX
         public static void GetFullPath_NonControlWhiteSpaceStays(string component)
         {
