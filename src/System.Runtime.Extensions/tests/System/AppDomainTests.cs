@@ -641,7 +641,7 @@ namespace System.Tests
         [Fact]
         public void AssemblyResolve_LoadFromHandlerChecksForNullRequestingAssembly()
         {
-            Assert.ThrowsAny<Exception>(() => Assembly.LoadFrom(@"C:\Windows\System32\kernel32.dll"));
+            Assert.ThrowsAny<Exception>(() => Assembly.LoadFrom(@"nonexistent.dll"));
 
             CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
             CultureInfo.CurrentUICulture = new CultureInfo("de-CH");
