@@ -634,8 +634,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                callingType = callingObjectType as AggregateType;
-                Debug.Assert(callingType != null, "MemberGroup on non-array, non-aggregate");
+                callingType = (AggregateType)callingObjectType;
             }
 
             List<CType> callingTypes = new List<CType>();
