@@ -122,7 +122,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Keep this list sorted by containing type and name.
     internal enum PREDEFPROP
     {
-        PP_FIRST = 0,
         PP_G_OPTIONAL_VALUE,
         PP_COUNT,
     };
@@ -429,7 +428,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert((int)GetMethInfo((PREDEFMETH)i).method == i);
             }
-            for (int i = (int)PREDEFPROP.PP_FIRST + 1; i < (int)PREDEFPROP.PP_COUNT; i++)
+            for (int i = 0; i < (int)PREDEFPROP.PP_COUNT; i++)
             {
                 Debug.Assert((int)GetPropInfo((PREDEFPROP)i).property == i);
             }
@@ -438,7 +437,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public PropertySymbol GetProperty(PREDEFPROP property)
         {
-            Debug.Assert(property > PREDEFPROP.PP_FIRST && property < PREDEFPROP.PP_COUNT);
+            Debug.Assert(property >= 0 && property < PREDEFPROP.PP_COUNT);
             return _properties[(int)property] ?? (_properties[(int)property] = LoadProperty(property));
         }
 
@@ -552,13 +551,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // the list of predefined property definitions.
         // This list must be in the same order as the PREDEFPROP enum.
         private static readonly PredefinedPropertyInfo[] s_predefinedProperties = {
-            new PredefinedPropertyInfo(PREDEFPROP.PP_FIRST,             PredefinedName.PN_COUNT,        PREDEFMETH.PM_COUNT),
             new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  PredefinedName.PN_CAP_VALUE,    PREDEFMETH.PM_G_OPTIONAL_GETVALUE)
         };
 
         private static PredefinedPropertyInfo GetPropInfo(PREDEFPROP property)
         {
-            Debug.Assert(property > PREDEFPROP.PP_FIRST && property < PREDEFPROP.PP_COUNT);
+            Debug.Assert(property >= 0 && property < PREDEFPROP.PP_COUNT);
             Debug.Assert(s_predefinedProperties[(int)property].property == property);
 
             return s_predefinedProperties[(int)property];
