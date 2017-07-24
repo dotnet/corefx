@@ -293,20 +293,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(propertyGetter > PREDEFMETH.PM_FIRST && propertyGetter < PREDEFMETH.PM_COUNT);
             Debug.Assert(propertySetter > PREDEFMETH.PM_FIRST && propertySetter <= PREDEFMETH.PM_COUNT);
 
-            MethodSymbol getter = GetOptionalMethod(propertyGetter);
+            MethodSymbol getter = GetMethod(propertyGetter);
             MethodSymbol setter = null;
             if (propertySetter != PREDEFMETH.PM_COUNT)
             {
-                setter = GetOptionalMethod(propertySetter);
+                setter = GetMethod(propertySetter);
             }
 
             if (getter == null && setter == null)
             {
                 RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
-                getter = GetOptionalMethod(propertyGetter);
+                getter = GetMethod(propertyGetter);
                 if (propertySetter != PREDEFMETH.PM_COUNT)
                 {
-                    setter = GetOptionalMethod(propertySetter);
+                    setter = GetMethod(propertySetter);
                 }
             }
 
@@ -499,28 +499,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol GetMethod(PREDEFMETH method)
         {
-            MethodSymbol result = EnsureMethod(method);
-            if (result == null)
-            {
-                ReportError(method);
-            }
-
-            return result;
-        }
-
-        private MethodSymbol GetOptionalMethod(PREDEFMETH method)
-        {
-            return EnsureMethod(method);
-        }
-
-        private MethodSymbol EnsureMethod(PREDEFMETH method)
-        {
             Debug.Assert(method > PREDEFMETH.PM_FIRST && method < PREDEFMETH.PM_COUNT);
-            if (_methods[(int)method] == null)
-            {
-                _methods[(int)method] = LoadMethod(method);
-            }
-            return _methods[(int)method];
+            return _methods[(int)method] ?? (_methods[(int)method] = LoadMethod(method));
         }
 
         private MethodSymbol LoadMethod(
@@ -599,11 +579,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         GetMethAccess(method),
                         IsMethStatic(method),
                         IsMethVirtual(method));
-        }
-
-        private void ReportError(PREDEFMETH method)
-        {
-            ReportError(GetMethPredefType(method), GetMethPredefName(method));
         }
 
         private void ReportError(PredefinedType type, PredefinedName name)
