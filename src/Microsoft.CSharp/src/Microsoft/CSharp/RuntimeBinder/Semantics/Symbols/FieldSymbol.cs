@@ -43,10 +43,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public AggregateSymbol getClass()
-        {
-            return parent as AggregateSymbol;
-        }
+        public AggregateSymbol getClass() => parent as AggregateSymbol;
 
         public EventSymbol getEvent(SymbolLoader symbolLoader)
         {
