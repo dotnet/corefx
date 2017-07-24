@@ -458,24 +458,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(signature != null);
             Debug.Assert(cMethodTyVars >= 0);
             Debug.Assert(methodName != null);
-
-            if (type == null)
-            {
-                return null;
-            }
+            Debug.Assert(type != null);
             TypeArray classTyVars = type.GetTypeVarsAll();
 
             int index = 0;
             CType returnType = LoadTypeFromSignature(signature, ref index, classTyVars);
-            if (returnType == null)
-            {
-                return null;
-            }
+            Debug.Assert(returnType != null);
+
             TypeArray argumentTypes = LoadTypeArrayFromSignature(signature, ref index, classTyVars);
-            if (argumentTypes == null)
-            {
-                return null;
-            }
+            Debug.Assert(argumentTypes != null);
+
             TypeArray standardMethodTyVars = GetTypeManager().GetStdMethTyVarArray(cMethodTyVars);
 
             MethodSymbol ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
