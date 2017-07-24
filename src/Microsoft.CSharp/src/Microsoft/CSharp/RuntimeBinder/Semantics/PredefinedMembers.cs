@@ -189,14 +189,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public PREDEFPROP property;
         public PredefinedName name;
         public PREDEFMETH getter;
-        public PREDEFMETH setter;
 
-        public PredefinedPropertyInfo(PREDEFPROP property, PredefinedName name, PREDEFMETH getter, PREDEFMETH setter)
+        public PredefinedPropertyInfo(PREDEFPROP property, PredefinedName name, PREDEFMETH getter)
         {
             this.property = property;
             this.name = name;
             this.getter = getter;
-            this.setter = setter;
         }
     };
 
@@ -275,8 +273,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return LoadProperty(
                         property,
                         GetPropName(property),
-                        GetPropGetter(property),
-                        GetPropSetter(property));
+                        GetPropGetter(property));
         }
 
         private Name GetPropName(PREDEFPROP property)
@@ -286,31 +283,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
             Name propertyName,
-            PREDEFMETH propertyGetter,
-            PREDEFMETH propertySetter)
+            PREDEFMETH propertyGetter)
         {
             Debug.Assert(propertyName != null);
             Debug.Assert(propertyGetter > PREDEFMETH.PM_FIRST && propertyGetter < PREDEFMETH.PM_COUNT);
-            Debug.Assert(propertySetter > PREDEFMETH.PM_FIRST && propertySetter <= PREDEFMETH.PM_COUNT);
 
             MethodSymbol getter = GetMethod(propertyGetter);
-            MethodSymbol setter = null;
-            if (propertySetter != PREDEFMETH.PM_COUNT)
-            {
-                setter = GetMethod(propertySetter);
-            }
 
-            if (getter == null && setter == null)
+            if (getter == null)
             {
                 RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
                 getter = GetMethod(propertyGetter);
-                if (propertySetter != PREDEFMETH.PM_COUNT)
-                {
-                    setter = GetMethod(propertySetter);
-                }
             }
-
-            setter?.SetMethKind(MethodKindEnum.PropAccessor);
 
             PropertySymbol property = null;
             if (getter != null)
@@ -325,13 +309,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 property = getter.getProperty();
                 Debug.Assert(property != null);
-
-                if (property.name != propertyName || propertySetter != PREDEFMETH.PM_COUNT
-                    && (setter == null || !setter.isPropertyAccessor() || setter.getProperty() != property))
-                {
-                    Debug.Assert(!property.Bogus);
-                    property = null;
-                }
             }
 
             return property;
@@ -609,16 +586,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetMethInfo(GetPropGetter(property)).type;
         }
 
-        private static PREDEFMETH GetPropSetter(PREDEFPROP property)
-        {
-            PREDEFMETH result = GetPropInfo(property).setter;
-
-            // setters are not MethodRequiredEnum.Required
-            Debug.Assert(result > PREDEFMETH.PM_FIRST && result <= PREDEFMETH.PM_COUNT);
-
-            return GetPropInfo(property).setter;
-        }
-
         private void ReportError(PREDEFPROP property)
         {
             ReportError(GetPropPredefType(property), GetPropPredefName(property));
@@ -627,8 +594,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // the list of predefined property definitions.
         // This list must be in the same order as the PREDEFPROP enum.
         private static readonly PredefinedPropertyInfo[] s_predefinedProperties = {
-            new PredefinedPropertyInfo(PREDEFPROP.PP_FIRST,             PredefinedName.PN_COUNT,        PREDEFMETH.PM_COUNT,                PREDEFMETH.PM_COUNT),
-            new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  PredefinedName.PN_CAP_VALUE,    PREDEFMETH.PM_G_OPTIONAL_GETVALUE,  PREDEFMETH.PM_COUNT)
+            new PredefinedPropertyInfo(PREDEFPROP.PP_FIRST,             PredefinedName.PN_COUNT,        PREDEFMETH.PM_COUNT),
+            new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  PredefinedName.PN_CAP_VALUE,    PREDEFMETH.PM_G_OPTIONAL_GETVALUE)
         };
 
         private static PredefinedPropertyInfo GetPropInfo(PREDEFPROP property)
