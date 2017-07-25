@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -11,15 +12,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private sealed class OperatorInfo
         {
+            public readonly TokenKind TokenKind;
+            public readonly PredefinedName MethodName;
+            public readonly ExpressionKind ExpressionKind;
+
             public OperatorInfo(TokenKind kind, PredefinedName pn, ExpressionKind e)
             {
                 TokenKind = kind;
                 MethodName = pn;
                 ExpressionKind = e;
             }
-            public readonly TokenKind TokenKind;
-            public readonly PredefinedName MethodName;
-            public readonly ExpressionKind ExpressionKind;
         }
 
         private static readonly OperatorInfo[] s_operatorInfos = {
@@ -93,34 +95,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 )
         };
 
-        private static OperatorInfo GetInfo(OperatorKind op) => s_operatorInfos[(int)op];
+        private static Dictionary<Name, string> s_operatorsByName;
 
-        public static OperatorKind OperatorOfMethodName(Name name)
+        private static Dictionary<Name, string> GetOperatorByName()
         {
-            Debug.Assert(name != null);
-
-            for (OperatorKind i = OperatorKind.OP_NONE; i < OperatorKind.OP_LAST; i = (i + 1))
+            Dictionary<Name, string> dict = new Dictionary<Name, string>
             {
-                if (HasMethodName(i) && (name == NameManager.GetPredefinedName(GetMethodName(i))))
+                {NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS), "equals"},
+                {NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE), "compare" }
+            };
+
+            foreach (OperatorInfo opInfo in s_operatorInfos)
+            {
+                PredefinedName predefName = opInfo.MethodName;
+                TokenKind token = opInfo.TokenKind;
+                if (predefName != PredefinedName.PN_COUNT && token != TokenKind.Unknown)
                 {
-                    return i;
+                    dict.Add(NameManager.GetPredefinedName(predefName), TokenFacts.GetText(token));
                 }
             }
 
-            return OperatorKind.OP_NONE;
+            return dict;
         }
 
-        private static bool HasMethodName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetMethodName(op) != PredefinedName.PN_COUNT;
-        }
+        private static OperatorInfo GetInfo(OperatorKind op) => s_operatorInfos[(int)op];
 
-        private static PredefinedName GetMethodName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).MethodName;
-        }
+        public static string OperatorOfMethodName(Name name) =>
+            (s_operatorsByName ?? (s_operatorsByName = GetOperatorByName()))[name];
 
         public static bool HasDisplayName(OperatorKind op)
         {
