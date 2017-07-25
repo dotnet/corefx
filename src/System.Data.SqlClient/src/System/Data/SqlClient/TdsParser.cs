@@ -1166,7 +1166,9 @@ namespace System.Data.SqlClient
             else
                 Debug.Assert(!string.IsNullOrEmpty(details.errorMessage), "Empty error message received from SNI");
 
-            string sqlContextInfo = SR.GetResourceString(Enum.GetName(typeof(SniContext), stateObj.SniContext), Enum.GetName(typeof(SniContext), stateObj.SniContext));
+            string sniContextEnumName = TdsEnums.GetSniContextEnumName(stateObj.SniContext);
+
+            string sqlContextInfo = SR.GetResourceString(sniContextEnumName, sniContextEnumName);
             string providerRid = String.Format((IFormatProvider)null, "SNI_PN{0}", details.provider);
             string providerName = SR.GetResourceString(providerRid, providerRid);
             Debug.Assert(!string.IsNullOrEmpty(providerName), String.Format((IFormatProvider)null, "invalid providerResourceId '{0}'", providerRid));
