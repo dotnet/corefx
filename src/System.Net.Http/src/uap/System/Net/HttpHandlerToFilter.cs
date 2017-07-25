@@ -26,18 +26,25 @@ namespace System.Net.Http
 {
     internal class HttpHandlerToFilter : HttpMessageHandler
     {
-        private readonly RTHttpBaseProtocolFilter _next;
+        private readonly RTHttpBaseProtocolFilter _filter;
+        private readonly RTHttpBaseProtocolFilter _filterWithNoCredentials;
         private int _filterMaxVersionSet;
+        private HttpClientHandler _handler;
 
-        internal HttpHandlerToFilter(RTHttpBaseProtocolFilter filter)
+        internal HttpHandlerToFilter(
+            RTHttpBaseProtocolFilter filter,
+            RTHttpBaseProtocolFilter filterWithNoCredentials,
+            HttpClientHandler handler)
         {
             if (filter == null)
             {
                 throw new ArgumentNullException(nameof(filter));
             }
 
-            _next = filter;
+            _filter = filter;
+            _filterWithNoCredentials = filterWithNoCredentials;
             _filterMaxVersionSet = 0;
+            _handler = handler;
         }
 
         internal string RequestMessageLookupKey { get; set; }
@@ -45,46 +52,181 @@ namespace System.Net.Http
 
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancel)
         {
+            int redirects = 0;
+            HttpMethod requestHttpMethod;
+            bool skipRequestContentIfPresent = false;
+            HttpResponseMessage response = null;
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
-            cancel.ThrowIfCancellationRequested();
 
-            RTHttpRequestMessage rtRequest = await ConvertRequestAsync(request).ConfigureAwait(false);
+            requestHttpMethod = request.Method;
 
-            RTHttpResponseMessage rtResponse;
-            try
+            while (true)
             {
-                rtResponse = await _next.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                object info;
-                if (rtRequest.Properties.TryGetValue(SavedExceptionDispatchInfoLookupKey, out info))
+                cancel.ThrowIfCancellationRequested();
+
+                if (response != null)
                 {
-                    ((ExceptionDispatchInfo)info).Throw();
+                    response.Dispose();
+                    response = null;
                 }
 
-                throw;
+                RTHttpRequestMessage rtRequest = await ConvertRequestAsync(
+                    request,
+                    requestHttpMethod,
+                    skipRequestContentIfPresent).ConfigureAwait(false);
+
+                RTHttpResponseMessage rtResponse;
+                try
+                {
+                    if (redirects > 0)
+                    {
+                        rtResponse = await _filterWithNoCredentials.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        rtResponse = await _filter.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception)
+                {
+                    object info;
+                    if (rtRequest.Properties.TryGetValue(SavedExceptionDispatchInfoLookupKey, out info))
+                    {
+                        ((ExceptionDispatchInfo)info).Throw();
+                    }
+
+                    throw;
+                }
+
+                response = ConvertResponse(rtResponse);
+
+                ProcessResponseCookies(response, request.RequestUri);
+
+                if (!_handler.AllowAutoRedirect)
+                {
+                    break;
+                }
+
+                if (response.StatusCode != HttpStatusCode.MultipleChoices &&
+                    response.StatusCode != HttpStatusCode.MovedPermanently &&
+                    response.StatusCode != HttpStatusCode.Redirect &&
+                    response.StatusCode != HttpStatusCode.RedirectMethod &&
+                    response.StatusCode != HttpStatusCode.RedirectKeepVerb)
+                {
+                    break;
+                }
+
+                redirects++;
+                if (redirects > _handler.MaxAutomaticRedirections)
+                {
+                    break;
+                }
+
+                Uri redirectUri = response.Headers.Location;
+                if (redirectUri == null)
+                {
+                    break;
+                }
+
+                if (!redirectUri.IsAbsoluteUri)
+                {
+                    redirectUri = new Uri(string.Format("{0}://{1}:{2}{3}",
+                        request.RequestUri.Scheme,
+                        request.RequestUri.Host,
+                        request.RequestUri.Port,
+                        redirectUri.OriginalString));
+                }
+
+                if (redirectUri.Scheme != Uri.UriSchemeHttp &&
+                    redirectUri.Scheme != Uri.UriSchemeHttps)
+                {
+                    break;
+                }
+
+                if (request.RequestUri.Scheme == Uri.UriSchemeHttps &&
+                    redirectUri.Scheme == Uri.UriSchemeHttp)
+                {
+                    break;
+                }
+
+                if (response.StatusCode != HttpStatusCode.RedirectKeepVerb &&
+                    requestHttpMethod == HttpMethod.Post)
+                {
+                    requestHttpMethod = HttpMethod.Get;
+                    skipRequestContentIfPresent = true;
+                }
+
+                request.RequestUri = redirectUri;
             }
 
-            // Update in case of redirects
-            request.RequestUri = rtRequest.RequestUri;
-
-            HttpResponseMessage response = ConvertResponse(rtResponse);
             response.RequestMessage = request;
 
             return response;
         }
 
-        private async Task<RTHttpRequestMessage> ConvertRequestAsync(HttpRequestMessage request)
+        // Taken from System.Net.CookieModule.OnReceivedHeaders
+        private void ProcessResponseCookies(HttpResponseMessage response, Uri uri)
         {
-            RTHttpRequestMessage rtRequest = new RTHttpRequestMessage(new RTHttpMethod(request.Method.Method), request.RequestUri);
+            if (_handler.UseCookies)
+            {
+                IEnumerable<string> values;
+                if (response.Headers.TryGetValues(HttpKnownHeaderNames.SetCookie, out values))
+                {
+                    foreach (string cookieString in values)
+                    {
+                        if (!string.IsNullOrWhiteSpace(cookieString))
+                        {
+                            try
+                            {
+                                // Parse the cookies so that we can filter some of them out
+                                CookieContainer helper = new CookieContainer();
+                                helper.SetCookies(uri, cookieString);
+                                CookieCollection cookies = helper.GetCookies(uri);
+                                foreach (Cookie cookie in cookies)
+                                {
+                                    // We don't want to put HttpOnly cookies in the CookieContainer if the system
+                                    // doesn't support the RTHttpBaseProtocolFilter CookieUsageBehavior property.
+                                    // Prior to supporting that, the WinRT HttpClient could not turn off cookie
+                                    // processing. So, it would always be storing all cookies in its internal container.
+                                    // Putting HttpOnly cookies in the .NET CookieContainer would cause problems later
+                                    // when the .NET layer tried to add them on outgoing requests and conflicted with
+                                    // the WinRT internal cookie processing.
+                                    //
+                                    // With support for WinRT CookieUsageBehavior, cookie processing is turned off
+                                    // within the WinRT layer. This allows us to process cookies using only the .NET
+                                    // layer. So, we need to add all applicable cookies that are received to the
+                                    // CookieContainer.
+                                    if (HttpClientHandler.RTCookieUsageBehaviorSupported || !cookie.HttpOnly)
+                                    {
+                                        _handler.CookieContainer.Add(uri, cookie);
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task<RTHttpRequestMessage> ConvertRequestAsync(
+            HttpRequestMessage request,
+            HttpMethod httpMethod,
+            bool skipRequestContentIfPresent)
+        {
+            RTHttpRequestMessage rtRequest = new RTHttpRequestMessage(
+                new RTHttpMethod(httpMethod.Method),
+                request.RequestUri);
 
             // Add a reference from the WinRT object back to the .NET object.
             rtRequest.Properties.Add(RequestMessageLookupKey, request);
@@ -117,7 +259,7 @@ namespace System.Net.Http
                 // So, we only have to change it if we don't want HTTP/2.0.
                 if (maxVersion !=  RTHttpVersion.Http20)
                 {
-                    _next.MaxVersion = maxVersion;
+                    _filter.MaxVersion = maxVersion;
                 }
             }
             
@@ -131,6 +273,17 @@ namespace System.Net.Http
                 }
             }
 
+            // Cookies
+            if (_handler.UseCookies)
+            {
+                string cookieHeader = _handler.CookieContainer.GetCookieHeader(request.RequestUri);
+                if (!string.IsNullOrWhiteSpace(cookieHeader))
+                {
+                    bool success = rtRequest.Headers.TryAppendWithoutValidation(HttpKnownHeaderNames.Cookie, cookieHeader);
+                    Debug.Assert(success);
+                }
+            }
+
             // Properties
             foreach (KeyValuePair<string, object> propertyPair in request.Properties)
             {
@@ -138,7 +291,7 @@ namespace System.Net.Http
             }
 
             // Content
-            if (request.Content != null)
+            if (!skipRequestContentIfPresent && request.Content != null)
             {
                 rtRequest.Content = await CreateRequestContentAsync(request, rtRequest.Headers).ConfigureAwait(false);
             }
