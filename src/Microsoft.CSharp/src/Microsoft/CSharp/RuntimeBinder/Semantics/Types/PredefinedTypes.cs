@@ -47,7 +47,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
         }
 
-        public AggregateSymbol GetPredefAgg(PredefinedType pt) =>
+        public AggregateSymbol GetPredefinedAggregate(PredefinedType pt) =>
             _predefSyms[(int)pt] ?? (_predefSyms[(int)pt] = DelayLoadPredefSym(pt));
 
         ////////////////////////////////////////////////////////////////////////////////

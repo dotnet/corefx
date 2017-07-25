@@ -919,7 +919,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public AggregateSymbol GetPredefAgg(PredefinedType pt) => _predefTypes.GetPredefAgg(pt);
+        public AggregateSymbol GetPredefAgg(PredefinedType pt) => _predefTypes.GetPredefinedAggregate(pt);
 
         public TypeArray CreateArrayOfUnitTypes(int cSize)
         {

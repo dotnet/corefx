@@ -59,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _nameManager;
         }
 
-        public PredefinedTypes getPredefTypes()
+        public PredefinedTypes GetPredefindTypes()
         {
             return GlobalSymbolContext.GetPredefTypes();
         }
@@ -96,7 +96,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateSymbol GetPredefAgg(PredefinedType pt) => GetTypeManager().GetPredefAgg(pt);
 
-        public AggregateType GetPredefType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
+        public AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
 
         public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
         {
@@ -122,7 +122,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_AggregateType:
                     return (AggregateType)typeSym;
                 case TypeKind.TK_ArrayType:
-                    return GetPredefType(PredefinedType.PT_ARRAY);
+                    return GetPredefindType(PredefinedType.PT_ARRAY);
                 case TypeKind.TK_TypeParameterType:
                     return ((TypeParameterType)typeSym).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
@@ -349,7 +349,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // * From any array type to System.Array or any interface implemented by System.Array.
-                if (pDest.isPredefType(PredefinedType.PT_ARRAY) || IsBaseInterface(GetPredefType(PredefinedType.PT_ARRAY), pDest))
+                if (pDest.isPredefType(PredefinedType.PT_ARRAY) || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), pDest))
                 {
                     return true;
                 }
@@ -375,7 +375,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pSource.isDelegateType() &&
                 (pDest.isPredefType(PredefinedType.PT_MULTIDEL) ||
                 pDest.isPredefType(PredefinedType.PT_DELEGATE) ||
-                IsBaseInterface(GetPredefType(PredefinedType.PT_MULTIDEL), pDest)))
+                IsBaseInterface(GetPredefindType(PredefinedType.PT_MULTIDEL), pDest)))
             {
                 return true;
             }

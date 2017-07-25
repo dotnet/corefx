@@ -160,7 +160,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (typeDst is ArrayType arrayDest && typeSrc is AggregateType aggtypeSrc)
                 {
                     // * From System.Array and the interfaces it implements, to any array-type.
-                    if (loader.HasIdentityOrImplicitReferenceConversion(loader.GetPredefType(PredefinedType.PT_ARRAY), typeSrc))
+                    if (loader.HasIdentityOrImplicitReferenceConversion(loader.GetPredefindType(PredefinedType.PT_ARRAY), typeSrc))
                     {
                         return true;
                     }

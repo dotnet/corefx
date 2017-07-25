@@ -297,7 +297,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         // Need to box first before unboxing.
                         Expr exprT;
-                        ExprClass exprObj = GetExprFactory().CreateClass(_binder.GetPDT(PredefinedType.PT_OBJECT));
+                        ExprClass exprObj = GetExprFactory().CreateClass(_binder.GetPredefindType(PredefinedType.PT_OBJECT));
                         _binder.bindSimpleCast(_exprSrc, exprObj, out exprT, EXPRFLAG.EXF_FORCE_BOX);
                         _exprSrc = exprT;
                     }
@@ -399,7 +399,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From System.Array and the interfaces it implements, to any array-type.
 
-                if (_binder.canConvert(_binder.GetPDT(PredefinedType.PT_ARRAY), _typeSrc, CONVERTTYPE.NOUDC))
+                if (_binder.canConvert(_binder.GetPredefindType(PredefinedType.PT_ARRAY), _typeSrc, CONVERTTYPE.NOUDC))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);

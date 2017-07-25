@@ -325,7 +325,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
 
                             // Mark object.
-                            AggregateType typeObject = GetSymbolLoader().GetPredefType(PredefinedType.PT_OBJECT);
+                            AggregateType typeObject = GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
                             _HiddenTypes.Add(typeObject);
                         }
                     }
@@ -582,7 +582,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // This is the specific case where we want to create a DateTime
                         // but the constval that stores it is a long.
 
-                        AggregateType dateTimeType = symbolLoader.GetPredefType(PredefinedType.PT_DATETIME);
+                        AggregateType dateTimeType = symbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                         optionalArgument = exprFactory.CreateConstant(dateTimeType, ConstVal.Get(DateTime.FromBinary(cv.Int64Val)));
                     }
                     else if (pConstValType.isSimpleOrEnumOrString())
