@@ -472,7 +472,7 @@ namespace System.Data.Tests.Common
             Array array = null;
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
 
-            Assert.Throws<ArgumentNullException>("values", () => dataColumnMappingCollection.AddRange(array));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => dataColumnMappingCollection.AddRange(array));
         }
 
         [Fact]
@@ -546,7 +546,7 @@ namespace System.Data.Tests.Common
         {
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
 
-            Assert.Throws<ArgumentNullException>("value", () => dataColumnMappingCollection.Remove((object)null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => dataColumnMappingCollection.Remove((object)null));
         }
     }
 }
