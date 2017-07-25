@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -99,7 +98,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static Dictionary<Name, string> GetOperatorByName()
         {
-            Dictionary<Name, string> dict = new Dictionary<Name, string>
+            Dictionary<Name, string> dict = new Dictionary<Name, string>(28)
             {
                 {NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS), "equals"},
                 {NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE), "compare" }
@@ -123,20 +122,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static string OperatorOfMethodName(Name name) =>
             (s_operatorsByName ?? (s_operatorsByName = GetOperatorByName()))[name];
 
-        public static bool HasDisplayName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).TokenKind != TokenKind.Unknown;
-        }
-        public static string GetDisplayName(OperatorKind op)
-        {
-            Debug.Assert(HasDisplayName(op));
-            return TokenFacts.GetText(GetInfo(op).TokenKind);
-        }
-        public static ExpressionKind GetExpressionKind(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).ExpressionKind;
-        }
+        public static string GetDisplayName(OperatorKind op) => TokenFacts.GetText(GetInfo(op).TokenKind);
+
+        public static ExpressionKind GetExpressionKind(OperatorKind op) => GetInfo(op).ExpressionKind;
     }
 }
