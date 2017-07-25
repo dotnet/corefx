@@ -189,7 +189,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     if (item.Status == TaskStatus.Faulted)
                     {
                         // One task should have a timeout exception
-                        if ((!taskWithCorrectException) && (item.Exception.InnerException is InvalidOperationException) && (item.Exception.InnerException.Message.StartsWith(SystemDataResourceManager.Instance.ADP_PooledOpenTimeout)))
+#if uapaot // Reflection is blocked for internal members on uapaot
+                        string errorMessage = "";
+#else
+                        string errorMessage = SystemDataResourceManager.Instance.ADP_PooledOpenTimeout;
+#endif
+                        if ((!taskWithCorrectException) && (item.Exception.InnerException is InvalidOperationException) && (item.Exception.InnerException.Message.StartsWith(errorMessage)))
                             taskWithCorrectException = true;
                         else if (!taskWithCorrectException)
                         {

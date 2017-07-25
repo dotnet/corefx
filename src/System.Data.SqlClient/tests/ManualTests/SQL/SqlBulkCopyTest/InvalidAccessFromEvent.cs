@@ -77,7 +77,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     Helpers.Execute(_dstcmd, "create table " + dstTable + " (orderid int, customerid nchar(5), rdate datetime, freight money, shipname nvarchar(40))");
                     _dstcmd.CommandText = "truncate table " + dstTable;
 
+#if uapaot // Reflection is blocked for internal members on uapaot
+                    expectedErrorMsg = "";
+#else
                     expectedErrorMsg = SystemDataResourceManager.Instance.SQL_ConnectionLockedForBcpEvent;
+#endif
                     InnerTest(new SqlRowsCopiedEventHandler(OnRowCopiedRollback));
                     InnerTest(new SqlRowsCopiedEventHandler(OnRowCopiedCommit));
                     InnerTest(new SqlRowsCopiedEventHandler(OnRowCopiedChangeDatabase));
@@ -85,10 +89,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     InnerTest(new SqlRowsCopiedEventHandler(OnRowCopiedBulkCopy));
 
                     // this will close the connect which is valid so it must be the last test!
+#if uapaot // Reflection is blocked for internal members on uapaot
+                    expectedErrorMsg = "";
+#else
                     expectedErrorMsg = string.Format(
                         SystemDataResourceManager.Instance.ADP_OpenConnectionRequired,
                         "WriteToServer",
                         SystemDataResourceManager.Instance.ADP_ConnectionStateMsg_Closed);
+#endif
                     InnerTest(new SqlRowsCopiedEventHandler(OnRowCopiedClose));
                 }
                 finally

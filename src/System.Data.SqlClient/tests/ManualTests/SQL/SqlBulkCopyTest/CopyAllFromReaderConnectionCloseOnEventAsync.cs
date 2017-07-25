@@ -53,7 +53,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                     debugScope.ForceAsyncWriteDelay = 1;
 
                                     // Check that the copying fails
+#if uapaot // Reflection is blocked for internal members on uapaot
+                                    string message = "";
+#else
                                     string message = string.Format(SystemDataResourceManager.Instance.ADP_OpenConnectionRequired, "WriteToServer", SystemDataResourceManager.Instance.ADP_ConnectionStateMsg_Closed);
+#endif
                                     DataTestUtility.AssertThrowsWrapper<AggregateException, InvalidOperationException>(() => bulkcopy.WriteToServerAsync(reader).Wait(5000), innerExceptionMessage: message);
                                 }
                             }
