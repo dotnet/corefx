@@ -38,7 +38,7 @@ namespace System.Drawing.Imaging.Tests
         private readonly Color _actualGreen = Color.FromArgb(255, 0, 255, 0);
         private readonly Color _expectedRed = Color.FromArgb(255, 255, 0, 0);
         private readonly Color _expectedBlack = Color.FromArgb(255, 0, 0, 0);
-        private readonly ColorMatrix _colorMatrix = new ColorMatrix(new float[][]
+        private readonly ColorMatrix _greenCmponentToZeroColorMap = new ColorMatrix(new float[][]
         {
             new float[] {1, 0, 0, 0, 0},
             new float[] {0, 0, 0, 0, 0},
@@ -63,10 +63,8 @@ namespace System.Drawing.Imaging.Tests
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_Default_Success()
         {
-            using (var imageAttr = new ImageAttributes())
-            {
-                Assert.NotEqual(null, imageAttr);
-            }
+            var imageAttr = new ImageAttributes();
+            imageAttr.Dispose();
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -76,7 +74,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap);
 
                 using (ImageAttributes clone = Assert.IsAssignableFrom<ImageAttributes>(imageAttr.Clone()))
                 {
@@ -104,7 +102,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap);
                 bitmap.SetPixel(0, 0, _actualYellow);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
                 Assert.Equal(_expectedRed, bitmap.GetPixel(0, 0));
@@ -162,12 +160,12 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 bitmap.SetPixel(0, 0, _actualYellow);
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
                 Assert.Equal(_expectedRed, bitmap.GetPixel(0, 0));
 
                 bitmap.SetPixel(0, 0, grayShade);
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.SkipGrays);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.SkipGrays);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
                 Assert.Equal(grayShade, bitmap.GetPixel(0, 0));
             }
@@ -189,7 +187,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
 
                 bitmap.SetPixel(0, 0, _actualGreen);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -222,7 +220,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
 
                 bitmap.SetPixel(0, 0, _actualGreen);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -236,10 +234,10 @@ namespace System.Drawing.Imaging.Tests
             var imageAttr = new ImageAttributes();
             imageAttr.Dispose();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_colorMatrix));
-            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default));
+            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap));
+            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default));
             AssertExtensions.Throws<ArgumentException>(null, () =>
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default));
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, ColorAdjustType.Default));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -268,7 +266,7 @@ namespace System.Drawing.Imaging.Tests
         {
             using (var imageAttr = new ImageAttributes())
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type));
+                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type));
             }
         }
 
@@ -287,8 +285,8 @@ namespace System.Drawing.Imaging.Tests
         {
             using (var imageAttr = new ImageAttributes())
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_colorMatrix, flag));
-                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_colorMatrix, flag, ColorAdjustType.Default));
+                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, flag));
+                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, flag, ColorAdjustType.Default));
             }
         }
 
@@ -299,8 +297,8 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix);
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix);
                 imageAttr.ClearColorMatrix();
 
                 bitmap.SetPixel(0, 0, _actualGreen);
@@ -328,8 +326,8 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, ColorMatrixFlag.Default, type);
                 imageAttr.ClearColorMatrix(type);
 
                 bitmap.SetPixel(0, 0, _actualGreen);
@@ -374,7 +372,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix);
                 bitmap.SetPixel(0, 0, _actualYellow);
                 bitmap.SetPixel(1, 1, Color.FromArgb(255, 100, 100, 100));
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -399,7 +397,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, flag);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, flag);
                 bitmap.SetPixel(0, 0, _actualYellow);
                 bitmap.SetPixel(1, 1, grayShade);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -428,7 +426,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, flag, type);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, flag, type);
                 bitmap.SetPixel(0, 0, _actualYellow);
                 bitmap.SetPixel(1, 1, grayShade);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -459,7 +457,7 @@ namespace System.Drawing.Imaging.Tests
             using (var graphics = Graphics.FromImage(bitmap))
             using (var imageAttr = new ImageAttributes())
             {
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, flag, type);
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, flag, type);
                 bitmap.SetPixel(0, 0, _actualYellow);
                 bitmap.SetPixel(1, 1, grayShade);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -474,10 +472,10 @@ namespace System.Drawing.Imaging.Tests
             var imageAttr = new ImageAttributes();
             imageAttr.Dispose();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix));
-            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, ColorMatrixFlag.Default));
+            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix));
+            AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, ColorMatrixFlag.Default));
             AssertExtensions.Throws<ArgumentException>(null, () =>
-                imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default));
+                imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default));
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -487,11 +485,11 @@ namespace System.Drawing.Imaging.Tests
             {
                 AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(null, _grayMatrix));
                 AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(null, _grayMatrix, ColorMatrixFlag.Default));
-                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_colorMatrix, null, ColorMatrixFlag.AltGrays));
+                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, null, ColorMatrixFlag.AltGrays));
                 AssertExtensions.Throws<ArgumentException>(null, () =>
                     imageAttr.SetColorMatrices(null, _grayMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default));
                 AssertExtensions.Throws<ArgumentException>(null, () =>
-                    imageAttr.SetColorMatrices(_colorMatrix, null, ColorMatrixFlag.AltGrays, ColorAdjustType.Default));
+                    imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, null, ColorMatrixFlag.AltGrays, ColorAdjustType.Default));
             }
         }
 
@@ -502,7 +500,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 AssertExtensions.Throws<ArgumentException>(null, () =>
-                    imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, ColorMatrixFlag.Default, type));
+                    imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, ColorMatrixFlag.Default, type));
             }
         }
 
@@ -515,9 +513,9 @@ namespace System.Drawing.Imaging.Tests
         {
             using (var imageAttr = new ImageAttributes())
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, flag));
+                AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, flag));
                 AssertExtensions.Throws<ArgumentException>(null, () =>
-                    imageAttr.SetColorMatrices(_colorMatrix, _grayMatrix, flag, ColorAdjustType.Default));
+                    imageAttr.SetColorMatrices(_greenCmponentToZeroColorMap, _grayMatrix, flag, ColorAdjustType.Default));
             }
         }
 
@@ -573,20 +571,6 @@ namespace System.Drawing.Imaging.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetThreshold(0.5f));
         }
-
-        //[ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        //[InlineData(float.MinValue)]
-        //[InlineData(float.MaxValue)]
-        //[InlineData(-1)]
-        //[InlineData(1.1f)]
-        //public void SetThreshold_InvalidThreshold_ThrowsArgumentException(float threshold)
-        //{
-        //    using (var imageAttr = new ImageAttributes())
-        //    {
-        //        AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetThreshold(threshold));
-        //        AssertExtensions.Throws<ArgumentException>(null, () => imageAttr.SetThreshold(threshold, ColorAdjustType.Default));
-        //    }
-        //}
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(ColorAdjustType_InvalidTypes_TestData))]
@@ -756,7 +740,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 imageAttr.SetGamma(2.2f);
-                imageAttr.SetColorMatrix(_colorMatrix);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap);
                 imageAttr.SetNoOp();
                 bitmap.SetPixel(0, 0, _actualGreen);
                 graphics.DrawImage(bitmap, _rectangle, _rectangle.X, _rectangle.Y, _rectangle.Width, _rectangle.Height, GraphicsUnit.Pixel, imageAttr);
@@ -773,7 +757,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 imageAttr.SetGamma(2.2f, type);
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
                 imageAttr.SetNoOp(type);
 
                 bitmap.SetPixel(0, 0, Color.FromArgb(255, 100, 255, 0));
@@ -810,7 +794,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 imageAttr.SetGamma(2.2f);
-                imageAttr.SetColorMatrix(_colorMatrix);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap);
                 imageAttr.SetNoOp();
                 imageAttr.ClearNoOp();
 
@@ -829,7 +813,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 imageAttr.SetGamma(2.2f, type);
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
                 imageAttr.SetNoOp(type);
                 imageAttr.ClearNoOp(type);
 
@@ -848,7 +832,7 @@ namespace System.Drawing.Imaging.Tests
             using (var imageAttr = new ImageAttributes())
             {
                 imageAttr.SetGamma(2.2f, type);
-                imageAttr.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, type);
+                imageAttr.SetColorMatrix(_greenCmponentToZeroColorMap, ColorMatrixFlag.Default, type);
                 imageAttr.SetNoOp(type);
                 imageAttr.ClearNoOp(type);
 
