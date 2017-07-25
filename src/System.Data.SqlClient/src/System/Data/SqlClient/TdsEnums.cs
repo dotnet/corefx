@@ -879,8 +879,8 @@ namespace System.Data.SqlClient
                     return "Undefined";
                 case SniContext.Snix_Connect:
                     return "Snix_Connect";
-                case SniContext.Snix_PreLoginBeforeSuccessfullWrite:
-                    return "Snix_PreLoginBeforeSuccessfullWrite";
+                case SniContext.Snix_PreLoginBeforeSuccessfulWrite:
+                    return "Snix_PreLoginBeforeSuccessfulWrite";
                 case SniContext.Snix_PreLogin:
                     return "Snix_PreLogin";
                 case SniContext.Snix_LoginSspi:
@@ -898,7 +898,7 @@ namespace System.Data.SqlClient
                 case SniContext.Snix_Execute:
                     return "Snix_Execute";
                 case SniContext.Snix_Read:
-                    return "Undefined";
+                    return "Snix_Read";
                 case SniContext.Snix_Close:
                     return "Snix_Close";
                 case SniContext.Snix_SendRows:
@@ -914,7 +914,7 @@ namespace System.Data.SqlClient
     {
         Undefined = 0,
         Snix_Connect,
-        Snix_PreLoginBeforeSuccessfullWrite,
+        Snix_PreLoginBeforeSuccessfulWrite,
         Snix_PreLogin,
         Snix_LoginSspi,
         Snix_ProcessSspi,
