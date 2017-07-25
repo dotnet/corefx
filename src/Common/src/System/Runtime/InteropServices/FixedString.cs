@@ -9,7 +9,7 @@ namespace System.Runtime.InteropServices
     /// structs. Provides easy string property access. Set strings are always null
     /// terminated and will truncate if too large.
     /// 
-    /// Usage: Instead of "fixed char _buffer[12]" use "FixedBuffer.Size12 _buffer"
+    /// Usage: Instead of "fixed char _buffer[12]" use "FixedString.Size12 _buffer"
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal unsafe struct FixedString

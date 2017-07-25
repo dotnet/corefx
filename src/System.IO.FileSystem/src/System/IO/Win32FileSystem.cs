@@ -473,6 +473,8 @@ namespace System.IO
                         if (!Interop.Kernel32.DeleteFile(Path.Combine(fullPath, fileName)) && exception == null)
                         {
                             errorCode = Marshal.GetLastWin32Error();
+
+                            // We don't care if something else deleted the file first
                             if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND)
                             {
                                 exception = Win32Marshal.GetExceptionForWin32Error(errorCode, fileName);
@@ -504,7 +506,7 @@ namespace System.IO
                         }
                         else
                         {
-                            // Reparse point, don't recurse, just remove.
+                            // Reparse point, don't recurse, just remove. (dwReserved0 is documented for this flag)
                             if (findData.dwReserved0 == Interop.Kernel32.IOReparseOptions.IO_REPARSE_TAG_MOUNT_POINT)
                             {
                                 // Mount point. Unmount using full path plus a trailing '\'.
