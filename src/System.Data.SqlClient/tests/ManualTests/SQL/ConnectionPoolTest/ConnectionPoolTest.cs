@@ -189,8 +189,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     if (item.Status == TaskStatus.Faulted)
                     {
                         // One task should have a timeout exception
-                        string errorMessage = SystemDataResourceManager.Instance.ADP_PooledOpenTimeout;
-                        if ((!taskWithCorrectException) && (item.Exception.InnerException is InvalidOperationException) && (item.Exception.InnerException.Message.StartsWith(errorMessage)))
+                        if ((!taskWithCorrectException) && (item.Exception.InnerException is InvalidOperationException) && (item.Exception.InnerException.Message.StartsWith(SystemDataResourceManager.Instance.ADP_PooledOpenTimeout)))
                             taskWithCorrectException = true;
                         else if (!taskWithCorrectException)
                         {

@@ -254,7 +254,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     // Tweak the timeout to 1ms, stop the proxy from proxying and then try GetValue (which should timeout)
                     reader.SetDefaultTimeout(1);
                     proxy.PauseCopying();
-
                     string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
                     Exception exception = Assert.Throws<SqlException>(() => reader.GetValue(0));
                     Assert.True(exception.Message.Contains(errorMessage));

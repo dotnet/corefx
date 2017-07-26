@@ -343,8 +343,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         SqlTransaction tx2 = connection2.BeginTransaction(IsolationLevel.ReadCommitted);
                         command2.Transaction = tx2;
 
-                        string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-                        DataTestUtility.AssertThrowsWrapper<SqlException>(() => command2.ExecuteReader(), errorMessage);
+                        DataTestUtility.AssertThrowsWrapper<SqlException>(() => command2.ExecuteReader(), SystemDataResourceManager.Instance.SQL_Timeout as string);
 
                         tx2.Rollback();
                         connection2.Close();

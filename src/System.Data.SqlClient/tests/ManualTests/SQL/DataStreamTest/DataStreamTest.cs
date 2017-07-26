@@ -887,12 +887,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         // now try to read one more byte
                         string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "GetBytes");
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => cb = reader.GetBytes(i, 51, data, 0, 1), errorMessage);
-
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "CheckDataIsReady");
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetValue(i), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetFieldValue<byte[]>(i), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetFieldValue<SqlBinary>(i), errorMessage);
-
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "GetFieldValueAsync");
                         DataTestUtility.AssertThrowsWrapper<AggregateException, InvalidOperationException>(() => reader.GetFieldValueAsync<byte[]>(i).Wait(), innerExceptionMessage: errorMessage);
                         DataTestUtility.AssertThrowsWrapper<AggregateException, InvalidOperationException>(() => reader.GetFieldValueAsync<SqlBinary>(i).Wait(), innerExceptionMessage: errorMessage);
@@ -932,7 +930,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         // com+ type coercion should fail
                         // Em
                         object value;
-
                         string errorMessage = SystemDataResourceManager.Instance.SqlMisc_ConversionOverflowMessage;
                         DataTestUtility.AssertThrowsWrapper<OverflowException>(() => value = reader[0], errorMessage);
                         DataTestUtility.AssertThrowsWrapper<OverflowException>(() => value = reader[1], errorMessage);
