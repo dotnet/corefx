@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>递增或递减运算符的操作数必须是变量、属性或索引器</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>“{0}”未包含“{1}”的定义，并且找不到可接受第一个“{0}”类型参数的扩展方法“{1}”(是否缺少 using 指令或程序集引用?)</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>“{0}”方法没有采用“{1}”个参数的重载</value>
   </data>

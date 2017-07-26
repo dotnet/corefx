@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>インクリメント演算子またはデクリメント演算子のオペランドには、変数、プロパティ、またはインデクサーを指定してください。</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' に '{1}' の定義が含まれておらず、型 '{0}' の最初の引数を受け付ける拡張メソッド '{1}' が見つかりませんでした。using ディレクティブまたはアセンブリ参照が不足しています</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>引数を '{1}' 個指定できる、メソッド '{0}' のオーバーロードはありません</value>
   </data>

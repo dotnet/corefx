@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>L'operando di un operatore di incremento o decremento deve essere una variabile, una proprietà o un indicizzatore</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' non contiene una definizione per '{1}' e non è stato trovato alcun metodo di estensione '{1}' che accetta un primo argomento di tipo '{0}'. Probabilmente manca una direttiva using o un riferimento a un assembly.</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Nessun overload del metodo '{0}' accetta argomenti '{1}'</value>
   </data>

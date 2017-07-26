@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>L'opérande d'un opérateur d'incrémentation ou de décrémentation doit être une variable, une propriété ou un indexeur</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' ne contient pas de définition pour '{1}' et aucune méthode d'extension '{1}' acceptant un premier argument de type '{0}' n'a été trouvée (une directive using ou une référence d'assembly est-elle manquante ?)</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Aucune surcharge pour la méthode '{0}' ne prend d'arguments '{1}'</value>
   </data>

@@ -191,9 +191,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_IncrementLvalueExpected:
                     codeStr = SR.IncrementLvalueExpected;
                     break;
-                case ErrorCode.ERR_NoSuchMemberOrExtension:
-                    codeStr = SR.NoSuchMemberOrExtension;
-                    break;
                 case ErrorCode.ERR_BadArgCount:
                     codeStr = SR.BadArgCount;
                     break;

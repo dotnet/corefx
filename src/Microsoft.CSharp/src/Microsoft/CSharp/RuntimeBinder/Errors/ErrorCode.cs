@@ -65,7 +65,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         ERR_ConvertToStaticClass = 716,
         ERR_GenericArgIsStaticClass = 718,
         ERR_IncrementLvalueExpected = 1059,
-        ERR_NoSuchMemberOrExtension = 1061,
         ERR_BadArgCount = 1501,
         ERR_BadArgTypes = 1502,
         ERR_BadArgType = 1503,

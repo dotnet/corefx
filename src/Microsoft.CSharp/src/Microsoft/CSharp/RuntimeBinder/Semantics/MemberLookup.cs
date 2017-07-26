@@ -788,14 +788,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                if ((_flags & MemLookFlags.ExtensionCall) != 0)
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_NoSuchMemberOrExtension, _typeSrc, _name);
-                }
-                else
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
-                }
+                GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
             }
         }
     }

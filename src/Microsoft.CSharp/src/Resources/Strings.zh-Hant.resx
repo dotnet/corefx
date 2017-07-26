@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>遞增或遞減運算子的運算元必須是變數、屬性或索引子。</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' 不包含 '{1}' 的定義，也找不到擴充方法 '{1}' 來接受型別 '{0}' 的第一個引數 (您是否遺漏 using 指示詞或組件參考?)</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>方法 '{0}' 沒有任何多載接受 '{1}' 個引數</value>
   </data>

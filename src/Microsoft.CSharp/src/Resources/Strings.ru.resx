@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>Операндом оператора инкремента или декремента должна быть переменная, свойство или индексатор</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>"{0}" не содержит определения для "{1}", а найти метод расширения "{1}", принимающий первый аргумент типа "{0}", не удалось (возможно, пропущена директива using или ссылка на сборку)</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Отсутствие перегрузки для метода "{0}" принимает"{1}" аргументы</value>
   </data>

@@ -228,9 +228,6 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>El operando de un operador de incremento o decremento debe ser una variable, una propiedad o un indizador</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' no contiene una definición para '{1}' ni se encuentra ningún método de extensión '{1}' que acepte un primer argumento del tipo '{0}' (¿falta una directiva de uso o una referencia de ensamblado?).</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Ninguna sobrecarga del método '{0}' toma argumentos '{1}'</value>
   </data>
