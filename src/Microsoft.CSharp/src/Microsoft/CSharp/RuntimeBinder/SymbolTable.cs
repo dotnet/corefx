@@ -1355,7 +1355,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Name name;
             bool isIndexer = property.GetIndexParameters().Length != 0
-                             && (property.DeclaringType?.GetCustomAttribute(typeof(DefaultMemberAttribute)) as DefaultMemberAttribute)
+                             && property.DeclaringType?.GetCustomAttribute<DefaultMemberAttribute>()
                              ?.MemberName == property.Name;
 
             if (isIndexer)
