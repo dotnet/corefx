@@ -349,12 +349,12 @@ namespace System
         private const int PRODUCT_IOTUAPCOMMERCIAL = 0x00000083;
 
         [DllImport("kernel32.dll", SetLastError = false)]
-        static extern bool GetProductInfo(
-         int dwOSMajorVersion,
-         int dwOSMinorVersion,
-         int dwSpMajorVersion,
-         int dwSpMinorVersion,
-         out int pdwReturnedProductType
+        private static extern bool GetProductInfo(
+            int dwOSMajorVersion,
+            int dwOSMinorVersion,
+            int dwSpMajorVersion,
+            int dwSpMinorVersion,
+            out int pdwReturnedProductType
         );
 
         [DllImport("ntdll.dll")]
