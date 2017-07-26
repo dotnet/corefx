@@ -1115,7 +1115,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             agg.SetSealed(type.IsSealed);
-            agg.SetHasExternReference(false);
 
             AggregateType baseAggType = agg.getThisType();
             if (type.BaseType != null)
@@ -1625,8 +1624,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
             methodSymbol.SetAccess(access);
-
-            methodSymbol.isExternal = false;
 
             if (method != null)
             {
