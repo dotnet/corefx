@@ -14,7 +14,7 @@
   </Target>
 
   <PropertyGroup Condition="'$(TargetOS)'=='Linux'">
-    <PerfTestCommandDotnetExecutable>$RUNTIME_PATH/dotnet</PerfTestCommandDotnetExecutable>
+    <PerfTestCommandDotnetExecutable>./corerun</PerfTestCommandDotnetExecutable>
     <PerfTestCommand>$(PerfTestCommandDotnetExecutable) PerfRunner.exe  --perf:runid Perf</PerfTestCommand>
     <BenchviewDir>$(ToolsDir)Microsoft.BenchView.JSONFormat/tools</BenchviewDir>
   </PropertyGroup>

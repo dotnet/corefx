@@ -118,7 +118,7 @@
     <TestProgram Condition="'$(TestHostExecutable)'==''">$(XunitExecutable)</TestProgram>
     <TestArguments Condition="'$(TestHostExecutable)'==''">$(XunitArguments)</TestArguments>
 
-    <TestCommandLine Condition="'$(Performance)'!='true'">$(TestProgram) $(TestArguments) {XunitTraitOptions}</TestCommandLine>
+    <TestCommandLine Condition="'$(Performance)'!='true' or '$(IncludePerformanceTests)'!='true'">$(TestProgram) $(TestArguments) {XunitTraitOptions}</TestCommandLine>
   </PropertyGroup>
 
   <!-- The Code Coverage targets will override TestHost and TestCommandLine if coverage is enabled -->
