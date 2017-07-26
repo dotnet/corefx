@@ -23,7 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private PropertySymbol _prop;     // For property accessors, this is the PropertySymbol.
         private EventSymbol _evt;     // For event accessors, this is the EventSymbol.
 
-        public bool isExtension;  // is the method a extension method
         public bool isExternal;            // Has external definition.
         public bool isVirtual;              // Virtual member?
         public bool isAbstract;             // Abstract method?
@@ -64,11 +63,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             // All type variables are used in a parameter.
             return false;
-        }
-
-        public bool IsExtension()
-        {
-            return isExtension;
         }
 
         public MethodKindEnum MethKind()
