@@ -399,7 +399,7 @@ namespace System.IO
         [SecurityCritical]
         private bool IsResultIncluded(ref Interop.Kernel32.WIN32_FIND_DATA findData, out TSource result)
         {
-            Debug.Assert(findData.cFileName.Value.Length != 0 && !Path.IsPathRooted(findData.cFileName.Value),
+            Debug.Assert(findData.cFileName.Length != 0 && !Path.IsPathRooted(findData.cFileName.GetString()),
                 "Expected file system enumeration to not have empty file/directory name and not have rooted name");
 
             return _resultHandler.IsResultIncluded(_searchData.FullPath, _searchData.UserPath, ref findData, out result);
@@ -451,7 +451,7 @@ namespace System.IO
                 {
                     if (Win32FileSystemEnumerableHelpers.IsDir(ref data))
                     {
-                        string fileName = data.cFileName.Value;
+                        string fileName = data.cFileName.GetString();
 
                         Debug.Assert(fileName.Length != 0 && !Path.IsPathRooted(fileName),
                             "Expected file system enumeration to not have empty file/directory name and not have rooted name");
@@ -568,7 +568,7 @@ namespace System.IO
                 if ((_includeFiles && Win32FileSystemEnumerableHelpers.IsFile(ref findData)) ||
                     (_includeDirs && Win32FileSystemEnumerableHelpers.IsDir(ref findData)))
                 {
-                    result = Path.Combine(userPath, findData.cFileName.Value);
+                    result = Path.Combine(userPath, findData.cFileName.GetString());
                     return true;
                 }
 
@@ -584,7 +584,7 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsFile(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.Value);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetString());
                     result = new FileInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -601,7 +601,7 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsDir(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.Value);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetString());
                     result = new DirectoryInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -618,13 +618,13 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsFile(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.Value);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetString());
                     result = new FileInfo(fullPathFinal, ref findData);
                     return true;
                 }
                 else if (Win32FileSystemEnumerableHelpers.IsDir(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.Value);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetString());
                     result = new DirectoryInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -642,7 +642,7 @@ namespace System.IO
         {
             // Don't add "." nor ".."
             return (0 != (data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY))
-                                                && !data.cFileName.Equals(".") && !data.cFileName.Equals("..");
+                                                && !data.cFileName.EqualsString(".") && !data.cFileName.EqualsString("..");
         }
 
         [SecurityCritical]  // auto-generated

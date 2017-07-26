@@ -469,7 +469,7 @@ namespace System.IO
                     if ((findData.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0)
                     {
                         // File
-                        string fileName = findData.cFileName.Value;
+                        string fileName = findData.cFileName.GetString();
                         if (!Interop.Kernel32.DeleteFile(Path.Combine(fullPath, fileName)) && exception == null)
                         {
                             errorCode = Marshal.GetLastWin32Error();
@@ -484,10 +484,10 @@ namespace System.IO
                     else
                     {
                         // Directory, skip ".", "..".
-                        if (findData.cFileName.Equals(".") || findData.cFileName.Equals(".."))
+                        if (findData.cFileName.EqualsString(".") || findData.cFileName.EqualsString(".."))
                             continue;
 
-                        string fileName = findData.cFileName.Value;
+                        string fileName = findData.cFileName.GetString();
                         if ((findData.dwFileAttributes & (int)FileAttributes.ReparsePoint) == 0)
                         {
                             // Not a reparse point, recurse.

@@ -67,8 +67,13 @@ internal partial class Interop
             internal uint nFileSizeLow;
             internal uint dwReserved0;
             internal uint dwReserved1;
-            internal FixedString.Size260 cFileName;
-            internal FixedString.Size14 cAlternateFileName;
+            private fixed char _cFileName[260];
+            private fixed char _cAlternateFileName[14];
+
+            internal Span<char> cFileName
+            {
+                get { fixed (char* c = _cFileName) return new Span<char>(c, 260); }
+            }
         }
 
         internal struct FILE_TIME

@@ -2,137 +2,69 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Runtime.InteropServices
+namespace System.IO
 {
-    /// <summary>
-    /// Contains definitions for various fixed size strings for creating blittable
-    /// structs. Provides easy string property access. Set strings are always null
-    /// terminated and will truncate if too large.
-    /// 
-    /// Usage: Instead of "fixed char _buffer[12]" use "FixedString.Size12 _buffer"
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal unsafe struct FixedString
+    internal static class FixedString
     {
-        // We cant derive structs in C#, this is the next best thing. Nested
-        // class/struct defines have visibility to the nesting class/struct
-        // privates, and given the pointer manipulation we must do we can
-        // leverage it for a similar effect. It isn't perfect, but it reduces
-        // copying of the riskier blocks of code.
-
-        private const int BaseSize = 1;
-        private char _firstChar;
-
-        private string GetString(int maxSize)
+        /// <summary>
+        /// Returns a string from the given span, terminating the string at null if present.
+        /// </summary>
+        internal unsafe static string GetString(this Span<char> span)
         {
-            fixed (char* c = &_firstChar)
+            int stringLength = span.GetStringLength();
+            if (stringLength == 0)
+                return string.Empty;
+
+            fixed (char* c = &span[0])
             {
-                // Go to null or end of buffer
-                int end = 0;
-                while (end < maxSize && c[end] != (char)0)
-                    end++;
-                return new string(c, 0, end);
+                return new string(c, 0, stringLength);
             }
-        }
-
-        private bool Equals(string value, int maxSize)
-        {
-            if (value == null || value.Length > maxSize)
-                return false;
-
-            fixed (char* c = &_firstChar)
-            {
-                int i = 0;
-                for (; i < value.Length; i++)
-                {
-                    // Fixed strings are always terminated at null
-                    // and therefore can never match embedded nulls.
-                    if (value[i] != c[i] || value[i] == '\0')
-                        return false;
-                }
-
-                // If we've maxed out the buffer or reached the
-                // null terminator, we're equal.
-                return i == maxSize || c[i] == '\0';
-            }
-        }
-
-        private void SetString(string value, int maxSize)
-        {
-            fixed (char* c = &_firstChar)
-                StringToBuffer(value, c, maxSize - 1, nullTerminate: true);
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct Size14
-        {
-            private const int Size = 14;
-            private FixedString _buffer;
-            private unsafe fixed char _bufferExtension[Size - BaseSize];
-
-            public string Value
-            {
-                get => _buffer.GetString(Size);
-                set => _buffer.SetString(value, Size);
-            }
-
-            public override string ToString() => Value;
-            public bool Equals(string value) => _buffer.Equals(value, Size);
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct Size260
-        {
-            private const int Size = 260;
-            private FixedString _buffer;
-            private unsafe fixed char _bufferExtension[Size - BaseSize];
-
-            public string Value
-            {
-                get => _buffer.GetString(Size);
-                set => _buffer.SetString(value, Size);
-            }
-
-            public override string ToString() => Value;
-            public bool Equals(string value) => _buffer.Equals(value, Size);
         }
 
         /// <summary>
-        /// Copy up to the specified number of characters to the designated buffer with an
-        /// additional null terminator if not otherwise specified.
+        /// Gets the null-terminated string length of the given span.
         /// </summary>
-        /// <param name="value">The string to copy from.</param>
-        /// <param name="destination">The buffer to copy to.</param>
-        /// <param name="maxCharacters">Max number of characters to copy.</param>
-        /// <param name="nullTerminate">Add a null to the end of the string (not counted in <paramref name="maxCharacters"/>).</param>
-        public unsafe static void StringToBuffer(string value, char* destination, int maxCharacters, bool nullTerminate = true)
+        internal unsafe static int GetStringLength(this Span<char> span)
         {
-            int count = maxCharacters;
-            if (count == 0 || value == null || value.Length == 0)
+            int length = span.IndexOf('\0');
+            return length < 0 ? span.Length : length;
+        }
+
+        /// <summary>
+        /// Returns true if the given string equals the given span.
+        /// The span's logical length is to the first null if present.
+        /// </summary>
+        internal unsafe static bool EqualsString(this Span<char> span, string value)
+        {
+            if (value == null || value.Length > span.Length)
+                return false;
+
+            int stringLength = span.GetStringLength();
+            if (stringLength != value.Length)
+                return false;
+
+            fixed (char* c = value)
             {
-                if (nullTerminate)
-                    *destination = '\0';
+                var source = new ReadOnlySpan<char>(c, value.Length);
+                return span.StartsWith(source);
+            }
+        }
+
+        internal unsafe static void SetString(this Span<char> span, string value, int maxSize)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                span[0] = '\0';
                 return;
             }
 
-            if (count < 0)
-                count = value.Length;
-            else if (value.Length < count)
-                count = value.Length;
-
-            fixed (char* start = value)
+            fixed (char* c = value)
             {
-                Buffer.MemoryCopy(
-                    source: start,
-                    destination: destination,
-                    destinationSizeInBytes: count * sizeof(char),
-                    sourceBytesToCopy: count * sizeof(char)
-                );
-            }
-
-            if (nullTerminate)
-            {
-                destination += count = '\0';
+                int count = Math.Min(value.Length, span.Length);
+                ReadOnlySpan<char> source = new ReadOnlySpan<char>(c, count);
+                source.CopyTo(span);
+                if (count < span.Length)
+                    span[count] = '\0';
             }
         }
     }

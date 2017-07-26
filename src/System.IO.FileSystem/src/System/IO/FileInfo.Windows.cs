@@ -11,9 +11,9 @@ namespace System.IO
     {
         [SecurityCritical]
         internal FileInfo(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
-            : this(fullPath, findData.cFileName.Value)
+            : this(fullPath, findData.cFileName.GetString())
         {
-            Debug.Assert(findData.cFileName.Equals(Path.GetFileName(fullPath)));
+            Debug.Assert(findData.cFileName.EqualsString(Path.GetFileName(fullPath)));
             Init(ref findData);
         }
     }
