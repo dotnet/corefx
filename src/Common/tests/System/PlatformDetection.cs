@@ -33,8 +33,22 @@ namespace System
         public static bool IsUbuntu => IsDistroAndVersion("ubuntu");
         public static bool IsWindowsNanoServer => (IsWindows && IsNotWindowsIoTCore && !File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")));
         public static bool IsNotWindowsNanoServer => !IsWindowsNanoServer;
-        public static bool IsWindowsIoTCore => IsWindowsIoTCoreEdition();
+        public static bool IsWindowsIoTCore
+        {
+            get
+            {
+                int productType;
+                Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out productType));
+                if ((productType == PRODUCT_IOTUAPCOMMERCIAL) ||
+                    (productType == PRODUCT_IOTUAP))
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
         public static bool IsNotWindowsIoTCore => !IsWindowsIoTCore;
+        public static bool IsDrawingSupported => (IsNotWindowsNanoServer && IsNotWindowsNanoServer);
         public static bool IsWindows10Version1607OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
@@ -331,8 +345,8 @@ namespace System
             return -1;
         }
 
-        const int PRODUCT_IOTUAP = 0x0000007B;
-        const int PRODUCT_IOTUAPCOMMERCIAL = 0x00000083;
+        private const int PRODUCT_IOTUAP = 0x0000007B;
+        private const int PRODUCT_IOTUAPCOMMERCIAL = 0x00000083;
 
         [DllImport("kernel32.dll", SetLastError = false)]
         static extern bool GetProductInfo(
@@ -342,18 +356,6 @@ namespace System
          int dwSpMinorVersion,
          out int pdwReturnedProductType
         );
-
-        public static bool IsWindowsIoTCoreEdition()
-        {
-            int productType;
-            GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out productType);
-            if ((productType == PRODUCT_IOTUAPCOMMERCIAL) ||
-                (productType == PRODUCT_IOTUAP))
-            {
-                return true;
-            }
-            return false;
-        }
 
         [DllImport("ntdll.dll")]
         private static extern int RtlGetVersion(out RTL_OSVERSIONINFOEX lpVersionInformation);
