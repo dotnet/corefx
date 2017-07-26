@@ -231,9 +231,6 @@
   <data name="NoSuchMemberOrExtension" xml:space="preserve">
     <value>'{0}' 不包含 '{1}' 的定義，也找不到擴充方法 '{1}' 來接受型別 '{0}' 的第一個引數 (您是否遺漏 using 指示詞或組件參考?)</value>
   </data>
-  <data name="ValueTypeExtDelegate" xml:space="preserve">
-    <value>在實值型別 '{1}' 中定義的擴充方法 '{0}' 無法用來建立委派</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>方法 '{0}' 沒有任何多載接受 '{1}' 個引數</value>
   </data>
@@ -299,12 +296,6 @@
   </data>
   <data name="BadCtorArgCount" xml:space="preserve">
     <value>'{0}' 不包含接受 '{1}' 個引數的建構函式</value>
-  </data>
-  <data name="BadExtensionArgTypes" xml:space="preserve">
-    <value>'{0}' 不包含 '{1}' 的定義，而且最佳的擴充方法多載 '{2}' 有一些無效的引數</value>
-  </data>
-  <data name="BadInstanceArgType" xml:space="preserve">
-    <value>執行個體引數: 無法從 '{0}' 轉換為 '{1}'</value>
   </data>
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>非可叫用 (Non-invocable) 成員 '{0}' 不能做為方法使用。</value>

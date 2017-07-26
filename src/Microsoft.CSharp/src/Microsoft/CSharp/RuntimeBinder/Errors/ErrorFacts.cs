@@ -194,9 +194,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NoSuchMemberOrExtension:
                     codeStr = SR.NoSuchMemberOrExtension;
                     break;
-                case ErrorCode.ERR_ValueTypeExtDelegate:
-                    codeStr = SR.ValueTypeExtDelegate;
-                    break;
                 case ErrorCode.ERR_BadArgCount:
                     codeStr = SR.BadArgCount;
                     break;
@@ -262,12 +259,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
                 case ErrorCode.ERR_BadCtorArgCount:
                     codeStr = SR.BadCtorArgCount;
-                    break;
-                case ErrorCode.ERR_BadExtensionArgTypes:
-                    codeStr = SR.BadExtensionArgTypes;
-                    break;
-                case ErrorCode.ERR_BadInstanceArgType:
-                    codeStr = SR.BadInstanceArgType;
                     break;
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;
