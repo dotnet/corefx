@@ -639,6 +639,13 @@ namespace System.IO.Tests
 
             if (TestFiles)
             {
+                if (PlatformDetection.IsNetNative)
+                {
+                    // UapAot throws if the Directory of the file to create doesn't exist.
+                    Assert.Throws<DirectoryNotFoundException>(() => File.Create(longFullname));
+                    return;
+                }
+
                 using (File.Create(longFullname)) { }
             }
             else
