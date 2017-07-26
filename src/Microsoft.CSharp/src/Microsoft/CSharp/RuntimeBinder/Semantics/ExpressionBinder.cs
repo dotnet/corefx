@@ -1447,18 +1447,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pmwtGet = new MethWithType();
             pmwtSet = new MethWithType();
             // Get the accessors.
-            if (pwt.Prop().methGet != null)
+            if (pwt.Prop().GetterMethod != null)
             {
-                pmwtGet.Set(pwt.Prop().methGet, pwt.GetType());
+                pmwtGet.Set(pwt.Prop().GetterMethod, pwt.GetType());
             }
             else
             {
                 pmwtGet.Clear();
             }
 
-            if (pwt.Prop().methSet != null)
+            if (pwt.Prop().SetterMethod != null)
             {
-                pmwtSet.Set(pwt.Prop().methSet, pwt.GetType());
+                pmwtSet.Set(pwt.Prop().SetterMethod, pwt.GetType());
             }
             else
             {

@@ -694,7 +694,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (!(pMethProp is MethodSymbol method))
                 {
                     PropertySymbol prop = (PropertySymbol)pMethProp;
-                    method = prop.methGet ?? prop.methSet;
+                    method = prop.GetterMethod ?? prop.SetterMethod;
                     if (method == null)
                     {
                         return null;

@@ -202,7 +202,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case SYMKIND.SK_PropertySymbol:
                     PropertySymbol prop = ((PropertySymbol)this);
-                    MethodSymbol meth = prop.methGet ?? prop.methSet;
+                    MethodSymbol meth = prop.GetterMethod ?? prop.SetterMethod;
                     return meth != null && meth.isVirtual;
 
                 default:

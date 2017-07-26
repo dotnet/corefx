@@ -536,8 +536,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void ReportBogus(SymWithType swt)
         {
             Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
-            MethodSymbol meth1 = swt.Prop().methGet;
-            MethodSymbol meth2 = swt.Prop().methSet;
+            MethodSymbol meth1 = swt.Prop().GetterMethod;
+            MethodSymbol meth2 = swt.Prop().SetterMethod;
             Debug.Assert((meth1 ?? meth2) != null);
             if (meth1 == null | meth2 == null)
             {

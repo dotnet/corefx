@@ -236,13 +236,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendSym(prop, pctx);
 
                 // add accessor name
-                if (prop.methGet == meth)
+                if (prop.GetterMethod == meth)
                 {
                     ErrAppendString(".get");
                 }
                 else
                 {
-                    Debug.Assert(meth == prop.methSet);
+                    Debug.Assert(meth == prop.SetterMethod);
                     ErrAppendString(".set");
                 }
 
