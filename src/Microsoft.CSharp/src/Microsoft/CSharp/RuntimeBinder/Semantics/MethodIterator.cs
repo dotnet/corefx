@@ -181,7 +181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // Check bogus.
-                if (GetSemanticChecker().CheckBogus(_pCurrentSym))
+                if (CSemanticChecker.CheckBogus(_pCurrentSym))
                 {
                     // Sym is bogus, but if we're allow it, then let it through and mark it.
                     if (_bAllowBogusAndInaccessible)

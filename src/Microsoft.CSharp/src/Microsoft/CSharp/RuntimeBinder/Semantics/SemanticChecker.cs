@@ -286,9 +286,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (atsThru == null) ? ACCESSERROR.ACCESSERROR_NOACCESS : ACCESSERROR.ACCESSERROR_NOACCESSTHRU;
         }
 
-        public bool CheckBogus(Symbol sym)
+        public static bool CheckBogus(Symbol sym)
         {
-            return sym is PropertySymbol prop && prop.Bogus;
+            return (sym as PropertySymbol)?.Bogus ?? false;
         }
 
         public void ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)

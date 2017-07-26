@@ -244,7 +244,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We can't call CheckBogus on methods or indexers because if the method has the wrong
                 // number of parameters people don't think they should have to /r the assemblies containing
                 // the parameter types and they complain about the resulting CS0012 errors.
-                if (!(symCur is MethodSymbol) && (_flags & MemLookFlags.Indexer) == 0 && GetSemanticChecker().CheckBogus(symCur))
+                if (!(symCur is MethodSymbol) && (_flags & MemLookFlags.Indexer) == 0 && CSemanticChecker.CheckBogus(symCur))
                 {
                     // A bogus member - we can't use these, so only record them for error reporting.
                     if (!_swtBogus)
@@ -535,7 +535,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void ReportBogus(SymWithType swt)
         {
-            Debug.Assert(swt.Sym is PropertySymbol propAssert && propAssert.Bogus);
+            Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
             MethodSymbol meth1 = swt.Prop().methGet;
             MethodSymbol meth2 = swt.Prop().methSet;
             Debug.Assert((meth1 ?? meth2) != null);

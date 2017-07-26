@@ -236,7 +236,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (!bFoundExpanded)
                     {
                         lookedAtCandidates = true;
-                        allCandidatesUnsupported &= (_pCurrentSym is PropertySymbol prop && prop.Bogus);
+                        allCandidatesUnsupported &= CSemanticChecker.CheckBogus(_pCurrentSym);
 
                         // If we have the wrong number of arguments and still have room in our cache of 20,
                         // then store it in our cache and go to the next sym.
