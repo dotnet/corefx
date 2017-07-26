@@ -371,15 +371,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 if (prop.errExpImpl != null)
                     ErrAppendType(prop.errExpImpl, pctx, false);
-                if (prop.isIndexer())
+                if (prop is IndexerSymbol indexer)
                 {
                     ErrAppendChar('.');
-                    ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                    ErrAppendIndexer(indexer, pctx);
                 }
             }
-            else if (prop.isIndexer())
+            else if (prop is IndexerSymbol indexer)
             {
-                ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                ErrAppendIndexer(indexer, pctx);
             }
             else
             {

@@ -21,17 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public MethodSymbol methSet;            // Setter method (always has same parent)
         public PropertyInfo AssociatedPropertyInfo;
 
-        public bool isIndexer()
-        {
-            return isOperator;
-        }
-
-        public IndexerSymbol AsIndexerSymbol()
-        {
-            Debug.Assert(isIndexer());
-            return (IndexerSymbol)this;
-        }
-
         public bool Bogus { get; set; }
     }
 }

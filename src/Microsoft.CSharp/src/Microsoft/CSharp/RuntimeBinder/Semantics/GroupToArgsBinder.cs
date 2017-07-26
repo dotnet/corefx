@@ -700,7 +700,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return null;
                     }
 
-                    bIsIndexer = prop.isIndexer();
+                    bIsIndexer = prop is IndexerSymbol;
                 }
 
                 if (!method.isVirtual || pType == null)

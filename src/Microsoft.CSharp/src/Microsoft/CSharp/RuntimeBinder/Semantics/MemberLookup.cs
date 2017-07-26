@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _swtFirst.Set(sym, type);
                 Debug.Assert(_csym == 1);
                 Debug.Assert(_prgtype[0] == type);
-                _fMulti = sym is MethodSymbol || sym is PropertySymbol prop && prop.isIndexer();
+                _fMulti = sym is MethodSymbol || sym is IndexerSymbol;
             }
         }
 
@@ -232,7 +232,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Make sure that whether we're seeing a ctor, operator, or indexer is consistent with the flags.
                 if (((_flags & MemLookFlags.Ctor) == 0) != (meth == null || !meth.IsConstructor()) ||
                     ((_flags & MemLookFlags.Operator) == 0) != (meth == null || !meth.isOperator) ||
-                    ((_flags & MemLookFlags.Indexer) == 0) != (prop == null || !prop.isIndexer()))
+                    ((_flags & MemLookFlags.Indexer) == 0) != !(prop is IndexerSymbol))
                 {
                     if (!_swtBad)
                     {

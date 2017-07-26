@@ -546,7 +546,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return rval;
             }
 
-            Debug.Assert(mem.SymFirst() is PropertySymbol prop && prop.isIndexer());
+            Debug.Assert(mem.SymFirst() is IndexerSymbol);
 
             ExprMemberGroup grp = GetExprFactory().CreateMemGroup((EXPRFLAG)mem.GetFlags(),
                 pName, BSYMMGR.EmptyTypeArray(), mem.SymFirst().getKind(), mem.GetSourceType(), null/*pMPS*/, mem.GetObject(), mem.GetResults());
@@ -796,9 +796,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pwt.Sym is PropertySymbol &&
                     pwt.GetType() != null &&
                     pwt.Prop().getClass() == pwt.GetType().getAggregate());
-            Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop().isIndexer());
+            Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop() is IndexerSymbol);
             Debug.Assert(pOtherType == null ||
-                    !pwt.Prop().isIndexer() &&
+                    !(pwt.Prop() is IndexerSymbol) &&
                     pOtherType.getAggregate() == pwt.Prop().RetType.getAggregate());
 
             bool fConstrained;
