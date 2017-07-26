@@ -70,9 +70,9 @@ internal partial class Interop
             private fixed char _cFileName[260];
             private fixed char _cAlternateFileName[14];
 
-            internal Span<char> cFileName
+            internal ReadOnlySpan<char> cFileName
             {
-                get { fixed (char* c = _cFileName) return new Span<char>(c, 260); }
+                get { fixed (char* c = _cFileName) return new ReadOnlySpan<char>(c, 260); }
             }
         }
 
