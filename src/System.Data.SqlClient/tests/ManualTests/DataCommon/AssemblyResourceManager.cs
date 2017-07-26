@@ -55,6 +55,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         private bool TryGetResourceValue(string resourceName, object[] args, out object result)
         {
+#if uapaot // Reflection of internal types not supported on UapAot
+            result = string.Empty;
+            return true;
+#else
             var type = _resourceAssembly.GetType("System.SR");
             var info = type.GetProperty(resourceName, BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -68,6 +72,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
             return result != null;
+#endif
         }
     }
 }

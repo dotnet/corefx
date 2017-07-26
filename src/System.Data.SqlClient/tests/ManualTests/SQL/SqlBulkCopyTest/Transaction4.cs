@@ -31,11 +31,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             conn3.Open();
                             // Start a local transaction on the wrong connection.
                             SqlTransaction myTrans = conn3.BeginTransaction();
-#if uapaot // Reflection is blocked for internal members on uapaot
-                            string errorMsg = "";
-#else
                             string errorMsg = SystemDataResourceManager.Instance.SQL_BulkLoadConflictingTransactionOption;
-#endif
                             DataTestUtility.AssertThrowsWrapper<ArgumentException>(() => new SqlBulkCopy(dstConn, SqlBulkCopyOptions.UseInternalTransaction, myTrans), exceptionMessage: errorMsg);
                         }
                     }

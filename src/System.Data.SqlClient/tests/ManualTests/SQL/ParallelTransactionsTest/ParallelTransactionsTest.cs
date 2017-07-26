@@ -13,11 +13,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void BasicParallelTest_shouldThrowsUnsupported()
         {
             string connectionString = DataTestUtility.TcpConnStr;
-#if uapaot // Reflection is blocked for internal members on uapaot
-            string expectedErrorMessage = "";
-#else
             string expectedErrorMessage = SystemDataResourceManager.Instance.ADP_ParallelTransactionsNotSupported(typeof(SqlConnection).Name);
-#endif
             string tempTableName = "";
             try
             {
@@ -73,11 +69,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void MultipleExecutesInSameTransactionTest_shouldThrowsUnsupported()
         {
             string connectionString = DataTestUtility.TcpConnStr;
-#if uapaot // Reflection is blocked for internal members on uapaot
-            string expectedErrorMessage = "";
-#else
             string expectedErrorMessage = SystemDataResourceManager.Instance.ADP_ParallelTransactionsNotSupported(typeof(SqlConnection).Name);
-#endif
             string tempTableName = "";
             try
             {

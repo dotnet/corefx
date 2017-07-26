@@ -1210,20 +1210,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
                 using (SqlCommand cmd = new SqlCommand("Test_EmployeeSalesByCountry", connection))
                 {
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
                     string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DeriveParametersNotSupported, "SqlCommand", cmd.CommandType);
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(
                         () => SqlCommandBuilder.DeriveParameters(cmd),
                         errorMessage);
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    errorMessage = "";
-#else
                     errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_OpenConnectionRequired, "DeriveParameters", "");
-#endif
                     cmd.CommandType = CommandType.StoredProcedure;
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(
                         () => SqlCommandBuilder.DeriveParameters(cmd),
@@ -1235,11 +1227,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     CheckParameters(cmd, expectedParamResults);
 
                     cmd.CommandText = "Test_EmployeeSalesBy";
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    errorMessage = "";
-#else
                     errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NoStoredProcedureExists, cmd.CommandText);
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(
                         () => SqlCommandBuilder.DeriveParameters(cmd),
                         errorMessage);

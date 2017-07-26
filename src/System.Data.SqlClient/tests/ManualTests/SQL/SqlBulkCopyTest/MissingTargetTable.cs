@@ -43,11 +43,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         }
                         catch (InvalidOperationException ioe)
                         {
-#if uapaot // Reflection is blocked for internal members on uapaot
-                            string expectedErrorMsg = "";
-#else
                             string expectedErrorMsg = string.Format(SystemDataResourceManager.Instance.SQL_BulkLoadInvalidDestinationTable, targetTable);
-#endif
                             Assert.True(ioe.Message.Contains(expectedErrorMsg), "Unexpected error message: " + ioe.Message);
                             hitException = true;
                         }

@@ -148,11 +148,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 cmd.CommandTimeout = 1;
                 cmd.CommandText = "WAITFOR DELAY '00:00:30';select * from Customers";
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                string errorMessage = "";
-#else
                 string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-#endif
                 DataTestUtility.ExpectFailure<SqlException>(() => cmd.ExecuteReader(), errorMessage);
 
                 VerifyConnection(cmd);
@@ -211,11 +207,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlCommand command = stateTuple.Item2;
             Barrier threadsReady = stateTuple.Item3;
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-            string errorMessage = "";
-#else
             string errorMessage = SystemDataResourceManager.Instance.SQL_OperationCancelled;
-#endif
             DataTestUtility.ExpectFailure<SqlException>(() =>
             {
                 threadsReady.SignalAndWait();
@@ -262,11 +254,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     // Tweak the timeout to 1ms, stop the proxy from proxying and then try GetValue (which should timeout)
                     reader.SetDefaultTimeout(1);
                     proxy.PauseCopying();
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
+
                     string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-#endif
                     Exception exception = Assert.Throws<SqlException>(() => reader.GetValue(0));
                     Assert.True(exception.Message.Contains(errorMessage));
 

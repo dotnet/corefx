@@ -38,13 +38,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public void TestMain()
         {
-#if uapaot // Reflection is blocked for internal members on uapaot
-            _operationCanceledErrorMessage = "";
-            _severeErrorMessage = "";
-#else
             _operationCanceledErrorMessage = SystemDataResourceManager.Instance.SQL_OperationCancelled;
             _severeErrorMessage = SystemDataResourceManager.Instance.SQL_SevereError;
-#endif
 
             // pure random
             _randPool = new RandomizerPool();

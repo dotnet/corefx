@@ -37,11 +37,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             ColumnMappings.Add("LastName", "col2"); // this column does not exist
                             ColumnMappings.Add("FirstName", "col3");
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                            string errorMsg = "";
-#else
                             string errorMsg = SystemDataResourceManager.Instance.SQL_BulkLoadNonMatchingColumnMapping;
-#endif
                             DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => bulkcopy.WriteToServer(reader), exceptionMessage: errorMsg);
                         }
                     }

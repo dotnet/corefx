@@ -37,11 +37,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                 SqlBulkCopyColumnMappingCollection ColumnMappings = bulkcopy.ColumnMappings;
                                 bulkcopy.DestinationTableName = dstTable;
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                                string exceptionMsg = "";
-#else
                                 string exceptionMsg = SystemDataResourceManager.Instance.ADP_TransactionConnectionMismatch;
-#endif
                                 DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => bulkcopy.WriteToServer(reader), exceptionMessage: exceptionMsg);
 
                                 SqlCommand myCmd = dstConn.CreateCommand();

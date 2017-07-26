@@ -228,17 +228,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                     SqlTransaction tx = connection.BeginTransaction();
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string invalidSaveStateMessage = "";
-                    string executeCommandWithoutTransactionMessage = "";
-                    string transactionConflictErrorMessage = "";
-                    string parallelTransactionErrorMessage = "";
-#else
                     string invalidSaveStateMessage = SystemDataResourceManager.Instance.SQL_NullEmptyTransactionName;
                     string executeCommandWithoutTransactionMessage = SystemDataResourceManager.Instance.ADP_TransactionRequired("ExecuteNonQuery");
                     string transactionConflictErrorMessage = SystemDataResourceManager.Instance.ADP_TransactionConnectionMismatch;
                     string parallelTransactionErrorMessage = SystemDataResourceManager.Instance.ADP_ParallelTransactionsNotSupported("SqlConnection");
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() =>
                     {
                         SqlCommand command = new SqlCommand("sql", connection);
@@ -350,11 +343,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         SqlTransaction tx2 = connection2.BeginTransaction(IsolationLevel.ReadCommitted);
                         command2.Transaction = tx2;
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        string errorMessage = "";
-#else
                         string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-#endif
                         DataTestUtility.AssertThrowsWrapper<SqlException>(() => command2.ExecuteReader(), errorMessage);
 
                         tx2.Rollback();

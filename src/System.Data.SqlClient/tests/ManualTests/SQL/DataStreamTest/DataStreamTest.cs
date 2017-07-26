@@ -144,11 +144,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 using (SqlCommand cmd = new SqlCommand(sqlBatch, c))
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
                     string errorMessage = SystemDataResourceManager.Instance.SQL_InvalidRead;
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetInt32(0), errorMessage);
                 }
             }
@@ -221,11 +217,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     s = rdr.GetString(9); //ShipAddres;
                     s = rdr.GetString(10); //ShipCity;
                                            // should get an exception here
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
                     string errorMessage = SystemDataResourceManager.Instance.SqlMisc_NullValueMessage;
-#endif
                     DataTestUtility.AssertThrowsWrapper<SqlNullValueException>(() => rdr.GetString(11), errorMessage);
 
                     s = rdr.GetString(12); //ShipPostalCode;
@@ -244,11 +236,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 using (SqlCommand cmd = new SqlCommand(sqlBatch, conn))
                 using (SqlDataReader rdr = cmd.ExecuteReader())
                 {
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
                     string errorMessage = SystemDataResourceManager.Instance.SqlMisc_NullValueMessage;
-#endif
 
                     rdr.Read();
                     // read data out of buffer
@@ -508,11 +496,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         reader.Read();
                         conn.Close();
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "CheckDataIsReady");
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => value = reader[0], errorMessage);
                         Assert.True(reader.IsClosed, "FAILED: Stream was not closed by connection close (Scenario: Read)");
                         conn.Open();
@@ -591,11 +575,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         xr.Read();
 
                         // make sure we get an exception if we try to get another reader
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = SystemDataResourceManager.Instance.ADP_OpenReaderExists;
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => xr = cmd.ExecuteXmlReader(), errorMessage);
                     }
 
@@ -661,20 +641,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                     // multiple columns
                     cmd.CommandText = "select * from customers";
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    errorMessage = "";
-#else
                     errorMessage = SystemDataResourceManager.Instance.SQL_NonXmlResult;
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => xr = cmd.ExecuteXmlReader(), errorMessage);
 
                     // non-ntext column
                     cmd.CommandText = "select employeeID from employees";
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    errorMessage = "";
-#else
                     errorMessage = SystemDataResourceManager.Instance.SQL_NonXmlResult;
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => xr = cmd.ExecuteXmlReader(), errorMessage);
                 }
             }
@@ -838,51 +810,31 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         reader.Read();
                         i = reader.GetOrdinal("notes");
                         reader.GetChars(i, 14, chars, 0, 14);
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        string errorMessage = "";
-#else
                         string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSequentialColumnAccess, i, i + 1);
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetString(i), errorMessage);
 
                         // Tests GetValue before GetBytes\Chars
                         reader.Read();
                         i = reader.GetOrdinal("photo");
                         reader.GetSqlBinary(i);
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSequentialColumnAccess, i, i + 1);
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetBytes(i, 0, data, 0, 13), errorMessage);
 
                         i = reader.GetOrdinal("notes");
                         reader.GetString(i);
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSequentialColumnAccess, i, i + 1);
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetChars(i, 0, chars, 0, 14), errorMessage);
 
                         // Tests GetBytes\GetChars re-reading same characters
                         reader.Read();
                         i = reader.GetOrdinal("photo");
                         reader.GetBytes(i, 0, data, 0, 13);
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSeqByteAccess, 0, 13, "GetBytes");
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetBytes(i, 0, data, 0, 13), errorMessage);
 
                         i = reader.GetOrdinal("notes");
                         reader.GetChars(i, 0, chars, 0, 14);
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSeqByteAccess, 0, 14, "GetChars");
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetChars(i, 0, chars, 0, 14), errorMessage);
                     }
 
@@ -894,11 +846,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         reader.GetValues(sqldata); // should work
 
                         int columnToTry = 0;
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        string errorMessage = "";
-#else
                         string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSequentialColumnAccess, columnToTry, sqldata.Length);
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetInt32(columnToTry), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetValue(columnToTry), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetFieldValue<int>(columnToTry), errorMessage);
@@ -908,11 +856,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                         reader.Read();
                         columnToTry = 17;
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_NonSequentialColumnAccess, columnToTry, sqldata.Length);
-#endif
 
                         s = reader.GetString(columnToTry);
                         DataTestUtility.AssertEqualsWithDescription("http://accweb/emmployees/fuller.bmp", s, "FAILED: Did not receive expected string.");
@@ -941,27 +885,15 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         conn.Close();
 
                         // now try to read one more byte
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        string errorMessage = "";
-#else
                         string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "GetBytes");
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => cb = reader.GetBytes(i, 51, data, 0, 1), errorMessage);
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "CheckDataIsReady");
-#endif
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetValue(i), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetFieldValue<byte[]>(i), errorMessage);
                         DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => reader.GetFieldValue<SqlBinary>(i), errorMessage);
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        errorMessage = "";
-#else
                         errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "GetFieldValueAsync");
-#endif
                         DataTestUtility.AssertThrowsWrapper<AggregateException, InvalidOperationException>(() => reader.GetFieldValueAsync<byte[]>(i).Wait(), innerExceptionMessage: errorMessage);
                         DataTestUtility.AssertThrowsWrapper<AggregateException, InvalidOperationException>(() => reader.GetFieldValueAsync<SqlBinary>(i).Wait(), innerExceptionMessage: errorMessage);
                     }
@@ -1001,11 +933,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         // Em
                         object value;
 
-#if uapaot // Reflection is blocked for internal members on uapaot
-                        string errorMessage = "";
-#else
                         string errorMessage = SystemDataResourceManager.Instance.SqlMisc_ConversionOverflowMessage;
-#endif
                         DataTestUtility.AssertThrowsWrapper<OverflowException>(() => value = reader[0], errorMessage);
                         DataTestUtility.AssertThrowsWrapper<OverflowException>(() => value = reader[1], errorMessage);
                         DataTestUtility.AssertThrowsWrapper<OverflowException>(() => value = reader.GetDecimal(0), errorMessage);
@@ -1060,11 +988,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     }
 
                     bool result;
-#if uapaot // Reflection is blocked for internal members on uapaot
-                    string errorMessage = "";
-#else
                     string errorMessage = string.Format(SystemDataResourceManager.Instance.ADP_DataReaderClosed, "HasRows");
-#endif
                     DataTestUtility.AssertThrowsWrapper<InvalidOperationException>(() => result = reader.HasRows, errorMessage);
                 }
             }
@@ -1850,11 +1774,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             Task closeTask = Task.Run(() => reader.Dispose());
 
                             // Wait for the task to see the timeout
-#if uapaot // Reflection is blocked for internal members on uapaot
-                            string errorMessage = "";
-#else
                             string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-#endif
                             DataTestUtility.AssertThrowsWrapper<AggregateException, SqlException>(() => task.Wait(), innerExceptionMessage: errorMessage);
                         }
                     }
@@ -1896,11 +1816,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             reader.SetDefaultTimeout(30000);
 
                             // Close will now observe the stored timeout error
-#if uapaot // Reflection is blocked for internal members on uapaot
-                            string errorMessage = "";
-#else
                             string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-#endif
                             DataTestUtility.AssertThrowsWrapper<SqlException>(reader.Dispose, errorMessage);
                         }
                     }
