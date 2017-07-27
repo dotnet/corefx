@@ -79,13 +79,4 @@
   <data name="DataSetLinq_NonNullableCast" xml:space="preserve">
     <value>Cannot cast DBNull. Value to type '{0}'. Please use a nullable type.</value>
   </data>
-  <data name="ToLDVUnsupported" xml:space="preserve">
-    <value>Can not create DataView after using projection.</value>
-  </data>
-  <data name="LDV_InvalidNumOfKeys" xml:space="preserve">
-    <value>Must provide '{0}' keys to find.</value>
-  </data>
-  <data name="LDVRowStateError" xml:space="preserve">
-    <value>DataViewRowState must be DataViewRowState.CurrentRows.</value>
-  </data>
 </root>
