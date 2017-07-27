@@ -191,8 +191,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ReplaceFile.cs">
       <Link>Common\Interop\Windows\Interop.ReplaceFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\FixedString.cs">
-      <Link>Common\System\Runtime\InteropServices\FixedString.cs</Link>
+    <Compile Include="$(CommonPath)\System\Memory\FixedBufferExtensions.cs">
+      <Link>Common\System\Memory\FixedBufferExtensions.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->

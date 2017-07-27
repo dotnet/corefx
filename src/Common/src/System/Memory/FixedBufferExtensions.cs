@@ -35,11 +35,17 @@ namespace System
             if (value == null || value.Length > span.Length)
                 return false;
 
-            int stringLength = span.GetFixedBufferStringLength();
-            if (stringLength != value.Length)
-                return false;
+            int i = 0;
+            for (; i < value.Length; i++)
+            {
+                // Strings with embedded nulls can never match as the fixed buffer always null terminates.
+                if (value[i] == '\0' || value[i] != span[i])
+                    return false;
+            }
 
-            return span.StartsWith(value.AsReadOnlySpan());
+            // If we've maxed out the buffer or reached the
+            // null terminator, we're equal.
+            return i == span.Length || span[i] == '\0';
         }
     }
 }
