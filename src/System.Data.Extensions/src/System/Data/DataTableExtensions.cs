@@ -21,7 +21,7 @@ namespace System.Data
         /// <returns>IEnumerable of datarows.</returns>
         public static EnumerableRowCollection<DataRow> AsEnumerable(this DataTable source)
         {
-            DataSetUtil.CheckArgumentNull(source, "source");
+            DataSetUtil.CheckArgumentNull(nameof(source), "source");
             return new EnumerableRowCollection<DataRow>(source);
         }
 
@@ -38,7 +38,7 @@ namespace System.Data
         public static DataTable CopyToDataTable<T>(this IEnumerable<T> source)
             where T : DataRow
         {
-            DataSetUtil.CheckArgumentNull(source, "source");
+            DataSetUtil.CheckArgumentNull(nameof(source), "source");
             return LoadTableFromEnumerable(source, table: null, options: null, errorHandler: null);
         }
 
@@ -48,8 +48,8 @@ namespace System.Data
         public static void CopyToDataTable<T>(this IEnumerable<T> source, DataTable table, LoadOption options)
             where T : DataRow
         {
-            DataSetUtil.CheckArgumentNull(source, "source");
-            DataSetUtil.CheckArgumentNull(table, "table");
+            DataSetUtil.CheckArgumentNull(nameof(source), "source");
+            DataSetUtil.CheckArgumentNull(nameof(table), "table");
             LoadTableFromEnumerable(source, table, options, errorHandler: null);
         }
 
@@ -77,8 +77,8 @@ namespace System.Data
         public static void CopyToDataTable<T>(this IEnumerable<T> source, DataTable table, LoadOption options, FillErrorEventHandler errorHandler)
             where T : DataRow
         {
-            DataSetUtil.CheckArgumentNull(source, "source");
-            DataSetUtil.CheckArgumentNull(table, "table");
+            DataSetUtil.CheckArgumentNull(nameof(source), "source");
+            DataSetUtil.CheckArgumentNull(nameof(table), "table");
             LoadTableFromEnumerable(source, table, options, errorHandler);
         }
 
@@ -104,14 +104,7 @@ namespace System.Data
                 // need to get first row to create table
                 if (!rows.MoveNext())
                 {
-                    if (table == null)
-                    {
-                        throw DataSetUtil.InvalidOperation(SR.DataSetLinq_EmptyDataRowSource);
-                    }
-                    else
-                    {
-                        return table;
-                    }
+                    return table ?? throw DataSetUtil.InvalidOperation(SR.DataSetLinq_EmptyDataRowSource);
                 }
 
                 DataRow current;

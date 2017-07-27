@@ -187,7 +187,7 @@ namespace System.Data
         /// <returns>HashCode for row based on values in the row.</returns>
         public int GetHashCode(TRow row)
         {
-            DataSetUtil.CheckArgumentNull(row, "row");
+            DataSetUtil.CheckArgumentNull(nameof(row), "row");
 
             if (row.RowState == DataRowState.Deleted)
             {

@@ -95,12 +95,12 @@ internal static class DataSetUtil
     }
 
     // only StackOverflowException & ThreadAbortException are sealed classes
-    static private readonly Type s_stackOverflowType = typeof(StackOverflowException);
-    static private readonly Type s_outOfMemoryType = typeof(OutOfMemoryException);
-    static private readonly Type s_threadAbortType = typeof(System.Threading.ThreadAbortException);
-    static private readonly Type s_nullReferenceType = typeof(NullReferenceException);
-    static private readonly Type s_accessViolationType = typeof(AccessViolationException);
-    static private readonly Type s_securityType = typeof(System.Security.SecurityException);
+    private static readonly Type s_stackOverflowType = typeof(StackOverflowException);
+    private static readonly Type s_outOfMemoryType = typeof(OutOfMemoryException);
+    private static readonly Type s_threadAbortType = typeof(System.Threading.ThreadAbortException);
+    private static readonly Type s_nullReferenceType = typeof(NullReferenceException);
+    private static readonly Type s_accessViolationType = typeof(AccessViolationException);
+    private static readonly Type s_securityType = typeof(System.Security.SecurityException);
 
     static internal bool IsCatchableExceptionType(Exception e)
     {
