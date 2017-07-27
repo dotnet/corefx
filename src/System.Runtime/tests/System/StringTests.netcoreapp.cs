@@ -12,6 +12,34 @@ namespace System.Tests
     public partial class StringTests
     {
         [Theory]
+        [InlineData(0, 0)]
+        [InlineData(3, 1)]
+        public static void Ctor_CharSpan_EmptyString(int length, int offset)
+        {
+            Assert.Same(string.Empty, new string(new ReadOnlySpan<char>(new char[length], offset, 0)));
+        }
+
+        [Theory]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, 0, 8, "abcdefgh")]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, 0, 9, "abcdefgh\0")]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0', 'i', 'j', 'k' }, 0, 12, "abcdefgh\0ijk")]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, 2, 3, "cde")]
+        [InlineData(new char[] { '\0' }, 0, 1, "\0")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 0, 0, "")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 1, 0, "")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 0, 1, "a")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 1, 1, "b")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 2, 1, "c")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 3, 0, "")]
+        [InlineData(new char[] { 'a', '\0', 'c', 'd' }, 0, 4, "a\0cd")]
+        [InlineData(new char[] { '\u8001', '\u8002', '\ufffd', '\u1234', '\ud800', '\udfff' }, 0, 6, "\u8001\u8002\ufffd\u1234\ud800\udfff")]
+        public static void Ctor_CharSpan(char[] valueArray, int startIndex, int length, string expected)
+        {
+            var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
+            Assert.Equal(expected, new string(span));
+        }
+
+        [Theory]
         // CurrentCulture
         [InlineData("Hello", "ello", StringComparison.CurrentCulture, true)]
         [InlineData("Hello", "ELL", StringComparison.CurrentCulture, false)]
