@@ -394,7 +394,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         /// <param name="modes">The modes to yield.</param>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>
@@ -420,7 +420,7 @@ namespace System.IO.MemoryMappedFiles.Tests
 
                         foreach (MemoryMappedFileAccess access in accesses)
                         {
-                            if ((mode == FileMode.Create || mode == FileMode.CreateNew || mode == FileMode.Truncate) && 
+                            if ((mode == FileMode.Create || mode == FileMode.CreateNew || mode == FileMode.Truncate) &&
                                 !IsWritable(access))
                             {
                                 continue;
@@ -473,7 +473,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// listed in the MemberData attribute (e.g. actual system page size instead of -1).
         /// </summary>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>
@@ -495,8 +495,8 @@ namespace System.IO.MemoryMappedFiles.Tests
 
                 foreach (long tmpCapacity in capacities)
                 {
-                    long capacity = tmpCapacity == -1 ? 
-                        s_pageSize.Value : 
+                    long capacity = tmpCapacity == -1 ?
+                        s_pageSize.Value :
                         tmpCapacity;
 
                     foreach (MemoryMappedFileAccess access in accesses)
@@ -686,9 +686,6 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
 
         }
-
-        [DllImport("libc", SetLastError = true)]
-        private static extern int geteuid();
 
         /// <summary>
         /// Test to ensure that leaveOpen is appropriately respected, either leaving the FileStream open

@@ -11,7 +11,7 @@
     <OutputType>Library</OutputType>
     <IncludePerformanceTests>true</IncludePerformanceTests>
     <AssemblyName>System.Net.Primitives.Performance.Tests</AssemblyName>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
@@ -25,6 +25,12 @@
     <ProjectReference Include="..\..\pkg\System.Net.Primitives.pkgproj">
       <Project>{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}</Project>
       <Name>System.Net.Primitives</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>PerfRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

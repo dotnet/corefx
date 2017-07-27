@@ -3,15 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Text;
 using Xunit.Abstractions;
 
 namespace System.Net.Test.Common
 {
     public class VerboseTestLogging : ITestOutputHelper
     {
-        private static VerboseTestLogging s_instance = new VerboseTestLogging();
+        private static readonly VerboseTestLogging s_instance = new VerboseTestLogging();
 
         private VerboseTestLogging()
         {

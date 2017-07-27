@@ -27,11 +27,12 @@
     <Compile Include="Perf.Int32.cs" />
     <Compile Include="Perf.IntPtr.cs" />
     <Compile Include="Perf.StringBuilder.cs" />
-    <Compile Include="..\System\String.SplitTests.cs" />
-    <Compile Include="..\Helpers.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="Perf.String.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -42,6 +43,12 @@
       <Name>System.Runtime</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj">
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>PerfRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

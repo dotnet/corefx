@@ -17,14 +17,12 @@
     },
     "Microsoft.xunit.netcore.extensions": "1.0.0-prerelease-01005-01",
     "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-01005-01",
-    "Microsoft.DotNet.xunit.performance": "1.0.0-alpha-build0040"
+    "xunit.performance.core": "1.0.0-beta-build0007"
   },
   "frameworks": {
     "netstandard1.5": {}
   },
   "supports": {
-    "coreFx.Test.netcoreapp1.0": {},
-    "coreFx.Test.net462": {},
-    "coreFx.Test.net463": {}
+    "coreFx.Test.netcoreapp1.0": {}
   }
 }

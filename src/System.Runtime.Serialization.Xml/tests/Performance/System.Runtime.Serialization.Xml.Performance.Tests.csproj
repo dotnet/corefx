@@ -7,7 +7,7 @@
     <RootNamespace>System.Runtime.Serialization.Xml.Performance.Tests</RootNamespace>
     <AssemblyName>System.Runtime.Serialization.Xml.Performance.Tests</AssemblyName>
     <IncludePerformanceTests>true</IncludePerformanceTests>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(UseContractReferences)' == 'true'" >
     <ProjectJson>ContractReferences/project.json</ProjectJson>
@@ -37,6 +37,12 @@
     <ProjectReference Include="..\..\..\System.Xml.XmlSerializer\pkg\System.Xml.XmlSerializer.pkgproj">
       <Project>{D62A6082-5229-4845-8BE9-75753E08C65A}</Project>
       <Name>System.Xml.XmlSerializer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>PerfRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

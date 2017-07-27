@@ -150,9 +150,9 @@ namespace System.Diagnostics.Tests
                 {
                     if (!receivedOutput)
                     {
+                        receivedOutput = true;
                         Assert.Equal(e.Data, "a");
                     }
-                    receivedOutput = true;
                 }
                 catch (Exception ex)
                 {

@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "System.Runtime": "4.3.0",
+    "Microsoft.NETCore.Platforms": "1.1.0",
+    "System.Console": "4.3.0",
+    "System.Diagnostics.Process": "4.3.0",
+    "System.IO": "4.3.0",
+    "System.Reflection": "4.3.0",
+    "System.Threading.Tasks": "4.3.0",
+    "xunit.performance.api": "1.0.0-beta-build0007",
+    "Microsoft.Diagnostics.Tracing.TraceEvent": {
+      "version": "1.0.3-alpha-experimental"
+    },
+    "test-runtime": {
+      "target": "project",
+      "exclude": "compile"
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.1": {}
+  }
+}
