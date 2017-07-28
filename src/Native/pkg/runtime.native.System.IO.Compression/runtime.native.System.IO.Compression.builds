@@ -42,30 +42,29 @@
       <OSGroup>opensuse.42.1</OSGroup>
       <Platform>amd64</Platform>
     </Project>
-  </ItemGroup>
-  <ItemGroup>
-    <Project Include="runtime.native.System.IO.Compression.pkgproj">
+  </ItemGroup>    
+  <ItemDefinitionGroup>
+    <Project>
       <UndefineProperties>SkipUnix</UndefineProperties>
     </Project>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Project Include="runtime.native.System.IO.Compression.pkgproj"/>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>x86</Platform>
-      <UndefineProperties>SkipUnix</UndefineProperties>
     </Project>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>amd64</Platform>
-      <UndefineProperties>SkipUnix</UndefineProperties>
     </Project>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>arm</Platform>
-      <UndefineProperties>SkipUnix</UndefineProperties>
     </Project>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>arm64</Platform>
-      <UndefineProperties>SkipUnix</UndefineProperties>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
