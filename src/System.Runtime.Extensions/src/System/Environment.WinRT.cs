@@ -20,12 +20,10 @@ namespace System
             {
                 return GetFolderPathCoreFallBack(folder, option);
             }
-
         }
 
         private static string GetFolderPathCoreCurrent(SpecialFolder folder, SpecialFolderOption option)
         {
-
             switch (folder)
             {
                 case SpecialFolder.ApplicationData:
