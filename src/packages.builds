@@ -34,7 +34,7 @@
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
     <!-- add specific native builds / pkgproj's here to include in servicing builds -->
     <Project Include=".\Native\pkg\runtime.native.System.IO.Compression\runtime.native.System.IO.Compression.builds">
-      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true;SkipUnix=true</AdditionalProperties>
     </Project>
     <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography.Apple\runtime.native.System.Security.Cryptography.Apple.builds">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
