@@ -487,9 +487,6 @@
     <StablePackage Include="Microsoft.NETCore.Targets">
       <Version>1.0.1</Version>
     </StablePackage>
-    <StablePackage Include="Microsoft.Private.PackageBaseline">
-      <Version>1.0.0</Version>
-    </StablePackage>
     <StablePackage Include="Microsoft.VisualBasic">
       <Version>10.0.1</Version>
     </StablePackage>
