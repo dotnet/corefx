@@ -26,7 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly VoidType _voidType;
         private readonly NullType _nullType;
         private readonly OpenTypePlaceholderType _typeUnit;
-        private readonly BoundLambdaType _typeAnonMeth;
         private readonly MethodGroupType _typeMethGrp;
         private readonly ArgumentListType _argListType;
         private readonly ErrorType _errorType;
@@ -46,18 +45,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeUnit = _typeFactory.CreateUnit();
-            _typeAnonMeth = _typeFactory.CreateAnonMethod();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
 
-            InitType(_errorType);
             _errorType.SetErrors(true);
-
-            InitType(_voidType);
-            InitType(_nullType);
-            InitType(_typeUnit);
-            InitType(_typeAnonMeth);
-            InitType(_typeMethGrp);
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -66,10 +57,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void InitTypeFactory(SymbolTable table)
         {
             _symbolTable = table;
-        }
-
-        private void InitType(CType at)
-        {
         }
 
         private sealed class StdTypeVarColl
@@ -400,11 +387,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _typeUnit;
         }
 
-        public BoundLambdaType GetAnonMethType()
-        {
-            return _typeAnonMeth;
-        }
-
         public MethodGroupType GetMethGrpType()
         {
             return _typeMethGrp;
@@ -500,9 +482,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_OpenTypePlaceholderType:
                 case TypeKind.TK_MethodGroupType:
-                case TypeKind.TK_BoundLambdaType:
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_NaturalIntegerType:
                 case TypeKind.TK_ArgumentListType:
                     return type;
 
@@ -848,8 +827,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsTyVars");
                     return false;
 
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_BoundLambdaType:
                 case TypeKind.TK_NullType:
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_OpenTypePlaceholderType:
