@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Xunit.Performance;
+using System;
 using System.Globalization;
+using Microsoft.Xunit.Performance;
+using Xunit;
 
 namespace System.Tests
 {
