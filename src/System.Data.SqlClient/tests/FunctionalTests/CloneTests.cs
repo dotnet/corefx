@@ -31,6 +31,7 @@ namespace System.Data.SqlClient.Tests
             SqlCommand command = connection.CreateCommand();
             command.CommandText = "select 1";
             command.ResetCommandTimeout();
+            Assert.Equal(command.CommandTimeout, 30);
             command.CommandType = CommandType.Text;
 
             SqlParameter parameter = command.CreateParameter();
