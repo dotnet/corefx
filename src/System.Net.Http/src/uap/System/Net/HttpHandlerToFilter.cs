@@ -21,19 +21,23 @@ using RTHttpVersion = Windows.Web.Http.HttpVersion;
 using RTIHttpContent = Windows.Web.Http.IHttpContent;
 using RTIInputStream = Windows.Storage.Streams.IInputStream;
 using RTHttpBaseProtocolFilter = Windows.Web.Http.Filters.HttpBaseProtocolFilter;
+using RTChainValidationResult = Windows.Security.Cryptography.Certificates.ChainValidationResult;
 
 namespace System.Net.Http
 {
     internal class HttpHandlerToFilter : HttpMessageHandler
     {
+        // We need two different WinRT filters because we need to remove credentials during redirection requests
+        // and WinRT doesn't allow changing the filter properties after the first request.
         private readonly RTHttpBaseProtocolFilter _filter;
-        private readonly RTHttpBaseProtocolFilter _filterWithNoCredentials;
+        private Lazy<RTHttpBaseProtocolFilter> _filterWithNoCredentials;
+        private RTHttpBaseProtocolFilter FilterWithNoCredentials => _filterWithNoCredentials.Value;
+
         private int _filterMaxVersionSet;
         private HttpClientHandler _handler;
 
         internal HttpHandlerToFilter(
             RTHttpBaseProtocolFilter filter,
-            RTHttpBaseProtocolFilter filterWithNoCredentials,
             HttpClientHandler handler)
         {
             if (filter == null)
@@ -42,9 +46,10 @@ namespace System.Net.Http
             }
 
             _filter = filter;
-            _filterWithNoCredentials = filterWithNoCredentials;
             _filterMaxVersionSet = 0;
             _handler = handler;
+            
+            _filterWithNoCredentials = new Lazy<RTHttpBaseProtocolFilter>(InitFilterWithNoCredentials);
         }
 
         internal string RequestMessageLookupKey { get; set; }
@@ -84,7 +89,7 @@ namespace System.Net.Http
                 {
                     if (redirects > 0)
                     {
-                        rtResponse = await _filterWithNoCredentials.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
+                        rtResponse = await FilterWithNoCredentials.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
                     }
                     else
                     {
@@ -138,11 +143,7 @@ namespace System.Net.Http
 
                 if (!redirectUri.IsAbsoluteUri)
                 {
-                    redirectUri = new Uri(string.Format("{0}://{1}:{2}{3}",
-                        request.RequestUri.Scheme,
-                        request.RequestUri.Host,
-                        request.RequestUri.Port,
-                        redirectUri.OriginalString));
+                    redirectUri = new Uri(request.RequestUri, redirectUri.OriginalString);
                 }
 
                 if (redirectUri.Scheme != Uri.UriSchemeHttp &&
@@ -157,6 +158,10 @@ namespace System.Net.Http
                     break;
                 }
 
+                // Follow HTTP RFC 7231 rules. In general, 3xx responses
+                // except for 307 will keep verb except POST becomes GET.
+                // 307 responses have all verbs stay the same.
+                // https://tools.ietf.org/html/rfc7231#section-6.4
                 if (response.StatusCode != HttpStatusCode.RedirectKeepVerb &&
                     requestHttpMethod == HttpMethod.Post)
                 {
@@ -170,6 +175,38 @@ namespace System.Net.Http
             response.RequestMessage = request;
 
             return response;
+        }
+
+        private RTHttpBaseProtocolFilter InitFilterWithNoCredentials()
+        {
+            RTHttpBaseProtocolFilter filter = new RTHttpBaseProtocolFilter();
+
+            filter.AllowAutoRedirect = _filter.AllowAutoRedirect;
+            filter.AllowUI = _filter.AllowUI;
+            filter.AutomaticDecompression = _filter.AutomaticDecompression;
+            filter.CacheControl.ReadBehavior = _filter.CacheControl.ReadBehavior;
+            filter.CacheControl.WriteBehavior = _filter.CacheControl.WriteBehavior;
+
+            if (HttpClientHandler.RTCookieUsageBehaviorSupported)
+            {
+                filter.CookieUsageBehavior = _filter.CookieUsageBehavior;
+            }
+
+            filter.MaxConnectionsPerServer = _filter.MaxConnectionsPerServer;
+            filter.MaxVersion = _filter.MaxVersion;
+            filter.UseProxy = _filter.UseProxy;
+
+            if (_handler.ServerCertificateCustomValidationCallback != null)
+            {
+                foreach (RTChainValidationResult error in _filter.IgnorableServerCertificateErrors)
+                {
+                    filter.IgnorableServerCertificateErrors.Add(error);
+                }
+
+                filter.ServerCustomValidationRequested += _handler.RTServerCertificateCallback;
+            }
+
+            return filter;
         }
 
         // Taken from System.Net.CookieModule.OnReceivedHeaders

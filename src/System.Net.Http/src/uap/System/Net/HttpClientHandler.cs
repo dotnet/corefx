@@ -52,11 +52,7 @@ namespace System.Net.Http
         private readonly HttpHandlerToFilter _handlerToFilter;
         private readonly HttpMessageHandler _diagnosticsPipeline;
 
-        // We need two different WinRT filters because we need to remove credentials during redirection requests
-        // and WinRT doesn't allow changing the filter properties after the first request.
         private RTHttpBaseProtocolFilter _rtFilter;
-        private RTHttpBaseProtocolFilter _rtFilterWithNoCredentials;
-
         private ClientCertificateOption _clientCertificateOptions;
         private CookieContainer _cookieContainer;
         private bool _useCookies;
@@ -144,7 +140,6 @@ namespace System.Net.Http
                 // HBPF will decompress both gzip and deflate, we will set
                 // accept-encoding for one, the other, or both passed in here.
                 _rtFilter.AutomaticDecompression = (value != DecompressionMethods.None);
-                _rtFilterWithNoCredentials.AutomaticDecompression = _rtFilter.AutomaticDecompression;
                 _automaticDecompression = value;
             }
         }
@@ -156,7 +151,6 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _rtFilter.UseProxy = value;
-                _rtFilterWithNoCredentials.UseProxy = value;
             }
         }
 
@@ -263,7 +257,6 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _rtFilter.MaxConnectionsPerServer = (uint)value;
-                _rtFilterWithNoCredentials.MaxConnectionsPerServer = (uint)value;
             }
         }
 
@@ -364,9 +357,8 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _rtFilter = CreateFilter();
-            _rtFilterWithNoCredentials = CreateFilter();
 
-            _handlerToFilter = new HttpHandlerToFilter(_rtFilter, _rtFilterWithNoCredentials, this);
+            _handlerToFilter = new HttpHandlerToFilter(_rtFilter, this);
             _handlerToFilter.RequestMessageLookupKey = RequestMessageLookupKey;
             _handlerToFilter.SavedExceptionDispatchInfoLookupKey = SavedExceptionDispatchInfoLookupKey;
             _diagnosticsPipeline = new DiagnosticsHandler(_handlerToFilter);
@@ -657,15 +649,6 @@ namespace System.Net.Http
                     _rtFilter.IgnorableServerCertificateErrors.Add(RTChainValidationResult.Untrusted);
                     _rtFilter.IgnorableServerCertificateErrors.Add(RTChainValidationResult.WrongUsage);
                     _rtFilter.ServerCustomValidationRequested += RTServerCertificateCallback;
-
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.Expired);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.IncompleteChain);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.InvalidName);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.RevocationFailure);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.RevocationInformationMissing);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.Untrusted);
-                    _rtFilterWithNoCredentials.IgnorableServerCertificateErrors.Add(RTChainValidationResult.WrongUsage);
-                    _rtFilterWithNoCredentials.ServerCustomValidationRequested += RTServerCertificateCallback;
                 }
 
                 _operationStarted = true;
@@ -693,7 +676,7 @@ namespace System.Net.Http
                 "ServerCustomValidationRequested");
         }
 
-        private void RTServerCertificateCallback(RTHttpBaseProtocolFilter sender, RTHttpServerCustomValidationRequestedEventArgs args)
+        internal void RTServerCertificateCallback(RTHttpBaseProtocolFilter sender, RTHttpServerCustomValidationRequestedEventArgs args)
         {
             bool success = RTServerCertificateCallbackHelper(
                 args.RequestMessage,
