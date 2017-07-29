@@ -21,7 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             return string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(code), args);
         }
 
-        public void Initialize(ErrorCode code, string[] args)
+        public CError(ErrorCode code, string[] args)
         {
             _text = ComputeString(code, args);
         }

@@ -8,9 +8,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
     {
         public CError CreateError(ErrorCode iErrorIndex, params string[] args)
         {
-            CError output = new CError();
-            output.Initialize(iErrorIndex, args);
-            return output;
+            return new CError(iErrorIndex, args);
         }
     }
 }
