@@ -1356,13 +1356,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pMWI.Meth().RetType != null)
             {
                 checkUnsafe(pMWI.Meth().RetType);
-                bool fCheckParams = false;
-
-                if (pMWI.Meth().isExternal)
-                {
-                    fCheckParams = true;
-                    SetExternalRef(pMWI.Meth().RetType);
-                }
 
                 // We need to check unsafe on the parameters as well, since we cannot check in conversion.
                 TypeArray pParams = pMWI.Meth().Params;
@@ -1375,10 +1368,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (type.isUnsafe())
                     {
                         checkUnsafe(type);
-                    }
-                    if (fCheckParams && type is ParameterModifierType)
-                    {
-                        SetExternalRef(type);
                     }
                 }
             }
@@ -1641,7 +1630,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray @params = mp.Params;
             int iDst = 0;
             MethodSymbol m = mp as MethodSymbol;
-            bool markTypeFromExternCall = m != null && m.isExternal;
             int argCount = ExpressionIterator.Count(argsPtr);
 
             if (m != null && m.isVarargs)
@@ -1668,8 +1656,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (paramCount != 0)
                         paramCount--;
-                    if (markTypeFromExternCall)
-                        SetExternalRef(indir.Type);
                     GetExprFactory().AppendItemToList(indir, ref newArgs, ref newArgsTail);
                 }
                 else if (paramCount != 0)
@@ -1856,21 +1842,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 while (symbol.getClass().IsStruct() && !symbol.isStatic && expr != null && (field = expr as ExprField) != null);
             }
         }
-
-        private void SetExternalRef(CType type)
-        {
-            AggregateSymbol agg = type.GetNakedAgg();
-            if (null == agg || agg.HasExternReference())
-                return;
-
-            agg.SetHasExternReference(true);
-            for (Symbol sym = agg.firstChild; sym != null; sym = sym.nextChild)
-            {
-                if (sym is FieldSymbol field)
-                    SetExternalRef(field.GetType());
-            }
-        }
-
 
         private static readonly PredefinedType[] s_rgptIntOp =
         {

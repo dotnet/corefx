@@ -670,23 +670,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethWithInst mwiWrap = new MethWithInst(mpwiWrap);
             MethWithInst mwiAmbig = new MethWithInst(mpwiAmbig);
 
-            bool isExtensionMethod = false;
-            // If the method we have bound to is an extension method and we are using it as an extension and not as a static method
-            if (methInvoke.Params.Count < @params.Count && mwiWrap.Meth().IsExtension())
-            {
-                isExtensionMethod = true;
-                TypeArray extParams = GetTypes().SubstTypeArray(mwiWrap.Meth().Params, mwiWrap.GetType());
-                // The this parameter must be a reference type.
-                CType param = extParams[0] is TypeParameterType ? @params[0] : extParams[0];
-                if (!param.IsRefType())
-                {
-                    // We should issue a better message here.
-                    // We were only disallowing value types, hence the error message specific to value types.
-                    // Now we are issuing the same error message for not-known to be reference types, not just value types.
-                    ErrorContext.Error(ErrorCode.ERR_ValueTypeExtDelegate, mwiWrap, param);
-                }
-            }
-
             // From here on we should only return true.
             if (!fReportErrors && !needDest)
                 return true;
@@ -725,7 +708,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            Expr obj = !isExtensionMethod ? grp.OptionalObject: null;
+            Expr obj = grp.OptionalObject;
             bool bIsMatchingStatic;
             bool constrained;
             PostBindMethod(ref mwiWrap, obj);
@@ -734,7 +717,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 grp.SetMismatchedStaticBit();
             }
-            obj = isExtensionMethod ? grp.OptionalObject: obj;
+
             Debug.Assert(mwiWrap.Meth().getKind() == SYMKIND.SK_MethodSymbol);
             if (mwiWrap.TypeArgs.Count > 0)
             {
@@ -746,7 +729,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
 
             ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(0, getVoidType(), null, mwiWrap);
-            if (!mwiWrap.Meth().isStatic || isExtensionMethod)
+            if (!mwiWrap.Meth().isStatic)
             {
                 if (mwiWrap.Meth().getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL))
                 {
@@ -788,33 +771,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pmpwi = result.GetBestResult();
             pmpwiAmbig = result.GetAmbiguousResult();
             return retval;
-        }
-        /*
-         * bindInstanceParamForExtension
-         *
-         * This method is called by canConvert for the case of the instance parameter on the extension method
-         *
-         */
-        private bool canConvertInstanceParamForExtension(Expr exprSrc, CType typeDest)
-        {
-            CType typeSrc = exprSrc?.Type;
-            return typeSrc != null && canConvertInstanceParamForExtension(typeSrc, typeDest);
-        }
-
-        private bool canConvertInstanceParamForExtension(CType typeSrc, CType typeDest)
-        {
-            // 26.2.3 Extension method invocations
-            //
-            // The following conversions are defined of instance params on Extension methods
-            //
-            // *   Identity conversions
-            // *   Implicit reference conversions
-            // *   Boxing conversions
-
-            // Always make sure both types are declared.
-            return CConversions.FIsSameType(typeSrc, typeDest) ||
-                        CConversions.FImpRefConv(GetSymbolLoader(), typeSrc, typeDest) ||
-                        CConversions.FBoxingConv(GetSymbolLoader(), typeSrc, typeDest);
         }
 
         private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)

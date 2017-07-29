@@ -43,7 +43,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Keep track of the first 20 or so syms with the wrong arg count.
             private readonly SymWithType[] _swtWrongCount = new SymWithType[20];
             private int _nWrongCount;
-            private bool _bIterateToEndOfNsList;               // we have found an appliacable extension method only itereate to 
             // end of current namespaces extension method list
             private readonly GroupToArgsBinderResult _results;
             private readonly List<CandidateFunctionMember> _methList;
@@ -82,7 +81,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pBestParameters = null;
                 _nArgBest = -1;
                 _nWrongCount = 0;
-                _bIterateToEndOfNsList = false;
                 _results = new GroupToArgsBinderResult();
                 _methList = new List<CandidateFunctionMember>();
                 _mpwiParamTypeConstraints = new MethPropWithInst();
@@ -872,7 +870,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // return false.
             private bool GetNextSym(CMemberLookupResults.CMethodIterator iterator)
             {
-                if (!iterator.MoveNext(_methList.IsEmpty(), _bIterateToEndOfNsList))
+                if (!iterator.MoveNext(_methList.IsEmpty()))
                 {
                     return false;
                 }
@@ -886,24 +884,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_pCurrentType != type &&
                         _pCurrentType != null &&
                         !_methList.IsEmpty() &&
-                        !_methList.Head().mpwi.GetType().isInterfaceType() &&
-                        (!(_methList.Head().mpwi.Sym is MethodSymbol) || !_methList.Head().mpwi.Meth().IsExtension()))
+                        !_methList.Head().mpwi.GetType().isInterfaceType())
                 {
                     return false;
-                }
-                else if (_pCurrentType != type &&
-                        _pCurrentType != null &&
-                        !_methList.IsEmpty() &&
-                        !_methList.Head().mpwi.GetType().isInterfaceType() &&
-                        _methList.Head().mpwi.Sym is MethodSymbol &&
-                        _methList.Head().mpwi.Meth().IsExtension())
-                {
-                    // we have found a applicable method that is an extension now we must move to the end of the NS list before quiting
-                    if (_pGroup.OptionalObject != null)
-                    {
-                        // if we find this while looking for static methods we should ignore it
-                        _bIterateToEndOfNsList = true;
-                    }
                 }
 
                 _pCurrentType = type;
@@ -913,7 +896,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 while (_HiddenTypes.Contains(_pCurrentType))
                 {
                     // Move through this type and get the next one.
-                    for (; iterator.GetCurrentType() == _pCurrentType; iterator.MoveNext(_methList.IsEmpty(), _bIterateToEndOfNsList)) ;
+                    for (; iterator.GetCurrentType() == _pCurrentType; iterator.MoveNext(_methList.IsEmpty())) ;
                     _pCurrentSym = iterator.GetCurrentSymbol();
                     _pCurrentType = iterator.GetCurrentType();
 
@@ -1020,7 +1003,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private bool ArgumentsAreConvertible()
             {
                 bool containsErrorSym = false;
-                bool bIsInstanceParameterConvertible = false;
                 if (_pArguments.carg != 0)
                 {
                     UpdateArguments();
@@ -1097,13 +1079,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // Do not store the result if we have an extension method and the instance 
                                 // parameter isn't convertible.
 
-                                if (!meth.IsExtension() || bIsInstanceParameterConvertible)
-                                {
-                                    _results.AddInconvertibleResult(
-                                        meth,
-                                        _pCurrentType,
-                                        _pCurrentTypeArgs);
-                                }
+                                _results.AddInconvertibleResult(meth, _pCurrentType, _pCurrentTypeArgs);
                             }
                             return false;
                         }
@@ -1114,24 +1090,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (_results.IsBetterUninferableResult(_pCurrentTypeArgs) && _pCurrentSym is MethodSymbol meth)
                     {
-                        // If we're an instance method or we're an extension that has an inferable instance argument,
-                        // then mark us down. Note that the extension may not need to infer type args,
-                        // so check if we have any type variables at all to begin with.
-                        if (!meth.IsExtension() ||
-                            meth.typeVars.Count == 0 ||
-                                MethodTypeInferrer.CanObjectOfExtensionBeInferred(
-                                    _pExprBinder,
-                                    GetSymbolLoader(),
-                                    meth,
-                                    _pCurrentType.GetTypeArgsAll(),
-                                    meth.Params,
-                                    _pArguments))
-                        {
-                            _results.GetUninferableResult().Set(
-                                    meth,
-                                    _pCurrentType,
-                                    _pCurrentTypeArgs);
-                        }
+                        // If we're an instance method then mark us down.
+                        _results.GetUninferableResult().Set(meth, _pCurrentType, _pCurrentTypeArgs);
                     }
                 }
                 else
@@ -1141,13 +1101,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Do not store the result if we have an extension method and the instance 
                         // parameter isn't convertible.
 
-                        if (!meth.IsExtension() || bIsInstanceParameterConvertible)
-                        {
-                            _results.AddInconvertibleResult(
-                                    meth,
-                                    _pCurrentType,
-                                    _pCurrentTypeArgs);
-                        }
+                        _results.AddInconvertibleResult(meth, _pCurrentType, _pCurrentTypeArgs);
                     }
                 }
                 return !containsErrorSym;
@@ -1418,14 +1372,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    if (_results.GetBestResult().Sym is MethodSymbol methSym && methSym.IsExtension() && _pGroup.OptionalObject != null)
-                    {
-                        GetErrorContext().Error(ErrorCode.ERR_BadExtensionArgTypes, _pGroup.OptionalObject.Type, _pGroup.Name, _results.GetBestResult().Sym);
-                    }
-                    else
-                    {
-                        GetErrorContext().Error(ErrorCode.ERR_BadArgTypes, _results.GetBestResult());
-                    }
+                    GetErrorContext().Error(ErrorCode.ERR_BadArgTypes, _results.GetBestResult());
                 }
 
                 // Argument X: cannot convert type 'Y' to type 'Z'
@@ -1455,18 +1402,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         else
                         {
-                            // if we tried to bind to an extensionmethod and the instance argument conversion failed then the method does not exist
-                            // on the type at all. 
-                            Symbol sym = _results.GetBestResult().Sym;
-                            if (ivar == 0 && sym is MethodSymbol meth && meth.IsExtension() && _pGroup.OptionalObject != null &&
-                                !_pExprBinder.canConvertInstanceParamForExtension(_pGroup.OptionalObject, meth.Params[0]))
-                            {
-                                GetErrorContext().Error(ErrorCode.ERR_BadInstanceArgType, _pGroup.OptionalObject.Type, var);
-                            }
-                            else
-                            {
-                                GetErrorContext().Error(ErrorCode.ERR_BadArgType, ivar + 1, new ErrArg(_pArguments.types[ivar], ErrArgFlags.Unique), new ErrArg(var, ErrArgFlags.Unique));
-                            }
+                            GetErrorContext().Error(ErrorCode.ERR_BadArgType, ivar + 1, new ErrArg(_pArguments.types[ivar], ErrArgFlags.Unique), new ErrArg(var, ErrArgFlags.Unique));
                         }
                     }
                 }
