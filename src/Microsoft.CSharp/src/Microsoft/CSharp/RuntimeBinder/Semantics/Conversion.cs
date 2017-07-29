@@ -776,33 +776,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pmpwiAmbig = result.GetAmbiguousResult();
             return retval;
         }
-        /*
-         * bindInstanceParamForExtension
-         *
-         * This method is called by canConvert for the case of the instance parameter on the extension method
-         *
-         */
-        private bool canConvertInstanceParamForExtension(Expr exprSrc, CType typeDest)
-        {
-            CType typeSrc = exprSrc?.Type;
-            return typeSrc != null && canConvertInstanceParamForExtension(typeSrc, typeDest);
-        }
-
-        private bool canConvertInstanceParamForExtension(CType typeSrc, CType typeDest)
-        {
-            // 26.2.3 Extension method invocations
-            //
-            // The following conversions are defined of instance params on Extension methods
-            //
-            // *   Identity conversions
-            // *   Implicit reference conversions
-            // *   Boxing conversions
-
-            // Always make sure both types are declared.
-            return CConversions.FIsSameType(typeSrc, typeDest) ||
-                        CConversions.FImpRefConv(GetSymbolLoader(), typeSrc, typeDest) ||
-                        CConversions.FBoxingConv(GetSymbolLoader(), typeSrc, typeDest);
-        }
 
         private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
         {
