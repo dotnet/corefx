@@ -38,7 +38,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorFacts.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorFmt.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorHandling.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\IErrorSink.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\MessageID.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\UserStringBuilder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ExpressionTreeCallRewriter.cs" />

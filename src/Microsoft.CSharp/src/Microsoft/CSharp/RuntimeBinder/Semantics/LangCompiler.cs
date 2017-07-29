@@ -2,18 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class LangCompiler :
-         CSemanticChecker,
-         IErrorSink
+    internal sealed class LangCompiler : CSemanticChecker
     {
         private SymbolLoader _symbolLoader;
-        private ErrorHandling _errorContext;
 
         ////////////////////////////////////////////////////////////////////////////////
         // Construct a compiler. All the real work is done in the Init() routine. This 
@@ -22,34 +18,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public LangCompiler(NameManager pNameMgr)
         {
             GlobalSymbolContext globalSymbolContext = new GlobalSymbolContext(pNameMgr);
-            _errorContext = new ErrorHandling(new UserStringBuilder(globalSymbolContext), this);
-            _symbolLoader = new SymbolLoader(globalSymbolContext, _errorContext);
-        }
-
-        private new ErrorHandling GetErrorContext()
-        {
-            return _errorContext;
+            _symbolLoader = new SymbolLoader(
+                globalSymbolContext, new ErrorHandling(new UserStringBuilder(globalSymbolContext)));
         }
 
         public override SymbolLoader SymbolLoader { get { return _symbolLoader; } }
         public override SymbolLoader GetSymbolLoader() { return _symbolLoader; }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Searches the class [atsSearch] to see if it contains a method which is 
-        // sufficient to implement [mwt]. Does not search base classes. [mwt] is 
-        // typically a method in some interface.  We may be implementing this interface
-        // at some particular type, e.g. IList<String>, and so the required signature is
-        // the instantiation (i.e. substitution) of [mwt] for that instance. Similarly, 
-        // the implementation may be provided by some base class that exists via
-        // polymorphic inheritance, e.g. Foo : List<String>, and so we must instantiate
-        // the parameters for each potential implementation. [atsSearch] may thus be an
-        // instantiated type.
-        //
-        // If fOverride is true, this checks for a method with swtSlot set to the 
-        // particular method.
-        public void SubmitError(CParameterizedError error)
-        {
-            GetErrorContext().RealizeError(error);
-        }
     }
 }

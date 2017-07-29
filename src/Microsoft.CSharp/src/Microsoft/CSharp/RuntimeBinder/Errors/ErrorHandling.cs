@@ -21,7 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
     internal sealed class ErrorHandling
     {
-        private readonly IErrorSink _errorSink;
         private readonly UserStringBuilder _userStringBuilder;
 
         // By default these DO NOT add related locations. To add a related location, pass an ErrArgRef.
@@ -43,7 +42,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         public void SubmitError(CParameterizedError error)
         {
-            _errorSink?.SubmitError(error);
+            RealizeError(error);
         }
 
         private void MakeErrorLocArgs(out CParameterizedError error, ErrorCode id, ErrArg[] prgarg)
@@ -72,12 +71,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             MakeErrorTreeArgs(out error, id, args);
         }
 
-        public ErrorHandling(
-            UserStringBuilder strBldr,
-            IErrorSink sink)
+        public ErrorHandling(UserStringBuilder strBldr)
         {
             _userStringBuilder = strBldr;
-            _errorSink = sink;
         }
 
         private void ErrorTreeArgs(ErrorCode id, ErrArg[] prgarg)
