@@ -53,7 +53,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // particular method.
         public void SubmitError(CParameterizedError error)
         {
-            _pController.SubmitError(GetErrorContext().RealizeError(error));
+            GetErrorContext().RealizeError(error).Submit();
         }
     }
 }

@@ -14,18 +14,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
     internal sealed class CError
     {
-        private string _text;
-
-        private static string ComputeString(ErrorCode code, string[] args)
-        {
-            return string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(code), args);
-        }
-
         public CError(ErrorCode code, string[] args)
         {
-            _text = ComputeString(code, args);
+            Text = string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(code), args);
         }
 
-        public string Text { get { return _text; } }
+        public string Text { get; }
+
+        public void Submit()
+        {
+            throw new RuntimeBinderException(Text);
+        }
     }
 }

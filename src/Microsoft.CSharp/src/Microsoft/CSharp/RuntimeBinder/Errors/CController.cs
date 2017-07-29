@@ -28,6 +28,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         // can't create a container) the error is destroyed and the host is notified via
         // exception.
 
-        public abstract void SubmitError(CError pError);
     }
 }
