@@ -35,7 +35,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Error.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CController.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CError.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CErrorFactory.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CParameterizedError.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorCode.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorFacts.cs" />

@@ -26,7 +26,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             _pController = pCtrl;
             GlobalSymbolContext globalSymbolContext = new GlobalSymbolContext(pNameMgr);
-            _errorContext = new ErrorHandling(new UserStringBuilder(globalSymbolContext), this, pCtrl.GetErrorFactory());
+            _errorContext = new ErrorHandling(new UserStringBuilder(globalSymbolContext), this);
             _symbolLoader = new SymbolLoader(globalSymbolContext, _errorContext);
         }
 

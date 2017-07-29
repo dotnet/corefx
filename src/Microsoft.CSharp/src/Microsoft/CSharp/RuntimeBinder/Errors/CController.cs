@@ -14,11 +14,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
     internal abstract class CController
     {
-        private readonly CErrorFactory _errorFactory;
-
         protected CController()
         {
-            _errorFactory = new CErrorFactory();
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -32,10 +29,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         // exception.
 
         public abstract void SubmitError(CError pError);
-
-        public CErrorFactory GetErrorFactory()
-        {
-            return _errorFactory;
-        }
     }
 }

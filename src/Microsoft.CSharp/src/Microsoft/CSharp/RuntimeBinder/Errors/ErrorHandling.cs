@@ -23,7 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
     {
         private readonly IErrorSink _errorSink;
         private readonly UserStringBuilder _userStringBuilder;
-        private readonly CErrorFactory _errorFactory;
 
         // By default these DO NOT add related locations. To add a related location, pass an ErrArgRef.
         public void Error(ErrorCode id, params ErrArg[] args)
@@ -75,20 +74,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         public ErrorHandling(
             UserStringBuilder strBldr,
-            IErrorSink sink,
-            CErrorFactory factory)
+            IErrorSink sink)
         {
-            Debug.Assert(factory != null);
-
             _userStringBuilder = strBldr;
             _errorSink = sink;
-            _errorFactory = factory;
         }
 
-        private CError CreateError(ErrorCode iErrorIndex, string[] args)
-        {
-            return _errorFactory.CreateError(iErrorIndex, args);
-        }
         private void ErrorTreeArgs(ErrorCode id, ErrArg[] prgarg)
         {
             CParameterizedError error;
@@ -239,8 +230,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 prgpsz = prgpszNew;
             }
 
-            CError err = CreateError(parameterizedError.GetErrorNumber(), prgpsz);
-            return err;
+            return new CError(parameterizedError.GetErrorNumber(), prgpsz);
         }
     }
 }
