@@ -50,7 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void Reset()
         {
-            _semanticChecker = new LangCompiler();
+            _semanticChecker = new CSemanticChecker();
 
             BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
             NameManager nameManager = _semanticChecker.GetNameManager();

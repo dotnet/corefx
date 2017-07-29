@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     //
     // Semantic check methods on SymbolLoader
     //
-    internal abstract class CSemanticChecker
+    internal sealed class CSemanticChecker
     {
         // Generate an error if CType is static.
         public bool CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
@@ -30,7 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        public virtual ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
+        public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
             Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
@@ -79,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return CheckTypeAccess(CType, symWhere) ? ACCESSERROR.ACCESSERROR_NOERROR : ACCESSERROR.ACCESSERROR_NOACCESS;
         }
-        public virtual bool CheckTypeAccess(CType type, Symbol symWhere)
+        public bool CheckTypeAccess(CType type, Symbol symWhere)
         {
             Debug.Assert(type != null);
 
@@ -121,8 +121,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 ErrorContext.Error(err, CType);
         }
 
-        public abstract SymbolLoader SymbolLoader { get; }
-        public abstract SymbolLoader GetSymbolLoader();
+        public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
+
+        public SymbolLoader GetSymbolLoader() => SymbolLoader;
 
         /////////////////////////////////////////////////////////////////////////////////
         // SymbolLoader forwarders (begin)

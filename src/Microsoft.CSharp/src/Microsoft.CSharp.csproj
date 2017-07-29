@@ -72,7 +72,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\GroupToArgsBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\GroupToArgsBinderResult.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\ImplicitConversion.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\LangCompiler.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MemberLookup.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MemberLookupResults.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\MethodIterator.cs" />
