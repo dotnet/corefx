@@ -23,14 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
     {
         private readonly UserStringBuilder _userStringBuilder;
 
-        // By default these DO NOT add related locations. To add a related location, pass an ErrArgRef.
         public void Error(ErrorCode id, params ErrArg[] args)
-        {
-            ErrorTreeArgs(id, args);
-        }
-
-        // By default these DO add related locations.
-        public void ErrorRef(ErrorCode id, params ErrArgRef[] args)
         {
             ErrorTreeArgs(id, args);
         }

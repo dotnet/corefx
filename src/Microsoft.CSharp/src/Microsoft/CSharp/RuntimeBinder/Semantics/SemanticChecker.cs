@@ -116,7 +116,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void ReportStaticClassError(Symbol symCtx, CType CType, ErrorCode err)
         {
             if (symCtx != null)
-                ErrorContext.Error(err, CType, new ErrArgRef(symCtx));
+                ErrorContext.Error(err, CType, new ErrArg(symCtx));
             else
                 ErrorContext.Error(err, CType);
         }
@@ -294,7 +294,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                ErrorContext.ErrorRef(ErrorCode.ERR_BadAccess, swtBad);
+                ErrorContext.Error(ErrorCode.ERR_BadAccess, swtBad);
             }
         }
 

@@ -832,7 +832,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         return GetExprFactory().CreateClass(pOtherType);
                     }
-                    ErrorContext.ErrorRef(ErrorCode.ERR_PropertyLacksGet, pwt);
+                    ErrorContext.Error(ErrorCode.ERR_PropertyLacksGet, pwt);
                 }
                 else
                 {
@@ -857,7 +857,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         else
                         {
-                            ErrorContext.ErrorRef(ErrorCode.ERR_InaccessibleGetter, pwt);
+                            ErrorContext.Error(ErrorCode.ERR_InaccessibleGetter, pwt);
                         }
                     }
                 }
@@ -1438,13 +1438,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        ErrorContext.ErrorRef(ErrorCode.ERR_ObjectProhibited, swt);
+                        ErrorContext.Error(ErrorCode.ERR_ObjectProhibited, swt);
                         return null;
                     }
                 }
                 else
                 {
-                    ErrorContext.ErrorRef(ErrorCode.ERR_ObjectRequired, swt);
+                    ErrorContext.Error(ErrorCode.ERR_ObjectRequired, swt);
                     return pObject;
                 }
             }

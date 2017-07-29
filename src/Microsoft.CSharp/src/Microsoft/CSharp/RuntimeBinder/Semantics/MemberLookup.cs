@@ -729,7 +729,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (_swtFirst)
             {
                 // Ambiguous lookup.
-                GetErrorContext().ErrorRef(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
+                GetErrorContext().Error(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
             }
             else if (_swtInaccess)
             {
@@ -774,11 +774,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case SYMKIND.SK_MethodSymbol:
                         Debug.Assert(_arity != 0);
                         cvar = ((MethodSymbol)_swtBadArity.Sym).typeVars.Count;
-                        GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
+                        GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
                     case SYMKIND.SK_AggregateSymbol:
                         cvar = ((AggregateSymbol)_swtBadArity.Sym).GetTypeVars().Count;
-                        GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
+                        GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
                     default:
                         Debug.Assert(_arity != 0);

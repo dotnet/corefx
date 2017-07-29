@@ -141,9 +141,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public static void ReportTypeArgsNotAllowedError(SymbolLoader symbolLoader, int arity, ErrArgRef argName, ErrArgRef argKind)
+        public static void ReportTypeArgsNotAllowedError(SymbolLoader symbolLoader, int arity, ErrArg argName, ErrArg argKind)
         {
-            symbolLoader.ErrorContext.ErrorRef(ErrorCode.ERR_TypeArgsNotAllowed, argName, argKind);
+            symbolLoader.ErrorContext.Error(ErrorCode.ERR_TypeArgsNotAllowed, argName, argKind);
         }
     }
 }

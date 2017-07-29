@@ -1272,7 +1272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_mpwiBogus)
                 {
                     // We might have called this, but it is bogus...
-                    GetErrorContext().ErrorRef(ErrorCode.ERR_BindToBogus, _mpwiBogus);
+                    GetErrorContext().Error(ErrorCode.ERR_BindToBogus, _mpwiBogus);
                     return;
                 }
 
@@ -1326,7 +1326,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 else if (_mwtBadArity)
                 {
                     int cvar = _mwtBadArity.Meth().typeVars.Count;
-                    GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _mwtBadArity, new ErrArgSymKind(_mwtBadArity.Meth()), _pArguments.carg);
+                    GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _mwtBadArity, new ErrArgSymKind(_mwtBadArity.Meth()), _pArguments.carg);
                 }
                 else if (_mpwiParamTypeConstraints)
                 {
@@ -1407,7 +1407,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Best matching overloaded method 'name' had some invalid arguments.
                 if (_pDelegate != null)
                 {
-                    GetErrorContext().ErrorRef(ErrorCode.ERR_MethDelegateMismatch, nameErr, _pDelegate, _results.GetBestResult());
+                    GetErrorContext().Error(ErrorCode.ERR_MethDelegateMismatch, nameErr, _pDelegate, _results.GetBestResult());
                     return;
                 }
 

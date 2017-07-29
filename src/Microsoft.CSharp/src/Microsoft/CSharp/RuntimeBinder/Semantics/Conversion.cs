@@ -704,7 +704,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeRetReal = GetTypes().SubstType(mwiWrap.Meth().RetType, mwiWrap.Ats, mwiWrap.TypeArgs);
             if (typeRet != typeRetReal && !CConversions.FImpRefConv(GetSymbolLoader(), typeRetReal, typeRet))
             {
-                ErrorContext.ErrorRef(ErrorCode.ERR_BadRetType, mwiWrap, typeRetReal);
+                ErrorContext.Error(ErrorCode.ERR_BadRetType, mwiWrap, typeRetReal);
                 fError = true;
             }
 
@@ -718,7 +718,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     if (param != paramReal && !CConversions.FImpRefConv(GetSymbolLoader(), param, paramReal))
                     {
-                        ErrorContext.ErrorRef(ErrorCode.ERR_MethDelegateMismatch, mwiWrap, typeDst);
+                        ErrorContext.Error(ErrorCode.ERR_MethDelegateMismatch, mwiWrap, typeDst);
                         fError = true;
                         break;
                     }
