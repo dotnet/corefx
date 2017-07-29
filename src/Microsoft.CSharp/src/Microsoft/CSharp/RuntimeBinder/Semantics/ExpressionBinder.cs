@@ -2148,12 +2148,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (type == null || type.isUnsafe())
             {
-                if (ReportUnsafeErrors())
-                {
-                    throw ErrorContext.Error(ErrorCode.ERR_UnsafeNeeded);
-                }
-
-                RecordUnsafeUsage();
+                throw ErrorContext.Error(ErrorCode.ERR_UnsafeNeeded);
             }
         }
 
@@ -2161,16 +2156,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private AggregateDeclaration ContextForMemberLookup()
         {
             return Context.ContextForMemberLookup;
-        }
-
-        private bool ReportUnsafeErrors()
-        {
-            return Context.ReportUnsafeErrors;
-        }
-
-        private void RecordUnsafeUsage()
-        {
-            RecordUnsafeUsage(Context);
         }
 
         private ExprWrap WrapShortLivedExpression(Expr expr)
@@ -2181,11 +2166,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprAssignment GenerateOptimizedAssignment(Expr op1, Expr op2)
         {
             return GetExprFactory().CreateAssignment(op1, op2);
-        }
-
-        private static void RecordUnsafeUsage(BindingContext context)
-        {
-            context.ReportUnsafeErrors = false;
         }
 
         internal static int CountArguments(Expr args, out bool typeErrors)

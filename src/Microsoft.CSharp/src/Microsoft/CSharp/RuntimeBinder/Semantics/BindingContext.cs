@@ -25,7 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(parent.SemanticChecker != null);
             ExprFactory = parent.ExprFactory;
-            ReportUnsafeErrors = parent.ReportUnsafeErrors;
             ContextForMemberLookup = parent.ContextForMemberLookup;
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
@@ -41,8 +40,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public SymbolLoader SymbolLoader { get; }
 
         public AggregateDeclaration ContextForMemberLookup { get; set; }
-
-        public bool ReportUnsafeErrors { get; set; } = true;
 
         public CSemanticChecker SemanticChecker { get; }
 
