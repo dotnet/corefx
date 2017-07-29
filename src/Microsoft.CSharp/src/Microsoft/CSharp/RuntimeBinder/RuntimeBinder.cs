@@ -32,7 +32,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private SymbolTable _symbolTable;
         private CSemanticChecker _semanticChecker;
-        private SymbolLoader SymbolLoader { get { return _semanticChecker.GetSymbolLoader(); } }
+        private SymbolLoader SymbolLoader => _semanticChecker.SymbolLoader;
+
         private ExprFactory _exprFactory;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
@@ -67,7 +68,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymbolLoader.getPredefinedMembers().RuntimeBinderSymbolTable = _symbolTable;
             SymbolLoader.SetSymbolTable(_symbolTable);
 
-            _exprFactory = new ExprFactory(_semanticChecker.GetSymbolLoader().GetGlobalSymbolContext());
+            _exprFactory = new ExprFactory(_semanticChecker.SymbolLoader.GetGlobalSymbolContext());
             _bindingContext = new BindingContext(_semanticChecker, _exprFactory);
             _binder = new ExpressionBinder(_bindingContext);
         }
@@ -624,11 +625,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType callingObjectType = callingObject.Type;
             if (callingObjectType is ArrayType)
             {
-                callingType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_ARRAY);
+                callingType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ARRAY);
             }
             else if (callingObjectType is NullableType callingNub)
             {
-                callingType = callingNub.GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
+                callingType = callingNub.GetAts(_semanticChecker.SymbolLoader.GetErrorContext());
             }
             else
             {

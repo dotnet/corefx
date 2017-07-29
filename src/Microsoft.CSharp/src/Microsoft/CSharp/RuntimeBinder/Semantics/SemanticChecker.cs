@@ -123,8 +123,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
 
-        public SymbolLoader GetSymbolLoader() => SymbolLoader;
-
         /////////////////////////////////////////////////////////////////////////////////
         // SymbolLoader forwarders (begin)
         //

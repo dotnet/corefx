@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(semanticChecker != null);
             ExprFactory = exprFactory;
             SemanticChecker = semanticChecker;
-            SymbolLoader = semanticChecker.GetSymbolLoader();
+            SymbolLoader = semanticChecker.SymbolLoader;
         }
 
         public BindingContext(BindingContext parent)
@@ -29,7 +29,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ContextForMemberLookup = parent.ContextForMemberLookup;
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
-            SymbolLoader = (SemanticChecker = parent.SemanticChecker).GetSymbolLoader();
+            SymbolLoader = (SemanticChecker = parent.SemanticChecker).SymbolLoader;
         }
 
 

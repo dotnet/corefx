@@ -188,7 +188,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 fError = true;
             }
 
-            TypeArray bnds = checker.GetSymbolLoader().GetTypeManager().SubstTypeArray(var.GetBounds(), typeArgsCls, typeArgsMeth);
+            TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.GetBounds(), typeArgsCls, typeArgsMeth);
             int itypeMin = 0;
 
             if (var.HasValConstraint())
@@ -253,7 +253,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // to which they have an implicit reference conversion
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedRefType;
                         }
-                        else if (arg is NullableType nubArg && checker.GetSymbolLoader().HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
+                        else if (arg is NullableType nubArg && checker.SymbolLoader.HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
@@ -309,7 +309,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // have all the information necessary yet, if it is not fully bound.
                 // by calling LookupAggMember, it will ensure that we will update all the
                 // information necessary at least for the given method.
-                checker.GetSymbolLoader().LookupAggMember(NameManager.GetPredefinedName(PredefinedName.PN_CTOR), agg, symbmask_t.MASK_ALL);
+                checker.SymbolLoader.LookupAggMember(NameManager.GetPredefinedName(PredefinedName.PN_CTOR), agg, symbmask_t.MASK_ALL);
 
                 if (agg.HasPubNoArgCtor() && !agg.IsAbstract())
                 {
@@ -382,7 +382,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_TypeParameterType:
                 case TypeKind.TK_ArrayType:
                 case TypeKind.TK_AggregateType:
-                    return checker.GetSymbolLoader().HasBaseConversion(arg, typeBnd);
+                    return checker.SymbolLoader.HasBaseConversion(arg, typeBnd);
             }
         }
     }

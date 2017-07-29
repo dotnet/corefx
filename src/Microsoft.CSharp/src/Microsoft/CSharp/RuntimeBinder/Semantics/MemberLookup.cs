@@ -604,7 +604,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Save the inputs for error handling, etc.
             _pSemanticChecker = checker;
-            _pSymbolLoader = checker.GetSymbolLoader();
+            _pSymbolLoader = checker.SymbolLoader;
             _typeSrc = typeSrc;
             _obj = obj is ExprClass ? null : obj;
             _symWhere = symWhere;
