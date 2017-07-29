@@ -22,12 +22,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class CSemanticChecker
     {
         // Generate an error if CType is static.
-        public bool CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
+        public void CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
         {
-            if (!CType.isStaticClass())
-                return false;
-            ReportStaticClassError(symCtx, CType, err);
-            return true;
+            if (CType.isStaticClass())
+            {
+                throw ReportStaticClassError(symCtx, CType, err);
+            }
         }
 
         public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
@@ -113,13 +113,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Generates an error for static classes
-        public void ReportStaticClassError(Symbol symCtx, CType CType, ErrorCode err)
-        {
-            if (symCtx != null)
-                ErrorContext.Error(err, CType, new ErrArg(symCtx));
-            else
-                ErrorContext.Error(err, CType);
-        }
+        public RuntimeBinderException ReportStaticClassError(Symbol symCtx, CType CType, ErrorCode err) =>
+            ErrorContext.Error(err, symCtx != null ? new []{CType, new ErrArg(symCtx)} : new ErrArg[]{CType});
 
         public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
 
@@ -283,19 +278,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (sym as PropertySymbol)?.Bogus ?? false;
         }
 
-        public void ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)
+        public RuntimeBinderException ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)
         {
             Debug.Assert(!CheckAccess(swtBad.Sym, swtBad.GetType(), symWhere, typeQual) ||
                    !CheckTypeAccess(swtBad.GetType(), symWhere));
 
-            if (CheckAccess2(swtBad.Sym, swtBad.GetType(), symWhere, typeQual) == ACCESSERROR.ACCESSERROR_NOACCESSTHRU)
-            {
-                ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, swtBad, typeQual, symWhere);
-            }
-            else
-            {
-                ErrorContext.Error(ErrorCode.ERR_BadAccess, swtBad);
-            }
+            return CheckAccess2(swtBad.Sym, swtBad.GetType(), symWhere, typeQual)
+                   == ACCESSERROR.ACCESSERROR_NOACCESSTHRU
+                ? ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, swtBad, typeQual, symWhere)
+                : ErrorContext.Error(ErrorCode.ERR_BadAccess, swtBad);
         }
 
         public bool CheckAccess(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)

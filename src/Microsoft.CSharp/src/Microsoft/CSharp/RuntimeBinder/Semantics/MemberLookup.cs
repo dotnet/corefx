@@ -533,24 +533,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private CSemanticChecker GetSemanticChecker() { return _pSemanticChecker; }
         private ErrorHandling GetErrorContext() { return GetSymbolLoader().GetErrorContext(); }
 
-        private void ReportBogus(SymWithType swt)
+        private RuntimeBinderException ReportBogus(SymWithType swt)
         {
             Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
             MethodSymbol meth1 = swt.Prop().GetterMethod;
             MethodSymbol meth2 = swt.Prop().SetterMethod;
             Debug.Assert((meth1 ?? meth2) != null);
-            if (meth1 == null | meth2 == null)
-            {
-                GetErrorContext().Error(
+            return meth1 == null | meth2 == null
+                ? GetErrorContext().Error(
                     ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 ?? meth2, swt.GetType()),
-                    new ErrArgRefOnly(swt.Sym));
-            }
-            else
-            {
-                GetErrorContext().Error(
+                    new ErrArgRefOnly(swt.Sym))
+                : GetErrorContext().Error(
                     ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()),
                     new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
-            }
         }
 
         private bool IsDelegateType(CType pSrcType, AggregateType pAggType)
@@ -718,7 +713,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /******************************************************************************
             Reports errors. Only call this if FError() is true.
         ******************************************************************************/
-        public void ReportErrors()
+        public Exception ReportErrors()
         {
             Debug.Assert(FError());
 
@@ -729,43 +724,44 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (_swtFirst)
             {
                 // Ambiguous lookup.
-                GetErrorContext().Error(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
+                return GetErrorContext().Error(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
             }
-            else if (_swtInaccess)
+
+            if (_swtInaccess)
             {
-                if (!_swtInaccess.Sym.isUserCallable() && ((_flags & MemLookFlags.UserCallable) != 0))
-                    GetErrorContext().Error(ErrorCode.ERR_CantCallSpecialMethod, _swtInaccess);
-                else
-                    GetSemanticChecker().ReportAccessError(_swtInaccess, _symWhere, _typeQual);
+                return !_swtInaccess.Sym.isUserCallable() && ((_flags & MemLookFlags.UserCallable) != 0)
+                    ? GetErrorContext().Error(ErrorCode.ERR_CantCallSpecialMethod, _swtInaccess)
+                    : GetSemanticChecker().ReportAccessError(_swtInaccess, _symWhere, _typeQual);
             }
-            else if ((_flags & MemLookFlags.Ctor) != 0)
+
+            if ((_flags & MemLookFlags.Ctor) != 0)
             {
-                if (_arity > 0)
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, _typeSrc.getAggregate(), _arity);
-                }
-                else
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_NoConstructors, _typeSrc.getAggregate());
-                }
+                return _arity > 0
+                    ? GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, _typeSrc.getAggregate(), _arity)
+                    : GetErrorContext().Error(ErrorCode.ERR_NoConstructors, _typeSrc.getAggregate());
             }
-            else if ((_flags & MemLookFlags.Operator) != 0)
+
+            if ((_flags & MemLookFlags.Operator) != 0)
             {
-                GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
+                return GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
             }
-            else if ((_flags & MemLookFlags.Indexer) != 0)
+
+            if ((_flags & MemLookFlags.Indexer) != 0)
             {
-                GetErrorContext().Error(ErrorCode.ERR_BadIndexLHS, _typeSrc);
+                return GetErrorContext().Error(ErrorCode.ERR_BadIndexLHS, _typeSrc);
             }
-            else if (_swtBad)
+
+            if (_swtBad)
             {
-                GetErrorContext().Error((_flags & MemLookFlags.MustBeInvocable) != 0 ? ErrorCode.ERR_NonInvocableMemberCalled : ErrorCode.ERR_CantCallSpecialMethod, _swtBad);
+                return GetErrorContext().Error((_flags & MemLookFlags.MustBeInvocable) != 0 ? ErrorCode.ERR_NonInvocableMemberCalled : ErrorCode.ERR_CantCallSpecialMethod, _swtBad);
             }
-            else if (_swtBogus)
+
+            if (_swtBogus)
             {
-                ReportBogus(_swtBogus);
+                return ReportBogus(_swtBogus);
             }
-            else if (_swtBadArity)
+
+            if (_swtBadArity)
             {
                 int cvar;
 
@@ -774,29 +770,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case SYMKIND.SK_MethodSymbol:
                         Debug.Assert(_arity != 0);
                         cvar = ((MethodSymbol)_swtBadArity.Sym).typeVars.Count;
-                        GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
-                        break;
+                        return GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
+
                     case SYMKIND.SK_AggregateSymbol:
                         cvar = ((AggregateSymbol)_swtBadArity.Sym).GetTypeVars().Count;
-                        GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
-                        break;
+                        return GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
+
                     default:
                         Debug.Assert(_arity != 0);
-                        ExpressionBinder.ReportTypeArgsNotAllowedError(GetSymbolLoader(), _arity, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
-                        break;
+                        return ExpressionBinder.ReportTypeArgsNotAllowedError(GetSymbolLoader(), _arity, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
                 }
             }
-            else
-            {
-                if ((_flags & MemLookFlags.ExtensionCall) != 0)
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_NoSuchMemberOrExtension, _typeSrc, _name);
-                }
-                else
-                {
-                    GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
-                }
-            }
+
+            return GetErrorContext().Error((_flags & MemLookFlags.ExtensionCall) != 0 ? ErrorCode.ERR_NoSuchMemberOrExtension : ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
         }
     }
 }

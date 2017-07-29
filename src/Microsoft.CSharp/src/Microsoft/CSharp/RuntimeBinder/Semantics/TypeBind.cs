@@ -161,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (fReportErrors)
                 {
-                    errHandling.Error(ErrorCode.ERR_BadTypeArgument, arg);
+                    throw errHandling.Error(ErrorCode.ERR_BadTypeArgument, arg);
                 }
 
                 return false;
@@ -182,7 +182,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (fReportErrors)
                 {
-                    errHandling.Error(ErrorCode.ERR_RefConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                    throw errHandling.Error(ErrorCode.ERR_RefConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                 }
 
                 fError = true;
@@ -216,7 +216,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (fReportErrors)
                     {
-                        errHandling.Error(ErrorCode.ERR_ValConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                        throw errHandling.Error(ErrorCode.ERR_ValConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                     }
 
                     fError = true;
@@ -289,8 +289,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Note that the exceptional case of Nullable types and boxing is handled above.
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedValType;
                         }
-                        errHandling.Error(error, new ErrArg(symErr), new ErrArg(typeBnd, ErrArgFlags.Unique), var, new ErrArg(arg, ErrArgFlags.Unique));
+
+                        throw errHandling.Error(error, new ErrArg(symErr), new ErrArg(typeBnd, ErrArgFlags.Unique), var, new ErrArg(arg, ErrArgFlags.Unique));
                     }
+
                     fError = true;
                 }
             }
@@ -323,7 +325,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (fReportErrors)
             {
-                errHandling.Error(ErrorCode.ERR_NewConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                throw errHandling.Error(ErrorCode.ERR_NewConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
             }
 
             return false;

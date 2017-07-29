@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             _userStringBuilder = new UserStringBuilder(globalSymbols);
         }
 
-        public void Error(ErrorCode id, params ErrArg[] args)
+        public RuntimeBinderException Error(ErrorCode id, params ErrArg[] args)
         {
             // Create an argument array manually using the type information in the ErrArgs.
             string[] prgpsz = new string[args.Length];
@@ -160,7 +160,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 prgpsz = prgpszNew;
             }
 
-            throw new RuntimeBinderException(string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(id), prgpsz));
+            return new RuntimeBinderException(string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(id), prgpsz));
         }
     }
 }

@@ -859,8 +859,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     true);
             if (swt == null)
             {
-                mem.ReportErrors();
-                Debug.Assert(false, "Why didn't member lookup report an error?");
+                throw mem.ReportErrors();
             }
 
             if (swt.Sym.getKind() != SYMKIND.SK_MethodSymbol)
@@ -902,8 +901,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         true);
                 if (swtEvent == null)
                 {
-                    mem.ReportErrors();
-                    Debug.Assert(false, "Why didn't member lookup report an error?");
+                    throw mem.ReportErrors();
                 }
 
                 CType eventCType = null;
@@ -1364,14 +1362,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         if (type.IsArray && type.GetArrayRank() != numIndexArguments)
                         {
-                            _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
+                            throw _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
-
+                        
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
                 }
-                mem.ReportErrors();
-                Debug.Assert(false, "Why didn't member lookup report an error?");
+                throw mem.ReportErrors();
             }
 
             switch (swt.Sym.getKind())
