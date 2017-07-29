@@ -1051,11 +1051,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // If we have named arguments specified, make sure we have them all appearing after 
             // fixed arguments.
-            bool bSeenNamed = false;
-            VerifyNamedArgumentsAfterFixed(args, out bSeenNamed);
+            bool seenNamed = VerifyNamedArgumentsAfterFixed(args);
 
             GroupToArgsBinderResult result;
-            if (!BindMethodGroupToArgumentsCore(out result, bindFlags, grp, ref args, carg, bSeenNamed))
+            if (!BindMethodGroupToArgumentsCore(out result, bindFlags, grp, ref args, carg, seenNamed))
             {
                 Debug.Assert(false, "Why didn't BindMethodGroupToArgumentsCore throw an error?");
                 return null;
@@ -1080,10 +1079,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void VerifyNamedArgumentsAfterFixed(Expr args, out bool seenNamed)
+        private bool VerifyNamedArgumentsAfterFixed(Expr args)
         {
             Expr list = args;
-            seenNamed = false;
+            bool seenNamed = false;
             while (list != null)
             {
                 Expr arg;
@@ -1111,6 +1110,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
             }
+
+            return seenNamed;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
