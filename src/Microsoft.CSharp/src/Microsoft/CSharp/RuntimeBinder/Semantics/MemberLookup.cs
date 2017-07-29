@@ -684,10 +684,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return _swtFirst;
         }
-        public SymWithType SwtInaccessible()
-        {
-            return _swtInaccess;
-        }
 
         public Expr GetObject()
         {
