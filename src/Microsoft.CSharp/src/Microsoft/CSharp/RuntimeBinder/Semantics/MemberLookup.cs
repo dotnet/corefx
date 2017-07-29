@@ -774,7 +774,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     default:
                         Debug.Assert(_arity != 0);
-                        return ExpressionBinder.ReportTypeArgsNotAllowedError(GetSymbolLoader(), _arity, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
+                        return GetErrorContext().Error(ErrorCode.ERR_TypeArgsNotAllowed, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
                 }
             }
 

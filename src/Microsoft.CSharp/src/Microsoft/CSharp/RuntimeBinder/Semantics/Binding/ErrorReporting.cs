@@ -131,10 +131,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 isNested = true;
             }
         }
-
-        public static RuntimeBinderException ReportTypeArgsNotAllowedError(SymbolLoader symbolLoader, int arity, ErrArg argName, ErrArg argKind)
-        {
-            return symbolLoader.ErrorContext.Error(ErrorCode.ERR_TypeArgsNotAllowed, argName, argKind);
-        }
     }
 }
