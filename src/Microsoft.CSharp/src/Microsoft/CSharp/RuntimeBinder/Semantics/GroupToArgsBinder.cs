@@ -40,9 +40,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private TypeArray _pCurrentParameters;
             private TypeArray _pBestParameters;
             private int _nArgBest;
-            // Keep track of the first 20 or so syms with the wrong arg count.
-            private readonly SymWithType[] _swtWrongCount = new SymWithType[20];
-            private int _nWrongCount;
             private bool _bIterateToEndOfNsList;               // we have found an appliacable extension method only itereate to 
             // end of current namespaces extension method list
             private readonly GroupToArgsBinderResult _results;
@@ -81,7 +78,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pCurrentParameters = null;
                 _pBestParameters = null;
                 _nArgBest = -1;
-                _nWrongCount = 0;
                 _bIterateToEndOfNsList = false;
                 _results = new GroupToArgsBinderResult();
                 _methList = new List<CandidateFunctionMember>();
@@ -144,7 +140,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 bool fExpanded = false;
                 bool bSearchForExpanded = true;
-                int cswtMaxWrongCount = _swtWrongCount.Length;
                 bool allCandidatesUnsupported = true;
                 bool lookedAtCandidates = false;
 
@@ -218,11 +213,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // then store it in our cache and go to the next sym.
                         if (_pCurrentParameters.Count != _pArguments.carg)
                         {
-                            if (_nWrongCount < cswtMaxWrongCount &&
-                                    (!_pCurrentSym.isParamArray || _pArguments.carg < _pCurrentParameters.Count - 1))
-                            {
-                                _swtWrongCount[_nWrongCount++] = new SymWithType(_pCurrentSym, _pCurrentType);
-                            }
                             bSearchForExpanded = true;
                             continue;
                         }
