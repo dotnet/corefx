@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         // This function submits the given error to the controller, and if it's a fatal
         // error, throws the fatal exception.
 
-        public void SubmitError(CParameterizedError error)
+        private void SubmitError(CParameterizedError error)
         {
             RealizeError(error);
         }
@@ -51,11 +51,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         // By default these DO NOT add related locations. To add a related location, pass an ErrArgRef.
 
-        public void MakeError(out CParameterizedError error, ErrorCode id, params ErrArg[] args)
-        {
-            MakeErrorTreeArgs(out error, id, args);
-        }
-
         public ErrorHandling(UserStringBuilder strBldr)
         {
             _userStringBuilder = strBldr;
@@ -68,7 +63,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             SubmitError(error);
         }
 
-        public void RealizeError(CParameterizedError parameterizedError)
+        private void RealizeError(CParameterizedError parameterizedError)
         {
             // Create an arg array manually using the type information in the ErrArgs.
             string[] prgpsz = new string[parameterizedError.GetParameterCount()];
@@ -86,9 +81,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 if (0 != (arg.eaf & ErrArgFlags.NoStr))
                     continue;
 
-                bool fUserStrings = false;
 
-                if (!_userStringBuilder.ErrArgToString(out prgpsz[ppsz], arg, out fUserStrings))
+                if (!_userStringBuilder.ErrArgToString(out prgpsz[ppsz], arg, out bool fUserStrings))
                 {
                     if (arg.eak == ErrArgKind.Int)
                     {

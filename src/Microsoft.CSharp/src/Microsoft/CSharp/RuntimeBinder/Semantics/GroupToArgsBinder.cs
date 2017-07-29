@@ -1343,11 +1343,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    CParameterizedError error;
-
                     if (_pDelegate != null)
                     {
-                        GetErrorContext().MakeError(out error, ErrorCode.ERR_MethDelegateMismatch, nameErr, _pDelegate);
+                        GetErrorContext().Error(ErrorCode.ERR_MethDelegateMismatch, nameErr, _pDelegate);
                     }
                     else
                     {
@@ -1355,27 +1353,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (_fCandidatesUnsupported)
                         {
-                            GetErrorContext().MakeError(out error, ErrorCode.ERR_BindToBogus, nameErr);
+                            GetErrorContext().Error(ErrorCode.ERR_BindToBogus, nameErr);
                         }
                         else if (bUseDelegateErrors)
                         {
                             Debug.Assert(0 == (_pGroup.Flags & EXPRFLAG.EXF_CTOR));
-                            GetErrorContext().MakeError(out error, ErrorCode.ERR_BadDelArgCount, nameErr, _pArguments.carg);
+                            GetErrorContext().Error(ErrorCode.ERR_BadDelArgCount, nameErr, _pArguments.carg);
                         }
                         else
                         {
                             if (0 != (_pGroup.Flags & EXPRFLAG.EXF_CTOR))
                             {
                                 Debug.Assert(!(_pGroup.ParentType is TypeParameterType));
-                                GetErrorContext().MakeError(out error, ErrorCode.ERR_BadCtorArgCount, _pGroup.ParentType, _pArguments.carg);
+                                GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, _pGroup.ParentType, _pArguments.carg);
                             }
                             else
                             {
-                                GetErrorContext().MakeError(out error, ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
+                                GetErrorContext().Error(ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
                             }
                         }
                     }
-                    GetErrorContext().SubmitError(error);
                 }
             }
             private void ReportErrorsForBestMatching(bool bUseDelegateErrors, Name nameErr)
