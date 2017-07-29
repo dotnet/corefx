@@ -127,15 +127,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // SymbolLoader forwarders (begin)
         //
 
-        private ErrorHandling ErrorContext
-        {
-            get
-            {
-                return SymbolLoader.ErrorContext;
-            }
-        }
+        public ErrorHandling ErrorContext => SymbolLoader.ErrorContext;
 
-        public ErrorHandling GetErrorContext() { return ErrorContext; }
         public NameManager GetNameManager() { return SymbolLoader.GetNameManager(); }
         public TypeManager GetTypeManager() { return SymbolLoader.GetTypeManager(); }
         public BSYMMGR getBSymmgr() { return SymbolLoader.getBSymmgr(); }

@@ -38,7 +38,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (type is NullableType nub)
             {
-                CType typeT = nub.GetAts(checker.GetErrorContext());
+                CType typeT = nub.GetAts(checker.ErrorContext);
                 if (typeT != null)
                     type = typeT;
                 else
@@ -355,7 +355,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_NullableType:
-                    typeBnd = ((NullableType)typeBnd).GetAts(checker.GetErrorContext());
+                    typeBnd = ((NullableType)typeBnd).GetAts(checker.ErrorContext);
                     if (null == typeBnd)
                         return true;
                     break;
@@ -374,7 +374,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_PointerType:
                     return false;
                 case TypeKind.TK_NullableType:
-                    arg = ((NullableType)arg).GetAts(checker.GetErrorContext());
+                    arg = ((NullableType)arg).GetAts(checker.ErrorContext);
                     if (null == arg)
                         return true;
                     // Fall through.

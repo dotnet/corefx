@@ -1364,7 +1364,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         if (type.IsArray && type.GetArrayRank() != numIndexArguments)
                         {
-                            _semanticChecker.GetErrorContext().Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
+                            _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
 
                         return CreateArray(callingObject, optionalIndexerArguments);
