@@ -49,7 +49,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // particular method.
         public void SubmitError(CParameterizedError error)
         {
-            GetErrorContext().RealizeError(error).Submit();
+            GetErrorContext().RealizeError(error);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             SubmitError(error);
         }
 
-        public CError RealizeError(CParameterizedError parameterizedError)
+        public void RealizeError(CParameterizedError parameterizedError)
         {
             // Create an arg array manually using the type information in the ErrArgs.
             string[] prgpsz = new string[parameterizedError.GetParameterCount()];
@@ -230,7 +230,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 prgpsz = prgpszNew;
             }
 
-            return new CError(parameterizedError.GetErrorNumber(), prgpsz);
+            throw new RuntimeBinderException(string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(parameterizedError.GetErrorNumber()), prgpsz));
         }
     }
 }
