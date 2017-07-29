@@ -33,7 +33,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\CSharpSetMemberBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\CSharpUnaryOperationBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Error.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CParameterizedError.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorCode.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorFacts.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorFmt.cs" />
