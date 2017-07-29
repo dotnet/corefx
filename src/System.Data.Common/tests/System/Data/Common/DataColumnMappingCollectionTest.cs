@@ -548,5 +548,27 @@ namespace System.Data.Tests.Common
 
             AssertExtensions.Throws<ArgumentNullException>("value", () => dataColumnMappingCollection.Remove((object)null));
         }
+
+        [Fact]
+        public void This_Int_SetAndGetOK()
+        {
+            DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
+            dataColumnMappingCollection.Add(new DataColumnMapping("sourcePIN", "dataSetPIN"));
+
+            dataColumnMappingCollection[0] = new DataColumnMapping("sourcePIN", "dataSetPINSet");
+            DataColumnMapping dataColumnMapping = dataColumnMappingCollection[0];
+            Assert.Equal("dataSetPINSet", dataColumnMapping.DataSetColumn);
+        }
+
+        [Fact]
+        public void GetDataColumn_DataColumnMappingCollection_String_Type_DataTable_MissingMappingAction_MissingSchemaAction()
+        {
+            DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
+            dataColumnMappingCollection.Add(new DataColumnMapping("sourcePIN", "dataSetPIN"));
+
+            DataColumn dataColumn = DataColumnMappingCollection.GetDataColumn(dataColumnMappingCollection, "sourcePIN", null, new DataTable(), MissingMappingAction.Ignore, MissingSchemaAction.Ignore);
+
+            Assert.Null(dataColumn);
+        }
     }
 }
