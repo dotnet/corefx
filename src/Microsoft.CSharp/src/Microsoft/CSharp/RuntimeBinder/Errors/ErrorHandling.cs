@@ -13,9 +13,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
     {
         private readonly UserStringBuilder _userStringBuilder;
 
-        public ErrorHandling(UserStringBuilder strBldr)
+        public ErrorHandling(GlobalSymbolContext globalSymbols)
         {
-            _userStringBuilder = strBldr;
+            _userStringBuilder = new UserStringBuilder(globalSymbols);
         }
 
         public void Error(ErrorCode id, params ErrArg[] args)

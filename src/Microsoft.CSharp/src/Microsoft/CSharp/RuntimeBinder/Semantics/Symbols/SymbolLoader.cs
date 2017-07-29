@@ -22,7 +22,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             GlobalSymbolContext globalSymbols = new GlobalSymbolContext(new NameManager());
             _nameManager = globalSymbols.GetNameManager();
             PredefinedMembers = new PredefinedMembers(this);
-            ErrorContext = new ErrorHandling(new UserStringBuilder(globalSymbols));
+            ErrorContext = new ErrorHandling(globalSymbols);
             GlobalSymbolContext = globalSymbols;
             Debug.Assert(GlobalSymbolContext != null);
         }
