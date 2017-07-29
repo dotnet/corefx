@@ -1358,7 +1358,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_pDelegate != null)
                     {
                         GetErrorContext().MakeError(out error, ErrorCode.ERR_MethDelegateMismatch, nameErr, _pDelegate);
-                        GetErrorContext().AddRelatedTypeLoc(error, _pDelegate);
                     }
                     else
                     {
@@ -1384,19 +1383,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             {
                                 GetErrorContext().MakeError(out error, ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
                             }
-                        }
-                    }
-
-                    // Report possible matches (same name and is accessible). We stored these in m_swtWrongCount.
-                    for (int i = 0; i < _nWrongCount; i++)
-                    {
-                        if (GetSemanticChecker().CheckAccess(
-                                    _swtWrongCount[i].Sym,
-                                    _swtWrongCount[i].GetType(),
-                                    _pExprBinder.ContextForMemberLookup(),
-                                    GetTypeQualifier(_pGroup)))
-                        {
-                            GetErrorContext().AddRelatedSymLoc(error, _swtWrongCount[i].Sym);
                         }
                     }
                     GetErrorContext().SubmitError(error);

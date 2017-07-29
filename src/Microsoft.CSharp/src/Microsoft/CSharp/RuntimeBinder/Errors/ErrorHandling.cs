@@ -44,14 +44,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             error.Initialize(id, prgarg);
         }
 
-        public void AddRelatedSymLoc(CParameterizedError err, Symbol sym)
-        {
-        }
-
-        public void AddRelatedTypeLoc(CParameterizedError err, CType pType)
-        {
-        }
-
         private void MakeErrorTreeArgs(out CParameterizedError error, ErrorCode id, ErrArg[] prgarg)
         {
             MakeErrorLocArgs(out error, id, prgarg);
