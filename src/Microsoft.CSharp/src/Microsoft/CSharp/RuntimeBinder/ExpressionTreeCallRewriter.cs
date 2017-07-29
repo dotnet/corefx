@@ -90,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         protected override Expr VisitCALL(ExprCall pExpr)
         {
-            if (pExpr.PredefinedMethod == PREDEFMETH.PM_FIRST)
+            if (pExpr.PredefinedMethod == PREDEFMETH.PM_COUNT)
             {
                 return pExpr;
             }
@@ -683,7 +683,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else if (pExpr is ExprConstant)
             {
-                Debug.Assert(pExpr.Type.IsNullType());
+                Debug.Assert(pExpr.Type is NullType);
                 return null;
             }
             else
@@ -893,7 +893,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     CType underlyingType = pExpr.Type;
                     object objval;
 
-                    if (pExpr.Type.IsNullType())
+                    if (pExpr.Type is NullType)
                     {
                         return null;
                     }

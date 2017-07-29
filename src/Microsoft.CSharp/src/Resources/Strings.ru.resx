@@ -129,9 +129,6 @@
   <data name="AssgReadonlyProp" xml:space="preserve">
     <value>Невозможно присвоить значение свойству или индексатору "{0}" -- доступ только для чтения</value>
   </data>
-  <data name="AbstractBaseCall" xml:space="preserve">
-    <value>Не удается вызвать абстрактный член базового класса: "{0}"</value>
-  </data>
   <data name="RefProperty" xml:space="preserve">
     <value>Свойства и индексаторы не могут передаваться как параметры с ключевыми словами out и ref</value>
   </data>
@@ -149,15 +146,6 @@
   </data>
   <data name="AmbigMember" xml:space="preserve">
     <value>Неоднозначность между "{0}" и "{1}"</value>
-  </data>
-  <data name="SizeofUnsafe" xml:space="preserve">
-    <value>"{0}" does not have a predefined size, therefore sizeof can only be used in an unsafe context (consider using System.Runtime.InteropServices.Marshal.SizeOf)</value>
-  </data>
-  <data name="CallingFinalizeDepracated" xml:space="preserve">
-    <value>Непосредственный вызов деструкторов и функций object.Finalize запрещен. Рекомендуется вызов IDisposable.Dispose, если она доступна.</value>
-  </data>
-  <data name="CallingBaseFinalizeDeprecated" xml:space="preserve">
-    <value>Не вызывайте метод Finalize базового класса напрямую. Он вызывается автоматически из деструктора.</value>
   </data>
   <data name="NoImplicitConvCast" xml:space="preserve">
     <value>Не удается неявно преобразовать тип "{0}" в "{1}". Существует явное преобразование (требуется приведение типа?)</value>
@@ -219,32 +207,17 @@
   <data name="AmbigUDConv" xml:space="preserve">
     <value>Неоднозначные пользовательские преобразования "{0}" и "{1}" при преобразовании из "{2}" в "{3}"</value>
   </data>
-  <data name="PredefinedTypeNotFound" xml:space="preserve">
-    <value>Предопределенный тип "{0}" не определен и не импортирован</value>
-  </data>
   <data name="BindToBogus" xml:space="preserve">
     <value>"{0}" не поддерживается языком</value>
   </data>
   <data name="CantCallSpecialMethod" xml:space="preserve">
     <value>"{0}": явный вызов оператора или метода доступа невозможен</value>
   </data>
-  <data name="BogusType" xml:space="preserve">
-    <value>"{0}" является типом, который не поддерживается в данном языке</value>
-  </data>
-  <data name="MissingPredefinedMember" xml:space="preserve">
-    <value>Отсутствует обязательный для компилятора член "{0}.{1}"</value>
-  </data>
-  <data name="LiteralDoubleCast" xml:space="preserve">
-    <value>Литерал с типом double не может быть неявно преобразован к типу "{1}"; для создания литерала этого типа следует воспользоваться суффиксом "{0}"</value>
-  </data>
   <data name="ConvertToStaticClass" xml:space="preserve">
     <value>Не удается выполнить преобразование к статическому типу "{0}"</value>
   </data>
   <data name="GenericArgIsStaticClass" xml:space="preserve">
     <value>"{0}": нельзя использовать статические типы в качестве аргументов-типов</value>
-  </data>
-  <data name="PartialMethodToDelegate" xml:space="preserve">
-    <value>Невозможно создать делегат на основе метода "{0}", поскольку он является разделяемым методом без реализующего объявления</value>
   </data>
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>Операндом оператора инкремента или декремента должна быть переменная, свойство или индексатор</value>
@@ -326,12 +299,6 @@
   </data>
   <data name="BadInstanceArgType" xml:space="preserve">
     <value>Instance argument: невозможно преобразовать из "{0}" в "{1}"</value>
-  </data>
-  <data name="BadArgTypesForCollectionAdd" xml:space="preserve">
-    <value>Наиболее подходящий перегруженный метод Add "{0}" для инициализатора коллекции содержит недопустимые аргументы</value>
-  </data>
-  <data name="InitializerAddHasParamModifiers" xml:space="preserve">
-    <value>Наиболее подходящий перегруженный метод, соответствующий "{0}" для элемента инициализации коллекции не может быть использован. Методы инициализации коллекции "Add" не имеют ссылочных и выходных параметров.</value>
   </data>
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>Невызываемый член "{0}" не может использоваться как метод.</value>

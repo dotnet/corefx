@@ -116,11 +116,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             LAgain:
                 if (type1.GetTypeKind() != type2.GetTypeKind())
                 {
-                    if (type1.IsTypeParameterType())
+                    if (type1 is TypeParameterType)
                     {
                         nParam = BetterType.Right;
                     }
-                    else if (type2.IsTypeParameterType())
+                    else if (type2 is TypeParameterType)
                     {
                         nParam = BetterType.Left;
                     }
@@ -145,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:
-                            nParam = CompareTypes(type1.AsAggregateType().GetTypeArgsAll(), type2.AsAggregateType().GetTypeArgsAll());
+                            nParam = CompareTypes(((AggregateType)type1).GetTypeArgsAll(), ((AggregateType)type2).GetTypeArgsAll());
                             break;
                     }
                 }
@@ -194,15 +194,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (iDot == -1) break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
                     Name nm = this.GetNameManager().Add(sub);
-                    NamespaceSymbol sym = this.LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
-                    if (sym == null)
-                    {
-                        ns = _symFactory.CreateNamespace(nm, ns);
-                    }
-                    else
-                    {
-                        ns = sym;
-                    }
+                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
                     start += sub.Length + 1;
                 }
             }
@@ -256,12 +248,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = GetNameFromPtrs(0, 0);
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
-            if (nsa == null)
-            {
+            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol) as AssemblyQualifiedNamespaceSymbol
                 // Create a new one.
-                nsa = _symFactory.CreateNamespaceAid(name, ns);
-            }
+                ?? _symFactory.CreateNamespaceAid(name, ns);
 
             Debug.Assert(nsa.GetNS() == ns);
 

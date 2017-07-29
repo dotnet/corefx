@@ -162,10 +162,6 @@
           <source>Property or indexer '{0}' cannot be assigned to -- it is read only</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile assegnare un valore alla proprietà o all'indicizzatore '{0}' perché è di sola lettura</target>
         </trans-unit>
-        <trans-unit id="AbstractBaseCall" translate="yes" xml:space="preserve">
-          <source>Cannot call an abstract base member: '{0}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile chiamare un membro di base astratto: '{0}'</target>
-        </trans-unit>
         <trans-unit id="RefProperty" translate="yes" xml:space="preserve">
           <source>A property or indexer may not be passed as an out or ref parameter</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Una proprietà o un indicizzatore non può essere passato come parametro out o ref</target>
@@ -189,18 +185,6 @@
         <trans-unit id="AmbigMember" translate="yes" xml:space="preserve">
           <source>Ambiguity between '{0}' and '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Ambiguità tra '{0}' e '{1}'</target>
-        </trans-unit>
-        <trans-unit id="SizeofUnsafe" translate="yes" xml:space="preserve">
-          <source>'{0}' does not have a predefined size, therefore sizeof can only be used in an unsafe context (consider using System.Runtime.InteropServices.Marshal.SizeOf)</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' non ha una dimensione predefinita, quindi sizeof può essere utilizzato solo in un contesto di tipo unsafe. Si consiglia di utilizzare System.Runtime.InteropServices.Marshal.SizeOf.</target>
-        </trans-unit>
-        <trans-unit id="CallingFinalizeDepracated" translate="yes" xml:space="preserve">
-          <source>Destructors and object.Finalize cannot be called directly. Consider calling IDisposable.Dispose if available.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile chiamare direttamente i distruttori e object.Finalize. Provare a chiamare IDisposable.Dispose se disponibile.</target>
-        </trans-unit>
-        <trans-unit id="CallingBaseFinalizeDeprecated" translate="yes" xml:space="preserve">
-          <source>Do not directly call your base class Finalize method. It is called automatically from your destructor.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Non chiamare direttamente il metodo Finalize della classe base. Viene chiamato automaticamente dal distruttore.</target>
         </trans-unit>
         <trans-unit id="NoImplicitConvCast" translate="yes" xml:space="preserve">
           <source>Cannot implicitly convert type '{0}' to '{1}'. An explicit conversion exists (are you missing a cast?)</source>
@@ -282,10 +266,6 @@
           <source>Ambiguous user defined conversions '{0}' and '{1}' when converting from '{2}' to '{3}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Conversioni '{0}' e '{1}' ambigue definite dall'utente durante la conversione da '{2}' a '{3}'</target>
         </trans-unit>
-        <trans-unit id="PredefinedTypeNotFound" translate="yes" xml:space="preserve">
-          <source>Predefined type '{0}' is not defined or imported</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Il tipo predefinito '{0}' non è definito né importato</target>
-        </trans-unit>
         <trans-unit id="BindToBogus" translate="yes" xml:space="preserve">
           <source>'{0}' is not supported by the language</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' non è supportato dal linguaggio</target>
@@ -294,18 +274,6 @@
           <source>'{0}': cannot explicitly call operator or accessor</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}': impossibile chiamare in modo esplicito l'operatore o la funzione di accesso</target>
         </trans-unit>
-        <trans-unit id="BogusType" translate="yes" xml:space="preserve">
-          <source>'{0}' is a type not supported by the language</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' è un tipo non supportato dal linguaggio</target>
-        </trans-unit>
-        <trans-unit id="MissingPredefinedMember" translate="yes" xml:space="preserve">
-          <source>Missing compiler required member '{0}.{1}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Manca il membro '{0}.{1}', necessario per il compilatore.</target>
-        </trans-unit>
-        <trans-unit id="LiteralDoubleCast" translate="yes" xml:space="preserve">
-          <source>Literal of type double cannot be implicitly converted to type '{1}'; use an '{0}' suffix to create a literal of this type</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile convertire in modo implicito il valore letterale di tipo double nel tipo '{1}'. Utilizzare un suffisso '{0}' per creare un valore letterale di questo tipo</target>
-        </trans-unit>
         <trans-unit id="ConvertToStaticClass" translate="yes" xml:space="preserve">
           <source>Cannot convert to static type '{0}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile convertire nel tipo statico '{0}'</target>
@@ -313,10 +281,6 @@
         <trans-unit id="GenericArgIsStaticClass" translate="yes" xml:space="preserve">
           <source>'{0}': static types cannot be used as type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}': i tipi statici non possono essere utilizzati come argomenti di tipi</target>
-        </trans-unit>
-        <trans-unit id="PartialMethodToDelegate" translate="yes" xml:space="preserve">
-          <source>Cannot create delegate from method '{0}' because it is a partial method without an implementing declaration</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile creare un delegato dal metodo '{0}' perché è un metodo parziale senza una dichiarazione di implementazione</target>
         </trans-unit>
         <trans-unit id="IncrementLvalueExpected" translate="yes" xml:space="preserve">
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
@@ -425,14 +389,6 @@
         <trans-unit id="BadInstanceArgType" translate="yes" xml:space="preserve">
           <source>Instance argument: cannot convert from '{0}' to '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Argomento dell'istanza: impossibile eseguire la conversione da '{0}' a '{1}'</target>
-        </trans-unit>
-        <trans-unit id="BadArgTypesForCollectionAdd" translate="yes" xml:space="preserve">
-          <source>The best overloaded Add method '{0}' for the collection initializer has some invalid arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Il miglior metodo Add di overload '{0}' per l'inizializzatore di raccolta presenta alcuni argomenti non validi</target>
-        </trans-unit>
-        <trans-unit id="InitializerAddHasParamModifiers" translate="yes" xml:space="preserve">
-          <source>The best overloaded method match '{0}' for the collection initializer element cannot be used. Collection initializer 'Add' methods cannot have ref or out parameters.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Impossibile utilizzare la corrispondenza migliore del metodo di overload '{0}' per l'elemento inizializzatore della raccolta. I metodi 'Add' dell'inizializzatore di raccolta non possono includere parametri ref o out.</target>
         </trans-unit>
         <trans-unit id="NonInvocableMemberCalled" translate="yes" xml:space="preserve">
           <source>Non-invocable member '{0}' cannot be used like a method.</source>

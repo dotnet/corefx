@@ -162,10 +162,6 @@
           <source>Property or indexer '{0}' cannot be assigned to -- it is read only</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">プロパティまたはインデクサー '{0}' は読み取り専用であるため、割り当てることはできません</target>
         </trans-unit>
-        <trans-unit id="AbstractBaseCall" translate="yes" xml:space="preserve">
-          <source>Cannot call an abstract base member: '{0}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">抽象基本メンバーを呼び出すことはできません: '{0}'</target>
-        </trans-unit>
         <trans-unit id="RefProperty" translate="yes" xml:space="preserve">
           <source>A property or indexer may not be passed as an out or ref parameter</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">プロパティまたはインデクサーを out か ref のパラメーターとして渡すことはできません。</target>
@@ -189,18 +185,6 @@
         <trans-unit id="AmbigMember" translate="yes" xml:space="preserve">
           <source>Ambiguity between '{0}' and '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' と '{1}' 間があいまいです</target>
-        </trans-unit>
-        <trans-unit id="SizeofUnsafe" translate="yes" xml:space="preserve">
-          <source>'{0}' does not have a predefined size, therefore sizeof can only be used in an unsafe context (consider using System.Runtime.InteropServices.Marshal.SizeOf)</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' には定義済みのサイズが指定されていないため、sizeof は unsafe コンテキストでのみ使用できます (System.Runtime.InteropServices.Marshal.SizeOf の使用をお勧めします)</target>
-        </trans-unit>
-        <trans-unit id="CallingFinalizeDepracated" translate="yes" xml:space="preserve">
-          <source>Destructors and object.Finalize cannot be called directly. Consider calling IDisposable.Dispose if available.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">デストラクター と object.Finalize を直接呼び出すことはできません。使用可能であれば IDisposable.Dispose を呼び出してください。</target>
-        </trans-unit>
-        <trans-unit id="CallingBaseFinalizeDeprecated" translate="yes" xml:space="preserve">
-          <source>Do not directly call your base class Finalize method. It is called automatically from your destructor.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">基本クラスの Finalize メソッドを直接呼び出さないでください。デストラクターから自動的に呼び出されます。</target>
         </trans-unit>
         <trans-unit id="NoImplicitConvCast" translate="yes" xml:space="preserve">
           <source>Cannot implicitly convert type '{0}' to '{1}'. An explicit conversion exists (are you missing a cast?)</source>
@@ -282,10 +266,6 @@
           <source>Ambiguous user defined conversions '{0}' and '{1}' when converting from '{2}' to '{3}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{2}' から '{3}' へ変換するときの、あいまいなユーザー定義の変換 '{0}' および '{1}' です</target>
         </trans-unit>
-        <trans-unit id="PredefinedTypeNotFound" translate="yes" xml:space="preserve">
-          <source>Predefined type '{0}' is not defined or imported</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">定義済みの型 '{0}' は定義、またはインポートされていません</target>
-        </trans-unit>
         <trans-unit id="BindToBogus" translate="yes" xml:space="preserve">
           <source>'{0}' is not supported by the language</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' はこの言語でサポートされていません</target>
@@ -294,18 +274,6 @@
           <source>'{0}': cannot explicitly call operator or accessor</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}': 演算子またはアクセサーを明示的に呼び出すことはできません</target>
         </trans-unit>
-        <trans-unit id="BogusType" translate="yes" xml:space="preserve">
-          <source>'{0}' is a type not supported by the language</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' はこの言語でサポートされていない型です</target>
-        </trans-unit>
-        <trans-unit id="MissingPredefinedMember" translate="yes" xml:space="preserve">
-          <source>Missing compiler required member '{0}.{1}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">コンパイラが必要とするメンバー '{0}.{1}' がありません</target>
-        </trans-unit>
-        <trans-unit id="LiteralDoubleCast" translate="yes" xml:space="preserve">
-          <source>Literal of type double cannot be implicitly converted to type '{1}'; use an '{0}' suffix to create a literal of this type</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">型 double のリテラルを暗黙的に型 '{1}' に変換することはできません。'{0}' サフィックスを使用して、この型のリテラルを作成してください</target>
-        </trans-unit>
         <trans-unit id="ConvertToStaticClass" translate="yes" xml:space="preserve">
           <source>Cannot convert to static type '{0}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">スタティック型 '{0}' へ変換できません</target>
@@ -313,10 +281,6 @@
         <trans-unit id="GenericArgIsStaticClass" translate="yes" xml:space="preserve">
           <source>'{0}': static types cannot be used as type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}': スタティック型を型引数として使用することはできません</target>
-        </trans-unit>
-        <trans-unit id="PartialMethodToDelegate" translate="yes" xml:space="preserve">
-          <source>Cannot create delegate from method '{0}' because it is a partial method without an implementing declaration</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">メソッド '{0}' は実装宣言がない部分メソッドであるため、このメソッドからデリゲートを作成できません</target>
         </trans-unit>
         <trans-unit id="IncrementLvalueExpected" translate="yes" xml:space="preserve">
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
@@ -425,14 +389,6 @@
         <trans-unit id="BadInstanceArgType" translate="yes" xml:space="preserve">
           <source>Instance argument: cannot convert from '{0}' to '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">インスタンス引数: '{0}' から '{1}' へ変換できません</target>
-        </trans-unit>
-        <trans-unit id="BadArgTypesForCollectionAdd" translate="yes" xml:space="preserve">
-          <source>The best overloaded Add method '{0}' for the collection initializer has some invalid arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">コレクション初期化子に最も適しているオーバーロード Add メソッド '{0}' には無効な引数がいくつか含まれています</target>
-        </trans-unit>
-        <trans-unit id="InitializerAddHasParamModifiers" translate="yes" xml:space="preserve">
-          <source>The best overloaded method match '{0}' for the collection initializer element cannot be used. Collection initializer 'Add' methods cannot have ref or out parameters.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">コレクション初期化子要素の '{0}' に最も適しているオーバーロード メソッドは使用できません。コレクション初期化子 'Add' メソッドには、ref パラメーターまたは out パラメーターを使用できません。</target>
         </trans-unit>
         <trans-unit id="NonInvocableMemberCalled" translate="yes" xml:space="preserve">
           <source>Non-invocable member '{0}' cannot be used like a method.</source>
