@@ -8,13 +8,14 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-#pragma warning disable CS0649 // never assigned to warning
-        internal struct SECURITY_ATTRIBUTES
+        internal struct CREATEFILE2_EXTENDED_PARAMETERS
         {
-            internal uint nLength;
-            internal IntPtr lpSecurityDescriptor;
-            internal BOOL bInheritHandle;
+            internal uint dwSize;
+            internal uint dwFileAttributes;
+            internal uint dwFileFlags;
+            internal uint dwSecurityQosFlags;
+            internal IntPtr lpSecurityAttributes;
+            internal IntPtr hTemplateFile;
         }
-#pragma warning restore CS0649
     }
 }

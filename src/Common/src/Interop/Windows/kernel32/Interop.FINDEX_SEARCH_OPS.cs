@@ -2,19 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 internal partial class Interop
 {
     internal partial class Kernel32
     {
-#pragma warning disable CS0649 // never assigned to warning
-        internal struct SECURITY_ATTRIBUTES
+        internal enum FINDEX_SEARCH_OPS : uint
         {
-            internal uint nLength;
-            internal IntPtr lpSecurityDescriptor;
-            internal BOOL bInheritHandle;
+            FindExSearchNameMatch = 0x0u,
+            FindExSearchLimitToDirectories = 0x1u,
+            FindExSearchLimitToDevices = 0x2u,
+            FindExSearchMaxSearchOp = 0x3u,
         }
-#pragma warning restore CS0649
     }
 }
