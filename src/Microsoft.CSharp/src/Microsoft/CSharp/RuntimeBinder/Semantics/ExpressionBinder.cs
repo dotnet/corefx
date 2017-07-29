@@ -1282,7 +1282,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     throw ErrorContext.Error(err, ((ExprMemberGroup)expr).Name, new ErrArgIds(MessageID.MethodGroup));
             }
 
-            return !TryReportLvalueFailure(expr, kind);
+            TryReportLvalueFailure(expr, kind);
+            return true;
         }
 
         private void PostBindMethod(ref MethWithInst pMWI, Expr pObject)

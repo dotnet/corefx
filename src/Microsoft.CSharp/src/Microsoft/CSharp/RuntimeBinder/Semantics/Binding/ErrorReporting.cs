@@ -57,7 +57,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Return true if we actually report a failure.
-        private bool TryReportLvalueFailure(Expr expr, CheckLvalueKind kind)
+        private void TryReportLvalueFailure(Expr expr, CheckLvalueKind kind)
         {
             Debug.Assert(expr != null);
 
@@ -113,7 +113,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // But in the runtime, we allow this - mark that we're doing an
                         // unbox here, so that we gen the correct expression tree for it.
                         pObject.Flags |= EXPRFLAG.EXF_UNBOXRUNTIME;
-                        return false;
+                        return;
                     }
                 }
 
