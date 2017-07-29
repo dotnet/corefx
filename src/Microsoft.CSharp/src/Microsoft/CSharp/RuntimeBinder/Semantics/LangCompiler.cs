@@ -13,18 +13,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
          IErrorSink
     {
         private SymbolLoader _symbolLoader;
-        private CController _pController;   // This is our parent "controller"
         private ErrorHandling _errorContext;
 
         ////////////////////////////////////////////////////////////////////////////////
         // Construct a compiler. All the real work is done in the Init() routine. This 
         // primary initializes all the sub-components.
 
-        public LangCompiler(CController pCtrl, NameManager pNameMgr)
+        public LangCompiler(NameManager pNameMgr)
         {
-            Debug.Assert(pCtrl != null);
-
-            _pController = pCtrl;
             GlobalSymbolContext globalSymbolContext = new GlobalSymbolContext(pNameMgr);
             _errorContext = new ErrorHandling(new UserStringBuilder(globalSymbolContext), this);
             _symbolLoader = new SymbolLoader(globalSymbolContext, _errorContext);

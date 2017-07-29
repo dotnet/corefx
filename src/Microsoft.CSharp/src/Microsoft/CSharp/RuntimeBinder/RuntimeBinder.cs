@@ -36,7 +36,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private ExprFactory _exprFactory;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
-        private RuntimeBinderController _controller;
 
         private readonly object _bindLock = new object();
 
@@ -51,8 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void Reset()
         {
-            _controller = new RuntimeBinderController();
-            _semanticChecker = new LangCompiler(_controller, new NameManager());
+            _semanticChecker = new LangCompiler(new NameManager());
 
             BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
             NameManager nameManager = _semanticChecker.GetNameManager();

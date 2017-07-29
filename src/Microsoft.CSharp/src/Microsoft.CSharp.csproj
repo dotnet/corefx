@@ -33,7 +33,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\CSharpSetMemberBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\CSharpUnaryOperationBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Error.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CController.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CError.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\CParameterizedError.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Errors\ErrorCode.cs" />
@@ -48,7 +47,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ICSharpInvokeOrInvokeMemberBinder.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\ResetBindException.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinder.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderController.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderException.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderExtensions.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\RuntimeBinderInternalCompilerException.cs" />
