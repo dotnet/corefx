@@ -15,11 +15,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Construct a compiler. All the real work is done in the Init() routine. This 
         // primary initializes all the sub-components.
 
-        public LangCompiler(NameManager pNameMgr)
+        public LangCompiler()
         {
-            GlobalSymbolContext globalSymbolContext = new GlobalSymbolContext(pNameMgr);
-            _symbolLoader = new SymbolLoader(
-                globalSymbolContext, new ErrorHandling(new UserStringBuilder(globalSymbolContext)));
+            _symbolLoader = new SymbolLoader();
         }
 
         public override SymbolLoader SymbolLoader { get { return _symbolLoader; } }
