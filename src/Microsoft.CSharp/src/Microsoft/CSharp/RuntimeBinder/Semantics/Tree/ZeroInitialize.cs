@@ -6,13 +6,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprZeroInit : ExprWithType
     {
-        public ExprZeroInit(CType type, bool isError)
+        public ExprZeroInit(CType type)
             : base(ExpressionKind.ZeroInit, type)
         {
-            if (isError)
-            {
-                SetError();
-            }
         }
     }
 }

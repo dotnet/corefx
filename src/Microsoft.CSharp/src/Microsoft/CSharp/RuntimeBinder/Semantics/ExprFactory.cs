@@ -124,7 +124,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Expr CreateZeroInit(CType type)
         {
             Debug.Assert(type != null);
-            bool isError = false;
 
             if (type.isEnumType())
             {
@@ -133,6 +132,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return CreateConstant(type, ConstVal.Get(Activator.CreateInstance(type.AssociatedSystemType)));
             }
 
+            Debug.Assert(type.fundType() > FUNDTYPE.FT_NONE);
+            Debug.Assert(type.fundType() < FUNDTYPE.FT_COUNT);
             switch (type.fundType())
             {
                 case FUNDTYPE.FT_PTR:
@@ -141,35 +142,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return CreateCast(0, CreateClass(type), CreateNull());
                     }
 
-                case FUNDTYPE.FT_REF:
-                case FUNDTYPE.FT_I1:
-                case FUNDTYPE.FT_U1:
-                case FUNDTYPE.FT_I2:
-                case FUNDTYPE.FT_U2:
-                case FUNDTYPE.FT_I4:
-                case FUNDTYPE.FT_U4:
-                case FUNDTYPE.FT_I8:
-                case FUNDTYPE.FT_U8:
-                case FUNDTYPE.FT_R4:
-                case FUNDTYPE.FT_R8:
-                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
                 case FUNDTYPE.FT_STRUCT:
                     if (type.isPredefType(PredefinedType.PT_DECIMAL))
                     {
-                        goto case FUNDTYPE.FT_R8;
+                        goto default;
                     }
 
-                    break;
+                    goto case FUNDTYPE.FT_VAR;
 
                 case FUNDTYPE.FT_VAR:
-                    break;
+                    return new ExprZeroInit(type);
 
                 default:
-                    isError = true;
-                    break;
+                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
             }
-
-            return new ExprZeroInit(type, isError);
         }
 
         public ExprConstant CreateConstant(CType type, ConstVal constVal) => new ExprConstant(type, constVal);
