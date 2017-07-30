@@ -88,7 +88,7 @@ namespace System.Drawing.Imaging.Tests
         }
 
         [ActiveIssue(22640)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(InvalidPath_TestData))]
         public void Ctor_InvalidPath_ThrowsArgumentException(string path)
         {
@@ -128,7 +128,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { EmfType.EmfPlusOnly };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_IntPtrEmfType_Success(EmfType emfType)
         {
@@ -148,7 +148,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { (EmfType)int.MinValue };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_Invalid_TestData))]
         public void Ctor_IntPtrInvalidEmfType_ThrowsArgumentException(EmfType emfType)
         {
@@ -176,7 +176,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { "description" };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_IntPtrEmfTypeString_Success(string description)
         {
@@ -187,7 +187,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(InvalidPath_TestData))]
         public void Ctor_ZeroPointerEmfTypeInvalidString_ThrowsArgumentException(string description)
         {
@@ -214,7 +214,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { MetafileFrameUnit.GdiCompatible };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_TestData))]
         public void Ctor_IntPtrRectangleFMetafileFrameUnit_Success(MetafileFrameUnit frameUnit)
         {
@@ -225,7 +225,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_IntPtrRectangleFMetafileFrameUnitEmfType_Success(EmfType emfType)
         {
@@ -237,7 +237,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_IntPtrRectangleFMetafileFrameUnitEmfTypeString_Success(string description)
         {
@@ -258,7 +258,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_TestData))]
         public void Ctor_IntPtrRectangleMetafileFrameUnit_Success(MetafileFrameUnit frameUnit)
         {
@@ -269,7 +269,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_IntPtrRectangleMetafileFrameUnitEmfType_Success(EmfType emfType)
         {
@@ -281,7 +281,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_IntPtrRectangleMetafileFrameUnitEmfTypeString_Success(string description)
         {
@@ -318,7 +318,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { (MetafileFrameUnit)int.MinValue };
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_Invalid_TestData))]
         public void Ctor_InvalidMetafileFrameUnit_ThrowsArgumentException(MetafileFrameUnit farameUnit)
         {
@@ -337,7 +337,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_Invalid_TestData))]
         public void Ctor_InvalidEmfType_ThrowsArgumentException(EmfType emfType)
         {
@@ -370,7 +370,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_StringIntPtrEmfType_Success(EmfType emfType)
         {
@@ -386,7 +386,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_StringIntPtrEmfType_Success(string description)
         {
@@ -412,7 +412,7 @@ namespace System.Drawing.Imaging.Tests
             DeleteFile(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_Invalid_TestData))]
         public void Ctor_InvalidEmfTypeI_ThrowsArgumentException(EmfType emfType)
         {
@@ -440,7 +440,7 @@ namespace System.Drawing.Imaging.Tests
         }
 
         [ActiveIssue(22723)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(@"fileNo*-//\\#@(found")]
         [InlineData("")]
         public void Ctor_InvalidPathI_ThrowsArgumentException(string fileName)
@@ -469,7 +469,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         public void Ctor_StringIntPtrRectangleF_Success()
         {
             string fileName = GetPath("newTestImage.wmf");
@@ -483,7 +483,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_TestData))]
         public void Ctor_StringIntPtrRectangleFMetafileFrameUnit_Success(MetafileFrameUnit frameUnit)
         {
@@ -498,7 +498,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_StringIntPtrRectangleFMetafileFrameUnitEmfType_Success(EmfType emfType)
         {
@@ -514,7 +514,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_StringIntPtrRectangleFMetafileFrameUnitEmfTypeString_Success(string description)
         {
@@ -531,7 +531,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_RectangleFEmpty_Success(string description)
         {
@@ -548,7 +548,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         public void Ctor_StringIntPtrRectangle_Success()
         {
             string fileName = GetPath("newTestImage.wmf");
@@ -562,7 +562,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_TestData))]
         public void Ctor_StringIntPtrRectangleMetafileFrameUnit_Success(MetafileFrameUnit frameUnit)
         {
@@ -577,7 +577,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_StringIntPtrRectangleMetafileFrameUnitEmfType_Success(EmfType emfType)
         {
@@ -593,7 +593,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_StringIntPtrRectangleMetafileFrameUnitEmfTypeString_Success(string description)
         {
@@ -610,7 +610,7 @@ namespace System.Drawing.Imaging.Tests
             File.Delete(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_RectangleEmpty_Success(string description)
         {
@@ -647,7 +647,7 @@ namespace System.Drawing.Imaging.Tests
             DeleteFile(fileName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_Invalid_TestData))]
         public void Ctor_InvalidEmfTypeII_ThrowsArgumentException(MetafileFrameUnit frameUnit)
         {
@@ -670,7 +670,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_Invalid_TestData))]
         public void Ctor_InvalidEmfTypeII_ThrowsArgumentException(EmfType emfType)
         {
@@ -709,7 +709,7 @@ namespace System.Drawing.Imaging.Tests
         }
 
         [ActiveIssue(22723)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(@"fileNo*-//\\#@(found")]
         [InlineData("")]
         public void Ctor_InvalidPathII_ThrowsArgumentException(string fileName)
@@ -746,7 +746,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         public void Ctor_StreamIntPtrRectangle_Success()
         {
             using (var bufferGraphics = Graphics.FromHwndInternal(IntPtr.Zero))
@@ -757,7 +757,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_TestData))]
         public void Ctor_StreamIntPtrRectangleMetafileFrameUnit_Success(MetafileFrameUnit frameUnit)
         {
@@ -769,7 +769,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_TestData))]
         public void Ctor_StreamIntPtrRectangleMetafileFrameUnitEmfType_Success(EmfType emfType)
         {
@@ -782,7 +782,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_StreamIntPtrRectangleMetafileFrameUnitEmfTypeString_Success(string description)
         {
@@ -796,7 +796,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
         public void Ctor_RectangleEmptyI_Success(string description)
         {
@@ -824,7 +824,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(MetafileFrameUnit_Invalid_TestData))]
         public void Ctor_InvalidEmfTypeIII_ThrowsArgumentException(MetafileFrameUnit frameUnit)
         {
@@ -840,7 +840,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(EmfType_Invalid_TestData))]
         public void Ctor_InvalidEmfTypeIII_ThrowsArgumentException(EmfType emfType)
         {
@@ -887,7 +887,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(@"fileNo*-//\\#@(found")]
         [InlineData("")]
         public void Static_GetMetafileHeader_InvalidPath_ThrowsArgumentException(string fileName)
