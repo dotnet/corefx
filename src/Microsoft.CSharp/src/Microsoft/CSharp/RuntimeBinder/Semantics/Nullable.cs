@@ -69,14 +69,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             NullableType nubSrc = (NullableType)exprSrc.Type;
             CType typeBase = nubSrc.GetUnderlyingType();
-            AggregateType ats = nubSrc.GetAts(GetErrorContext());
-            if (ats == null)
-            {
-                ExprProperty rval = GetExprFactory().CreateProperty(typeBase, exprSrc);
-                rval.SetError();
-                return rval;
-            }
-
+            AggregateType ats = nubSrc.GetAts();
             PropertySymbol prop = GetSymbolLoader().getBSymmgr().propNubValue;
             if (prop == null)
             {
@@ -97,16 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             NullableType pNubSourceType = GetSymbolLoader().GetTypeManager().GetNullable(pExprSrc.Type);
 
-            AggregateType pSourceType = pNubSourceType.GetAts(GetErrorContext());
-            if (pSourceType == null)
-            {
-                MethWithInst mwi = new MethWithInst(null, null);
-                ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(pExprSrc, mwi);
-                ExprCall rval = GetExprFactory().CreateCall(0, pNubSourceType, null, pMemGroup, null);
-                rval.SetError();
-                return rval;
-            }
-
+            AggregateType pSourceType = pNubSourceType.GetAts();
             MethodSymbol meth = GetSymbolLoader().getBSymmgr().methNubCtor;
             if (meth == null)
             {
