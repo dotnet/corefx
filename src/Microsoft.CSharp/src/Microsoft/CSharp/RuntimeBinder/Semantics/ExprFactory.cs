@@ -121,12 +121,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // This returns a null for reference types and an EXPRZEROINIT for all others.
 
-        public Expr CreateZeroInit(CType type) => CreateZeroInit(CreateClass(type));
-
-        private Expr CreateZeroInit(ExprClass typeExpr)
+        public Expr CreateZeroInit(CType type)
         {
-            Debug.Assert(typeExpr != null);
-            CType type = typeExpr.Type;
+            Debug.Assert(type != null);
             bool isError = false;
 
             if (type.isEnumType())
@@ -150,7 +147,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
 
                         // Just allocate a new node and fill it in.
-                        return CreateCast(0, typeExpr, CreateNull());
+                        return CreateCast(0, CreateClass(type), CreateNull());
                     }
 
                 case FUNDTYPE.FT_REF:
