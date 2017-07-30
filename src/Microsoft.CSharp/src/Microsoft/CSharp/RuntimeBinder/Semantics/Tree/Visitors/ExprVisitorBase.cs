@@ -352,10 +352,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ExpressionKind.ZeroInit:
                     exprRet = Visit((pExpr as ExprZeroInit).OptionalArgument);
                     (pExpr as ExprZeroInit).OptionalArgument = exprRet;
-
-                    // Used for when we zeroinit 0 parameter constructors for structs/enums.
-                    exprRet = Visit((pExpr as ExprZeroInit).OptionalConstructorCall);
-                    (pExpr as ExprZeroInit).OptionalConstructorCall = exprRet;
                     break;
 
                 case ExpressionKind.Block:
