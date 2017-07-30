@@ -102,7 +102,6 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymbolMask.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymbolTable.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymFactory.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\SymFactoryBase.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\TypeParameterSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Symbols\VariableSymbol.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\Tree\ArrayIndex.cs" />

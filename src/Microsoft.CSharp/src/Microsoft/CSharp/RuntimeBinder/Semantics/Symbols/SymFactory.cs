@@ -7,11 +7,85 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class SymFactory : SymFactoryBase
+    internal sealed class SymFactory
     {
-        public SymFactory(SYMTBL symtable) :
-            base(symtable)
+        private readonly SYMTBL m_pSymTable;
+
+        public SymFactory(SYMTBL symtable)
         {
+            m_pSymTable = symtable;
+        }
+
+        private Symbol newBasicSym(
+            SYMKIND kind,
+            Name name,
+            ParentSymbol parent)
+        {
+            Symbol sym;
+            switch (kind)
+            {
+                case SYMKIND.SK_NamespaceSymbol:
+                    sym = new NamespaceSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
+                    sym = new AssemblyQualifiedNamespaceSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_AggregateSymbol:
+                    sym = new AggregateSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_AggregateDeclaration:
+                    sym = new AggregateDeclaration();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_TypeParameterSymbol:
+                    sym = new TypeParameterSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_FieldSymbol:
+                    sym = new FieldSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_LocalVariableSymbol:
+                    sym = new LocalVariableSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_MethodSymbol:
+                    sym = new MethodSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_PropertySymbol:
+                    sym = new PropertySymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_EventSymbol:
+                    sym = new EventSymbol();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_Scope:
+                    sym = new Scope();
+                    sym.name = name;
+                    break;
+                case SYMKIND.SK_IndexerSymbol:
+                    sym = new IndexerSymbol();
+                    sym.name = name;
+                    break;
+                default:
+                    throw Error.InternalCompilerError();
+            }
+
+            sym.setKind(kind);
+
+            if (parent != null)
+            {
+                // Set the parent element of the child symbol.
+                parent.AddToChildList(sym);
+                m_pSymTable.InsertChild(parent, sym);
+            }
+
+            return (sym);
         }
 
         // Namespace
