@@ -22,7 +22,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             GlobalSymbols = new BSYMMGR(namemgr);
             _predefTypes = new PredefinedTypes(GlobalSymbols);
             TypeManager.Init(GlobalSymbols, _predefTypes);
-            GlobalSymbols.Init();
 
             _nameManager = namemgr;
         }
