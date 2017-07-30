@@ -137,15 +137,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case FUNDTYPE.FT_PTR:
                     {
-                        CType nullType = Types.GetNullType();
-
-                        // It looks like this if is always false ...
-                        if (nullType.fundType() == type.fundType())
-                        {
-                            // Create a constant here.
-                            return CreateConstant(type, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
-                        }
-
                         // Just allocate a new node and fill it in.
                         return CreateCast(0, CreateClass(type), CreateNull());
                     }
