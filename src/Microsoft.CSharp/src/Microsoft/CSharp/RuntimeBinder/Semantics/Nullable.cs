@@ -81,20 +81,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (prop == null)
             {
                 prop = GetSymbolLoader().getPredefinedMembers().GetProperty(PREDEFPROP.PP_G_OPTIONAL_VALUE);
+                Debug.Assert(prop != null);
                 GetSymbolLoader().getBSymmgr().propNubValue = prop;
             }
 
             PropWithType pwt = new PropWithType(prop, ats);
             MethPropWithInst mpwi = new MethPropWithInst(prop, ats);
             ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(exprSrc, mpwi);
-            ExprProperty exprRes = GetExprFactory().CreateProperty(typeBase, null, null, pMemGroup, pwt, null);
-
-            if (prop == null)
-            {
-                exprRes.SetError();
-            }
-
-            return exprRes;
+            return GetExprFactory().CreateProperty(typeBase, null, null, pMemGroup, pwt, null);
         }
 
         public ExprCall BindNew(Expr pExprSrc)
@@ -117,19 +111,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (meth == null)
             {
                 meth = GetSymbolLoader().getPredefinedMembers().GetMethod(PREDEFMETH.PM_G_OPTIONAL_CTOR);
+                Debug.Assert(meth != null);
                 GetSymbolLoader().getBSymmgr().methNubCtor = meth;
             }
 
             MethWithInst methwithinst = new MethWithInst(meth, pSourceType, BSYMMGR.EmptyTypeArray());
             ExprMemberGroup memgroup = GetExprFactory().CreateMemGroup(null, methwithinst);
-            ExprCall pExprRes = GetExprFactory().CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
-
-            if (meth == null)
-            {
-                pExprRes.SetError();
-            }
-
-            return pExprRes;
+            return GetExprFactory().CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
         }
         public CNullable(SymbolLoader symbolLoader, ErrorHandling errorContext, ExprFactory exprFactory)
         {
