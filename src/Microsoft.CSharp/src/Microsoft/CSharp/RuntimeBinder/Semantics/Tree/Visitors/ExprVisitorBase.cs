@@ -350,8 +350,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case ExpressionKind.ZeroInit:
-                    exprRet = Visit((pExpr as ExprZeroInit).OptionalArgument);
-                    (pExpr as ExprZeroInit).OptionalArgument = exprRet;
                     break;
 
                 case ExpressionKind.Block:

@@ -352,7 +352,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected override Expr VisitZEROINIT(ExprZeroInit expr)
         {
             Debug.Assert(expr != null);
-            Debug.Assert(expr.OptionalArgument == null);
             return GenerateConstant(expr);
         }
         protected override Expr VisitTYPEOF(ExprTypeOf expr)

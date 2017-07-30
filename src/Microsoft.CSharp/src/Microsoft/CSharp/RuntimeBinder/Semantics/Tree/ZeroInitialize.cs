@@ -14,7 +14,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 SetError();
             }
         }
-
-        public Expr OptionalArgument { get; set; }
     }
 }
