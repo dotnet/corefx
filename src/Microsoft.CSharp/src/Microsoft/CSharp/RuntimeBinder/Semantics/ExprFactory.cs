@@ -121,9 +121,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // This returns a null for reference types and an EXPRZEROINIT for all others.
 
-        public Expr CreateZeroInit(CType type) => CreateZeroInit(CreateClass(type), null, false);
+        public Expr CreateZeroInit(CType type) => CreateZeroInit(CreateClass(type), null);
 
-        private Expr CreateZeroInit(ExprClass typeExpr, Expr originalConstructorCall, bool isConstructor)
+        private Expr CreateZeroInit(ExprClass typeExpr, Expr originalConstructorCall)
         {
             Debug.Assert(typeExpr != null);
             CType type = typeExpr.Type;
@@ -181,7 +181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            return new ExprZeroInit(type, originalConstructorCall, isConstructor, isError);
+            return new ExprZeroInit(type, originalConstructorCall, isError);
         }
 
         public ExprConstant CreateConstant(CType type, ConstVal constVal) => new ExprConstant(type, constVal);

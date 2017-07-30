@@ -353,13 +353,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             Debug.Assert(expr.OptionalArgument == null);
-
-            if (expr.IsConstructor)
-            {
-                // We have a parameterless "new MyStruct()" which has been realized as a zero init.
-                ExprTypeOf pTypeOf = CreateTypeOf(expr.Type);
-                return GenerateCall(PREDEFMETH.PM_EXPRESSION_NEW_TYPE, pTypeOf);
-            }
             return GenerateConstant(expr);
         }
         protected override Expr VisitTYPEOF(ExprTypeOf expr)
