@@ -47,14 +47,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
 
-            InitType(_errorType);
             _errorType.SetErrors(true);
-
-            InitType(_voidType);
-            InitType(_nullType);
-            InitType(_typeUnit);
-            InitType(_typeAnonMeth);
-            InitType(_typeMethGrp);
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -65,10 +58,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void InitTypeFactory(SymbolTable table)
         {
             _symbolTable = table;
-        }
-
-        private void InitType(CType at)
-        {
         }
 
         private sealed class StdTypeVarColl
