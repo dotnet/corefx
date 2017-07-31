@@ -267,18 +267,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 BetterType betterConversion = WhichConversionIsBetter(argType, p1, p2);
 
-                if (betterMethod == BetterType.Right && betterConversion == BetterType.Left)
+                if (betterMethod == BetterType.Right)
                 {
-                    betterMethod = BetterType.Neither;
-                    break;
+                    if (betterConversion == BetterType.Left)
+                    {
+                        betterMethod = BetterType.Neither;
+                        break;
+                    }
                 }
-                else if (betterMethod == BetterType.Left && betterConversion == BetterType.Right)
+                else if (betterMethod == BetterType.Left)
                 {
-                    betterMethod = BetterType.Neither;
-                    break;
+                    if (betterConversion == BetterType.Right)
+                    {
+                        betterMethod = BetterType.Neither;
+                        break;
+                    }
                 }
-                else if (betterMethod == BetterType.Neither)
+                else
                 {
+                    Debug.Assert(betterMethod == BetterType.Neither);
                     if (betterConversion == BetterType.Right || betterConversion == BetterType.Left)
                     {
                         betterMethod = betterConversion;
@@ -291,11 +298,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // expanded. If so, the one with more parameters wins (ie option beats expanded).
             if (pta1.Count != pta2.Count && betterMethod == BetterType.Neither)
             {
-                if (node1.fExpanded && !node2.fExpanded)
+                if (node1.fExpanded)
                 {
-                    return BetterType.Right;
+                    if (!node2.fExpanded)
+                    {
+                        return BetterType.Right;
+                    }
                 }
-                else if (node2.fExpanded && !node1.fExpanded)
+                else if (node2.fExpanded)
                 {
                     return BetterType.Left;
                 }
@@ -312,6 +322,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return BetterType.Right;
                 }
+
                 return BetterType.Neither;
             }
 
