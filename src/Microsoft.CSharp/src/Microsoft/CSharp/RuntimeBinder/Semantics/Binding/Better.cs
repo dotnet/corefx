@@ -464,33 +464,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         break;
                 }
             }
-            if (ambiguous)
-                goto AMBIG;
 
-            // Now, compare the candidate with items previous to it...
-            foreach (CandidateFunctionMember contender in list)
+            if (!ambiguous)
             {
-                if (contender == candidate)
+                // Now, compare the candidate with items previous to it...
+                foreach (CandidateFunctionMember contender in list)
                 {
-                    // We hit our winner, so its good enough...
-                    methAmbig1 = null;
-                    methAmbig2 = null;
-                    return candidate;
+                    if (contender == candidate)
+                    {
+                        // We hit our winner, so its good enough...
+                        methAmbig1 = null;
+                        methAmbig2 = null;
+                        return candidate;
+                    }
+
+                    BetterType result = WhichMethodIsBetter(contender, candidate, pTypeThrough, args);
+                    if (result == BetterType.Right)
+                    {
+                        // meaning m2 is better
+                        continue;
+                    }
+                    else if (result == BetterType.Same || result == BetterType.Neither)
+                    {
+                        ambig1 = candidate;
+                        ambig2 = contender;
+                    }
+
+                    break;
                 }
-                BetterType result = WhichMethodIsBetter(contender, candidate, pTypeThrough, args);
-                if (result == BetterType.Right)
-                { // meaning m2 is better
-                    continue;
-                }
-                else if (result == BetterType.Same || result == BetterType.Neither)
-                {
-                    ambig1 = candidate;
-                    ambig2 = contender;
-                }
-                break;
             }
 
-        AMBIG:
             // an ambig call. Return two of the ambiguous set.
             if (ambig1 != null && ambig2 != null)
             {
