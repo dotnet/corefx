@@ -3,12 +3,12 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{C7CB4B69-2A11-4A20-A21E-5C954855AE5A}</ProjectGuid>
-    <AssemblyName>System.Data.Extensions</AssemblyName>
+    <AssemblyName>System.Data.DataSetExtensions</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup> 
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Resources.ResourceManager" />
@@ -28,7 +28,9 @@
     <Compile Include="System\Data\OrderedEnumerableRowCollection.cs" />
     <Compile Include="System\Data\ShippingAssemblyAttribute.cs" />
     <Compile Include="System\Data\SortExpressionBuilder.cs" />
-    <Compile Include="System\Data\TypedTableBase.cs" />
+    <Compile Include="System\Data\TypedTableBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\TypedTableBaseExtensions.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
