@@ -342,12 +342,10 @@ namespace System.IO.Tests
         [InlineData(@"\\Server\Foo.txt")]
         [InlineData(@"\\Server\Share\Foo.txt")]
         [InlineData(@"\\Server\Share\Test\Foo.txt")]
-
         [InlineData(@"C:\")]
         [InlineData(@"C:\foo1")]
         [InlineData(@"C:\\")]
         [InlineData(@"C:\\foo2")]
-
         [InlineData(@"C:/")]
         [InlineData(@"C:/foo1")]
         [InlineData(@"C://")]
@@ -365,7 +363,6 @@ namespace System.IO.Tests
         [InlineData("./foo.txt")]
         [InlineData("..")]
         [InlineData("../foo.txt")]
-
         [InlineData(@"C:")]
         [InlineData(@"C:/")]
         [InlineData(@"C://")]
@@ -379,7 +376,6 @@ namespace System.IO.Tests
         [InlineData("/")]
         [InlineData("/foo.txt")]
         [InlineData("/..")]
-
         [InlineData("//")]
         [InlineData("//foo.txt")]
         [InlineData("//..")]
