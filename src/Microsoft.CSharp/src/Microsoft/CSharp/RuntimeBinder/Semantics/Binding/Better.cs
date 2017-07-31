@@ -20,22 +20,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static readonly byte[][] s_betterConversionTable =
         {
             //          BYTE    SHORT   INT     LONG    FLOAT   DOUBLE  DECIMAL CHAR    BOOL    SBYTE   USHORT  UINT    ULONG   IPTR     UIPTR    OBJECT
-            new byte[] /* BYTE*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* SHORT*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      1,      0,       0,       0},
-            new byte[] /* INT*/    {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,       0,       0},
-            new byte[] /* LONG*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      0,       0,       0},
-            new byte[] /* FLOAT*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* DOUBLE*/ {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* DECIMAL*/{0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* CHAR*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* BOOL*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* SBYTE*/  {1,     0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      1,      0,       0,       0},
-            new byte[] /* USHORT*/ {0,     2,      0,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* UINT*/   {0,     2,      2,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* ULONG*/  {0,     2,      2,      2,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* IPTR*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* UIPTR*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* OBJECT*/ {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0}
+            new byte[] /* BYTE*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* SHORT*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      1,      3,       3,       3},
+            new byte[] /* INT*/    {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      3,       3,       3},
+            new byte[] /* LONG*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      3,       3,       3},
+            new byte[] /* FLOAT*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* DOUBLE*/ {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* DECIMAL*/{3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* CHAR*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* BOOL*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* SBYTE*/  {1,     3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      1,      3,       3,       3},
+            new byte[] /* USHORT*/ {3,     2,      3,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* UINT*/   {3,     2,      2,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* ULONG*/  {3,     2,      2,      2,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* IPTR*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* UIPTR*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* OBJECT*/ {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3}
         };
 
         private BetterType WhichMethodIsBetterTieBreaker(
@@ -402,15 +402,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (p1.isPredefined() && p2.isPredefined() &&
                 p1.getPredefType() <= PredefinedType.PT_OBJECT && p2.getPredefType() <= PredefinedType.PT_OBJECT)
             {
-                int c = s_betterConversionTable[(int)p1.getPredefType()][(int)p2.getPredefType()];
-                if (c == 1)
-                {
-                    return BetterType.Left;
-                }
-                else if (c == 2)
-                {
-                    return BetterType.Right;
-                }
+                return (BetterType)s_betterConversionTable[(int)p1.getPredefType()][(int)p2.getPredefType()];
             }
 
             return BetterType.Neither;
