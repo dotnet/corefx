@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Net.Test.Common;
 using Xunit;
 
 namespace System.Net.Tests
 {
-    public class WebRequestTest
+    public class WebRequestTest : RemoteExecutorTestBase
     {
         static WebRequestTest()
         {
@@ -27,6 +29,20 @@ namespace System.Net.Tests
             Assert.NotNull(initialDefaultWebProxy);
 
             Assert.Null(initialDefaultWebProxyCredentials);
+        }
+
+        [Fact]
+        public void DefaultWebProxy_SetThenGet_ValuesMatch()
+        {
+            RemoteInvoke(() =>
+            {
+                IWebProxy p = new DummyWebProxy();
+
+                WebRequest.DefaultWebProxy = p;
+                Assert.Same(p, WebRequest.DefaultWebProxy);
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]

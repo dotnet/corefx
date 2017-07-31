@@ -3,47 +3,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-
+using System.Net.Test.Common;
 using Xunit;
 
 namespace System.Net.Tests
 {
     public class GlobalProxySelectionTest : RemoteExecutorTestBase
     {
-        private class MyWebProxy : IWebProxy
-        {
-            public MyWebProxy() { }
-
-            public ICredentials Credentials
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-
-                set
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            public Uri GetProxy(Uri destination)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool IsBypassed(Uri host)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         [Fact]
         public void Select_Success()
         {
             RemoteInvoke(() =>
             {
-                var myProxy = new MyWebProxy();
+                var myProxy = new DummyWebProxy();
 
 #pragma warning disable 0618 //GlobalProxySelection is Deprecated.
                 Assert.NotNull(GlobalProxySelection.Select);
