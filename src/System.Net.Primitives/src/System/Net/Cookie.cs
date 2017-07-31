@@ -73,7 +73,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
@@ -87,7 +87,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
@@ -248,7 +248,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
@@ -292,7 +292,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
@@ -709,7 +709,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
@@ -850,7 +850,7 @@ namespace System.Net
     block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
     public, this is a temporary workaround till that happens. 
 */
-#if uap 
+#if uapaot
         public
 #else 
         internal
