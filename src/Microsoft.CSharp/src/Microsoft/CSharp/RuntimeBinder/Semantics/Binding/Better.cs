@@ -239,7 +239,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int i = 0; i < carg; i++)
             {
                 Expr arg = args.fHasExprs ? args.prgexpr[i] : null;
-                CType argType = args.types[i];
                 CType p1 = pta1[i];
                 CType p2 = pta2[i];
 
@@ -250,10 +249,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We need to consider conversions from the actual runtime type
                 // since we could have private interfaces that we are converting
 
-                if (arg.RuntimeObjectActualType != null)
-                {
-                    argType = arg.RuntimeObjectActualType;
-                }
+                CType argType = arg.RuntimeObjectActualType ?? args.types[i];
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // END RUNTIME BINDER ONLY CHANGE
