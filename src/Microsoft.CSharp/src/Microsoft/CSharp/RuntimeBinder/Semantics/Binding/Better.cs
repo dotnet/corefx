@@ -349,12 +349,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return BetterType.Same;
             }
-            return WhichConversionIsBetter(argType, p1, p2);
-        }
 
-        private BetterType WhichConversionIsBetter(CType argType,
-            CType p1, CType p2)
-        {
             // 7.4.2.4 Better conversion from type
             //
             // Given a conversion C1 that converts from a type S to a type T1 and a conversion C2
@@ -369,11 +364,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   T2 exists, C2 is the better conversion.
             //
             // [Otherwise, see table above for better integral type conversions.]
-
-            if (p1 == p2)
-            {
-                return BetterType.Same;
-            }
 
             if (argType == p1)
             {
