@@ -35,7 +35,7 @@ namespace System.Net.Tests
         {
             RemoteInvoke(() =>
             {
-                IWebProxy p = new DummyWebProxy();
+                IWebProxy p = new WebProxy();
 
                 WebRequest.DefaultWebProxy = p;
                 Assert.Same(p, WebRequest.DefaultWebProxy);
