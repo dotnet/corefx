@@ -4,13 +4,29 @@
 
   <PropertyGroup>
     <PackageReportDir Condition="'$(PackageReportDir)' == ''">$(BinDir)pkg/reports/</PackageReportDir>
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" Condition="'$(SkipManagedPackageBuild)' != 'true'">
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="*\pkg\**\*.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.UAP\Microsoft.Private.CoreFx.UAP.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
