@@ -434,33 +434,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CandidateFunctionMember contender = list[i];
                 Debug.Assert(candidate != contender);
 
-                BetterType result = WhichMethodIsBetter(candidate, contender, pTypeThrough, args);
-                if (result == BetterType.Left)
+                switch (WhichMethodIsBetter(candidate, contender, pTypeThrough, args))
                 {
-                    ambiguous = false;
-                    continue;  // (meaning m1 is better...)
-                }
-                else if (result == BetterType.Right)
-                {
-                    ambiguous = false;
-                    candidate = contender;
-                }
-                else
-                {
-                    // in case of tie we don't want to bother with the contender who tied...
-                    ambig1 = candidate;
-                    ambig2 = contender;
+                    case BetterType.Left:
+                        ambiguous = false;  // (meaning m1 is better...)
+                        break;
 
-                    i++;
-                    if (i < list.Count)
-                    {
-                        contender = list[i];
+                    case BetterType.Right:
+                        ambiguous = false;
                         candidate = contender;
-                    }
-                    else
-                    {
-                        ambiguous = true;
-                    }
+                        break;
+
+                    default:
+
+                        // in case of tie we don't want to bother with the contender who tied...
+                        ambig1 = candidate;
+                        ambig2 = contender;
+
+                        i++;
+                        if (i < list.Count)
+                        {
+                            contender = list[i];
+                            candidate = contender;
+                        }
+                        else
+                        {
+                            ambiguous = true;
+                        }
+                        break;
                 }
             }
             if (ambiguous)
