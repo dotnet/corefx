@@ -388,16 +388,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool a2b = canConvert(p1, p2);
             bool b2a = canConvert(p2, p1);
 
-            if (a2b && !b2a)
+            if (a2b != b2a)
             {
-                return BetterType.Left;
+                return a2b ? BetterType.Left : BetterType.Right;
             }
-            if (b2a && !a2b)
-            {
-                return BetterType.Right;
-            }
-
-            Debug.Assert(b2a == a2b);
 
             if (p1.isPredefined() && p2.isPredefined() &&
                 p1.getPredefType() <= PredefinedType.PT_OBJECT && p2.getPredefType() <= PredefinedType.PT_OBJECT)
