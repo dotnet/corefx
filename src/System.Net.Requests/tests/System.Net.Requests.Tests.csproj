@@ -33,7 +33,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyWebProxy.cs"/>    
     <Compile Include="AuthorizationTest.cs" />
     <Compile Include="AuthenticationManagerTest.cs" />
     <Compile Include="GlobalProxySelectionTest.cs" />

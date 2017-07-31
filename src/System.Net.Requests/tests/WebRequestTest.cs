@@ -29,7 +29,7 @@ namespace System.Net.Tests
 
             Assert.Null(initialDefaultWebProxyCredentials);
         }
-
+        
         [Fact]
         public void DefaultWebProxy_SetThenGet_ValuesMatch()
         {
