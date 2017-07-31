@@ -20,6 +20,7 @@
     <Compile Include="IndexingTests.cs" />
     <Compile Include="IntegerBinaryOperationTests.cs" />
     <Compile Include="IntegerUnaryOperationTests.cs" />
+    <Compile Include="RuntimeBinderExceptionTestHelper.cs" />
     <Compile Include="RuntimeBinderExceptionTests.cs" />
     <Compile Include="RuntimeBinderInternalCompilerExceptionTests.cs" />
     <Compile Include="RuntimeBinderTests.cs" />

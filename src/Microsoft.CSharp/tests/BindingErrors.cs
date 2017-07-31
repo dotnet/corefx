@@ -7,11 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.CSharp.RuntimeBinder.Tests
@@ -93,7 +89,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             var obj = new TypeWithConditional();
             obj.DoNothing(); // Confirm can bind statically.
             dynamic d = obj;
-            Assert.Throws<RuntimeBinderException>(() => d.DoNothing());
+            Assert.Throws<RuntimeBinderException>(() => d.DoNothing()).VerifyHelpLink(0);
         }
 
         [Fact]
@@ -102,83 +98,83 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             var obj = new DerivedTypeWithConditional();
             obj.DoNothing(); // Confirm can bind statically.
             dynamic d = obj;
-            Assert.Throws<RuntimeBinderException>(() => d.DoNothing());
+            Assert.Throws<RuntimeBinderException>(() => d.DoNothing()).VerifyHelpLink(0);
         }
 
         [Fact]
         public void CannotBindToEventAsProperty()
         {
             dynamic d = new TypeWithEvent();
-            Assert.Throws<RuntimeBinderException>(() => d.Event = 3);
+            Assert.Throws<RuntimeBinderException>(() => d.Event = 3).VerifyHelpLink(0);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int x = d.Event;
-            });
+            }).VerifyHelpLink(0);
         }
 
         [Fact]
         public void CannotBindToEventAsInvokable()
         {
             dynamic d = new TypeWithEvent();
-            Assert.Throws<RuntimeBinderException>(() => d.Event(new EventArgs()));
+            Assert.Throws<RuntimeBinderException>(() => d.Event(new EventArgs())).VerifyHelpLink(0);
         }
 
         [Fact]
         public void MethodOnNullReference()
         {
             dynamic d = null;
-            Assert.Throws<RuntimeBinderException>(() => d.DoStuff());
+            Assert.Throws<RuntimeBinderException>(() => d.DoStuff()).VerifyHelpLink(0);
         }
 
         [Fact]
         public void PropertyOrFieldOnNullReference()
         {
             dynamic d = null;
-            Assert.Throws<RuntimeBinderException>(() => d.Value = 3);
+            Assert.Throws<RuntimeBinderException>(() => d.Value = 3).VerifyHelpLink(0);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int x = d.Value;
-            });
+            }).VerifyHelpLink(0);
         }
 
         [Fact]
         public void CannotConvertVoid()
         {
             dynamic d = new List<int>();
-            Assert.Throws<RuntimeBinderException>(() => d.Add(1).ToString());
+            Assert.Throws<RuntimeBinderException>(() => d.Add(1).ToString()).VerifyHelpLink(29);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int i = d.Add(1);
-            });
+            }).VerifyHelpLink(29);
         }
 
         [Fact]
         public void MethodGroupLikeProperty()
         {
             dynamic d = new List<int>();
-            Assert.Throws<RuntimeBinderException>(() => d.Add = 42);
+            Assert.Throws<RuntimeBinderException>(() => d.Add = 42).VerifyHelpLink(0);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int i = d.Add;
-            });
+            }).VerifyHelpLink(0);
         }
 
         [Fact]
         public void PropertyLikeMethod()
         {
             dynamic d = new List<int>();
-            Assert.Throws<RuntimeBinderException>(() => d.Add = 42);
+            Assert.Throws<RuntimeBinderException>(() => d.Add = 42).VerifyHelpLink(0);
             Assert.Throws<RuntimeBinderException>(() =>
             {
                 int i = d.Add;
-            });
+            }).VerifyHelpLink(0);
         }
 
         [Fact]
         public void AmbiguousOverloadAsTarget()
         {
             dynamic d = new TypeWithOverloads();
-            Assert.Throws<RuntimeBinderException>(() => d.DoNothing(1, 2));
+            Assert.Throws<RuntimeBinderException>(() => d.DoNothing(1, 2)).VerifyHelpLink(121);
         }
 
         [Fact]
@@ -186,7 +182,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         {
             TypeWithOverloads target = new TypeWithOverloads();
             dynamic d = 2;
-            Assert.Throws<RuntimeBinderException>(() => target.DoNothing(1, d));
+            Assert.Throws<RuntimeBinderException>(() => target.DoNothing(1, d)).VerifyHelpLink(121);
         }
 
         [Fact]

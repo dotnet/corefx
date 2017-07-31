@@ -96,5 +96,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Func<CallSite, object, object, object, object> target = site.Target;
             Assert.Throws<ArgumentException>("Type Argument", () => target.Invoke(site, null, 2, 2));
         }
+
+        [Fact]
+        public void CanOverrideHelpLink()
+        {
+            RuntimeBinderException ex = Assert.Throws<RuntimeBinderException>(() => ((dynamic)new int[0])[0, 0]);
+            ex.VerifyHelpLink(22);
+            ex.HelpLink = null;
+            Assert.Null(ex.HelpLink);
+            ex.HelpLink = "Changed the HelpLink";
+            Assert.Equal("Changed the HelpLink", ex.HelpLink);
+        }
+
+        [Fact]
+        public void SerializeRBEThrowsPNSE()
+        {
+            BinaryFormatterHelpers.AssertExceptionDeserializationFails<RuntimeBinderException>();
+        }
     }
 }

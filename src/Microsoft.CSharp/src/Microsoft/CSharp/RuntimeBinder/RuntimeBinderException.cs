@@ -4,6 +4,8 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Threading;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -14,6 +16,16 @@ namespace Microsoft.CSharp.RuntimeBinder
     /// </summary>
     public class RuntimeBinderException : Exception
     {
+        private bool _helpLinkOverwritten;
+
+        private static class BingUriGenerator
+        {
+            private const string BingSearchString = "https://bingdev.cloudapp.net/BingUrl.svc/Get?selectedText=&mainLanguage=C%23&projectType=%7BFAE04EC0-301F-11D3-BF4B-00C04F79EFBC%7D&requestId={0}&clientId=&errorCode=CS{1:D4}";
+            private static readonly string s_requestID = Uri.EscapeDataString(Guid.NewGuid().ToString());
+
+            public static string BingUri(ErrorCode code) => string.Format(BingSearchString, s_requestID, (int)code);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeBinderException"/> class. 
         /// </summary>
@@ -28,6 +40,12 @@ namespace Microsoft.CSharp.RuntimeBinder
         public RuntimeBinderException(string message)
             : base(message)
         {
+        }
+
+        internal RuntimeBinderException(ErrorCode code, string message)
+            : this(message)
+        {
+            ErrorCode = code;
         }
 
         /// <summary>
@@ -50,6 +68,26 @@ namespace Microsoft.CSharp.RuntimeBinder
             : base(info, context)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        internal ErrorCode ErrorCode { get; }
+
+        public override string HelpLink
+        {
+            get
+            {
+                if (_helpLinkOverwritten || ErrorCode <= 0)
+                {
+                    return base.HelpLink;
+                }
+
+                return BingUriGenerator.BingUri(ErrorCode);
+            }
+            set
+            {
+                _helpLinkOverwritten = true;
+                base.HelpLink = value;
+            }
         }
     }
 }

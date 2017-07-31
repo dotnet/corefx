@@ -10,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -136,7 +137,12 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return new DynamicMetaObject(
                     Expression.Throw(
                         Expression.New(
-                            typeof(RuntimeBinderException).GetConstructor(new Type[] { typeof(string) }),
+                            typeof(RuntimeBinderException).GetConstructor(
+                                BindingFlags.NonPublic | BindingFlags.Instance,
+                                null,
+                                new [] { typeof(ErrorCode), typeof(string) },
+                                null),
+                            Expression.Constant(e.ErrorCode),
                             Expression.Constant(e.Message)
                         ),
                         GetTypeForErrorMetaObject(action, args.Length == 0 ? null : args[0])

@@ -773,10 +773,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void WithNonLiteralNull(dynamic value)
         {
             object nonLiteralNull = null;
-            Assert.Throws<RuntimeBinderException>(() => value + nonLiteralNull);
-            Assert.Throws<RuntimeBinderException>(() => nonLiteralNull + value);
-            Assert.Throws<RuntimeBinderException>(() => value - nonLiteralNull);
-            Assert.Throws<RuntimeBinderException>(() => nonLiteralNull - value);
+            Assert.Throws<RuntimeBinderException>(() => value + nonLiteralNull).VerifyHelpLink(19);
+            Assert.Throws<RuntimeBinderException>(() => nonLiteralNull + value).VerifyHelpLink(19);
+            Assert.Throws<RuntimeBinderException>(() => value - nonLiteralNull).VerifyHelpLink(19);
+            Assert.Throws<RuntimeBinderException>(() => nonLiteralNull - value).VerifyHelpLink(19);
         }
 
         [Theory, MemberData(nameof(ByteEnumValueArguments))]
