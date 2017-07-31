@@ -311,6 +311,85 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public static void IsPathFullyQualified_NullThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => Path.IsPathFullyQualified(null));
+        }
+
+        [Fact]
+        public static void IsPathFullyQualified_Empty()
+        {
+            Assert.False(Path.IsPathFullyQualified(""));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData("/")]
+        [InlineData(@"\")]
+        [InlineData(".")]
+        [InlineData("C:")]
+        [InlineData("C:foo.txt")]
+        public static void IsPathFullyQualified_Windows_Invalid(string path)
+        {
+            Assert.False(Path.IsPathFullyQualified(path));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"\\")]
+        [InlineData(@"\\\")]
+        [InlineData(@"\\Server")]
+        [InlineData(@"\\Server\Foo.txt")]
+        [InlineData(@"\\Server\Share\Foo.txt")]
+        [InlineData(@"\\Server\Share\Test\Foo.txt")]
+
+        [InlineData(@"C:\")]
+        [InlineData(@"C:\foo1")]
+        [InlineData(@"C:\\")]
+        [InlineData(@"C:\\foo2")]
+
+        [InlineData(@"C:/")]
+        [InlineData(@"C:/foo1")]
+        [InlineData(@"C://")]
+        [InlineData(@"C://foo2")]
+        public static void IsPathFullyQualified_Windows_Valid(string path)
+        {
+            Assert.True(Path.IsPathFullyQualified(path));
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(@"\")]
+        [InlineData(@"\\")]
+        [InlineData(".")]
+        [InlineData("./foo.txt")]
+        [InlineData("..")]
+        [InlineData("../foo.txt")]
+
+        [InlineData(@"C:")]
+        [InlineData(@"C:/")]
+        [InlineData(@"C://")]
+        public static void IsPathFullyQualified_Unix_Invalid(string path)
+        {
+            Assert.False(Path.IsPathFullyQualified(path));
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData("/")]
+        [InlineData("/foo.txt")]
+        [InlineData("/..")]
+
+        [InlineData("//")]
+        [InlineData("//foo.txt")]
+        [InlineData("//..")]
+        public static void IsPathFullyQualified_Unix_Valid(string path)
+        {
+            Assert.True(Path.IsPathFullyQualified(path));
+        }
+
+
+        [Fact]
         public static void GetRandomFileName()
         {
             char[] invalidChars = Path.GetInvalidFileNameChars();
