@@ -249,7 +249,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We need to consider conversions from the actual runtime type
                 // since we could have private interfaces that we are converting
 
-                CType argType = arg.RuntimeObjectActualType ?? args.types[i];
+                CType argType = arg?.RuntimeObjectActualType ?? args.types[i];
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // END RUNTIME BINDER ONLY CHANGE
