@@ -12,7 +12,6 @@ namespace System.Drawing
     public static class Helpers
     {
         public const string GdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetGdiplusIsAvailable);
-        public const string IsNotLinuxAndGdiplusIsAvailable = nameof(Helpers) + "." + nameof(CheckIsNotLinuxAndGdiplusIsAvailable);
 
         public static bool GetGdiplusIsAvailable()
         {
@@ -29,18 +28,6 @@ namespace System.Drawing
                 }
 
                 return nativeLib != IntPtr.Zero;
-            }
-        }
-
-        public static bool CheckIsNotLinuxAndGdiplusIsAvailable()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return false;
-            }
-            else
-            {
-                return GetGdiplusIsAvailable();
             }
         }
 
