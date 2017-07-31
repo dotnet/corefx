@@ -235,13 +235,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   conversion from Ex to Qx.
 
             BetterType betterMethod = BetterType.Neither;
-            CType type1 = pTypeThrough != null ? pTypeThrough : mpwi1.GetType();
-            CType type2 = pTypeThrough != null ? pTypeThrough : mpwi2.GetType();
-            MethodOrPropertySymbol methProp1 = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi1.MethProp(), type1);
-            MethodOrPropertySymbol methProp2 = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi2.MethProp(), type2);
-            List<Name> names1 = methProp1.ParameterNames;
-            List<Name> names2 = methProp2.ParameterNames;
-
             for (int i = 0; i < args.carg; i++)
             {
                 Expr arg = args.fHasExprs ? args.prgexpr[i] : null;
