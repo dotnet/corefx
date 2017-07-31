@@ -265,7 +265,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // END RUNTIME BINDER ONLY CHANGE
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                BetterType betterConversion = WhichConversionIsBetter(arg, argType, p1, p2);
+                BetterType betterConversion = WhichConversionIsBetter(argType, p1, p2);
 
                 if (betterMethod == BetterType.Right && betterConversion == BetterType.Left)
                 {
@@ -318,8 +318,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return betterMethod;
         }
 
-        private BetterType WhichConversionIsBetter(Expr arg, CType argType,
-            CType p1, CType p2)
+        private BetterType WhichConversionIsBetter(CType argType, CType p1, CType p2)
         {
             Debug.Assert(argType != null);
             Debug.Assert(p1 != null);
