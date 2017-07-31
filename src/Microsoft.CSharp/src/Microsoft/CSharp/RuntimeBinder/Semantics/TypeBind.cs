@@ -147,11 +147,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
-            if (arg is OpenTypePlaceholderType)
-            {
-                return true;
-            }
-
             if (arg is ErrorType)
             {
                 // Error should have been reported previously.
