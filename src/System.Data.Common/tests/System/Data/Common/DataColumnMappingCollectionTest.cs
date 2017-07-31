@@ -476,7 +476,7 @@ namespace System.Data.Tests.Common
         }
 
         [Fact]
-        public void This_String_SetAndGetOK()
+        public void Indexer_String_SetAndGetOK()
         {
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
             dataColumnMappingCollection.Add(new DataColumnMapping("sourcePIN", "dataSetPIN"));
@@ -550,7 +550,7 @@ namespace System.Data.Tests.Common
         }
 
         [Fact]
-        public void This_Int_SetAndGetOK()
+        public void Indexer_Int_SetAndGetOK()
         {
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
             dataColumnMappingCollection.Add(new DataColumnMapping("sourcePIN", "dataSetPIN"));
