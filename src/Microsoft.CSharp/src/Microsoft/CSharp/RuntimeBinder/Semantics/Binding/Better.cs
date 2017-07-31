@@ -235,7 +235,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   conversion from Ex to Qx.
 
             BetterType betterMethod = BetterType.Neither;
-            for (int i = 0; i < args.carg; i++)
+            int carg = args.carg;
+            for (int i = 0; i < carg; i++)
             {
                 Expr arg = args.fHasExprs ? args.prgexpr[i] : null;
                 CType argType = args.types[i];
@@ -307,11 +308,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // then we are ambiguous. Otherwise, take the one that didn't need any 
                 // optionals.
 
-                if (pta1.Count == args.carg)
+                if (pta1.Count == carg)
                 {
                     return BetterType.Left;
                 }
-                else if (pta2.Count == args.carg)
+
+                if (pta2.Count == carg)
                 {
                     return BetterType.Right;
                 }
