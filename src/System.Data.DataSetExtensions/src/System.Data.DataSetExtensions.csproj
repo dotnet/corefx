@@ -8,7 +8,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup> 
+  <ItemGroup>
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Resources.ResourceManager" />
@@ -26,7 +26,6 @@
     <Compile Include="System\Data\EnumerableRowCollection.cs" />
     <Compile Include="System\Data\EnumerableRowCollectionExtensions.cs" />
     <Compile Include="System\Data\OrderedEnumerableRowCollection.cs" />
-    <Compile Include="System\Data\ShippingAssemblyAttribute.cs" />
     <Compile Include="System\Data\SortExpressionBuilder.cs" />
     <Compile Include="System\Data\TypedTableBase.cs">
       <SubType>Component</SubType>
