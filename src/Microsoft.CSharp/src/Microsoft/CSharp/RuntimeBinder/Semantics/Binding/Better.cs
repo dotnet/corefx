@@ -478,24 +478,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return candidate;
                     }
 
-                    BetterType result = WhichMethodIsBetter(contender, candidate, pTypeThrough, args);
-                    if (result == BetterType.Right)
+                    switch (WhichMethodIsBetter(contender, candidate, pTypeThrough, args))
                     {
-                        // meaning m2 is better
-                        continue;
-                    }
-                    else if (result == BetterType.Same || result == BetterType.Neither)
-                    {
-                        ambig1 = candidate;
-                        ambig2 = contender;
+                        case BetterType.Right:
+
+                            // meaning m2 is better
+                            continue;
+                        case BetterType.Same:
+                        case BetterType.Neither:
+                            ambig1 = candidate;
+                            ambig2 = contender;
+                            break;
                     }
 
                     break;
                 }
             }
 
-            // an ambig call. Return two of the ambiguous set.
-            if (ambig1 != null && ambig2 != null)
+            // an ambiguous call. Return two of the ambiguous set.
+            if (ambig1 != null & ambig2 != null)
             {
                 methAmbig1 = ambig1;
                 methAmbig2 = ambig2;
