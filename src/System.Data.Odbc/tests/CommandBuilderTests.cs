@@ -8,9 +8,7 @@ namespace System.Data.Odbc.Tests
 {
     public class CommandBuilderTests : IntegrationTestBase
     {
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Fact(Skip = "Native dependencies missing in CI. See https://github.com/dotnet/corefx/issues/15776.")]
         public void QuoteIdentifier_UseConnection()
         {
             var commandBuilder = new OdbcCommandBuilder();
@@ -39,9 +37,7 @@ namespace System.Data.Odbc.Tests
             Assert.Throws<InvalidOperationException>(() => commandBuilder.UnquoteIdentifier("Test"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Fact(Skip = "Native dependencies missing in CI. See https://github.com/dotnet/corefx/issues/15776.")]
         public void QuoteIdentifier_CustomPrefixSuffix()
         {
             var commandBuilder = new OdbcCommandBuilder();
