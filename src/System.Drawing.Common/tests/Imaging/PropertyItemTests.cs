@@ -39,6 +39,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { 0, 0, 0, new byte[0] };
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Properties_TestData))]
         public void Properties_SetValues_ReturnsExpected(int id, int len, short type, byte[] value)
