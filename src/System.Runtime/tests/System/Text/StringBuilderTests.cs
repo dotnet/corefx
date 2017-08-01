@@ -732,6 +732,19 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Append(new char[] { 'a' }, 0, 1));
         }
 
+        [Theory]
+        [InlineData("Hello", new char[] { 'a' }, "Helloa")]
+        [InlineData("Hello", new char[] { 'b', 'c', 'd' }, "Hellobcd")]
+        [InlineData("", new char[] { 'e', 'f', 'g' }, "efg")]
+        [InlineData("Hello", new char[0], "Hello")]
+        public static void Append_CharSpan(string original, char[] value, string expected)
+        {
+            var builder = new StringBuilder(original);
+            builder.Append(new ReadOnlySpan<char>(value));
+            Assert.Equal(expected, builder.ToString());
+            Assert.Equal(expected, builder.ToString());
+        }
+
         public static IEnumerable<object[]> AppendFormat_TestData()
         {
             yield return new object[] { "", null, "", new object[0], "" };
@@ -1017,6 +1030,42 @@ namespace System.Text.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => builder.CopyTo(0, new char[10], 10, 1)); // Destination index + count > destinationArray.Length
             AssertExtensions.Throws<ArgumentException>(null, () => builder.CopyTo(0, new char[10], 9, 2)); // Destination index + count > destinationArray.Length
+        }
+
+        [Theory]
+        [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0' }, 5, new char[] { 'H', 'e', 'l', 'l', 'o' })]
+        [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0' }, 4, new char[] { 'H', 'e', 'l', 'l' })]
+        [InlineData("Hello", 1, new char[] { '\0', '\0', '\0', '\0', '\0' }, 4, new char[] { 'e', 'l', 'l', 'o', '\0' })]
+        public static void CopyTo_CharSpan(string value, int sourceIndex, char[] destination, int count, char[] expected)
+        {
+            var builder = new StringBuilder(value);
+            builder.CopyTo(sourceIndex, new Span<char>(destination), count);
+            Assert.Equal(expected, destination);
+        }
+
+        [Fact]
+        public static void CopyTo_CharSpan_StringBuilderWithMultipleChunks()
+        {
+            StringBuilder builder = StringBuilderWithMultipleChunks();
+            char[] destination = new char[builder.Length];
+            builder.CopyTo(0, new Span<char>(destination), destination.Length);
+            Assert.Equal(s_chunkSplitSource.ToCharArray(), destination);
+        }
+
+        [Fact]
+        public static void CopyTo_CharSpan_Invalid()
+        {
+            var builder = new StringBuilder("Hello");
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => builder.CopyTo(-1, new Span<char>(new char[10]), 0)); // Source index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => builder.CopyTo(6, new Span<char>(new char[10]), 0)); // Source index > builder.Length
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.CopyTo(0, new Span<char>(new char[10]), -1)); // Count < 0
+
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.CopyTo(5, new Span<char>(new char[10]), 1)); // Source index + count > builder.Length
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.CopyTo(4, new Span<char>(new char[10]), 2)); // Source index + count > builder.Length
+
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.CopyTo(0, new Span<char>(new char[10]), 11)); // count > destinationArray.Length
         }
 
         [Fact]
@@ -1581,6 +1630,29 @@ namespace System.Text.Tests
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
+        }
+
+        [Theory]
+        [InlineData("Hello", 0, new char[] { '\0' }, "\0Hello")]
+        [InlineData("Hello", 3, new char[] { 'a', 'b', 'c' }, "Helabclo")]
+        [InlineData("Hello", 5, new char[] { 'd', 'e', 'f' }, "Hellodef")]
+        [InlineData("Hello", 0, new char[0], "Hello")]
+        public static void Insert_CharSpan(string original, int index, char[] value, string expected)
+        {
+            var builder = new StringBuilder(original);
+            builder.Insert(index, new ReadOnlySpan<char>(value));
+            Assert.Equal(expected, builder.ToString());
+        }
+
+        [Fact]
+        public static void Insert_CharSpan_Invalid()
+        {
+            var builder = new StringBuilder(0, 5);
+            builder.Append("Hello");
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Insert(-1, new ReadOnlySpan<char>(new char[0]))); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Insert(builder.Length + 1, new ReadOnlySpan<char>(new char[0]))); // Index > builder.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Insert(builder.Length, new ReadOnlySpan<char>(new char[1]))); // New length > builder.MaxCapacity
         }
 
         [Theory]
