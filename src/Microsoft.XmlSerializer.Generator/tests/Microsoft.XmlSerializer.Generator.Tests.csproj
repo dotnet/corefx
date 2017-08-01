@@ -10,7 +10,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include=".\SGenTests.cs" />
+    <Compile Include=".\SGenTests.cs" Condition="'$(TargetGroup)' != 'uap'" />
+    <Compile Include="AlwaysPassTest.cs" />
     <Content Include="System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>baseline\System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs</Link>

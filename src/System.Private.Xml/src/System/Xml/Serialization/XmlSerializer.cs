@@ -261,11 +261,6 @@ namespace System.Xml.Serialization
             _mapping = GetKnownMapping(type, defaultNamespace);
             if (_mapping != null)
             {
-                if (Mode == SerializationMode.PreGenOnly)
-                {
-                    throw new NotSupportedException("Not support to use PreGenOnly mode since there's known mapping.");
-                }
-
                 _primitiveType = type;
                 return;
             }

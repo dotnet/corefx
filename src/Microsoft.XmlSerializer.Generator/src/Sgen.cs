@@ -38,9 +38,8 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         caseSensitive = true;
                     }
-
-
                 }
+
                 for (int i = 0; i < args.Length; i++)
                 {
                     bool argument = false;
@@ -58,11 +57,6 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    if(!caseSensitive)
-                    {
-                        arg = arg.ToLower(CultureInfo.InvariantCulture);
-                    }
-                    
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
                         WriteHeader();
@@ -88,6 +82,11 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out"))
                     {
+                        if (!caseSensitive)
+                        {
+                            value = value.ToLower(CultureInfo.InvariantCulture);
+                        }
+
                         if (codePath != null)
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
@@ -138,12 +137,8 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
-                Console.Error.WriteLine("SGEN: error SGEN1: " + e.Message);
-                if(e.InnerException != null)
-                {
-                    Console.Error.WriteLine("      " + e.InnerException.Message);
-                }
-
+                string errorPrefix = "SGEN: error SGEN1: " + e.Message;
+                Error(e, errorPrefix);
                 return 1;
             }
 
@@ -160,7 +155,6 @@ namespace Microsoft.XmlSerializer.Generator
                 try
                 {
                     types = assembly.GetTypes();
-                    Console.Out.WriteLine(string.Format("{0} types loaded", types.Count()));
                 }
                 catch (ReflectionTypeLoadException typeException)
                 {
@@ -359,6 +353,15 @@ namespace Microsoft.XmlSerializer.Generator
         private static string FormatMessage(bool warning, string code, string message)
         {
             return "SGEN: " + (warning ? "warning " : "error ") + code + ": " + message;
+        }
+
+        static void Error(Exception e, string prefix)
+        {
+            Console.Error.WriteLine(prefix + e.Message);
+            if (e.InnerException != null)
+            {
+                Error(e.InnerException, prefix);
+            }
         }
     }
 }

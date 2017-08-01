@@ -7,9 +7,6 @@
     <NoWarn>CS0219</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'">
-    <!--<CodeAnalysisRuleSet>.\CodeAnalysis.ruleset</CodeAnalysisRuleSet>-->
-    <!--<OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Tests\netstandard\</OutputPath>-->
-    <!--<TreatWarningsAsErrors>false</TreatWarningsAsErrors>-->
     <OutputPath>..\..\..\bin\AnyOS.AnyCPU.Debug\System.Xml.XmlSerializer.Sgen.Data.XmlSerializers\netstandard\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
@@ -25,6 +22,5 @@
       <Name>System.Xml.XmlSerializer.Sgen.Data</Name>
     </ProjectReference>
   </ItemGroup>
-  <!--<Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />-->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

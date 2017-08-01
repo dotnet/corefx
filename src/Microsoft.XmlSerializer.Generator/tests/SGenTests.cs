@@ -15,8 +15,6 @@ namespace Microsoft.XmlSerializer.Generator.Tests
     public static class SgenTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void BasicTest()
         {
             int n = Sgen.Main(new string[0]);
@@ -24,8 +22,6 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void GeneralBaselineTest()
         {
             string codefile = "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs";
@@ -34,29 +30,20 @@ namespace Microsoft.XmlSerializer.Generator.Tests
                 File.Delete(codefile);
             }
 
-            if (!File.Exists("System.Xml.XmlSerializer.Sgen.Data.dll"))
-            {
-                throw new FileNotFoundException(string.Format("Cannot find file {0}.", "System.Xml.XmlSerializer.Sgen.Data.dll"));
-            }
-
+            Assert.True(File.Exists("System.Xml.XmlSerializer.Sgen.Data.dll"), string.Format("Cannot find file {0}.", "System.Xml.XmlSerializer.Sgen.Data.dll"));
             int n = Sgen.Main(new string[] { "System.Xml.XmlSerializer.Sgen.Data.dll", "/force", "/casesensitive"});
             Assert.Equal(0, n);
-            if(!File.Exists(codefile))
-            {
-                throw new FileNotFoundException(string.Format("Fail to generate {0}.", codefile));
-            }
-
+            Assert.True(File.Exists(codefile), string.Format("Fail to generate {0}.", codefile));
             string basefile = Path.Combine(Directory.GetCurrentDirectory(), "baseline", "System.Xml.XmlSerializer.Sgen.Data.XmlSerializers.cs");
-            if (!File.Exists(basefile))
-            {
-                throw new FileNotFoundException(string.Format("Missing baseline file {0}.", basefile));
-            }
+            Assert.True(File.Exists(basefile), string.Format("Missing baseline file {0}.", basefile));
+
 
             List<string> allbaseclasses = GetAllClassdNames(basefile);
             List<string> allclasses = GetAllClassdNames(codefile);
             CompareList(allbaseclasses, allclasses);
             List<string> allbasemethods = GetAllMethodNames(basefile);
             List<string> allmethods = GetAllMethodNames(codefile);
+            CompareList(allbasemethods, allmethods);
             List<string> allbaselines = GetAllLines(basefile);
             List<string> alllines = GetAllLines(codefile);
             CompareList(allbaselines, alllines);
@@ -84,10 +71,10 @@ namespace Microsoft.XmlSerializer.Generator.Tests
         {
             List<string> methodNames = new List<string>();
             var strMethodLines = GetAllLines(strFileName)
-            .Where(a => (a.Contains("protected") ||
-            a.Contains("private") ||
-            a.Contains("public")) &&
-            !a.Contains("class"));
+                            .Where(a => (a.Contains("protected") ||
+                                         a.Contains("private") ||
+                                         a.Contains("public")) &&
+                                         !a.Contains("class"));
             foreach (var item in strMethodLines)
             {
                 if (item.IndexOf("(") != -1)
