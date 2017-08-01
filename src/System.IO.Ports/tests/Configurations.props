@@ -4,6 +4,7 @@
     <BuildConfigurations>
       netstandard-Windows_NT;
       netfx;
+      uap-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

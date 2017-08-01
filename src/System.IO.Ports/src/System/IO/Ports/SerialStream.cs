@@ -590,19 +590,16 @@ namespace System.IO.Ports
         internal SerialStream(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, int readTimeout, int writeTimeout, Handshake handshake,
             bool dtrEnable, bool rtsEnable, bool discardNull, byte parityReplace)
         {
-            int flags = NativeMethods.FILE_FLAG_OVERLAPPED;
-
-            if ((portName == null) || !portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
+            if ((portName == null) ||
+                !portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) || 
+                !ulong.TryParse(portName.Substring(3), out ulong portNumber))
+            {
                 throw new ArgumentException(SR.Arg_InvalidSerialPort, nameof(portName));
+            }
 
             // Error checking done in SerialPort.
 
-            SafeFileHandle tempHandle = Interop.Kernel32.CreateFileDefaultSecurity(
-                @"\\?\" + portName,
-                Interop.Kernel32.GenericOperations.GENERIC_READ | Interop.Kernel32.GenericOperations.GENERIC_WRITE,
-                0,              // comm devices must be opened w/exclusive-access
-                FileMode.Open,  // comm devices must use OPEN_EXISTING
-                flags);
+            SafeFileHandle tempHandle = SerialCommunication.Current.OpenPort(portNumber);
 
             if (tempHandle.IsInvalid)
             {
