@@ -477,11 +477,23 @@ namespace System.Drawing
 
             max = r; min = r;
 
-            if (g > max) max = g;
-            if (b > max) max = b;
+            if (g > max)
+            {
+                max = g;
+            }
+            else if (g < min)
+            {
+                min = g;
+            }
 
-            if (g < min) min = g;
-            if (b < min) min = b;
+            if (b > max)
+            {
+                max = b;
+            }
+            else if (b < min)
+            {
+                min = b;
+            }
 
             return (max + min) / 2;
         }
@@ -502,11 +514,23 @@ namespace System.Drawing
 
             max = r; min = r;
 
-            if (g > max) max = g;
-            if (b > max) max = b;
+            if (g > max)
+            {
+                max = g;
+            }
+            else if (g < min)
+            {
+                min = g;
+            }
 
-            if (g < min) min = g;
-            if (b < min) min = b;
+            if (b > max)
+            {
+                max = b;
+            }
+            else if (b < min)
+            {
+                min = b;
+            }
 
             delta = max - min;
 
@@ -543,11 +567,23 @@ namespace System.Drawing
             float max = r;
             float min = r;
 
-            if (g > max) max = g;
-            if (b > max) max = b;
+            if (g > max)
+            {
+                max = g;
+            }
+            else if (g < min)
+            {
+                min = g;
+            }
 
-            if (g < min) min = g;
-            if (b < min) min = b;
+            if (b > max)
+            {
+                max = b;
+            }
+            else if (b < min)
+            {
+                min = b;
+            }
 
             // if max == min, then there is no color and
             // the saturation is zero.
