@@ -12,20 +12,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Constructor.
 
         public MiscSymFactory(SYMTBL symtable)
-            : base(symtable, false)
+            : base(symtable)
         {
-        }
-
-        // Files
-        public InputFile CreateMDInfile(Name name)
-        {
-            InputFile sym = new InputFile();
-            return sym;
         }
 
         public Scope CreateScope(Scope parent)
         {
-            Scope sym = newBasicSym(SYMKIND.SK_Scope, null, parent).AsScope();
+            Scope sym = (Scope)newBasicSym(SYMKIND.SK_Scope, null, parent);
             if (parent != null)
             {
                 sym.nestingOrder = parent.nestingOrder + 1;

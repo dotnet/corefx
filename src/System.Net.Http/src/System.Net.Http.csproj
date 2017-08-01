@@ -119,20 +119,32 @@
   </ItemGroup>
   <!-- Managed HttpClientHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="System\Net\Http\Managed\ManagedHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\AuthenticationHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\AutoRedirectHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\AuthenticationHelper.Basic.cs" />
+    <Compile Include="System\Net\Http\Managed\AuthenticationHelper.Digest.cs" />
+    <Compile Include="System\Net\Http\Managed\ChunkedEncodingReadStream.cs" />
+    <Compile Include="System\Net\Http\Managed\ChunkedEncodingWriteStream.cs" />
     <Compile Include="System\Net\Http\Managed\ConnectHelper.cs" />
+    <Compile Include="System\Net\Http\Managed\ConnectionCloseReadStream.cs" />
+    <Compile Include="System\Net\Http\Managed\ContentLengthReadStream.cs" />
+    <Compile Include="System\Net\Http\Managed\ContentLengthWriteStream.cs" />
+    <Compile Include="System\Net\Http\Managed\CookieHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\DecompressionHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\EmptyReadStream.cs" />
     <Compile Include="System\Net\Http\Managed\HttpConnection.cs" />
+    <Compile Include="System\Net\Http\Managed\HttpConnectionContent.cs" />
     <Compile Include="System\Net\Http\Managed\HttpConnectionHandler.cs" />
     <Compile Include="System\Net\Http\Managed\HttpConnectionKey.cs" />
     <Compile Include="System\Net\Http\Managed\HttpConnectionPool.cs" />
-    <Compile Include="System\Net\Http\Managed\AuthenticationHandler.cs" />
-    <Compile Include="System\Net\Http\Managed\AutoRedirectHandler.cs" />
-    <Compile Include="System\Net\Http\Managed\BasicAuthenticationHelper.cs" />
-    <Compile Include="System\Net\Http\Managed\CookieHandler.cs" />
-    <Compile Include="System\Net\Http\Managed\DecompressionHandler.cs" />
-    <Compile Include="System\Net\Http\Managed\HttpContentWriteStream.cs" />
+    <Compile Include="System\Net\Http\Managed\HttpConnectionPools.cs" />
+    <Compile Include="System\Net\Http\Managed\HttpConnectionSettings.cs" />
     <Compile Include="System\Net\Http\Managed\HttpContentReadStream.cs" />
+    <Compile Include="System\Net\Http\Managed\HttpContentStream.cs" />
+    <Compile Include="System\Net\Http\Managed\HttpContentWriteStream.cs" />
     <Compile Include="System\Net\Http\Managed\HttpProxyConnectionHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\ManagedHandler.cs" />
+    <Compile Include="System\Net\Http\Managed\ValueStringBuilder.cs" />
   </ItemGroup>
   <!-- Common, except for Windows net46 build -->
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'  And '$(TargetGroup)' != 'netfx'">
@@ -427,14 +439,18 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Security.Cryptography.Encoding" />
     <Reference Include="System.Security.Cryptography.OpenSsl" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Text.Encoding" />
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
+    <Reference Include="System.Threading.Timer" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Security.Cryptography.Algorithms" />

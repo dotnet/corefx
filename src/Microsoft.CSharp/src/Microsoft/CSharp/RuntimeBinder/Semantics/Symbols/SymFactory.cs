@@ -10,57 +10,46 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class SymFactory : SymFactoryBase
     {
         public SymFactory(SYMTBL symtable) :
-            base(symtable, true)
+            base(symtable)
         {
         }
 
         // Namespace
         public NamespaceSymbol CreateNamespace(Name name, NamespaceSymbol parent)
         {
-            NamespaceSymbol sym = newBasicSym(SYMKIND.SK_NamespaceSymbol, name, parent).AsNamespaceSymbol();
+            NamespaceSymbol sym = (NamespaceSymbol)newBasicSym(SYMKIND.SK_NamespaceSymbol, name, parent);
             sym.SetAccess(ACCESS.ACC_PUBLIC);
 
             return (sym);
         }
 
-        public AssemblyQualifiedNamespaceSymbol CreateNamespaceAid(Name name, ParentSymbol parent, KAID assemblyID)
+        public AssemblyQualifiedNamespaceSymbol CreateNamespaceAid(Name name, ParentSymbol parent)
         {
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol sym = newBasicSym(SYMKIND.SK_AssemblyQualifiedNamespaceSymbol, name, parent).AsAssemblyQualifiedNamespaceSymbol();
+            AssemblyQualifiedNamespaceSymbol sym = newBasicSym(SYMKIND.SK_AssemblyQualifiedNamespaceSymbol, name, parent) as AssemblyQualifiedNamespaceSymbol;
 
             Debug.Assert(sym != null);
             return sym;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
-        public AggregateSymbol CreateAggregate(Name name, NamespaceOrAggregateSymbol parent, InputFile infile, TypeManager typeManager)
+        public AggregateSymbol CreateAggregate(Name name, NamespaceOrAggregateSymbol parent, TypeManager typeManager)
         {
-            if (name == null || parent == null || infile == null || typeManager == null)
+            if (name == null || parent == null || typeManager == null)
             {
                 throw Error.InternalCompilerError();
             }
 
-            AggregateSymbol sym = null;
-            if (infile.GetAssemblyID() == KAID.kaidUnresolved)
-            {
-                // Unresolved aggs need extra storage.
-                sym = CreateUnresolvedAggregate(name, parent, typeManager);
-            }
-            else
-            {
-                sym = newBasicSym(SYMKIND.SK_AggregateSymbol, name, parent).AsAggregateSymbol();
-                sym.name = name;
-                sym.SetTypeManager(typeManager);
-                sym.SetSealed(false);
-                sym.SetAccess(ACCESS.ACC_UNKNOWN);
-                sym.initBogus();
-                sym.SetIfaces(null);
-                sym.SetIfacesAll(null);
-                sym.SetTypeVars(null);
-            }
+            AggregateSymbol sym = (AggregateSymbol)newBasicSym(SYMKIND.SK_AggregateSymbol, name, parent);
+            sym.name = name;
+            sym.SetTypeManager(typeManager);
+            sym.SetSealed(false);
+            sym.SetAccess(ACCESS.ACC_UNKNOWN);
+            sym.SetIfaces(null);
+            sym.SetIfacesAll(null);
+            sym.SetTypeVars(null);
 
-            sym.InitFromInfile(infile);
             return sym;
         }
 
@@ -70,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //Debug.Assert(declOuter == null || declOuter.Bag() == agg.Parent);
 
             // DECLSYMs are not parented like named symbols.
-            AggregateDeclaration sym = newBasicSym(SYMKIND.SK_AggregateDeclaration, agg.name, null).AsAggregateDeclaration();
+            AggregateDeclaration sym = newBasicSym(SYMKIND.SK_AggregateDeclaration, agg.name, null) as AggregateDeclaration;
 
             declOuter?.AddToChildList(sym);
             agg.AddDecl(sym);
@@ -79,29 +68,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (sym);
         }
 
-        private AggregateSymbol CreateUnresolvedAggregate(Name name, ParentSymbol parent, TypeManager typeManager)
-        {
-            Debug.Assert(name != null);
-
-            Symbol sym = newBasicSym(SYMKIND.SK_UnresolvedAggregateSymbol, name, parent);
-            AggregateSymbol AggregateSymbol = null;
-
-            // Unresolved Aggs need extra storage, but are still considered Aggs.
-
-            sym.setKind(SYMKIND.SK_AggregateSymbol);
-            AggregateSymbol = sym.AsAggregateSymbol();
-            AggregateSymbol.SetTypeManager(typeManager);
-
-            Debug.Assert(AggregateSymbol != null);
-            return (AggregateSymbol);
-        }
-
         // Members of aggs
         public FieldSymbol CreateMemberVar(Name name, ParentSymbol parent)
         {
             Debug.Assert(name != null);
 
-            FieldSymbol sym = newBasicSym(SYMKIND.SK_FieldSymbol, name, parent).AsFieldSymbol();
+            FieldSymbol sym = newBasicSym(SYMKIND.SK_FieldSymbol, name, parent) as FieldSymbol;
 
             Debug.Assert(sym != null);
             return (sym);
@@ -109,7 +81,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public LocalVariableSymbol CreateLocalVar(Name name, ParentSymbol parent, CType type)
         {
-            LocalVariableSymbol sym = newBasicSym(SYMKIND.SK_LocalVariableSymbol, name, parent).AsLocalVariableSymbol();
+            LocalVariableSymbol sym = (LocalVariableSymbol)newBasicSym(SYMKIND.SK_LocalVariableSymbol, name, parent);
             sym.SetType(type);
             sym.SetAccess(ACCESS.ACC_UNKNOWN);    // required for Symbol::hasExternalAccess which is used by refactoring
             sym.wrap = null;
@@ -117,23 +89,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return sym;
         }
 
-        public MethodSymbol CreateMethod(Name name, ParentSymbol parent)
-        {
-            MethodSymbol sym = newBasicSym(SYMKIND.SK_MethodSymbol, name, parent).AsMethodSymbol();
-
-            return sym;
-        }
+        public MethodSymbol CreateMethod(Name name, ParentSymbol parent) => 
+            newBasicSym(SYMKIND.SK_MethodSymbol, name, parent) as MethodSymbol;
 
         public PropertySymbol CreateProperty(Name name, ParentSymbol parent)
         {
-            PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent).AsPropertySymbol();
+            PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent) as PropertySymbol;
             Debug.Assert(sym != null);
             return (sym);
         }
 
         public EventSymbol CreateEvent(Name name, ParentSymbol parent)
         {
-            EventSymbol sym = newBasicSym(SYMKIND.SK_EventSymbol, name, parent).AsEventSymbol();
+            EventSymbol sym = newBasicSym(SYMKIND.SK_EventSymbol, name, parent) as EventSymbol;
 
             Debug.Assert(sym != null);
             return (sym);
@@ -141,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateMethodTypeParameter(Name pName, MethodSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = (TypeParameterSymbol)newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent);
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 
@@ -153,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateClassTypeParameter(Name pName, AggregateSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = (TypeParameterSymbol)newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent);
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 

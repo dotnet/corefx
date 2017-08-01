@@ -17,9 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadBinaryOps:
                     codeStr = SR.BadBinaryOps;
                     break;
-                case ErrorCode.ERR_IntDivByZero:
-                    codeStr = SR.IntDivByZero;
-                    break;
                 case ErrorCode.ERR_BadIndexLHS:
                     codeStr = SR.BadIndexLHS;
                     break;
@@ -95,17 +92,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_AssgReadonlyProp:
                     codeStr = SR.AssgReadonlyProp;
                     break;
-                case ErrorCode.ERR_AbstractBaseCall:
-                    codeStr = SR.AbstractBaseCall;
-                    break;
                 case ErrorCode.ERR_RefProperty:
                     codeStr = SR.RefProperty;
-                    break;
-                case ErrorCode.ERR_ManagedAddr:
-                    codeStr = SR.ManagedAddr;
-                    break;
-                case ErrorCode.ERR_FixedNotNeeded:
-                    codeStr = SR.FixedNotNeeded;
                     break;
                 case ErrorCode.ERR_UnsafeNeeded:
                     codeStr = SR.UnsafeNeeded;
@@ -116,29 +104,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_MustHaveOpTF:
                     codeStr = SR.MustHaveOpTF;
                     break;
-                case ErrorCode.ERR_CheckedOverflow:
-                    codeStr = SR.CheckedOverflow;
-                    break;
                 case ErrorCode.ERR_ConstOutOfRangeChecked:
                     codeStr = SR.ConstOutOfRangeChecked;
                     break;
                 case ErrorCode.ERR_AmbigMember:
                     codeStr = SR.AmbigMember;
-                    break;
-                case ErrorCode.ERR_SizeofUnsafe:
-                    codeStr = SR.SizeofUnsafe;
-                    break;
-                case ErrorCode.ERR_FieldInitRefNonstatic:
-                    codeStr = SR.FieldInitRefNonstatic;
-                    break;
-                case ErrorCode.ERR_CallingFinalizeDepracated:
-                    codeStr = SR.CallingFinalizeDepracated;
-                    break;
-                case ErrorCode.ERR_CallingBaseFinalizeDeprecated:
-                    codeStr = SR.CallingBaseFinalizeDeprecated;
-                    break;
-                case ErrorCode.ERR_BadCastInFixed:
-                    codeStr = SR.BadCastInFixed;
                     break;
                 case ErrorCode.ERR_NoImplicitConvCast:
                     codeStr = SR.NoImplicitConvCast;
@@ -197,23 +167,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_ValConstraintNotSatisfied:
                     codeStr = SR.ValConstraintNotSatisfied;
                     break;
-                case ErrorCode.ERR_CircularConstraint:
-                    codeStr = SR.CircularConstraint;
-                    break;
-                case ErrorCode.ERR_BaseConstraintConflict:
-                    codeStr = SR.BaseConstraintConflict;
-                    break;
-                case ErrorCode.ERR_ConWithValCon:
-                    codeStr = SR.ConWithValCon;
-                    break;
                 case ErrorCode.ERR_AmbigUDConv:
                     codeStr = SR.AmbigUDConv;
-                    break;
-                case ErrorCode.ERR_PredefinedTypeNotFound:
-                    codeStr = SR.PredefinedTypeNotFound;
-                    break;
-                case ErrorCode.ERR_PredefinedTypeBadType:
-                    codeStr = SR.PredefinedTypeBadType;
                     break;
                 case ErrorCode.ERR_BindToBogus:
                     codeStr = SR.BindToBogus;
@@ -221,26 +176,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_CantCallSpecialMethod:
                     codeStr = SR.CantCallSpecialMethod;
                     break;
-                case ErrorCode.ERR_BogusType:
-                    codeStr = SR.BogusType;
-                    break;
-                case ErrorCode.ERR_MissingPredefinedMember:
-                    codeStr = SR.MissingPredefinedMember;
-                    break;
-                case ErrorCode.ERR_LiteralDoubleCast:
-                    codeStr = SR.LiteralDoubleCast;
-                    break;
-                case ErrorCode.ERR_UnifyingInterfaceInstantiations:
-                    codeStr = SR.UnifyingInterfaceInstantiations;
-                    break;
                 case ErrorCode.ERR_ConvertToStaticClass:
                     codeStr = SR.ConvertToStaticClass;
                     break;
                 case ErrorCode.ERR_GenericArgIsStaticClass:
                     codeStr = SR.GenericArgIsStaticClass;
-                    break;
-                case ErrorCode.ERR_PartialMethodToDelegate:
-                    codeStr = SR.PartialMethodToDelegate;
                     break;
                 case ErrorCode.ERR_IncrementLvalueExpected:
                     codeStr = SR.IncrementLvalueExpected;
@@ -311,9 +251,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_RefReadonlyLocalCause:
                     codeStr = SR.RefReadonlyLocalCause;
                     break;
-                case ErrorCode.ERR_ThisStructNotInAnonMeth:
-                    codeStr = SR.ThisStructNotInAnonMeth;
-                    break;
                 case ErrorCode.ERR_DelegateOnNullable:
                     codeStr = SR.DelegateOnNullable;
                     break;
@@ -325,12 +262,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
                 case ErrorCode.ERR_BadInstanceArgType:
                     codeStr = SR.BadInstanceArgType;
-                    break;
-                case ErrorCode.ERR_BadArgTypesForCollectionAdd:
-                    codeStr = SR.BadArgTypesForCollectionAdd;
-                    break;
-                case ErrorCode.ERR_InitializerAddHasParamModifiers:
-                    codeStr = SR.InitializerAddHasParamModifiers;
                     break;
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;

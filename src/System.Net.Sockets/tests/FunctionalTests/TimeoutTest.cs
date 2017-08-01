@@ -40,9 +40,15 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        // Use a Timeout large enough so that we can effectively detect when it's not accurate,
+        // but also not so large that it takes too long to run.
+        const int Timeout = 2000;
+
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public void ReceiveTimesOut_Throws()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReceiveTimesOut_Throws(bool forceNonBlocking)
         {
             using (Socket localSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
             using (Socket remoteSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
@@ -51,24 +57,38 @@ namespace System.Net.Sockets.Tests
                 localSocket.Listen(1);
                 IAsyncResult localAsync = localSocket.BeginAccept(null, null);
 
+                remoteSocket.ForceNonBlocking(forceNonBlocking);
+
                 remoteSocket.Connect(IPAddress.IPv6Loopback, port);
 
                 Socket acceptedSocket = localSocket.EndAccept(localAsync);
-                acceptedSocket.ReceiveTimeout = TestSettings.FailingTestTimeout;
+                acceptedSocket.ReceiveTimeout = Timeout;
+
+                acceptedSocket.ForceNonBlocking(forceNonBlocking);
+
+                DateTime start = default(DateTime);
 
                 SocketException sockEx = Assert.Throws<SocketException>(() =>
-               {
-                   acceptedSocket.Receive(new byte[1]);
-               });
+                {
+                    start = DateTime.UtcNow;
+                    acceptedSocket.Receive(new byte[1]);
+                });
+
+                double elapsed = (DateTime.UtcNow - start).TotalMilliseconds;
 
                 Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
                 Assert.True(acceptedSocket.Connected);
+
+                // Try to ensure that the elapsed timeout is reasonably correct
+                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 1.5);
             }
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public void SocketSendTimeout_Send_Success()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SendTimesOut_Throws(bool forceNonBlocking)
         {
             using (Socket localSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
             using (Socket remoteSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
@@ -77,15 +97,35 @@ namespace System.Net.Sockets.Tests
                 localSocket.Listen(1);
                 IAsyncResult localAsync = localSocket.BeginAccept(null, null);
 
+                remoteSocket.ForceNonBlocking(forceNonBlocking);
+
                 remoteSocket.Connect(IPAddress.IPv6Loopback, port);
 
                 Socket acceptedSocket = localSocket.EndAccept(localAsync);
-                acceptedSocket.SendTimeout = TestSettings.PassingTestTimeout;
+                acceptedSocket.SendTimeout = Timeout;
 
-                // Note that Send almost never times out because it only has to copy the data to the native buffer.
-                int bytes = acceptedSocket.Send(new byte[100]);
-                Assert.Equal(100, bytes);
+                acceptedSocket.ForceNonBlocking(forceNonBlocking);
+
+                DateTime start = default(DateTime);
+
+                // Force Send to timeout by filling the kernel buffer.
+                var sendBuffer = new byte[16 * 1024];
+                SocketException sockEx = Assert.Throws<SocketException>((Action) (() =>
+                {
+                    while (true)
+                    {
+                        start = DateTime.UtcNow;
+                        acceptedSocket.Send(sendBuffer);
+                    }
+                }));
+
+                double elapsed = (DateTime.UtcNow - start).TotalMilliseconds;
+
+                Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
                 Assert.True(acceptedSocket.Connected);
+
+                // Try to ensure that the elapsed timeout is reasonably correct
+                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 1.5);
             }
         }
     }

@@ -172,33 +172,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void DirectoryEqualToMaxDirectory_CanBeCreated()
-        {
-            DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, IOInputs.MaxComponent);
-            Assert.All(path.SubPaths, (subpath) =>
-            {
-                DirectoryInfo result = Create(subpath);
-
-                Assert.Equal(subpath, result.FullName);
-                Assert.True(Directory.Exists(result.FullName));
-            });
-        }
-
-        [Fact]
         public void DirectoryEqualToMaxDirectory_CanBeCreatedAllAtOnce()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, maxComponent: 10);
-            DirectoryInfo result = Create(path.FullPath);
+            string path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory);
+            DirectoryInfo result = Create(path);
 
-            Assert.Equal(path.FullPath, result.FullName);
+            Assert.Equal(path, result.FullName);
             Assert.True(Directory.Exists(result.FullName));
         }
 
         [Theory,
             MemberData(nameof(PathsWithComponentLongerThanMaxComponent))]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/8655")]
         public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsException(string path)
         {
             // While paths themselves can be up to 260 characters including trailing null, file systems
@@ -209,7 +194,7 @@ namespace System.IO.Tests
             }
             else
             {
-                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException>(() => Create(path));
+                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() => Create(path));
             }
         }
 
@@ -304,9 +289,9 @@ namespace System.IO.Tests
         public void UnixPathLongerThan256_Allowed()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, 257, IOInputs.MaxComponent);
-            DirectoryInfo result = Create(path.FullPath);
-            Assert.Equal(path.FullPath, result.FullName);
+            string path = IOServices.GetPath(testDir.FullName, 257);
+            DirectoryInfo result = Create(path);
+            Assert.Equal(path, result.FullName);
             Assert.True(Directory.Exists(result.FullName));
         }
 
@@ -359,7 +344,6 @@ namespace System.IO.Tests
             MemberData(nameof(NonControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Not NetFX
-        [ActiveIssue(21358)] // Pending CoreCLR behavior change
         public void TrailingWhiteSpace_NotTrimmed(string component)
         {
             // In CoreFX we don't trim anything other than space (' ')
