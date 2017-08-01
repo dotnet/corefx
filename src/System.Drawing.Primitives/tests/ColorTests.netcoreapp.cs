@@ -77,22 +77,13 @@ namespace System.Drawing.Primitives.Tests
             Assert.Equal(blue, color.B);
         }
 
-        [Fact]
-        public void FromOutOfRangeKnownColor()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(KnownColor.MenuHighlight + 1)]
+        public void FromOutOfRangeKnownColor(KnownColor known)
         {
-            Color color = Color.FromKnownColor((KnownColor)(-1));
-            Assert.Equal(0, color.A);
-            Assert.Equal(0, color.R);
-            Assert.Equal(0, color.G);
-            Assert.Equal(0, color.B);
-
-            color = Color.FromKnownColor(0);
-            Assert.Equal(0, color.A);
-            Assert.Equal(0, color.R);
-            Assert.Equal(0, color.G);
-            Assert.Equal(0, color.B);
-
-            color = Color.FromKnownColor(KnownColor.MenuHighlight + 1);
+            Color color = Color.FromKnownColor(known);
             Assert.Equal(0, color.A);
             Assert.Equal(0, color.R);
             Assert.Equal(0, color.G);
@@ -110,16 +101,13 @@ namespace System.Drawing.Primitives.Tests
             Assert.Equal((KnownColor)0, match.ToKnownColor());
         }
 
-        [Fact]
-        public void FromOutOfRangeKnownColorToKnownColor()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(KnownColor.MenuHighlight + 1)]
+        public void FromOutOfRangeKnownColorToKnownColor(KnownColor known)
         {
-            Color color = Color.FromKnownColor((KnownColor)(-1));
-            Assert.Equal((KnownColor)0, color.ToKnownColor());
-
-            color = Color.FromKnownColor(0);
-            Assert.Equal((KnownColor)0, color.ToKnownColor());
-
-            color = Color.FromKnownColor(KnownColor.MenuHighlight + 1);
+            Color color = Color.FromKnownColor(known);
             Assert.Equal((KnownColor)0, color.ToKnownColor());
         }
 
@@ -137,16 +125,13 @@ namespace System.Drawing.Primitives.Tests
             Assert.False(match.IsSystemColor);
         }
 
-        [Fact]
-        public void IsSystemColorOutOfRangeKnown()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(KnownColor.MenuHighlight + 1)]
+        public void IsSystemColorOutOfRangeKnown(KnownColor known)
         {
-            Color color = Color.FromKnownColor((KnownColor)(-1));
-            Assert.False(color.IsSystemColor);
-
-            color = Color.FromKnownColor(0);
-            Assert.False(color.IsSystemColor);
-
-            color = Color.FromKnownColor(KnownColor.MenuHighlight + 1);
+            Color color = Color.FromKnownColor(known);
             Assert.False(color.IsSystemColor);
         }
 
@@ -164,16 +149,13 @@ namespace System.Drawing.Primitives.Tests
             Assert.False(match.IsKnownColor);
         }
 
-        [Fact]
-        public void IsKnownColorOutOfRangeKnown()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(KnownColor.MenuHighlight + 1)]
+        public void IsKnownColorOutOfRangeKnown(KnownColor known)
         {
-            Color color = Color.FromKnownColor((KnownColor)(-1));
-            Assert.False(color.IsKnownColor);
-
-            color = Color.FromKnownColor(0);
-            Assert.False(color.IsKnownColor);
-
-            color = Color.FromKnownColor(KnownColor.MenuHighlight + 1);
+            Color color = Color.FromKnownColor(known);
             Assert.False(color.IsKnownColor);
         }
 
