@@ -384,10 +384,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return a2b ? BetterType.Left : BetterType.Right;
             }
 
-            if (p1.isPredefined() && p2.isPredefined() &&
-                p1.getPredefType() <= PredefinedType.PT_OBJECT && p2.getPredefType() <= PredefinedType.PT_OBJECT)
+            if (p1.isPredefined() && p2.isPredefined())
             {
-                return (BetterType)s_betterConversionTable[(int)p1.getPredefType()][(int)p2.getPredefType()];
+                PredefinedType pt1 = p1.getPredefType();
+                if (pt1 <= PredefinedType.PT_OBJECT)
+                {
+                    PredefinedType pt2 = p2.getPredefType();
+                    if (pt2 <= PredefinedType.PT_OBJECT)
+                    {
+                        return (BetterType)s_betterConversionTable[(int)pt1][(int)pt2];
+                    }
+                }
             }
 
             return BetterType.Neither;
