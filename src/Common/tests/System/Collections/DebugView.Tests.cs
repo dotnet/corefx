@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -66,7 +67,10 @@ namespace System.Collections.Tests
         public static void TestDebuggerAttributes(object obj)
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(obj);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(obj);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(obj);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            Array items = itemProperty.GetValue(info.Instance) as Array;
+            Assert.Equal((obj as IEnumerable).Cast<object>().ToArray(), items.Cast<object>());
         }
 
         [Theory]
