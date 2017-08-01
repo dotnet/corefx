@@ -75,7 +75,8 @@ namespace System.Collections.Tests
         public static void TestDebuggerAttributes_Null(object obj)
         {
             Type proxyType = DebuggerAttributes.GetProxyType(obj);
-            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
     }
 }
