@@ -498,7 +498,7 @@ namespace System.Drawing
 
             float max, min;
             float delta;
-            float hue = 0.0f;
+            float hue;
 
             max = r; min = r;
 
@@ -518,8 +518,9 @@ namespace System.Drawing
             {
                 hue = 2 + (b - r) / delta;
             }
-            else if (b == max)
+            else
             {
+                Debug.Assert(b == max);
                 hue = 4 + (r - g) / delta;
             }
             hue *= 60;
