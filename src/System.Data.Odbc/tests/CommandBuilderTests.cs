@@ -9,6 +9,8 @@ namespace System.Data.Odbc.Tests
     public class CommandBuilderTests : IntegrationTestBase
     {
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void QuoteIdentifier_UseConnection()
         {
             var commandBuilder = new OdbcCommandBuilder();
@@ -38,6 +40,8 @@ namespace System.Data.Odbc.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void QuoteIdentifier_CustomPrefixSuffix()
         {
             var commandBuilder = new OdbcCommandBuilder();
