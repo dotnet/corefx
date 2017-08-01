@@ -455,7 +455,7 @@ namespace System.Drawing
         public static Color FromKnownColor(KnownColor color)
         {
             var value = (int)color;
-            if (value < (int)KnownColor.FirstColor || value > (int)KnownColor.LastColor)
+            if (value <= 0 || value > (int)KnownColor.LastColor)
             {
                 return FromName(color.ToString());
             }
