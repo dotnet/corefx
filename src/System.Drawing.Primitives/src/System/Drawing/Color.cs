@@ -452,16 +452,8 @@ namespace System.Drawing
 
         public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
 
-        public static Color FromKnownColor(KnownColor color)
-        {
-            var value = (int)color;
-            if (value <= 0 || value > (int)KnownColor.LastColor)
-            {
-                return FromName(color.ToString());
-            }
-
-            return new Color(color);
-        }
+        public static Color FromKnownColor(KnownColor color) =>
+            color <= 0 || color > KnownColor.MenuHighlight ? FromName(color.ToString()) : new Color(color);
 
         public static Color FromName(string name)
         {
