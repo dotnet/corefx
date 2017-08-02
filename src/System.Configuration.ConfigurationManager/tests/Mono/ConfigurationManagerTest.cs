@@ -143,6 +143,12 @@ namespace MonoTests.System.Configuration
         [Fact]
         public void exePath_UserLevelPerRoaming()
         {
+            string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            // If there is not ApplicationData folder PerUserRoaming won't work
+            if (string.IsNullOrEmpty(applicationData))
+                return;
+
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             string filePath = config.FilePath;
             Assert.False(string.IsNullOrEmpty(filePath), "should have some file path");
