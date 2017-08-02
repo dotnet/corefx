@@ -89,7 +89,7 @@
       <Link>Common\System\HResults.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and ('$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap')">
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
     <Compile Include="System\Environment.WinRT.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'uap'">
@@ -255,18 +255,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
-        <AdditionalProperties>$(AdditionalProperties);TargetGroup=$(TargetGroup)</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
-        <AdditionalProperties>$(AdditionalProperties);TargetGroup=$(TargetGroup)</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
-        <AdditionalProperties>$(AdditionalProperties);TargetGroup=$(TargetGroup)</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
-        <AdditionalProperties>$(AdditionalProperties);TargetGroup=$(TargetGroup)</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
+    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
     <Reference Include="mscorlib" />
