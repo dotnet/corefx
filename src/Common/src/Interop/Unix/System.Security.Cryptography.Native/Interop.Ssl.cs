@@ -156,12 +156,12 @@ internal static partial class Interop
             SSL_ERROR_WANT_WRITE = 3,
             SSL_ERROR_SYSCALL = 5,
             SSL_ERROR_ZERO_RETURN = 6,
-            
+
             // NOTE: this SslErrorCode value doesn't exist in OpenSSL, but
             // we use it to distinguish when a renegotiation is pending.
             // Choosing an arbitrarily large value that shouldn't conflict
             // with any actual OpenSSL error codes
-            SSL_ERROR_RENEGOTIATE = 29304 
+            SSL_ERROR_RENEGOTIATE = 29304
         }
     }
 }
@@ -295,6 +295,57 @@ namespace Microsoft.Win32.SafeHandles
         internal SafeSslHandle(IntPtr validSslPointer, bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
         {
             handle = validSslPointer;
+        }
+
+        internal class ReadBioBuffer : IDisposable
+        {
+            private SafeBioHandle _bioHandle;
+            private GCHandle _handle;
+
+            internal ReadBioBuffer(SafeBioHandle bioHandle)
+            {
+                _bioHandle = bioHandle;
+                _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                Interop.CustomBio.BioSetGCHandle(BioHandle, _handle);
+            }
+
+            public int BytesAvailable { get; set; }
+            public byte[] ByteArray { get; private set; }
+            public int Offset { get; set; }
+
+            public void SetBio(byte[] buffer, int offset, int length)
+            {
+                ByteArray = buffer;
+                Offset = offset;
+                BytesAvailable = length;
+            }
+
+            public void ResetBio()
+            {
+                ByteArray = null;
+                Offset = 0;
+                BytesAvailable = 0;
+            }
+
+            //Bio is already released by the ssl object
+            private void Dispose(bool isDisposing)
+            {
+                if (_handle.IsAllocated)
+                {
+                    _handle.Free();
+                }
+            }
+
+            internal void Dispose()
+            {
+                Dispose(false);
+                GC.SuppressFinalize(this);
+            }
+
+            ~ReadBioBuffer()
+            {
+                Dispose(false);
+            }
         }
     }
 }
