@@ -336,13 +336,85 @@ namespace Microsoft.Win32.SafeHandles
                 }
             }
 
-            internal void Dispose()
+            public void Dispose()
             {
                 Dispose(false);
                 GC.SuppressFinalize(this);
             }
 
             ~ReadBioBuffer()
+            {
+                Dispose(false);
+            }
+        }
+
+        internal class WriteBioBuffer :IDisposable
+        {
+            private SafeBioHandle _bioHandle;
+            private GCHandle _handle;
+
+            internal WriteBioBuffer(SafeBioHandle bioHandle)
+            {
+                _bioHandle = bioHandle;
+                _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                Interop.CustomBio.BioSetGCHandle(BioHandle, _handle);
+            }
+
+            public int FreeSpace { get; set; }
+            public byte[] ByteArray { get; private set; }
+            public int StartOfFreeSpace { get; set; }
+            public int TotalBytes { get; set; }
+
+            public void SetBio(byte[] buffer, int offset, int length)
+            {
+                ByteArray = buffer;
+                StartOfFreeSpace = offset;
+                TotalBytes = 0;
+                FreeSpace = length;
+            }
+
+            public void ResetBio()
+            {
+                ByteArray = null;
+                StartOfFreeSpace = 0;
+                TotalBytes = 0;
+                FreeSpace = 0;
+            }
+
+            public void CheckSpaceOrIncrease(int sizeWanted)
+            {
+                if (ByteArray == null)
+                {
+                    ByteArray = new byte[sizeWanted];
+                    FreeSpace = sizeWanted;
+                    TotalBytes = 0;
+                    StartOfFreeSpace = 0;
+                }
+                else if (FreeSpace < sizeWanted)
+                {
+                    var newArray = new byte[ByteArray.Length + (sizeWanted - StartOfFreeSpace)];
+                    FreeSpace = sizeWanted;
+                    Array.Copy(ByteArray, newArray, ByteArray.Length);
+                    ByteArray = newArray;
+                }
+            }
+
+            //Bio is already released by the ssl object
+            private void Dispose(bool isDisposing)
+            {
+                if (_handle.IsAllocated)
+                {
+                    _handle.Free();
+                }
+            }
+
+            public void Dispose()
+            {
+                Dispose(false);
+                GC.SuppressFinalize(this);
+            }
+
+            ~WriteBioBuffer()
             {
                 Dispose(false);
             }
