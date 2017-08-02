@@ -16,7 +16,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="T">The type of elements in the set.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
-    [DebuggerTypeProxy(typeof(ImmutableListDebuggerProxy<>))]
+    [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
     public sealed partial class ImmutableList<T> : IImmutableList<T>, IList<T>, IList, IOrderedCollection<T>, IImmutableListQueries<T>, IStrongEnumerable<T, ImmutableList<T>.Enumerator>
     {
         /// <summary>
@@ -3331,49 +3331,6 @@ namespace System.Collections.Immutable
             /// <param name="key">The leaf node's key.</param>
             /// <returns>The leaf node.</returns>
             private static Node CreateLeaf(T key) => new Node(key, left: EmptyNode, right: EmptyNode);
-        }
-    }
-
-    /// <summary>
-    /// A simple view of the immutable list that the debugger can show to the developer.
-    /// </summary>
-    internal class ImmutableListDebuggerProxy<T>
-    {
-        /// <summary>
-        /// The collection to be enumerated.
-        /// </summary>
-        private readonly ImmutableList<T> _list;
-
-        /// <summary>
-        /// The simple view of the collection.
-        /// </summary>
-        private T[] _cachedContents;
-
-        /// <summary>   
-        /// Initializes a new instance of the <see cref="ImmutableListDebuggerProxy{T}"/> class.
-        /// </summary>
-        /// <param name="list">The list to display in the debugger</param>
-        public ImmutableListDebuggerProxy(ImmutableList<T> list)
-        {
-            Requires.NotNull(list, nameof(list));
-            _list = list;
-        }
-
-        /// <summary>
-        /// Gets a simple debugger-viewable list.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Contents
-        {
-            get
-            {
-                if (_cachedContents == null)
-                {
-                    _cachedContents = _list.ToArray(_list.Count);
-                }
-
-                return _cachedContents;
-            }
         }
     }
 }
