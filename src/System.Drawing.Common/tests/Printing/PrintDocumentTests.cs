@@ -29,6 +29,8 @@ namespace System.Drawing.Printing.Tests
 {
     public class PrintDocumentTests
     {
+        private static bool AnyInstalledPrinters => PrinterSettings.InstalledPrinters.Count == 0;
+
         private readonly PageSettings _pageSettings = new PageSettings()
         {
             PaperSize = new PaperSize()
@@ -37,7 +39,7 @@ namespace System.Drawing.Printing.Tests
             }
         };
 
-        [Fact]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void Ctor_Default_Success()
         {
             using (var document = new PrintDocument())
@@ -48,7 +50,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void DefaultPageSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -61,7 +63,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void DefaultPageSettings_Null_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -72,18 +74,24 @@ namespace System.Drawing.Printing.Tests
         }
 
         [Theory]
-        [InlineData(null)]
         [InlineData("")]
         [InlineData("newDocument")]
         public void DocumentName_SetValue_ReturnsExpected(string documentName)
         {
-            if (documentName == null)
-            { documentName = string.Empty; }
-
             using (var document = new PrintDocument())
             {
                 document.DocumentName = documentName;
                 Assert.Equal(documentName, document.DocumentName);
+            }
+        }
+
+        [Fact]
+        public void DocumentName_Null_ReturnsExpected()
+        {
+            using (var document = new PrintDocument())
+            {
+                document.DocumentName = null;
+                Assert.Equal(string.Empty, document.DocumentName);
             }
         }
 
@@ -99,7 +107,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void PrintController_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -113,7 +121,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PrinterSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -136,7 +144,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void BeginPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -156,7 +164,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void EndPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -176,7 +184,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void PrintPage_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -196,7 +204,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void QueryPageSettings_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -228,7 +236,7 @@ namespace System.Drawing.Printing.Tests
 
         private void AssertDefaultPageSettings(PageSettings pageSettings)
         {
-            Assert.Equal(new Rectangle(0, 0, 827, 1169), pageSettings.Bounds);
+            Assert.Equal(new Rectangle(0, 0, 850, 1100), pageSettings.Bounds);
             Assert.True(pageSettings.Color);
             Assert.Equal(0, pageSettings.HardMarginX);
             Assert.Equal(0, pageSettings.HardMarginY);
