@@ -135,50 +135,45 @@ internal static partial class Interop
         {
             sendBuf = null;
             sendCount = 0;
-            if ((recvBuf != null) && (recvCount > 0))
+
+            context.InputBio.SetBio(recvBuf, recvOffset, recvCount);
+            context.OutputBio.SetBio(null, 0, 0);
+
+            try
             {
-                BioWrite(context.InputBio, recvBuf, recvOffset, recvCount);
-            }
+                int retVal = Ssl.SslDoHandshake(context);
 
-            int retVal = Ssl.SslDoHandshake(context);
-
-            if (retVal != 1)
-            {
-                Exception innerError;
-                Ssl.SslErrorCode error = GetSslError(context, retVal, out innerError);
-
-                if ((retVal != -1) || (error != Ssl.SslErrorCode.SSL_ERROR_WANT_READ))
+                if (retVal != 1)
                 {
-                    throw new SslException(SR.Format(SR.net_ssl_handshake_failed_error, error), innerError);
-                }
-            }
+                    Exception innerError;
+                    Ssl.SslErrorCode error = GetSslError(context, retVal, out innerError);
 
-            sendCount = Crypto.BioCtrlPending(context.OutputBio);
-
-            if (sendCount > 0)
-            {
-                sendBuf = new byte[sendCount];
-
-                try
-                {
-                    sendCount = BioRead(context.OutputBio, sendBuf, sendCount);
-                }
-                finally
-                {
-                    if (sendCount <= 0)
+                    if ((retVal != -1) || (error != Ssl.SslErrorCode.SSL_ERROR_WANT_READ))
                     {
-                        sendBuf = null;
-                        sendCount = 0;
+                        throw new SslException(SR.Format(SR.net_ssl_handshake_failed_error, error), innerError);
                     }
                 }
-            }
 
-            bool stateOk = Ssl.IsSslStateOK(context);
-            if (stateOk)
-            {
-                context.MarkHandshakeCompleted();
+                sendCount = Crypto.BioCtrlPending(context.OutputBio);
+
+                if (context.OutputBio.ByteArray != null)
+                {
+                    sendBuf = context.OutputBio.ByteArray;
+                    sendCount = context.OutputBio.TotalBytes;
+                }
+
+                bool stateOk = Ssl.IsSslStateOK(context);
+                if (stateOk)
+                {
+                    context.MarkHandshakeCompleted();
+                }
+                return stateOk;
             }
-            return stateOk;
+            finally
+            {
+                context.InputBio.ResetBio();
+                context.OutputBio.ResetBio();
+            }
         }
 
         internal static int Encrypt(SafeSslHandle context, byte[] input, int offset, int count, ref byte[] output, out Ssl.SslErrorCode errorCode)
@@ -190,56 +185,65 @@ internal static partial class Interop
             Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
+            context.OutputBio.SetBio(output, 0, output?.Length ?? 0);
 
-            int retVal;
-            unsafe
+            try
             {
-                fixed (byte* fixedBuffer = input)
+                int retVal;
+                unsafe
                 {
-                    retVal = Ssl.SslWrite(context, fixedBuffer + offset, count);
-                }
-            }
-
-            if (retVal != count)
-            {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
-                retVal = 0;
-
-                switch (errorCode)
-                {
-                    // indicate end-of-file
-                    case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
-                    case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
-                        break;
-
-                    default:
-                        throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
-                }
-            }
-            else
-            {
-                int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
-
-                if (output == null || output.Length < capacityNeeded)
-                {
-                    output = new byte[capacityNeeded];
+                    fixed (byte* fixedBuffer = input)
+                    {
+                        retVal = Ssl.SslWrite(context, fixedBuffer + offset, count);
+                    }
                 }
 
-                retVal = BioRead(context.OutputBio, output, capacityNeeded);
-            }
+                if (retVal != count)
+                {
+                    Exception innerError;
+                    errorCode = GetSslError(context, retVal, out innerError);
+                    retVal = 0;
 
-            return retVal;
+                    switch (errorCode)
+                    {
+                        // indicate end-of-file
+                        case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
+                        case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
+                            break;
+
+                        default:
+                            throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
+                    }
+                }
+                else
+                {
+                    int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
+
+                    if (output == null || output.Length < capacityNeeded)
+                    {
+                        output = new byte[capacityNeeded];
+                    }
+
+                    retVal = BioRead(context.OutputBio, output, capacityNeeded);
+                }
+                output = context.OutputBio.ByteArray;
+                return context.OutputBio.TotalBytes;
+            }
+            finally
+            {
+                context.OutputBio.ResetBio();
+            }
         }
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
-            int retVal = BioWrite(context.InputBio, outBuffer, offset, count);
+            context.InputBio.SetBio(outBuffer, offset, count);
 
-            if (retVal == count)
+            try
             {
+                int retVal;
                 unsafe
                 {
                     fixed (byte* fixedBuffer = outBuffer)
@@ -252,33 +256,38 @@ internal static partial class Interop
                 {
                     count = retVal;
                 }
-            }
 
-            if (retVal != count)
-            {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
-                retVal = 0;
 
-                switch (errorCode)
+                if (retVal != count)
                 {
-                    // indicate end-of-file
-                    case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
-                        break;
+                    Exception innerError;
+                    errorCode = GetSslError(context, retVal, out innerError);
+                    retVal = 0;
 
-                    case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
-                        // update error code to renegotiate if renegotiate is pending, otherwise make it SSL_ERROR_WANT_READ
-                        errorCode = Ssl.IsSslRenegotiatePending(context) ?
-                                    Ssl.SslErrorCode.SSL_ERROR_RENEGOTIATE :
-                                    Ssl.SslErrorCode.SSL_ERROR_WANT_READ;
-                        break;
+                    switch (errorCode)
+                    {
+                        // indicate end-of-file
+                        case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
+                            break;
 
-                    default:
-                        throw new SslException(SR.Format(SR.net_ssl_decrypt_failed, errorCode), innerError);
+                        case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
+                            // update error code to renegotiate if renegotiate is pending, otherwise make it SSL_ERROR_WANT_READ
+                            errorCode = Ssl.IsSslRenegotiatePending(context) ?
+                                        Ssl.SslErrorCode.SSL_ERROR_RENEGOTIATE :
+                                        Ssl.SslErrorCode.SSL_ERROR_WANT_READ;
+                            break;
+
+                        default:
+                            throw new SslException(SR.Format(SR.net_ssl_decrypt_failed, errorCode), innerError);
+                    }
                 }
-            }
 
-            return retVal;
+                return retVal;
+            }
+            finally
+            {
+                context.InputBio.ResetBio();
+            }
         }
 
         internal static SafeX509Handle GetPeerCertificate(SafeSslHandle context)

@@ -170,8 +170,8 @@ namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeSslHandle : SafeHandle
     {
-        private SafeBioHandle _readBio;
-        private SafeBioHandle _writeBio;
+        private ReadBioBuffer _readBio;
+        private WriteBioBuffer _writeBio;
         private bool _isServer;
         private bool _handshakeCompleted = false;
 
@@ -180,22 +180,9 @@ namespace Microsoft.Win32.SafeHandles
             get { return _isServer; }
         }
 
-        public SafeBioHandle InputBio
-        {
-            get
-            {
-                return _readBio;
-            }
-        }
-
-        public SafeBioHandle OutputBio
-        {
-            get
-            {
-                return _writeBio;
-            }
-        }
-
+        public ReadBioBuffer InputBio => _readBio;
+        public WriteBioBuffer OutputBio => _writeBio;
+        
         internal void MarkHandshakeCompleted()
         {
             _handshakeCompleted = true;
@@ -203,8 +190,8 @@ namespace Microsoft.Win32.SafeHandles
 
         public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
         {
-            SafeBioHandle readBio = Interop.Crypto.CreateMemoryBio();
-            SafeBioHandle writeBio = Interop.Crypto.CreateMemoryBio();
+            SafeBioHandle readBio = Interop.CustomBio.CreateCustomBio();
+            SafeBioHandle writeBio = Interop.CustomBio.CreateCustomBio();
             SafeSslHandle handle = Interop.Ssl.SslCreate(context);
             if (readBio.IsInvalid || writeBio.IsInvalid || handle.IsInvalid)
             {
@@ -220,8 +207,8 @@ namespace Microsoft.Win32.SafeHandles
             {
                 readBio.TransferOwnershipToParent(handle);
                 writeBio.TransferOwnershipToParent(handle);
-                handle._readBio = readBio;
-                handle._writeBio = writeBio;
+                handle._readBio = new ReadBioBuffer(readBio);
+                handle._writeBio = new WriteBioBuffer(writeBio);
                 Interop.Ssl.SslSetBio(handle, readBio, writeBio);
             }
             catch (Exception exc)
