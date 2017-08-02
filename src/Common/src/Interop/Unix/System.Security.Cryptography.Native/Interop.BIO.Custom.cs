@@ -110,7 +110,25 @@ internal static partial class Interop
             {
                 return -1;
             }
-            throw new NotImplementedException();
+
+            var buffer = handle.Target as SafeSslHandle.WriteBioBuffer;
+
+            if (buffer == null)
+            {
+                Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_NONE);
+                return -1;
+            }
+
+            buffer.CheckSpaceOrIncrease(size);
+            fixed (byte* bPtr = buffer.ByteArray)
+            {
+                var offsetPtr = bPtr + buffer.StartOfFreeSpace;
+                Buffer.MemoryCopy(input, offsetPtr, buffer.FreeSpace, size);
+                buffer.StartOfFreeSpace += size;
+                buffer.FreeSpace -= size;
+                buffer.TotalBytes += size;
+                return size;
+            }
         }
 
         private static unsafe int Read(IntPtr bio, void* output, int size)
