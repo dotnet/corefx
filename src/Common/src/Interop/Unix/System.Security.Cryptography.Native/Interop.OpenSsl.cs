@@ -154,8 +154,6 @@ internal static partial class Interop
                     }
                 }
 
-                sendCount = Crypto.BioCtrlPending(context.OutputBio);
-
                 if (context.OutputBio.ByteArray != null)
                 {
                     sendBuf = context.OutputBio.ByteArray;
@@ -215,18 +213,7 @@ internal static partial class Interop
                             throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                     }
                 }
-                else
-                {
-                    int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
 
-                    if (output == null || output.Length < capacityNeeded)
-                    {
-                        output = new byte[capacityNeeded];
-                    }
-
-                    retVal = BioRead(context.OutputBio, output, capacityNeeded);
-                }
-                output = context.OutputBio.ByteArray;
                 return context.OutputBio.TotalBytes;
             }
             finally

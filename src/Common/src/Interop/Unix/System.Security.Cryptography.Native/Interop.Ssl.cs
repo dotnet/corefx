@@ -293,7 +293,7 @@ namespace Microsoft.Win32.SafeHandles
             {
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
-                Interop.CustomBio.BioSetGCHandle(BioHandle, _handle);
+                Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
             }
 
             public int BytesAvailable { get; set; }
@@ -344,7 +344,7 @@ namespace Microsoft.Win32.SafeHandles
             {
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
-                Interop.CustomBio.BioSetGCHandle(BioHandle, _handle);
+                Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
             }
 
             public int FreeSpace { get; set; }
