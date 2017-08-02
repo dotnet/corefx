@@ -8,6 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="Mono\DataRowComparerTest.cs" />
+    <Compile Include="Mono\DataRowExtensionsTest.cs" />
+    <Compile Include="Mono\DataTableExtensionsTest.cs" />
+    <Compile Include="Mono\EnumerableRowCollectionTest.cs" />
     <Compile Include="System\Data\DataRowComparerTests.cs" />
     <Compile Include="System\Data\DataRowExtensionsTests.cs" />
     <Compile Include="System\Data\DataTableExtensionsTests.cs" />

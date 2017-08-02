@@ -374,5 +374,65 @@ namespace System.Data.Tests
 
             Assert.Throws<InvalidOperationException>(() => DataRowComparer<DataRow>.Default.GetHashCode(row));
         }
+
+        [Fact]
+        public void GetHashCode_NoColumns()
+        {
+            var comparer = DataRowComparer<DataRow>.Default;
+            DataTable table = new DataTable();
+            DataRow row = table.NewRow();
+
+            Assert.Equal(0, comparer.GetHashCode(row));
+        }
+        
+        [Fact]
+        public void GetHashCode_OneColumn()
+        {
+            var comparer = DataRowComparer<DataRow>.Default;
+            DataTable table = new DataTable();
+            DataRow row = table.NewRow();
+            table.Columns.Add();
+
+            Assert.NotEqual(0, comparer.GetHashCode(row));
+        }
+
+        [Fact]
+        public void Equals_RowsSame()
+        {
+            var comparer = DataRowComparer<DataRow>.Default;
+            DataTable table = new DataTable();
+            DataRow row1 = table.NewRow();
+            DataRow row2 = table.NewRow();
+            row1 = row2;
+
+            Assert.True(comparer.Equals(row1, row2));
+        }
+
+        [Fact]
+        public void Equals_OneRowNull()
+        {
+            var comparer = DataRowComparer<DataRow>.Default;
+            DataTable table = new DataTable();
+            DataRow row1 = table.NewRow();
+            DataRow row2 = table.NewRow();
+            row1 = null;
+
+            Assert.False(comparer.Equals(row1, row2));
+        }
+
+        [Fact]
+        public void Equals_RowsHaveDifferentValues()
+        {
+            var comparer = DataRowComparer<DataRow>.Default;
+            DataTable table = new DataTable();
+            table.Columns.Add();
+            DataRow row1 = table.NewRow();
+            DataRow row2 = table.NewRow();
+            row1[0] = "hi";
+            row2[0] = "ih";
+
+            Assert.False(comparer.Equals(row1, row2));
+        }
+
     }
 }
