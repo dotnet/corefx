@@ -8,7 +8,7 @@ namespace System.IO.Ports
 {
     internal sealed partial class Win32SerialCommunication : SerialCommunication
     {
-        public override SafeFileHandle OpenPort(ulong portNumber)
+        public override SafeFileHandle OpenPort(uint portNumber)
         {
             return Interop.Kernel32.CreateFileDefaultSecurity(
                 @"\\?\COM" + portNumber,

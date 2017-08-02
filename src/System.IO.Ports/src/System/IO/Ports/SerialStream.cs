@@ -592,7 +592,7 @@ namespace System.IO.Ports
         {
             if ((portName == null) ||
                 !portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) || 
-                !ulong.TryParse(portName.Substring(3), out ulong portNumber))
+                !uint.TryParse(portName.Substring(3), out uint portNumber))
             {
                 throw new ArgumentException(SR.Arg_InvalidSerialPort, nameof(portName));
             }

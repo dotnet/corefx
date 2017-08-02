@@ -8,7 +8,7 @@ namespace System.IO.Ports
 {
     internal sealed partial class UapSerialCommunication : SerialCommunication
     {
-        public override SafeFileHandle OpenPort(ulong portNumber)
+        public override SafeFileHandle OpenPort(uint portNumber)
         {
             return Interop.KernelBase.OpenCommPort(
                 portNumber,

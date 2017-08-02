@@ -10,6 +10,6 @@ namespace System.IO.Ports
     {
         public static SerialCommunication Current { get { return s_current; } }
 
-        public abstract SafeFileHandle OpenPort(ulong portName);
+        public abstract SafeFileHandle OpenPort(uint portName);
     }
 }

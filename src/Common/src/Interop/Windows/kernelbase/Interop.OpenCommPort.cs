@@ -13,7 +13,7 @@ internal partial class Interop
     {
         [DllImport(Libraries.KernelBase, SetLastError = true)]
         internal static extern SafeFileHandle OpenCommPort(
-             ulong portNumber,
+             uint uPortNumber,
              int dwDesiredAccess,
              int dwFlagsAndAttributes);
     }
