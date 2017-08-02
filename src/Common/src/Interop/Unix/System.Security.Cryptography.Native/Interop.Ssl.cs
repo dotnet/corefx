@@ -379,7 +379,7 @@ namespace Microsoft.Win32.SafeHandles
                 }
                 else if (FreeSpace < sizeWanted)
                 {
-                    var newArray = new byte[ByteArray.Length + (sizeWanted - StartOfFreeSpace)];
+                    var newArray = new byte[ByteArray.Length + (sizeWanted - FreeSpace)];
                     FreeSpace = sizeWanted;
                     Array.Copy(ByteArray, newArray, ByteArray.Length);
                     ByteArray = newArray;

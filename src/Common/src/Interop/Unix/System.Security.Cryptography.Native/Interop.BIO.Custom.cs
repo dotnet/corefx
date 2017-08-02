@@ -146,7 +146,7 @@ internal static partial class Interop
                 Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_NONE);
                 return -1;
             }
-            if (buffer.BytesAvailable == 0)
+            if (buffer.ByteArray == null || buffer.BytesAvailable == 0)
             {
                 Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_READ | Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
                 return -1;

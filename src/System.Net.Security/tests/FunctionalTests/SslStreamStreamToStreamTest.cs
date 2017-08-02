@@ -11,6 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 namespace System.Net.Security.Tests
 {
@@ -139,8 +141,9 @@ namespace System.Net.Security.Tests
         }
 
         [Theory]
+        [Trait(XunitConstants.Category, "SingleTest")]
         [InlineData(false)]
-        [InlineData(true)]
+        //[InlineData(true)]
         public void SslStream_StreamToStream_LargeWrites_Sync_Success(bool randomizedData)
         {
             VirtualNetwork network = new VirtualNetwork();
