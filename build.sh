@@ -28,12 +28,6 @@ if [ $? -ne 0 ];then
    exit 1
 fi
 
-cp Tools-Override/* Tools/
-if [ $? -ne 0 ]; then
-    echo [ERROR] Failed to copy Tools-Override.
-    exit $?
-fi
-
 "$__scriptpath/build-managed.sh" $*
 exit $?
 

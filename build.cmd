@@ -7,10 +7,6 @@ if /I [%1] == [-?] goto Usage
 call %~dp0build-native.cmd %*
 if NOT [%ERRORLEVEL%]==[0] exit /b 1
 
-:: Always copy over the Tools-Override
-xcopy /vy "%~dp0Tools-Override\"* "%~dp0Tools" 1>nul
-if NOT [%ERRORLEVEL%]==[0] (echo [ERROR] Failed to copy Tools-Override.& exit /b 1)
-
 call %~dp0build-managed.cmd %*
 exit /b %ERRORLEVEL%
 

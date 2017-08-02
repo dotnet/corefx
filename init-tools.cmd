@@ -69,6 +69,10 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
   goto :error
 )
 
+:: Always copy over the Tools-Override
+xcopy /vy "%~dp0Tools-Override\"* "%~dp0Tools" 1>nul
+if NOT [%ERRORLEVEL%]==[0] (echo [ERROR] Failed to copy Tools-Override.& exit /b 1)
+
 :: Create semaphore file
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
