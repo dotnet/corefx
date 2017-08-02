@@ -6,6 +6,11 @@
 #include "opensslshim.h"
 
 /*
+Creates a custom BIO instance.
+*/
+extern "C" BIO* CryptoNative_CreateCustomBio(BIO_METHOD* bioMethod);
+
+/*
 Creates a new memory-backed BIO instance.
 */
 extern "C" BIO* CryptoNative_CreateMemoryBio();
@@ -54,3 +59,17 @@ Shims the BIO_ctrl_pending method.
 Returns the number of pending characters in the BIOs read and write buffers.
 */
 extern "C" int32_t CryptoNative_BioCtrlPending(BIO* bio);
+/*
+Adds app data to the extension slot of the bio
+*/
+extern "C" void CryptoNative_BioSetAppData(BIO* bio, void* data);
+
+/*
+Gets app data from the extension slot of the bio
+*/
+extern "C" void* CryptoNative_BioGetAppData(BIO* bio);
+
+/*
+Shims the Set flags for the custom bio
+*/
+extern "C" void CryptoNative_BioSetFlags(BIO* bio, int32_t flags);

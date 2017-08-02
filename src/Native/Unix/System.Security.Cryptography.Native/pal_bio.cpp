@@ -6,6 +6,11 @@
 
 #include <assert.h>
 
+extern "C" BIO* CryptoNative_CreateCustomBio(BIO_METHOD* bioMethod)
+{
+    return BIO_new(bioMethod);
+}
+
 extern "C" BIO* CryptoNative_CreateMemoryBio()
 {
     return BIO_new(BIO_s_mem());
@@ -51,4 +56,19 @@ extern "C" int32_t CryptoNative_BioCtrlPending(BIO* bio)
     size_t result = BIO_ctrl_pending(bio);
     assert(result <= INT32_MAX);
     return static_cast<int32_t>(result);
+}
+
+extern "C" void CryptoNative_BioSetAppData(BIO* bio, void* data)
+{
+    BIO_set_app_data(bio, data);
+}
+
+extern "C" void* CryptoNative_BioGetAppData(BIO* bio)
+{
+    return BIO_get_app_data(bio);
+}
+
+extern "C" void CryptoNative_BioSetFlags(BIO* bio, int32_t flags)
+{
+    BIO_set_flags(bio, flags);
 }
