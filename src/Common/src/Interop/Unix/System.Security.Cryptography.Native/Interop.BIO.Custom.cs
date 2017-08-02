@@ -24,7 +24,7 @@ internal static partial class Interop
         private unsafe delegate int WriteDelegate(IntPtr bio, void* buf, int num);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate long ControlDelegate(IntPtr bio, BIO_CTRL cmd, long num, void* ptr);
+        private unsafe delegate long ControlDelegate(IntPtr bio, Crypto.BIO_CTRL cmd, long num, void* ptr);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int DestroyDelegate(IntPtr bio);
@@ -89,6 +89,18 @@ internal static partial class Interop
         }
 
         private static int Destroy(IntPtr bio) => 1;
+
+        private static unsafe long Control(IntPtr bio, Crypto.BIO_CTRL cmd, long param, void* ptr)
+        {
+            switch (cmd)
+            {
+                case Crypto.BIO_CTRL.BIO_CTRL_FLUSH:
+                case Crypto.BIO_CTRL.BIO_CTRL_POP:
+                case Crypto.BIO_CTRL.BIO_CTRL_PUSH:
+                    return 1;
+            }
+            return 0;
+        }
 
         private static unsafe int Write(IntPtr bio, void* input, int size)
         {
