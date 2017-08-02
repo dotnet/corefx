@@ -121,7 +121,31 @@ internal static partial class Interop
             {
                 return -1;
             }
-            throw new NotImplementedException();
+            var buffer = handle.Target as SafeSslHandle.ReadBioBuffer;
+
+            if (buffer == null)
+            {
+                Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.NONE);
+                return -1;
+            }
+            if (buffer.BytesAvailable == 0)
+            {
+                Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_READ | Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
+                return -1;
+            }
+            fixed (byte* bPtr = buffer.ByteArray)
+            {
+                var offsetPtr = bPtr + buffer.Offset;
+                var bytesToCopy = Math.Min(size, buffer.BytesAvailable);
+                Buffer.MemoryCopy(offsetPtr, output, size, bytesToCopy);
+                buffer.BytesAvailable -= bytesToCopy;
+                buffer.Offset += bytesToCopy;
+                if (bytesToCopy < size)
+                {
+                    Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_READ | Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
+                }
+                return bytesToCopy;
+            }
         }
 
         [Flags]

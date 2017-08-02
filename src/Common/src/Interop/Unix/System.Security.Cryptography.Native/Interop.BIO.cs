@@ -51,6 +51,7 @@ internal static partial class Interop
         [Flags]
         internal enum BIO_FLAGS
         {
+            BIO_FLAGS_NONE = 0x0,
             BIO_FLAGS_READ = 0x01,
             BIO_FLAGS_WRITE = 0x02,
             BIO_FLAGS_IO_SPECIAL = 0x04,
