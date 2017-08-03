@@ -113,12 +113,11 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ActiveIssue(22741)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_NullStream_ThrowsArgumentException()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => new Metafile((Stream)null));
+            AssertExtensions.Throws<ArgumentNullException, ArgumentException>("stream", null, () => new Metafile((Stream)null));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
