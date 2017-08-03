@@ -22,7 +22,7 @@ namespace System.Collections.Generic
     // 3 -node will be represented as:           B             or         B
     //                                                              R          B               B       R
     //
-    // For a detailed description of the algorithm, take a look at "Algorithms" by Rebert Sedgewick.
+    // For a detailed description of the algorithm, take a look at "Algorithms" by Robert Sedgewick.
 
     internal enum NodeColor : byte
     {
@@ -116,7 +116,8 @@ namespace System.Collections.Generic
                 return;
             }
 
-            T[] elements = EnumerableHelpers.ToArray(collection, out int count);
+            int count;
+            T[] elements = EnumerableHelpers.ToArray(collection, out count);
             if (count > 0)
             {
                 // If `comparer` is null, sets it to Comparer<T>.Default. We checked for this condition in the IComparer<T> constructor.
@@ -1176,7 +1177,8 @@ namespace System.Collections.Generic
             }
             else
             {
-                T[] elements = EnumerableHelpers.ToArray(other, out int length);
+                int length;
+                T[] elements = EnumerableHelpers.ToArray(other, out length);
                 Array.Sort(elements, 0, length, Comparer);
                 SymmetricExceptWithSameComparer(elements, length);
             }
