@@ -42,63 +42,25 @@ namespace NetPrimitivesUnitTests
             Assert.False(cookies[CookieName].DomainImplicit);
         }
 
-        [Fact]
-        public void CookieParser_GetString()
+        [Theory]
+        [InlineData("cookie_token=cookie_value")]
+        [InlineData("cookie_token=cookie_value;")]
+        [InlineData("cookie_token1=cookie_value1;cookie_token2=cookie_value2")]
+        [InlineData("cookie_token1=cookie_value1;cookie_token2=cookie_value2;")]
+        public void CookieParserGetString_SetCookieHeaderValue_Success(string cookieString)
         {
-            string cookieString = "cookie_token=cookie_value";
             var parser = new CookieParser(cookieString);
             string actual = parser.GetString();
             Assert.Equal(cookieString, actual);
         }
 
-        [Fact]
-        public void CookieParser_GetString_TwoTokens()
+        [Theory]
+        [InlineData("cookie_name", "cookie_value", "cookie_name=cookie_value")]
+        [InlineData("cookie_name", "cookie_value", "cookie_name=cookie_value;")]
+        public void CookieParserGet_SetCookieHeaderValue_Success(string name, string value, string cookieString)
         {
-            string cookieString = "cookie_token1=cookie_value1;cookie_token2=cookie_value2";
-            var parser = new CookieParser(cookieString);
-            string actual = parser.GetString();
-            Assert.Equal(cookieString, actual);
-        }
-
-        [Fact]
-        public void CookieParser_GetString_WithTrailingSemicolon()
-        {
-            string cookieString = "cookie_token=cookie_value;";
-            var parser = new CookieParser(cookieString);
-            string actual = parser.GetString();
-            Assert.Equal(cookieString, actual);
-        }
-
-        [Fact]
-        public void CookieParser_GetString_TwoTokens_WithTrailingSemicolon()
-        {
-            string cookieString = "cookie_token1=cookie_value1;cookie_token2=cookie_value2;";
-            var parser = new CookieParser(cookieString);
-            string actual = parser.GetString();
-            Assert.Equal(cookieString, actual);
-        }
-
-        [Fact]
-        public void CookieParser_Get()
-        {
-            string name = "cookie_token";
-            string value = "cookie_value";
-            string cookieString = $"{name}={value}";
             var parser = new CookieParser(cookieString);
             Cookie cookie= parser.Get();
-            Assert.NotNull(cookie);
-            Assert.Equal(name, cookie.Name);
-            Assert.Equal(value, cookie.Value);
-        }
-
-        [Fact]
-        public void CookieParser_Get_WithTrailingSemicolon()
-        {
-            string name = "cookie_token";
-            string value = "cookie_value";
-            string cookieString = $"{name}={value};"; // There's a semicolon at the end of the string
-            var parser = new CookieParser(cookieString);
-            Cookie cookie = parser.Get();
             Assert.NotNull(cookie);
             Assert.Equal(name, cookie.Name);
             Assert.Equal(value, cookie.Value);
