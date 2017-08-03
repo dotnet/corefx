@@ -254,8 +254,8 @@ namespace System.Drawing.Printing.Tests
             Assert.Equal(PaperKind.Letter, pageSettings.PaperSize.Kind);
             Assert.Equal(PaperSourceKind.FormSource, pageSettings.PaperSource.Kind);
             Assert.Equal(new PointF(0f, 0f), pageSettings.PrintableArea.Location);
-            Assert.Equal(827, pageSettings.PrintableArea.Width, 0);
-            Assert.Equal(1169, pageSettings.PrintableArea.Height, 0);
+            Assert.Equal(850, pageSettings.PrintableArea.Width, 0);
+            Assert.Equal(1100, pageSettings.PrintableArea.Height, 0);
             Assert.Equal(PrinterResolutionKind.Custom, pageSettings.PrinterResolution.Kind);
             Assert.True(pageSettings.PrinterSettings.IsDefaultPrinter);
         }
