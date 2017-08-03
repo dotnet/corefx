@@ -47,7 +47,6 @@ namespace NetPrimitivesUnitTests
         {
             string cookieString = "cookie_token=cookie_value";
             var parser = new CookieParser(cookieString);
-
             string actual = parser.GetString();
             Assert.Equal(cookieString, actual);
         }
@@ -57,7 +56,6 @@ namespace NetPrimitivesUnitTests
         {
             string cookieString = "cookie_token1=cookie_value1;cookie_token2=cookie_value2";
             var parser = new CookieParser(cookieString);
-
             string actual = parser.GetString();
             Assert.Equal(cookieString, actual);
         }
@@ -65,12 +63,10 @@ namespace NetPrimitivesUnitTests
         [Fact]
         public void CookieParser_GetString_WithTrailingSemicolon()
         {
-            string cookieString = "cookie_token=cookie_value";
-            string cookieStringWithSemicolon = $"{cookieString};";
-            var parser = new CookieParser(cookieStringWithSemicolon);
-
+            string cookieString = "cookie_token=cookie_value;";
+            var parser = new CookieParser(cookieString);
             string actual = parser.GetString();
-            Assert.Equal(cookieStringWithSemicolon, actual);
+            Assert.Equal(cookieString, actual);
         }
 
         [Fact]
@@ -78,7 +74,6 @@ namespace NetPrimitivesUnitTests
         {
             string cookieString = "cookie_token1=cookie_value1;cookie_token2=cookie_value2;";
             var parser = new CookieParser(cookieString);
-
             string actual = parser.GetString();
             Assert.Equal(cookieString, actual);
         }
@@ -91,7 +86,6 @@ namespace NetPrimitivesUnitTests
             string cookieString = $"{name}={value}";
             var parser = new CookieParser(cookieString);
             Cookie cookie= parser.Get();
-
             Assert.NotNull(cookie);
             Assert.Equal(name, cookie.Name);
             Assert.Equal(value, cookie.Value);
@@ -105,7 +99,6 @@ namespace NetPrimitivesUnitTests
             string cookieString = $"{name}={value};"; // There's a semicolon at the end of the string
             var parser = new CookieParser(cookieString);
             Cookie cookie = parser.Get();
-
             Assert.NotNull(cookie);
             Assert.Equal(name, cookie.Name);
             Assert.Equal(value, cookie.Value);
