@@ -213,7 +213,7 @@ internal static partial class Interop
                             throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                     }
                 }
-
+                output = context.OutputBio.ByteArray;
                 return context.OutputBio.TotalBytes;
             }
             finally
