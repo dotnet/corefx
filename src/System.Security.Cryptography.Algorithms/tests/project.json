@@ -17,6 +17,7 @@
       "target": "project",
       "exclude": "compile"
     },
+    "runtime.native.System.Security.Cryptography.Apple": "4.3.1-servicing-25603-01",
     "Microsoft.xunit.netcore.extensions": "1.0.0-prerelease-01005-01",
     "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-01005-01"
   },
