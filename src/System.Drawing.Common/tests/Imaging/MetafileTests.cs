@@ -93,13 +93,13 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { string.Empty };
         }
 
-        [ActiveIssue(22640)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [MemberData(nameof(InvalidPath_TestData))]
+        [InlineData(@"fileNo*-//\\#@(found")]
+        [InlineData("")]
         public void Ctor_InvalidPath_ThrowsArgumentException(string path)
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => new Metafile(path));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => new Metafile(path));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]

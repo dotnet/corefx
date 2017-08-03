@@ -59,6 +59,9 @@ namespace System.Drawing.Imaging
         /// </summary>
         public Metafile(string filename)
         {
+            // Called in order to emulate exception behavior from netfx related to invalid file paths.
+            Path.GetFullPath(filename);
+
             IntPtr metafile = IntPtr.Zero;
 
             int status = SafeNativeMethods.Gdip.GdipCreateMetafileFromFile(filename, out metafile);
