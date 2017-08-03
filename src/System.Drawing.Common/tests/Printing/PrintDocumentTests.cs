@@ -40,6 +40,7 @@ namespace System.Drawing.Printing.Tests
         };
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [Fact]
         public void Ctor_Default_Success()
         {
             using (var document = new PrintDocument())
@@ -51,6 +52,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [Fact]
         public void DefaultPageSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -64,6 +66,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [Fact]
         public void DefaultPageSettings_Null_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -85,6 +88,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Fact]
         public void DocumentName_Null_ReturnsExpected()
         {
@@ -108,6 +112,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [Fact]
         public void PrintController_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
