@@ -4,6 +4,7 @@
 
 using Windows.Foundation.Metadata;
 using Windows.Storage;
+using System.IO;
 
 namespace System
 {
@@ -11,19 +12,28 @@ namespace System
     {
         private static string GetFolderPathCore(SpecialFolder folder, SpecialFolderOption option)
         {
-            // For testing we'll fall back if the needed APIs aren't present
+            // For testing we'll fall back if the needed APIs aren't present.
+            //
+            // We're not honoring the special folder options (noverify/create) for a few reasons. One, most of the
+            // folders always exist (e.g. it is moot). Two, most locations are inaccessible from an appcontainer
+            // currently - making it impossible to answer the question of existence or create if necessary. Thirdly,
+            // the Win32 API would create these folders with very specific ACLs, which even in the cases we can create
+            // are a significant compat risk (trying to replicate internal Windows behavior- it is documented that they
+            // set specific ACLs, but not which ones).
             if (ApiInformation.IsTypePresent("Windows.Storage.UserDataPaths"))
             {
-                return GetFolderPathCoreCurrent(folder, option);
+                return GetFolderPathCoreCurrent(folder);
             }
             else
             {
-                return GetFolderPathCoreFallBack(folder, option);
+                return GetFolderPathCoreFallBack(folder);
             }
         }
 
-        private static string GetFolderPathCoreCurrent(SpecialFolder folder, SpecialFolderOption option)
+        private static string GetFolderPathCoreCurrent(SpecialFolder folder)
         {
+            // While all of these give back real paths, most of them are not accessible
+            // from an appcontainer currently (they will give access denied)
             switch (folder)
             {
                 case SpecialFolder.ApplicationData:
@@ -75,7 +85,7 @@ namespace System
                 case SpecialFolder.Windows:
                     return SystemDataPaths.GetDefault().Windows;
 
-                // The following aren't available on WinRT. Our default behavior for
+                // The following aren't available on WinRT. Our default behavior
                 // is string.Empty for paths that aren't available.
                 //
                 // case SpecialFolder.Programs:
@@ -106,14 +116,20 @@ namespace System
             }
         }
 
-        private static string GetFolderPathCoreFallBack(SpecialFolder folder, SpecialFolderOption option)
+        private static string GetFolderPathCoreFallBack(SpecialFolder folder)
         {
+            // For testing without the new WinRT APIs. We cannot use Win32 APIs for
+            // special folders as they are not in the WACK.
             switch (folder)
             {
                 case SpecialFolder.ApplicationData:
                     return ApplicationData.Current.RoamingFolder?.Path;
                 case SpecialFolder.LocalApplicationData:
                     return ApplicationData.Current.LocalFolder?.Path;
+                case SpecialFolder.System:
+                    return SystemDirectory;
+                case SpecialFolder.Windows:
+                    return Path.GetDirectoryName(SystemDirectory);
                 default:
                     return string.Empty;
             }
