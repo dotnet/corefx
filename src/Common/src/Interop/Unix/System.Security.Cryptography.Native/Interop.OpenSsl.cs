@@ -136,6 +136,14 @@ internal static partial class Interop
             sendBuf = null;
             sendCount = 0;
 
+            if (recvBuf == null && context.OutputBio.TotalBytes > 0)
+            {
+                sendBuf = context.OutputBio.ByteArray;
+                sendCount = context.OutputBio.TotalBytes;
+                context.OutputBio.ResetBio();
+                return false;
+            }
+
             context.InputBio.SetBio(recvBuf, recvOffset, recvCount);
             context.OutputBio.SetBio(null, 0, 0);
 
