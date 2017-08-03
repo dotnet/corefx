@@ -117,7 +117,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case TypeKind.TK_MethodGroupType:
                         VSFAIL("Something is wrong with Type.IsNeverSameType()");
                         return false;
-                    case TypeKind.TK_NaturalIntegerType:
                     case TypeKind.TK_ArgumentListType:
                         return _typeSrc == _typeDest;
                     case TypeKind.TK_VoidType:
@@ -849,7 +848,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             // For a type var destination we need to cast to object then to the other type var.
                             Expr exprT;
-                            ExprClass exprObj = GetExprFactory().CreateClass(_binder.GetReqPDT(PredefinedType.PT_OBJECT));
+                            ExprClass exprObj = GetExprFactory().CreateClass(_binder.GetPredefindType(PredefinedType.PT_OBJECT));
                             _binder.bindSimpleCast(_exprSrc, exprObj, out exprT, EXPRFLAG.EXF_FORCE_BOX);
                             _binder.bindSimpleCast(exprT, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_FORCE_UNBOX);
                         }
