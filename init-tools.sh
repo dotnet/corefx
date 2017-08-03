@@ -134,6 +134,13 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         display_error_message
         exit 1
     fi
+
+    cp Tools-Override/* Tools/
+    if [ $? -ne 0 ]; then
+        echo [ERROR] Failed to copy Tools-Override.
+        exit $?
+    fi
+
     touch $__INIT_TOOLS_DONE_MARKER
     echo "Done initializing tools."
 else
