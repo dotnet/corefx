@@ -15,8 +15,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
@@ -24,7 +22,6 @@
     <Compile Include="System\IO\Ports\InternalResources.cs" />
     <Compile Include="System\IO\Ports\NativeMethods.cs" />
     <Compile Include="System\IO\Ports\Parity.cs" />
-    <Compile Include="System\IO\Ports\SerialCommunication.cs" />
     <Compile Include="System\IO\Ports\SerialData.cs" />
     <Compile Include="System\IO\Ports\SerialDataReceivedEventArgs.cs" />
     <Compile Include="System\IO\Ports\SerialDataReceivedEventHandler.cs" />
@@ -138,12 +135,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <Compile Include="System\IO\Ports\SerialCommunication.Current.Uap.cs" />
-    <Compile Include="System\IO\Ports\UapSerialCommunication.cs" />
+    <Compile Include="System\IO\Ports\SerialStream.Uap.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
-    <Compile Include="System\IO\Ports\SerialCommunication.Current.Win32.cs" />
-    <Compile Include="System\IO\Ports\Win32SerialCommunication.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' and '$(TargetGroup)' != 'netfx' and '$(TargetsWindows)' == 'true'">
+    <Compile Include="System\IO\Ports\SerialStream.Win32.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />

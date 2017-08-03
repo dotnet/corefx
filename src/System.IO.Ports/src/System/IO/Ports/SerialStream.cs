@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Ports
 {
-    internal sealed class SerialStream : Stream
+    internal sealed partial class SerialStream : Stream
     {
         private const int ErrorEvents = (int)(SerialError.Frame | SerialError.Overrun |
                                  SerialError.RXOver | SerialError.RXParity | SerialError.TXFull);
@@ -599,7 +599,7 @@ namespace System.IO.Ports
 
             // Error checking done in SerialPort.
 
-            SafeFileHandle tempHandle = SerialCommunication.Current.OpenPort(portNumber);
+            SafeFileHandle tempHandle = OpenPort(portNumber);
 
             if (tempHandle.IsInvalid)
             {
