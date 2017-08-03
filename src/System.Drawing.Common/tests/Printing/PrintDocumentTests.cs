@@ -40,7 +40,7 @@ namespace System.Drawing.Printing.Tests
         };
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_Default_Success()
         {
             using (var document = new PrintDocument())
@@ -52,7 +52,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DefaultPageSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -66,7 +66,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DefaultPageSettings_Null_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -89,7 +89,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DocumentName_Null_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -112,7 +112,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void PrintController_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -149,6 +149,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
         public void BeginPrint_SetValue_ReturnsExpected()
         {
