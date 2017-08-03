@@ -121,7 +121,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(Helpers.GdiplusIsAvailable))]
         public void PrinterSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -144,7 +144,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(Helpers.GdiplusIsAvailable))]
         public void BeginPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -164,7 +164,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(Helpers.GdiplusIsAvailable))]
         public void EndPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -184,7 +184,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(Helpers.GdiplusIsAvailable))]
         public void PrintPage_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -204,7 +204,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
-        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(nameof(AnyInstalledPrinters) + "." + nameof(Helpers.GdiplusIsAvailable))]
         public void QueryPageSettings_SetValue_ReturnsExpected()
         {
             bool flag = false;
