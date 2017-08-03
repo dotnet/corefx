@@ -76,12 +76,12 @@ namespace System.Net
         /// The correct date token (0-6 for day of the week, 1-14 for month, etc.) if successful,
         /// otherwise, DATE_TOKEN_ERROR.
         /// </returns>
-        private static int MapDayMonthToDword(char[] lpszDay, int index)
+        private static int MapDayMonthToDword(string day, int index)
         {
-            switch (char.ToUpper(lpszDay[index]))
+            switch (char.ToUpper(day[index]))
             {
                 case 'A':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'P':
                             return DATE_TOKEN_APRIL;
@@ -94,7 +94,7 @@ namespace System.Net
                     return DATE_TOKEN_DECEMBER;
 
                 case 'F':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'R':
                             return DATE_TOKEN_FRIDAY;
@@ -107,12 +107,12 @@ namespace System.Net
                     return DATE_TOKEN_GMT;
 
                 case 'M':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'O':
                             return DATE_TOKEN_MONDAY;
                         case 'A':
-                            switch (char.ToUpper(lpszDay[index + 2]))
+                            switch (char.ToUpper(day[index + 2]))
                             {
                                 case 'R':
                                     return DATE_TOKEN_MARCH;
@@ -129,13 +129,13 @@ namespace System.Net
                     return DATE_TOKEN_NOVEMBER;
 
                 case 'J':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'A':
                             return DATE_TOKEN_JANUARY;
 
                         case 'U':
-                            switch (char.ToUpper(lpszDay[index + 2]))
+                            switch (char.ToUpper(day[index + 2]))
                             {
                                 case 'N':
                                     return DATE_TOKEN_JUNE;
@@ -152,7 +152,7 @@ namespace System.Net
                     return DATE_TOKEN_OCTOBER;
 
                 case 'S':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'A':
                             return DATE_TOKEN_SATURDAY;
@@ -164,7 +164,7 @@ namespace System.Net
                     return DATE_TOKEN_ERROR;
 
                 case 'T':
-                    switch (char.ToUpper(lpszDay[index + 1]))
+                    switch (char.ToUpper(day[index + 1]))
                     {
                         case 'U':
                             return DATE_TOKEN_TUESDAY;
@@ -192,7 +192,6 @@ namespace System.Net
             int i = 0, iLastLettered = -1;
             bool fIsANSIDateFormat = false;
             int[] rgdwDateParseResults = new int[MAX_FIELD_DATE_ENTRIES];
-            char[] lpInputBuffer = dateString.ToCharArray();
 
             result = new DateTime();
 
@@ -212,7 +211,7 @@ namespace System.Net
 
             while (index < dateString.Length && i < MAX_FIELD_DATE_ENTRIES)
             {
-                if (lpInputBuffer[index] >= '0' && lpInputBuffer[index] <= '9')
+                if (dateString[index] >= '0' && dateString[index] <= '9')
                 {
                     //
                     // we have a numerical entry, scan through it and convent to DWORD
@@ -223,16 +222,16 @@ namespace System.Net
                     do
                     {
                         rgdwDateParseResults[i] *= BASE_DEC;
-                        rgdwDateParseResults[i] += (lpInputBuffer[index] - '0');
+                        rgdwDateParseResults[i] += (dateString[index] - '0');
                         index++;
                     } while (index < dateString.Length &&
-                             lpInputBuffer[index] >= '0' &&
-                             lpInputBuffer[index] <= '9');
+                             dateString[index] >= '0' &&
+                             dateString[index] <= '9');
 
                     i++; // next token
                 }
-                else if ((lpInputBuffer[index] >= 'A' && lpInputBuffer[index] <= 'Z') ||
-                         (lpInputBuffer[index] >= 'a' && lpInputBuffer[index] <= 'z'))
+                else if ((dateString[index] >= 'A' && dateString[index] <= 'Z') ||
+                         (dateString[index] >= 'a' && dateString[index] <= 'z'))
                 {
                     //
                     // we have a string, should be a day, month, or GMT
@@ -240,7 +239,7 @@ namespace System.Net
                     //
 
                     rgdwDateParseResults[i] =
-                    MapDayMonthToDword(lpInputBuffer, index);
+                    MapDayMonthToDword(dateString, index);
 
                     iLastLettered = i;
 
@@ -272,8 +271,8 @@ namespace System.Net
                     {
                         index++;
                     } while ((index < dateString.Length) &&
-                             ((lpInputBuffer[index] >= 'A' && lpInputBuffer[index] <= 'Z') ||
-                              (lpInputBuffer[index] >= 'a' && lpInputBuffer[index] <= 'z')));
+                             ((dateString[index] >= 'A' && dateString[index] <= 'Z') ||
+                              (dateString[index] >= 'a' && dateString[index] <= 'z')));
 
                     i++; // next token
                 }
