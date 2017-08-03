@@ -126,6 +126,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
         public void PrinterSettings_SetValue_ReturnsExpected()
         {
@@ -170,6 +171,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
         public void EndPrint_SetValue_ReturnsExpected()
         {
@@ -190,6 +192,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
         public void PrintPage_SetValue_ReturnsExpected()
         {
@@ -210,6 +213,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
         public void QueryPageSettings_SetValue_ReturnsExpected()
         {
@@ -247,7 +251,7 @@ namespace System.Drawing.Printing.Tests
             Assert.Equal(0, pageSettings.HardMarginX);
             Assert.Equal(0, pageSettings.HardMarginY);
             Assert.False(pageSettings.Landscape);
-            Assert.Equal(PaperKind.A4, pageSettings.PaperSize.Kind);
+            Assert.Equal(PaperKind.Letter, pageSettings.PaperSize.Kind);
             Assert.Equal(PaperSourceKind.FormSource, pageSettings.PaperSource.Kind);
             Assert.Equal(new PointF(0f, 0f), pageSettings.PrintableArea.Location);
             Assert.Equal(827, pageSettings.PrintableArea.Width, 0);
