@@ -1288,7 +1288,7 @@ namespace System.Net.WebSockets
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(GetType().FullName);
+                throw new ObjectDisposedException(GetType().ToString());
             }
         }
 
