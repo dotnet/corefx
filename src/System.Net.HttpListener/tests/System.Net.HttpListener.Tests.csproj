@@ -15,7 +15,7 @@
   <ItemGroup>
     <Compile Include="GetContextHelper.cs" />
     <Compile Include="HttpListenerFactory.cs" />
-    <!-- <Compile Include="HttpListenerAuthenticationTests.cs" />
+    <Compile Include="HttpListenerAuthenticationTests.cs" />
     <Compile Include="HttpListenerContextTests.cs" />
     <Compile Include="HttpListenerPrefixCollectionTests.cs" />
     <Compile Include="HttpListenerResponseTests.cs" />
@@ -23,13 +23,13 @@
     <Compile Include="HttpListenerResponseTests.Headers.cs" />
     <Compile Include="HttpListenerRequestTests.cs" />
     <Compile Include="HttpListenerTests.cs" />
-    <Compile Include="HttpListenerTimeoutManagerTests.cs" /> -->
+    <Compile Include="HttpListenerTimeoutManagerTests.cs" />
     <Compile Include="HttpListenerWebSocketTests.cs" />
-    <!-- <Compile Include="HttpRequestStreamTests.cs" />
+    <Compile Include="HttpRequestStreamTests.cs" />
     <Compile Include="HttpResponseStreamTests.cs" />
     <Compile Include="InvalidClientRequestTests.cs" />
     <Compile Include="SimpleHttpTests.cs" />
-    <Compile Include="WebSocketTests.cs" /> -->
+    <Compile Include="WebSocketTests.cs" />
     <Compile Include="XUnitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\tests\System\PlatformDetection.cs</Link>
