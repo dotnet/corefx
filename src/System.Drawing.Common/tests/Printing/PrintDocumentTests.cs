@@ -29,8 +29,6 @@ namespace System.Drawing.Printing.Tests
 {
     public class PrintDocumentTests
     {
-        private static bool AnyInstalledPrinters => PrinterSettings.InstalledPrinters.Count == 0;
-
         private readonly PageSettings _pageSettings = new PageSettings()
         {
             PaperSize = new PaperSize()
@@ -127,7 +125,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.GdiplusIsAvailable)]
         public void PrinterSettings_SetValue_ReturnsExpected()
         {
             using (var document = new PrintDocument())
@@ -151,7 +149,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.GdiplusIsAvailable)]
         public void BeginPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -172,7 +170,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.GdiplusIsAvailable)]
         public void EndPrint_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -193,7 +191,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.GdiplusIsAvailable)]
         public void PrintPage_SetValue_ReturnsExpected()
         {
             bool flag = false;
@@ -214,7 +212,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(AnyInstalledPrinters), Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.GdiplusIsAvailable)]
         public void QueryPageSettings_SetValue_ReturnsExpected()
         {
             bool flag = false;
