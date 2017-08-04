@@ -4002,6 +4002,7 @@ public static partial class DataContractSerializerTests
 
     [Fact]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework throws InvalidDataContractException.")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "dotnet-corefx #22974")]
     public static void DCS_TypeWithCollectionAndDateTimeOffset_ListIsNull()
     {
         // Adding offsetMinutes so the DateTime component in serialized strings are time-zone independent
