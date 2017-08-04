@@ -190,8 +190,8 @@ namespace System.Net
         {
             int index = 0;
             int i = 0, iLastLettered = -1;
-            bool fIsANSIDateFormat = false;
-            int[] rgdwDateParseResults = new int[MAX_FIELD_DATE_ENTRIES];
+            bool isANSIDateFormat = false;
+            int[] dateParseResults = new int[MAX_FIELD_DATE_ENTRIES];
 
             result = new DateTime();
 
@@ -217,12 +217,12 @@ namespace System.Net
                     // we have a numerical entry, scan through it and convent to DWORD
                     //
 
-                    rgdwDateParseResults[i] = 0;
+                    dateParseResults[i] = 0;
 
                     do
                     {
-                        rgdwDateParseResults[i] *= BASE_DEC;
-                        rgdwDateParseResults[i] += (dateString[index] - '0');
+                        dateParseResults[i] *= BASE_DEC;
+                        dateParseResults[i] += (dateString[index] - '0');
                         index++;
                     } while (index < dateString.Length &&
                              dateString[index] >= '0' &&
@@ -238,15 +238,15 @@ namespace System.Net
                     //   lets skim to the end of the string
                     //
 
-                    rgdwDateParseResults[i] =
+                    dateParseResults[i] =
                     MapDayMonthToDword(dateString, index);
 
                     iLastLettered = i;
 
                     // We want to ignore the possibility of a time zone such as PST or EST in a non-standard
                     // date format such as "Thu Dec 17 16:01:28 PST 1998" (Notice that the year is _after_ the time zone
-                    if ((rgdwDateParseResults[i] == DATE_TOKEN_ERROR) &&
-                        !(fIsANSIDateFormat && (i == DATE_ANSI_INDEX_YEAR)))
+                    if ((dateParseResults[i] == DATE_TOKEN_ERROR) &&
+                        !(isANSIDateFormat && (i == DATE_ANSI_INDEX_YEAR)))
                     {
                         return false;
                     }
@@ -259,7 +259,7 @@ namespace System.Net
 
                     if (i == DATE_ANSI_INDEX_MONTH)
                     {
-                        fIsANSIDateFormat = true;
+                        isANSIDateFormat = true;
                     }
 
                     //
@@ -306,32 +306,32 @@ namespace System.Net
 
             millisecond = 0;
 
-            if (fIsANSIDateFormat)
+            if (isANSIDateFormat)
             {
-                day = rgdwDateParseResults[DATE_ANSI_INDEX_DAY];
-                month = rgdwDateParseResults[DATE_ANSI_INDEX_MONTH];
-                hour = rgdwDateParseResults[DATE_ANSI_INDEX_HRS];
-                minute = rgdwDateParseResults[DATE_ANSI_INDEX_MINS];
-                second = rgdwDateParseResults[DATE_ANSI_INDEX_SECS];
+                day = dateParseResults[DATE_ANSI_INDEX_DAY];
+                month = dateParseResults[DATE_ANSI_INDEX_MONTH];
+                hour = dateParseResults[DATE_ANSI_INDEX_HRS];
+                minute = dateParseResults[DATE_ANSI_INDEX_MINS];
+                second = dateParseResults[DATE_ANSI_INDEX_SECS];
                 if (iLastLettered != DATE_ANSI_INDEX_YEAR)
                 {
-                    year = rgdwDateParseResults[DATE_ANSI_INDEX_YEAR];
+                    year = dateParseResults[DATE_ANSI_INDEX_YEAR];
                 }
                 else
                 {
                     // This is a fix to get around toString/toGMTstring (where the timezone is
                     // appended at the end. (See above)
-                    year = rgdwDateParseResults[DATE_INDEX_TZ];
+                    year = dateParseResults[DATE_INDEX_TZ];
                 }
             }
             else
             {
-                day = rgdwDateParseResults[DATE_1123_INDEX_DAY];
-                month = rgdwDateParseResults[DATE_1123_INDEX_MONTH];
-                year = rgdwDateParseResults[DATE_1123_INDEX_YEAR];
-                hour = rgdwDateParseResults[DATE_1123_INDEX_HRS];
-                minute = rgdwDateParseResults[DATE_1123_INDEX_MINS];
-                second = rgdwDateParseResults[DATE_1123_INDEX_SECS];
+                day = dateParseResults[DATE_1123_INDEX_DAY];
+                month = dateParseResults[DATE_1123_INDEX_MONTH];
+                year = dateParseResults[DATE_1123_INDEX_YEAR];
+                hour = dateParseResults[DATE_1123_INDEX_HRS];
+                minute = dateParseResults[DATE_1123_INDEX_MINS];
+                second = dateParseResults[DATE_1123_INDEX_SECS];
             }
 
             //
@@ -381,15 +381,15 @@ namespace System.Net
             //   then convert to appropriate GMT time
             //
 
-            if ((i > DATE_INDEX_TZ &&
-                 rgdwDateParseResults[DATE_INDEX_TZ] != DATE_TOKEN_GMT))
+            if (i > DATE_INDEX_TZ &&
+                dateParseResults[DATE_INDEX_TZ] != DATE_TOKEN_GMT)
             {
 
                 //
                 // if we received +/-nnnn as offset (hhmm), modify the output FILETIME
                 //
 
-                double offset = rgdwDateParseResults[DATE_INDEX_TZ];
+                double offset = dateParseResults[DATE_INDEX_TZ];
                 result.AddHours(offset);
             }
 
