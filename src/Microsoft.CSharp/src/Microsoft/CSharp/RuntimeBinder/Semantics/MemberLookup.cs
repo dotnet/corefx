@@ -11,6 +11,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
+    [Flags]
     internal enum MemLookFlags : uint
     {
         None = 0,
@@ -109,7 +110,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _swtFirst.Set(sym, type);
                 Debug.Assert(_csym == 1);
                 Debug.Assert(_prgtype[0] == type);
-                _fMulti = sym is MethodSymbol || sym is PropertySymbol prop && prop.isIndexer();
+                _fMulti = sym is MethodSymbol || sym is IndexerSymbol;
             }
         }
 
@@ -232,7 +233,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Make sure that whether we're seeing a ctor, operator, or indexer is consistent with the flags.
                 if (((_flags & MemLookFlags.Ctor) == 0) != (meth == null || !meth.IsConstructor()) ||
                     ((_flags & MemLookFlags.Operator) == 0) != (meth == null || !meth.isOperator) ||
-                    ((_flags & MemLookFlags.Indexer) == 0) != (prop == null || !prop.isIndexer()))
+                    ((_flags & MemLookFlags.Indexer) == 0) != !(prop is IndexerSymbol))
                 {
                     if (!_swtBad)
                     {
@@ -244,7 +245,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We can't call CheckBogus on methods or indexers because if the method has the wrong
                 // number of parameters people don't think they should have to /r the assemblies containing
                 // the parameter types and they complain about the resulting CS0012 errors.
-                if (!(symCur is MethodSymbol) && (_flags & MemLookFlags.Indexer) == 0 && GetSemanticChecker().CheckBogus(symCur))
+                if (!(symCur is MethodSymbol) && (_flags & MemLookFlags.Indexer) == 0 && CSemanticChecker.CheckBogus(symCur))
                 {
                     // A bogus member - we can't use these, so only record them for error reporting.
                     if (!_swtBogus)
@@ -535,45 +536,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void ReportBogus(SymWithType swt)
         {
-            Debug.Assert(swt.Sym.hasBogus() && swt.Sym.checkBogus());
-
-            switch (swt.Sym.getKind())
+            Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
+            MethodSymbol meth1 = swt.Prop().GetterMethod;
+            MethodSymbol meth2 = swt.Prop().SetterMethod;
+            Debug.Assert((meth1 ?? meth2) != null);
+            if (meth1 == null | meth2 == null)
             {
-                case SYMKIND.SK_PropertySymbol:
-                    if (swt.Prop().useMethInstead)
-                    {
-                        MethodSymbol meth1 = swt.Prop().methGet;
-                        MethodSymbol meth2 = swt.Prop().methSet;
-                        ReportBogusForEventsAndProperties(swt, meth1, meth2);
-                        return;
-                    }
-                    break;
-
-                case SYMKIND.SK_MethodSymbol:
-                    if (swt.Meth().name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE) && swt.Meth().getClass().IsDelegate())
-                    {
-                        swt.Set(swt.Meth().getClass(), swt.GetType());
-                    }
-                    break;
+                GetErrorContext().Error(
+                    ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 ?? meth2, swt.GetType()),
+                    new ErrArgRefOnly(swt.Sym));
             }
-
-            // Generic bogus error.
-            GetErrorContext().ErrorRef(ErrorCode.ERR_BindToBogus, swt);
-        }
-
-        private void ReportBogusForEventsAndProperties(SymWithType swt, MethodSymbol meth1, MethodSymbol meth2)
-        {
-            if (meth1 != null && meth2 != null)
+            else
             {
-                GetErrorContext().Error(ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()), new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
-                return;
+                GetErrorContext().Error(
+                    ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()),
+                    new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
             }
-            if (meth1 != null || meth2 != null)
-            {
-                GetErrorContext().Error(ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 != null ? meth1 : meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
-                return;
-            }
-            throw Error.InternalCompilerError();
         }
 
         private bool IsDelegateType(CType pSrcType, AggregateType pAggType)
@@ -635,14 +613,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _arity = arity;
             _flags = flags;
 
-            if ((_flags & MemLookFlags.BaseCall) != 0)
-                _typeQual = null;
-            else if ((_flags & MemLookFlags.Ctor) != 0)
-                _typeQual = _typeSrc;
-            else if (obj != null)
-                _typeQual = (CType)obj.Type;
-            else
-                _typeQual = null;
+            _typeQual = (_flags & MemLookFlags.Ctor) != 0 ? _typeSrc : obj?.Type;
 
             // Determine what to search.
             AggregateType typeCls1 = null;
@@ -677,7 +648,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             if (typeIface != null || ifaces.Count > 0)
-                typeCls2 = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
+                typeCls2 = GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
 
             // Search the class first (except possibly object).
             if (typeCls1 == null || LookupInClass(typeCls1, ref typeCls2))

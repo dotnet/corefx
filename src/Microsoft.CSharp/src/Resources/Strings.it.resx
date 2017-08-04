@@ -129,9 +129,6 @@
   <data name="AssgReadonlyProp" xml:space="preserve">
     <value>Impossibile assegnare un valore alla proprietà o all'indicizzatore '{0}' perché è di sola lettura</value>
   </data>
-  <data name="AbstractBaseCall" xml:space="preserve">
-    <value>Impossibile chiamare un membro di base astratto: '{0}'</value>
-  </data>
   <data name="RefProperty" xml:space="preserve">
     <value>Una proprietà o un indicizzatore non può essere passato come parametro out o ref</value>
   </data>
@@ -149,12 +146,6 @@
   </data>
   <data name="AmbigMember" xml:space="preserve">
     <value>Ambiguità tra '{0}' e '{1}'</value>
-  </data>
-  <data name="CallingFinalizeDepracated" xml:space="preserve">
-    <value>Impossibile chiamare direttamente i distruttori e object.Finalize. Provare a chiamare IDisposable.Dispose se disponibile.</value>
-  </data>
-  <data name="CallingBaseFinalizeDeprecated" xml:space="preserve">
-    <value>Non chiamare direttamente il metodo Finalize della classe base. Viene chiamato automaticamente dal distruttore.</value>
   </data>
   <data name="NoImplicitConvCast" xml:space="preserve">
     <value>Impossibile convertire in modo implicito il tipo '{0}' in '{1}'. È presente una conversione esplicita. Probabile cast mancante.</value>
@@ -216,23 +207,11 @@
   <data name="AmbigUDConv" xml:space="preserve">
     <value>Conversioni '{0}' e '{1}' ambigue definite dall'utente durante la conversione da '{2}' a '{3}'</value>
   </data>
-  <data name="PredefinedTypeNotFound" xml:space="preserve">
-    <value>Il tipo predefinito '{0}' non è definito né importato</value>
-  </data>
   <data name="BindToBogus" xml:space="preserve">
     <value>'{0}' non è supportato dal linguaggio</value>
   </data>
   <data name="CantCallSpecialMethod" xml:space="preserve">
     <value>'{0}': impossibile chiamare in modo esplicito l'operatore o la funzione di accesso</value>
-  </data>
-  <data name="BogusType" xml:space="preserve">
-    <value>'{0}' è un tipo non supportato dal linguaggio</value>
-  </data>
-  <data name="MissingPredefinedMember" xml:space="preserve">
-    <value>Manca il membro '{0}.{1}', necessario per il compilatore.</value>
-  </data>
-  <data name="LiteralDoubleCast" xml:space="preserve">
-    <value>Impossibile convertire in modo implicito il valore letterale di tipo double nel tipo '{1}'. Utilizzare un suffisso '{0}' per creare un valore letterale di questo tipo</value>
   </data>
   <data name="ConvertToStaticClass" xml:space="preserve">
     <value>Impossibile convertire nel tipo statico '{0}'</value>

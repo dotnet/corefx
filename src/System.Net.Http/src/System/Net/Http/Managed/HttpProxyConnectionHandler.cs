@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace System.Net.Http
             Debug.Assert(innerHandler != null);
 
             _innerHandler = innerHandler;
-            _proxy = settings._useProxy ? settings._proxy : new PassthroughWebProxy(s_proxyFromEnvironment.Value);
+            _proxy = (settings._useProxy && settings._proxy != null) ? settings._proxy : new PassthroughWebProxy(s_proxyFromEnvironment.Value);
             _defaultCredentials = settings._defaultProxyCredentials;
             _connectionPools = new HttpConnectionPools(settings._maxConnectionsPerServer);
         }
@@ -73,25 +74,64 @@ namespace System.Net.Http
                 foreach (AuthenticationHeaderValue h in response.Headers.ProxyAuthenticate)
                 {
                     // We only support Basic auth, ignore others
-                    const string Basic = "Basic";
-                    if (h.Scheme == Basic)
+                    if (h.Scheme == AuthenticationHelper.Basic)
                     {
                         NetworkCredential credential =
-                            _proxy.Credentials?.GetCredential(proxyUri, Basic) ??
-                            _defaultCredentials?.GetCredential(proxyUri, Basic);
+                            _proxy.Credentials?.GetCredential(proxyUri, AuthenticationHelper.Basic) ??
+                            _defaultCredentials?.GetCredential(proxyUri, AuthenticationHelper.Basic);
 
                         if (credential != null)
                         {
                             response.Dispose();
 
-                            request.Headers.ProxyAuthorization = new AuthenticationHeaderValue(Basic,
-                                BasicAuthenticationHelper.GetBasicTokenForCredential(credential));
+                            request.Headers.ProxyAuthorization = new AuthenticationHeaderValue(AuthenticationHelper.Basic,
+                                AuthenticationHelper.GetBasicTokenForCredential(credential));
 
                             connection = await GetOrCreateConnection(request, proxyUri).ConfigureAwait(false);
                             response = await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
                         }
 
                         break;
+                    }
+                    else if (h.Scheme == AuthenticationHelper.Digest)
+                    {
+                        NetworkCredential credential =
+                            _proxy.Credentials?.GetCredential(proxyUri, AuthenticationHelper.Digest) ??
+                            _defaultCredentials?.GetCredential(proxyUri, AuthenticationHelper.Digest);
+
+                        if (credential != null)
+                        {
+                            // Update digest response with new parameter from Proxy-Authenticate
+                            AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(h.Parameter);
+
+                            if (await AuthenticationHelper.TrySetDigestAuthToken(request, credential, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
+                            {
+                                response.Dispose();
+                                response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                                // Retry in case of nonce timeout in server.
+                                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                                {
+                                    foreach (AuthenticationHeaderValue ahv in response.Headers.ProxyAuthenticate)
+                                    {
+                                        if (ahv.Scheme == AuthenticationHelper.Digest)
+                                        {
+                                            digestResponse = new AuthenticationHelper.DigestResponse(ahv.Parameter);
+                                            if (AuthenticationHelper.IsServerNonceStale(digestResponse) &&
+                                                await AuthenticationHelper.TrySetDigestAuthToken(request, credential, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
+                                            {
+                                                response.Dispose();
+                                                response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                                            }
+
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            break;
+                        }
                     }
                 }
             }

@@ -1055,10 +1055,14 @@ namespace System
         public bool Equals(double obj) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
+        public static bool IsFinite(double d) { throw null; }
         public static bool IsInfinity(double d) { throw null; }
         public static bool IsNaN(double d) { throw null; }
+        public static bool IsNegative(double d) { throw null; }
         public static bool IsNegativeInfinity(double d) { throw null; }
+        public static bool IsNormal(double d) { throw null; }
         public static bool IsPositiveInfinity(double d) { throw null; }
+        public static bool IsSubnormal(double d) { throw null; }
         public static bool operator ==(double left, double right) { throw null; }
         public static bool operator >(double left, double right) { throw null; }
         public static bool operator >=(double left, double right) { throw null; }
@@ -1951,10 +1955,14 @@ namespace System
         public override bool Equals(object obj) { throw null; }
         public bool Equals(float obj) { throw null; }
         public override int GetHashCode() { throw null; }
+        public static bool IsFinite(float f) { throw null; }
         public static bool IsInfinity(float f) { throw null; }
         public static bool IsNaN(float f) { throw null; }
+        public static bool IsNegative(float f) { throw null; }
         public static bool IsNegativeInfinity(float f) { throw null; }
+        public static bool IsNormal(float f) { throw null; }
         public static bool IsPositiveInfinity(float f) { throw null; }
+        public static bool IsSubnormal(float f) { throw null; }
         public static bool operator ==(float left, float right) { throw null; }
         public static bool operator >(float left, float right) { throw null; }
         public static bool operator >=(float left, float right) { throw null; }
@@ -2047,6 +2055,7 @@ namespace System
         public unsafe String(sbyte* value, int startIndex, int length) { }
         [System.CLSCompliantAttribute(false)]
         public unsafe String(sbyte* value, int startIndex, int length, System.Text.Encoding enc) { }
+        public String(System.ReadOnlySpan<char> value) { }
         [System.Runtime.CompilerServices.IndexerName("Chars")]
         public char this[int index] { get { throw null; } }
         public int Length { get { throw null; } }
@@ -5044,6 +5053,7 @@ namespace System.IO
         [System.ObsoleteAttribute("Do not call or override this method.")]
         protected virtual void ObjectInvariant() { }
         public abstract int Read(byte[] buffer, int offset, int count);
+        public virtual int Read(System.Span<byte> destination) { throw null; }
         public System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
         public virtual int ReadByte() { throw null; }
@@ -5051,6 +5061,7 @@ namespace System.IO
         public abstract void SetLength(long value);
         public static System.IO.Stream Synchronized(System.IO.Stream stream) { throw null; }
         public abstract void Write(byte[] buffer, int offset, int count);
+        public virtual void Write(System.ReadOnlySpan<byte> source) { }
         public System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
         public virtual void WriteByte(byte value) { }
@@ -5150,6 +5161,7 @@ namespace System.Reflection
         public virtual System.IO.FileStream GetFile(string name) { throw null; }
         public virtual System.IO.FileStream[] GetFiles() { throw null; }
         public virtual System.IO.FileStream[] GetFiles(bool getResourceModules) { throw null; }
+        public virtual System.Type[] GetForwardedTypes() { throw null; }
         public override int GetHashCode() { throw null; }
         public virtual System.Reflection.ManifestResourceInfo GetManifestResourceInfo(string resourceName) { throw null; }
         public virtual string[] GetManifestResourceNames() { throw null; }

@@ -136,25 +136,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(pGroup != null);
 
-                CType rval = null;
 
-                if (0 != (pGroup.Flags & EXPRFLAG.EXF_BASECALL))
-                {
-                    rval = null;
-                }
-                else if (0 != (pGroup.Flags & EXPRFLAG.EXF_CTOR))
-                {
-                    rval = pGroup.ParentType;
-                }
-                else if (pGroup.OptionalObject != null)
-                {
-                    rval = pGroup.OptionalObject.Type;
-                }
-                else
-                {
-                    rval = null;
-                }
-                return rval;
+                return (pGroup.Flags & EXPRFLAG.EXF_CTOR) != 0 ? pGroup.ParentType : pGroup.OptionalObject?.Type;
             }
 
             private void LookForCandidates()
@@ -229,7 +212,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (!bFoundExpanded)
                     {
                         lookedAtCandidates = true;
-                        allCandidatesUnsupported &= _pCurrentSym.getBogus();
+                        allCandidatesUnsupported &= CSemanticChecker.CheckBogus(_pCurrentSym);
 
                         // If we have the wrong number of arguments and still have room in our cache of 20,
                         // then store it in our cache and go to the next sym.
@@ -325,7 +308,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
 
                             // Mark object.
-                            AggregateType typeObject = GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
+                            AggregateType typeObject = GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
                             _HiddenTypes.Add(typeObject);
                         }
                     }
@@ -582,7 +565,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // This is the specific case where we want to create a DateTime
                         // but the constval that stores it is a long.
 
-                        AggregateType dateTimeType = symbolLoader.GetReqPredefType(PredefinedType.PT_DATETIME);
+                        AggregateType dateTimeType = symbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                         optionalArgument = exprFactory.CreateConstant(dateTimeType, ConstVal.Get(DateTime.FromBinary(cv.Int64Val)));
                     }
                     else if (pConstValType.isSimpleOrEnumOrString())
@@ -636,7 +619,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             // Otherwise, we generate Type.Missing
 
-                            AggregateSymbol agg = symbolLoader.GetOptPredefAgg(PredefinedType.PT_MISSING);
+                            AggregateSymbol agg = symbolLoader.GetPredefAgg(PredefinedType.PT_MISSING);
                             Name name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
                             FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
@@ -687,13 +670,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (!(pMethProp is MethodSymbol method))
                 {
                     PropertySymbol prop = (PropertySymbol)pMethProp;
-                    method = prop.methGet ?? prop.methSet;
+                    method = prop.GetterMethod ?? prop.SetterMethod;
                     if (method == null)
                     {
                         return null;
                     }
 
-                    bIsIndexer = prop.isIndexer();
+                    bIsIndexer = prop is IndexerSymbol;
                 }
 
                 if (!method.isVirtual || pType == null)
@@ -1253,21 +1236,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // used for Methods and Indexers
                 Debug.Assert(_pGroup.SymKind == SYMKIND.SK_MethodSymbol || _pGroup.SymKind == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.Flags & EXPRFLAG.EXF_INDEXER));
                 Debug.Assert(_pGroup.TypeArgs.Count == 0 || _pGroup.SymKind == SYMKIND.SK_MethodSymbol);
-
-                // if this is a binding to finalize on object, then complain:
-                if (_results.GetBestResult().MethProp().name == NameManager.GetPredefinedName(PredefinedName.PN_DTOR) &&
-                    _results.GetBestResult().MethProp().getClass().isPredefAgg(PredefinedType.PT_OBJECT))
-                {
-                    if (0 != (_pGroup.Flags & EXPRFLAG.EXF_BASECALL))
-                    {
-                        GetErrorContext().Error(ErrorCode.ERR_CallingBaseFinalizeDeprecated);
-                    }
-                    else
-                    {
-                        GetErrorContext().Error(ErrorCode.ERR_CallingFinalizeDepracated);
-                    }
-                }
-
                 Debug.Assert(0 == (_pGroup.Flags & EXPRFLAG.EXF_USERCALLABLE) || _results.GetBestResult().MethProp().isUserCallable());
 
                 if (_pGroup.SymKind == SYMKIND.SK_MethodSymbol)
@@ -1493,10 +1461,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             if (ivar == 0 && sym is MethodSymbol meth && meth.IsExtension() && _pGroup.OptionalObject != null &&
                                 !_pExprBinder.canConvertInstanceParamForExtension(_pGroup.OptionalObject, meth.Params[0]))
                             {
-                                if (!_pGroup.OptionalObject.Type.getBogus())
-                                {
-                                    GetErrorContext().Error(ErrorCode.ERR_BadInstanceArgType, _pGroup.OptionalObject.Type, var);
-                                }
+                                GetErrorContext().Error(ErrorCode.ERR_BadInstanceArgType, _pGroup.OptionalObject.Type, var);
                             }
                             else
                             {

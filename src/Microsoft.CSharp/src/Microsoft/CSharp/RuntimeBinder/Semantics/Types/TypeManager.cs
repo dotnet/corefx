@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -26,7 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly VoidType _voidType;
         private readonly NullType _nullType;
         private readonly OpenTypePlaceholderType _typeUnit;
-        private readonly BoundLambdaType _typeAnonMeth;
         private readonly MethodGroupType _typeMethGrp;
         private readonly ArgumentListType _argListType;
         private readonly ErrorType _errorType;
@@ -34,10 +32,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly StdTypeVarColl _stvcMethod;
         private readonly StdTypeVarColl _stvcClass;
 
-        public TypeManager()
+        public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
         {
-            _predefTypes = null; // Initialized via the Init call.
-            _BSymmgr = null; // Initialized via the Init call.
             _typeFactory = new TypeFactory();
             _typeTable = new TypeTable();
 
@@ -46,30 +42,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeUnit = _typeFactory.CreateUnit();
-            _typeAnonMeth = _typeFactory.CreateAnonMethod();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
 
-            InitType(_errorType);
             _errorType.SetErrors(true);
-
-            InitType(_voidType);
-            InitType(_nullType);
-            InitType(_typeUnit);
-            InitType(_typeAnonMeth);
-            InitType(_typeMethGrp);
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
+            _BSymmgr = bsymmgr;
+            _predefTypes = predefTypes;
         }
 
         public void InitTypeFactory(SymbolTable table)
         {
             _symbolTable = table;
-        }
-
-        private void InitType(CType at)
-        {
         }
 
         private sealed class StdTypeVarColl
@@ -400,11 +386,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _typeUnit;
         }
 
-        public BoundLambdaType GetAnonMethType()
-        {
-            return _typeAnonMeth;
-        }
-
         public MethodGroupType GetMethGrpType()
         {
             return _typeMethGrp;
@@ -420,10 +401,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _errorType;
         }
 
-        public AggregateSymbol GetNullable()
-        {
-            return this.GetOptPredefAgg(PredefinedType.PT_G_OPTIONAL);
-        }
+        public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
 
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
         {
@@ -500,9 +478,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_OpenTypePlaceholderType:
                 case TypeKind.TK_MethodGroupType:
-                case TypeKind.TK_BoundLambdaType:
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_NaturalIntegerType:
                 case TypeKind.TK_ArgumentListType:
                     return type;
 
@@ -848,8 +823,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsTyVars");
                     return false;
 
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_BoundLambdaType:
                 case TypeKind.TK_NullType:
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_OpenTypePlaceholderType:
@@ -923,15 +896,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public AggregateSymbol GetReqPredefAgg(PredefinedType pt)
-        {
-            return _predefTypes.GetReqPredefAgg(pt);
-        }
-
-        public AggregateSymbol GetOptPredefAgg(PredefinedType pt)
-        {
-            return _predefTypes.GetOptPredefAgg(pt);
-        }
+        public AggregateSymbol GetPredefAgg(PredefinedType pt) => _predefTypes.GetPredefinedAggregate(pt);
 
         public TypeArray CreateArrayOfUnitTypes(int cSize)
         {
@@ -1029,12 +994,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pTypeParameter;
         }
 
-        internal void Init(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
-        {
-            _BSymmgr = bsymmgr;
-            _predefTypes = predefTypes;
-        }
-
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // RUNTIME BINDER ONLY CHANGE
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1096,7 +1055,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeSrc is NullableType)
             {
                 // We have an inaccessible nullable type, which means that the best we can do is System.ValueType.
-                typeDst = this.GetOptPredefAgg(PredefinedType.PT_VALUE).getThisType();
+                typeDst = GetPredefAgg(PredefinedType.PT_VALUE).getThisType();
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
@@ -1106,7 +1065,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // We have an inaccessible array type for which we could not earlier find a better array type
                 // with a covariant conversion, so the best we can do is System.Array.
-                typeDst = this.GetReqPredefAgg(PredefinedType.PT_ARRAY).getThisType();
+                typeDst = GetPredefAgg(PredefinedType.PT_ARRAY).getThisType();
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
@@ -1124,7 +1083,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // This happens with interfaces, for instance. But in that case, the
                     // conversion to object does exist, is an implicit reference conversion,
                     // and so we will use it.
-                    baseType = this.GetReqPredefAgg(PredefinedType.PT_OBJECT).getThisType();
+                    baseType = GetPredefAgg(PredefinedType.PT_OBJECT).getThisType();
                 }
 
                 return GetBestAccessibleType(semanticChecker, bindingContext, baseType, out typeDst);

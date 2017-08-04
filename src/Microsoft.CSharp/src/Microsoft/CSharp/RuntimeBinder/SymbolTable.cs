@@ -140,7 +140,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (type is ArrayType)
             {
-                type = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ARRAY);
+                type = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_ARRAY);
             }
             if (type is NullableType nub)
             {
@@ -1108,9 +1108,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     typeName = type.GetGenericTypeDefinition().FullName;
                 }
-                if (typeName != null && PredefinedTypeFacts.IsPredefinedType(typeName))
+                if (typeName != null)
                 {
-                    PredefinedTypes.InitializePredefinedType(agg, PredefinedTypeFacts.GetPredefTypeIndex(typeName));
+                    PredefinedType predefinedType = PredefinedTypeFacts.TryGetPredefTypeIndex(typeName);
+                    if (predefinedType != PredefinedType.PT_UNDEFINEDINDEX)
+                    {
+                        PredefinedTypes.InitializePredefinedType(agg, predefinedType);
+                    }
                 }
             }
 
@@ -1354,7 +1358,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         private void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
             Name name;
-            bool isIndexer = property.GetIndexParameters() != null && property.GetIndexParameters().Length != 0;
+            bool isIndexer = property.GetIndexParameters().Length != 0
+                             && property.DeclaringType?.GetCustomAttribute<DefaultMemberAttribute>()
+                             ?.MemberName == property.Name;
 
             if (isIndexer)
             {
@@ -1448,44 +1454,44 @@ namespace Microsoft.CSharp.RuntimeBinder
             ACCESS access = ACCESS.ACC_PRIVATE;
             if (methGet != null)
             {
-                prop.methGet = AddMethodToSymbolTable(methGet, aggregate, MethodKindEnum.PropAccessor);
+                prop.GetterMethod = AddMethodToSymbolTable(methGet, aggregate, MethodKindEnum.PropAccessor);
 
                 // If we have an indexed property, leave the method as a method we can call,
                 // and mark the property as bogus.
-                if (isIndexer || prop.methGet.Params.Count == 0)
+                if (isIndexer || prop.GetterMethod.Params.Count == 0)
                 {
-                    prop.methGet.SetProperty(prop);
+                    prop.GetterMethod.SetProperty(prop);
                 }
                 else
                 {
-                    prop.setBogus(true);
-                    prop.methGet.SetMethKind(MethodKindEnum.Actual);
+                    prop.Bogus = true;
+                    prop.GetterMethod.SetMethKind(MethodKindEnum.Actual);
                 }
 
-                if (prop.methGet.GetAccess() > access)
+                if (prop.GetterMethod.GetAccess() > access)
                 {
-                    access = prop.methGet.GetAccess();
+                    access = prop.GetterMethod.GetAccess();
                 }
             }
             if (methSet != null)
             {
-                prop.methSet = AddMethodToSymbolTable(methSet, aggregate, MethodKindEnum.PropAccessor);
+                prop.SetterMethod = AddMethodToSymbolTable(methSet, aggregate, MethodKindEnum.PropAccessor);
 
                 // If we have an indexed property, leave the method as a method we can call,
                 // and mark the property as bogus.
-                if (isIndexer || prop.methSet.Params.Count == 1)
+                if (isIndexer || prop.SetterMethod.Params.Count == 1)
                 {
-                    prop.methSet.SetProperty(prop);
+                    prop.SetterMethod.SetProperty(prop);
                 }
                 else
                 {
-                    prop.setBogus(true);
-                    prop.methSet.SetMethKind(MethodKindEnum.Actual);
+                    prop.Bogus = true;
+                    prop.SetterMethod.SetMethKind(MethodKindEnum.Actual);
                 }
 
-                if (prop.methSet.GetAccess() > access)
+                if (prop.SetterMethod.GetAccess() > access)
                 {
-                    access = prop.methSet.GetAccess();
+                    access = prop.SetterMethod.GetAccess();
                 }
             }
 
@@ -1653,7 +1659,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);
 
-            methodSymbol.useMethInstead = false;
             methodSymbol.isParamArray = DoesMethodHaveParameterArray(parameters);
             methodSymbol.isHideByName = false;
 
@@ -1728,7 +1733,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 DateTimeConstantAttribute attr = (DateTimeConstantAttribute)attrs[0];
 
                 ConstVal cv = ConstVal.Get(((DateTime)attr.Value).Ticks);
-                CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DATETIME);
+                CType cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_DATETIME);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
             else if ((attrs = parameters[i].GetCustomAttributes(typeof(DecimalConstantAttribute), false).ToArray()) != null
@@ -1739,7 +1744,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 DecimalConstantAttribute attr = (DecimalConstantAttribute)attrs[0];
 
                 ConstVal cv = ConstVal.Get(attr.Value);
-                CType cvType = _semanticChecker.GetSymbolLoader().GetOptPredefType(PredefinedType.PT_DECIMAL);
+                CType cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_DECIMAL);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
             else if (((parameters[i].Attributes & ParameterAttributes.HasDefault) != 0) &&
@@ -1749,7 +1754,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // looking at isn't a by ref type or a type parameter.
 
                 ConstVal cv = default(ConstVal);
-                CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
+                CType cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
 
                 // We need to use RawDefaultValue, because DefaultValue is too clever.
 #if UNSUPPORTEDAPI
@@ -1766,72 +1771,72 @@ namespace Microsoft.CSharp.RuntimeBinder
                     if (defType == typeof(byte))
                     {
                         cv = ConstVal.Get((byte)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BYTE);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_BYTE);
                     }
                     else if (defType == typeof(short))
                     {
                         cv = ConstVal.Get((short)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SHORT);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_SHORT);
                     }
                     else if (defType == typeof(int))
                     {
                         cv = ConstVal.Get((int)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_INT);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_INT);
                     }
                     else if (defType == typeof(long))
                     {
                         cv = ConstVal.Get((long)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_LONG);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_LONG);
                     }
                     else if (defType == typeof(float))
                     {
                         cv = ConstVal.Get((float)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_FLOAT);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_FLOAT);
                     }
                     else if (defType == typeof(double))
                     {
                         cv = ConstVal.Get((double)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DOUBLE);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_DOUBLE);
                     }
                     else if (defType == typeof(decimal))
                     {
                         cv = ConstVal.Get((decimal)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DECIMAL);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_DECIMAL);
                     }
                     else if (defType == typeof(char))
                     {
                         cv = ConstVal.Get((char)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_CHAR);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_CHAR);
                     }
                     else if (defType == typeof(bool))
                     {
                         cv = ConstVal.Get((bool)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BOOL);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_BOOL);
                     }
                     else if (defType == typeof(sbyte))
                     {
                         cv = ConstVal.Get((sbyte)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SBYTE);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_SBYTE);
                     }
                     else if (defType == typeof(ushort))
                     {
                         cv = ConstVal.Get((ushort)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_USHORT);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_USHORT);
                     }
                     else if (defType == typeof(uint))
                     {
                         cv = ConstVal.Get((uint)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_UINT);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_UINT);
                     }
                     else if (defType == typeof(ulong))
                     {
                         cv = ConstVal.Get((ulong)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ULONG);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_ULONG);
                     }
                     else if (defType == typeof(string))
                     {
                         cv = ConstVal.Get((string)defValue);
-                        cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_STRING);
+                        cvType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_STRING);
                     }
                     // if we fall off the end of this cascading if, we get Object/null
                     // because that's how we initialized the constval.

@@ -236,13 +236,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendSym(prop, pctx);
 
                 // add accessor name
-                if (prop.methGet == meth)
+                if (prop.GetterMethod == meth)
                 {
                     ErrAppendString(".get");
                 }
                 else
                 {
-                    Debug.Assert(meth == prop.methSet);
+                    Debug.Assert(meth == prop.SetterMethod);
                     ErrAppendString(".set");
                 }
 
@@ -299,32 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // handle user defined operators
                 // map from CLS predefined names to "operator <X>"
                 ErrAppendString("operator ");
-
-                //
-                // This is kinda slow, but the alternative is to add bits to methsym.
-                //
-                string operatorName;
-                OperatorKind op = Operators.OperatorOfMethodName(meth.name);
-                if (Operators.HasDisplayName(op))
-                {
-                    operatorName = Operators.GetDisplayName(op);
-                }
-                else
-                {
-                    //
-                    // either equals or compare
-                    //
-                    if (meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS))
-                    {
-                        operatorName = "equals";
-                    }
-                    else
-                    {
-                        Debug.Assert(meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE));
-                        operatorName = "compare";
-                    }
-                }
-                ErrAppendString(operatorName);
+                ErrAppendString(Operators.OperatorOfMethodName(meth.name));
             }
             else if (meth.IsExpImpl())
             {
@@ -347,14 +322,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // append argument types
                 ErrAppendChar('(');
 
-                if (!meth.computeCurrentBogusState())
-                {
-                    ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isVarargs, meth.isParamArray);
-                }
+                ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isVarargs, meth.isParamArray);
 
                 ErrAppendChar(')');
             }
         }
+
         private void ErrAppendIndexer(IndexerSymbol indexer, SubstContext pctx)
         {
             ErrAppendString("this[");
@@ -373,15 +346,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 if (prop.errExpImpl != null)
                     ErrAppendType(prop.errExpImpl, pctx, false);
-                if (prop.isIndexer())
+                if (prop is IndexerSymbol indexer)
                 {
                     ErrAppendChar('.');
-                    ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                    ErrAppendIndexer(indexer, pctx);
                 }
             }
-            else if (prop.isIndexer())
+            else if (prop is IndexerSymbol indexer)
             {
-                ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                ErrAppendIndexer(indexer, pctx);
             }
             else
             {
@@ -584,14 +557,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     // Leave blank.
                     break;
 
-                case TypeKind.TK_BoundLambdaType:
-                    ErrAppendId(MessageID.AnonMethod);
-                    break;
-
-                case TypeKind.TK_UnboundLambdaType:
-                    ErrAppendId(MessageID.Lambda);
-                    break;
-
                 case TypeKind.TK_MethodGroupType:
                     ErrAppendId(MessageID.MethodGroup);
                     break;
@@ -669,7 +634,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendChar('?');
                     break;
 
-                case TypeKind.TK_NaturalIntegerType:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad type kind");

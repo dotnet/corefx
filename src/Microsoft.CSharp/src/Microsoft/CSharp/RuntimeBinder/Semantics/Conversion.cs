@@ -21,6 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     }
 
     // Flags for bindImplicitConversion/bindExplicitConversion
+    [Flags]
     internal enum CONVERTTYPE
     {
         NOUDC = 0x01,  // Do not consider user defined conversions.
@@ -226,10 +227,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         (s_simpleTypeBetter[i][j] == right && s_simpleTypeBetter[j][i] == left) ||
                         (s_simpleTypeBetter[i][j] == neither && s_simpleTypeBetter[j][i] == neither));
                     Debug.Assert(
-                        GetOptPDT((PredefinedType)i) == null ||
-                        GetOptPDT((PredefinedType)j) == null ||
-                        (!canConvert(GetOptPDT((PredefinedType)i), GetOptPDT((PredefinedType)j), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[i][j] == left) &&
-                        (!canConvert(GetOptPDT((PredefinedType)j), GetOptPDT((PredefinedType)i), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[j][i] == left));
+                        GetPredefindType((PredefinedType)i) == null ||
+                        GetPredefindType((PredefinedType)j) == null ||
+                        (!canConvert(GetPredefindType((PredefinedType)i), GetPredefindType((PredefinedType)j), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[i][j] == left) &&
+                        (!canConvert(GetPredefindType((PredefinedType)j), GetPredefindType((PredefinedType)i), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[j][i] == left));
                 }
             }
             s_fCheckedBetter = true;
@@ -279,7 +280,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return BetterType.Right;
             }
-            return WhichTypeIsBetter(GetOptPDT(pt1), GetOptPDT(pt2), typeGiven);
+            return WhichTypeIsBetter(GetPredefindType(pt1), GetPredefindType(pt2), typeGiven);
         }
 
 
@@ -391,16 +392,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Failed because value was out of range. Report nifty error message.
                         string value = constant.Int64Value.ToString(CultureInfo.InvariantCulture);
                         ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
-                        exprResult = ExprFactory.CreateCast(0, destExpr, expr);
-                        exprResult.SetError();
-                        return exprResult;
-                    }
-                    else if (ftSrc == FUNDTYPE.FT_R8 && (0 != (expr.Flags & EXPRFLAG.EXF_LITERALCONST)) &&
-                             (dest.isPredefType(PredefinedType.PT_FLOAT) || dest.isPredefType(PredefinedType.PT_DECIMAL)))
-                    {
-                        // Tried to assign a literal of type double (the default) to a float or decimal. Suggest use
-                        // of a 'F' or 'M' suffix.
-                        ErrorContext.Error(ErrorCode.ERR_LiteralDoubleCast, dest.isPredefType(PredefinedType.PT_DECIMAL) ? "M" : "F", dest);
                         exprResult = ExprFactory.CreateCast(0, destExpr, expr);
                         exprResult.SetError();
                         return exprResult;
@@ -736,14 +727,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Expr obj = !isExtensionMethod ? grp.OptionalObject: null;
-            bool bIsMatchingStatic;
             bool constrained;
-            PostBindMethod(0 != (grp.Flags & EXPRFLAG.EXF_BASECALL), ref mwiWrap, obj);
-            obj = AdjustMemberObject(mwiWrap, obj, out constrained, out bIsMatchingStatic);
-            if (!bIsMatchingStatic)
-            {
-                grp.SetMismatchedStaticBit();
-            }
+            PostBindMethod(ref mwiWrap, obj);
+            obj = AdjustMemberObject(mwiWrap, obj, out constrained);
             obj = isExtensionMethod ? grp.OptionalObject: obj;
             Debug.Assert(mwiWrap.Meth().getKind() == SYMKIND.SK_MethodSymbol);
             if (mwiWrap.TypeArgs.Count > 0)
@@ -755,7 +741,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!needDest)
                 return true;
 
-            ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(grp.Flags & EXPRFLAG.EXF_BASECALL, getVoidType(), null, mwiWrap);
+            ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(0, getVoidType(), null, mwiWrap);
             if (!mwiWrap.Meth().isStatic || isExtensionMethod)
             {
                 if (mwiWrap.Meth().getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL))
@@ -766,7 +752,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (obj != null && obj.Type.fundType() != FUNDTYPE.FT_REF)
                 {
                     // Must box the object before creating a delegate to it.
-                    obj = mustConvert(obj, GetReqPDT(PredefinedType.PT_OBJECT));
+                    obj = mustConvert(obj, GetPredefindType(PredefinedType.PT_OBJECT));
                 }
             }
             else
@@ -1031,8 +1017,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(convCur.getClass() == aggCur);
 
                         if (fImplicitOnly && !convCur.isImplicit())
-                            continue;
-                        if (GetSemanticChecker().CheckBogus(convCur))
                             continue;
 
                         // Get the substituted src and dst types.
@@ -1693,7 +1677,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr bindDecimalConstCast(ExprClass exprDestType, CType srcType, ExprConstant src)
         {
             CType destType = exprDestType.Type;
-            CType typeDecimal = SymbolLoader.GetOptPredefType(PredefinedType.PT_DECIMAL);
+            CType typeDecimal = SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
             ConstVal cv;
 
             if (typeDecimal == null)
