@@ -1632,13 +1632,19 @@ namespace System.Net.Http.Functional.Tests
 
         #region Various HTTP Method Tests
 
-        [ActiveIssue(22161, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
             string method,
             bool secureServer)
         {
+            if (PlatformDetection.IsUap && method == "TRACE")
+            {
+                // 'TRACE' method is not supported on Uap.
+                // See: https://github.com/dotnet/corefx/issues/22161
+                return;
+            }
+
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
