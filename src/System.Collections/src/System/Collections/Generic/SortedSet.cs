@@ -1896,7 +1896,6 @@ namespace System.Collections.Generic
             {
 #if DEBUG
                 Debug.Assert(HasChild(child));
-                Debug.Assert(!HasChild(newChild));
 #endif
 
                 if (Left == child)
