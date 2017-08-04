@@ -48,7 +48,7 @@ namespace MonoTests.System.Data
             dt.Columns.Add("CName", typeof(string));
 
             // for no rows
-            Assert.Throws<InvalidOperationException>(() => dt.AsEnumerable().CopyToDataTable<DataRow>());
+            Assert.Throws<InvalidOperationException>(() => dt.AsEnumerable().CopyToDataTable());
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace MonoTests.System.Data
             dt.Columns.Add("CID", typeof(int));
             dt.Columns.Add("CName", typeof(string));
             dt.Rows.Add(new object[] { 1, "foo" });
-            DataTable dst = dt.AsEnumerable().CopyToDataTable<DataRow>();
+            DataTable dst = dt.AsEnumerable().CopyToDataTable();
             Assert.Equal(1, dst.Rows.Count);
             Assert.Equal("foo", dst.Rows[0]["CName"]);
         }
@@ -70,7 +70,7 @@ namespace MonoTests.System.Data
             dt.Columns.Add("CID", typeof(int));
             dt.Columns.Add("CName", typeof(string));
             DataTable dst = new DataTable();
-            dt.AsEnumerable().CopyToDataTable<DataRow>(dst, LoadOption.PreserveChanges);
+            dt.AsEnumerable().CopyToDataTable(dst, LoadOption.PreserveChanges);
         }
 
         [Fact]
