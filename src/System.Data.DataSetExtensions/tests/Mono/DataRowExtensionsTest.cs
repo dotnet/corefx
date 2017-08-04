@@ -1,5 +1,4 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 //
 // DataRowExtensionsTest.cs
@@ -64,11 +63,9 @@ namespace MonoTests.System.Data
             row["Column2"] = DBNull.Value;
 
             string s = row.Field<string>("Column1");
-            // #A1
             Assert.Equal(null, s);
 
             int? i = row.Field<int?>("Column2");
-            // #A2
             Assert.Equal(null, i);
         }
 

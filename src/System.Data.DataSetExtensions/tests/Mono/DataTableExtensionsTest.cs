@@ -1,5 +1,4 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 //
 // DataTableExtensionsTest.cs
@@ -60,15 +59,11 @@ namespace MonoTests.System.Data
             dt.Columns.Add("CName", typeof(string));
             dt.Rows.Add(new object[] { 1, "foo" });
             DataTable dst = dt.AsEnumerable().CopyToDataTable<DataRow>();
-            // #1
             Assert.Equal(1, dst.Rows.Count);
-            // #2
             Assert.Equal("foo", dst.Rows[0]["CName"]);
         }
 
         [Fact]
-        // no error for empty table this time.
-        // [Category("NotWorking")] // some DataTableReader internal issues
         public void CopyToDataTableTableArgNoRows()
         {
             DataTable dt = new DataTable();
@@ -84,31 +79,14 @@ namespace MonoTests.System.Data
             DataSet ds = new DataSet();
             ds.ReadXml("testdataset1.xml");
             DataTable dt = ds.Tables[0];
-            // TableName
             Assert.Equal("ScoreList", dt.TableName);
             var dv = dt.AsEnumerable();
-            // #0
             Assert.Equal(4, dv.Count());
             var i = dv.GetEnumerator();
             Assert.True(i.MoveNext(), "#1");
-            // #2
             Assert.Equal(1, i.Current["ID"]);
             Assert.True(i.MoveNext(), "#3");
-            // #4
             Assert.Equal(2, i.Current["ID"]);
         }
-
-        //[Fact]
-        //public void AsDataView()
-        //{
-        //    DataSet ds = new DataSet();
-        //    ds.ReadXml("Test/System.Data/testdataset1.xml");
-        //    DataTable dt = ds.Tables[0];
-        //    var dv = dt.AsEnumerable().Where((DataRow r) => (int)r["Score"] > 60).AsDataView<DataRow>();
-        //    // #1
-        //    Assert.Equal(1, dv[0]["ID"]);
-        //    // #2
-        //    Assert.Equal(4, dv[1]["ID"]);
-        //}
     }
 }

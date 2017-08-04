@@ -1,5 +1,4 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 //
 // EnumerableRowCollectionTest.cs
@@ -62,7 +61,6 @@ namespace MonoTests.System.Data
             {
                 if (iterated)
                     Assert.True(false, "should match only one raw");
-                // #1
                 Assert.Equal(100, line["Score"]);
                 iterated = true;
             }
@@ -75,18 +73,17 @@ namespace MonoTests.System.Data
             ds.ReadXml ("testdataset1.xml");
             var table = ds.Tables [0];
             var q = from line in table.AsEnumerable ()
-            where line.Field<int> ("Score") > 80
-            select new {
-                StudentID = line.Field<int> ("ID"),
-                StudentName = line.Field<string> ("Name"),
-                StudentScore = line.Field<int> ("Score") };
+                where line.Field<int> ("Score") > 80
+                select new {
+                    StudentID = line.Field<int> ("ID"),
+                    StudentName = line.Field<string> ("Name"),
+                    StudentScore = line.Field<int> ("Score") };
             bool iterated = false;
             foreach (var ql in q) {
-            if (iterated)
-                Assert.True(false, "should match only one raw");
-            // #1
-            Assert.Equal(100, ql.StudentScore);
-            iterated = true;
+                if (iterated)
+                    Assert.True(false, "should match only one raw");
+                Assert.Equal(100, ql.StudentScore);
+                iterated = true;
             }
         }
 
@@ -107,11 +104,9 @@ namespace MonoTests.System.Data
             foreach (var ql in q) {
                 switch (prevID) {
                     case -1:
-                        // #1
                         Assert.Equal(1, ql.StudentID);
                         break;
                     case 1:
-                        // #2
                         Assert.Equal(4, ql.StudentID);
                         break;
                     default:
@@ -139,11 +134,9 @@ namespace MonoTests.System.Data
             foreach (var ql in q) {
                 switch (prevID) {
                     case -1:
-                        // #1
                         Assert.Equal(4, ql.StudentID);
                         break;
                     case 4:
-                        // #2
                         Assert.Equal(1, ql.StudentID);
                         break;
                     default:
@@ -171,11 +164,9 @@ namespace MonoTests.System.Data
             foreach (var ql in q) {
             switch (prevID) {
                 case -1:
-                    // #1
                     Assert.Equal(1, ql.StudentID);
                     break;
                 case 1:
-                    // #2
                     Assert.Equal(4, ql.StudentID);
                     break;
                 default:
@@ -203,11 +194,9 @@ namespace MonoTests.System.Data
             foreach (var ql in q) {
                 switch (prevID) {
                 case -1:
-                    // #1
                     Assert.Equal(4, ql.StudentID);
                     break;
                 case 4:
-                    // #2
                     Assert.Equal(1, ql.StudentID);
                     break;
                 default:

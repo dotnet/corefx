@@ -1,5 +1,4 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 //
 // DataRowComparerTest.cs
@@ -43,7 +42,7 @@ namespace MonoTests.System.Data
         {
             DataRowComparer<DataRow> c1 = DataRowComparer.Default;
             DataRowComparer<DataRow> c2 = DataRowComparer.Default;
-            Assert.Equal(c1, c2);
+            Assert.Same(c1, c2);
         }
 
         [Fact]
@@ -183,11 +182,8 @@ namespace MonoTests.System.Data
             }
             catch (RowNotInTableException ex)
             {
-                // "#A2"
                 Assert.Equal(typeof(RowNotInTableException), ex.GetType());
-                // "#A3"
                 Assert.Null(ex.InnerException);
-                // "#A4"
                 Assert.NotNull(ex.Message);
             }
 
@@ -199,11 +195,8 @@ namespace MonoTests.System.Data
             }
             catch (RowNotInTableException ex)
             {
-                // "#B2"
                 Assert.Equal(typeof(RowNotInTableException), ex.GetType());
-                // "#B3"
                 Assert.Null(ex.InnerException);
-                // "#B4"
                 Assert.NotNull(ex.Message);
             }
 
@@ -217,11 +210,8 @@ namespace MonoTests.System.Data
             }
             catch (RowNotInTableException ex)
             {
-                // #C2
                 Assert.Equal(typeof(RowNotInTableException), ex.GetType());
-                // #C3
                 Assert.Null(ex.InnerException);
-                // #C4
                 Assert.NotNull(ex.Message);
             }
         }
@@ -239,18 +229,6 @@ namespace MonoTests.System.Data
             ds.AcceptChanges();
             DataRowComparer<DataRow> c = DataRowComparer.Default;
             Assert.True(c.GetHashCode(r1) == c.GetHashCode(r2), "#1");
-            /*
-			// LAMESPEC: .NET fails here
-			r2 ["col2"] = "baz";
-			r2.AcceptChanges ();
-			Assert.IsFalse (c.GetHashCode (r1) == c.GetHashCode (r2), "#2");
-			ds.AcceptChanges (); // now r2 original value is "baz"
-			r2 ["col2"] = "bar";
-			Assert.IsFalse (c.GetHashCode (r1) == c.GetHashCode (r2), "#3");
-			// LAMESPEC: .NET fails here
-			DataRow r3 = dt.Rows.Add (new object [] {"foo", "baz"});
-			Assert.IsFalse (c.GetHashCode (r1) == c.GetHashCode (r3), "#4");
-			*/
         }
 
         [Fact]
@@ -265,13 +243,9 @@ namespace MonoTests.System.Data
             }
             catch (ArgumentNullException ex)
             {
-                // #2
                 Assert.Equal(typeof(ArgumentNullException), ex.GetType());
-                // #3
                 Assert.Null(ex.InnerException);
-                // #4
                 Assert.NotNull(ex.Message);
-                // #5
                 Assert.Equal("row", ex.ParamName);
             }
         }
