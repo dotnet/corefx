@@ -238,8 +238,7 @@ namespace System.Net
                     //   lets skim to the end of the string
                     //
 
-                    dateParseResults[i] =
-                    MapDayMonthToDword(dateString, index);
+                    dateParseResults[i] = MapDayMonthToDword(dateString, index);
 
                     iLastLettered = i;
 
