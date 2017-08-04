@@ -1638,22 +1638,24 @@ namespace System.Net.Http.Functional.Tests
             string method,
             bool secureServer)
         {
-            if (PlatformDetection.IsUap && method == "TRACE")
-            {
-                // 'TRACE' method is not supported on Uap.
-                // See: https://github.com/dotnet/corefx/issues/22161
-                return;
-            }
-
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
                     new HttpMethod(method),
                     secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer);
-                using (HttpResponseMessage response = await client.SendAsync(request))
+
+                if (PlatformDetection.IsUap && method == "TRACE")
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    TestHelper.VerifyRequestMethod(response, method);
+                    HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
+                    Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
+                }
+                else
+                {
+                    using (HttpResponseMessage response = await client.SendAsync(request))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        TestHelper.VerifyRequestMethod(response, method);
+                    }
                 }
             }
         }
