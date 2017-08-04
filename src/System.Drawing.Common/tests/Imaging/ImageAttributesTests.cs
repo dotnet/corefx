@@ -1222,6 +1222,18 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        public void SetOutputChannelColorProfile_InvalidPath_ThrowsPathTooLongException()
+        {
+            string fileNameTooLong = new string('a', short.MaxValue);
+            using (var imageAttr = new ImageAttributes())
+            {
+                Assert.Throws<PathTooLongException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong));
+                Assert.Throws<PathTooLongException>(() => imageAttr.SetOutputChannelColorProfile(fileNameTooLong, ColorAdjustType.Default));
+            }
+        }
+
+
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(ColorAdjustType_InvalidTypes_TestData))]
         public void SetOutputChannelColorProfile_InvalidTypes_ThrowsArgumentException(ColorAdjustType type)

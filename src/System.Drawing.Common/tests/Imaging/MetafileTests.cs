@@ -412,7 +412,7 @@ namespace System.Drawing.Imaging.Tests
 
             File.Delete(fileName);
         }
-        
+
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Description_TestData))]
@@ -481,6 +481,21 @@ namespace System.Drawing.Imaging.Tests
                 AssertExtensions.Throws<ArgumentException>("path", null, () => new Metafile(fileName, referenceHdc));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => new Metafile(fileName, referenceHdc, EmfType.EmfOnly));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => new Metafile(fileName, referenceHdc, EmfType.EmfOnly, "description"));
+            }
+        }
+
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        public void Ctor_PathTooLong_ThrowsPathTooLongException()
+        {
+            string fileName = GetPath(new string('a', short.MaxValue));
+            using (var bufferGraphics = Graphics.FromHwndInternal(IntPtr.Zero))
+            {
+                IntPtr referenceHdc = bufferGraphics.GetHdc();
+                Assert.Throws<PathTooLongException>(() => new Metafile(fileName, referenceHdc));
+                Assert.Throws<PathTooLongException>(() => new Metafile(fileName, referenceHdc, EmfType.EmfOnly));
+                Assert.Throws<PathTooLongException>(() => new Metafile(fileName, referenceHdc, EmfType.EmfOnly, "description"));
+                DeleteFile(fileName);
             }
         }
 
@@ -1061,7 +1076,7 @@ namespace System.Drawing.Imaging.Tests
             GraphicsUnit graphicsUnit = (GraphicsUnit)int.MaxValue;
 
             AssertMetafileHeaderIsBlank(metafile.GetMetafileHeader());
-            Assert.Equal(new Rectangle(0, 0, 1, 1), metafile.GetBounds(ref graphicsUnit));           
+            Assert.Equal(new Rectangle(0, 0, 1, 1), metafile.GetBounds(ref graphicsUnit));
             Assert.Equal(GraphicsUnit.Pixel, graphicsUnit);
         }
 
