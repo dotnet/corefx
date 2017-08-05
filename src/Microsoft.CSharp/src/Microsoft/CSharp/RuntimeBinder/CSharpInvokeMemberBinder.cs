@@ -34,9 +34,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public bool IsChecked => false;
 
-        public IList<Type> TypeArguments => new ReadOnlyCollection<Type>(_typeArguments);
-
-        private readonly Type[] _typeArguments;
+        public Type[] TypeArguments { get; }
 
         private readonly CSharpArgumentInfo[] _argumentInfo;
 
@@ -71,7 +69,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Flags = flags;
             CallingContext = callingContext;
-            _typeArguments = BinderHelper.ToList(typeArguments);
+            TypeArguments = BinderHelper.ToList(typeArguments);
             _argumentInfo = BinderHelper.ToList(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }

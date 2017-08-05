@@ -224,7 +224,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CSharpInvokeMemberBinder callPayload = payload as CSharpInvokeMemberBinder;
             if (callPayload != null)
             {
-                int arity = callPayload.TypeArguments?.Count ?? 0;
+                int arity = callPayload.TypeArguments?.Length ?? 0;
                 MemberLookup mem = new MemberLookup();
                 Expr callingObject = CreateCallingObjectForCall(callPayload, arguments, locals);
 
@@ -845,7 +845,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.BindInvokeFailedNonDelegate();
             }
 
-            int arity = payload.TypeArguments?.Count ?? 0;
+            int arity = payload.TypeArguments?.Length ?? 0;
             MemberLookup mem = new MemberLookup();
 
             Debug.Assert(_bindingContext.ContextForMemberLookup != null);
