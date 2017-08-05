@@ -43,7 +43,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public Type CallingContext { get; }
 
-        private readonly List<CSharpArgumentInfo> _argumentInfo;
+        private readonly CSharpArgumentInfo[] _argumentInfo;
 
         CSharpArgumentInfo ICSharpBinder.GetArgumentInfo(int index) => _argumentInfo[index];
 
@@ -66,7 +66,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             IsChecked = isChecked;
             CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToList(argumentInfo);
-            Debug.Assert(_argumentInfo.Count == 1);
+            Debug.Assert(_argumentInfo.Length == 1);
             _binder = RuntimeBinder.GetInstance();
         }
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Dynamic;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
@@ -33,15 +34,20 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public bool IsChecked => false;
 
-        public IList<Type> TypeArguments => _typeArguments.AsReadOnly();
+        public IList<Type> TypeArguments => new ReadOnlyCollection<Type>(_typeArguments);
 
-        private readonly List<Type> _typeArguments;
+        private readonly Type[] _typeArguments;
 
-        private readonly List<CSharpArgumentInfo> _argumentInfo;
+        private readonly CSharpArgumentInfo[] _argumentInfo;
 
         public CSharpArgumentInfo GetArgumentInfo(int index) => _argumentInfo[index];
 
-        public CSharpArgumentInfo[] ArgumentInfoArray() => _argumentInfo.ToArray();
+        public CSharpArgumentInfo[] ArgumentInfoArray()
+        {
+            CSharpArgumentInfo[] array = new CSharpArgumentInfo[_argumentInfo.Length];
+            _argumentInfo.CopyTo(array, 0);
+            return array;
+        }
 
         bool ICSharpInvokeOrInvokeMemberBinder.ResultDiscarded => (Flags & CSharpCallFlags.ResultDiscarded) != 0;
 
