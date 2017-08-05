@@ -306,14 +306,7 @@ namespace Microsoft.Win32.SafeHandles
                 Offset = offset;
                 BytesAvailable = length;
             }
-
-            public void ResetBio()
-            {
-                ByteArray = null;
-                Offset = 0;
-                BytesAvailable = 0;
-            }
-
+            
             //Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {
@@ -352,22 +345,22 @@ namespace Microsoft.Win32.SafeHandles
             public int StartOfFreeSpace { get; set; }
             public int TotalBytes { get; set; }
 
-            public void SetBio(byte[] buffer, int offset, int length)
+            public void SetBio(byte[] buffer)
             {
                 ByteArray = buffer;
-                StartOfFreeSpace = offset;
-                TotalBytes = 0;
-                FreeSpace = length;
-            }
-
-            public void ResetBio()
-            {
-                ByteArray = null;
                 StartOfFreeSpace = 0;
                 TotalBytes = 0;
-                FreeSpace = 0;
+                FreeSpace = buffer?.Length ?? 0;
             }
 
+            public int TakeBytes()
+            {
+                var bytes = TotalBytes;
+                TotalBytes = 0;
+                ByteArray = null;
+                return bytes == 0 ? -1 : bytes;
+            }
+            
             public void CheckSpaceOrIncrease(int sizeWanted)
             {
                 if (ByteArray == null)

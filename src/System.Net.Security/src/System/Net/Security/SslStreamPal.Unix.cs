@@ -150,6 +150,10 @@ namespace System.Net.Security
 
                 if (encrypt)
                 {
+                    if(output == null || output.Length < (size + 32 + 5))
+                    {
+                        output = new byte[size + 32 + 5];
+                    }
                     resultSize = Interop.OpenSsl.Encrypt(scHandle, input, offset, size, ref output, out errorCode);
                 }
                 else
