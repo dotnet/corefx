@@ -370,7 +370,7 @@ namespace Microsoft.Win32.SafeHandles
                     _byteArray = new byte[input.Length + _bytesWritten];
                     oldSpan.CopyTo(_byteArray);
                 }
-                input.CopyTo(_byteArray, _bytesWritten);
+                input.CopyTo(new Span<byte>(_byteArray, _bytesWritten));
                 return input.Length;
             }
             
