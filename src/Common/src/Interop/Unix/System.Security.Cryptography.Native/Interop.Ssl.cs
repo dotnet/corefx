@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
@@ -332,6 +333,8 @@ namespace Microsoft.Win32.SafeHandles
         {
             private SafeBioHandle _bioHandle;
             private GCHandle _handle;
+            private byte[] _byteArray;
+            private int _bytesWritten;
 
             internal WriteBioBuffer(SafeBioHandle bioHandle)
             {
@@ -339,46 +342,38 @@ namespace Microsoft.Win32.SafeHandles
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
                 Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
             }
-
-            public int FreeSpace { get; set; }
-            public byte[] ByteArray { get; private set; }
-            public int StartOfFreeSpace { get; set; }
-            public int TotalBytes { get; set; }
-
+                        
             public void SetBio(byte[] buffer)
             {
-                ByteArray = buffer;
-                StartOfFreeSpace = 0;
-                TotalBytes = 0;
-                FreeSpace = buffer?.Length ?? 0;
+                _byteArray = buffer;
+                _bytesWritten = 0;
             }
 
-            public int TakeBytes()
+            public int TakeBytes(out byte[] output)
             {
-                var bytes = TotalBytes;
-                TotalBytes = 0;
-                ByteArray = null;
-                return bytes == 0 ? -1 : bytes;
+                var bytes = _bytesWritten;
+                output = _byteArray;
+                _bytesWritten = 0;
+                _byteArray = null;
+                return bytes;
             }
             
-            public void CheckSpaceOrIncrease(int sizeWanted)
+            public int Write(Span<byte> input)
             {
-                if (ByteArray == null)
+                if(_byteArray == null)
                 {
-                    ByteArray = new byte[sizeWanted];
-                    FreeSpace = sizeWanted;
-                    TotalBytes = 0;
-                    StartOfFreeSpace = 0;
+                    _byteArray = new byte[input.Length];
                 }
-                else if (FreeSpace < sizeWanted)
+                else if (_byteArray.Length - _bytesWritten < intput.Length)
                 {
-                    var newArray = new byte[ByteArray.Length + (sizeWanted - FreeSpace)];
-                    FreeSpace = sizeWanted;
-                    Array.Copy(ByteArray, newArray, ByteArray.Length);
-                    ByteArray = newArray;
+                    var oldSpan = new Span<byte>(_byteArray);
+                    _byteArray = new byte[input.Length + _bytesWritten];
+                    oldSpan.CopyTo(_byteArray);
                 }
+                input.CopyTo(_byteArray, _bytesWritten);
+                return input.Length;
             }
-
+            
             //Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {

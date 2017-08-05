@@ -136,10 +136,9 @@ internal static partial class Interop
             sendBuf = null;
             sendCount = 0;
 
-            if (recvBuf == null && context.OutputBio.TotalBytes > 0)
+            sendCount = context.OutputBio.TakeBytes(out sendBuf);
+            if (recvBuf == null && sendCount > 0)
             {
-                sendBuf = context.OutputBio.ByteArray;
-                sendCount = context.OutputBio.TakeBytes();
                 return false;
             }
 
@@ -159,12 +158,8 @@ internal static partial class Interop
                 }
             }
 
-            if (context.OutputBio.ByteArray != null)
-            {
-                sendBuf = context.OutputBio.ByteArray;
-                sendCount = context.OutputBio.TakeBytes();
-            }
-
+            sendCount = context.OutputBio.TakeBytes(out sendBuf);
+            
             bool stateOk = Ssl.IsSslStateOK(context);
             if (stateOk)
             {
@@ -210,7 +205,7 @@ internal static partial class Interop
                         throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                 }
             }
-            return context.OutputBio.TakeBytes();
+            return context.OutputBio.TakeBytes(out output);
         }
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
