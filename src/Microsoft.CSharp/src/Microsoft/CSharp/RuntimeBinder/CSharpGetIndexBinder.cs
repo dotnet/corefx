@@ -51,7 +51,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             base(BinderHelper.CreateCallInfo(argumentInfo, 1)) // discard 1 argument: the target object
         {
             CallingContext = callingContext;
-            _argumentInfo = BinderHelper.ToList(argumentInfo);
+            _argumentInfo = BinderHelper.ToArray(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }
 

@@ -61,7 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             _flags = flags;
             CallingContext = callingContext;
-            _argumentInfo = BinderHelper.ToList(argumentInfo);
+            _argumentInfo = BinderHelper.ToArray(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }
 

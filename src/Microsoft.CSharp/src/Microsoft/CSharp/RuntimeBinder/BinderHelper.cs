@@ -360,7 +360,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal static T[] ToList<T>(IEnumerable<T> source) => source == null ? Array.Empty<T>() : source.ToArray();
+        internal static T[] ToArray<T>(IEnumerable<T> source) => source == null ? Array.Empty<T>() : source.ToArray();
 
         /////////////////////////////////////////////////////////////////////////////////
 

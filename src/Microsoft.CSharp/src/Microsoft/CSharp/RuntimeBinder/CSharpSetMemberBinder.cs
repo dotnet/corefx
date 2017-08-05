@@ -59,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             IsCompoundAssignment = isCompoundAssignment;
             IsChecked = isChecked;
             CallingContext = callingContext;
-            _argumentInfo = BinderHelper.ToList(argumentInfo);
+            _argumentInfo = BinderHelper.ToArray(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }
 
