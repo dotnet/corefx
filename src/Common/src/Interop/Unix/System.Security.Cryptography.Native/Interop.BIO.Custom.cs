@@ -126,12 +126,10 @@ internal static partial class Interop
 
             if (buffer == null)
             {
-                Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_NONE);
                 return -1;
             }
             if (buffer.ByteArray == null || buffer.BytesAvailable == 0)
             {
-                Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_READ | Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
                 return -1;
             }
             fixed (byte* bPtr = buffer.ByteArray)
@@ -141,10 +139,6 @@ internal static partial class Interop
                 Buffer.MemoryCopy(offsetPtr, output, size, bytesToCopy);
                 buffer.BytesAvailable -= bytesToCopy;
                 buffer.Offset += bytesToCopy;
-                if (bytesToCopy < size)
-                {
-                    Crypto.BioSetFlags(bio, Crypto.BIO_FLAGS.BIO_FLAGS_READ | Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
-                }
                 return bytesToCopy;
             }
         }

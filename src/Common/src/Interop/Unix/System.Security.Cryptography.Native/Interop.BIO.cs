@@ -46,7 +46,7 @@ internal static partial class Interop
         internal static extern IntPtr BioGetAppData(IntPtr bio);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetFlags")]
-        internal static extern IntPtr BioSetFlags(IntPtr bio, BIO_FLAGS flags);
+        internal static extern IntPtr BioSetFlags(SafeBioHandle bio, BIO_FLAGS flags);
 
         [Flags]
         internal enum BIO_FLAGS

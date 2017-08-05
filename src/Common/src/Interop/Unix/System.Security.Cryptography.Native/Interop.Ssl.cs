@@ -295,6 +295,7 @@ namespace Microsoft.Win32.SafeHandles
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
                 Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
+                Interop.Crypto.BioSetFlags(bioHandle, Interop.Crypto.BIO_FLAGS.BIO_FLAGS_READ | Interop.Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
             }
 
             public int BytesAvailable { get; set; }
