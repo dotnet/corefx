@@ -8,11 +8,12 @@ using System.Drawing.Internal;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
+using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
     [ComVisible(true)]
-    public sealed partial class Bitmap : Image
+    public sealed partial class Bitmap : Image, ISerializable
     {
         private static Color s_defaultTransparentColor = Color.LightGray;
 
