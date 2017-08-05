@@ -364,7 +364,7 @@ namespace Microsoft.Win32.SafeHandles
                 {
                     _byteArray = new byte[input.Length];
                 }
-                else if (_byteArray.Length - _bytesWritten < intput.Length)
+                else if (_byteArray.Length - _bytesWritten < input.Length)
                 {
                     var oldSpan = new Span<byte>(_byteArray);
                     _byteArray = new byte[input.Length + _bytesWritten];
