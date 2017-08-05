@@ -289,6 +289,9 @@ namespace Microsoft.Win32.SafeHandles
         {
             private SafeBioHandle _bioHandle;
             private GCHandle _handle;
+            private int _bytesAvailable;
+            private byte[] _byteArray;
+            private int _offset;
 
             internal ReadBioBuffer(SafeBioHandle bioHandle)
             {
@@ -298,15 +301,22 @@ namespace Microsoft.Win32.SafeHandles
                 Interop.Crypto.BioSetFlags(bioHandle, Interop.Crypto.BIO_FLAGS.BIO_FLAGS_READ | Interop.Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
             }
 
-            public int BytesAvailable { get; set; }
-            public byte[] ByteArray { get; private set; }
-            public int Offset { get; set; }
-
             public void SetBio(byte[] buffer, int offset, int length)
             {
-                ByteArray = buffer;
-                Offset = offset;
-                BytesAvailable = length;
+                _byteArray = buffer;
+                _offset = offset;
+                _bytesAvailable = length;
+            }
+
+            public int Read(Span<byte> output)
+            {
+                var bytesToCopy = Math.Min(output.Length, _bytesAvailable);
+                if (bytesToCopy == 0) return -1;
+                var span = new Span<byte>(_byteArray, _offset, bytesToCopy);
+                span.CopyTo(output);
+                _offset += bytesToCopy;
+                _bytesAvailable -= bytesToCopy;
+                return bytesToCopy;
             }
             
             //Bio is already released by the ssl object

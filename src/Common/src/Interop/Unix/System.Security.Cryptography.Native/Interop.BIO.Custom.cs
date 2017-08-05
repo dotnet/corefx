@@ -117,30 +117,11 @@ internal static partial class Interop
         private static unsafe int Read(IntPtr bio, void* output, int size)
         {
             var handle = BioGetGCHandle(bio);
-            Debug.Assert(handle.IsAllocated);
-            if (!handle.IsAllocated)
+            if (handle.IsAllocated && handle.Target is SafeSslHandle.ReadBioBuffer buffer)
             {
-                return -1;
+                return buffer.Read(new Span<byte>(output, size));
             }
-            var buffer = handle.Target as SafeSslHandle.ReadBioBuffer;
-
-            if (buffer == null)
-            {
-                return -1;
-            }
-            if (buffer.ByteArray == null || buffer.BytesAvailable == 0)
-            {
-                return -1;
-            }
-            fixed (byte* bPtr = buffer.ByteArray)
-            {
-                var offsetPtr = bPtr + buffer.Offset;
-                var bytesToCopy = Math.Min(size, buffer.BytesAvailable);
-                Buffer.MemoryCopy(offsetPtr, output, size, bytesToCopy);
-                buffer.BytesAvailable -= bytesToCopy;
-                buffer.Offset += bytesToCopy;
-                return bytesToCopy;
-            }
+            return -1;
         }
 
         [Flags]
