@@ -1630,7 +1630,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             methodSymbol.SetAccess(access);
 
-            methodSymbol.isExtension = false; // We don't support extension methods.
             methodSymbol.isExternal = false;
 
             if (method != null)
