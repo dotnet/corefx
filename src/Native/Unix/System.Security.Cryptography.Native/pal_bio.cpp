@@ -60,12 +60,12 @@ extern "C" int32_t CryptoNative_BioCtrlPending(BIO* bio)
 
 extern "C" void CryptoNative_BioSetAppData(BIO* bio, void* data)
 {
-    BIO_set_app_data(bio, data);
+    BIO_set_ex_data(bio, 0, data);
 }
 
 extern "C" void* CryptoNative_BioGetAppData(BIO* bio)
 {
-    return BIO_get_app_data(bio);
+    return BIO_get_ex_data(bio, 0);
 }
 
 extern "C" void CryptoNative_BioSetFlags(BIO* bio, int32_t flags)

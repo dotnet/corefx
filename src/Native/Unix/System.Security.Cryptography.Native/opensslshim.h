@@ -68,13 +68,13 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(BIO_ctrl, true) \
     PER_FUNCTION_BLOCK(BIO_ctrl_pending, true) \
     PER_FUNCTION_BLOCK(BIO_free, true) \
-    PER_FUNCTION_BLOCK(BIO_get_app_data, true) \
+    PER_FUNCTION_BLOCK(BIO_get_ex_data, true) \
     PER_FUNCTION_BLOCK(BIO_gets, true) \
     PER_FUNCTION_BLOCK(BIO_new, true) \
     PER_FUNCTION_BLOCK(BIO_new_file, true) \
     PER_FUNCTION_BLOCK(BIO_read, true) \
     PER_FUNCTION_BLOCK(BIO_s_mem, true) \
-    PER_FUNCTION_BLOCK(BIO_set_app_data, true) \
+    PER_FUNCTION_BLOCK(BIO_set_ex_data, true) \
     PER_FUNCTION_BLOCK(BIO_set_flags, true) \
     PER_FUNCTION_BLOCK(BIO_write, true) \
     PER_FUNCTION_BLOCK(BN_bin2bn, true) \
@@ -255,7 +255,6 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(SSL_CTX_free, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_new, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cert_verify_callback, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_mode, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cipher_list, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_client_CA_list, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_client_cert_cb, true) \
@@ -363,13 +362,13 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define BIO_ctrl BIO_ctrl_ptr
 #define BIO_ctrl_pending BIO_ctrl_pending_ptr
 #define BIO_free BIO_free_ptr
-#define BIO_get_app_data BIO_get_app_data_ptr
+#define BIO_get_ex_data BIO_get_ex_data_ptr
 #define BIO_gets BIO_gets_ptr
 #define BIO_new BIO_new_ptr
 #define BIO_new_file BIO_new_file_ptr
 #define BIO_read BIO_read_ptr
 #define BIO_s_mem BIO_s_mem_ptr
-#define BIO_set_app_data BIO_set_app_data_ptr
+#define BIO_set_ex_data BIO_set_ex_data_ptr
 #define BIO_set_flags BIO_set_flags_ptr
 #define BIO_write BIO_write_ptr
 #define BN_bin2bn BN_bin2bn_ptr
@@ -549,7 +548,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_ctrl SSL_CTX_ctrl_ptr
 #define SSL_CTX_free SSL_CTX_free_ptr
 #define SSL_CTX_new SSL_CTX_new_ptr
-#define SSL_CTX_set_mode SSL_CTX_set_mode_ptr
 #define SSL_CTX_set_cert_verify_callback SSL_CTX_set_cert_verify_callback_ptr
 #define SSL_CTX_set_cipher_list SSL_CTX_set_cipher_list_ptr
 #define SSL_CTX_set_client_CA_list SSL_CTX_set_client_CA_list_ptr
