@@ -68,14 +68,14 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(BIO_ctrl, true) \
     PER_FUNCTION_BLOCK(BIO_ctrl_pending, true) \
     PER_FUNCTION_BLOCK(BIO_free, true) \
-    PER_FUNCTION_BLOCK(BIO_get_app_data) \
+    PER_FUNCTION_BLOCK(BIO_get_app_data, true) \
     PER_FUNCTION_BLOCK(BIO_gets, true) \
     PER_FUNCTION_BLOCK(BIO_new, true) \
     PER_FUNCTION_BLOCK(BIO_new_file, true) \
     PER_FUNCTION_BLOCK(BIO_read, true) \
     PER_FUNCTION_BLOCK(BIO_s_mem, true) \
-    PER_FUNCTION_BLOCK(BIO_set_app_data) \
-    PER_FUNCTION_BLOCK(BIO_set_flags) \
+    PER_FUNCTION_BLOCK(BIO_set_app_data, true) \
+    PER_FUNCTION_BLOCK(BIO_set_flags, true) \
     PER_FUNCTION_BLOCK(BIO_write, true) \
     PER_FUNCTION_BLOCK(BN_bin2bn, true) \
     PER_FUNCTION_BLOCK(BN_bn2bin, true) \
