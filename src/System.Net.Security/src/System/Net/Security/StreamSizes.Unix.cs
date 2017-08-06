@@ -24,7 +24,7 @@ namespace System.Net
         {
             Header = 0;
             Trailer = 0;
-            MaximumMessage = 16 * 1024;
+            MaximumMessage = 32 * 1024;
         }
     }
 }

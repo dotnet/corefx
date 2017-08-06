@@ -23,7 +23,7 @@ namespace System.Net.Security
 
         private const int PinnableReadBufferSize = 4096 * 4 + 32;         // We read in 16K chunks + headers.
         private static PinnableBufferCache s_PinnableReadBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableReadBufferSize);
-        private const int PinnableWriteBufferSize = 1024 * 16 + 5 + 32;        // We write in 4K chunks + encryption overhead.
+        private const int PinnableWriteBufferSize = 4096 + 1024;        // We write in 4K chunks + encryption overhead.
         private static PinnableBufferCache s_PinnableWriteBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableWriteBufferSize);
 
         private SslState _sslState;
