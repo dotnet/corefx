@@ -83,7 +83,7 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionDelegate;
             _refreshCredentialNeeded = true;
             _encryptionPolicy = encryptionPolicy;
-            
+
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
@@ -845,7 +845,7 @@ namespace System.Net.Security
             }
 
             output = outgoingSecurity.token;
-            
+
             return status;
         }
 
@@ -934,16 +934,15 @@ namespace System.Net.Security
                 _trailerSize,
                 ref output,
                 out resultSize);
-
             if (NetEventSource.IsEnabled)
             {
                 switch (secStatus.ErrorCode)
                 {
                     case SecurityStatusPalErrorCode.OK:
-                        NetEventSource.Exit($"OK data size:{resultSize}");
+                        NetEventSource.Exit(this, $"OK data size:{resultSize}");
                         break;
                     case SecurityStatusPalErrorCode.ContinueNeeded:
-                        NetEventSource.Exit(this, $"OK but more writes needed data size:{ resultSize}");
+                        NetEventSource.Exit(this, $"OK but more writes needed data size:{resultSize}");
                         break;
                     default:
                         NetEventSource.Exit(this, $"ERROR {secStatus}");
@@ -1154,7 +1153,7 @@ namespace System.Net.Security
 
             return token;
         }
-        
+
         private static TlsAlertMessage GetAlertMessageFromChain(X509Chain chain)
         {
             foreach (X509ChainStatus chainStatus in chain.ChainStatus)
@@ -1172,7 +1171,7 @@ namespace System.Net.Security
                 }
 
                 if ((chainStatus.Status &
-                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation )) != 0)
+                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation)) != 0)
                 {
                     return TlsAlertMessage.CertificateRevoked;
                 }
@@ -1186,7 +1185,7 @@ namespace System.Net.Security
 
                 if ((chainStatus.Status & X509ChainStatusFlags.CtlNotValidForUsage) != 0)
                 {
-                    return TlsAlertMessage.UnsupportedCert; 
+                    return TlsAlertMessage.UnsupportedCert;
                 }
 
                 if ((chainStatus.Status &

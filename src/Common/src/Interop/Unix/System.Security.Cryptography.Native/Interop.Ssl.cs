@@ -183,7 +183,7 @@ namespace Microsoft.Win32.SafeHandles
 
         public ReadBioBuffer InputBio => _readBio;
         public WriteBioBuffer OutputBio => _writeBio;
-        
+
         internal void MarkHandshakeCompleted()
         {
             _handshakeCompleted = true;
@@ -318,7 +318,7 @@ namespace Microsoft.Win32.SafeHandles
                 _bytesAvailable -= bytesToCopy;
                 return bytesToCopy;
             }
-            
+
             //Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {
@@ -340,7 +340,7 @@ namespace Microsoft.Win32.SafeHandles
             }
         }
 
-        internal class WriteBioBuffer :IDisposable
+        internal class WriteBioBuffer : IDisposable
         {
             private SafeBioHandle _bioHandle;
             private GCHandle _handle;
@@ -354,7 +354,7 @@ namespace Microsoft.Win32.SafeHandles
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
                 Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
             }
-                        
+
             public void SetBio(byte[] buffer, bool isHandshake)
             {
                 _byteArray = buffer;
@@ -370,7 +370,7 @@ namespace Microsoft.Win32.SafeHandles
                 _byteArray = null;
                 return bytes;
             }
-            
+
             public int Write(Span<byte> input)
             {
                 if (_isHandshake)
@@ -378,6 +378,7 @@ namespace Microsoft.Win32.SafeHandles
                     if (_byteArray == null)
                     {
                         _byteArray = new byte[input.Length];
+                        _bytesWritten = 0;
                     }
                     else if (_byteArray.Length - _bytesWritten < input.Length)
                     {
@@ -386,12 +387,17 @@ namespace Microsoft.Win32.SafeHandles
                         oldSpan.CopyTo(_byteArray);
                     }
                 }
-                var bytesToWrite = Math.Min(input.Length, input.Length - _bytesWritten);
+                var bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
+                if (bytesToWrite < 1)
+                {
+                    Interop.Crypto.BioSetFlags(_bioHandle, Interop.Crypto.BIO_FLAGS.BIO_FLAGS_WRITE);
+                    return -1;
+                }
                 input.Slice(0, bytesToWrite).CopyTo(new Span<byte>(_byteArray, _bytesWritten));
                 _bytesWritten += bytesToWrite;
                 return bytesToWrite;
             }
-            
+
             //Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {
