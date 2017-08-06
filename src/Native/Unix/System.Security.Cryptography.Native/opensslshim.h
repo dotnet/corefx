@@ -255,6 +255,7 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(SSL_CTX_free, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_new, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cert_verify_callback, true) \
+    PER_FUNCTION_BLOCK(SSL_CTX_set_mode, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cipher_list, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_client_CA_list, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_client_cert_cb, true) \
@@ -548,6 +549,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_ctrl SSL_CTX_ctrl_ptr
 #define SSL_CTX_free SSL_CTX_free_ptr
 #define SSL_CTX_new SSL_CTX_new_ptr
+#define SSL_CTX_set_mode SSL_CTX_set_mode_ptr
 #define SSL_CTX_set_cert_verify_callback SSL_CTX_set_cert_verify_callback_ptr
 #define SSL_CTX_set_cipher_list SSL_CTX_set_cipher_list_ptr
 #define SSL_CTX_set_client_CA_list SSL_CTX_set_client_CA_list_ptr

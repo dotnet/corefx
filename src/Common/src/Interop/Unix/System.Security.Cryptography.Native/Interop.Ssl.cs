@@ -346,6 +346,7 @@ namespace Microsoft.Win32.SafeHandles
             private GCHandle _handle;
             private byte[] _byteArray;
             private int _bytesWritten;
+            private bool _isHandshake;
 
             internal WriteBioBuffer(SafeBioHandle bioHandle)
             {
@@ -354,10 +355,11 @@ namespace Microsoft.Win32.SafeHandles
                 Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
             }
                         
-            public void SetBio(byte[] buffer)
+            public void SetBio(byte[] buffer, bool isHandshake)
             {
                 _byteArray = buffer;
                 _bytesWritten = 0;
+                _isHandshake = isHandshake;
             }
 
             public int TakeBytes(out byte[] output)
@@ -371,19 +373,23 @@ namespace Microsoft.Win32.SafeHandles
             
             public int Write(Span<byte> input)
             {
-                if(_byteArray == null)
+                if (_isHandshake)
                 {
-                    _byteArray = new byte[input.Length];
+                    if (_byteArray == null)
+                    {
+                        _byteArray = new byte[input.Length];
+                    }
+                    else if (_byteArray.Length - _bytesWritten < input.Length)
+                    {
+                        var oldSpan = new Span<byte>(_byteArray);
+                        _byteArray = new byte[input.Length + _bytesWritten];
+                        oldSpan.CopyTo(_byteArray);
+                    }
                 }
-                else if (_byteArray.Length - _bytesWritten < input.Length)
-                {
-                    var oldSpan = new Span<byte>(_byteArray);
-                    _byteArray = new byte[input.Length + _bytesWritten];
-                    oldSpan.CopyTo(_byteArray);
-                }
-                input.CopyTo(new Span<byte>(_byteArray, _bytesWritten));
-                _bytesWritten += input.Length;
-                return input.Length;
+                var bytesToWrite = Math.Min(input.Length, input.Length - _bytesWritten);
+                input.Slice(0, bytesToWrite).CopyTo(new Span<byte>(_byteArray, _bytesWritten));
+                _bytesWritten += bytesToWrite;
+                return bytesToWrite;
             }
             
             //Bio is already released by the ssl object

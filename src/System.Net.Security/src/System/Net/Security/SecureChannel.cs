@@ -905,8 +905,6 @@ namespace System.Net.Security
                 NetEventSource.DumpBuffer(this, buffer, 0, Math.Min(buffer.Length, 128));
             }
 
-            byte[] writeBuffer = output;
-
             try
             {
                 if (offset < 0 || offset > (buffer == null ? 0 : buffer.Length))
@@ -934,19 +932,24 @@ namespace System.Net.Security
                 size,
                 _headerSize,
                 _trailerSize,
-                ref writeBuffer,
+                ref output,
                 out resultSize);
 
-            if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
+            if (NetEventSource.IsEnabled)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"ERROR {secStatus}");
+                switch (secStatus.ErrorCode)
+                {
+                    case SecurityStatusPalErrorCode.OK:
+                        NetEventSource.Exit($"OK data size:{resultSize}");
+                        break;
+                    case SecurityStatusPalErrorCode.ContinueNeeded:
+                        NetEventSource.Exit(this, $"OK but more writes needed data size:{ resultSize}");
+                        break;
+                    default:
+                        NetEventSource.Exit(this, $"ERROR {secStatus}");
+                        break;
+                }
             }
-            else
-            {
-                output = writeBuffer;
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"OK data size:{resultSize}");
-            }
-
             return secStatus;
         }
 

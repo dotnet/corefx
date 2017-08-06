@@ -417,7 +417,11 @@ namespace System.Net.Security
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     int encryptedBytes;
                     SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
-                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+                    if(status.ErrorCode != SecurityStatusPalErrorCode.ContinueNeeded)
+                    {
+                        chunkBytes = 0;
+                    }
+                    else if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
                         ProtocolToken message = new ProtocolToken(null, status);

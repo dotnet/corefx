@@ -73,6 +73,10 @@ internal static partial class Interop
                 // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
                 Ssl.SslCtxSetQuietShutdown(innerContext);
 
+                // This allows the write buffer to move during a multi call write, this stops us having to pin it
+                // across multiple calls where there is an async output to the innerstream inbetween
+                Ssl.SslCtxSetAcceptMovingWriteBuffer(innerContext);
+
                 if (!Ssl.SetEncryptionPolicy(innerContext, policy))
                 {
                     throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
@@ -143,7 +147,7 @@ internal static partial class Interop
             }
 
             context.InputBio.SetBio(recvBuf, recvOffset, recvCount);
-            context.OutputBio.SetBio(null);
+            context.OutputBio.SetBio(null, true);
 
             int retVal = Ssl.SslDoHandshake(context);
 
@@ -177,7 +181,7 @@ internal static partial class Interop
             Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
-            context.OutputBio.SetBio(output);
+            context.OutputBio.SetBio(output, false);
 
             int retVal;
             unsafe
@@ -200,7 +204,9 @@ internal static partial class Interop
                     case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
                     case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
                         break;
-
+                    //indicates we need to write the out buffer and write again
+                    case Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE:
+                        break;
                     default:
                         throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                 }
