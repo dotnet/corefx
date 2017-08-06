@@ -27,6 +27,7 @@ CannotMakeTypeAbstract : Type 'System.Drawing.SystemColors' is abstract in the i
 CannotMakeTypeAbstract : Type 'System.Drawing.SystemFonts' is abstract in the implementation but is not abstract in the contract.
 CannotMakeTypeAbstract : Type 'System.Drawing.SystemIcons' is abstract in the implementation but is not abstract in the contract.
 CannotMakeTypeAbstract : Type 'System.Drawing.SystemPens' is abstract in the implementation but is not abstract in the contract.
+CannotMakeTypeAbstract : Type 'System.Drawing.BufferedGraphicsManager' is abstract in the implementation but is not abstract in the contract.
 
 // Won't came back into netcoreapp. See here: https://github.com/dotnet/corefx/issues/18075
 MembersMustExist : Member 'System.ComponentModel.DataAnnotations.ValidationContext.ServiceContainer.get()' does not exist in the implementation but it does exist in the contract.
