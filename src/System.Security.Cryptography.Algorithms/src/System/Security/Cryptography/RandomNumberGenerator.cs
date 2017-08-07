@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+
 namespace System.Security.Cryptography
 {
     public abstract class RandomNumberGenerator : IDisposable
@@ -46,6 +48,20 @@ namespace System.Security.Cryptography
                     GetBytes(tempData);
                     Buffer.BlockCopy(tempData, 0, data, offset, count);
                 }
+            }
+        }
+
+        public virtual void GetBytes(Span<byte> data)
+        {
+            byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
+            try
+            {
+                GetBytes(array, 0, data.Length);
+                new ReadOnlySpan<byte>(array, 0, data.Length).CopyTo(data);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(array);
             }
         }
 

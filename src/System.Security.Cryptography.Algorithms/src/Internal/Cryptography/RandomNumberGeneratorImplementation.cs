@@ -21,6 +21,17 @@ namespace System.Security.Cryptography
             GetBytesInternal(data, offset, count);
         }
 
+        public override unsafe void GetBytes(Span<byte> data)
+        {
+            if (data.Length > 0)
+            {
+                fixed (byte* ptr = &data.DangerousGetPinnableReference())
+                {
+                    GetBytes(ptr, data.Length);
+                }
+            }
+        }
+
         public override void GetNonZeroBytes(byte[] data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
