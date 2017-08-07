@@ -7,12 +7,12 @@ internal static partial class Interop
 {
     internal static class CustomBio
     {
-        private static IntPtr _customBioMethodStructure;
-        private static CreateDelegate _createDelegate;
-        private static DestroyDelegate _destroyDelegate;
-        private unsafe static ControlDelegate _controlDelegate;
-        private unsafe static ReadDelegate _readDelegate;
-        private unsafe static WriteDelegate _writeDelegate;
+        private static IntPtr s_customBioMethodStructure;
+        private static CreateDelegate s_createDelegate;
+        private static DestroyDelegate s_destroyDelegate;
+        private unsafe static ControlDelegate s_controlDelegate;
+        private unsafe static ReadDelegate s_readDelegate;
+        private unsafe static WriteDelegate s_writeDelegate;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate int CreateDelegate(bio_st* bio);
@@ -36,32 +36,32 @@ internal static partial class Interop
 
         internal unsafe static void Initialize()
         {
-            _createDelegate = Create;
-            _controlDelegate = Control;
-            _destroyDelegate = Destroy;
-            _writeDelegate = Write;
-            _readDelegate = Read;
+            s_createDelegate = Create;
+            s_controlDelegate = Control;
+            s_destroyDelegate = Destroy;
+            s_writeDelegate = Write;
+            s_readDelegate = Read;
 
-            var name = Marshal.StringToHGlobalAnsi("Managed Bio");
+            IntPtr name = Marshal.StringToHGlobalAnsi("Managed Bio");
             var bioStruct = new bio_method_st()
             {
-                create = _createDelegate,
+                create = s_createDelegate,
                 name = name,
                 type = BIO_TYPE.BIO_TYPE_SOURCE_SINK,
-                destroy = _destroyDelegate,
-                ctrl = _controlDelegate,
-                bread = _readDelegate,
-                bwrite = _writeDelegate,
+                destroy = s_destroyDelegate,
+                ctrl = s_controlDelegate,
+                bread = s_readDelegate,
+                bwrite = s_writeDelegate,
             };
 
-            var memory = Marshal.AllocHGlobal(Marshal.SizeOf<bio_method_st>());
+            IntPtr memory = Marshal.AllocHGlobal(Marshal.SizeOf<bio_method_st>());
             Marshal.StructureToPtr(bioStruct, memory, true);
-            _customBioMethodStructure = memory;
+            s_customBioMethodStructure = memory;
         }
 
         internal static GCHandle BioGetGCHandle(IntPtr bio)
         {
-            var ptr = Crypto.BioGetAppData(bio);
+            IntPtr ptr = Crypto.BioGetAppData(bio);
             if (ptr == IntPtr.Zero)
             {
                 return default(GCHandle);
@@ -78,7 +78,7 @@ internal static partial class Interop
 
         internal static SafeBioHandle CreateCustomBio()
         {
-            var bio = Crypto.CreateCustomBio(_customBioMethodStructure);
+            SafeBioHandle bio = Crypto.CreateCustomBio(s_customBioMethodStructure);
             return bio;
         }
 
@@ -104,7 +104,7 @@ internal static partial class Interop
 
         private static unsafe int Write(IntPtr bio, void* input, int size)
         {
-            var handle = BioGetGCHandle(bio);
+            GCHandle handle = BioGetGCHandle(bio);
 
             if (handle.IsAllocated && handle.Target is SafeSslHandle.WriteBioBuffer buffer)
             {
@@ -116,7 +116,7 @@ internal static partial class Interop
 
         private static unsafe int Read(IntPtr bio, void* output, int size)
         {
-            var handle = BioGetGCHandle(bio);
+            GCHandle handle = BioGetGCHandle(bio);
             if (handle.IsAllocated && handle.Target is SafeSslHandle.ReadBioBuffer buffer)
             {
                 return buffer.Read(new Span<byte>(output, size));

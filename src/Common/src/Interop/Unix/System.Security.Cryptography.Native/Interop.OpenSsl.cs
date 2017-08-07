@@ -153,8 +153,7 @@ internal static partial class Interop
 
             if (retVal != 1)
             {
-                Exception innerError;
-                Ssl.SslErrorCode error = GetSslError(context, retVal, out innerError);
+                Ssl.SslErrorCode error = GetSslError(context, retVal, out Exception innerError);
 
                 if ((retVal != -1) || (error != Ssl.SslErrorCode.SSL_ERROR_WANT_READ))
                 {
@@ -194,8 +193,7 @@ internal static partial class Interop
 
             if (retVal != count)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)
@@ -237,8 +235,7 @@ internal static partial class Interop
 
             if (retVal != count)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)
@@ -326,7 +323,7 @@ internal static partial class Interop
             {
                 store.Open(OpenFlags.ReadOnly);
 
-                foreach (var certificate in store.Certificates)
+                foreach (X509Certificate2 certificate in store.Certificates)
                 {
                     //Check if issuer name is already present
                     //Avoiding duplicate names
