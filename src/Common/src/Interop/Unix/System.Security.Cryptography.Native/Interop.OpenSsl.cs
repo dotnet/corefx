@@ -147,7 +147,7 @@ internal static partial class Interop
             }
 
             context.InputBio.SetBio(recvBuf, recvOffset, recvCount);
-            context.OutputBio.SetBio(null, true);
+            context.OutputBio.SetBio(buffer: null, isHandshake: true);
 
             int retVal = Ssl.SslDoHandshake(context);
 
@@ -162,7 +162,7 @@ internal static partial class Interop
             }
 
             sendCount = context.OutputBio.TakeBytes(out sendBuf);
-            
+
             bool stateOk = Ssl.IsSslStateOK(context);
             if (stateOk)
             {
@@ -180,7 +180,7 @@ internal static partial class Interop
             Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
-            context.OutputBio.SetBio(output, false);
+            context.OutputBio.SetBio(output, isHandshake: false);
 
             int retVal;
             unsafe
