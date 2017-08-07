@@ -359,14 +359,14 @@ namespace System.ComponentModel.Design.Tests
         public void GetOptionValue_NullPageName_ThrowsArgumentNullException()
         {
             IDesignerOptionService service = new TestDesignerOptionService();
-            Assert.Throws<ArgumentNullException>("pageName", () => service.GetOptionValue(null, "ValueName"));
+            AssertExtensions.Throws<ArgumentNullException>("pageName", () => service.GetOptionValue(null, "ValueName"));
         }
 
         [Fact]
         public void GetOptionValue_NullValueName_ThrowsArgumentNullException()
         {
             IDesignerOptionService service = new TestDesignerOptionService();
-            Assert.Throws<ArgumentNullException>("valueName", () => service.GetOptionValue("PageName", null));
+            AssertExtensions.Throws<ArgumentNullException>("valueName", () => service.GetOptionValue("PageName", null));
         }
 
         [Fact]
@@ -416,14 +416,14 @@ namespace System.ComponentModel.Design.Tests
         public void SetOptionValue_NullPageName_ThrowsArgumentNullException()
         {
             IDesignerOptionService service = new TestDesignerOptionService();
-            Assert.Throws<ArgumentNullException>("pageName", () => service.SetOptionValue(null, "ValueName", "value"));
+            AssertExtensions.Throws<ArgumentNullException>("pageName", () => service.SetOptionValue(null, "ValueName", "value"));
         }
 
         [Fact]
         public void SetOptionValue_NullValueName_ThrowsArgumentNullException()
         {
             IDesignerOptionService service = new TestDesignerOptionService();
-            Assert.Throws<ArgumentNullException>("valueName", () => service.SetOptionValue("PageName", null, "value"));
+            AssertExtensions.Throws<ArgumentNullException>("valueName", () => service.SetOptionValue("PageName", null, "value"));
         }
 
         [Fact]
