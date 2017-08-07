@@ -156,7 +156,6 @@
       "InboxOn": {}
     },
     "Microsoft.Private.PackageBaseline": {
-      "BaselineVersion": "2.0.0",
       "InboxOn": {}
     },
     "Microsoft.VisualBasic": {
@@ -537,6 +536,7 @@
       "StableVersions": [
         "4.4.0"
       ],
+      "BaselineVersion": "4.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0"
@@ -967,6 +967,7 @@
       "StableVersions": [
         "4.4.0"
       ],
+      "BaselineVersion": "4.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0"
@@ -1246,7 +1247,7 @@
         "4.4.0",
         "4.4.1"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.4.1",
       "InboxOn": {
         "netcoreapp2.0": "4.0.2.1"
       },
@@ -1254,7 +1255,8 @@
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.3.0",
         "4.0.2.0": "4.4.0",
-        "4.0.2.1": "4.4.1"
+        "4.0.2.1": "4.4.1",
+        "4.0.3.0": "4.5.0"
       }
     },
     "System.Diagnostics.FileVersionInfo": {
@@ -2014,6 +2016,7 @@
       "StableVersions": [
         "4.4.0"
       ],
+      "BaselineVersion": "4.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0"
@@ -2290,7 +2293,7 @@
         "4.1.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "netcoreapp2.0": "4.2.0.0",
         "net45": "4.0.0.0",
@@ -2324,7 +2327,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "uap10.1": "4.0.3.0",
         "win8": "4.0.0.0"
@@ -2749,7 +2752,7 @@
         "4.3.0",
         "4.4.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.4.0",
       "InboxOn": {
         "netcoreapp2.0": "4.1.3.0",
         "net46": "4.0.0.0",
@@ -2776,7 +2779,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "uap10.1": "4.0.3.0"
       },
@@ -2914,7 +2917,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "net45": "4.0.0.0",
         "portable46-net451+win81": "4.0.0.0",
@@ -3132,7 +3135,7 @@
         "4.3.0",
         "4.4.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.4.0",
       "InboxOn": {
         "netcoreapp2.0": "4.1.2.0",
         "monoandroid10": "Any",
@@ -3440,7 +3443,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "netcoreapp2.0": "4.0.2.0",
         "monoandroid10": "Any",
@@ -3738,7 +3741,7 @@
         "4.0.11",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "portable46-win81+wp81+wpa81": "4.0.0.0",
         "portable46-win81+wp81": "4.0.0.0",
@@ -3764,7 +3767,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.3.0",
       "InboxOn": {
         "portable46-win81+wpa81": "4.0.0.0",
         "uap10.1": "4.0.3.0",
@@ -3855,7 +3858,7 @@
         "4.3.0",
         "4.4.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.2.0",
@@ -4011,6 +4014,7 @@
       "StableVersions": [
         "4.4.0"
       ],
+      "BaselineVersion": "4.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0"
