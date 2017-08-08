@@ -63,15 +63,7 @@ namespace System.Data.Tests.Common
 			//Second row where data row column value is DBNull
 			 _dataReader.Read();
 			Assert.Equal("row_2", _dataReader.GetFieldValue<string>(0));
-			try
-			{
-				actual_data = _dataReader.GetFieldValue<byte[]>(1);
-                Assert.False(true);
-			}
-			catch (InvalidCastException)
-			{
-				//This is expected
-			}
+			Assert.Throws<InvalidCastException>(() => _dataReader.GetFieldValue<byte[]>(1));
 
 			//Third row
 			 _dataReader.Read();
