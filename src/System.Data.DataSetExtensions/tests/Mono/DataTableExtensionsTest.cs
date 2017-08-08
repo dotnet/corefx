@@ -77,7 +77,7 @@ namespace MonoTests.System.Data
         public void AsEnumerable()
         {
             DataSet ds = new DataSet();
-            ds.ReadXml("testdataset1.xml");
+            ds.ReadXml("Mono/testdataset1.xml");
             DataTable dt = ds.Tables[0];
             Assert.Equal("ScoreList", dt.TableName);
             var dv = dt.AsEnumerable();
