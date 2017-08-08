@@ -5,10 +5,13 @@
 #include "pal_types.h"
 #include "opensslshim.h"
 
+typedef int32_t (*BWriteCallback)(BIO* b, const char* buf, int32_t len);
+typedef int32_t (*BReadCallback)(BIO* b, char* buf, int32_t len);
+
 /*
 Creates a custom BIO instance.
 */
-extern "C" BIO* CryptoNative_CreateCustomBio(BIO_METHOD* bioMethod);
+extern "C" BIO* CryptoNative_CreateCustomBio();
 
 /*
 Creates a new memory-backed BIO instance.
@@ -78,3 +81,6 @@ extern "C" void CryptoNative_BioSetWriteFlag(BIO* bio);
 Set the read and should retry flag for the custom bio
 */
 extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio);
+
+extern "C" void CryptoNative_InitCustomBioMethod(BWriteCallback bwrite, BReadCallback bread);
+

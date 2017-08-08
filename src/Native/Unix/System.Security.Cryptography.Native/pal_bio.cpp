@@ -6,11 +6,6 @@
 
 #include <assert.h>
 
-extern "C" BIO* CryptoNative_CreateCustomBio(BIO_METHOD* bioMethod)
-{
-    return BIO_new(bioMethod);
-}
-
 extern "C" BIO* CryptoNative_CreateMemoryBio()
 {
     return BIO_new(BIO_s_mem());
@@ -82,4 +77,53 @@ Set the read and should retry flag for the custom bio
 extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio)
 {
     BIO_set_flags(bio, BIO_FLAGS_WRITE);
+}
+
+static long ControlCallback(BIO* bio, int cmd, long param, void* ptr)
+{
+    (void)bio, (void)param, (void)ptr; // deliberately unused parameters
+    switch (cmd)
+    {
+        case BIO_CTRL_FLUSH:
+        case BIO_CTRL_POP:
+        case BIO_CTRL_PUSH:
+            return 1;
+    }
+    return 0;
+}
+
+static int DestroyCallback(BIO* bio)
+{
+    (void)bio; // deliberately unused parameter
+    return -1;
+}
+
+static int CreateCallback(BIO* bio)
+{
+    bio->init = 1;
+    return 1;
+}
+
+static BIO_METHOD sslStreamCustomBio = {
+    BIO_TYPE_SOURCE_SINK,
+    "SslStreamCustomBio",
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    ControlCallback,
+    CreateCallback,
+    DestroyCallback,
+    nullptr,
+};
+
+extern "C" void CryptoNative_InitCustomBioMethod(BWriteCallback bwrite, BReadCallback bread)
+{
+    sslStreamCustomBio.bwrite = bwrite;
+    sslStreamCustomBio.bread = bread;
+}
+
+extern "C" BIO* CryptoNative_CreateCustomBio()
+{
+    return BIO_new(&sslStreamCustomBio);
 }
