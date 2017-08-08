@@ -172,6 +172,7 @@ namespace System.Tests
         [InlineData(EnvironmentVariableTarget.User)]
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/23003")]
         public void GetEnumerator_LinqOverDictionaryEntries_Success(EnvironmentVariableTarget? target)
         {
             IDictionary envVars = target != null ?
