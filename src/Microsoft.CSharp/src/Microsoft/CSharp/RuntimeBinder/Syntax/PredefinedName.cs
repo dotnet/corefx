@@ -19,11 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
         PN_COMBINE,
         PN_REMOVE,
 
-        // internal method name for conversion operators
-        // these get mangled when converted to CLS names
-        PN_OPEXPLICITMN,
-        PN_OPIMPLICITMN,
-
         // CLS method names for user defined operators
         PN_OPUNARYPLUS,
         PN_OPUNARYMINUS,

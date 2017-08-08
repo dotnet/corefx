@@ -21,8 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
             "$Item$",
             "Combine",
             "Remove",
-            "op_Explicit",
-            "op_Implicit",
             "op_UnaryPlus",
             "op_UnaryNegation",
             "op_OnesComplement",
