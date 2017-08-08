@@ -61,6 +61,7 @@ namespace System.Security.Cryptography
             }
             finally
             {
+                Array.Clear(array, 0, data.Length);
                 ArrayPool<byte>.Shared.Return(array);
             }
         }
@@ -70,6 +71,24 @@ namespace System.Security.Cryptography
             // For compatibility we cannot have it be abstract. Since this technically is an abstract method
             // with no implementation, we'll just throw NotImplementedException.
             throw new NotImplementedException();
+        }
+
+        public virtual void GetNonZeroBytes(Span<byte> data)
+        {
+            byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
+            try
+            {
+                // NOTE: There is no GetNonZeroBytes(byte[], int, int) overload, so this call
+                // may end up retrieving more data than was intended, if the array pool
+                // gives back a larger array than was actually needed.
+                GetNonZeroBytes(array);
+                new ReadOnlySpan<byte>(array, 0, data.Length).CopyTo(data);
+            }
+            finally
+            {
+                Array.Clear(array, 0, data.Length);
+                ArrayPool<byte>.Shared.Return(array);
+            }
         }
 
         internal void VerifyGetBytes(byte[] data, int offset, int count)

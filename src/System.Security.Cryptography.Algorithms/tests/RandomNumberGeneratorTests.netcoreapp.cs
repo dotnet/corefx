@@ -44,5 +44,16 @@ namespace System.Security.Cryptography.RNG.Tests
                 Assert.Equal(1, rand[0]);
             }
         }
+
+        [Fact]
+        public static void GetNonZeroBytes_Span()
+        {
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                var rand = new byte[65536];
+                rng.GetNonZeroBytes(new Span<byte>(rand));
+                Assert.Equal(-1, Array.IndexOf<byte>(rand, 0));
+            }
+        }
     }
 }

@@ -100,7 +100,7 @@ namespace System.Security.Cryptography.RNG.Tests
         }
 
         [Fact]
-        public static void GetNonZeroBytes()
+        public static void GetNonZeroBytes_Array()
         {
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
