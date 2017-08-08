@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    public class AdjustPrecScaleForBulkCopy
+    public static class AdjustPrecScaleForBulkCopy
     {
         [CheckConnStrSetupFact]
         public static void RunTest()
