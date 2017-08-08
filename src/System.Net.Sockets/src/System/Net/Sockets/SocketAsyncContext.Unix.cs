@@ -294,19 +294,15 @@ namespace System.Net.Sockets
 
             public Action<int, byte[], int, SocketFlags, IPPacketInformation, SocketError> Callback
             {
-                private get { return (Action<int, byte[], int, SocketFlags, IPPacketInformation, SocketError>)CallbackOrEvent; }
-                set { CallbackOrEvent = value; }
+                set => CallbackOrEvent = value;
             }
 
-            protected override bool DoTryComplete(SocketAsyncContext context)
-            {
-                return SocketPal.TryCompleteReceiveMessageFrom(context._socket, Buffer, Buffers, Offset, Count, Flags, SocketAddress, ref SocketAddressLen, IsIPv4, IsIPv6, out BytesTransferred, out ReceivedFlags, out IPPacketInformation, out ErrorCode);
-            }
+            protected override bool DoTryComplete(SocketAsyncContext context) =>
+                SocketPal.TryCompleteReceiveMessageFrom(context._socket, Buffer, Buffers, Offset, Count, Flags, SocketAddress, ref SocketAddressLen, IsIPv4, IsIPv6, out BytesTransferred, out ReceivedFlags, out IPPacketInformation, out ErrorCode);
 
-            protected override void InvokeCallback()
-            {
-                Callback(BytesTransferred, SocketAddress, SocketAddressLen, ReceivedFlags, IPPacketInformation, ErrorCode);
-            }
+            protected override void InvokeCallback() =>
+                ((Action<int, byte[], int, SocketFlags, IPPacketInformation, SocketError>)CallbackOrEvent)(
+                    BytesTransferred, SocketAddress, SocketAddressLen, ReceivedFlags, IPPacketInformation, ErrorCode);
         }
 
         private sealed class AcceptOperation : ReadOperation
@@ -315,14 +311,11 @@ namespace System.Net.Sockets
 
             public Action<IntPtr, byte[], int, SocketError> Callback
             {
-                private get { return (Action<IntPtr, byte[], int, SocketError>)CallbackOrEvent; }
-                set { CallbackOrEvent = value; }
+                set => CallbackOrEvent = value;
             }
 
-            protected override void Abort()
-            {
+            protected override void Abort() =>
                 AcceptedFileDescriptor = (IntPtr)(-1);
-            }
 
             protected override bool DoTryComplete(SocketAsyncContext context)
             {
@@ -331,18 +324,16 @@ namespace System.Net.Sockets
                 return completed;
             }
 
-            protected override void InvokeCallback()
-            {
-                Callback(AcceptedFileDescriptor, SocketAddress, SocketAddressLen, ErrorCode);
-            }
+            protected override void InvokeCallback() =>
+                ((Action<IntPtr, byte[], int, SocketError>)CallbackOrEvent)(
+                    AcceptedFileDescriptor, SocketAddress, SocketAddressLen, ErrorCode);
         }
 
         private sealed class ConnectOperation : WriteOperation
         {
             public Action<SocketError> Callback
             {
-                private get { return (Action<SocketError>)CallbackOrEvent; }
-                set { CallbackOrEvent = value; }
+                set => CallbackOrEvent = value;
             }
 
             protected override void Abort() { }
@@ -354,10 +345,8 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            protected override void InvokeCallback()
-            {
-                Callback(ErrorCode);
-            }
+            protected override void InvokeCallback() =>
+                ((Action<SocketError>)CallbackOrEvent)(ErrorCode);
         }
 
         private sealed class SendFileOperation : WriteOperation
@@ -371,19 +360,14 @@ namespace System.Net.Sockets
 
             public Action<long, SocketError> Callback
             {
-                private get { return (Action<long, SocketError>)CallbackOrEvent; }
-                set { CallbackOrEvent = value; }
+                set => CallbackOrEvent = value;
             }
 
-            protected override void InvokeCallback()
-            {
-                Callback(BytesTransferred, ErrorCode);
-            }
+            protected override void InvokeCallback() =>
+                ((Action<long, SocketError>)CallbackOrEvent)(BytesTransferred, ErrorCode);
 
-            protected override bool DoTryComplete(SocketAsyncContext context)
-            {
-                return SocketPal.TryCompleteSendFile(context._socket, FileHandle, ref Offset, ref Count, ref BytesTransferred, out ErrorCode);
-            }
+            protected override bool DoTryComplete(SocketAsyncContext context) =>
+                SocketPal.TryCompleteSendFile(context._socket, FileHandle, ref Offset, ref Count, ref BytesTransferred, out ErrorCode);
         }
 
         private enum QueueState
