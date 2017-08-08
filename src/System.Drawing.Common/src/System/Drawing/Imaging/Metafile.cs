@@ -13,7 +13,7 @@ namespace System.Drawing.Imaging
     /// Defines a graphic metafile. A metafile contains records that describe a sequence of graphics operations that
     /// can be recorded and played back.
     /// </summary>
-    public sealed partial class Metafile : Image, ISerializable
+    public sealed partial class Metafile : Image
     {
         /// <summary>
         /// Initializes a new instance of the <see cref='Metafile'/> class from the specified handle and

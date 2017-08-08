@@ -181,7 +181,6 @@
     <Compile Include="AssemblyRef.cs" />
     <Compile Include="SRDescriptionAttribute.cs" />
     <Compile Include="System\Drawing\Bitmap.cs" />
-    <Compile Include="System\Drawing\Bitmap.NotSerializable.cs" />
     <Compile Include="System\Drawing\BitmapSelector.cs" />
     <Compile Include="System\Drawing\Brushes.cs" />
     <Compile Include="System\Drawing\BufferedGraphics.cs" />
@@ -210,7 +209,6 @@
     <Compile Include="System\Drawing\Imaging\BitmapData.cs" />
     <Compile Include="System\Drawing\Imaging\ImageFormat.cs" />
     <Compile Include="System\Drawing\Imaging\Metafile.cs" />
-    <Compile Include="System\Drawing\Imaging\Metafile.NotSerializable.cs" />
     <Compile Include="System\Drawing\Imaging\MetafileHeader.cs" />
     <Compile Include="System\Drawing\Imaging\METAHEADER.cs" />
     <Compile Include="System\Drawing\Internal\GPStream.cs" />

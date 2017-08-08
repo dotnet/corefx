@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 namespace System.Drawing
 {
     [ComVisible(true)]
-    public sealed partial class Bitmap : Image, ISerializable
+    public sealed partial class Bitmap : Image
     {
         private static Color s_defaultTransparentColor = Color.LightGray;
 
