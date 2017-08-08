@@ -610,8 +610,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Otherwise, we generate Type.Missing
 
                             AggregateSymbol agg = symbolLoader.GetPredefAgg(PredefinedType.PT_MISSING);
-                            string name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
-                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
+                            FieldSymbol field = symbolLoader.LookupAggMember("Value", agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             ExprField exprField = exprFactory.CreateField(agg.getThisType(), null, fwt, false);
 
@@ -1226,7 +1225,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_pGroup.OptionalObject != null &&
                         _pGroup.OptionalObject.Type != null &&
                         _pGroup.OptionalObject.Type.isDelegateType() &&
-                        _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
+                        _pGroup.Name == "Invoke")
                 {
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().MethProp().getClass().IsDelegate());
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().getAggregate().IsDelegate());

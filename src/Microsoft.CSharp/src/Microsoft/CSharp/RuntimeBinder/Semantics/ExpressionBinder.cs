@@ -484,7 +484,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
             }
 
-            string pName = NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL);
+            const string pName = "$Item$";
 
             MemberLookup mem = new MemberLookup();
             if (!mem.Lookup(GetSemanticChecker(), type, pObject, ContextForMemberLookup(), pName, 0,
@@ -682,8 +682,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (fieldType != null)
             {
-                string getOrCreateMethodName =
-                    NameManager.GetPredefinedName(PredefinedName.PN_GETORCREATEEVENTREGISTRATIONTOKENTABLE);
+                const string getOrCreateMethodName = "GetOrCreateEventRegistrationTokenTable";
                 GetSymbolLoader()
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
                         getOrCreateMethodName, null, fieldType.AssociatedSystemType);
@@ -699,7 +698,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     new MethWithInst(getOrCreatempwi), pResult, getOrCreateGrp, (MemLookFlags)MemLookFlags.None);
 
                 AggregateSymbol fieldTypeSymbol = fieldType.GetOwningAggregate();
-                string invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
+                const string invocationListName = "InvocationList";
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.
                 GetSymbolLoader()

@@ -112,14 +112,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case 1:
                     if (isSZArray)
                     {
-                        goto case 2;
+                        name = "[X\002";
+                        break;
                     }
                     else
                     {
                         goto default;
                     }
                 case 2:
-                    name = NameManager.GetPredefinedName(PredefinedName.PN_ARRAY0 + args);
+                    name = "[X\003";
                     break;
                 default:
                     name = "[X" + args + 1;
@@ -244,9 +245,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
-                string namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
-
-                pPointer = _typeFactory.CreatePointer(namePtr, baseType);
+                pPointer = _typeFactory.CreatePointer("*", baseType);
                 pPointer.InitFromParent();
 
                 _typeTable.InsertPointer(baseType, pPointer);
@@ -272,9 +271,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                string pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
-
-                pNullableType = _typeFactory.CreateNullable(pName, pUnderlyingType, _BSymmgr, this);
+                pNullableType = _typeFactory.CreateNullable("?*", pUnderlyingType, _BSymmgr, this);
                 pNullableType.InitFromParent();
 
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
@@ -291,7 +288,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ParameterModifierType GetParameterModifier(CType paramType, bool isOut)
         {
-            string name = NameManager.GetPredefinedName(isOut ? PredefinedName.PN_OUTPARAM : PredefinedName.PN_REFPARAM);
+            string name = isOut ? "#" : "&";
             ParameterModifierType pParamModifier = _typeTable.LookupParameterModifier(name, paramType);
 
             if (pParamModifier == null)

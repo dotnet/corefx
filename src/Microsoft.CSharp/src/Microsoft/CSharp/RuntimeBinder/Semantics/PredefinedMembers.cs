@@ -222,7 +222,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 delegateType,
                                 signature,
                                 0,                          // meth ty vars
-                                GetPredefName(PredefinedName.PN_CTOR),
+                                ".ctor",
                                 ACCESS.ACC_PUBLIC,
                                 false,                      // MethodCallingConventionEnum.Static
                                 false);                     // MethodCallingConventionEnum.Virtual
@@ -299,10 +299,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetSymbolLoader().getBSymmgr();
         }
 
-        private string GetPredefName(PredefinedName pn)
-        {
-            return NameManager.GetPredefinedName(pn);
-        }
         private AggregateSymbol GetOptPredefAgg(PredefinedType pt)
         {
             return GetSymbolLoader().GetPredefAgg(pt);

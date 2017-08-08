@@ -659,7 +659,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // If we have a constructor, only find its type.
-            bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
+            bool bIsConstructor = name == ".ctor";
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
                 if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), name, mask))
@@ -984,12 +984,12 @@ namespace Microsoft.CSharp.RuntimeBinder
                 Expr addMethArg = _binder.mustConvert(addMethGrp, _symbolTable.GetCTypeFromType(funcType));
 
                 args = _exprFactory.CreateList(addMethArg, removeMethArg, delegateVal);
-                methodName = NameManager.GetPredefinedName(PredefinedName.PN_ADDEVENTHANDLER);
+                methodName = "AddEventHandler";
             }
             else
             {
                 args = _exprFactory.CreateList(removeMethArg, delegateVal);
-                methodName = NameManager.GetPredefinedName(PredefinedName.PN_REMOVEEVENTHANDLER);
+                methodName = "RemoveEventHandler";
             }
 
             // WindowsRuntimeMarshal.Add\RemoveEventHandler(...)

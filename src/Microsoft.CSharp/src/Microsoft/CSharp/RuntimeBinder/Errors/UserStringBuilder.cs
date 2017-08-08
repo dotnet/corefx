@@ -127,17 +127,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             ErrAppendString(string.Format(CultureInfo.InvariantCulture, format, args));
         }
-        private void ErrAppendName(string name)
-        {
-            if (name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
-            {
-                ErrAppendString("this");
-            }
-            else
-            {
-                ErrAppendString(name);
-            }
-        }
+
+        private void ErrAppendName(string name) => ErrAppendString(name == "$Item$" ? "this" : name);
 
         private void ErrAppendMethodParentSym(MethodSymbol sym, SubstContext pcxt, out TypeArray substMethTyParams)
         {
@@ -666,7 +657,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case ErrArgKind.Str:
-                    if (parg.psz == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
+                    if (parg.psz == "$Item$")
                     {
                         psz = "this";
                     }
