@@ -170,6 +170,7 @@ namespace System.Tests
         [Theory]
         [InlineData(null)]
         [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/23003")]
         public void GetEnumerator_LinqOverDictionaryEntries_Success(EnvironmentVariableTarget? target)
         {
             IDictionary envVars = target != null ?
