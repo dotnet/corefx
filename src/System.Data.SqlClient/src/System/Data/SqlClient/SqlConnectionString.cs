@@ -4,9 +4,6 @@
 
 
 
-//------------------------------------------------------------------------------
-
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -29,6 +26,7 @@ namespace System.Data.SqlClient
             internal const string Current_Language = "";
             internal const string Data_Source = "";
             internal const bool Encrypt = false;
+            internal const bool Enlist = true;
             internal const string FailoverPartner = "";
             internal const string Initial_Catalog = "";
             internal const bool Integrated_Security = false;
@@ -152,6 +150,17 @@ namespace System.Data.SqlClient
             internal const string SQL_Server_2012 = "SQL Server 2012";
         }
 
+        internal enum TransactionBindingEnum
+        {
+            ImplicitUnbind,
+            ExplicitUnbind
+        }
+
+        internal static class TRANSACTIONBINDING
+        {
+            internal const string ImplicitUnbind = "Implicit Unbind";
+            internal const string ExplicitUnbind = "Explicit Unbind";
+        }
 
         private static Dictionary<string, string> s_sqlClientSynonyms;
 
@@ -159,6 +168,7 @@ namespace System.Data.SqlClient
 
         private readonly bool _encrypt;
         private readonly bool _trustServerCertificate;
+        private readonly bool _enlist;
         private readonly bool _mars;
         private readonly bool _persistSecurityInfo;
         private readonly bool _pooling;
@@ -188,13 +198,14 @@ namespace System.Data.SqlClient
         private readonly string _workstationId;
 
         private readonly TypeSystem _typeSystemVersion;
+
+        private readonly TransactionBindingEnum _transactionBinding;
+
         internal SqlConnectionString(string connectionString) : base(connectionString, GetParseSynonyms())
         {
             ThrowUnsupportedIfKeywordSet(KEY.AsynchronousProcessing);
             ThrowUnsupportedIfKeywordSet(KEY.Connection_Reset);
             ThrowUnsupportedIfKeywordSet(KEY.Context_Connection);
-            ThrowUnsupportedIfKeywordSet(KEY.Enlist);
-            ThrowUnsupportedIfKeywordSet(KEY.TransactionBinding);
 
             // Network Library has its own special error message
             if (ContainsKey(KEY.Network_Library))
@@ -204,6 +215,7 @@ namespace System.Data.SqlClient
 
             _integratedSecurity = ConvertValueToIntegratedSecurity();
             _encrypt = ConvertValueToBoolean(KEY.Encrypt, DEFAULT.Encrypt);
+            _enlist = ConvertValueToBoolean(KEY.Enlist, DEFAULT.Enlist);
             _mars = ConvertValueToBoolean(KEY.MARS, DEFAULT.MARS);
             _persistSecurityInfo = ConvertValueToBoolean(KEY.Persist_Security_Info, DEFAULT.Persist_Security_Info);
             _pooling = ConvertValueToBoolean(KEY.Pooling, DEFAULT.Pooling);
@@ -232,6 +244,7 @@ namespace System.Data.SqlClient
 
             // Temporary string - this value is stored internally as an enum.
             string typeSystemVersionString = ConvertValueToString(KEY.Type_System_Version, null);
+            string transactionBindingString = ConvertValueToString(KEY.TransactionBinding, null);
 
             _userID = ConvertValueToString(KEY.User_ID, DEFAULT.User_ID);
             _workstationId = ConvertValueToString(KEY.Workstation_Id, null);
@@ -340,6 +353,23 @@ namespace System.Data.SqlClient
                 throw ADP.InvalidConnectionOptionValue(KEY.Type_System_Version);
             }
 
+            if (string.IsNullOrEmpty(transactionBindingString))
+            {
+                transactionBindingString = DbConnectionStringDefaults.TransactionBinding;
+            }
+
+            if (transactionBindingString.Equals(TRANSACTIONBINDING.ImplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            {
+                _transactionBinding = TransactionBindingEnum.ImplicitUnbind;
+            }
+            else if (transactionBindingString.Equals(TRANSACTIONBINDING.ExplicitUnbind, StringComparison.OrdinalIgnoreCase))
+            {
+                _transactionBinding = TransactionBindingEnum.ExplicitUnbind;
+            }
+            else
+            {
+                throw ADP.InvalidConnectionOptionValue(KEY.TransactionBinding);
+            }
 
             if (_applicationIntent == ApplicationIntent.ReadOnly && !String.IsNullOrEmpty(_failoverPartner))
                 throw SQL.ROR_FailoverNotSupportedConnString();
@@ -357,10 +387,19 @@ namespace System.Data.SqlClient
 
         // This c-tor is used to create SSE and user instance connection strings when user instance is set to true
         // BUG (VSTFDevDiv) 479687: Using TransactionScope with Linq2SQL against user instances fails with "connection has been broken" message
-        internal SqlConnectionString(SqlConnectionString connectionOptions, string dataSource, bool userInstance) : base(connectionOptions)
+        internal SqlConnectionString(SqlConnectionString connectionOptions, string dataSource, bool userInstance, bool? setEnlistValue) : base(connectionOptions)
         {
             _integratedSecurity = connectionOptions._integratedSecurity;
             _encrypt = connectionOptions._encrypt;
+
+            if (setEnlistValue.HasValue)
+            {
+                _enlist = setEnlistValue.Value;
+            }
+            else
+            {
+                _enlist = connectionOptions._enlist;
+            }
 
             _mars = connectionOptions._mars;
             _persistSecurityInfo = connectionOptions._persistSecurityInfo;
@@ -384,6 +423,7 @@ namespace System.Data.SqlClient
             _userID = connectionOptions._userID;
             _workstationId = connectionOptions._workstationId;
             _typeSystemVersion = connectionOptions._typeSystemVersion;
+            _transactionBinding = connectionOptions._transactionBinding;
             _applicationIntent = connectionOptions._applicationIntent;
             _connectRetryCount = connectionOptions._connectRetryCount;
             _connectRetryInterval = connectionOptions._connectRetryInterval;
@@ -402,6 +442,7 @@ namespace System.Data.SqlClient
         //        internal bool EnableUdtDownload { get { return _enableUdtDownload;} }
         internal bool Encrypt { get { return _encrypt; } }
         internal bool TrustServerCertificate { get { return _trustServerCertificate; } }
+        internal bool Enlist { get { return _enlist; } }
         internal bool MARS { get { return _mars; } }
         internal bool MultiSubnetFailover { get { return _multiSubnetFailover; } }
 
@@ -431,6 +472,8 @@ namespace System.Data.SqlClient
         internal string WorkstationId { get { return _workstationId; } }
 
         internal TypeSystem TypeSystemVersion { get { return _typeSystemVersion; } }
+
+        internal TransactionBindingEnum TransactionBinding { get { return _transactionBinding; } }
 
         // This dictionary is meant to be read-only translation of parsed string
         // keywords/synonyms to a known keyword string.

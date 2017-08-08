@@ -88,7 +88,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_Roundtrip_Equal()
         {
@@ -102,7 +101,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_OutOfRange_Throws()
         {
@@ -114,14 +112,38 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
-        [Fact]
-        public async Task MaxResponseContentBufferSize_TooSmallForContent_Throws()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "no exception throw on netfx")]
+        [Theory]
+        [InlineData(1, 2, true)]
+        [InlineData(1, 127, true)]
+        [InlineData(254, 255, true)]
+        [InlineData(10, 256, true)]
+        [InlineData(1, 440, true)]
+        [InlineData(2, 1, false)]
+        [InlineData(2, 2, false)]
+        [InlineData(1000, 1000, false)]
+        public async Task MaxResponseContentBufferSize_ThrowsIfTooSmallForContent(int maxSize, int contentLength, bool exceptionExpected)
         {
-            using (var client = new HttpClient())
+            using (var client = new HttpClient() { MaxResponseContentBufferSize = maxSize })
             {
-                client.MaxResponseContentBufferSize = 1;
-                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetStringAsync(Configuration.Http.RemoteEchoServer));
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    Task<string> t = client.GetStringAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 OK\r\n" +
+                        $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                        $"Content-Length: {contentLength}\r\n" +
+                        "\r\n" +
+                        new string('s', contentLength));
+                    if (exceptionExpected)
+                    {
+                        await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    }
+                    else
+                    {
+                        await t;
+                    }
+                });
             }
         }
 
@@ -325,14 +347,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task SendAsync_RequestContentDisposed()
+        public async Task SendAsync_RequestContentNotDisposed()
         {
             var content = new ByteArrayContent(new byte[1]);
             using (var request = new HttpRequestMessage(HttpMethod.Get, CreateFakeUri()) { Content = content }) 
             using (var client = new HttpClient(new CustomResponseHandler((r, c) => Task.FromResult(new HttpResponseMessage()))))
             {
                 await client.SendAsync(request);
-                Assert.Throws<ObjectDisposedException>(() => { content.ReadAsStringAsync(); });
+                await content.ReadAsStringAsync(); // no exception
             }
         }
 

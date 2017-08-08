@@ -9,7 +9,6 @@ namespace System
     /// <summary>
     /// An exception class used when an invalid Uniform Resource Identifier is detected.
     /// </summary>
-    [Serializable]
     public class UriFormatException : FormatException, ISerializable
     {
         public UriFormatException() : base()
@@ -26,9 +25,11 @@ namespace System
 
         protected UriFormatException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
 
-        void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext) {
+        void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }; // class UriFormatException

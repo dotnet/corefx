@@ -36,6 +36,12 @@
         "win-x64": {
             "#import": [ "win" ]
         },
+        "win-arm": {
+            "#import": [ "win" ]
+        },
+        "win-arm64": {
+            "#import": [ "win" ]
+        },
 
         "win7": {
             "#import": [ "win" ]
@@ -57,7 +63,7 @@
             "#import": [ "win8", "win7-x64" ]
         },
         "win8-arm": {
-            "#import": [ "win8" ]
+            "#import": [ "win8", "win-arm" ]
         },
 
         "win81": {
@@ -86,7 +92,7 @@
             "#import": [ "win10", "win81-arm" ]
         },
         "win10-arm64": {
-            "#import": [ "win10" ]
+            "#import": [ "win10", "win-arm64" ]
         },
 
         "aot": {
@@ -568,43 +574,11 @@
             "#import": [ "opensuse.42.1", "opensuse-x64" ]
         },
 
-        "alpine": {
+        "gentoo": {
             "#import": [ "linux" ]
         },
-        "alpine-x64": {
-            "#import": [ "alpine", "linux-x64" ]
-        },
-        "alpine-arm": {
-            "#import": [ "alpine", "linux-arm" ]
-        },
-        "alpine-arm64": {
-            "#import": [ "alpine", "linux-arm64" ]
-        },
-
-        "alpine.3": {
-            "#import": [ "alpine" ]
-        },
-        "alpine.3-x64": {
-            "#import": [ "alpine.3", "alpine-x64" ]
-        },
-        "alpine.3-arm": {
-            "#import": [ "alpine.3", "alpine-arm" ]
-        },
-        "alpine.3-arm64": {
-            "#import": [ "alpine.3", "alpine-arm64" ]
-        },
-
-        "alpine.3.4.3": {
-            "#import": [ "alpine.3" ]
-        },
-        "alpine.3.4.3-x64": {
-            "#import": [ "alpine.3.4.3", "alpine.3-x64" ]
-        },
-        "alpine.3.4.3-arm": {
-            "#import": [ "alpine.3.4.3", "alpine.3-arm" ]
-        },
-        "alpine.3.4.3-arm64": {
-            "#import": [ "alpine.3.4.3", "alpine.3-arm64" ]
+        "gentoo-x64": {
+            "#import": [ "gentoo", "linux-x64" ]
         },
 
         "corert": {
@@ -956,27 +930,6 @@
         "opensuse.42.1-x64-corert": {
             "#import": [ "opensuse.42.1-corert", "opensuse.13.2-x64-corert", "opensuse.42.1-x64" ]
         },
-
-        "alpine-corert": {
-            "#import": [ "linux-corert", "alpine" ]
-        },
-        "alpine-x64-corert": {
-            "#import": [ "alpine-corert", "linux-x64-corert", "alpine-x64" ]
-        },
-
-        "alpine.3-corert": {
-            "#import": [ "alpine-corert", "alpine.3" ]
-        },
-        "alpine.3-x64-corert": {
-            "#import": [ "alpine.3-corert", "alpine-x64-corert", "alpine.3-x64" ]
-        },
-
-        "alpine.3.4.3-corert": {
-            "#import": [ "alpine.3-corert", "alpine.3.4.3" ]
-        },
-        "alpine.3.4.3-x64-corert": {
-            "#import": [ "alpine.3.4.3-corert", "alpine.3-x64-corert", "alpine.3.4.3-x64" ]
-        }
 
     }
 }

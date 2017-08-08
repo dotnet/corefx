@@ -16,8 +16,9 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16805")]
-    public class HttpClientHandler_SslProtocols_Test
+    public partial class HttpClientHandler_SslProtocols_Test
     {
         [Fact]
         public void DefaultProtocols_MatchesExpected()
@@ -90,6 +91,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.Tls12, true)]
         public async Task GetAsync_AllowedSSLVersion_Succeeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is failing.
+                return;
+            }
+
             using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
             using (var client = new HttpClient(handler))
             {
@@ -123,6 +130,12 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is failing.
+                return;
+            }
+
             using (HttpClientHandler handler = new HttpClientHandler())
             {
                 if (PlatformDetection.IsCentos7)
@@ -153,6 +166,13 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(NotSupportedSSLVersionServers))]
         public async Task GetAsync_UnsupportedSSLVersion_Throws(string name, string url)
         {
+            if (ManagedHandlerTestHelpers.IsEnabled && !PlatformDetection.IsWindows10Version1607OrGreater)
+            {
+                // On Windows, https://github.com/dotnet/corefx/issues/21925#issuecomment-313408314
+                // On Linux, an older version of OpenSSL may permit negotiating SSLv3.
+                return;
+            }
+
             using (var client = new HttpClient())
             {
                 await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
@@ -243,19 +263,5 @@ namespace System.Net.Http.Functional.Tests
         private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7;
         // TLS 1.2 may not be enabled on Win7
         // https://technet.microsoft.com/en-us/library/dn786418.aspx#BKMK_SchannelTR_TLS12
-
-        private static bool BackendSupportsSslConfiguration =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
-
-        private static bool SSLv3DisabledByDefault =>
-            BackendSupportsSslConfiguration ||
-            Version.Parse(CurlVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetVersionDescription")]
-        private static extern string CurlVersionDescription();
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
     }
 }

@@ -12,13 +12,10 @@ namespace System.Xml
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-    [Serializable]
     public class XmlQualifiedName
     {
         private string _name;
         private string _ns;
-
-        [NonSerialized]
         private Int32 _hash;
 
         /// <devdoc>

@@ -254,7 +254,7 @@ namespace System.IO.Pipes.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // P/Invoking to Win32 functions
-        public async Task CancelTokenOn_ServerWaitForConnectionAsyncWithOuterCancellation_Throws_OperationCanceledException()
+        public async Task CancelTokenOn_ServerWaitForConnectionAsyncWithOuterCancellation_Throws_IOException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
             {
@@ -263,7 +263,7 @@ namespace System.IO.Pipes.Tests
                 Task waitForConnectionTask = server.WaitForConnectionAsync(cts.Token);
 
                 Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waitForConnectionTask);
+                await Assert.ThrowsAsync<IOException>(() => waitForConnectionTask);
             }
         }
 
@@ -523,7 +523,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16934")] //Hangs forever in desktop as it doesn't have cancellation support
+        [ActiveIssue("dotnet/corefx #16934", TargetFrameworkMonikers.NetFramework)] //Hangs forever in desktop as it doesn't have cancellation support
         public async Task Server_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -622,7 +622,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16934")] //Hangs forever in desktop as it doesn't have cancellation support
+        [ActiveIssue("dotnet/corefx #16934", TargetFrameworkMonikers.NetFramework)] //Hangs forever in desktop as it doesn't have cancellation support
         public async Task Client_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -753,7 +753,8 @@ namespace System.IO.Pipes.Tests
             }
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerInOutRead_ClientInOutWrite : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -766,7 +767,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerInOutWrite_ClientInOutRead : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -779,7 +781,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerInOut_ClientIn : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -792,7 +795,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerInOut_ClientOut : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -805,7 +809,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerOut_ClientIn : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -818,7 +823,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Simple_ServerIn_ClientOut : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)

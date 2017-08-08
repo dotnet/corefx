@@ -57,6 +57,7 @@ namespace System.Collections
     [DebuggerTypeProxy(typeof(System.Collections.Hashtable.HashtableDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Hashtable : IDictionary, ISerializable, IDeserializationCallback, ICloneable
     {
         /*
@@ -113,14 +114,14 @@ namespace System.Collections
         internal const Int32 HashPrime = 101;
         private const Int32 InitialSize = 3;
 
-        private const String LoadFactorName = "LoadFactor";
-        private const String VersionName = "Version";
-        private const String ComparerName = "Comparer";
-        private const String HashCodeProviderName = "HashCodeProvider";
-        private const String HashSizeName = "HashSize";  // Must save buckets.Length
-        private const String KeysName = "Keys";
-        private const String ValuesName = "Values";
-        private const String KeyComparerName = "KeyComparer";
+        private const String LoadFactorName = "LoadFactor"; // Do not rename (binary serialization)
+        private const String VersionName = "Version"; // Do not rename (binary serialization)
+        private const String ComparerName = "Comparer"; // Do not rename (binary serialization)
+        private const String HashCodeProviderName = "HashCodeProvider"; // Do not rename (binary serialization)
+        private const String HashSizeName = "HashSize";  // Must save buckets.Length. Do not rename (binary serialization)
+        private const String KeysName = "Keys"; // Do not rename (binary serialization)
+        private const String ValuesName = "Values"; // Do not rename (binary serialization)
+        private const String KeyComparerName = "KeyComparer"; // Do not rename (binary serialization)
 
         // Deleted entries have their key set to buckets
 
@@ -1301,7 +1302,6 @@ namespace System.Collections
 
         // Implements a Collection for the keys of a hashtable. An instance of this
         // class is created by the GetKeys method of a hashtable.
-        [Serializable]
         private class KeyCollection : ICollection
         {
             private Hashtable _hashtable;
@@ -1348,7 +1348,6 @@ namespace System.Collections
 
         // Implements a Collection for the values of a hashtable. An instance of
         // this class is created by the GetValues method of a hashtable.
-        [Serializable]
         private class ValueCollection : ICollection
         {
             private Hashtable _hashtable;
@@ -1394,7 +1393,6 @@ namespace System.Collections
         }
 
         // Synchronized wrapper for hashtable
-        [Serializable]
         private class SyncHashtable : Hashtable, IEnumerable
         {
             protected Hashtable _table;
@@ -1406,27 +1404,12 @@ namespace System.Collections
 
             internal SyncHashtable(SerializationInfo info, StreamingContext context) : base(info, context)
             {
-                _table = (Hashtable)info.GetValue("ParentTable", typeof(Hashtable));
-                if (_table == null)
-                {
-                    throw new SerializationException(SR.Serialization_InsufficientState);
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-                Contract.EndContractBlock();
-
-                // Our serialization code hasn't been fully tweaked to be safe 
-                // for a concurrent writer.
-                lock (_table.SyncRoot)
-                {
-                    info.AddValue("ParentTable", _table, typeof(Hashtable));
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override int Count
@@ -1581,7 +1564,6 @@ namespace System.Collections
         // Implements an enumerator for a hashtable. The enumerator uses the
         // internal version number of the hashtable to ensure that no modifications
         // are made to the hashtable while an enumeration is in progress.
-        [Serializable]
         private class HashtableEnumerator : IDictionaryEnumerator, ICloneable
         {
             private Hashtable _hashtable;

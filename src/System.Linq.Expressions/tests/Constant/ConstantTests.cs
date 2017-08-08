@@ -956,13 +956,13 @@ namespace System.Linq.Expressions.Tests
         public static void InvalidTypeValueType()
         {
             // implicit cast, but not reference assignable.
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant(0, typeof(long)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant(0, typeof(long)));
         }
 
         [Fact]
         public static void InvalidTypeReferenceType()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant("hello", typeof(Expression)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant("hello", typeof(Expression)));
         }
 
         [Fact]
@@ -974,7 +974,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void ByRefType()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Constant(null, typeof(string).MakeByRefType()));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(string).MakeByRefType()));
         }
 
         [Fact]
@@ -986,14 +986,14 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void GenericType()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Constant(null, typeof(List<>)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(List<>)));
         }
 
         [Fact]
         public static void TypeContainsGenericParameters()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Constant(null, typeof(List<>.Enumerator)));
-            Assert.Throws<ArgumentException>(() => Expression.Constant(null, typeof(List<>).MakeGenericType(typeof(List<>))));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(List<>.Enumerator)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(List<>).MakeGenericType(typeof(List<>))));
         }
 
         [Fact]

@@ -352,7 +352,8 @@ namespace System.Runtime.Serialization
                 for (int i = 0; i < currentFieldIndex; i++)
                 {
                     FieldInfo fieldInfo = fieldsTemp[(currentFieldIndex - 1 - i)];
-                    fields[i] = fieldInfo;
+                    SerializationFieldInfo serInfo = fieldInfo as SerializationFieldInfo;
+                    fields[i] = serInfo == null ? fieldInfo : serInfo.FieldInfo;
                 }
 
                 Debug.Assert(fixupObj != null, "[ObjectManager.DoValueTypeFixup]fixupObj!=null");
@@ -649,7 +650,7 @@ namespace System.Runtime.Serialization
             {
                 throw new ArgumentOutOfRangeException(nameof(objectID), SR.ArgumentOutOfRange_ObjectID);
             }
-            if (member != null && !(member is FieldInfo))
+            if (member != null && !(member is FieldInfo)) // desktop checks specifically for RuntimeFieldInfo and SerializationFieldInfo, but the former is an implementation detail in corelib
             {
                 throw new SerializationException(SR.Serialization_UnknownMemberInfo);
             }
@@ -914,7 +915,7 @@ namespace System.Runtime.Serialization
             {
                 throw new ArgumentNullException(nameof(member));
             }
-            if (!(member is FieldInfo))
+            if (!(member is FieldInfo)) // desktop checks specifically for RuntimeFieldInfo and SerializationFieldInfo, but the former is an implementation detail in corelib
             {
                 throw new SerializationException(SR.Format(SR.Serialization_InvalidType, member.GetType().ToString()));
             }
@@ -974,11 +975,6 @@ namespace System.Runtime.Serialization
         internal virtual void AddOnDeserialization(DeserializationEventHandler handler)
         {
             _onDeserializationHandler = (DeserializationEventHandler)Delegate.Combine(_onDeserializationHandler, handler);
-        }
-
-        internal virtual void RemoveOnDeserialization(DeserializationEventHandler handler)
-        {
-            _onDeserializationHandler = (DeserializationEventHandler)Delegate.Remove(_onDeserializationHandler, handler);
         }
 
         internal virtual void AddOnDeserialized(object obj)
@@ -1371,7 +1367,6 @@ namespace System.Runtime.Serialization
         internal long ContainerID => _valueFixup != null ? _valueFixup.ContainerID : 0;
     }
 
-    [Serializable]
     internal sealed class FixupHolder
     {
         internal const int ArrayFixup = 0x1;
@@ -1394,7 +1389,6 @@ namespace System.Runtime.Serialization
         }
     }
 
-    [Serializable]
     internal sealed class FixupHolderList
     {
         internal const int InitialSize = 2;
@@ -1439,7 +1433,6 @@ namespace System.Runtime.Serialization
         }
     }
 
-    [Serializable]
     internal sealed class LongList
     {
         private const int InitialSize = 2;
@@ -1622,7 +1615,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-    internal sealed class TypeLoadExceptionHolder
+    public sealed class TypeLoadExceptionHolder
     {
         internal TypeLoadExceptionHolder(string typeName)
         {

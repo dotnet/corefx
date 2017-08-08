@@ -20,18 +20,6 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslV2_3Method")]
         internal static extern IntPtr SslV2_3Method();
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslV3Method")]
-        internal static extern IntPtr SslV3Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1Method")]
-        internal static extern IntPtr TlsV1Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1_1Method")]
-        internal static extern IntPtr TlsV1_1Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1_2Method")]
-        internal static extern IntPtr TlsV1_2Method();
-
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCreate")]
         internal static extern SafeSslHandle SslCreate(SafeSslContextHandle ctx);
 
@@ -40,6 +28,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetError")]
         internal static extern SslErrorCode SslGetError(IntPtr ssl, int ret);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetQuietShutdown")]
+        internal static extern void SslSetQuietShutdown(SafeSslHandle ssl, int mode);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslDestroy")]
         internal static extern void SslDestroy(IntPtr ssl);
@@ -71,7 +62,7 @@ internal static partial class Interop
         internal static extern unsafe int SslWrite(SafeSslHandle ssl, byte* buf, int num);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslRead")]
-        internal static extern int SslRead(SafeSslHandle ssl, byte[] buf, int num);
+        internal static extern unsafe int SslRead(SafeSslHandle ssl, byte* buf, int num);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_IsSslRenegotiatePending")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -79,6 +70,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
         internal static extern int SslShutdown(IntPtr ssl);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
+        internal static extern int SslShutdown(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetBio")]
         internal static extern void SslSetBio(SafeSslHandle ssl, SafeBioHandle rbio, SafeBioHandle wbio);
@@ -151,10 +145,6 @@ internal static partial class Interop
 
         internal static class SslMethods
         {
-            internal static readonly IntPtr TLSv1_method = TlsV1Method();
-            internal static readonly IntPtr TLSv1_1_method = TlsV1_1Method();
-            internal static readonly IntPtr TLSv1_2_method = TlsV1_2Method();
-            internal static readonly IntPtr SSLv3_method = SslV3Method();
             internal static readonly IntPtr SSLv23_method = SslV2_3Method();
         }
 
@@ -286,17 +276,16 @@ namespace Microsoft.Win32.SafeHandles
         {
             Debug.Assert(!IsInvalid, "Expected a valid context in Disconnect");
 
-            // Because we set "quiet shutdown" on the SSL_CTX, SslShutdown is supposed
-            // to always return 1 (completed success).  In "close-notify" shutdown (the
-            // opposite of quiet) there's also 0 (incomplete success) and negative
-            // (probably async IO WANT_READ/WANT_WRITE, but need to check) return codes
-            // to handle.
-            //
-            // If quiet shutdown is ever not set, see
-            // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
-            // for guidance on how to rewrite this method.
             int retVal = Interop.Ssl.SslShutdown(handle);
-            Debug.Assert(retVal == 1);
+
+            // Here, we are ignoring checking for <0 return values from Ssl_Shutdown,
+            // since the underlying memory bio is already disposed, we are not
+            // interested in reading or writing to it.
+            if (retVal == 0)
+            {
+                // Do a bi-directional shutdown.
+                retVal = Interop.Ssl.SslShutdown(handle);
+            }
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)

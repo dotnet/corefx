@@ -246,6 +246,7 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(sk_value, true) \
     PER_FUNCTION_BLOCK(SSL_CIPHER_description, true) \
     PER_FUNCTION_BLOCK(SSL_ctrl, true) \
+    PER_FUNCTION_BLOCK(SSL_set_quiet_shutdown, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_check_private_key, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_ctrl, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_free, true) \
@@ -280,7 +281,7 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(SSL_shutdown, true) \
     PER_FUNCTION_BLOCK(SSL_state, true) \
     PER_FUNCTION_BLOCK(SSLv23_method, true) \
-    PER_FUNCTION_BLOCK(SSLv3_method, true) \
+    PER_FUNCTION_BLOCK(SSLv3_method, false) \
     PER_FUNCTION_BLOCK(SSL_write, true) \
     PER_FUNCTION_BLOCK(TLSv1_1_method, true) \
     PER_FUNCTION_BLOCK(TLSv1_2_method, true) \
@@ -324,6 +325,7 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(X509_STORE_CTX_get_error_depth, true) \
     PER_FUNCTION_BLOCK(X509_STORE_CTX_init, true) \
     PER_FUNCTION_BLOCK(X509_STORE_CTX_new, true) \
+    PER_FUNCTION_BLOCK(X509_STORE_CTX_set_flags, true) \
     PER_FUNCTION_BLOCK(X509_STORE_CTX_set_verify_cb, true) \
     PER_FUNCTION_BLOCK(X509_STORE_free, true) \
     PER_FUNCTION_BLOCK(X509_STORE_new, true) \
@@ -535,6 +537,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define sk_value sk_value_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
 #define SSL_ctrl SSL_ctrl_ptr
+#define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
 #define SSL_CTX_check_private_key SSL_CTX_check_private_key_ptr
 #define SSL_CTX_ctrl SSL_CTX_ctrl_ptr
 #define SSL_CTX_free SSL_CTX_free_ptr
@@ -613,6 +616,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_CTX_get_error_depth X509_STORE_CTX_get_error_depth_ptr
 #define X509_STORE_CTX_init X509_STORE_CTX_init_ptr
 #define X509_STORE_CTX_new X509_STORE_CTX_new_ptr
+#define X509_STORE_CTX_set_flags X509_STORE_CTX_set_flags_ptr
 #define X509_STORE_CTX_set_verify_cb X509_STORE_CTX_set_verify_cb_ptr
 #define X509_STORE_free X509_STORE_free_ptr
 #define X509_STORE_new X509_STORE_new_ptr

@@ -679,25 +679,18 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitCastToType(this ILGenerator il, Type typeFrom, Type typeTo)
         {
-            if (!typeFrom.IsValueType && typeTo.IsValueType)
+            if (typeFrom.IsValueType)
             {
-                il.Emit(OpCodes.Unbox_Any, typeTo);
-            }
-            else if (typeFrom.IsValueType && !typeTo.IsValueType)
-            {
+                Debug.Assert(!typeTo.IsValueType);
                 il.Emit(OpCodes.Box, typeFrom);
                 if (typeTo != typeof(object))
                 {
                     il.Emit(OpCodes.Castclass, typeTo);
                 }
             }
-            else if (!typeFrom.IsValueType && !typeTo.IsValueType)
-            {
-                il.Emit(OpCodes.Castclass, typeTo);
-            }
             else
             {
-                throw Error.InvalidCast(typeFrom, typeTo);
+                il.Emit(typeTo.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, typeTo);
             }
         }
 
@@ -911,7 +904,6 @@ namespace System.Linq.Expressions.Compiler
             Label labEnd;
             LocalBuilder locFrom = locals.GetLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
-            LocalBuilder locTo = locals.GetLocal(typeTo);
             // test for null
             il.Emit(OpCodes.Ldloca, locFrom);
             il.EmitHasValue(typeFrom);
@@ -926,16 +918,16 @@ namespace System.Linq.Expressions.Compiler
             // construct result type
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
             il.Emit(OpCodes.Newobj, ci);
-            il.Emit(OpCodes.Stloc, locTo);
             labEnd = il.DefineLabel();
             il.Emit(OpCodes.Br_S, labEnd);
             // if null then create a default one
             il.MarkLabel(labIfNull);
+            LocalBuilder locTo = locals.GetLocal(typeTo);
             il.Emit(OpCodes.Ldloca, locTo);
             il.Emit(OpCodes.Initobj, typeTo);
-            il.MarkLabel(labEnd);
             il.Emit(OpCodes.Ldloc, locTo);
             locals.FreeLocal(locTo);
+            il.MarkLabel(labEnd);
         }
 
 
@@ -943,14 +935,10 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(!typeFrom.IsNullableType());
             Debug.Assert(typeTo.IsNullableType());
-            LocalBuilder locTo = locals.GetLocal(typeTo);
             Type nnTypeTo = typeTo.GetNonNullableType();
             il.EmitConvertToType(typeFrom, nnTypeTo, isChecked, locals);
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
             il.Emit(OpCodes.Newobj, ci);
-            il.Emit(OpCodes.Stloc, locTo);
-            il.Emit(OpCodes.Ldloc, locTo);
-            locals.FreeLocal(locTo);
         }
 
 

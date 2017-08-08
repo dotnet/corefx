@@ -12,17 +12,14 @@
     <Compile Include="ZipFileConvenienceMethods.cs" />
     <Compile Include="ZipFileInvalidFileTests.cs" />
     <Compile Include="ZipFileReadOpenUpdateTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs" Condition="'$(TargetGroup)' == 'netstandard'">
+      <Link>Common\System\IO\StreamSpanExtensions.netstandard.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\Compression\CRC.cs">
       <Link>Common\System\IO\Compression\CRC.cs</Link>

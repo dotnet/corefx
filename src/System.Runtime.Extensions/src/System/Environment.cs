@@ -4,6 +4,7 @@
 
 using Internal.Runtime.Augments;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -31,13 +32,23 @@ namespace System
             //
             // While we could pass Hashtable back from CoreCLR the type is also defined here. We only
             // want to surface the local Hashtable.
-            return new Hashtable(EnvironmentAugments.GetEnvironmentVariables());
+            return EnvironmentAugments.EnumerateEnvironmentVariables().ToHashtable();
         }
 
         public static IDictionary GetEnvironmentVariables(EnvironmentVariableTarget target)
         {
             // See comments in GetEnvironmentVariables()
-            return new Hashtable(EnvironmentAugments.GetEnvironmentVariables(target));
+            return EnvironmentAugments.EnumerateEnvironmentVariables(target).ToHashtable();
+        }
+
+        private static Hashtable ToHashtable(this IEnumerable<KeyValuePair<string, string>> pairs)
+        {
+            Hashtable hashTable = new Hashtable();
+            foreach (KeyValuePair<string, string> pair in pairs)
+            {
+                hashTable.Add(pair.Key, pair.Value);
+            }
+            return hashTable;
         }
 
         public static void SetEnvironmentVariable(string variable, string value)
@@ -192,6 +203,13 @@ namespace System
                     {
                         object result = processType.GetTypeInfo().GetDeclaredProperty("WorkingSet64")?.GetMethod?.Invoke(currentProcess, null);
                         if (result is long) return (long)result;
+                    }
+                    catch (TargetInvocationException tie)
+                    {
+                        if(tie.InnerException != null)
+                            throw tie.InnerException;
+
+                        throw tie;
                     }
                     finally { currentProcess.Dispose(); }
                 }

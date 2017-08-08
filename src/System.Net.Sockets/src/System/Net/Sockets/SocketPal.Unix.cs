@@ -16,6 +16,7 @@ namespace System.Net.Sockets
     {
         public const bool SupportsMultipleConnectAttempts = false;
         private static readonly bool SupportsDualModeIPv4PacketInfo = GetPlatformSupportsDualModeIPv4PacketInfo();
+        private static readonly byte[] s_peekBuffer = new byte[1];
 
         private static bool GetPlatformSupportsDualModeIPv4PacketInfo()
         {
@@ -88,7 +89,13 @@ namespace System.Net.Sockets
                     IOVectorCount = 1
                 };
 
-                errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
+                errno = Interop.Sys.ReceiveMessage(
+                    socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    &messageHeader,
+                    flags,
+                    &received);
+                GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
+
                 receivedFlags = messageHeader.Flags;
                 sockAddrLen = messageHeader.SocketAddressLen;
             }
@@ -128,7 +135,12 @@ namespace System.Net.Sockets
                 };
 
                 long bytesSent;
-                errno = Interop.Sys.SendMessage(socket, &messageHeader, flags, &bytesSent);
+                errno = Interop.Sys.SendMessage(
+                    socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    &messageHeader,
+                    flags,
+                    &bytesSent);
+                GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                 sent = checked((int)bytesSent);
             }
@@ -187,7 +199,12 @@ namespace System.Net.Sockets
                     };
 
                     long bytesSent;
-                    errno = Interop.Sys.SendMessage(socket, &messageHeader, flags, &bytesSent);
+                    errno = Interop.Sys.SendMessage(
+                        socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        &messageHeader,
+                        flags,
+                        &bytesSent);
+                    GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                     sent = checked((int)bytesSent);
                 }
@@ -305,7 +322,13 @@ namespace System.Net.Sockets
                         IOVectorCount = iovCount
                     };
 
-                    errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
+                    errno = Interop.Sys.ReceiveMessage(
+                        socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        &messageHeader,
+                        flags,
+                        &received);
+                    GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
+
                     receivedFlags = messageHeader.Flags;
                     sockAddrLen = messageHeader.SocketAddressLen;
                 }
@@ -362,7 +385,13 @@ namespace System.Net.Sockets
                     ControlBufferLen = cmsgBufferLen
                 };
 
-                errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
+                errno = Interop.Sys.ReceiveMessage(
+                    socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    &messageHeader,
+                    flags,
+                    &received);
+                GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
+
                 receivedFlags = messageHeader.Flags;
                 sockAddrLen = messageHeader.SocketAddressLen;
                 ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
@@ -418,7 +447,13 @@ namespace System.Net.Sockets
                     };
 
                     long received;
-                    errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
+                    errno = Interop.Sys.ReceiveMessage(
+                        socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        &messageHeader,
+                        flags,
+                        &received);
+                    GC.KeepAlive(socket); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
+
                     receivedFlags = messageHeader.Flags;
                     int sockAddrLen = messageHeader.SocketAddressLen;
                     ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
@@ -586,23 +621,13 @@ namespace System.Net.Sockets
                 {
                     // Special case a receive of 0 bytes into a single buffer.  A common pattern is to ReceiveAsync 0 bytes in order
                     // to be asynchronously notified when data is available, without needing to dedicate a buffer.  Some platforms (e.g. macOS),
-                    // however, special-case a receive of 0 to always succeed immediately even if data isn't available.  As such, we treat 0
-                    // specially, checking whether any bytes are available rather than doing an actual receive.
-                    receivedFlags = SocketFlags.None;
-                    received = -1;
-
-                    int available = 0;
-                    errno = Interop.Sys.GetBytesAvailable(socket, &available);
-                    if (errno == Interop.Error.SUCCESS)
+                    // however complete a 0-byte read successfully when data isn't available, as the request can logically be satisfied
+                    // synchronously. As such, we treat 0 specially, and perform a 1-byte peek.
+                    received = Receive(socket, flags | SocketFlags.Peek, s_peekBuffer, 0, s_peekBuffer.Length, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
+                    if (received > 0)
                     {
-                        if (available > 0)
-                        {
-                            bytesReceived = 0;
-                            errorCode = SocketError.Success;
-                            return true;
-                        }
-
-                        errno = Interop.Error.EAGAIN; // simulate a receive with no data available
+                        // Peeked for 1-byte, but the actual request was for 0.
+                        received = 0;
                     }
                 }
                 else
@@ -1019,15 +1044,17 @@ namespace System.Net.Sockets
             {
                 if (optionName == SocketOptionName.ReceiveTimeout)
                 {
+                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.ReceiveTimeout = optionValue == 0 ? -1 : optionValue;
-                    err = Interop.Sys.SetReceiveTimeout(handle, optionValue);
-                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
+                    handle.TrackOption(optionLevel, optionName);
+                    return SocketError.Success;
                 }
                 else if (optionName == SocketOptionName.SendTimeout)
                 {
+                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.SendTimeout = optionValue == 0 ? -1 : optionValue;
-                    err = Interop.Sys.SetSendTimeout(handle, optionValue);
-                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
+                    handle.TrackOption(optionLevel, optionName);
+                    return SocketError.Success;
                 }
             }
             else if (optionLevel == SocketOptionLevel.IP)
@@ -1400,7 +1427,7 @@ namespace System.Net.Sockets
                 Socket socket = socketList[i] as Socket;
                 if (socket == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.net_sockets_select, socket?.GetType().FullName ?? "null", typeof(Socket).FullName));
+                    throw new ArgumentException(SR.Format(SR.net_sockets_select, socket?.GetType().FullName ?? "null", typeof(Socket).FullName), nameof(socketList));
                 }
 
                 int fd = (int)socket.SafeHandle.DangerousGetHandle();

@@ -90,9 +90,6 @@
     <Compile Include="Utilities\ImmutableByteArrayInteropTest.cs" />
     <Compile Include="Utilities\MemoryBlockTests.cs" />
     <Compile Include="Utilities\OrderByTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Namespace\NamespaceForwardedCS.cs" />
@@ -102,7 +99,9 @@
     <None Include="Resources\Interop\Interop.Mock01.cs" />
     <None Include="Resources\Interop\Interop.Mock01.Impl.cs" />
     <None Include="Resources\Interop\IndexerWithByRefParam.il" />
+    <None Include="Resources\Interop\OtherAccessors.il" />
     <EmbeddedResource Include="Resources\Interop\IndexerWithByRefParam.dll" />
+    <EmbeddedResource Include="Resources\Interop\OtherAccessors.dll" />
     <EmbeddedResource Include="Resources\Interop\Interop.Mock01.dll" />
     <EmbeddedResource Include="Resources\Interop\Interop.Mock01.Impl.dll" />
     <None Include="Resources\Misc\CPPClassLibrary2.h" />
@@ -134,6 +133,11 @@
     <None Include="Resources\Misc\Signed.cmd" />
     <None Include="Resources\Misc\Signed.cs" />
     <EmbeddedResource Include="Resources\Misc\Signed.exe" />
+  </ItemGroup>
+    <ItemGroup>
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <TargetingPackExclusions Include="System.Reflection.Metadata" />
+    <ReferenceFromRuntime Include="System.Reflection.Metadata" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

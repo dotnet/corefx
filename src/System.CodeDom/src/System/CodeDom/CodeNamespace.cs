@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeNamespace : CodeObject
     {
         private string _name;
@@ -29,8 +28,6 @@ namespace System.CodeDom
         {
             Name = name;
         }
-
-        private CodeNamespace(SerializationInfo info, StreamingContext context) { }
 
         public CodeTypeDeclarationCollection Types
         {

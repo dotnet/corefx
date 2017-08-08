@@ -2,277 +2,146 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
-    public class BinaryFormatterTests : RemoteExecutorTestBase
+    public partial class BinaryFormatterTests : RemoteExecutorTestBase
     {
-        public static IEnumerable<object> SerializableObjects()
+        [Theory]
+        [MemberData(nameof(BasicObjectsRoundtrip_MemberData))]
+        public void ValidateBasicObjectsRoundtrip(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
-            // Primitive types
-            yield return byte.MinValue;
-            yield return byte.MaxValue;
-            yield return sbyte.MinValue;
-            yield return sbyte.MaxValue;
-            yield return short.MinValue;
-            yield return short.MaxValue;
-            yield return int.MinValue;
-            yield return int.MaxValue;
-            yield return uint.MinValue;
-            yield return uint.MaxValue;
-            yield return long.MinValue;
-            yield return long.MaxValue;
-            yield return ulong.MinValue;
-            yield return ulong.MaxValue;
-            yield return char.MinValue;
-            yield return char.MaxValue;
-            yield return float.MinValue;
-            yield return float.MaxValue;
-            yield return double.MinValue;
-            yield return double.MaxValue;
-            yield return decimal.MinValue;
-            yield return decimal.MaxValue;
-            yield return decimal.MinusOne;
-            yield return true;
-            yield return false;
-            yield return "";
-            yield return "c";
-            yield return "\u4F60\u597D";
-            yield return "some\0data\0with\0null\0chars";
-            yield return "<>&\"\'";
-            yield return " < ";
-            yield return "minchar" + char.MinValue + "minchar";
-
-            // Enum values
-            yield return DayOfWeek.Monday;
-            yield return DateTimeKind.Local;
-
-            // Nullables
-            yield return (int?)1;
-            yield return (StructWithIntField?)new StructWithIntField() { X = 42 };
-
-            // Other core serializable types
-            yield return IntPtr.Zero;
-            yield return UIntPtr.Zero;
-            yield return DateTime.Now;
-            yield return DateTimeOffset.Now;
-            yield return DateTimeKind.Local;
-            yield return TimeSpan.FromDays(7);
-            yield return new Version(1, 2, 3, 4);
-            yield return new Guid("0CACAA4D-C6BD-420A-B660-2F557337CA89");
-            yield return new AttributeUsageAttribute(AttributeTargets.Class);
-            yield return new List<int>();
-            yield return new List<int>() { 1, 2, 3, 4, 5 };
-            yield return new Dictionary<int, string>() { { 1, "test" }, { 2, "another test" } };
-            yield return Tuple.Create(1);
-            yield return Tuple.Create(1, "2");
-            yield return Tuple.Create(1, "2", 3u);
-            yield return Tuple.Create(1, "2", 3u, 4L);
-            yield return Tuple.Create(1, "2", 3u, 4L, 5.6);
-            yield return Tuple.Create(1, "2", 3u, 4L, 5.6, 7.8f);
-            yield return Tuple.Create(1, "2", 3u, 4L, 5.6, 7.8f, 9m);
-            yield return Tuple.Create(1, "2", 3u, 4L, 5.6, 7.8f, 9m, Tuple.Create(10));
-            yield return new KeyValuePair<int, byte>(42, 84);
-
-            // Arrays of primitive types
-            yield return Enumerable.Range(0, 256).Select(i => (byte)i).ToArray();
-            yield return new int[] { };
-            yield return new int[] { 1 };
-            yield return new int[] { 1, 2, 3, 4, 5 };
-            yield return new char[] { 'a', 'b', 'c', 'd', 'e' };
-            yield return new string[] { };
-            yield return new string[] { "hello", "world" };
-            yield return new short[] { short.MaxValue };
-            yield return new long[] { long.MaxValue };
-            yield return new ushort[] { ushort.MaxValue };
-            yield return new uint[] { uint.MaxValue };
-            yield return new ulong[] { ulong.MaxValue };
-            yield return new bool[] { true, false };
-            yield return new double[] { 1.2 };
-            yield return new float[] { 1.2f, 3.4f };
-
-            // Arrays of other types
-            yield return new object[] { };
-            yield return new Guid[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-            yield return new DayOfWeek[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
-            yield return new Point[] { new Point(1, 2), new Point(3, 4) };
-            yield return new ObjectWithArrays
+            object clone = FormatterClone(obj, null, assemblyFormat, filterLevel, typeFormat);
+            if (!ReferenceEquals(obj, string.Empty)) // "" is interned and will roundtrip as the same object
             {
-                IntArray = new int[0],
-                StringArray = new string[] { "hello", "world" },
-                ByteArray = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 },
-                JaggedArray = new int[][] { new int[] { 1, 2, 3 }, new int[] { 4, 5, 6, 7 } },
-                MultiDimensionalArray = new int[,] { { 1, 2 }, { 3, 4 }, { 5, 6 } },
-                TreeArray = new Tree<int>[] { new Tree<int>(1, new Tree<int>(2, null, null), new Tree<int>(3, null, null)) }
-            };
-            yield return new object[] { new int[,] { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } };
-            yield return new object[] { new int[,,] { { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 }, { 11, 12, 13, 14, 15 } } } };
-            yield return new object[] { new int[,,,] { { { { 1 } } } } };
-            yield return new ArraySegment<int>(new int[] { 1, 2, 3, 4, 5 }, 1, 2);
-            yield return Enumerable.Range(0, 10000).Select(i => (object)i).ToArray();
-            yield return new object[200]; // fewer than 256 nulls
-            yield return new object[300]; // more than 256 nulls
-
-            // Non-vector arrays
-            yield return Array.CreateInstance(typeof(uint), new[] { 5 }, new[] { 1 });
-            yield return Array.CreateInstance(typeof(int), new[] { 0, 0, 0 }, new[] { 0, 0, 0 });
-            var arr = Array.CreateInstance(typeof(string), new[] { 1, 2 }, new[] { 3, 4 });
-            arr.SetValue("hello", new[] { 3, 5 });
-            yield return arr;
-
-            // Various globalization types
-            yield return CultureInfo.CurrentCulture;
-            yield return CultureInfo.InvariantCulture;
-
-            // Internal specialized equality comparers
-            yield return EqualityComparer<byte>.Default;
-            yield return EqualityComparer<int>.Default;
-            yield return EqualityComparer<string>.Default;
-            yield return EqualityComparer<int?>.Default;
-            yield return EqualityComparer<double?>.Default;
-            yield return EqualityComparer<object>.Default;
-            yield return EqualityComparer<Int32Enum>.Default;
-
-            // Custom object
-            var sealedObjectWithIntStringFields = new SealedObjectWithIntStringFields();
-            yield return sealedObjectWithIntStringFields;
-            yield return new SealedObjectWithIntStringFields() { Member1 = 42, Member2 = null, Member3 = "84" };
-
-            // Custom object with fields pointing to the same object
-            yield return new ObjectWithIntStringUShortUIntULongAndCustomObjectFields
-            {
-                Member1 = 10,
-                Member2 = "hello",
-                _member3 = "hello",
-                Member4 = sealedObjectWithIntStringFields,
-                Member4shared = sealedObjectWithIntStringFields,
-                Member5 = new SealedObjectWithIntStringFields(),
-                Member6 = "Hello World",
-                str1 = "hello < world",
-                str2 = "<",
-                str3 = "< world",
-                str4 = "hello < world",
-                u16 = ushort.MaxValue,
-                u32 = uint.MaxValue,
-                u64 = ulong.MaxValue,
-            };
-
-            // Simple type without a default ctor
-            var point = new Point(1, 2);
-            yield return point;
-
-            // Graph without cycles
-            yield return new Tree<int>(42, null, null);
-            yield return new Tree<int>(1, new Tree<int>(2, new Tree<int>(3, null, null), null), null);
-            yield return new Tree<Colors>(Colors.Red, null, new Tree<Colors>(Colors.Blue, null, new Tree<Colors>(Colors.Green, null, null)));
-            yield return new Tree<int>(1, new Tree<int>(2, new Tree<int>(3, null, null), new Tree<int>(4, null, null)), new Tree<int>(5, null, null));
-
-            // Graph with cycles
-            Graph<int> a = new Graph<int> { Value = 1 };
-            yield return a;
-            Graph<int> b = new Graph<int> { Value = 2, Links = new[] { a } };
-            yield return b;
-            Graph<int> c = new Graph<int> { Value = 3, Links = new[] { a, b } };
-            yield return c;
-            Graph<int> d = new Graph<int> { Value = 3, Links = new[] { a, b, c } };
-            yield return d;
-            a.Links = new[] { b, c, d }; // complete the cycle
-            yield return a;
-
-            // Structs
-            yield return new EmptyStruct();
-            yield return new StructWithIntField { X = 42 };
-            yield return new StructWithStringFields { String1 = "hello", String2 = "world" };
-            yield return new StructContainingOtherStructs { Nested1 = new StructWithStringFields { String1 = "a", String2 = "b" }, Nested2 = new StructWithStringFields { String1 = "3", String2 = "4" } };
-            yield return new StructContainingArraysOfOtherStructs();
-            yield return new StructContainingArraysOfOtherStructs { Nested = new StructContainingOtherStructs[0] };
-            var s = new StructContainingArraysOfOtherStructs
-            {
-                Nested = new[]
-                {
-                    new StructContainingOtherStructs { Nested1 = new StructWithStringFields { String1 = "a", String2 = "b" }, Nested2 = new StructWithStringFields { String1 = "3", String2 = "4" } },
-                    new StructContainingOtherStructs { Nested1 = new StructWithStringFields { String1 = "e", String2 = "f" }, Nested2 = new StructWithStringFields { String1 = "7", String2 = "8" } },
-                }
-            };
-            yield return s;
-            yield return new object[] { s, new StructContainingArraysOfOtherStructs?(s) };
-
-            // ISerializable
-            yield return new BasicISerializableObject(1, "2");
-            yield return new DerivedISerializableWithNonPublicDeserializationCtor(1, "2");
-
-            // Various other special cases
-            yield return new TypeWithoutNamespace();
-        }
-
-        public static IEnumerable<object> NonSerializableObjects()
-        {
-            yield return new NonSerializableStruct();
-            yield return new NonSerializableClass();
-            yield return new SerializableClassWithBadField();
-            yield return new object[] { 1, 2, 3, new NonSerializableClass() };
-        }
-
-        public static IEnumerable<object[]> ValidateBasicObjectsRoundtrip_MemberData()
-        {
-            foreach (object obj in SerializableObjects())
-            {
-                foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
-                {
-                    foreach (TypeFilterLevel filterLevel in new[] { TypeFilterLevel.Full, TypeFilterLevel.Low })
-                    {
-                        foreach (FormatterTypeStyle typeFormat in new[] { FormatterTypeStyle.TypesAlways, FormatterTypeStyle.TypesWhenNeeded, FormatterTypeStyle.XsdString })
-                        {  
-                            yield return new object[] { obj, assemblyFormat, filterLevel, typeFormat};
-                        }
-                    }
-                }
+                Assert.NotSame(obj, clone);
             }
+
+            CheckForAnyEquals(obj, clone);
+        }
+
+        // Used for updating blobs in BinaryFormatterTestData.cs
+        //[Fact]
+        public void UpdateBlobs()
+        {
+            string testDataFilePath = GetTestDataFilePath();
+            IEnumerable<object[]> coreTypeRecords = GetCoreTypeRecords();
+            string[] coreTypeBlobs = GetCoreTypeBlobs(coreTypeRecords, FormatterAssemblyStyle.Full).ToArray();
+
+            var (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs) = UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
+            Console.WriteLine($"{numberOfBlobs} existing blobs" +
+                $"{Environment.NewLine}{numberOfFoundBlobs} found blobs with regex search" +
+                $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
         }
 
         [Theory]
-        [MemberData(nameof(ValidateBasicObjectsRoundtrip_MemberData))]
-        public void ValidateBasicObjectsRoundtrip(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
+        [MemberData(nameof(SerializableObjects_MemberData))]
+        public void ValidateAgainstBlobs(object obj, string[] blobs)
         {
-            object result = FormatterClone(obj, null, assemblyFormat, filterLevel, typeFormat);
-            if (!ReferenceEquals(obj, string.Empty)) // "" is interned and will roundtrip as the same object
+            if (obj == null)
             {
-                Assert.NotSame(obj, result);
+                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
             }
-            Assert.Equal(obj, result);
+
+            if (blobs == null || blobs.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
+                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+            }
+
+            SanityCheckBlob(obj, blobs);
+
+            foreach (string blob in blobs)
+            {
+                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
+                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
+            }
+        }
+
+        [Fact]
+        public void ArraySegmentDefaultCtor()
+        {
+            // This is workaround for Xunit bug which tries to pretty print test case name and enumerate this object.
+            // When inner array is not initialized it throws an exception when this happens.
+            object obj = new ArraySegment<int>();
+            string corefxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
+            string netfxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
+            CheckForAnyEquals(obj, DeserializeBlobToObject(corefxBlob, FormatterAssemblyStyle.Full));
+            CheckForAnyEquals(obj, DeserializeBlobToObject(netfxBlob, FormatterAssemblyStyle.Full));
+        }
+
+        [Fact]
+        public void ValidateDeserializationOfObjectWithDifferentAssemblyVersion()
+        {
+            // To generate this properly, change AssemblyVersion to a value which is unlikely to happen in production and generate base64(serialized-data)
+            // For this test 9.98.7.987 is being used
+            var obj = new SomeType() { SomeField = 7 };
+            string serializedObj = @"AAEAAAD/////AQAAAAAAAAAMAgAAAHNTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAA2U3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlNvbWVUeXBlAQAAAAlTb21lRmllbGQACAIAAAAHAAAACw==";
+
+            var deserialized = (SomeType)DeserializeBlobToObject(serializedObj, FormatterAssemblyStyle.Simple);
+            Assert.Equal(obj, deserialized);
+        }
+
+        [Fact]
+        public void ValidateDeserializationOfObjectWithGenericTypeWhichGenericArgumentHasDifferentAssemblyVersion()
+        {
+            // To generate this properly, change AssemblyVersion to a value which is unlikely to happen in production and generate base64(serialized-data)
+            // For this test 9.98.7.987 is being used
+            var obj = new GenericTypeWithArg<SomeType>() { Test = new SomeType() { SomeField = 9 } };
+            string serializedObj = @"AAEAAAD/////AQAAAAAAAAAMAgAAAHNTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAADxAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5HZW5lcmljVHlwZVdpdGhBcmdgMVtbU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlNvbWVUeXBlLCBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViXV0BAAAABFRlc3QENlN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5Tb21lVHlwZQIAAAACAAAACQMAAAAFAwAAADZTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuU29tZVR5cGUBAAAACVNvbWVGaWVsZAAIAgAAAAkAAAAL";
+
+            var deserialized = (GenericTypeWithArg<SomeType>)DeserializeBlobToObject(serializedObj, FormatterAssemblyStyle.Simple);
+            Assert.Equal(obj, deserialized);
+        }
+
+        [Theory]
+        [MemberData(nameof(SerializableEqualityComparers_MemberData))]
+        public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
+            }
+
+            if (blobs == null || blobs.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
+                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+            }
+
+            SanityCheckBlob(obj, blobs);
+
+            foreach (string blob in blobs)
+            {
+                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
+                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
+            }
         }
 
         [Fact]
         public void RoundtripManyObjectsInOneStream()
         {
-            object[] objects = SerializableObjects().ToArray();
+            object[][] objects = SerializableObjects_MemberData().ToArray();
             var s = new MemoryStream();
             var f = new BinaryFormatter();
 
-            foreach (object obj in objects)
+            foreach (object[] obj in objects)
             {
-                f.Serialize(s, obj);
+                f.Serialize(s, obj[0]);
             }
             s.Position = 0;
-            foreach (object obj in objects)
+            foreach (object[] obj in objects)
             {
-                object result = f.Deserialize(s);
-                Assert.Equal(obj, result);
+                object clone = f.Deserialize(s);
+                CheckForAnyEquals(obj[0], clone);
             }
         }
 
@@ -292,147 +161,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static IEnumerable<object[]> SerializableExceptions()
-        {
-            yield return new object[] { new AbandonedMutexException() };
-            yield return new object[] { new AggregateException(new FieldAccessException(), new MemberAccessException()) };
-            yield return new object[] { new AmbiguousMatchException() };
-            yield return new object[] { new ArgumentException("message", "paramName") };
-            yield return new object[] { new ArgumentNullException("paramName") };
-            yield return new object[] { new ArgumentOutOfRangeException("paramName", 42, "message") };
-            yield return new object[] { new ArithmeticException() };
-            yield return new object[] { new ArrayTypeMismatchException("message") };
-            yield return new object[] { new BadImageFormatException("message", "filename") };
-            yield return new object[] { new COMException() };
-            yield return new object[] { new CultureNotFoundException() };
-            yield return new object[] { new DataMisalignedException("message") };
-            yield return new object[] { new DecoderFallbackException() };
-            yield return new object[] { new DirectoryNotFoundException() };
-            yield return new object[] { new DivideByZeroException() };
-            yield return new object[] { new DllNotFoundException() };
-            yield return new object[] { new EncoderFallbackException() };
-            yield return new object[] { new EndOfStreamException() };
-            yield return new object[] { new EventSourceException() };
-            yield return new object[] { new Exception("message") };
-            yield return new object[] { new FieldAccessException("message", new FieldAccessException()) };
-            yield return new object[] { new FileLoadException() };
-            yield return new object[] { new FileNotFoundException() };
-            yield return new object[] { new FormatException("message") };
-            yield return new object[] { new IndexOutOfRangeException() };
-            yield return new object[] { new InsufficientExecutionStackException() };
-            yield return new object[] { new InvalidCastException() };
-            yield return new object[] { new InvalidComObjectException() };
-            yield return new object[] { new InvalidOleVariantTypeException() };
-            yield return new object[] { new InvalidOperationException() };
-            yield return new object[] { new InvalidProgramException() };
-            yield return new object[] { new InvalidTimeZoneException() };
-            yield return new object[] { new IOException() };
-            yield return new object[] { new KeyNotFoundException() };
-            yield return new object[] { new LockRecursionException() };
-            yield return new object[] { new MarshalDirectiveException() };
-            yield return new object[] { new MemberAccessException() };
-            yield return new object[] { new MethodAccessException() };
-            yield return new object[] { new MissingFieldException() };
-            yield return new object[] { new MissingMemberException() };
-            yield return new object[] { new NotImplementedException() };
-            yield return new object[] { new NotSupportedException() };
-            yield return new object[] { new NullReferenceException() };
-            yield return new object[] { new ObjectDisposedException("objectName") };
-            yield return new object[] { new OperationCanceledException(new CancellationTokenSource().Token) };
-            yield return new object[] { new OutOfMemoryException() };
-            yield return new object[] { new OverflowException() };
-            yield return new object[] { new PathTooLongException() };
-            yield return new object[] { new PlatformNotSupportedException() };
-            yield return new object[] { new RankException() };
-            yield return new object[] { new SafeArrayRankMismatchException() };
-            yield return new object[] { new SafeArrayTypeMismatchException() };
-            yield return new object[] { new SecurityException() };
-            yield return new object[] { new SEHException() };
-            yield return new object[] { new SemaphoreFullException() };
-            yield return new object[] { new SerializationException() };
-            yield return new object[] { new SynchronizationLockException() };
-            yield return new object[] { new TargetInvocationException("message", new Exception()) };
-            yield return new object[] { new TargetParameterCountException() };
-            yield return new object[] { new TaskCanceledException(Task.CompletedTask) };
-            yield return new object[] { new TaskSchedulerException() };
-            yield return new object[] { new TimeoutException() };
-            yield return new object[] { new TypeAccessException() };
-            yield return new object[] { new TypeInitializationException(typeof(string).FullName, new Exception()) };
-            yield return new object[] { new TypeLoadException() };
-            yield return new object[] { new UnauthorizedAccessException("message", new ArgumentNullException()) };
-            yield return new object[] { new VerificationException() };
-            yield return new object[] { new WaitHandleCannotBeOpenedException() };
-        }
-
         [Theory]
-        [MemberData(nameof(SerializableExceptions))]
+        [MemberData(nameof(SerializableExceptions_MemberData))]
         public void Roundtrip_Exceptions(Exception expected)
         {
             BinaryFormatterHelpers.AssertRoundtrips(expected);
         }
 
-        private static int Identity(int i) => i;
-
-        [Fact]
-        public void Roundtrip_Delegates_NoTarget()
-        {
-            Func<int, int> expected = Identity;
-            Assert.Null(expected.Target);
-
-            Func<int, int> actual = FormatterClone(expected);
-
-            Assert.NotSame(expected, actual);
-            Assert.Same(expected.GetMethodInfo(), actual.GetMethodInfo());
-            Assert.Equal(expected(42), actual(42));
-        }
-
-        [Fact]
-        public void Roundtrip_Delegates_Target()
-        {
-            var owsam = new ObjectWithStateAndMethod { State = 42 };
-            Func<int> expected = owsam.GetState;
-            Assert.Same(owsam, expected.Target);
-
-            Func<int> actual = FormatterClone(expected);
-
-            Assert.NotSame(expected, actual);
-            Assert.NotSame(expected.Target, actual.Target);
-            Assert.Equal(expected(), actual());
-        }
-
-        public static IEnumerable<object[]> SerializableObjectsWithFuncOfObjectToCompare()
-        {
-            object target = 42;
-            yield return new object[] { new Random(), new Func<object, object>(o => ((Random)o).Next()) };
-        }
-
         [Theory]
-        [MemberData(nameof(SerializableObjectsWithFuncOfObjectToCompare))]
-        public void Roundtrip_ObjectsWithComparers(object obj, Func<object, object> getResult)
-        {
-            object actual = FormatterClone(obj);
-            Assert.Equal(getResult(obj), getResult(actual));
-        }
-
-        public static IEnumerable<object[]> ValidateNonSerializableTypes_MemberData()
-        {
-            foreach (object obj in NonSerializableObjects())
-            {
-                foreach (FormatterAssemblyStyle assemblyFormat in new[] { FormatterAssemblyStyle.Full, FormatterAssemblyStyle.Simple })
-                {
-                    foreach (TypeFilterLevel filterLevel in new[] { TypeFilterLevel.Full, TypeFilterLevel.Low })
-                    {
-                        foreach (FormatterTypeStyle typeFormat in new[] { FormatterTypeStyle.TypesAlways, FormatterTypeStyle.TypesWhenNeeded, FormatterTypeStyle.XsdString })
-                        {
-                            yield return new object[] { obj, assemblyFormat, filterLevel, typeFormat };
-                        }
-                    }
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(ValidateNonSerializableTypes_MemberData))]
+        [MemberData(nameof(NonSerializableTypes_MemberData))]
         public void ValidateNonSerializableTypes(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
             var f = new BinaryFormatter()
@@ -641,31 +378,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(42, real);
         }
 
-        public static IEnumerable<object[]> Deserialize_FuzzInput_MemberData()
-        {
-            var rand = new Random(42);
-            foreach (object obj in SerializableObjects())
-            {
-                const int FuzzingsPerObject = 3;
-                for (int i = 0; i < FuzzingsPerObject; i++)
-                {
-                    yield return new object[] { obj, rand, i };
-                }
-            }
-        }
-
-        [OuterLoop]
-        [Theory]
-        [MemberData(nameof(Deserialize_FuzzInput_MemberData))]
-        public void Deserialize_FuzzInput(object obj, Random rand, int fuzzTrial)
+        // Test is disabled becaues it can cause improbable memory allocations leading to interminable paging.
+        // We're keeping the code because it could be useful to a dev making local changes to binary formatter code.
+        //[OuterLoop]
+        //[Theory]
+        //[MemberData(nameof(FuzzInputs_MemberData))]
+        public void Deserialize_FuzzInput(object obj, Random rand)
         {
             // Get the serialized data for the object
-            var f = new BinaryFormatter();
-            var s = new MemoryStream();
-            f.Serialize(s, obj);
+            byte[] data = SerializeObjectToRaw(obj, FormatterAssemblyStyle.Simple);
 
             // Make some "random" changes to it
-            byte[] data = s.ToArray();
             for (int i = 1; i < rand.Next(1, 100); i++)
             {
                 data[rand.Next(data.Length)] = (byte)rand.Next(256);
@@ -674,7 +397,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // Try to deserialize that.
             try
             {
-                f.Deserialize(new MemoryStream(data));
+                DeserializeRawToObject(data, FormatterAssemblyStyle.Simple);
                 // Since there's no checksum, it's possible we changed data that didn't corrupt the instance
             }
             catch (ArgumentOutOfRangeException) { }
@@ -688,6 +411,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             catch (NullReferenceException) { }
             catch (SerializationException) { }
             catch (TargetInvocationException) { }
+            catch (ArgumentException) { }
+            catch (FileLoadException) { }
         }
 
         [Fact]
@@ -706,16 +431,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
         }
 
-        public static IEnumerable<object[]> Roundtrip_CrossProcess_MemberData()
-        {
-            // Just a few objects to verify we can roundtrip out of process memory
-            yield return new object[] { "test" };
-            yield return new object[] { new List<int> { 1, 2, 3, 4, 5 } };
-            yield return new object[] { new Tree<int>(1, new Tree<int>(2, new Tree<int>(3, null, null), new Tree<int>(4, null, null)), new Tree<int>(5, null, null)) };
-        }
-
         [Theory]
-        [MemberData(nameof(Roundtrip_CrossProcess_MemberData))]
+        [MemberData(nameof(CrossProcessObjects_MemberData))]
         public void Roundtrip_CrossProcess(object obj)
         {
             string outputPath = GetTestFilePath();
@@ -738,7 +455,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     b.Serialize(output, b.Deserialize(input));
                     return SuccessExitCode;
                 }
-            }, $"\"{outputPath}\"", $"\"{inputPath}\"").Dispose();
+            }, outputPath, inputPath).Dispose();
 
             // Deserialize what the other process serialized and compare it to the original
             using (FileStream fs = File.OpenRead(inputPath))
@@ -750,47 +467,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails when serializing arrays with non-zero lower bounds")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UAPAOT does not support non-zero lower bounds")]
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
             FormatterClone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));
-        }
-
-        private class DelegateBinder : SerializationBinder
-        {
-            public Func<string, string, Type> BindToTypeDelegate = null;
-            public override Type BindToType(string assemblyName, string typeName) => BindToTypeDelegate?.Invoke(assemblyName, typeName);
-        }
-
-        private static T FormatterClone<T>(
-            T obj, 
-            ISerializationSurrogate surrogate = null,
-            FormatterAssemblyStyle assemblyFormat = FormatterAssemblyStyle.Full,
-            TypeFilterLevel filterLevel = TypeFilterLevel.Full,
-            FormatterTypeStyle typeFormat = FormatterTypeStyle.TypesAlways)
-        {
-            BinaryFormatter f;
-            if (surrogate == null)
-            {
-                f = new BinaryFormatter();
-            }
-            else
-            {
-                var c = new StreamingContext();
-                var s = new SurrogateSelector();
-                s.AddSurrogate(obj.GetType(), c, surrogate);
-                f = new BinaryFormatter(s, c);
-            }
-            f.AssemblyFormat = assemblyFormat;
-            f.FilterLevel = filterLevel;
-            f.TypeFormat = typeFormat;
-
-            using (var s = new MemoryStream())
-            {
-                f.Serialize(s, obj);
-                Assert.NotEqual(0, s.Position);
-                s.Position = 0;
-                return (T)(f.Deserialize(s));
-            }
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.Configuration.Provider
 {
-    [Serializable]
     public class ProviderException : Exception
     {
         public ProviderException() { }
@@ -21,6 +20,8 @@ namespace System.Configuration.Provider
 
         protected ProviderException(SerializationInfo info, StreamingContext context)
             : base(info, context)
-        { }
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 }

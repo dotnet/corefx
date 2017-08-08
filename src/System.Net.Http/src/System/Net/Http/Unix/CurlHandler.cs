@@ -123,10 +123,10 @@ namespace System.Net.Http
         private static readonly bool s_supportsAutomaticDecompression;
         private static readonly bool s_supportsSSL;
         private static readonly bool s_supportsHttp2Multiplexing;
-        private static volatile StrongBox<CURLMcode> s_supportsMaxConnectionsPerServer;
         private static string s_curlVersionDescription;
         private static string s_curlSslVersionDescription;
 
+        private static readonly MultiAgent s_singletonSharedAgent;
         private readonly MultiAgent _agent;
         private volatile bool _anyOperationStarted;
         private volatile bool _disposed;
@@ -140,7 +140,7 @@ namespace System.Net.Http
         private CredentialCache _credentialCache = null; // protected by LockObject
         private bool _useDefaultCredentials = HttpHandlerDefaults.DefaultUseDefaultCredentials;
         private CookieContainer _cookieContainer = new CookieContainer();
-        private bool _useCookie = HttpHandlerDefaults.DefaultUseCookies;
+        private bool _useCookies = HttpHandlerDefaults.DefaultUseCookies;
         private TimeSpan _connectTimeout = Timeout.InfiniteTimeSpan;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
@@ -149,7 +149,7 @@ namespace System.Net.Http
         private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
         private X509Certificate2Collection _clientCertificates;
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
-        private bool _checkCertificateRevocationList;
+        private bool _checkCertificateRevocationList = HttpHandlerDefaults.DefaultCheckCertificateRevocationList;
         private SslProtocols _sslProtocols = SslProtocols.None; // use default
         private IDictionary<String, Object> _properties; // Only create dictionary when required.
 
@@ -170,19 +170,34 @@ namespace System.Net.Http
             {
                 EventSourceTrace($"libcurl: {CurlVersionDescription} {CurlSslVersionDescription} {features}");
             }
+
+            // By default every CurlHandler gets its own MultiAgent.  But for some backends,
+            // we need to restrict the number of threads involved in processing libcurl work,
+            // so we create a single MultiAgent that's used by all handlers.
+            bool useSingleton = false;
+            UseSingletonMultiAgent(ref useSingleton);
+            if (useSingleton)
+            {
+                s_singletonSharedAgent = new MultiAgent(null);
+            }
         }
 
         public CurlHandler()
         {
-            _agent = new MultiAgent(this);
+            // If the shared MultiAgent was initialized, use it.
+            // Otherwise, create a new MultiAgent for this handler.
+            _agent = s_singletonSharedAgent ?? new MultiAgent(this);
         }
+
+        /// <summary>Overridden by another partial implementation to set <see cref="result"/> to true if a single MultiAgent should be used.</summary>
+        static partial void UseSingletonMultiAgent(ref bool result);
 
         #region Properties
 
         private static string CurlVersionDescription => s_curlVersionDescription ?? (s_curlVersionDescription = Interop.Http.GetVersionDescription() ?? string.Empty);
         private static string CurlSslVersionDescription => s_curlSslVersionDescription ?? (s_curlSslVersionDescription = Interop.Http.GetSslVersionDescription() ?? string.Empty);
 
-        internal bool AutomaticRedirection
+        internal bool AllowAutoRedirect
         {
             get { return _automaticRedirection; }
             set
@@ -254,19 +269,14 @@ namespace System.Net.Http
             {
                 if (_clientCertificateOption != ClientCertificateOption.Manual)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.net_http_invalid_enable_first, "ClientCertificateOptions", "Manual"));
+                    throw new InvalidOperationException(SR.Format(SR.net_http_invalid_enable_first, nameof(ClientCertificateOptions), nameof(ClientCertificateOption.Manual)));
                 }
 
-                if (_clientCertificates == null)
-                {
-                    _clientCertificates = new X509Certificate2Collection();
-                }
-
-                return _clientCertificates;
+                return _clientCertificates ?? (_clientCertificates = new X509Certificate2Collection());
             }
         }
 
-        internal Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateValidationCallback
+        internal Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
             get { return _serverCertificateValidationCallback; }
             set
@@ -323,13 +333,13 @@ namespace System.Net.Http
             }
         }
 
-        internal bool UseCookie
+        internal bool UseCookies
         {
-            get { return _useCookie; }
+            get { return _useCookies; }
             set
             {
                 CheckDisposedOrStarted();
-                _useCookie = value;
+                _useCookies = value;
             }
         }
 
@@ -366,22 +376,6 @@ namespace System.Net.Http
                 if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(SR.net_http_value_must_be_greater_than, 0));
-                }
-
-                // Make sure the libcurl version we're using supports the option, by setting the value on a temporary multi handle.
-                // We do this once and cache the result.
-                StrongBox<CURLMcode> supported = s_supportsMaxConnectionsPerServer; // benign race condition to read and set this
-                if (supported == null)
-                {
-                    using (Interop.Http.SafeCurlMultiHandle multiHandle = Interop.Http.MultiCreate())
-                    {
-                        s_supportsMaxConnectionsPerServer = supported = new StrongBox<CURLMcode>(
-                            Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, value));
-                    }
-                }
-                if (supported.Value != CURLMcode.CURLM_OK)
-                {
-                    throw new PlatformNotSupportedException(CurlException.GetCurlErrorString((int)supported.Value, isMulti: true));
                 }
 
                 CheckDisposedOrStarted();
@@ -431,7 +425,7 @@ namespace System.Net.Http
         protected override void Dispose(bool disposing)
         {
             _disposed = true;
-            if (disposing)
+            if (disposing && _agent != s_singletonSharedAgent)
             {
                 _agent.Dispose();
             }
@@ -463,7 +457,7 @@ namespace System.Net.Http
                 throw new InvalidOperationException(SR.net_http_chunked_not_allowed_with_empty_content);
             }
 
-            if (_useCookie && _cookieContainer == null)
+            if (_useCookies && _cookieContainer == null)
             {
                 throw new InvalidOperationException(SR.net_http_invalid_cookiecontainer);
             }
@@ -568,7 +562,7 @@ namespace System.Net.Http
 
         private void AddResponseCookies(EasyRequest state, string cookieHeader)
         {
-            if (!_useCookie)
+            if (!_useCookies)
             {
                 return;
             }
@@ -737,6 +731,7 @@ namespace System.Net.Http
             }
 
             NetEventSource.Log.HandlerMessage(
+                agent?.GetHashCode() ?? 0,
                 (agent?.RunningWorkerId).GetValueOrDefault(),
                 easy?.Task.Id ?? 0,
                 memberName,

@@ -119,10 +119,11 @@ namespace System.Xml.Serialization
 
         protected abstract void InitIDs();
 
-#if uapaot
+#if FEATURE_SERIALIZATION_UAPAOT
         // this method must be called before any generated deserialization methods are called
-        internal void Init(XmlReader r, string encodingStyle)
+        internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle)
         {
+            _events = events;
             _r = r;
             _soap12 = (encodingStyle == Soap12.Encoding);
 
@@ -188,6 +189,7 @@ namespace System.Xml.Serialization
             InitIDs();
         }
 
+#if !XMLSERIALIZERGENERATOR
         protected bool DecodeName
         {
             get
@@ -223,9 +225,7 @@ namespace System.Xml.Serialization
                 if (_d == null)
                 {
                     _d = new XmlDocument(_r.NameTable);
-#if !XMLSERIALIZERGENERATOR
                     _d.SetBaseURI(_r.BaseURI);
-#endif
                 }
                 return _d;
             }
@@ -2145,8 +2145,10 @@ namespace System.Xml.Serialization
                 get { return _collectionItems; }
             }
         }
+#endif
     }
 
+#if !XMLSERIALIZERGENERATOR
     ///<internalonly/>
     public delegate void XmlSerializationFixupCallback(object fixup);
 
@@ -2156,4 +2158,5 @@ namespace System.Xml.Serialization
 
     ///<internalonly/>
     public delegate object XmlSerializationReadCallback();
+#endif
 }

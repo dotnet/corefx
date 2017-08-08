@@ -82,6 +82,22 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
+        public void LoadXml_GetXml_With_NS_Prefix()
+        {
+            string rsaKeyWithPrefix = "<ds:KeyValue xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:RSAKeyValue><ds:Modulus>ogZ1/O7iks9ncETqNxLDKoPvgrT4nFx1a3lOmpywEmgbc5+8vI5dSzReH4v0YrflY75rIJx13CYWMsaHfQ78GtXvaeshHlQ3lLTuSdYEJceKll/URlBoKQtOj5qYIVSFOIVGHv4Y/0lnLftOzIydem29KKH6lJQlJawBBssR12s=</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue>";
+            string rsaKeyWithoutPrefix = "<KeyValue xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><RSAKeyValue><Modulus>ogZ1/O7iks9ncETqNxLDKoPvgrT4nFx1a3lOmpywEmgbc5+8vI5dSzReH4v0YrflY75rIJx13CYWMsaHfQ78GtXvaeshHlQ3lLTuSdYEJceKll/URlBoKQtOj5qYIVSFOIVGHv4Y/0lnLftOzIydem29KKH6lJQlJawBBssR12s=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue>";
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(rsaKeyWithPrefix);
+
+            RSAKeyValue rsa1 = new RSAKeyValue();
+            rsa1.LoadXml(doc.DocumentElement);
+
+            string s = rsa1.GetXml().OuterXml;
+            //Comparing with rsaKeyWithoutPrefix because RSAKeyValue.GetXml().OuterXml returns the markup without the namespace prefixes
+            Assert.Equal(rsaKeyWithoutPrefix, s);
+        }
+
+        [Fact]
         public void LoadXml_Null()
         {
             RSAKeyValue rsa = new RSAKeyValue();
@@ -96,7 +112,16 @@ namespace System.Security.Cryptography.Xml.Tests
             xmlDocument.LoadXml(xml);
 
             RSAKeyValue rsa = new RSAKeyValue();
-            Assert.Throws<CryptographicException>(() => rsa.LoadXml(xmlDocument.DocumentElement));
+
+            // FormatException exception because desktop does not
+            // check if Convert.FromBase64String throws
+            // Related to: https://github.com/dotnet/corefx/issues/18690
+            try
+            {
+                rsa.LoadXml(xmlDocument.DocumentElement);
+            }
+            catch (CryptographicException) { }
+            catch (FormatException) when (PlatformDetection.IsFullFramework) { }
         }
 
         private static object[][] LoadXml_InvalidXml_Source()

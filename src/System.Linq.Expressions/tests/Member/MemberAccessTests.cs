@@ -245,13 +245,13 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void Field_ByrefTypeFieldAccessor_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Property(null, typeof(GenericClass<string>).MakeByRefType(), nameof(GenericClass<string>.Field)));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Expression.Property(null, typeof(GenericClass<string>).MakeByRefType(), nameof(GenericClass<string>.Field)));
         }
 
         [Fact]
         public static void Field_GenericFieldAccessor_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Property(null, typeof(GenericClass<>), nameof(GenericClass<string>.Field)));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Expression.Property(null, typeof(GenericClass<>), nameof(GenericClass<string>.Field)));
         }
 
         [Fact]
@@ -281,17 +281,17 @@ namespace System.Linq.Expressions.Tests
         {
             Expression expression = Expression.Constant(new PC());
 
-            Assert.Throws<ArgumentException>(null, () => Expression.Field(expression, typeof(FC), nameof(FC.II)));
-            Assert.Throws<ArgumentException>(null, () => Expression.Field(expression, typeof(FC).GetField(nameof(FC.II))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Field(expression, typeof(FC), nameof(FC.II)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Field(expression, typeof(FC).GetField(nameof(FC.II))));
 
-            Assert.Throws<ArgumentException>(null, () => Expression.MakeMemberAccess(expression, typeof(FC).GetField(nameof(FC.II))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.MakeMemberAccess(expression, typeof(FC).GetField(nameof(FC.II))));
         }
 
         [Fact]
         public static void Field_NoSuchFieldName_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Field(Expression.Constant(new FC()), "NoSuchField"));
-            Assert.Throws<ArgumentException>(null, () => Expression.Field(Expression.Constant(new FC()), typeof(FC), "NoSuchField"));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Field(Expression.Constant(new FC()), "NoSuchField"));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Field(Expression.Constant(new FC()), typeof(FC), "NoSuchField"));
         }
 
         [Theory]
@@ -514,7 +514,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void Property_ByRefStaticAccess_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Property(null, typeof(NonGenericClass).MakeByRefType(), nameof(NonGenericClass.NonGenericProperty)));
+            AssertExtensions.Throws<ArgumentException>("propertyName", () => Expression.Property(null, typeof(NonGenericClass).MakeByRefType(), nameof(NonGenericClass.NonGenericProperty)));
         }
 
         [Fact]

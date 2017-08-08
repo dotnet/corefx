@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,6 +10,8 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -161,6 +159,10 @@ namespace System.Data.SqlClient
         //
         // SQL.Connection
         //
+        internal static Exception CannotGetDTCAddress()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_CannotGetDTCAddress));
+        }
 
         internal static Exception InvalidInternalPacketSize(string str)
         {
@@ -202,6 +204,20 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_InstanceFailure));
         }
+
+        //
+        // Global Transactions.
+        //
+        internal static Exception GlobalTransactionsNotEnabled()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.GT_Disabled));
+        }
+        internal static Exception UnknownSysTxIsolationLevel(Transactions.IsolationLevel isolationLevel)
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_UnknownSysTxIsolationLevel, isolationLevel.ToString()));
+        }
+
+
         internal static Exception InvalidPartnerConfiguration(string server, string database)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_InvalidPartnerConfiguration, server, database));
@@ -280,6 +296,10 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SQL_PendingBeginXXXExists));
         }
 
+        internal static ArgumentOutOfRangeException InvalidSqlDependencyTimeout(string param)
+        {
+            return ADP.ArgumentOutOfRange(SR.GetString(SR.SqlDependency_InvalidTimeout), param);
+        }
 
         internal static Exception NonXmlResult()
         {
@@ -334,6 +354,14 @@ namespace System.Data.SqlClient
         internal static Exception MustSetTypeNameForParam(string paramType, string paramName)
         {
             return ADP.Argument(SR.GetString(SR.SQL_ParameterTypeNameRequired, paramType, paramName));
+        }
+        internal static Exception NullSchemaTableDataTypeNotSupported(string columnName)
+        {
+            return ADP.Argument(SR.GetString(SR.NullSchemaTableDataTypeNotSupported, columnName));
+        }
+        internal static Exception InvalidSchemaTableOrdinals()
+        {
+            return ADP.Argument(SR.GetString(SR.InvalidSchemaTableOrdinals));
         }
         internal static Exception EnumeratedRecordMetaDataChanged(string fieldName, int recordNumber)
         {
@@ -409,7 +437,64 @@ namespace System.Data.SqlClient
             return ADP.InvalidCast(SR.GetString(SR.SQL_XmlReaderNotSupportOnColumnType, columnName));
         }
 
+        //
+        // SQL.SqlDependency
+        //
+        internal static Exception SqlCommandHasExistingSqlNotificationRequest()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQLNotify_AlreadyHasCommand));
+        }
 
+        internal static Exception SqlDepDefaultOptionsButNoStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DefaultOptionsButNoStart));
+        }
+
+        internal static Exception SqlDependencyDatabaseBrokerDisabled()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DatabaseBrokerDisabled));
+        }
+
+        internal static Exception SqlDependencyEventNoDuplicate()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_EventNoDuplicate));
+        }
+
+        internal static Exception SqlDependencyDuplicateStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DuplicateStart));
+        }
+
+        internal static Exception SqlDependencyIdMismatch()
+        {
+            // do not include the id because it may require SecurityPermission(Infrastructure) permission
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_IdMismatch));
+        }
+
+        internal static Exception SqlDependencyNoMatchingServerStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerStart));
+        }
+
+        internal static Exception SqlDependencyNoMatchingServerDatabaseStart()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerDatabaseStart));
+        }
+
+        //
+        // SQL.SqlDelegatedTransaction
+        //
+        internal static TransactionPromotionException PromotionFailed(Exception inner)
+        {
+            TransactionPromotionException e = new TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
+            ADP.TraceExceptionAsReturnValue(e);
+            return e;
+        }
+        //Failure while attempting to promote transaction.
+
+        //
+        // SQL.SqlMetaData
+        //
         internal static Exception InvalidSqlDbTypeForConstructor(SqlDbType type)
         {
             return ADP.Argument(SR.GetString(SR.SqlMetaData_InvalidSqlDbTypeForConstructorFormat, type.ToString()));
@@ -433,6 +518,14 @@ namespace System.Data.SqlClient
         internal static Exception UnsupportedColumnTypeForSqlProvider(string columnName, string typeName)
         {
             return ADP.Argument(SR.GetString(SR.SqlProvider_InvalidDataColumnType, columnName, typeName));
+        }
+        internal static Exception InvalidColumnMaxLength(string columnName, long maxLength)
+        {
+            return ADP.Argument(SR.GetString(SR.SqlProvider_InvalidDataColumnMaxLength, columnName, maxLength));
+        }
+        internal static Exception InvalidColumnPrecScale()
+        {
+            return ADP.Argument(SR.GetString(SR.SqlMisc_InvalidPrecScaleMessage));
         }
         internal static Exception NotEnoughColumnsInStructuredType()
         {
@@ -533,6 +626,10 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_BulkLoadPendingOperation));
         }
+        internal static Exception InvalidTableDerivedPrecisionForTvp(string columnName, byte precision)
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SqlParameter_InvalidTableDerivedPrecisionForTvp, precision, columnName, System.Data.SqlTypes.SqlDecimal.MaxPrecision));
+        }
 
         //
         // transactions.
@@ -545,6 +642,11 @@ namespace System.Data.SqlClient
         internal static Exception OpenResultCountExceeded()
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_OpenResultCountExceeded));
+        }
+
+        internal static Exception UnsupportedSysTxForGlobalTransactions()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_UnsupportedSysTxVersion));
         }
 
         internal static readonly byte[] AttentionHeader = new byte[] {
@@ -773,6 +875,11 @@ namespace System.Data.SqlClient
             return exc;
         }
 
+        internal static Exception BatchedUpdatesNotAvailableOnContextConnection()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.SQL_BatchedUpdatesNotAvailableOnContextConnection));
+        }
+
         /// <summary>
         /// gets a message for SNI error (sniError must be valid, non-zero error code)
         /// </summary>
@@ -783,6 +890,12 @@ namespace System.Data.SqlClient
             string errorMessageId = String.Format((IFormatProvider)null, "SNI_ERROR_{0}", sniError);
             return SR.GetResourceString(errorMessageId, errorMessageId);
         }
+
+        // Default values for SqlDependency and SqlNotificationRequest
+        internal const int SqlDependencyTimeoutDefault = 0;
+        internal const int SqlDependencyServerTimeout = 5 * 24 * 3600; // 5 days - used to compute default TTL of the dependency
+        internal const string SqlNotificationServiceDefault = "SqlQueryNotificationService";
+        internal const string SqlNotificationStoredProcedureDefault = "SqlQueryNotificationStoredProcedure";
     }
 
     sealed internal class SQLMessage
@@ -825,6 +938,10 @@ namespace System.Data.SqlClient
         internal static string SSPIGenerateError()
         {
             return SR.GetString(SR.SQL_SSPIGenerateError);
+        }
+        internal static string SqlServerBrowserNotAccessible()
+        {
+            return SR.GetString(SR.SQL_SqlServerBrowserNotAccessible);
         }
         internal static string KerberosTicketMissingError()
         {
@@ -952,6 +1069,77 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(input != null, "input string cannot be null");
             return input.Replace("'", "''");
+        }
+
+        /// <summary>
+        /// Escape a string as a TSQL literal, wrapping it around with single quotes.
+        /// Use this method to escape input strings to prevent SQL injection 
+        /// and to get correct behavior for embedded quotes.
+        /// </summary>
+        /// <param name="input">unescaped string</param>
+        /// <returns>escaped and quoted literal string</returns>
+        internal static string MakeStringLiteral(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return "''";
+            }
+            else
+            {
+                return "'" + EscapeStringAsLiteral(input) + "'";
+            }
+        }
+    }
+
+    /// <summary>
+    /// This class holds methods invoked on System.Transactions through reflection for Global Transactions
+    /// </summary>
+    static internal class SysTxForGlobalTransactions
+    {
+        private static readonly Lazy<MethodInfo> _enlistPromotableSinglePhase = new Lazy<MethodInfo>(() =>
+            typeof(Transaction).GetMethod("EnlistPromotableSinglePhase", new Type[] { typeof(IPromotableSinglePhaseNotification), typeof(Guid) }));
+
+        private static readonly Lazy<MethodInfo> _setDistributedTransactionIdentifier = new Lazy<MethodInfo>(() =>
+            typeof(Transaction).GetMethod("SetDistributedTransactionIdentifier", new Type[] { typeof(IPromotableSinglePhaseNotification), typeof(Guid) }));
+
+        private static readonly Lazy<MethodInfo> _getPromotedToken = new Lazy<MethodInfo>(() =>
+            typeof(Transaction).GetMethod("GetPromotedToken"));
+
+        /// <summary>
+        /// Enlists the given IPromotableSinglePhaseNotification and Non-MSDTC Promoter type into a transaction
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo EnlistPromotableSinglePhase
+        {
+            get
+            {
+                return _enlistPromotableSinglePhase.Value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the given DistributedTransactionIdentifier for a Transaction instance.
+        /// Needs to be invoked when using a Non-MSDTC Promoter type
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo SetDistributedTransactionIdentifier
+        {
+            get
+            {
+                return _setDistributedTransactionIdentifier.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Promoted Token for a Transaction
+        /// </summary>
+        /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
+        public static MethodInfo GetPromotedToken
+        {
+            get
+            {
+                return _getPromotedToken.Value;
+            }
         }
     }
 }//namespace

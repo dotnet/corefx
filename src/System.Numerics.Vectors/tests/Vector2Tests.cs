@@ -28,7 +28,17 @@ namespace System.Numerics.Tests
             Assert.Throws<NullReferenceException>(() => v1.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));
-            Assert.Throws<ArgumentException>(() => v1.CopyTo(a, 2));
+            
+            if (!PlatformDetection.IsNetNative)
+            {
+               AssertExtensions.Throws<ArgumentException>(null, () => v1.CopyTo(a, 2));
+            }
+            else
+            {
+               // The .Net Native code generation optimizer does aggressive optimizations to range checks 
+               // which result in an ArgumentOutOfRangeException exception being thrown at runtime.
+               Assert.ThrowsAny<ArgumentException>(() => v1.CopyTo(a, 2));
+            }
 
             v1.CopyTo(a, 1);
             v1.CopyTo(b);

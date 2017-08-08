@@ -67,6 +67,12 @@ namespace Microsoft.SqlServer.TDS.EndPoint
         /// </summary>
         internal bool StopRequested { get; set; }
 
+
+        /// <summary>
+        /// Identifier to recognize the client of the Endpoint.
+        /// </summary>
+        public string EndpointName { get; set; }
+
         /// <summary>
         /// Initialization constructor
         /// </summary>
@@ -94,10 +100,27 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             // Update ServerEndpoint with the actual address/port, e.g. if port=0 was given
             ServerEndPoint = (IPEndPoint)ListenerSocket.LocalEndpoint;
 
+            Log($"{GetType().Name} {EndpointName} Is Server Socket Bound: {ListenerSocket.Server.IsBound} Testing connectivity to the endpoint created for the server.");
+            using (TcpClient client = new TcpClient())
+            {
+                try
+                {
+                    client.Connect("localhost", ServerEndPoint.Port);
+                }
+                catch (Exception e)
+                {
+                    Log($"{GetType().Name} {EndpointName} Error occured while testing server endpoint {e.Message}");
+                    throw;
+                }
+            }
+            Log($"{GetType().Name} {EndpointName} Endpoint test successful.");
+
             // Initialize the listener
             ListenerThread = new Thread(new ThreadStart(_RequestListener)) { IsBackground = true };
             ListenerThread.Name = "TDS Server EndPoint Listener";
             ListenerThread.Start();
+
+            Log($"{GetType().Name} {EndpointName} Listener Thread Started ");
         }
 
         /// <summary>
@@ -214,6 +237,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             {
                 // Remove the existing connection from the list
                 Connections.Remove(sender as T);
+                Log($"{GetType().Name} {EndpointName} Connection Closed");
             }
         }
 

@@ -14,14 +14,15 @@ namespace System.Drawing
     ///    </para>
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct Rectangle : IEquatable<Rectangle>
     {
         public static readonly Rectangle Empty = new Rectangle();
 
-        private int _x;
-        private int _y;
-        private int _width;
-        private int _height;
+        private int x; // Do not rename (binary serialization) 
+        private int y; // Do not rename (binary serialization) 
+        private int width; // Do not rename (binary serialization) 
+        private int height; // Do not rename (binary serialization) 
 
         /// <summary>
         ///    <para>
@@ -31,10 +32,10 @@ namespace System.Drawing
         /// </summary>
         public Rectangle(int x, int y, int width, int height)
         {
-            _x = x;
-            _y = y;
-            _width = width;
-            _height = height;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
         }
 
         /// <summary>
@@ -45,10 +46,10 @@ namespace System.Drawing
         /// </summary>
         public Rectangle(Point location, Size size)
         {
-            _x = location.X;
-            _y = location.Y;
-            _width = size.Width;
-            _height = size.Height;
+            x = location.X;
+            y = location.Y;
+            width = size.Width;
+            height = size.Height;
         }
 
         /// <summary>
@@ -95,8 +96,8 @@ namespace System.Drawing
         /// </summary>
         public int X
         {
-            get { return _x; }
-            set { _x = value; }
+            get { return x; }
+            set { x = value; }
         }
 
         /// <summary>
@@ -105,8 +106,8 @@ namespace System.Drawing
         /// </summary>
         public int Y
         {
-            get { return _y; }
-            set { _y = value; }
+            get { return y; }
+            set { y = value; }
         }
 
         /// <summary>
@@ -115,8 +116,8 @@ namespace System.Drawing
         /// </summary>
         public int Width
         {
-            get { return _width; }
-            set { _width = value; }
+            get { return width; }
+            set { width = value; }
         }
 
         /// <summary>
@@ -125,8 +126,8 @@ namespace System.Drawing
         /// </summary>
         public int Height
         {
-            get { return _height; }
-            set { _height = value; }
+            get { return height; }
+            set { height = value; }
         }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace System.Drawing
         ///    </para>
         /// </summary>
         [Browsable(false)]
-        public bool IsEmpty => _height == 0 && _width == 0 && _x == 0 && _y == 0;
+        public bool IsEmpty => height == 0 && width == 0 && x == 0 && y == 0;
 
         /// <summary>
         ///    <para>

@@ -23,6 +23,10 @@ namespace System.Resources
     // of Initialize() and GetString() below.
     internal sealed class WindowsRuntimeResourceManager : WindowsRuntimeResourceManagerBase
     {
+        // Setting invariant culture to Windows Runtime doesn't work because Windows Runtime expects language name in the form of BCP-47 tags while
+        // invariant name is an empty string. We will use the private invariant culture name x-VL instead.
+        private const string c_InvariantCulturePrivateName = "x-VL";
+
         private ResourceMap _resourceMap;
         private ResourceContext _clonedResourceContext;
         private string _clonedResourceContextFallBackList;
@@ -227,8 +231,26 @@ namespace System.Resources
             Debug.Assert(s_globalResourceContextFallBackList != null);
             Debug.Assert(s_globalResourceContext != null);
 
-            List<String> languages = new List<string>(s_globalResourceContext.Languages);
+            IReadOnlyList<string> langs;
 
+            try
+            {
+                langs = s_globalResourceContext.Languages;
+            }
+            catch (ArgumentException)
+            {
+                // Sometimes Windows Runtime fails and we get Argument Exception which can fail fast the whole app
+                // to avoid that we ignore the exception.
+                return;
+            }
+
+            List<String> languages = new List<string>(langs);
+            
+            if (languages.Count > 0 && languages[0] == c_InvariantCulturePrivateName)
+            {
+                languages[0] = CultureInfo.InvariantCulture.Name;
+            }
+            
             s_globalResourceContextBestFitCultureInfo = GetBestFitCultureFromLanguageList(languages);
             s_globalResourceContextFallBackList = ReadOnlyListToString(languages);
         }
@@ -436,12 +458,19 @@ namespace System.Resources
 
             if (s_globalResourceContextBestFitCultureInfo != null && s_globalResourceContextBestFitCultureInfo.Name.Equals(ci.Name, StringComparison.OrdinalIgnoreCase))
             {
+                if (!ReferenceEquals(s_globalResourceContextBestFitCultureInfo, ci))
+                {
+                    // We have same culture name but different reference, we'll need to update s_globalResourceContextBestFitCultureInfo only as ci can 
+                    // be a customized subclassed culture which setting different values for NFI, DTFI...etc.
+                    s_globalResourceContextBestFitCultureInfo = ci;
+                }
+
                 // the default culture is already set. nothing more need to be done
                 return true;
             }
 
             List<String> languages = new List<String>(s_globalResourceContext.Languages);
-            languages.Insert(0, ci.Name);
+            languages.Insert(0, ci.Name == CultureInfo.InvariantCulture.Name ? c_InvariantCulturePrivateName : ci.Name);
 
             // remove any duplication in the list
             int i = languages.Count - 1;

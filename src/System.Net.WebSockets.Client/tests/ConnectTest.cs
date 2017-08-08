@@ -16,6 +16,7 @@ namespace System.Net.WebSockets.Client.Tests
     {
         public ConnectTest(ITestOutputHelper output) : base(output) { }
 
+        [ActiveIssue(20360, TargetFrameworkMonikers.NetFramework)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(UnavailableWebSocketServers))]
         public async Task ConnectAsync_NotWebSocketServer_ThrowsWebSocketExceptionWithMessage(Uri server)
@@ -84,6 +85,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(18784, TargetFrameworkMonikers.NetFramework)]
         [OuterLoop]
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoHeadersServers))]
         public async Task ConnectAsync_AddHostHeader_Success(Uri server)
@@ -135,8 +137,15 @@ namespace System.Net.WebSockets.Client.Tests
             {
                 Assert.Null(cws.Options.Cookies);
                 cws.Options.Cookies = new CookieContainer();
-                cws.Options.Cookies.Add(server, new Cookie("Cookies", "Are Yummy"));
-                cws.Options.Cookies.Add(server, new Cookie("Especially", "Chocolate Chip"));
+
+                Cookie cookie1 = new Cookie("Cookies", "Are Yummy");
+                Cookie cookie2 = new Cookie("Especially", "Chocolate Chip");
+                Cookie secureCookie = new Cookie("Occasionally", "Raisin");
+                secureCookie.Secure = true;
+
+                cws.Options.Cookies.Add(server, cookie1);
+                cws.Options.Cookies.Add(server, cookie2);
+                cws.Options.Cookies.Add(server, secureCookie);
 
                 using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
                 {
@@ -161,8 +170,10 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
                 string headers = WebSocketData.GetTextFromBuffer(segment);
+
                 Assert.True(headers.Contains("Cookies=Are Yummy"));
                 Assert.True(headers.Contains("Especially=Chocolate Chip"));
+                Assert.Equal(server.Scheme == "wss", headers.Contains("Occasionally=Raisin"));
 
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
             }

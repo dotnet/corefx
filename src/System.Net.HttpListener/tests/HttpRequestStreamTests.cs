@@ -17,22 +17,19 @@ namespace System.Net.Tests
     {
         private HttpListenerFactory _factory;
         private HttpListener _listener;
-        private GetContextHelper _helper;
 
         public HttpRequestStreamTests()
         {
             _factory = new HttpListenerFactory();
             _listener = _factory.GetListener();
-            _helper = new GetContextHelper(_listener, _factory.ListeningUrl);
         }
 
         public void Dispose()
         {
             _factory.Dispose();
-            _helper.Dispose();
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true, "")]
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
@@ -76,7 +73,53 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
+        [InlineData(true, "")]
+        [InlineData(false, "")]
+        [InlineData(true, "Non-Empty")]
+        [InlineData(false, "Non-Empty")]
+        public async Task Read_FullLengthAsynchronous_PadBuffer_Success(bool transferEncodingChunked, string text)
+        {
+            byte[] expected = Encoding.UTF8.GetBytes(text);
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(text));
+
+                HttpListenerContext context = await contextTask;
+                if (transferEncodingChunked)
+                {
+                    Assert.Equal(-1, context.Request.ContentLength64);
+                    Assert.Equal("chunked", context.Request.Headers["Transfer-Encoding"]);
+                }
+                else
+                {
+                    Assert.Equal(expected.Length, context.Request.ContentLength64);
+                    Assert.Null(context.Request.Headers["Transfer-Encoding"]);
+                }
+
+                const int pad = 128;
+
+                // Add padding at beginning and end to test for correct offset/size handling
+                byte[] buffer = new byte[pad + expected.Length + pad];
+                int bytesRead = await context.Request.InputStream.ReadAsync(buffer, pad, expected.Length);
+                Assert.Equal(expected.Length, bytesRead);
+                Assert.Equal(expected, buffer.Skip(pad).Take(bytesRead));
+
+                // Subsequent reads don't do anything.
+                Assert.Equal(0, await context.Request.InputStream.ReadAsync(buffer, pad, 1));
+
+                context.Response.Close();
+                using (HttpResponseMessage response = await clientTask)
+                {
+                    Assert.Equal(200, (int)response.StatusCode);
+                }
+            }
+        }
+
+        [Theory]
         [InlineData(true, "")]
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
@@ -120,40 +163,35 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Different behaviour when not chunked, that needs investigation.
         public async Task Read_LargeLengthAsynchronous_Success(bool transferEncodingChunked)
         {
-            string text = new string('a', 128 * 1024 + 1); // More than 128kb
-            byte[] expected = Encoding.UTF8.GetBytes(text);
+            var rand = new Random(42);
+            byte[] expected = Enumerable
+                .Range(0, 128*1024 + 1) // More than 128kb
+                .Select(_ => (byte)('a' + rand.Next(0, 26)))
+                .ToArray();
+
             Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
 
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
-                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(text));
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new ByteArrayContent(expected));
 
                 HttpListenerContext context = await contextTask;
 
                 // If the size is greater than 128K, then we limit the size, and have to do multiple reads on
                 // Windows, which uses http.sys internally.
                 byte[] buffer = new byte[expected.Length];
-                int bytesRead = await context.Request.InputStream.ReadAsync(buffer, 0, buffer.Length);
-                if (PlatformDetection.IsWindows)
+                int totalRead = 0;
+                while (totalRead < expected.Length)
                 {
-                    Assert.Equal(expected.Length - 1, bytesRead);
-                    Assert.NotEqual(expected, buffer);
-
-                    bytesRead = await context.Request.InputStream.ReadAsync(buffer, buffer.Length - 1, 1);
-                    Assert.Equal(1, bytesRead);
-                    Assert.Equal(expected, buffer);
-                }
-                else
-                {
-                    Assert.Equal(expected.Length, bytesRead);
-                    Assert.Equal(expected, buffer);
+                    int bytesRead = await context.Request.InputStream.ReadAsync(buffer, totalRead, expected.Length - totalRead);
+                    Assert.InRange(bytesRead, 1, expected.Length - totalRead);
+                    totalRead += bytesRead;
                 }
 
                 // Subsequent reads don't do anything.
@@ -161,43 +199,39 @@ namespace System.Net.Tests
                 Assert.Equal(expected, buffer);
 
                 context.Response.Close();
+                await clientTask;
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Different behaviour when not chunked, that needs investigation.
         public async Task Read_LargeLengthSynchronous_Success(bool transferEncodingChunked)
         {
-            string text = new string('a', 128 * 1024 + 1); // More than 128kb
-            byte[] expected = Encoding.UTF8.GetBytes(text);
+            var rand = new Random(42);
+            byte[] expected = Enumerable
+                .Range(0, 128 * 1024 + 1) // More than 128kb
+                .Select(_ => (byte)('a' + rand.Next(0, 26)))
+                .ToArray();
+
             Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
 
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
-                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(text));
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new ByteArrayContent(expected));
 
                 HttpListenerContext context = await contextTask;
 
                 // If the size is greater than 128K, then we limit the size, and have to do multiple reads on
                 // Windows, which uses http.sys internally.
                 byte[] buffer = new byte[expected.Length];
-                int bytesRead = context.Request.InputStream.Read(buffer, 0, buffer.Length);
-                if (PlatformDetection.IsWindows)
+                int totalRead = 0;
+                while (totalRead < expected.Length)
                 {
-                    Assert.Equal(expected.Length - 1, bytesRead);
-                    Assert.NotEqual(expected, buffer);
-
-                    bytesRead = context.Request.InputStream.Read(buffer, buffer.Length - 1, 1);
-                    Assert.Equal(1, bytesRead);
-                    Assert.Equal(expected, buffer);
-                }
-                else
-                {
-                    Assert.Equal(expected.Length, bytesRead);
-                    Assert.Equal(expected, buffer);
+                    int bytesRead = context.Request.InputStream.Read(buffer, totalRead, expected.Length - totalRead);
+                    Assert.InRange(bytesRead, 1, expected.Length - totalRead);
+                    totalRead += bytesRead;
                 }
 
                 // Subsequent reads don't do anything.
@@ -205,10 +239,11 @@ namespace System.Net.Tests
                 Assert.Equal(expected, buffer);
 
                 context.Response.Close();
+                await clientTask;
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchAsynchronous_Success(bool transferEncodingChunked)
@@ -230,10 +265,11 @@ namespace System.Net.Tests
                 Assert.Equal(expected.Concat(new byte[5]), buffer);
 
                 context.Response.Close();
+                await clientTask;
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchSynchronous_Success(bool transferEncodingChunked)
@@ -255,10 +291,11 @@ namespace System.Net.Tests
                 Assert.Equal(expected.Concat(new byte[5]), buffer);
 
                 context.Response.Close();
+                await clientTask;
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_NotEnoughThenCloseAsynchronous_Success(bool transferEncodingChunked)
@@ -279,52 +316,115 @@ namespace System.Net.Tests
                 Assert.Equal(buffer.Length, bytesRead);
 
                 context.Response.Close();
+                await clientTask;
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Read_Disposed_ReturnsZero(bool transferEncodingChunked)
+        {
+            const string Text = "Some-String";
+            int bufferSize = Encoding.UTF8.GetByteCount(Text);
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(Text));
+
+                HttpListenerContext context = await contextTask;
+                context.Request.InputStream.Close();
+
+                byte[] buffer = new byte[bufferSize];
+                Assert.Equal(0, context.Request.InputStream.Read(buffer, 0, buffer.Length));
+                Assert.Equal(new byte[bufferSize], buffer);
+
+                IAsyncResult result = context.Request.InputStream.BeginRead(buffer, 0, buffer.Length, null, null);
+                Assert.Equal(0, context.Request.InputStream.EndRead(result));
+                Assert.Equal(new byte[bufferSize], buffer);
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
         [Fact]
         public async Task CanSeek_Get_ReturnsFalse()
         {
-            HttpListenerRequest response = await _helper.GetRequest(chunked: true);
-            using (Stream inputStream = response.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                Assert.False(inputStream.CanSeek);
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
 
-                Assert.Throws<NotSupportedException>(() => inputStream.Length);
-                Assert.Throws<NotSupportedException>(() => inputStream.SetLength(1));
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
 
-                Assert.Throws<NotSupportedException>(() => inputStream.Position);
-                Assert.Throws<NotSupportedException>(() => inputStream.Position = 1);
+                using (Stream inputStream = request.InputStream)
+                {
+                    Assert.False(inputStream.CanSeek);
+    
+                    Assert.Throws<NotSupportedException>(() => inputStream.Length);
+                    Assert.Throws<NotSupportedException>(() => inputStream.SetLength(1));
+    
+                    Assert.Throws<NotSupportedException>(() => inputStream.Position);
+                    Assert.Throws<NotSupportedException>(() => inputStream.Position = 1);
+    
+                    Assert.Throws<NotSupportedException>(() => inputStream.Seek(0, SeekOrigin.Begin));
+                }
 
-                Assert.Throws<NotSupportedException>(() => inputStream.Seek(0, SeekOrigin.Begin));
+                context.Response.Close();
+                await clientTask;
             }
         }
 
         [Fact]
         public async Task CanRead_Get_ReturnsTrue()
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked: true);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                Assert.True(inputStream.CanRead);
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    Assert.True(inputStream.CanRead);
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
         [Fact]
         public async Task CanWrite_Get_ReturnsFalse()
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked: true);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                Assert.False(inputStream.CanWrite);
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
 
-                Assert.Throws<InvalidOperationException>(() => inputStream.Write(new byte[0], 0, 0));
-                await Assert.ThrowsAsync<InvalidOperationException>(() => inputStream.WriteAsync(new byte[0], 0, 0));
-                Assert.Throws<InvalidOperationException>(() => inputStream.EndWrite(null));
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
 
-                // Flushing the output stream is a no-op.
-                inputStream.Flush();
-                Assert.Equal(Task.CompletedTask, inputStream.FlushAsync(CancellationToken.None));
+                using (Stream inputStream = request.InputStream)
+                {
+                    Assert.False(inputStream.CanWrite);
+    
+                    Assert.Throws<InvalidOperationException>(() => inputStream.Write(new byte[0], 0, 0));
+                    await Assert.ThrowsAsync<InvalidOperationException>(() => inputStream.WriteAsync(new byte[0], 0, 0));
+                    Assert.Throws<InvalidOperationException>(() => inputStream.EndWrite(null));
+    
+                    // Flushing the output stream is a no-op.
+                    inputStream.Flush();
+                    Assert.Equal(Task.CompletedTask, inputStream.FlushAsync(CancellationToken.None));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
@@ -333,11 +433,23 @@ namespace System.Net.Tests
         [InlineData(false)]
         public async Task Read_NullBuffer_ThrowsArgumentNullException(bool chunked)
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                AssertExtensions.Throws<ArgumentNullException>("buffer", () => inputStream.Read(null, 0, 0));
-                await Assert.ThrowsAsync<ArgumentNullException>("buffer", () => inputStream.ReadAsync(null, 0, 0));
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    AssertExtensions.Throws<ArgumentNullException>("buffer", () => inputStream.Read(null, 0, 0));
+                    await AssertExtensions.ThrowsAsync<ArgumentNullException>("buffer", () => inputStream.ReadAsync(null, 0, 0));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
@@ -348,11 +460,23 @@ namespace System.Net.Tests
         [InlineData(3, false)]
         public async Task Read_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset, bool chunked)
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => inputStream.Read(new byte[2], offset, 0));
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>("offset", () => inputStream.ReadAsync(new byte[2], offset, 0));
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => inputStream.Read(new byte[2], offset, 0));
+                    await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("offset", () => inputStream.ReadAsync(new byte[2], offset, 0));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
@@ -365,11 +489,23 @@ namespace System.Net.Tests
         [InlineData(2, 1, false)]
         public async Task Read_InvalidOffsetSize_ThrowsArgumentOutOfRangeException(int offset, int size, bool chunked)
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => inputStream.Read(new byte[2], offset, size));
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>("size", () => inputStream.ReadAsync(new byte[2], offset, size));
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => inputStream.Read(new byte[2], offset, size));
+                    await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("size", () => inputStream.ReadAsync(new byte[2], offset, size));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
@@ -378,50 +514,89 @@ namespace System.Net.Tests
         [InlineData(false)]
         public async Task EndRead_NullAsyncResult_ThrowsArgumentNullException(bool chunked)
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => inputStream.EndRead(null));
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => inputStream.EndRead(null));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No validation performed
         public async Task EndRead_InvalidAsyncResult_ThrowsArgumentException(bool chunked)
         {
-            HttpListenerRequest request1 = await _helper.GetRequest(chunked);
-            HttpListenerRequest request2 = await _helper.GetRequest(chunked);
-
-            using (Stream inputStream1 = request1.InputStream)
-            using (Stream inputStream2 = request2.InputStream)
+            using (HttpClient client = new HttpClient())
             {
-                IAsyncResult beginReadResult = inputStream1.BeginRead(new byte[0], 0, 0, null, null);
-
-                AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(new CustomAsyncResult()));
-                AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(beginReadResult));
+                Task<HttpListenerContext> contextTask1 = _listener.GetContextAsync();
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask1 = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+                HttpListenerContext context1 = await contextTask1;
+                HttpListenerRequest request1 = context1.Request;
+                
+                Task<HttpListenerContext> contextTask2 = _listener.GetContextAsync();
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask2 = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
+                HttpListenerContext context2 = await contextTask2;
+                HttpListenerRequest request2 = context2.Request;
+                
+                using (Stream inputStream1 = request1.InputStream)
+                using (Stream inputStream2 = request2.InputStream)
+                {
+                    IAsyncResult beginReadResult = inputStream1.BeginRead(new byte[0], 0, 0, null, null);
+    
+                    AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(new CustomAsyncResult()));
+                    AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(beginReadResult));
+                }
+                
+                context1.Response.Close();
+                await clientTask1;
+                
+                context2.Response.Close();
+                await clientTask2;
             }
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No validation performed
         public async Task EndRead_CalledTwice_ThrowsInvalidOperationException(bool chunked)
         {
-            HttpListenerRequest request = await _helper.GetRequest(chunked);
-            using (Stream inputStream = request.InputStream)
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+            using (HttpClient client = new HttpClient())
             {
-                IAsyncResult beginReadResult = inputStream.BeginRead(new byte[0], 0, 0, null, null);
-                inputStream.EndRead(beginReadResult);
+                client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent("Hello"));
 
-                Assert.Throws<InvalidOperationException>(() => inputStream.EndRead(beginReadResult));
+                HttpListenerContext context = await contextTask;
+                HttpListenerRequest request = context.Request;
+
+                using (Stream inputStream = request.InputStream)
+                {
+                    IAsyncResult beginReadResult = inputStream.BeginRead(new byte[0], 0, 0, null, null);
+                    inputStream.EndRead(beginReadResult);
+    
+                    Assert.Throws<InvalidOperationException>(() => inputStream.EndRead(beginReadResult));
+                }
+
+                context.Response.Close();
+                await clientTask;
             }
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Read_FromClosedConnectionAsynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -438,21 +613,16 @@ namespace System.Net.Tests
                 HttpListenerContext context = await _listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Shutdown(SocketShutdown.Both);
                 Helpers.WaitForSocketShutdown(client);
 
                 // Reading from a closed connection should fail.
                 byte[] buffer = new byte[expected.Length];
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Request.InputStream.ReadAsync(buffer, 0, buffer.Length));
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Request.InputStream.ReadAsync(buffer, 0, buffer.Length));
-
-                // Closing a response from a closed client if no writing has failed should fail.
-                Assert.Throws<HttpListenerException>(() => context.Response.Close());
             }
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Read_FromClosedConnectionSynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -469,16 +639,12 @@ namespace System.Net.Tests
                 HttpListenerContext context = await _listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Shutdown(SocketShutdown.Both);
                 Helpers.WaitForSocketShutdown(client);
 
                 // Reading from a closed connection should fail.
                 byte[] buffer = new byte[expected.Length];
                 Assert.Throws<HttpListenerException>(() => context.Request.InputStream.Read(buffer, 0, buffer.Length));
                 Assert.Throws<HttpListenerException>(() => context.Request.InputStream.Read(buffer, 0, buffer.Length));
-
-                // Closing a response from a closed client if no writing has occured should fail.
-                Assert.Throws<HttpListenerException>(() => context.Response.Close());
             }
         }
     }

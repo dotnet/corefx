@@ -14,17 +14,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="FileInfo\Serialization.cs" />
+    <Compile Include="Base\BaseGetSetAttributes.cs" />
+    <Compile Include="Base\BaseGetSetTimes.cs" />
+    <Compile Include="Base\FileGetSetAttributes.cs" />
+    <Compile Include="Base\InfoGetSetAttributes.cs" />
+    <Compile Include="Base\InfoGetSetTimes.cs" />
+    <Compile Include="Base\AllGetSetAttributes.cs" />
+    <Compile Include="Base\StaticGetSetTimes.cs" />
+    <Compile Include="FileInfo\GetSetAttributesCommon.cs" />
+    <Compile Include="FileInfo\IsReadOnly.cs" />
     <Compile Include="FileInfo\Replace.cs" />
     <Compile Include="FileStream\Handle.cs" />
     <Compile Include="Directory\GetLogicalDrives.cs" />
-    <Compile Include="DirectoryInfo\Serialization.cs" />
-    <Compile Include="FileStream\BeginRead.cs" />
     <Compile Include="FileStream\EndRead.cs" />
-    <Compile Include="FileStream\BeginWrite.cs" />
     <Compile Include="FileStream\EndWrite.cs" />
     <Compile Include="FileStream\LockUnlock.cs" />
+    <Compile Include="FileSystemTest.cs" />
     <Compile Include="File\EncryptDecrypt.cs" />
+    <Compile Include="File\GetSetAttributesCommon.cs" />
     <Compile Include="File\Replace.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
@@ -99,11 +106,9 @@
     <Compile Include="File\Move.cs" />
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
-    <Compile Include="PathFeatures.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
-    <Compile Include="FileSystemTest.cs" />
     <!-- Ported -->
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
@@ -111,9 +116,6 @@
     <Compile Include="PortedCommon\IOServices.cs" />
     <Compile Include="PortedCommon\PathInfo.cs" />
     <Compile Include="PortedCommon\ReparsePointUtilities.cs" />
-    <Compile Include="PortedCommon\TemporaryDirectory.cs" />
-    <Compile Include="PortedCommon\TemporaryFile.cs" />
-    <Compile Include="PortedCommon\TemporaryFileSystemItem.cs" />
     <Compile Include="DirectoryInfo\EnumerableAPIs.cs" />
     <Compile Include="DirectoryInfo\GetDirectories.cs" />
     <Compile Include="DirectoryInfo\GetFiles.cs" />
@@ -156,25 +158,22 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo.cs" />
     <!-- Helpers -->
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\PathFeatures.cs">
+      <Link>Common\System\IO\PathFeatures.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
     </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

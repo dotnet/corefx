@@ -10,7 +10,9 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
-        [Fact]
+        private static bool EphemeralKeysAreExportable => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer();
+
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void ExportAutoKey()
         {
             RSAParameters privateParams;
@@ -40,7 +42,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Equal(privateParams.Exponent, publicParams.Exponent);
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void PaddedExport()
         {
             // OpenSSL's numeric type for the storage of RSA key parts disregards zero-valued
@@ -67,7 +70,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             AssertKeyEquals(ref diminishedDPParameters, ref exported);
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void LargeKeyImportExport()
         {
             RSAParameters imported = TestData.RSA16384Params;
@@ -96,7 +100,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void UnusualExponentImportExport()
         {
             // Most choices for the Exponent value in an RSA key use a Fermat prime.
@@ -120,7 +125,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             AssertKeyEquals(ref unusualExponentParameters, ref exported);
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void ImportExport1032()
         {
             RSAParameters imported = TestData.RSA1032Parameters;
@@ -141,7 +147,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Null(exportedPublic.D);
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void ImportReset()
         {
             using (RSA rsa = RSAFactory.Create())
@@ -189,7 +196,8 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [Fact]
+        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void MultiExport()
         {
             RSAParameters imported = TestData.RSA1024Params;
@@ -246,7 +254,10 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
+                if (rsa is RSACng && PlatformDetection.IsFullFramework)
+                    AssertExtensions.Throws<ArgumentException>(null, () => rsa.ImportParameters(imported));
+                else
+                    Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
             }
         }
 
@@ -260,11 +271,17 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
+                if (rsa is RSACng && PlatformDetection.IsFullFramework)
+                    AssertExtensions.Throws<ArgumentException>(null, () => rsa.ImportParameters(imported));
+                else
+                    Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
             }
         }
 
         [Fact]
+#if TESTING_CNG_IMPLEMENTATION
+        [ActiveIssue(18882, TargetFrameworkMonikers.NetFramework)]
+#endif
         public static void ImportNoDP()
         {
             // Because RSAParameters is a struct, this is a copy,

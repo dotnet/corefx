@@ -1603,8 +1603,12 @@ namespace System.Linq.Expressions.Tests
         {
             Array arr = new[,] { { 1, 2, 3 }, { 1, 2, 2 } };
             AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
+        }
 
-            arr = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        public static void ArrayTypeArrayNotAllowedIfNonZeroBoundArray()
+        {
+            Array arr = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });
             AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(Expression.Constant(arr)));
         }
 
@@ -1612,7 +1616,7 @@ namespace System.Linq.Expressions.Tests
         public static void UnreadableArray()
         {
             Expression array = Expression.Property(null, typeof(Unreadable<int[]>), nameof(Unreadable<int>.WriteOnly));
-            Assert.Throws<ArgumentException>(() => Expression.ArrayLength(array));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayLength(array));
         }
 
         private static IEnumerable<object[]> TestArrays()

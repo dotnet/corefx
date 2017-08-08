@@ -212,12 +212,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_Empty()
         {
             Assert.Equal("Count = 0", DebuggerAttributes.ValidateDebuggerDisplayReferences(new SortedList()));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NormalList()
         {
             var list = new SortedList() { { "a", 1 }, { "b", 2 } };
@@ -228,6 +230,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_SynchronizedList()
         {
             var list = SortedList.Synchronized(new SortedList() { { "a", 1 }, { "b", 2 } });
@@ -238,6 +241,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullSortedList_ThrowsArgumentNullException()
         {
             bool threwNull = false;
@@ -254,6 +258,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "This test intentionally reflects on an internal member of SortedList. Cannot do that on UaoAot.")]
         public static void EnsureCapacity_NewCapacityLessThanMin_CapsToMaxArrayLength()
         {
             // A situation like this occurs for very large lengths of SortedList.
@@ -302,7 +307,7 @@ namespace System.Collections.Tests
             {
                 AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
 
-                Assert.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
             });
         }
 
@@ -478,10 +483,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 AssertExtensions.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentException>("array", null, () => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
             });
         }
 

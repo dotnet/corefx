@@ -76,7 +76,6 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        [ActiveIssue(17373)]
         [Theory]
         [InlineData(@"np:\\.\pipe\sqlbad\query")]
         [InlineData(@"np:\\.\pipe\MSSQL$NonExistentInstance\sql\query")]
@@ -92,10 +91,71 @@ namespace System.Data.SqlClient.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.DataSource = dataSource;
             builder.ConnectTimeout = 1;
-            using(SqlConnection connection = new SqlConnection(builder.ConnectionString))
+
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
-                VerifyConnectionFailure<SqlException>(() => connection.Open(), "(provider: Named Pipes Provider, error: 11 - Timeout error)");
+                string expectedErrorMsg = "(provider: Named Pipes Provider, error: 40 - Could not open a connection to SQL Server)";
+                VerifyConnectionFailure<SqlException>(() => connection.Open(), expectedErrorMsg);
             }
+        }
+
+        public static bool IsUsingManagedSNI() => ManualTesting.Tests.DataTestUtility.IsUsingManagedSNI();
+
+        [ConditionalFact(nameof(IsUsingManagedSNI))]
+        public void NamedPipeInvalidConnStringTest_ManagedSNI()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.ConnectTimeout = 1;
+
+            string invalidConnStringError = "(provider: Named Pipes Provider, error: 25 - Connection string is not valid)";
+            string fakeServerName = Guid.NewGuid().ToString("N");
+
+            // Using forward slashes
+            builder.DataSource = "np://" + fakeServerName + "/pipe/sql/query";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // Without pipe token
+            builder.DataSource = @"np:\\" + fakeServerName + @"\sql\query";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // Without a pipe name
+            builder.DataSource = @"np:\\" + fakeServerName + @"\pipe";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // Nothing after server
+            builder.DataSource = @"np:\\" + fakeServerName;
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // No leading slashes
+            builder.DataSource = @"np:" + fakeServerName + @"\pipe\sql\query";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // No server name
+            builder.DataSource = @"np:\\\pipe\sql\query";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+
+            // Nothing but slashes
+            builder.DataSource = @"np:\\\\\";
+            OpenBadConnection(builder.ConnectionString, invalidConnStringError);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        public static void LocalDBNotSupportedOnUapTest()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB")
+            {
+                IntegratedSecurity = true,
+                ConnectTimeout = 2
+            };
+
+            Assert.Throws<PlatformNotSupportedException>(() =>
+            {
+                using (SqlConnection conn = new SqlConnection(builder.ConnectionString))
+                {
+                    conn.Open();
+                }
+            });
         }
 
         private void GenerateConnectionException(string connectionString)
@@ -114,10 +174,23 @@ namespace System.Data.SqlClient.Tests
         private TException VerifyConnectionFailure<TException>(Action connectAction, string expectedExceptionMessage, Func<TException, bool> exVerifier) where TException : Exception
         {
             TException ex = Assert.Throws<TException>(connectAction);
-            Assert.Contains(expectedExceptionMessage, ex.Message);
+
+            // Some exception messages are different between Framework and Core
+            if(!PlatformDetection.IsFullFramework)
+            {
+                Assert.Contains(expectedExceptionMessage, ex.Message);
+            }
             Assert.True(exVerifier(ex), "FAILED Exception verifier failed on the exception.");
 
             return ex;
+        }
+
+        private void OpenBadConnection(string connectionString, string errorMsg)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                VerifyConnectionFailure<SqlException>(() => conn.Open(), errorMsg);
+            }
         }
 
         private TException VerifyConnectionFailure<TException>(Action connectAction, string expectedExceptionMessage) where TException : Exception

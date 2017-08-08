@@ -30,18 +30,6 @@ namespace System.Net.Tests
             return context.Response;
         }
 
-        public async Task<HttpListenerRequest> GetRequest(bool chunked)
-        {
-            // We need to create a mock request to give the HttpListener a context.
-            Task<HttpListenerContext> serverContext = _listener.GetContextAsync();
-
-            _client.DefaultRequestHeaders.TransferEncodingChunked = chunked;
-            Task<HttpResponseMessage> clientTask = _client.PostAsync(_listeningUrl, new StringContent("Hello"));
-
-            HttpListenerContext context = await serverContext;
-            return context.Request;
-        }
-
         public void Dispose()
         {
             _client.Dispose();
@@ -56,11 +44,18 @@ namespace System.Net.Tests
         public bool IsCompleted => throw new NotImplementedException();
     }
 
-    public class Helpers
+    public static class Helpers
     {
+        public static bool IsWindowsImplementation { get; } =
+            (TypeExists("Interop+HttpApi") || TypeExists("System.Net.UnsafeNclNativeMethods")); // types only in Windows netcoreapp/netfx builds, respectively
+
+        public static bool IsManagedImplementation => TypeExists("System.Net.WebSockets.ManagedWebSocket"); // type only in managed build
+
+        private static bool TypeExists(string name) => typeof(HttpListener).Assembly.GetType(name, throwOnError: false, ignoreCase: false) != null;
+
         public static void WaitForSocketShutdown(Socket socket)
         {
-            while (SocketConnected(socket));
+            socket.Close();
         }
 
         public static bool SocketConnected(Socket socket)

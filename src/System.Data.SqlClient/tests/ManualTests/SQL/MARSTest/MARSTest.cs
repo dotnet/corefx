@@ -13,6 +13,25 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private static readonly string _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { MultipleActiveResultSets = true }).ConnectionString;
 
+        [CheckConnStrSetupFact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void NamedPipesMARSTest()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.NpConnStr);
+            builder.MultipleActiveResultSets = true;
+            builder.ConnectTimeout = 5;
+
+            using (SqlConnection conn = new SqlConnection(builder.ConnectionString))
+            {
+                conn.Open();
+                using (SqlCommand command = new SqlCommand("SELECT @@SERVERNAME", conn))
+                {
+                    var result = command.ExecuteScalar();
+                    Assert.NotNull(result);
+                }
+            }
+        }
+
 #if DEBUG
         [CheckConnStrSetupFact]
         public static void MARSAsyncTimeoutTest()

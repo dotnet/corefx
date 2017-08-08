@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Security;
 using Windows.ApplicationModel;
 using Windows.Storage;
@@ -20,18 +19,22 @@ namespace System.IO.IsolatedStorage
 
             if (IsMachine(scope))
             {
-                dataDirectory = ApplicationData.Current.SharedLocalFolder.Path;
+                // Getting the shared local folder isn't possible if the policy for
+                // "Allow a Windows app to share application data between users".
+                dataDirectory = ApplicationData.Current.SharedLocalFolder?.Path;
+
+                if (dataDirectory == null)
+                {
+                    throw new IsolatedStorageException(SR.IsolatedStorage_Scope_Invalid);
+                }
+            }
+            if (!IsRoaming(scope))
+            {
+                dataDirectory = ApplicationData.Current.LocalFolder.Path;
             }
             else
             {
-                if (!IsRoaming(scope))
-                {
-                    dataDirectory = ApplicationData.Current.LocalFolder.Path;
-                }
-                else
-                {
-                    dataDirectory = ApplicationData.Current.RoamingFolder.Path;
-                }
+                dataDirectory = ApplicationData.Current.RoamingFolder.Path;
             }
 
             dataDirectory = Path.Combine(dataDirectory, IsolatedStorageDirectoryName);
@@ -63,6 +66,13 @@ namespace System.IO.IsolatedStorage
             hash = IdentityHelper.GetNormalizedUriHash(codeBase);
             hash = "Url" + separator + hash;
             identity = codeBase;
+        }
+
+        internal static string GetRandomDirectory(string rootDirectory, IsolatedStorageScope scope)
+        {
+            // We didn't create random directories for UAP/UWP in the past. As the root locations are
+            // scoped beneath app isolated folders we don't need the extra layer of obfuscation.
+            return rootDirectory;
         }
     }
 }

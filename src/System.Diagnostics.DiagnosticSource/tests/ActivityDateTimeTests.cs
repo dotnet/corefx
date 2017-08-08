@@ -6,6 +6,7 @@ namespace System.Diagnostics.Tests
     public class ActivityDateTimeTests
     {
         [Fact]
+        [ActiveIssue("dotnet/corefx #19545", TargetFrameworkMonikers.NetFramework)]
         public void StartStopReturnsPreciseDuration()
         {
             var activity = new Activity("test");
@@ -18,7 +19,7 @@ namespace System.Diagnostics.Tests
             
             sw.Stop();
 
-            Assert.True(activity.Duration.TotalMilliseconds > 1 && activity.Duration.TotalMilliseconds <= sw.ElapsedMilliseconds);
+            Assert.True(activity.Duration.TotalMilliseconds > 1 && activity.Duration <= sw.Elapsed);
         }
     }
 }

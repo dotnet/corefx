@@ -33,7 +33,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(Ctor_ExpectedPropertyValues_MemberData))]
-        public static void Ctor_ExpectedPropertyValues(
+        public static void WebProxy_Ctor_ExpectedPropertyValues(
             WebProxy p, Uri address, bool useDefaultCredentials, bool bypassLocal, string[] bypassedAddresses, ICredentials creds)
         {
             Assert.Equal(address, p.Address);
@@ -45,7 +45,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void BypassList_Roundtrip()
+        public static void WebProxy_BypassList_Roundtrip()
         {
             var p = new WebProxy();
             Assert.Empty(p.BypassList);
@@ -65,7 +65,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void UseDefaultCredentials_Roundtrip()
+        public static void WebProxy_UseDefaultCredentials_Roundtrip()
         {
             var p = new WebProxy();
             Assert.False(p.UseDefaultCredentials);
@@ -81,7 +81,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void BypassProxyOnLocal_Roundtrip()
+        public static void WebProxy_BypassProxyOnLocal_Roundtrip()
         {
             var p = new WebProxy();
             Assert.False(p.BypassProxyOnLocal);
@@ -94,7 +94,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void Address_Roundtrip()
+        public static void WebProxy_Address_Roundtrip()
         {
             var p = new WebProxy();
             Assert.Null(p.Address);
@@ -107,17 +107,17 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void InvalidArgs_Throws()
+        public static void WebProxy_InvalidArgs_Throws()
         {
             var p = new WebProxy();
             AssertExtensions.Throws<ArgumentNullException>("destination", () => p.GetProxy(null));
             AssertExtensions.Throws<ArgumentNullException>("host", () => p.IsBypassed(null));
             AssertExtensions.Throws<ArgumentNullException>("c", () => p.BypassList = null);
-            Assert.Throws<ArgumentException>(() => p.BypassList = new string[] { "*.com" });
+            AssertExtensions.Throws<ArgumentException>(null, () => p.BypassList = new string[] { "*.com" });
         }
 
         [Fact]
-        public static void InvalidBypassUrl_AddedDirectlyToList_SilentlyEaten()
+        public static void WebProxy_InvalidBypassUrl_AddedDirectlyToList_SilentlyEaten()
         {
             var p = new WebProxy("http://bing.com");
             p.BypassArrayList.Add("*.com");
@@ -125,14 +125,14 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void BypassList_DoesntContainUrl_NotBypassed()
+        public static void WebProxy_BypassList_DoesntContainUrl_NotBypassed()
         {
             var p = new WebProxy("http://microsoft.com");
             Assert.Equal(new Uri("http://microsoft.com"), p.GetProxy(new Uri("http://bing.com")));
         }
 
         [Fact]
-        public static void BypassList_ContainsUrl_IsBypassed()
+        public static void WebProxy_BypassList_ContainsUrl_IsBypassed()
         {
             var p = new WebProxy("http://microsoft.com", false, new[] { "hello", "bing.*", "world" });
             Assert.Equal(new Uri("http://bing.com"), p.GetProxy(new Uri("http://bing.com")));
@@ -160,7 +160,7 @@ namespace System.Net.Tests
             if (!string.IsNullOrWhiteSpace(domain))
             {
                 Uri uri = null;
-                try { new Uri($"http://{Guid.NewGuid().ToString("N")}.{domain}"); }
+                try { uri = new Uri($"http://{Guid.NewGuid().ToString("N")}.{domain}"); }
                 catch (UriFormatException) { }
 
                 if (uri != null)
@@ -177,7 +177,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(BypassOnLocal_MemberData))]
-        public static void BypassOnLocal_MatchesExpected(Uri destination, bool isLocal)
+        public static void WebProxy_BypassOnLocal_MatchesExpected(Uri destination, bool isLocal)
         {
             Uri proxyUri = new Uri("http://microsoft.com");
 
@@ -189,7 +189,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public static void BypassOnLocal_SpecialCases()
+        public static void WebProxy_BypassOnLocal_SpecialCases()
         {
             Assert.True(new WebProxy().IsBypassed(new Uri("http://anything.com")));
             Assert.True(new WebProxy((string)null).IsBypassed(new Uri("http://anything.com")));
@@ -200,7 +200,7 @@ namespace System.Net.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void GetDefaultProxy_NotSupported()
+        public static void WebProxy_GetDefaultProxy_NotSupported()
         {
 #pragma warning disable 0618 // obsolete method
             Assert.Throws<PlatformNotSupportedException>(() => WebProxy.GetDefaultProxy());

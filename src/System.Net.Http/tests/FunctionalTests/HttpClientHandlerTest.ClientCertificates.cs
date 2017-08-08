@@ -2,20 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.Test.Common;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientHandler_ClientCertificates_Test
+    public class HttpClientHandler_ClientCertificates_Test : RemoteExecutorTestBase
     {
+        public static bool CanTestCertificates =>
+            Capability.IsTrustedRootCertificateInstalled() &&
+            (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
+
+        public static bool CanTestClientCertificates =>
+            CanTestCertificates && BackendSupportsCustomCertificateHandling;
+
+        public HttpClientHandler_ClientCertificates_Test(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
+        private readonly ITestOutputHelper _output;
         [Fact]
         public void ClientCertificateOptions_Default()
         {
@@ -59,9 +73,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
+        [Fact]
         public async Task Automatic_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
+            if (BackendSupportsCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                return;
+            }
+
             using (var client = new HttpClient(new HttpClientHandler() { ClientCertificateOptions = ClientCertificateOption.Automatic }))
             {
                 await Assert.ThrowsAsync<PlatformNotSupportedException>(() => client.GetAsync(Configuration.Http.SecureRemoteEchoServer));
@@ -69,9 +88,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
+        [Fact]
         public async Task Manual_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
+            if (BackendSupportsCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                return;
+            }
+
             var handler = new HttpClientHandler();
             handler.ClientCertificates.Add(Configuration.Certificates.GetClientCertificate());
             using (var client = new HttpClient(handler))
@@ -81,14 +105,121 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void Manual_SendClientCertificateWithClientAuthEKUToRemoteServer_OK()
+        {
+            if (!CanTestClientCertificates) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                _output.WriteLine($"Skipping {nameof(Manual_SendClientCertificateWithClientAuthEKUToRemoteServer_OK)}()");
+                return;
+            }
+
+            // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
+            // the same process as the other tests. Each test needs to be isolated to its own process.
+            // See dicussion: https://github.com/dotnet/corefx/issues/21945
+            RemoteInvoke(async () =>
+            {
+                var cert = Configuration.Certificates.GetClientCertificate();
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(cert);
+                using (var client = new HttpClient(handler))
+                {
+                    HttpResponseMessage response = await client.GetAsync(Configuration.Http.EchoClientCertificateRemoteServer);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    string body = await response.Content.ReadAsStringAsync();
+                    byte[] bytes = Convert.FromBase64String(body);
+                    var receivedCert = new X509Certificate2(bytes);
+                    Assert.Equal(cert, receivedCert);
+
+                    return SuccessExitCode;
+                }
+            }).Dispose();
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void Manual_SendClientCertificateWithServerAuthEKUToRemoteServer_Forbidden()
+        {
+            if (ManagedHandlerTestHelpers.IsEnabled)
+            {
+                // TODO #21452: The managed handler is currently sending out client certificates when it shouldn't.
+                return;
+            }
+
+            if (!CanTestClientCertificates) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                _output.WriteLine($"Skipping {nameof(Manual_SendClientCertificateWithServerAuthEKUToRemoteServer_Forbidden)}()");
+                return;
+            }
+
+            // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
+            // the same process as the other tests. Each test needs to be isolated to its own process.
+            // See dicussion: https://github.com/dotnet/corefx/issues/21945
+            RemoteInvoke(async () =>
+            {
+                var cert = Configuration.Certificates.GetServerCertificate();
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(cert);
+                using (var client = new HttpClient(handler))
+                {
+                    HttpResponseMessage response = await client.GetAsync(Configuration.Http.EchoClientCertificateRemoteServer);
+                    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+
+                    return SuccessExitCode;
+                }
+            }).Dispose();
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void Manual_SendClientCertificateWithNoEKUToRemoteServer_OK()
+        {
+            if (!CanTestClientCertificates) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                _output.WriteLine($"Skipping {nameof(Manual_SendClientCertificateWithNoEKUToRemoteServer_OK)}()");
+                return;
+            }
+
+            // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
+            // the same process as the other tests. Each test needs to be isolated to its own process.
+            // See dicussion: https://github.com/dotnet/corefx/issues/21945
+            RemoteInvoke(async () =>
+            {
+                var cert = Configuration.Certificates.GetNoEKUCertificate();
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(cert);
+                using (var client = new HttpClient(handler))
+                {
+                    HttpResponseMessage response = await client.GetAsync(Configuration.Http.EchoClientCertificateRemoteServer);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    string body = await response.Content.ReadAsStringAsync();
+                    byte[] bytes = Convert.FromBase64String(body);
+                    var receivedCert = new X509Certificate2(bytes);
+                    Assert.Equal(cert, receivedCert);
+
+                    return SuccessExitCode;
+                }
+            }).Dispose();
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
+        [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(9543)] // fails sporadically with 'WinHttpException : The server returned an invalid or unrecognized response' or 'TaskCanceledException : A task was canceled'
-        [ConditionalTheory(nameof(BackendSupportsCustomCertificateHandling))]
+        [Theory]
         [InlineData(6, false)]
         [InlineData(3, true)]
         public async Task Manual_CertificateSentMatchesCertificateReceived_Success(
             int numberOfRequests,
             bool reuseClient) // validate behavior with and without connection pooling, which impacts client cert usage
         {
+            if (BackendDoesNotSupportCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            {
+                _output.WriteLine($"Skipping {nameof(Manual_CertificateSentMatchesCertificateReceived_Success)}()");
+                return;
+            }
+
             var options = new LoopbackServer.Options { UseSsl = true };
 
             Func<X509Certificate2, HttpClient> createClient = (cert) =>

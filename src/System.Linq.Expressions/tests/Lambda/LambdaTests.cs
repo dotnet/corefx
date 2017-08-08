@@ -269,6 +269,9 @@ namespace System.Linq.Expressions.Tests
                 double, double, double, double,
                 bool>), exp.Type);
 
+#if FEATURE_COMPILE
+            // From this point on, the tests require FEATURE_COMPILE (RefEmit) support as SLE needs to create delegate types on the fly. 
+            // You can't instantiate Func<> over 20 arguments or over byrefs.
             ParameterExpression[] paramList = Enumerable.Range(0, 20).Select(_ => Expression.Variable(typeof(int))).ToArray();
             exp = Expression.Lambda(
                 Expression.Constant(0),
@@ -300,6 +303,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(1, delMethod.GetParameters().Length);
             Assert.Equal(typeof(int).MakeByRefType(), delMethod.GetParameters()[0].ParameterType);
             Assert.Same(delType, Expression.Lambda(Expression.Constant(3L), Expression.Parameter(typeof(int).MakeByRefType())).Type);
+#endif //FEATURE_COMPILE
         }
 
         [Fact]
@@ -334,34 +338,34 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void IncorrectArgumentCount()
         {
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action>(Expression.Empty(), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action<int, int>>(Expression.Empty(), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int>>(Expression.Constant(1), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int, int, int>>(Expression.Constant(1), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Action), Expression.Empty(), Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Func<int, int, int>), Expression.Constant(1), "nullary or binary?", Enumerable.Empty<ParameterExpression>()));
         }
 
         [Fact]
         public void ByRefParameterForValueDelegateParameter()
         {
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Action<int>>(Expression.Empty(), Expression.Parameter(typeof(int).MakeByRefType())));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda<Func<int, bool, int, string>>(
                     Expression.Constant(""),
                     Expression.Parameter(typeof(int)),
                     Expression.Parameter(typeof(bool).MakeByRefType()),
                     Expression.Parameter(typeof(int))));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(typeof(Action<int>), Expression.Empty(), Expression.Parameter(typeof(int).MakeByRefType())));
-            Assert.Throws<ArgumentException>(null,
+            AssertExtensions.Throws<ArgumentException>(null,
                 () => Expression.Lambda(
                     typeof(Func<int, bool, int, string>),
                     Expression.Constant(""),
@@ -373,23 +377,17 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void IncorrectParameterTypes()
         {
-            Assert.Throws<ArgumentException>(
-                () => Expression.Lambda<Action<int>>(Expression.Empty(), Expression.Parameter(typeof(long))));
-            Assert.Throws<ArgumentException>(
-                () => Expression.Lambda(typeof(Action<int>), Expression.Empty(), Expression.Parameter(typeof(long))));
-            Assert.Throws<ArgumentException>(
-                () => Expression.Lambda<Func<Uri, int>>(Expression.Constant(1), Expression.Parameter(typeof(string)))
-                );
-            Assert.Throws<ArgumentException>(
-                () => Expression.Lambda(typeof(Func<Uri, int>), Expression.Constant(1), Expression.Parameter(typeof(string)))
-                );
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Action<int>>(Expression.Empty(), Expression.Parameter(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Action<int>), Expression.Empty(), Expression.Parameter(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<Uri, int>>(Expression.Constant(1), Expression.Parameter(typeof(string))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Func<Uri, int>), Expression.Constant(1), Expression.Parameter(typeof(string))));
         }
 
         [Fact]
         public void IncorrectReturnTypes()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda<Func<int>>(Expression.Constant(typeof(long))));
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Func<int>), Expression.Constant(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<int>>(Expression.Constant(typeof(long))));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda(typeof(Func<int>), Expression.Constant(typeof(long))));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
@@ -433,7 +431,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public void NameNeedNotBeValidCSharpLabel(bool useInterpreter)
         {
-            string name = "1, 2, 3, 4. This is not a valid C♯ label!\"'<>.\uffff";
+            string name = "1, 2, 3, 4. This is not a valid C\u266F label!\"'<>.\uffff";
             var exp = (Expression<Func<int>>)Expression.Lambda(Expression.Constant(21), name, Array.Empty<ParameterExpression>());
             Assert.Equal(name, exp.Name);
             Assert.Equal(21, exp.Compile(useInterpreter)());
@@ -536,11 +534,11 @@ namespace System.Linq.Expressions.Tests
         private static void VerifyUpdateDifferentParamsReturnsDifferent<TDelegate>(Expression<TDelegate> lamda, ParameterExpression[] pars)
         {
             // Should try to create new lambda, but should fail as should have wrong number of arguments.
-            Assert.Throws<ArgumentException>(() => lamda.Update(lamda.Body, pars.Append(Expression.Parameter(typeof(int)))));
+            AssertExtensions.Throws<ArgumentException>(null, () => lamda.Update(lamda.Body, pars.Append(Expression.Parameter(typeof(int)))));
 
             if (pars.Length != 0)
             {
-                Assert.Throws<ArgumentException>(() => lamda.Update(lamda.Body, null));
+                AssertExtensions.Throws<ArgumentException>(null, () => lamda.Update(lamda.Body, null));
                 for (int i = 0; i != pars.Length; ++i)
                 {
                     ParameterExpression[] newPars = new ParameterExpression[pars.Length];
@@ -772,7 +770,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentNullException>(() => parameters.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => parameters.CopyTo(copyToTest, -1));
             Assert.All(copyToTest, Assert.Null); // assert partial copy didn't happen before exception
-            Assert.Throws<ArgumentException>(() => parameters.CopyTo(copyToTest, 2));
+            AssertExtensions.Throws<ArgumentException>(parCount >= 1 && parCount <= 3 && name == null && !tailCall ? null : "destinationArray", () => parameters.CopyTo(copyToTest, 2));
             Assert.All(copyToTest, Assert.Null);
             parameters.CopyTo(copyToTest, 1);
             Assert.Equal(copyToTest, pars.Prepend(null));

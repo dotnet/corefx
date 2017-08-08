@@ -7,6 +7,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class MoveFileTests : IsoStorageTest
     {
         [Fact]
@@ -41,17 +42,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void MoveFile_ThrowsIsolatedStorageException()
+        public void MoveFile_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("foo", "bar"));
+                Assert.Throws<InvalidOperationException>(() => isf.MoveFile("foo", "bar"));
             }
         }
 
         [Fact]
-        public void MoveFile_ThrowsInvalidOperationException()
+        public void MoveFile_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -65,8 +66,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.MoveFile("\0bad", "bar"));
-                Assert.Throws<ArgumentException>(() => isf.MoveFile("foo", "\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveFile("\0bad", "bar"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveFile("foo", "\0bad"));
             }
         }
 
@@ -80,6 +81,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveFile_MoveOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -93,6 +95,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveFile_MovesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

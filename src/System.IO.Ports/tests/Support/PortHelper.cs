@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Legacy.Support
 {
@@ -14,11 +15,16 @@ namespace Legacy.Support
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern int GetLastError();
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", EntryPoint = "QueryDosDeviceW", CharSet = CharSet.Unicode)]
         private static extern int QueryDosDevice(string lpDeviceName, IntPtr lpTargetPath, int ucchMax);
 
         public static string[] GetPorts()
         {
+            if (PlatformDetection.IsWinRT)
+            {
+                return new string[0]; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap https://github.com/dotnet/corefx/issues/21156
+            }
+
             List<string> ports = new List<string>();
             int returnSize = 0;
             int maxSize = 1000000;
@@ -35,7 +41,7 @@ namespace Legacy.Support
                         returnSize = QueryDosDevice(null, mem, maxSize);
                         if (returnSize != 0)
                         {
-                            string allDevices = Marshal.PtrToStringAnsi(mem, returnSize);
+                            string allDevices = Marshal.PtrToStringUni(mem, returnSize);
                             retval = allDevices.Split('\0');
                             break;    // not really needed, but makes it more clear...
                         }
@@ -61,9 +67,10 @@ namespace Legacy.Support
 
             if (retval != null)
             {
+                var serialRegex = new Regex(@"^COM\d{1,3}$");
                 foreach (string str in retval)
                 {
-                    if (str.StartsWith("COM"))
+                    if (serialRegex.IsMatch(str))
                     {
                         ports.Add(str);
                         Debug.WriteLine("Installed serial ports :" + str);

@@ -438,7 +438,12 @@ namespace System.Runtime.Serialization
                             {
                                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.GetOnlyCollectionMustHaveAddMethod, GetClrTypeFullName(UnderlyingType))));
                             }
-                            Debug.Assert(AddMethod != null || Kind == CollectionKind.Array, "Add method cannot be null if the collection is being used as a get-only property");
+
+                            if (Kind != CollectionKind.Array && AddMethod == null)
+                            {
+                                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.GetOnlyCollectionMustHaveAddMethod, GetClrTypeFullName(UnderlyingType))));
+                            }
+
                             XmlFormatGetOnlyCollectionReaderDelegate tempDelegate = new XmlFormatReaderGenerator().GenerateGetOnlyCollectionReader(this);
                             Interlocked.MemoryBarrier();
                             _helper.XmlFormatGetOnlyCollectionReaderDelegate = tempDelegate;
@@ -460,9 +465,14 @@ namespace System.Runtime.Serialization
             _helper.IncrementCollectionCount(xmlWriter, obj, context);
         }
 
-        internal IEnumerator GetEnumeratorForCollection(object obj, out Type enumeratorReturnType)
+        internal IEnumerator GetEnumeratorForCollection(object obj)
         {
-            return _helper.GetEnumeratorForCollection(obj, out enumeratorReturnType);
+            return _helper.GetEnumeratorForCollection(obj);
+        }
+
+        internal Type GetCollectionElementType()
+        {
+            return _helper.GetCollectionElementType();
         }
 
         private class CollectionDataContractCriticalHelper : DataContract.DataContractCriticalHelper
@@ -780,7 +790,7 @@ namespace System.Runtime.Serialization
                             {
                                 _incrementCollectionCountDelegate = (x, o, c) =>
                                 {
-                                    context.IncrementCollectionCount(x, (ICollection)o);
+                                    c.IncrementCollectionCount(x, (ICollection)o);
                                 };
                             }
                             break;
@@ -835,7 +845,7 @@ namespace System.Runtime.Serialization
 
             private CreateGenericDictionaryEnumeratorDelegate _createGenericDictionaryEnumeratorDelegate;
 
-            internal IEnumerator GetEnumeratorForCollection(object obj, out Type enumeratorReturnType)
+            internal IEnumerator GetEnumeratorForCollection(object obj)
             {
                 IEnumerator enumerator = ((IEnumerable)obj).GetEnumerator();
                 if (Kind == CollectionKind.GenericDictionary)
@@ -854,55 +864,57 @@ namespace System.Runtime.Serialization
                     enumerator = new DictionaryEnumerator(((IDictionary)obj).GetEnumerator());
                 }
 
-                enumeratorReturnType = EnumeratorReturnType;
-
                 return enumerator;
             }
 
-            private Type _enumeratorReturnType;
-
-            public Type EnumeratorReturnType
+            internal Type GetCollectionElementType()
             {
-                get
-                {
-                    _enumeratorReturnType = _enumeratorReturnType ?? GetCollectionEnumeratorReturnType();
-                    return _enumeratorReturnType;
-                }
-            }
-
-            private Type GetCollectionEnumeratorReturnType()
-            {
-                Type enumeratorReturnType;
+                Type enumeratorType = null;
                 if (Kind == CollectionKind.GenericDictionary)
                 {
-                    var keyValueTypes = ItemType.GetGenericArguments();
-                    enumeratorReturnType =  Globals.TypeOfKeyValue.MakeGenericType(keyValueTypes);
+                    Type[] keyValueTypes = ItemType.GetGenericArguments();
+                    enumeratorType = Globals.TypeOfGenericDictionaryEnumerator.MakeGenericType(keyValueTypes);
                 }
                 else if (Kind == CollectionKind.Dictionary)
                 {
-
-                    enumeratorReturnType = Globals.TypeOfObject;
-                }
-                else if (Kind == CollectionKind.GenericCollection
-                      || Kind == CollectionKind.GenericList)
-                {
-                    enumeratorReturnType = ItemType;
+                    enumeratorType = Globals.TypeOfDictionaryEnumerator;
                 }
                 else
                 {
-                    var enumeratorType = GetEnumeratorMethod.ReturnType;
-                    if (enumeratorType.IsGenericType)
+                    enumeratorType = GetEnumeratorMethod.ReturnType;
+                }
+
+                MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
+                if (getCurrentMethod == null)
+                {
+                    if (enumeratorType.IsInterface)
                     {
-                        MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
-                        enumeratorReturnType = getCurrentMethod.ReturnType;
+                        getCurrentMethod = XmlFormatGeneratorStatics.GetCurrentMethod;
                     }
                     else
                     {
-                        enumeratorReturnType = Globals.TypeOfObject;
+                        Type ienumeratorInterface = Globals.TypeOfIEnumerator;
+                        if (Kind == CollectionKind.GenericDictionary || Kind == CollectionKind.GenericCollection || Kind == CollectionKind.GenericEnumerable)
+                        {
+                            Type[] interfaceTypes = enumeratorType.GetInterfaces();
+                            foreach (Type interfaceType in interfaceTypes)
+                            {
+                                if (interfaceType.IsGenericType
+                                    && interfaceType.GetGenericTypeDefinition() == Globals.TypeOfIEnumeratorGeneric
+                                    && interfaceType.GetGenericArguments()[0] == ItemType)
+                                {
+                                    ienumeratorInterface = interfaceType;
+                                    break;
+                                }
+                            }
+                        }
+
+                        getCurrentMethod = GetTargetMethodWithName(Globals.GetCurrentMethodName, enumeratorType, ienumeratorInterface);
                     }
                 }
 
-                return enumeratorReturnType;
+                Type elementType = getCurrentMethod.ReturnType;
+                return elementType;
             }
 
             private static MethodInfo s_buildCreateGenericDictionaryEnumerator;

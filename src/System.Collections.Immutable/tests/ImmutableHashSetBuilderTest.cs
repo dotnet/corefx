@@ -249,7 +249,6 @@ namespace System.Collections.Immutable.Tests
         public void Remove()
         {
             var builder = ImmutableHashSet.Create("a").ToBuilder();
-            AssertExtensions.Throws<ArgumentNullException>("item", () => builder.Remove(null));
             Assert.False(builder.Remove("b"));
             Assert.True(builder.Remove("a"));
         }
@@ -282,6 +281,29 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void NullHandling()
+        {
+            var builder = ImmutableHashSet<string>.Empty.ToBuilder();
+            Assert.True(builder.Add(null));
+            Assert.False(builder.Add(null));
+            Assert.True(builder.Contains(null));
+            Assert.True(builder.Remove(null));
+
+            builder.UnionWith(new[] { null, "a" });
+            Assert.True(builder.IsSupersetOf(new[] { null, "a" }));
+            Assert.True(builder.IsSubsetOf(new[] { null, "a" }));
+            Assert.True(builder.IsProperSupersetOf(new[] { default(string) }));
+            Assert.True(builder.IsProperSubsetOf(new[] { null, "a", "b" }));
+
+            builder.IntersectWith(new[] { default(string) });
+            Assert.Equal(1, builder.Count);
+
+            builder.ExceptWith(new[] { default(string) });
+            Assert.False(builder.Remove(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableHashSet.CreateBuilder<int>());

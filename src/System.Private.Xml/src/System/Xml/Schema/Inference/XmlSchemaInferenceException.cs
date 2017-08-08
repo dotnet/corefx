@@ -12,10 +12,12 @@ namespace System.Xml.Schema
     using System.Diagnostics;
     using System.Globalization;
 
-    [Serializable]
     public class XmlSchemaInferenceException : XmlSchemaException
     {
-        protected XmlSchemaInferenceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected XmlSchemaInferenceException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

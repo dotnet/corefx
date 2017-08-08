@@ -14,8 +14,11 @@ namespace System.Diagnostics.Tests
     public class ProcessThreadTests : ProcessTestBase
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestCommonPriorityAndTimeProperties()
         {
+            CreateDefaultProcess();
+
             ProcessThreadCollection threadCollection = _process.Threads;
             Assert.True(threadCollection.Count > 0);
             ProcessThread thread = threadCollection[0];
@@ -23,7 +26,10 @@ namespace System.Diagnostics.Tests
             {
                 if (ThreadState.Terminated != thread.ThreadState)
                 {
-                    Assert.True(thread.Id >= 0);
+                    // On OSX, thread id is a 64bit unsigned value. We truncate the ulong to int
+                    // due to .NET API surface area. Hence, on overflow id can be negative while
+                    // casting the ulong to int.
+                    Assert.True(thread.Id >= 0 || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
                     Assert.Equal(_process.BasePriority, thread.BasePriority);
                     Assert.True(thread.CurrentPriority >= 0);
                     Assert.True(thread.PrivilegedProcessorTime.TotalSeconds >= 0);
@@ -39,6 +45,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestThreadCount()
         {
             int numOfThreads = 10;
@@ -78,8 +85,9 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/974
+        [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX throws PNSE from StartTime
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public async Task TestStartTimeProperty()
         {
             TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
@@ -132,6 +140,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestStartAddressProperty()
         {
             using (Process p = Process.GetCurrentProcess())
@@ -148,8 +157,10 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPriorityLevelProperty()
         {
+            CreateDefaultProcess();
             ProcessThread thread = _process.Threads[0];
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -180,8 +191,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestThreadStateProperty()
         {
+            CreateDefaultProcess();
+
             ProcessThread thread = _process.Threads[0];
             if (ThreadState.Wait != thread.ThreadState)
             {
@@ -190,8 +204,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Threads_GetMultipleTimes_ReturnsSameInstance()
         {
+            CreateDefaultProcess();
+
             Assert.Same(_process.Threads, _process.Threads);
         }
 

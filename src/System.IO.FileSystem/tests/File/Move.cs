@@ -176,7 +176,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Path longer than max path limit
         public void OverMaxPathWorks_Windows()
         {
@@ -206,18 +205,17 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Path longer than max Windows path limit throws
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void LongPath()
         {
-            //Create a destination path longer than the traditional Windows limit of 256 characters
             string testFileSource = Path.Combine(TestDirectory, GetTestFileName());
             File.Create(testFileSource).Dispose();
 
             Assert.All(IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath()), (path) =>
             {
-                Assert.Throws<PathTooLongException>(() => Move(testFileSource, path));
+                AssertExtensions.ThrowsAny<PathTooLongException, FileNotFoundException, DirectoryNotFoundException>(() => Move(testFileSource, path));
                 File.Delete(testFileSource);
-                Assert.Throws<PathTooLongException>(() => Move(path, testFileSource));
+                AssertExtensions.ThrowsAny<PathTooLongException, FileNotFoundException, DirectoryNotFoundException>(() => Move(path, testFileSource));
             });
         }
 
@@ -269,28 +267,26 @@ namespace System.IO.Tests
             Assert.True(File.Exists(testFileShouldntMove));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace in path throws ArgumentException
-        public void WindowsWhitespacePath()
+        public void WindowsWhitespacePath(string whitespace)
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
-            Assert.All(IOInputs.GetWhiteSpace(), (whitespace) =>
-            {
-                Assert.Throws<ArgumentException>(() => Move(testFile.FullName, whitespace));
-            });
+            Assert.Throws<ArgumentException>(() => Move(testFile.FullName, whitespace));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace in path allowed
-        public void UnixWhitespacePath()
+        public void UnixWhitespacePath(string whitespace)
         {
             FileInfo testFileSource = new FileInfo(GetTestFilePath());
             testFileSource.Create().Dispose();
-            Assert.All(IOInputs.GetWhiteSpace(), (whitespace) =>
-            {
-                Move(testFileSource.FullName, Path.Combine(TestDirectory, whitespace));
-                Move(Path.Combine(TestDirectory, whitespace), testFileSource.FullName);
-            });
+
+            Move(testFileSource.FullName, Path.Combine(TestDirectory, whitespace));
+            Move(Path.Combine(TestDirectory, whitespace), testFileSource.FullName);
+
         }
 
         #endregion

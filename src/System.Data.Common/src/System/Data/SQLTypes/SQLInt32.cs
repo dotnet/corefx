@@ -16,10 +16,11 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlInt32 : INullable, IComparable, IXmlSerializable
     {
-        private bool _fNotNull; // false if null, the default ctor (plain 0) will make it Null
-        private int _value;
+        private bool m_fNotNull; // false if null, the default ctor (plain 0) will make it Null. Do not rename (binary serialization)
+        private int m_value; // Do not rename (binary serialization)
 
         private static readonly long s_iIntMin = int.MinValue;   // minimum (signed) int value
         private static readonly long s_lBitNotIntMax = ~int.MaxValue;
@@ -28,21 +29,20 @@ namespace System.Data.SqlTypes
         // construct a Null
         private SqlInt32(bool fNull)
         {
-            _fNotNull = false;
-            _value = 0;
+            m_fNotNull = false;
+            m_value = 0;
         }
 
         public SqlInt32(int value)
         {
-            _value = value;
-            _fNotNull = true;
+            m_value = value;
+            m_fNotNull = true;
         }
-
 
         // INullable
         public bool IsNull
         {
-            get { return !_fNotNull; }
+            get { return !m_fNotNull; }
         }
 
         // property: Value
@@ -53,7 +53,7 @@ namespace System.Data.SqlTypes
                 if (IsNull)
                     throw new SqlNullValueException();
                 else
-                    return _value;
+                    return m_value;
             }
         }
 
@@ -71,7 +71,7 @@ namespace System.Data.SqlTypes
 
         public override string ToString()
         {
-            return IsNull ? SQLResource.NullString : _value.ToString((IFormatProvider)null);
+            return IsNull ? SQLResource.NullString : m_value.ToString((IFormatProvider)null);
         }
 
         public static SqlInt32 Parse(string s)
@@ -86,14 +86,13 @@ namespace System.Data.SqlTypes
         // Unary operators
         public static SqlInt32 operator -(SqlInt32 x)
         {
-            return x.IsNull ? Null : new SqlInt32(-x._value);
+            return x.IsNull ? Null : new SqlInt32(-x.m_value);
         }
 
         public static SqlInt32 operator ~(SqlInt32 x)
         {
-            return x.IsNull ? Null : new SqlInt32(~x._value);
+            return x.IsNull ? Null : new SqlInt32(~x.m_value);
         }
-
 
         // Binary operators
 
@@ -103,8 +102,8 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            int iResult = x._value + y._value;
-            if (SameSignInt(x._value, y._value) && !SameSignInt(x._value, iResult))
+            int iResult = x.m_value + y.m_value;
+            if (SameSignInt(x.m_value, y.m_value) && !SameSignInt(x.m_value, iResult))
                 throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt32(iResult);
@@ -115,8 +114,8 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            int iResult = x._value - y._value;
-            if (!SameSignInt(x._value, y._value) && SameSignInt(y._value, iResult))
+            int iResult = x.m_value - y.m_value;
+            if (!SameSignInt(x.m_value, y.m_value) && SameSignInt(y.m_value, iResult))
                 throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt32(iResult);
@@ -127,7 +126,7 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            long lResult = x._value * (long)y._value;
+            long lResult = x.m_value * (long)y.m_value;
             long lTemp = lResult & s_lBitNotIntMax;
             if (lTemp != 0 && lTemp != s_lBitNotIntMax)
                 throw new OverflowException(SQLResource.ArithOverflowMessage);
@@ -140,12 +139,12 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                if ((x._value == s_iIntMin) && (y._value == -1))
+                if ((x.m_value == s_iIntMin) && (y.m_value == -1))
                     throw new OverflowException(SQLResource.ArithOverflowMessage);
 
-                return new SqlInt32(x._value / y._value);
+                return new SqlInt32(x.m_value / y.m_value);
             }
             else
                 throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
@@ -156,12 +155,12 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                if ((x._value == s_iIntMin) && (y._value == -1))
+                if ((x.m_value == s_iIntMin) && (y.m_value == -1))
                     throw new OverflowException(SQLResource.ArithOverflowMessage);
 
-                return new SqlInt32(x._value % y._value);
+                return new SqlInt32(x.m_value % y.m_value);
             }
             else
                 throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
@@ -170,17 +169,17 @@ namespace System.Data.SqlTypes
         // Bitwise operators
         public static SqlInt32 operator &(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x._value & y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x.m_value & y.m_value);
         }
 
         public static SqlInt32 operator |(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x._value | y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x.m_value | y.m_value);
         }
 
         public static SqlInt32 operator ^(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x._value ^ y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt32(x.m_value ^ y.m_value);
         }
 
 
@@ -203,7 +202,6 @@ namespace System.Data.SqlTypes
         {
             return x.IsNull ? Null : new SqlInt32(x.Value);
         }
-
 
         // Explicit conversions
 
@@ -286,7 +284,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value == y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value == y.m_value);
         }
 
         public static SqlBoolean operator !=(SqlInt32 x, SqlInt32 y)
@@ -296,22 +294,22 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator <(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value < y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value < y.m_value);
         }
 
         public static SqlBoolean operator >(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value > y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value > y.m_value);
         }
 
         public static SqlBoolean operator <=(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value <= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value <= y.m_value);
         }
 
         public static SqlBoolean operator >=(SqlInt32 x, SqlInt32 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value >= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value >= y.m_value);
         }
 
         //--------------------------------------------------
@@ -459,8 +457,6 @@ namespace System.Data.SqlTypes
             return (SqlString)this;
         }
 
-
-
         // IComparable
         // Compares this object to another object, returning an integer that
         // indicates the relationship.
@@ -524,12 +520,12 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _fNotNull = false;
+                m_fNotNull = false;
             }
             else
             {
-                _value = XmlConvert.ToInt32(reader.ReadElementString());
-                _fNotNull = true;
+                m_value = XmlConvert.ToInt32(reader.ReadElementString());
+                m_fNotNull = true;
             }
         }
 
@@ -541,7 +537,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(XmlConvert.ToString(_value));
+                writer.WriteString(XmlConvert.ToString(m_value));
             }
         }
 

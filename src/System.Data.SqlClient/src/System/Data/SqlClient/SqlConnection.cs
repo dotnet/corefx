@@ -9,8 +9,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
-
-
+using System.Transactions;
 
 namespace System.Data.SqlClient
 {
@@ -143,6 +142,14 @@ namespace System.Data.SqlClient
             set
             {
                 _AsyncCommandInProgress = value;
+            }
+        }
+
+        internal SqlConnectionString.TransactionBindingEnum TransactionBinding
+        {
+            get
+            {
+                return ((SqlConnectionString)ConnectionOptions).TransactionBinding;
             }
         }
 
@@ -315,6 +322,11 @@ namespace System.Data.SqlClient
                 string result = ((null != constr) ? constr.WorkstationId : string.Empty);
                 return result;
             }
+        }
+
+        protected override DbProviderFactory DbProviderFactory
+        {
+            get { return SqlClientFactory.Instance; }
         }
 
         // SqlCredential: Pair User Id and password in SecureString which are to be used for SQL authentication
@@ -720,6 +732,7 @@ namespace System.Data.SqlClient
                                 bool callDisconnect = false;
                                 lock (_reconnectLock)
                                 {
+                                    tdsConn.CheckEnlistedTransactionBinding();
                                     runningReconnect = _currentReconnectionTask; // double check after obtaining the lock
                                     if (runningReconnect == null)
                                     {
@@ -825,7 +838,8 @@ namespace System.Data.SqlClient
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
 
-                TaskCompletionSource<DbConnectionInternal> completion = new TaskCompletionSource<DbConnectionInternal>();
+                System.Transactions.Transaction transaction = ADP.GetCurrentTransaction();
+                TaskCompletionSource<DbConnectionInternal> completion = new TaskCompletionSource<DbConnectionInternal>(transaction);
                 TaskCompletionSource<object> result = new TaskCompletionSource<object>();
 
                 if (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterOpenConnection) ||
@@ -892,6 +906,21 @@ namespace System.Data.SqlClient
             {
                 SqlStatistics.StopTimer(statistics);
             }
+        }
+
+        public override DataTable GetSchema()
+        {
+            return GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
+        }
+
+        public override DataTable GetSchema(string collectionName)
+        {
+            return GetSchema(collectionName, null);
+        }
+
+        public override DataTable GetSchema(string collectionName, string[] restrictionValues)
+        {
+            return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
         }
 
         private class OpenAsyncRetry
@@ -987,6 +1016,7 @@ namespace System.Data.SqlClient
         private bool TryOpen(TaskCompletionSource<DbConnectionInternal> retry)
         {
             SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
+
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
 
             if (ForceNewConnection)
@@ -1006,6 +1036,7 @@ namespace System.Data.SqlClient
             // does not require GC.KeepAlive(this) because of OnStateChange
 
             var tdsInnerConnection = (SqlInternalConnectionTds)InnerConnection;
+
             Debug.Assert(tdsInnerConnection.Parser != null, "Where's the parser?");
 
             if (!tdsInnerConnection.ConnectionOptions.Pooling)
@@ -1017,7 +1048,7 @@ namespace System.Data.SqlClient
             // The _statistics can change with StatisticsEnabled. Copying to a local variable before checking for a null value.
             SqlStatistics statistics = _statistics;
             if (StatisticsEnabled ||
-                ( s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
+                (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterExecuteCommand) && statistics != null))
             {
                 ADP.TimerCurrent(out _statistics._openTimestamp);
                 tdsInnerConnection.Parser.Statistics = _statistics;

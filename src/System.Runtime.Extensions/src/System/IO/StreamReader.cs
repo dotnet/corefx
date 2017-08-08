@@ -13,7 +13,6 @@ namespace System.IO
     // This class implements a TextReader for reading characters to a Stream.
     // This is designed for character input in a particular Encoding, 
     // whereas the Stream class is designed for byte input and output.  
-    [Serializable]
     public class StreamReader : TextReader
     {
         // StreamReader.Null is threadsafe.
@@ -78,7 +77,6 @@ namespace System.IO
         // We don't guarantee thread safety on StreamReader, but we should at 
         // least prevent users from trying to read anything while an Async
         // read from the same thread is in progress.
-        [NonSerialized]
         private volatile Task _asyncReadTask;
 
         private void CheckAsyncTaskInProgress()
@@ -541,8 +539,12 @@ namespace System.IO
             if (changedEncoding)
             {
                 _decoder = _encoding.GetDecoder();
-                _maxCharsPerBuffer = _encoding.GetMaxCharCount(_byteBuffer.Length);
-                _charBuffer = new char[_maxCharsPerBuffer];
+                int newMaxCharsPerBuffer = _encoding.GetMaxCharCount(_byteBuffer.Length);
+                if (newMaxCharsPerBuffer > _maxCharsPerBuffer)
+                {
+                    _charBuffer = new char[newMaxCharsPerBuffer];
+                }
+                _maxCharsPerBuffer = newMaxCharsPerBuffer;
             }
         }
 

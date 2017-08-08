@@ -73,7 +73,8 @@ namespace System.Security.Cryptography.EcDsa.Tests
                     // Specify different curve than current
                     if (param.Curve.IsPrime)
                     {
-                        if (curveDef.Curve.Oid.FriendlyName != ECCurve.NamedCurves.nistP256.Oid.FriendlyName)
+                        if (curveDef.Curve.IsNamed &&
+                            curveDef.Curve.Oid.FriendlyName != ECCurve.NamedCurves.nistP256.Oid.FriendlyName)
                         {
                             // Specify different curve (nistP256) by explicit value
                             newEc.GenerateKey(ECCurve.NamedCurves.nistP256);
@@ -185,6 +186,9 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [MemberData(nameof(TestCurves))]
         public void TestChangeFromNamedCurveToKeySize(CurveDef curveDef)
         {
+            if (!curveDef.Curve.IsNamed)
+                return;
+
             using (ECDsa ec = ECDsaFactory.Create(curveDef.Curve))
             {
                 ECParameters param = ec.ExportParameters(false);
@@ -414,7 +418,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(RealImplementations))]
         public void SignHash_NullHash_ThrowsArgumentNullException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentNullException>(
+            AssertExtensions.Throws<ArgumentNullException>(
                 "hash",
                 () => ecdsa.SignHash(null));
         }
@@ -422,7 +426,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(RealImplementations))]
         public void VerifyHash_NullHash_ThrowsArgumentNullException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentNullException>(
+            AssertExtensions.Throws<ArgumentNullException>(
                 "hash",
                 () => ecdsa.VerifyHash(null, null));
         }
@@ -430,7 +434,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(RealImplementations))]
         public void VerifyHash_NullSignature_ThrowsArgumentNullException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentNullException>(
+            AssertExtensions.Throws<ArgumentNullException>(
                 "signature",
                 () => ecdsa.VerifyHash(new byte[0], null));
         }

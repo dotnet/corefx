@@ -41,6 +41,8 @@ namespace System.Collections.Concurrent.Tests
             1.0;
 #endif
 
+        protected virtual string CopyToNoLengthParamName => "destinationArray";
+
         [Fact]
         public void Ctor_InvalidArgs_Throws()
         {
@@ -433,6 +435,9 @@ namespace System.Collections.Concurrent.Tests
         [Fact]
         public void CopyTo_ArrayNonZeroLowerBound_ExpectedElementsCopied()
         {
+            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                return;
+
             int[] initialItems = Enumerable.Range(1, 10).ToArray();
 
             const int LowerBound = 1;
@@ -458,10 +463,10 @@ namespace System.Collections.Concurrent.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length - 2));
 
-            Assert.Throws<ArgumentException>(() => c.CopyTo(new int[7, 7], 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new int[7, 7], 0));
         }
 
         [Fact]
@@ -472,8 +477,8 @@ namespace System.Collections.Concurrent.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
-            Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length));
+            AssertExtensions.Throws<ArgumentException>(CopyToNoLengthParamName, "", () => c.CopyTo(dest, dest.Length - 2));
         }
 
         [Theory]
@@ -731,73 +736,35 @@ namespace System.Collections.Concurrent.Tests
             }
         }
 
-        [Theory]
-        [InlineData(3000000)]
+        [Fact]
         [OuterLoop]
-        public void ManyConcurrentAddsTakes_CollectionRemainsConsistent(int operations)
+        public void ManyConcurrentAddsTakes_CollectionRemainsConsistent()
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();
 
-            // Thread that adds
-            Task<HashSet<int>> adds = ThreadFactory.StartNew(() =>
+            const int operations = 30000;
+            Action addAndRemove = () =>
             {
-                for (int i = int.MinValue; i < (int.MinValue + operations); i++)
+                for (int i = 1; i < operations; i++)
                 {
-                    Assert.True(c.TryAdd(i));
-                }
-                return new HashSet<int>(Enumerable.Range(int.MinValue, operations));
-            });
-
-            // Thread that adds and takes
-            Task<KeyValuePair<HashSet<int>, HashSet<int>>> addsAndTakes = ThreadFactory.StartNew(() =>
-            {
-                var added = new HashSet<int>();
-                var taken = new HashSet<int>();
-
-                // avoid 0 as default(T), to detect accidentally reading a default value
-                for (int i = 1; i < (1 + operations); i++)
-                {
-                    Assert.True(c.TryAdd(i));
-                    added.Add(i);
-
+                    int addCount = new Random(12354).Next(1, 100);
                     int item;
-                    if (c.TryTake(out item))
-                    {
-                        Assert.NotEqual(0, item);
-                        taken.Add(item);
-                    }
+                    for (int j = 0; j < addCount; j++)
+                        Assert.True(c.TryAdd(i));
+                    for (int j = 0; j < addCount; j++)
+                        Assert.True(c.TryTake(out item));
                 }
+            };
 
-                return new KeyValuePair<HashSet<int>, HashSet<int>>(added, taken);
-            });
-
-            // Thread that just takes
-            Task<HashSet<int>> takes = ThreadFactory.StartNew(() =>
-            {
-                var taken = new HashSet<int>();
-                for (int i = 1; i < (1 + operations); i++)
-                {
-                    int item;
-                    if (c.TryTake(out item))
-                    {
-                        Assert.NotEqual(0, item);
-                        taken.Add(item);
-                    }
-                }
-                return taken;
-            });
+            const int numberOfThreads = 3;
+            var tasks = new Task[numberOfThreads];
+            for (int i = 0; i < numberOfThreads; i++)
+                tasks[i] = ThreadFactory.StartNew(addAndRemove);
 
             // Wait for them all to finish
-            WaitAllOrAnyFailed(adds, addsAndTakes, takes);
+            WaitAllOrAnyFailed(tasks);
 
-            // Combine everything they added and remove everything they took
-            var total = new HashSet<int>(adds.Result);
-            total.UnionWith(addsAndTakes.Result.Key);
-            total.ExceptWith(addsAndTakes.Result.Value);
-            total.ExceptWith(takes.Result);
-
-            // What's left should match what's in the collection
-            Assert.Equal(total.OrderBy(i => i), c.OrderBy(i => i));
+            Assert.Empty(c);
         }
 
         [Theory]
@@ -990,14 +957,19 @@ namespace System.Collections.Concurrent.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(10)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributes_Success(int count)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection(count);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(c);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(c);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(c);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            Array items = itemProperty.GetValue(info.Instance) as Array;
+            Assert.Equal(c, items.Cast<int>());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerTypeProxy_Ctor_NullArgument_Throws()
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();

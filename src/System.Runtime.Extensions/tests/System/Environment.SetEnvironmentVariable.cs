@@ -14,9 +14,9 @@ namespace System.Tests
         private const int MAX_VAR_LENGTH_ALLOWED = 32767;
         private const string NullString = "\u0000";
 
-        private static bool IsSupportedTarget(EnvironmentVariableTarget target)
+        internal static bool IsSupportedTarget(EnvironmentVariableTarget target)
         {
-            return target == EnvironmentVariableTarget.Process || RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            return target == EnvironmentVariableTarget.Process || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !PlatformDetection.IsUap);
         }
 
         [Fact]
@@ -28,12 +28,12 @@ namespace System.Tests
         [Fact]
         public void IncorrectVariableThrowsArgument()
         {
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(string.Empty, "test"));
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(NullString, "test"));
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable("Variable=Something", "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(string.Empty, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(NullString, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable("Variable=Something", "test"));
 
             string varWithLenLongerThanAllowed = new string('c', MAX_VAR_LENGTH_ALLOWED + 1);
-            Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable(varWithLenLongerThanAllowed, "test"));
+            AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable(varWithLenLongerThanAllowed, "test"));
         }
 
         private static void ExecuteAgainstTarget(
@@ -49,7 +49,8 @@ namespace System.Tests
             catch (SecurityException)
             {
                 shouldCleanUp = false;
-                Assert.True(target == EnvironmentVariableTarget.Machine, "only machine target should have access issues");
+                Assert.True(target == EnvironmentVariableTarget.Machine || (target == EnvironmentVariableTarget.User && PlatformDetection.IsUap),
+                            "only machine target, or user when in uap, should have access issues");
                 Assert.True(PlatformDetection.IsWindows, "and it should be Windows");
                 Assert.False(PlatformDetection.IsWindowsAndElevated, "and we shouldn't be elevated");
             }
@@ -61,9 +62,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void Default(EnvironmentVariableTarget target)
         {
             string varName = $"Test_SetEnvironmentVariable_Default ({target})";
@@ -85,9 +84,7 @@ namespace System.Tests
 
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable ({target})";
@@ -107,14 +104,12 @@ namespace System.Tests
             () =>
             {
                 // Clear the test variable
-                Environment.SetEnvironmentVariable(varName, null);
+                Environment.SetEnvironmentVariable(varName, null, target);
             });
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void ModifyEnvironmentVariable_AndEnumerate(EnvironmentVariableTarget target)
         {
             string varName = $"Test_ModifyEnvironmentVariable_AndEnumerate ({target})";
@@ -142,14 +137,12 @@ namespace System.Tests
             () =>
             {
                 // Clear the test variable
-                Environment.SetEnvironmentVariable(varName, null);
+                Environment.SetEnvironmentVariable(varName, null, target);
             });
         }
 
         [Theory]
-        [InlineData(EnvironmentVariableTarget.Process)]
-        [InlineData(EnvironmentVariableTarget.Machine)]
-        [InlineData(EnvironmentVariableTarget.User)]
+        [MemberData(nameof(EnvironmentTests.EnvironmentVariableTargets), MemberType = typeof(EnvironmentTests))]
         public void DeleteEnvironmentVariable(EnvironmentVariableTarget target)
         {
             string varName = $"Test_DeleteEnvironmentVariable ({target})";

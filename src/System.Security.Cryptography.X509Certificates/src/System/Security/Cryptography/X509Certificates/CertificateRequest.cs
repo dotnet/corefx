@@ -17,6 +17,7 @@ namespace System.Security.Cryptography.X509Certificates
     {
         private readonly AsymmetricAlgorithm _key;
         private readonly X509SignatureGenerator _generator;
+        private readonly RSASignaturePadding _rsaPadding;
 
         /// <summary>
         /// The X.500 Distinguished Name to use as the Subject in a created certificate or certificate request.
@@ -112,8 +113,11 @@ namespace System.Security.Cryptography.X509Certificates
         /// <param name="hashAlgorithm">
         ///   The hash algorithm to use when signing the certificate or certificate request.
         /// </param>
+        /// <param name="padding">
+        ///   The RSA signature padding to apply if self-signing or being signed with an <see cref="X509Certificate2" />.
+        /// </param>
         /// <seealso cref="X500DistinguishedName(string)"/>
-        public CertificateRequest(string subjectName, RSA key, HashAlgorithmName hashAlgorithm)
+        public CertificateRequest(string subjectName, RSA key, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
         {
             if (subjectName == null)
                 throw new ArgumentNullException(nameof(subjectName));
@@ -121,11 +125,14 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentNullException(nameof(key));
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
                 throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
+            if (padding == null)
+                throw new ArgumentNullException(nameof(padding));
 
             SubjectName = new X500DistinguishedName(subjectName);
 
             _key = key;
-            _generator = X509SignatureGenerator.CreateForRSA(key, RSASignaturePadding.Pkcs1);
+            _generator = X509SignatureGenerator.CreateForRSA(key, padding);
+            _rsaPadding = padding;
             PublicKey = _generator.PublicKey;
             HashAlgorithm = hashAlgorithm;
         }
@@ -143,7 +150,14 @@ namespace System.Security.Cryptography.X509Certificates
         /// <param name="hashAlgorithm">
         ///   The hash algorithm to use when signing the certificate or certificate request.
         /// </param>
-        public CertificateRequest(X500DistinguishedName subjectName, RSA key, HashAlgorithmName hashAlgorithm)
+        /// <param name="padding">
+        ///   The RSA signature padding to apply if self-signing or being signed with an <see cref="X509Certificate2" />.
+        /// </param>
+        public CertificateRequest(
+            X500DistinguishedName subjectName,
+            RSA key,
+            HashAlgorithmName hashAlgorithm,
+            RSASignaturePadding padding)
         {
             if (subjectName == null)
                 throw new ArgumentNullException(nameof(subjectName));
@@ -151,11 +165,14 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentNullException(nameof(key));
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
                 throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
+            if (padding == null)
+                throw new ArgumentNullException(nameof(padding));
 
             SubjectName = subjectName;
 
             _key = key;
-            _generator = X509SignatureGenerator.CreateForRSA(key, RSASignaturePadding.Pkcs1);
+            _generator = X509SignatureGenerator.CreateForRSA(key, padding);
+            _rsaPadding = padding;
             PublicKey = _generator.PublicKey;
             HashAlgorithm = hashAlgorithm;
         }
@@ -354,6 +371,13 @@ namespace System.Security.Cryptography.X509Certificates
         ///   <paramref name="notAfter"/> represents a date and time before <paramref name="notBefore"/>.
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="serialNumber"/> is null or has length 0.</exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="issuerCertificate"/> has a different key algorithm than the requested certificate.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///   <paramref name="issuerCertificate"/> is an RSA certificate and this object was created via a constructor
+        ///   which does not accept a <see cref="RSASignaturePadding"/> value.
+        /// </exception>
         public X509Certificate2 Create(
             X509Certificate2 issuerCertificate,
             DateTimeOffset notBefore,
@@ -364,6 +388,66 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentNullException(nameof(issuerCertificate));
             if (!issuerCertificate.HasPrivateKey)
                 throw new ArgumentException(SR.Cryptography_CertReq_IssuerRequiresPrivateKey, nameof(issuerCertificate));
+            if (notAfter < notBefore)
+                throw new ArgumentException(SR.Cryptography_CertReq_DatesReversed);
+            if (serialNumber == null || serialNumber.Length < 1)
+                throw new ArgumentException(SR.Arg_EmptyOrNullArray, nameof(serialNumber));
+
+            if (issuerCertificate.PublicKey.Oid.Value != PublicKey.Oid.Value)
+            {
+                throw new ArgumentException(
+                    SR.Format(
+                        SR.Cryptography_CertReq_AlgorithmMustMatch,
+                        issuerCertificate.PublicKey.Oid.Value,
+                        PublicKey.Oid.Value),
+                    nameof(issuerCertificate));
+            }
+
+            DateTime notBeforeLocal = notBefore.LocalDateTime;
+            if (notBeforeLocal < issuerCertificate.NotBefore)
+            {
+                throw new ArgumentException(
+                    SR.Format(
+                        SR.Cryptography_CertReq_NotBeforeNotNested,
+                        notBeforeLocal,
+                        issuerCertificate.NotBefore),
+                    nameof(notBefore));
+            }
+
+            DateTime notAfterLocal = notAfter.LocalDateTime;
+
+            // Round down to the second, since that's the cert accuracy.
+            // This makes one method which uses the same DateTimeOffset for chained notAfters
+            // not need to do the rounding locally.
+            long notAfterLocalTicks = notAfterLocal.Ticks;
+            long fractionalSeconds = notAfterLocalTicks % TimeSpan.TicksPerSecond;
+            notAfterLocalTicks -= fractionalSeconds;
+            notAfterLocal = new DateTime(notAfterLocalTicks, notAfterLocal.Kind);
+
+            if (notAfterLocal > issuerCertificate.NotAfter)
+            {
+                throw new ArgumentException(
+                    SR.Format(
+                        SR.Cryptography_CertReq_NotAfterNotNested,
+                        notAfterLocal,
+                        issuerCertificate.NotAfter),
+                    nameof(notAfter));
+            }
+
+            // Check the Basic Constraints and Key Usage extensions to help identify inappropriate certificates.
+            // Note that this is not a security check. The system library backing X509Chain will use these same criteria
+            // to determine if a chain is valid; and a user can easily call the X509SignatureGenerator overload to
+            // bypass this validation.  We're simply helping them at signing time understand that they've
+            // chosen the wrong cert.
+            var basicConstraints = (X509BasicConstraintsExtension)issuerCertificate.Extensions[Oids.BasicConstraints2];
+            var keyUsage = (X509KeyUsageExtension)issuerCertificate.Extensions[Oids.KeyUsage];
+
+            if (basicConstraints == null)
+                throw new ArgumentException(SR.Cryptography_CertReq_BasicConstraintsRequired, nameof(issuerCertificate));
+            if (!basicConstraints.CertificateAuthority)
+                throw new ArgumentException(SR.Cryptography_CertReq_IssuerBasicConstraintsInvalid, nameof(issuerCertificate));
+            if (keyUsage != null && (keyUsage.KeyUsages & X509KeyUsageFlags.KeyCertSign) == 0)
+                throw new ArgumentException(SR.Cryptography_CertReq_IssuerKeyUsageInvalid, nameof(issuerCertificate));
 
             AsymmetricAlgorithm key = null;
             string keyAlgorithm = issuerCertificate.GetKeyAlgorithm();
@@ -374,9 +458,14 @@ namespace System.Security.Cryptography.X509Certificates
                 switch (keyAlgorithm)
                 {
                     case Oids.RsaRsa:
+                        if (_rsaPadding == null)
+                        {
+                            throw new InvalidOperationException(SR.Cryptography_CertReq_RSAPaddingRequired);
+                        }
+
                         RSA rsa = issuerCertificate.GetRSAPrivateKey();
                         key = rsa;
-                        generator = X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);
+                        generator = X509SignatureGenerator.CreateForRSA(rsa, _rsaPadding);
                         break;
                     case Oids.Ecc:
                         ECDsa ecdsa = issuerCertificate.GetECDsaPrivateKey();

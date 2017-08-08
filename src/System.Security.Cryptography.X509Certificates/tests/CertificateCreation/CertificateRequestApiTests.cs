@@ -31,7 +31,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             {
                 CertificateRequest request = new CertificateRequest("", ecdsa, HashAlgorithmName.SHA256);
 
-                Assert.Throws<ArgumentNullException>("signatureGenerator", () => request.CreateSigningRequest(null));
+                AssertExtensions.Throws<ArgumentNullException>("signatureGenerator", () => request.CreateSigningRequest(null));
             }
         }
 
@@ -42,9 +42,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             {
                 rsa.ImportParameters(TestData.RsaBigExponentParams);
 
-                CertificateRequest request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256);
+                var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     null,
                     () => request.CreateSelfSigned(DateTimeOffset.MaxValue, DateTimeOffset.MinValue));
             }
@@ -54,25 +54,183 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         public static void Sign_ArgumentValidation()
         {
             using (X509Certificate2 testRoot = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (RSA publicKey = testRoot.GetRSAPublicKey())
             {
-                CertificateRequest request = new CertificateRequest("CN=Test", testRoot.GetRSAPublicKey(), HashAlgorithmName.SHA256);
+                var request = new CertificateRequest(
+                    "CN=Test",
+                    publicKey,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "generator",
                     () => request.Create(testRoot.SubjectName, null, DateTimeOffset.MinValue, DateTimeOffset.MinValue, null));
 
-                Assert.Throws<ArgumentException>(
+                DateTimeOffset notAfter = testRoot.NotAfter;
+                DateTimeOffset notBefore = testRoot.NotBefore;
+
+                AssertExtensions.Throws<ArgumentException>(
                     null,
-                    () => request.Create(testRoot, DateTimeOffset.MaxValue, DateTimeOffset.MinValue, null));
+                    () => request.Create(testRoot, notAfter, notBefore, null));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "serialNumber",
-                    () => request.Create(testRoot, DateTimeOffset.MinValue, DateTimeOffset.MaxValue, null));
+                    () => request.Create(testRoot, notBefore, notAfter, null));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "serialNumber",
-                    () => request.Create(testRoot, DateTimeOffset.MinValue, DateTimeOffset.MaxValue, Array.Empty<byte>()));
+                    () => request.Create(testRoot, notBefore, notAfter, Array.Empty<byte>()));
             }
+        }
+
+        [Fact]
+        public static void CtorValidation_ECDSA_string()
+        {
+            string subjectName = null;
+            ECDsa key = null;
+            HashAlgorithmName hashAlgorithm = default(HashAlgorithmName);
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "subjectName",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm));
+
+            subjectName = "";
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "key",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm));
+
+            key = ECDsa.Create(EccTestData.Secp384r1Data.KeyParameters);
+
+            using (key)
+            {
+                AssertExtensions.Throws<ArgumentException>(
+                    "hashAlgorithm",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm));
+            }
+        }
+
+        [Fact]
+        public static void CtorValidation_ECDSA_X500DN()
+        {
+            X500DistinguishedName subjectName = null;
+            ECDsa key = null;
+            HashAlgorithmName hashAlgorithm = default(HashAlgorithmName);
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "subjectName",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm));
+
+            subjectName = new X500DistinguishedName("");
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "key",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm));
+
+            key = ECDsa.Create(EccTestData.Secp384r1Data.KeyParameters);
+
+            using (key)
+            {
+                AssertExtensions.Throws<ArgumentException>(
+                    "hashAlgorithm",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm));
+            }
+        }
+
+        [Fact]
+        public static void CtorValidation_RSA_string()
+        {
+            string subjectName = null;
+            RSA key = null;
+            HashAlgorithmName hashAlgorithm = default(HashAlgorithmName);
+            RSASignaturePadding padding = null;
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "subjectName",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+            subjectName = "";
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "key",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+            key = RSA.Create(TestData.RsaBigExponentParams);
+
+            using (key)
+            {
+                AssertExtensions.Throws<ArgumentException>(
+                    "hashAlgorithm",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+                hashAlgorithm = HashAlgorithmName.SHA256;
+
+                AssertExtensions.Throws<ArgumentNullException>(
+                    "padding",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+            }
+        }
+
+        [Fact]
+        public static void CtorValidation_RSA_X500DN()
+        {
+            X500DistinguishedName subjectName = null;
+            RSA key = null;
+            HashAlgorithmName hashAlgorithm = default(HashAlgorithmName);
+            RSASignaturePadding padding = null;
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "subjectName",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+            subjectName = new X500DistinguishedName("");
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "key",
+                () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+            key = RSA.Create(TestData.RsaBigExponentParams);
+
+            using (key)
+            {
+                AssertExtensions.Throws<ArgumentException>(
+                    "hashAlgorithm",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+
+                hashAlgorithm = HashAlgorithmName.SHA256;
+
+                AssertExtensions.Throws<ArgumentNullException>(
+                    "padding",
+                    () => new CertificateRequest(subjectName, key, hashAlgorithm, padding));
+            }
+        }
+
+        [Fact]
+        public static void CtorValidation_PublicKey_X500DN()
+        {
+            X500DistinguishedName subjectName = null;
+            PublicKey publicKey = null;
+            HashAlgorithmName hashAlgorithm = default(HashAlgorithmName);
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "subjectName",
+                () => new CertificateRequest(subjectName, publicKey, hashAlgorithm));
+
+            subjectName = new X500DistinguishedName("");
+
+            AssertExtensions.Throws<ArgumentNullException>(
+                "publicKey",
+                () => new CertificateRequest(subjectName, publicKey, hashAlgorithm));
+
+            using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp384r1Data.KeyParameters))
+            {
+                X509SignatureGenerator generator = X509SignatureGenerator.CreateForECDsa(ecdsa);
+                publicKey = generator.PublicKey;
+            }
+
+            AssertExtensions.Throws<ArgumentException>(
+                "hashAlgorithm",
+                () => new CertificateRequest(subjectName, publicKey, hashAlgorithm));
         }
     }
 }

@@ -19,7 +19,6 @@ namespace System.Text.RegularExpressions
     /// contains static methods that allow use of regular expressions without instantiating
     /// a Regex explicitly.
     /// </summary>
-    [Serializable]
     public class Regex : ISerializable
     {
         protected internal string pattern;                   // The string pattern provided
@@ -139,26 +138,12 @@ namespace System.Text.RegularExpressions
         protected Regex(SerializationInfo info, StreamingContext context)
             : this(info.GetString("pattern"), (RegexOptions)info.GetInt32("options"))
         {
-            try
-            {
-                long timeoutTicks = info.GetInt64("matchTimeout");
-                TimeSpan timeout = new TimeSpan(timeoutTicks);
-                ValidateMatchTimeout(timeout);
-                internalMatchTimeout = timeout;
-            }
-            catch (SerializationException)
-            {
-                // If this occurs, then assume that this object was serialized using a version
-                // before timeout was added. In that case just do not set a timeout
-                // (keep default value)
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
         {
-            si.AddValue("pattern", ToString());
-            si.AddValue("options", Options);
-            si.AddValue("matchTimeout", MatchTimeout.Ticks);
+            throw new PlatformNotSupportedException();
         }
 
         private Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, bool useCache)

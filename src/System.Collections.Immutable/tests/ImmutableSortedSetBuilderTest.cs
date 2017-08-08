@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -265,7 +266,6 @@ namespace System.Collections.Immutable.Tests
         public void Remove()
         {
             var builder = ImmutableSortedSet.Create("a").ToBuilder();
-            AssertExtensions.Throws<ArgumentNullException>("key", () => builder.Remove(null));
             Assert.False(builder.Remove("b"));
             Assert.True(builder.Remove("a"));
         }
@@ -330,10 +330,50 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void NullHandling()
+        {
+            var builder = ImmutableSortedSet<string>.Empty.ToBuilder();
+            Assert.True(builder.Add(null));
+            Assert.False(builder.Add(null));
+            Assert.True(builder.Contains(null));
+            Assert.True(builder.Remove(null));
+
+            builder.UnionWith(new[] { null, "a" });
+            Assert.True(builder.IsSupersetOf(new[] { null, "a" }));
+            Assert.True(builder.IsSubsetOf(new[] { null, "a" }));
+            Assert.True(builder.IsProperSupersetOf(new[] { default(string) }));
+            Assert.True(builder.IsProperSubsetOf(new[] { null, "a", "b" }));
+
+            builder.IntersectWith(new[] { default(string) });
+            Assert.Equal(1, builder.Count);
+
+            builder.ExceptWith(new[] { default(string) });
+            Assert.False(builder.Remove(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedSet.CreateBuilder<string>());
             DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableSortedSet.CreateBuilder<int>());
+            ImmutableSortedSet<int>.Builder builder = ImmutableSortedSet.CreateBuilder<int>();
+            builder.Add(1);
+            builder.Add(2);
+            builder.Add(3);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(builder);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            int[] items = itemProperty.GetValue(info.Instance) as int[];
+            Assert.Equal(builder, items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedSet.CreateBuilder<int>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
     }
 }

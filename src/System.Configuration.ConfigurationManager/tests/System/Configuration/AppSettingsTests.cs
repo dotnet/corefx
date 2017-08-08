@@ -61,6 +61,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #19336", TargetFrameworkMonikers.NetFramework)]
         public void AddToAppSettings_Save()
         {
             using (var temp = new TempConfig(TestData.EmptyConfig))

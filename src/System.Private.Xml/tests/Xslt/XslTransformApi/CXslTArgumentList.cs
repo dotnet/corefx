@@ -20,9 +20,14 @@ namespace System.Xml.Tests
     public class CArgIntegrity : XsltApiTestCaseBase
     {
         private ITestOutputHelper _output;
+        private string _xslFile;
+        private string _xmlFile;
+
         public CArgIntegrity(ITestOutputHelper output) : base(output)
         {
             _output = output;
+            _xslFile = $"{GetTestFilePath()}.xsl";
+            _xmlFile = $"{GetTestFilePath()}.xml";
         }
 
         //[Variation(Desc = "Basic Verification Test", Pri = 0)]
@@ -51,7 +56,7 @@ namespace System.Xml.Tests
   </xsl:template>
 </xsl:stylesheet>";
 
-        private static void WriteFiles(string input, string output)
+        private void WriteFiles(string input, string output)
         {
             using (XmlWriter w = XmlWriter.Create(output))
             {
@@ -62,10 +67,10 @@ namespace System.Xml.Tests
             }
         }
 
-        private static void WriteXmlAndXslFiles()
+        private void WriteXmlAndXslFiles()
         {
-            WriteFiles(s_typeXml, "type.xml");
-            WriteFiles(s_typeXsl, "type.xsl");
+            WriteFiles(s_typeXml, _xmlFile);
+            WriteFiles(s_typeXsl, _xslFile);
         }
 
         //[Variation(Desc = "Tuple.XsltArgumentList.AddParam/AddExtensionObject", Param = 1)]
@@ -94,13 +99,13 @@ namespace System.Xml.Tests
 #pragma warning disable 0618
             XslTransform xslt = new XslTransform();
 #pragma warning restore 0618
-            xslt.Load("type.xsl");
+            xslt.Load(_xslFile);
 
             XsltArgumentList xslArg = new XsltArgumentList();
             xslArg.AddParam("param", "", t);
             xslArg.AddExtensionObject("", t);
 
-            XPathDocument xpathDom = new XPathDocument("type.xml");
+            XPathDocument xpathDom = new XPathDocument(_xmlFile);
             using (StringWriter sw = new StringWriter())
             {
                 xslt.Transform(xpathDom, xslArg, sw);
@@ -2984,26 +2989,16 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
         [Theory]
-        public void AddExtObject25(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        public void TC_ExtensionObj_Function_Mismatch_IncorrectCasing(InputType xslInputType, ReaderType readerType, TransformType outputType, DocType navType)
         {
             MyObject obj = new MyObject(25, _output);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
-            if (LoadXSL("MyObject_CaseSensitive.xsl", inputType, readerType) == 1)
-            {
-                try
-                {
-                    Transform_ArgList("fruits.xml", transformType, docType);
-                    CheckResult(419.3031944636, transformType);
-                }
-                catch (System.Xml.Xsl.XsltException)
-                {
-                    return;
-                }
-            }
-            _output.WriteLine("Exception not thrown for wrong-case spelling of methods");
-            Assert.True(false);
+            LoadXSL("MyObject_CaseSensitive.xsl", xslInputType, readerType);
+            var e = Assert.Throws<XsltException>(() => Transform_ArgList("fruits.xml", outputType, navType));
+            var exceptionSourceAssembly = PlatformDetection.IsFullFramework ? "System.Data.SqlXml" : "System.Xml";
+            CheckExpectedError(e, exceptionSourceAssembly, "Xslt_UnknownXsltFunction", new[] { "FN3" });
         }
 
         //[Variation("Object namespace System.Xml.Tests found")]

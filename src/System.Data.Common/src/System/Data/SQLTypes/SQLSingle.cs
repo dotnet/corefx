@@ -16,7 +16,6 @@ namespace System.Data.SqlTypes
     /// 3.40E +38 to be stored in or retrieved from a database.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    [Serializable]
     [XmlSchemaProvider("GetXsdType")]
     public struct SqlSingle : INullable, IComparable, IXmlSerializable
     {
@@ -32,8 +31,14 @@ namespace System.Data.SqlTypes
 
         public SqlSingle(float value)
         {
+#if !netfx
+            if (!float.IsFinite(value))
+#else
             if (float.IsInfinity(value) || float.IsNaN(value))
+#endif
+            {
                 throw new OverflowException(SQLResource.ArithOverflowMessage);
+            }
             else
             {
                 _fNotNull = true;

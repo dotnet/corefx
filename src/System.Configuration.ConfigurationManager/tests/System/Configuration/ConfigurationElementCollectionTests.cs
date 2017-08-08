@@ -47,6 +47,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [ActiveIssue(21004, TargetFrameworkMonikers.UapAot)]
         public void NullComparerThrows()
         {
             Assert.Equal("comparer", Assert.Throws<ArgumentNullException>(() => new SimpleCollection(null)).ParamName);
@@ -204,6 +205,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #19338", TargetFrameworkMonikers.NetFramework)]
         public void EqualsNullIsFalse()
         {
             // Note: this null refs on desktop

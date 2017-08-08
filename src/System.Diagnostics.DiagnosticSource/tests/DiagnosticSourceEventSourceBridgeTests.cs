@@ -103,6 +103,7 @@ namespace System.Diagnostics.Tests
         /// Test that things work properly for Linux newline conventions. 
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot,"This is linux specific test")]
         public void LinuxNewLineConventions()
         {
             using (var eventSourceListener = new TestDiagnosticSourceEventListener())

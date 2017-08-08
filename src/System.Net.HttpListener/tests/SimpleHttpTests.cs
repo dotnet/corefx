@@ -21,13 +21,13 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public static void Supported_True()
         {
             Assert.True(HttpListener.IsSupported);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_StartStop_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -43,7 +43,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_StartCloseAbort_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -59,7 +59,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_StartAbortClose_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -75,7 +75,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_StopNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -83,21 +83,21 @@ namespace System.Net.Tests
             listener.Close();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_CloseNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
             listener.Close();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_AbortNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
             listener.Abort();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [Fact]
         public void BasicTest_StartThrowsAbortCalledInFinally_AbortDoesntThrow()
         {
             HttpListener listener = new HttpListener();
@@ -117,8 +117,12 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
-        public async Task UnknownHeaders_Success()
+        [Theory]
+        public Task UnknownHeaders_Success_Large() => UnknownHeaders_Success(1000);
+
+        [Theory]
+        [InlineData(100)]
+        public async Task UnknownHeaders_Success(int numHeaders)
         {
             Task<HttpListenerContext> server = _listener.GetContextAsync();
 
@@ -128,15 +132,22 @@ namespace System.Net.Tests
 
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, _factory.ListeningUrl);
 
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < numHeaders; i++)
                 {
                     requestMessage.Headers.Add($"custom{i}", i.ToString());
                 }
 
                 Task<HttpResponseMessage> clientTask = client.SendAsync(requestMessage);
+
+                if (clientTask == await Task.WhenAny(server, clientTask))
+                {
+                    (await clientTask).EnsureSuccessStatusCode();
+                    Assert.True(false, "Client should not have completed prior to server sending response");
+                }
+
                 HttpListenerContext context = await server;
 
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < numHeaders; i++)
                 {
                     Assert.Equal(i.ToString(), context.Request.Headers[$"custom{i}"]);
                 }
@@ -151,4 +162,3 @@ namespace System.Net.Tests
         }
     }
 }
-    

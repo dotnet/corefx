@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Tests
 {
@@ -75,10 +77,18 @@ namespace System.IO.Tests
             Assert.False(testDir.Exists);
         }
 
-        [Fact]
-        public void ShouldThrowDirectoryNotFoundExceptionForNonexistentDirectory()
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsDirectoryNotFound(char trailingChar)
         {
-            Assert.Throws<DirectoryNotFoundException>(() => Delete(GetTestFilePath()));
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(path));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(path));
         }
 
         [Fact]
@@ -109,7 +119,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void ExtendedDirectoryWithSubdirectories()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + GetTestFilePath());
@@ -119,10 +128,9 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void LongPathExtendedDirectory()
         {
-            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500).FullPath);
+            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500));
             Delete(testDir.FullName);
             Assert.False(testDir.Exists);
         }
@@ -143,7 +151,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Deleting extended readonly directory throws IOException
         public void WindowsDeleteExtendedReadOnlyDirectory()
         {
@@ -175,7 +182,6 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Deleting extended hidden directory succeeds
         public void WindowsShouldBeAbleToDeleteExtendedHiddenDirectory()
         {
@@ -196,6 +202,17 @@ namespace System.IO.Tests
             Assert.False(Directory.Exists(testDir));
         }
 
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void Unix_NotFoundDirectory_ReadOnlyVolume()
+        {
+            ReadOnly_FileSystemHelper(readOnlyDirectory =>
+            {
+                Assert.Throws<DirectoryNotFoundException>(() => Delete(Path.Combine(readOnlyDirectory, "DoesNotExist")));
+            });
+        }
         #endregion
     }
 
@@ -231,6 +248,33 @@ namespace System.IO.Tests
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Delete(testDir.FullName + Path.DirectorySeparatorChar, true);
             Assert.False(testDir.Exists);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [OuterLoop("This test is very slow.")]
+        public void RecursiveDelete_DeepNesting()
+        {
+            // Create a 2000 level deep directory and recursively delete from the root.
+            // This number can be dropped if we find it problematic on low memory machines
+            // and/or we can look at skipping in such environments.
+            //
+            // On debug we were overflowing the stack with directories that were under 1000
+            // levels deep. Testing on a 32GB box I consistently fell over around 1300.
+            // With optimizations to the Delete helper I was able to raise this to around 3200.
+            // Release binaries don't stress the stack nearly as much (10K+ is doable, but can
+            // take 5 minutes on an SSD).
+
+            string rootDirectory = GetTestFilePath();
+            StringBuilder sb = new StringBuilder(5000);
+            sb.Append(rootDirectory);
+            for (int i = 0; i < 2000; i++)
+            {
+                sb.Append(@"\a");
+            }
+            string path = sb.ToString();
+            Directory.CreateDirectory(path);
+            Delete(rootDirectory, recursive: true);
         }
 
         [Fact]

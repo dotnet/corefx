@@ -160,7 +160,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void ConstantNullWithValueTypeIsInvalid()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant(null, typeof(int)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant(null, typeof(int)));
         }
 
         [Fact]
@@ -718,7 +718,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(f2().Value.Name, "lhs");
 
             ConstantExpression constant = Expression.Constant(1.0, typeof(double));
-            Assert.Throws<ArgumentException>(null, () => Expression.Lambda<Func<double?>>(constant, null));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<double?>>(constant, null));
         }
 
         public static int GetBound()
@@ -841,6 +841,7 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20717 - fails on x64", TargetFrameworkMonikers.UapAot)]
         public static void UnaryPlus(bool useInterpreter)
         {
             ConstantExpression ce = Expression.Constant((UInt16)10);

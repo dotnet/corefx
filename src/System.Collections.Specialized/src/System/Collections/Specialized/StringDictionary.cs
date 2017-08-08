@@ -12,13 +12,14 @@ namespace System.Collections.Specialized
     ///       with a proper StringComparer instance.</para>
     /// </devdoc>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class StringDictionary : IEnumerable
     {
         // For compatibility, we want the Keys property to return values in lower-case.
         // That means using ToLower in each property on this type.  Also for backwards
         // compatibility, we will be converting strings to lower-case, which has a
         // problem for some Georgian alphabets.
-        private readonly Hashtable _contents = new Hashtable();
+        private readonly Hashtable contents = new Hashtable(); // Do not rename (binary serialization)
 
 
         /// <devdoc>
@@ -38,7 +39,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return _contents.Count;
+                return contents.Count;
             }
         }
 
@@ -51,7 +52,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return _contents.IsSynchronized;
+                return contents.IsSynchronized;
             }
         }
 
@@ -67,7 +68,7 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                return (string)_contents[key.ToLowerInvariant()];
+                return (string)contents[key.ToLowerInvariant()];
             }
             set
             {
@@ -76,7 +77,7 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                _contents[key.ToLowerInvariant()] = value;
+                contents[key.ToLowerInvariant()] = value;
             }
         }
 
@@ -87,7 +88,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return _contents.Keys;
+                return contents.Keys;
             }
         }
 
@@ -99,7 +100,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return _contents.SyncRoot;
+                return contents.SyncRoot;
             }
         }
 
@@ -110,7 +111,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return _contents.Values;
+                return contents.Values;
             }
         }
 
@@ -124,7 +125,7 @@ namespace System.Collections.Specialized
                 throw new ArgumentNullException(nameof(key));
             }
 
-            _contents.Add(key.ToLowerInvariant(), value);
+            contents.Add(key.ToLowerInvariant(), value);
         }
 
         /// <devdoc>
@@ -132,7 +133,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual void Clear()
         {
-            _contents.Clear();
+            contents.Clear();
         }
 
         /// <devdoc>
@@ -145,7 +146,7 @@ namespace System.Collections.Specialized
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return _contents.ContainsKey(key.ToLowerInvariant());
+            return contents.ContainsKey(key.ToLowerInvariant());
         }
 
         /// <devdoc>
@@ -153,7 +154,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual bool ContainsValue(string value)
         {
-            return _contents.ContainsValue(value);
+            return contents.ContainsValue(value);
         }
 
         /// <devdoc>
@@ -162,7 +163,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual void CopyTo(Array array, int index)
         {
-            _contents.CopyTo(array, index);
+            contents.CopyTo(array, index);
         }
 
         /// <devdoc>
@@ -170,7 +171,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual IEnumerator GetEnumerator()
         {
-            return _contents.GetEnumerator();
+            return contents.GetEnumerator();
         }
 
         /// <devdoc>
@@ -183,7 +184,7 @@ namespace System.Collections.Specialized
                 throw new ArgumentNullException(nameof(key));
             }
 
-            _contents.Remove(key.ToLowerInvariant());
+            contents.Remove(key.ToLowerInvariant());
         }
     }
 }

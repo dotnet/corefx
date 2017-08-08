@@ -112,49 +112,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void TestSerializeDeserialize_DER()
-        {
-            byte[] expectedThumbPrint = new byte[]
-            {
-                0x10, 0x8e, 0x2b, 0xa2, 0x36, 0x32, 0x62, 0x0c,
-                0x42, 0x7c, 0x57, 0x0b, 0x6d, 0x9d, 0xb5, 0x1a,
-                0xc3, 0x13, 0x87, 0xfe,
-            };
-
-            Action<X509Certificate2> assert = (c) =>
-            {
-                IntPtr h = c.Handle;
-                Assert.NotEqual(IntPtr.Zero, h);
-                byte[] actualThumbprint = c.GetCertHash();
-                Assert.Equal(expectedThumbPrint, actualThumbprint);
-            };
-
-            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificate))
-            {
-                assert(c);
-                using (X509Certificate2 c2 = System.Runtime.Serialization.Formatters.Tests.BinaryFormatterHelpers.Clone(c))
-                {
-                    assert(c2);
-                }
-            }
-        }
-
-        [Fact]
         public static void TestCopyConstructor_NoPal()
         {
             using (var c1 = new X509Certificate2())
             using (var c2 = new X509Certificate2(c1))
-            {
-                VerifyDefaultConstructor(c1);
-                VerifyDefaultConstructor(c2);
-            }
-        }
-
-        [Fact]
-        public static void TestSerializeDeserialize_NoPal()
-        {
-            using (var c1 = new X509Certificate2())
-            using (var c2 = System.Runtime.Serialization.Formatters.Tests.BinaryFormatterHelpers.Clone(c1))
             {
                 VerifyDefaultConstructor(c1);
                 VerifyDefaultConstructor(c2);
@@ -319,11 +280,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void TestNullConstructorArguments()
         {
             Assert.Throws<ArgumentNullException>(() => new X509Certificate2((string)null));
-            Assert.Throws<ArgumentException>(() => new X509Certificate2(IntPtr.Zero));
-            Assert.Throws<ArgumentException>(() => new X509Certificate2((byte[])null, (string)null));
-            Assert.Throws<ArgumentException>(() => new X509Certificate2(Array.Empty<byte>(), (string)null));
-            Assert.Throws<ArgumentException>(() => new X509Certificate2((byte[])null, (string)null, X509KeyStorageFlags.DefaultKeySet));
-            Assert.Throws<ArgumentException>(() => new X509Certificate2(Array.Empty<byte>(), (string)null, X509KeyStorageFlags.DefaultKeySet));
+            AssertExtensions.Throws<ArgumentException>("handle", () => new X509Certificate2(IntPtr.Zero));
+            AssertExtensions.Throws<ArgumentException>("rawData", () => new X509Certificate2((byte[])null, (string)null));
+            AssertExtensions.Throws<ArgumentException>("rawData", () => new X509Certificate2(Array.Empty<byte>(), (string)null));
+            AssertExtensions.Throws<ArgumentException>("rawData", () => new X509Certificate2((byte[])null, (string)null, X509KeyStorageFlags.DefaultKeySet));
+            AssertExtensions.Throws<ArgumentException>("rawData", () => new X509Certificate2(Array.Empty<byte>(), (string)null, X509KeyStorageFlags.DefaultKeySet));
 
             // A null string password does not throw
             using (new X509Certificate2(TestData.MsCertificate, (string)null)) { }
@@ -390,27 +351,26 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             byte[] nonEmptyBytes = new byte[1];
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate(nonEmptyBytes, string.Empty, (X509KeyStorageFlags)0xFF));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate(string.Empty, string.Empty, (X509KeyStorageFlags)0xFF));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate2(nonEmptyBytes, string.Empty, (X509KeyStorageFlags)0xFF));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate2(string.Empty, string.Empty, (X509KeyStorageFlags)0xFF));
 
             // No test is performed here for the ephemeral flag failing downlevel, because the live
             // binary is always used by default, meaning it doesn't know EphemeralKeySet doesn't exist.
         }
-
-#if netcoreapp
+        
         [Fact]
         public static void InvalidStorageFlags_PersistedEphemeral()
         {
@@ -419,22 +379,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             byte[] nonEmptyBytes = new byte[1];
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate(nonEmptyBytes, string.Empty, PersistedEphemeral));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate(string.Empty, string.Empty, PersistedEphemeral));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate2(nonEmptyBytes, string.Empty, PersistedEphemeral));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => new X509Certificate2(string.Empty, string.Empty, PersistedEphemeral));
         }
-#endif
     }
 }

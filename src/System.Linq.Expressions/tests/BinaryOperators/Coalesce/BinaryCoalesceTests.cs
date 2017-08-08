@@ -318,7 +318,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.Coalesce(Expression.Constant(0, typeof(int?)), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -393,7 +393,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void RightLeft_NonEquivilentTypes_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Coalesce(Expression.Constant("abc"), Expression.Constant(5)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Coalesce(Expression.Constant("abc"), Expression.Constant(5)));
         }
 
         public delegate void VoidDelegate();
@@ -494,5 +494,36 @@ namespace System.Linq.Expressions.Tests
                 )).Compile(useInterpreter);
             Assert.Equal(1, func());
         }
+
+#if FEATURE_COMPILE
+        [Fact]
+        public static void VerifyIL_NullableIntCoalesceToNullableInt()
+        {
+            ParameterExpression x = Expression.Parameter(typeof(int?));
+            ParameterExpression y = Expression.Parameter(typeof(int?));
+            Expression<Func<int?, int?, int?>> f =
+                Expression.Lambda<Func<int?, int?, int?>>(Expression.Coalesce(x, y), x, y);
+
+            f.VerifyIL(
+                @".method valuetype [System.Private.CoreLib]System.Nullable`1<int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,valuetype [System.Private.CoreLib]System.Nullable`1<int32>,valuetype [System.Private.CoreLib]System.Nullable`1<int32>)
+                {
+                    .maxstack 2
+                    .locals init (
+                        [0] valuetype [System.Private.CoreLib]System.Nullable`1<int32>
+                    )
+
+                    IL_0000: ldarg.1
+                    IL_0001: stloc.0
+                    IL_0002: ldloca.s   V_0
+                    IL_0004: call       instance bool valuetype [System.Private.CoreLib]System.Nullable`1<int32>::get_HasValue()
+                    IL_0009: brfalse    IL_0014
+                    IL_000e: ldloc.0
+                    IL_000f: br         IL_0015
+                    IL_0014: ldarg.2
+                    IL_0015: ret
+                }");
+        }
+#endif
+
     }
 }

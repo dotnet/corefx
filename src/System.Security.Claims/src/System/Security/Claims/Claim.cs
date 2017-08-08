@@ -13,7 +13,6 @@ namespace System.Security.Claims
     /// A Claim consists of a Type, Value, a Subject and an Issuer.
     /// Additional properties, ValueType, Properties and OriginalIssuer help understand the claim when making decisions.
     /// </summary>
-    [Serializable]
     public class Claim
     {
         private enum SerializationMask
@@ -29,16 +28,13 @@ namespace System.Security.Claims
             UserData = 128,
         }
 
-        [NonSerialized]
         private readonly byte[] _userSerializationData;
 
         private readonly string _issuer;
         private readonly string _originalIssuer;
         private Dictionary<string, string> _properties;
 
-        [NonSerialized]
         private readonly ClaimsIdentity _subject;
-
         private readonly string _type;
         private readonly string _value;
         private readonly string _valueType;
@@ -126,6 +122,7 @@ namespace System.Security.Claims
             if ((mask & SerializationMask.HasProperties) == SerializationMask.HasProperties)
             {
                 int numProperties = reader.ReadInt32();
+                numPropertiesRead++;
                 for (int i = 0; i < numProperties; i++)
                 {
                     Properties.Add(reader.ReadString(), reader.ReadString());

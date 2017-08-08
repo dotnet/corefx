@@ -37,8 +37,8 @@ namespace System.Net.Http
             private static readonly Interop.Http.ReadWriteCallback s_receiveBodyCallback = CurlReceiveBodyCallback;
             private static readonly Interop.Http.DebugCallback s_debugCallback = CurlDebugFunction;
 
-            /// <summary>CurlHandler that owns this MultiAgent.</summary>
-            private readonly CurlHandler _associatedHandler;
+            /// <summary>CurlHandler that created this MultiAgent.  If null, this is a shared handler.</summary>
+            private readonly CurlHandler _creatingHandler;
 
             /// <summary>
             /// A collection of not-yet-processed incoming requests for work to be done
@@ -79,18 +79,21 @@ namespace System.Net.Http
             /// </summary>
             private Interop.Http.SafeCurlMultiHandle _multiHandle;
 
+            /// <summary>Set when Dispose has been called.</summary>
+            private bool _disposed;
+
             /// <summary>Initializes the MultiAgent.</summary>
-            /// <param name="handler">The handler that owns this agent.</param>
+            /// <param name="handler">The handler that created this agent, or null if it's shared.</param>
             public MultiAgent(CurlHandler handler)
             {
-                Debug.Assert(handler != null, "Expected non-null handler");
-                _associatedHandler = handler;
+                _creatingHandler = handler;
             }
 
             /// <summary>Disposes of the agent.</summary>
             public void Dispose()
             {
                 EventSourceTrace(null);
+                _disposed = true;
                 QueueIfRunning(new IncomingRequest { Type = IncomingRequestType.Shutdown });
                 _multiHandle?.Dispose();
             }
@@ -247,15 +250,26 @@ namespace System.Net.Http
                     EventSourceTrace("Set multiplexing on multi handle");
                 }
 
-                // Configure max connections per host if it was changed from the default
-                int maxConnections = _associatedHandler.MaxConnectionsPerServer;
-                if (maxConnections < int.MaxValue) // int.MaxValue considered infinite, mapping to libcurl default of 0
+                // Configure max connections per host if it was changed from the default.  In shared mode,
+                // this will be pulled from the handler that first created the agent; the setting from subsequent
+                // handlers that use this will be ignored.
+                if (_creatingHandler != null)
                 {
-                    // This should always succeed, as we already verified we can set this option with this value.  Treat 
-                    // any failure then as non-fatal in release; worst case is we employ more connections than desired.
-                    CURLMcode code = Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, maxConnections);
-                    Debug.Assert(code == CURLMcode.CURLM_OK, $"Expected OK, got {code}");
-                    EventSourceTrace("Set max connections per server to {0}", maxConnections);
+                    int maxConnections = _creatingHandler.MaxConnectionsPerServer;
+                    if (maxConnections < int.MaxValue) // int.MaxValue considered infinite, mapping to libcurl default of 0
+                    {
+                        CURLMcode code = Interop.Http.MultiSetOptionLong(multiHandle, Interop.Http.CURLMoption.CURLMOPT_MAX_HOST_CONNECTIONS, maxConnections);
+                        switch (code)
+                        {
+                            case CURLMcode.CURLM_OK:
+                                EventSourceTrace("Set max host connections to {0}", maxConnections);
+                                break;
+                            default:
+                                // Treat failures as non-fatal in release; worst case is we employ more connections than desired.
+                                EventSourceTrace("Setting CURLMOPT_MAX_HOST_CONNECTIONS failed: {0}. Ignoring option.", code);
+                                break;
+                        }
+                    }
                 }
 
                 return multiHandle;
@@ -300,7 +314,7 @@ namespace System.Net.Http
                             // more requests could have been added.  If they were,
                             // kick off another processing loop.
                             _runningWorker = null;
-                            if (_incomingRequests.Count > 0 && !_associatedHandler._disposed)
+                            if (_incomingRequests.Count > 0 && !_disposed)
                             {
                                 EnsureWorkerIsRunning();
                             }
@@ -425,6 +439,7 @@ namespace System.Net.Http
             private void HandleIncomingRequests()
             {
                 Debug.Assert(!Monitor.IsEntered(_incomingRequests), "Incoming requests lock should only be held while accessing the queue");
+                EventSourceTrace(null);
 
                 while (true)
                 {
@@ -493,7 +508,9 @@ namespace System.Net.Http
             private void PerformCurlWork()
             {
                 CURLMcode performResult;
+                EventSourceTrace("Ask libcurl to perform any available work...");
                 while ((performResult = Interop.Http.MultiPerform(_multiHandle)) == CURLMcode.CURLM_CALL_MULTI_PERFORM) ;
+                EventSourceTrace("...done performing work: {0}", performResult);
                 ThrowIfCURLMError(performResult);
             }
 
@@ -536,9 +553,12 @@ namespace System.Net.Http
             /// <summary>Handle a libcurl message received as part of processing work.  This should signal a completed operation.</summary>
             private void HandleCurlMessage(Interop.Http.CURLMSG message, IntPtr easyHandle, CURLcode result)
             {
-                Debug.Assert(message == Interop.Http.CURLMSG.CURLMSG_DONE, $"CURLMSG_DONE is supposed to be the only message type, but got {message}");
                 if (message != Interop.Http.CURLMSG.CURLMSG_DONE)
+                {
+                    Debug.Fail($"CURLMSG_DONE is supposed to be the only message type, but got {message}");
+                    EventSourceTrace("Unexpected CURLMSG: {0}", message);
                     return;
+                }
 
                 // Get the GCHandle pointer from the easy handle's state
                 IntPtr gcHandlePtr;
@@ -969,7 +989,7 @@ namespace System.Net.Http
                                     response.Content.Headers.TryAddWithoutValidation(headerName, headerValue);
                                 }
                                 else if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400 &&
-                                    easy._handler.AutomaticRedirection &&
+                                    easy._handler.AllowAutoRedirect &&
                                     string.Equals(headerName, HttpKnownHeaderNames.Location, StringComparison.OrdinalIgnoreCase))
                                 {
                                     // A "Location" header field can mean different things for different status codes.  For 3xx status codes,

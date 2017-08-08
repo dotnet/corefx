@@ -24,7 +24,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security.Principal
 {
-    [Serializable]
     public class WindowsIdentity : ClaimsIdentity, IDisposable, ISerializable, IDeserializationCallback
     {
         private string _name = null;
@@ -39,15 +38,10 @@ namespace System.Security.Principal
         private volatile bool _impersonationLevelInitialized;
 
         public new const string DefaultIssuer = @"AD AUTHORITY";
-        [NonSerialized]
         private string _issuerName = DefaultIssuer;
-        [NonSerialized]
         private object _claimsIntiailizedLock = new object();
-        [NonSerialized]
         private volatile bool _claimsInitialized;
-        [NonSerialized]
         private List<Claim> _deviceClaims;
-        [NonSerialized]
         private List<Claim> _userClaims;
 
         //
@@ -240,23 +234,18 @@ namespace System.Security.Principal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Public API has already shipped.")]
         public WindowsIdentity(SerializationInfo info, StreamingContext context)
         {
-            _claimsInitialized = false;
-
-            IntPtr userToken = (IntPtr)info.GetValue("m_userToken", typeof(IntPtr));
-            if (userToken != IntPtr.Zero)
-            {
-                CreateFromToken(userToken);
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // TODO: Add back when ClaimsIdentity is serializable
-            // base.GetObjectData(info, context);
-            info.AddValue("m_userToken", _safeTokenHandle.DangerousGetHandle());
+            throw new PlatformNotSupportedException();
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender) { }
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         //
         // Factory methods.
@@ -409,10 +398,20 @@ namespace System.Security.Principal
 
 
                 // CheckTokenMembership will check if the SID is both present and enabled in the access token.
+#if uap
+                if (!Interop.Kernel32.CheckTokenMembershipEx((til != TokenImpersonationLevel.None ? _safeTokenHandle : token),
+                                                      sid.BinaryForm,
+                                                      Interop.Kernel32.CTMF_INCLUDE_APPCONTAINER,
+                                                      ref isMember))
+                    throw new SecurityException(new Win32Exception().Message);
+#else
                 if (!Interop.Advapi32.CheckTokenMembership((til != TokenImpersonationLevel.None ? _safeTokenHandle : token),
                                                       sid.BinaryForm,
                                                       ref isMember))
                     throw new SecurityException(new Win32Exception().Message);
+#endif
+
+
             }
             finally
             {
@@ -726,8 +725,8 @@ namespace System.Security.Principal
             if ((uint)status == Interop.StatusOptions.STATUS_INSUFFICIENT_RESOURCES || (uint)status == Interop.StatusOptions.STATUS_NO_MEMORY)
                 return new OutOfMemoryException();
 
-            int win32ErrorCode = Interop.NtDll.RtlNtStatusToDosError(status);
-            return new SecurityException(new Win32Exception(win32ErrorCode).Message);
+            uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError((uint)status);
+            return new SecurityException(new Win32Exception(unchecked((int)win32ErrorCode)).Message);
         }
         
         private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
@@ -1067,14 +1066,12 @@ namespace System.Security.Principal
         Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
     }
 
-    [Serializable]
     internal enum TokenType : int
     {
         TokenPrimary = 1,
         TokenImpersonation
     }
 
-    [Serializable]
     internal enum TokenInformationClass : int
     {
         TokenUser = 1,

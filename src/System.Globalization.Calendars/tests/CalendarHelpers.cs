@@ -167,14 +167,14 @@ namespace System.Globalization.Tests
         [MemberData(nameof(Year_Month_Day_Era_TestData), DataType.Year, false)]
         public static void GetDaysInYear_Invalid(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInYear(year, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInYear(year, era));
         }
 
         [Theory]
         [MemberData(nameof(Year_Month_Day_Era_TestData), DataType.Year, false)]
         public static void GetMonthsInYear_Invalid(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetMonthsInYear(year, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetMonthsInYear(year, era));
         }
 
         [Theory]
@@ -182,7 +182,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
         public static void GetDaysInMonth_Invalid_net46(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInMonth(year, month, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInMonth(year, month, era));
         }
 
         [Theory]
@@ -190,7 +190,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void GetDaysInMonth_Invalid_netcore(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInMonth(year, month, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.GetDaysInMonth(year, month, era));
         }
 
         [Theory]
@@ -198,7 +198,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void IsLeapDay_Invalid_netcore(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapDay(year, month, day, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapDay(year, month, day, era));
         }
 
         [Theory]
@@ -206,7 +206,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
         public static void IsLeapDay_Invalid_net46(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapDay(year, month, day, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapDay(year, month, day, era));
         }
 
         [Theory]
@@ -214,7 +214,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void IsLeapMonth_Invalid_netcore(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapMonth(year, month, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapMonth(year, month, era));
         }
 
         [Theory]
@@ -222,21 +222,21 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
         public static void IsLeapMonth_Invalid_net46(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapMonth(year, month, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapMonth(year, month, era));
         }
 
         [Theory]
         [MemberData(nameof(Year_Month_Day_Era_TestData), DataType.Year, false)]
         public static void IsLeapYear_Invalid(Calendar calendar, int year, int month, int day, int era, string exceptionParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapYear(year, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(exceptionParamName, () => calendar.IsLeapYear(year, era));
         }
 
         [Theory]
         [MemberData(nameof(Year_Month_Day_Era_TestData), DataType.Year, false)]
         public static void GetLeapMonth_Invalid(Calendar calendar, int year, int month, int day, int era, string expectedParamName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(expectedParamName, () => calendar.GetLeapMonth(year, era));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(expectedParamName, () => calendar.GetLeapMonth(year, era));
         }
 
         [Theory]
@@ -262,46 +262,46 @@ namespace System.Globalization.Tests
         [MemberData(nameof(Calendars_TestData))]
         public static void AddDays_Invalid(Calendar calendar)
         {
-            Assert.Throws<ArgumentException>(() => calendar.AddDays(calendar.MaxSupportedDateTime, 1));
-            Assert.Throws<ArgumentException>(() => calendar.AddDays(calendar.MinSupportedDateTime, -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddDays(calendar.MaxSupportedDateTime, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddDays(calendar.MinSupportedDateTime, -1));
 
-            Assert.Throws<ArgumentException>(() => calendar.AddDays(DateTime.Now, -120001 * 30));
-            Assert.Throws<ArgumentException>(() => calendar.AddDays(DateTime.Now, 120001 * 30));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddDays(DateTime.Now, -120001 * 30));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddDays(DateTime.Now, 120001 * 30));
         }
 
         [Theory]
         [MemberData(nameof(Calendars_TestData))]
         public static void AddHours_Invalid(Calendar calendar)
         {
-            Assert.Throws<ArgumentException>(() => calendar.AddHours(calendar.MaxSupportedDateTime, 1));
-            Assert.Throws<ArgumentException>(() => calendar.AddHours(calendar.MinSupportedDateTime, -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddHours(calendar.MaxSupportedDateTime, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddHours(calendar.MinSupportedDateTime, -1));
 
-            Assert.Throws<ArgumentException>(() => calendar.AddHours(DateTime.Now, -120001 * 30 * 24));
-            Assert.Throws<ArgumentException>(() => calendar.AddHours(DateTime.Now, 120001 * 30 * 24));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddHours(DateTime.Now, -120001 * 30 * 24));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddHours(DateTime.Now, 120001 * 30 * 24));
         }
 
         [Theory]
         [MemberData(nameof(Calendars_TestData))]
         public static void AddMinutes_Invalid(Calendar calendar)
         {
-            Assert.Throws<ArgumentException>(() => calendar.AddMinutes(calendar.MaxSupportedDateTime, 1));
-            Assert.Throws<ArgumentException>(() => calendar.AddMinutes(calendar.MinSupportedDateTime, -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddMinutes(calendar.MaxSupportedDateTime, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddMinutes(calendar.MinSupportedDateTime, -1));
         }
 
         [Theory]
         [MemberData(nameof(Calendars_TestData))]
         public static void AddSeconds_Invalid(Calendar calendar)
         {
-            Assert.Throws<ArgumentException>(() => calendar.AddSeconds(calendar.MaxSupportedDateTime, 1));
-            Assert.Throws<ArgumentException>(() => calendar.AddSeconds(calendar.MinSupportedDateTime, -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddSeconds(calendar.MaxSupportedDateTime, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddSeconds(calendar.MinSupportedDateTime, -1));
         }
 
         [Theory]
         [MemberData(nameof(Calendars_TestData))]
         public static void AddMilliseconds_Invalid(Calendar calendar)
         {
-            Assert.Throws<ArgumentException>(() => calendar.AddMilliseconds(calendar.MaxSupportedDateTime, 1));
-            Assert.Throws<ArgumentException>(() => calendar.AddMilliseconds(calendar.MinSupportedDateTime, -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddMilliseconds(calendar.MaxSupportedDateTime, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => calendar.AddMilliseconds(calendar.MinSupportedDateTime, -1));
         }
 
         [Theory]

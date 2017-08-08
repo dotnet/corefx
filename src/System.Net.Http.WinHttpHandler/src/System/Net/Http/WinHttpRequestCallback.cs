@@ -305,9 +305,13 @@ namespace System.Net.Http
             
             Debug.Assert(state != null, "OnRequestError: state is null");
 
-            Exception innerException = WinHttpException.CreateExceptionUsingError((int)asyncResult.dwError);
+            Debug.Assert((unchecked((int)asyncResult.dwError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
+                unchecked((int)asyncResult.dwError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
+                $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)asyncResult.dwError)}, WinHttp API: {unchecked((uint)asyncResult.dwResult.ToInt32())}");
 
-            switch ((uint)asyncResult.dwResult.ToInt32())
+            Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
+
+            switch (unchecked((uint)asyncResult.dwResult.ToInt32()))
             {
                 case Interop.WinHttp.API_SEND_REQUEST:
                     state.LifecycleAwaitable.SetException(innerException);
@@ -346,7 +350,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's ReadAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: QUERY_DATA_AVAILABLE - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: QUERY_DATA_AVAILABLE - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.LifecycleAwaitable.SetCanceled();
                     }
                     else
@@ -361,7 +365,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's ReadAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: API_READ_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: API_READ_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.LifecycleAwaitable.SetCanceled();
                     }
                     else
@@ -375,7 +379,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's WriteAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: API_WRITE_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: API_WRITE_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.TcsInternalWriteDataToRequestStream.TrySetCanceled();
                     }
                     else

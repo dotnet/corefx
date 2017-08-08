@@ -15,22 +15,31 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_Type_Int_Invalid()
         {
-            // Type is not a valid RuntimeType
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                // Type is not a valid RuntimeType
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, 0));
+            }
         }
 
         [Fact]
         public static void CreateInstance_Type_Int_Int_Invalid()
         {
-            // Type is not a valid RuntimeType
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0, 1));
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                // Type is not a valid RuntimeType
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, 0, 1));
+            }
         }
 
         [Fact]
         public static void CreateInstance_Type_Int_Int_Int_Invalid()
         {
-            // Type is not a valid RuntimeType
-            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0, 1, 2));
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                // Type is not a valid RuntimeType
+                AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(nonRuntimeType, 0, 1, 2));
+            }
         }
     }
 }

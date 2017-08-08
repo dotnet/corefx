@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -11,6 +12,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public class CertTests
     {
+        private const string PrivateKeySectionHeader = "[Private Key]";
+        private const string PublicKeySectionHeader = "[Public Key]";
+
         private readonly ITestOutputHelper _log;
 
         public CertTests(ITestOutputHelper output)
@@ -110,15 +114,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.True(success, "MicrosoftDotComIssuerBytes");
             }
 
-            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            // High Sierra fails to build a chain for a self-signed certificate with revocation enabled.
+            // https://github.com/dotnet/corefx/issues/21875
+            if (!PlatformDetection.IsMacOsHighSierra)
             {
-                // NotAfter=7/17/2036
-                success = microsoftDotComRoot.Verify();
-                if (!success)
+                using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
                 {
-                    LogVerifyErrors(microsoftDotComRoot, "MicrosoftDotComRootBytes");
+                    // NotAfter=7/17/2036
+                    success = microsoftDotComRoot.Verify();
+                    if (!success)
+                    {
+                        LogVerifyErrors(microsoftDotComRoot, "MicrosoftDotComRootBytes");
+                    }
+                    Assert.True(success, "MicrosoftDotComRootBytes");
                 }
-                Assert.True(success, "MicrosoftDotComRootBytes");
             }
         }
 
@@ -184,6 +193,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.False(string.IsNullOrWhiteSpace(c.ToString(true)));
                     c.Dispose();
                 }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(StorageFlags))]
+        public static void X509Certificate2ToStringVerbose_WithPrivateKey(X509KeyStorageFlags keyStorageFlags)
+        {
+            using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, keyStorageFlags))
+            {
+                string certToString = cert.ToString(true);
+                Assert.Contains(PrivateKeySectionHeader, certToString);
+                Assert.Contains(PublicKeySectionHeader, certToString);
+            }
+        }
+
+        [Fact]
+        public static void X509Certificate2ToStringVerbose_NoPrivateKey()
+        {
+            using (var cert = new X509Certificate2(TestData.MsCertificatePemBytes))
+            {
+                string certToString = cert.ToString(true);
+                Assert.DoesNotContain(PrivateKeySectionHeader, certToString);
+                Assert.Contains(PublicKeySectionHeader, certToString);
             }
         }
 
@@ -315,5 +347,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
+
+        public static IEnumerable<object> StorageFlags => CollectionImportTests.StorageFlags;
     }
 }

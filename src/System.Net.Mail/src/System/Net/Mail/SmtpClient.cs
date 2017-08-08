@@ -137,6 +137,7 @@ namespace System.Net.Mail
 
                 // SMTP RFC's require ASCII only host names in the HELO/EHLO message.
                 string clientDomainRaw = IPGlobalProperties.GetIPGlobalProperties().HostName;
+
                 IdnMapping mapping = new IdnMapping();
                 try
                 {

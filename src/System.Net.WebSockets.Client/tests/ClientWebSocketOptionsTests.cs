@@ -3,7 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Net.Security;
+using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +16,20 @@ using Xunit.Abstractions;
 
 namespace System.Net.WebSockets.Client.Tests
 {
-    public class ClientWebSocketOptionsTests : ClientWebSocketTestBase
+    public partial class ClientWebSocketOptionsTests : ClientWebSocketTestBase
     {
+        public static bool CanTestCertificates =>
+            Capability.IsTrustedRootCertificateInstalled() &&
+            (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
+
+        public static bool CanTestClientCertificates =>
+            CanTestCertificates && BackendSupportsCustomCertificateHandling;
+
+        // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
+        // ClientWebSocket.ConnectAsync to carry out mutual TLS authentication.
+        public static bool ClientCertificatesSupported =>
+            !PlatformDetection.IsUap || PlatformDetection.IsWindows10InsiderPreviewBuild16215OrGreater;
+
         public ClientWebSocketOptionsTests(ITestOutputHelper output) : base(output) { }
 
         [ConditionalFact(nameof(WebSocketsSupported))]
@@ -30,15 +46,22 @@ namespace System.Net.WebSockets.Client.Tests
         [ConditionalFact(nameof(WebSocketsSupported))]
         public static void SetBuffer_InvalidArgs_Throws()
         {
+            // Recreate the minimum WebSocket buffer size values from the .NET Framework version of WebSocket,
+            // and pick the correct name of the buffer used when throwing an ArgumentOutOfRangeException.
+            int minSendBufferSize = PlatformDetection.IsFullFramework ? 16 : 1;
+            int minReceiveBufferSize = PlatformDetection.IsFullFramework ? 256 : 1;
+            string bufferName = PlatformDetection.IsFullFramework ? "internalBuffer" : "buffer";
+
             var cws = new ClientWebSocket();
+
             AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 0));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 1));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => cws.Options.SetBuffer(1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, minSendBufferSize));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => cws.Options.SetBuffer(minReceiveBufferSize, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 0, new ArraySegment<byte>(new byte[1])));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 1, new ArraySegment<byte>(new byte[1])));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => cws.Options.SetBuffer(1, 0, new ArraySegment<byte>(new byte[1])));
-            AssertExtensions.Throws<ArgumentNullException>("buffer.Array", () => cws.Options.SetBuffer(1, 1, default(ArraySegment<byte>)));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("buffer", () => cws.Options.SetBuffer(1, 1, new ArraySegment<byte>(new byte[0])));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, minSendBufferSize, new ArraySegment<byte>(new byte[1])));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => cws.Options.SetBuffer(minReceiveBufferSize, 0, new ArraySegment<byte>(new byte[1])));
+            AssertExtensions.Throws<ArgumentNullException>("buffer.Array", () => cws.Options.SetBuffer(minReceiveBufferSize, minSendBufferSize, default(ArraySegment<byte>)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(bufferName, () => cws.Options.SetBuffer(minReceiveBufferSize, minSendBufferSize, new ArraySegment<byte>(new byte[0])));
         }
 
         [ConditionalFact(nameof(WebSocketsSupported))]
@@ -57,6 +80,49 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(Timeout.InfiniteTimeSpan, cws.Options.KeepAliveInterval);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => cws.Options.KeepAliveInterval = TimeSpan.MinValue);
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(5120, TargetFrameworkMonikers.Netcoreapp)]
+        [ConditionalFact(nameof(WebSocketsSupported), nameof(CanTestClientCertificates), nameof(ClientCertificatesSupported))]
+        public async Task ClientCertificates_ValidCertificate_ServerReceivesCertificateAndConnectAsyncSucceeds()
+        {
+            var options = new LoopbackServer.Options { UseSsl = true, WebSocketEndpoint = true };
+
+            Func<ClientWebSocket, Socket, Uri, X509Certificate2, Task> connectToServerWithClientCert = async (clientSocket, server, url, clientCert) =>
+            {
+                // Start listening for incoming connections on the server side.
+                Task<List<string>> acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                    {
+                        // Validate that the client certificate received by the server matches the one configured on
+                        // the client-side socket.
+                        SslStream sslStream = Assert.IsType<SslStream>(stream);
+                        Assert.NotNull(sslStream.RemoteCertificate);
+                        Assert.Equal(clientCert, new X509Certificate2(sslStream.RemoteCertificate));
+
+                        // Complete the WebSocket upgrade over the secure channel. After this is done, the client-side
+                        // ConnectAsync should complete.
+                        Assert.True(await LoopbackServer.WebSocketHandshakeAsync(socket, reader, writer));
+                        return null;
+                    }, options);
+
+                // Initiate a connection attempt with a client certificate configured on the socket.
+                clientSocket.Options.ClientCertificates.Add(clientCert);
+                var cts = new CancellationTokenSource(TimeOutMilliseconds);
+                await clientSocket.ConnectAsync(url, cts.Token);
+                acceptTask.Wait(cts.Token);
+            };
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (X509Certificate2 clientCert = Test.Common.Configuration.Certificates.GetClientCertificate())
+                {
+                    using (ClientWebSocket clientSocket = new ClientWebSocket())
+                    {
+                        await connectToServerWithClientCert(clientSocket, server, url, clientCert);
+                    }
+                }
+            }, options);
         }
     }
 }

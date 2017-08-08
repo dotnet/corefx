@@ -161,18 +161,31 @@ namespace System.Xml.Serialization
         private void WriteArrayItems(ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc arrayTypeDesc, object o)
         {
             TypeDesc arrayElementTypeDesc = arrayTypeDesc.ArrayElementTypeDesc;
-            var a = o as IEnumerable;
 
-            //  #10593: This assert may not be true. We need more tests for this method.
-            Debug.Assert(a != null);
+            var arr = o as IList;
 
-            IEnumerator e = a.GetEnumerator();
-            if (e != null)
+            if (arr != null)
             {
-                while (e.MoveNext())
+                for (int i = 0; i < arr.Count; i++)
                 {
-                    object ai = e.Current;
+                    object ai = arr[i];
                     WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, true, true);
+                }
+            }
+            else
+            {
+                var a = o as IEnumerable;
+                //  #10593: This assert may not be true. We need more tests for this method.
+                Debug.Assert(a != null);
+
+                IEnumerator e = a.GetEnumerator();
+                if (e != null)
+                {
+                    while (e.MoveNext())
+                    {
+                        object ai = e.Current;
+                        WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, true, true);
+                    }
                 }
             }
         }
@@ -564,8 +577,6 @@ namespace System.Xml.Serialization
                 for (int i = 0; i < members.Length; i++)
                 {
                     MemberMapping m = members[i];
-                    string memberName = m.Name;
-                    object memberValue = GetMemberValue(o, memberName);
 
                     bool isSpecified = true;
                     bool shouldPersist = true;
@@ -586,6 +597,7 @@ namespace System.Xml.Serialization
                     {
                         if (isSpecified && shouldPersist)
                         {
+                            object memberValue = GetMemberValue(o, m.Name);
                             WriteMember(memberValue, m.Attribute, m.TypeDesc, o);
                         }
                     }
@@ -594,8 +606,9 @@ namespace System.Xml.Serialization
                 for (int i = 0; i < members.Length; i++)
                 {
                     MemberMapping m = members[i];
-                    string memberName = m.Name;
-                    object memberValue = GetMemberValue(o, memberName);
+
+                    if (m.Xmlns != null)
+                        continue;
 
                     bool isSpecified = true;
                     bool shouldPersist = true;
@@ -612,9 +625,6 @@ namespace System.Xml.Serialization
                         shouldPersist = (bool)method.Invoke(o, Array.Empty<object>());
                     }
 
-                    if (m.Xmlns != null)
-                        continue;
-
                     bool checkShouldPersist = m.CheckShouldPersist && (m.Elements.Length > 0 || m.Text != null);
 
                     if (!checkShouldPersist)
@@ -622,17 +632,19 @@ namespace System.Xml.Serialization
                         shouldPersist = true;
                     }
 
-                    object choiceSource = null;
-                    if (m.ChoiceIdentifier != null)
-                    {
-                        choiceSource = GetMemberValue(o, m.ChoiceIdentifier.MemberName);
-                    }
-
                     if (isSpecified && shouldPersist)
                     {
+                        object choiceSource = null;
+                        if (m.ChoiceIdentifier != null)
+                        {
+                            choiceSource = GetMemberValue(o, m.ChoiceIdentifier.MemberName);
+                        }
+
+                        object memberValue = GetMemberValue(o, m.Name);
                         WriteMember(memberValue, choiceSource, m.ElementsSortedByDerivation, m.Text, m.ChoiceIdentifier, m.TypeDesc, true);
                     }
                 }
+
                 if (!mapping.IsSoap)
                 {
                     WriteEndElement(o);
@@ -642,13 +654,7 @@ namespace System.Xml.Serialization
 
         private object GetMemberValue(object o, string memberName)
         {
-            MemberInfo[] memberInfos = o.GetType().GetMember(memberName);
-            if (memberInfos == null)
-            {
-                throw new InvalidOperationException(SR.Format(SR.XmlInternalError, memberName));
-            }
-
-            MemberInfo memberInfo = memberInfos[0];
+            MemberInfo memberInfo = ReflectionXmlSerializationHelper.GetMember(o.GetType(), memberName);
             object memberValue = GetMemberValue(o, memberInfo);
             return memberValue;
         }
@@ -1098,7 +1104,7 @@ namespace System.Xml.Serialization
             {
                 if (!typeDesc.HasCustomFormatter)
                 {
-                    stringValue = CovertPrimitiveToString(o, typeDesc);
+                    stringValue = ConvertPrimitiveToString(o, typeDesc);
                     return true;
                 }
                 else if (o is byte[] && typeDesc.FormatterName == "ByteArrayHex")
@@ -1175,7 +1181,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        private string CovertPrimitiveToString(object o, TypeDesc typeDesc)
+        private string ConvertPrimitiveToString(object o, TypeDesc typeDesc)
         {
             string stringValue;
             switch (typeDesc.FormatterName)
@@ -1384,6 +1390,52 @@ namespace System.Xml.Serialization
             WriteElementString = 4,
             WriteNullableStringLiteral = 8,
             Encoded = 16
+        }
+    }
+
+    internal class ReflectionXmlSerializationHelper
+    {
+        public static MemberInfo GetMember(Type declaringType, string memberName)
+        {
+            MemberInfo[] memberInfos = declaringType.GetMember(memberName);
+            if (memberInfos == null || memberInfos.Length == 0)
+            {
+                bool foundMatchedMember = false;
+                Type currentType = declaringType.BaseType;
+                while (currentType != null)
+                {
+                    memberInfos = currentType.GetMember(memberName);
+                    if (memberInfos != null && memberInfos.Length != 0)
+                    {
+                        foundMatchedMember = true;
+                        break;
+                    }
+
+                    currentType = currentType.BaseType;
+                }
+
+                if (!foundMatchedMember)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType.ToString()}"));
+                }
+
+                declaringType = currentType;
+            }
+
+            MemberInfo memberInfo = memberInfos[0];
+            if (memberInfos.Length != 1)
+            {
+                foreach (MemberInfo mi in memberInfos)
+                {
+                    if (declaringType == mi.DeclaringType)
+                    {
+                        memberInfo = mi;
+                        break;
+                    }
+                }
+            }
+
+            return memberInfo;
         }
     }
 }

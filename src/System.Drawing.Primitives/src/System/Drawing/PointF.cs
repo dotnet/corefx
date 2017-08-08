@@ -12,6 +12,7 @@ namespace System.Drawing
     ///    define a point in a two-dimensional plane.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct PointF : IEquatable<PointF>
     {
         /// <summary>
@@ -21,8 +22,8 @@ namespace System.Drawing
         ///    </para>
         /// </summary>
         public static readonly PointF Empty = new PointF();
-        private float _x;
-        private float _y;
+        private float x; // Do not rename (binary serialization) 
+        private float y; // Do not rename (binary serialization) 
 
         /// <summary>
         ///    <para>
@@ -32,8 +33,8 @@ namespace System.Drawing
         /// </summary>
         public PointF(float x, float y)
         {
-            _x = x;
-            _y = y;
+            this.x = x;
+            this.y = y;
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace System.Drawing
         ///    </para>
         /// </summary>
         [Browsable(false)]
-        public bool IsEmpty => _x == 0f && _y == 0f;
+        public bool IsEmpty => x == 0f && y == 0f;
 
         /// <summary>
         ///    <para>
@@ -51,8 +52,8 @@ namespace System.Drawing
         /// </summary>
         public float X
         {
-            get { return _x; }
-            set { _x = value; }
+            get { return x; }
+            set { x = value; }
         }
 
         /// <summary>
@@ -62,8 +63,8 @@ namespace System.Drawing
         /// </summary>
         public float Y
         {
-            get { return _y; }
-            set { _y = value; }
+            get { return y; }
+            set { y = value; }
         }
 
         /// <summary>
@@ -147,6 +148,6 @@ namespace System.Drawing
 
         public override int GetHashCode() => HashHelpers.Combine(X.GetHashCode(), Y.GetHashCode());
 
-        public override string ToString() => "{X=" + _x.ToString() + ", Y=" + _y.ToString() + "}";
+        public override string ToString() => "{X=" + x.ToString() + ", Y=" + y.ToString() + "}";
     }
 }

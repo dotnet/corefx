@@ -29,10 +29,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestModulesContainsDotnet()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Process.Modules is not supported on uap")]
+        public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("dotnet"));
+            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(HostRunnerName));
         }
 
         [Fact]

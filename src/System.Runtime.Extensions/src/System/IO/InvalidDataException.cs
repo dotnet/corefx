@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace System.IO
 {
-    [Serializable]
     public sealed class InvalidDataException : SystemException
     {
         public InvalidDataException()
@@ -21,10 +20,6 @@ namespace System.IO
 
         public InvalidDataException(string message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        private InvalidDataException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

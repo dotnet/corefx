@@ -132,6 +132,7 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/19410")]
         public void ValidLicense()
         {
             XmlDocument doc = GetDocumentFromResource("System.Security.Cryptography.Xml.Tests.XmlLicenseSample.xml");
@@ -154,7 +155,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void GetOutput_InvalidType()
         {
-            Assert.Throws<ArgumentException>(() => transform.GetOutput(typeof(string)));
+            AssertExtensions.Throws<ArgumentException>("type", () => transform.GetOutput(typeof(string)));
         }
 		
         [Fact]

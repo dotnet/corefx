@@ -58,7 +58,6 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(UsingNewNormalization))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void ValidCreation_ExtendedSyntax()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + GetTestFilePath());
@@ -74,10 +73,9 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix, long path
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void ValidCreation_LongPathExtendedSyntax()
         {
-            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500).FullPath);
+            DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500));
             Assert.StartsWith(IOInputs.ExtendedPrefix, testDir.FullName);
             string testFile = Path.Combine(testDir.FullName, GetTestFileName());
             using (FileStream stream = Create(testFile))
@@ -152,16 +150,22 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void LongPath()
+        public void LongPathSegment()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            Assert.Throws<PathTooLongException>(() => Create(Path.Combine(testDir.FullName, new string('a', 300))));
 
-            //TODO #645: File creation does not yet have long path support on Unix or Windows
-            //using (Create(Path.Combine(testDir.FullName, new string('k', 257))))
-            //{
-            //    Assert.True(File.Exists(Path.Combine(testDir.FullName, new string('k', 257))));
-            //}
+            // Long path should throw PathTooLongException on Desktop and IOException
+            // elsewhere.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<PathTooLongException>(
+                    () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
+            }
+            else
+            {
+                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(
+                    () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
+            }
         }
 
         #endregion
@@ -207,38 +211,41 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "*Tes*t")));
         }
 
-        [Fact]
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\0"),
+            InlineData("\t")]
         [PlatformSpecific(TestPlatforms.Windows)]  // Invalid file name with whitespace on Windows
-        public void WindowsWhitespacePath()
+        public void WindowsWhitespacePath(string path)
         {
-            Assert.Throws<ArgumentException>(() => Create("         "));
-            Assert.Throws<ArgumentException>(() => Create(" "));
-            Assert.Throws<ArgumentException>(() => Create("\n"));
-            Assert.Throws<ArgumentException>(() => Create(">"));
-            Assert.Throws<ArgumentException>(() => Create("<"));
-            Assert.Throws<ArgumentException>(() => Create("\0"));
-            Assert.Throws<ArgumentException>(() => Create("\t"));
+            Assert.Throws<ArgumentException>(() => Create(path));
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void CreateNullThrows_Unix()
+        {
+            Assert.Throws<ArgumentException>(() => Create("\0"));
+        }
+
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Valid file name with Whitespace on Unix
-        public void UnixWhitespacePath()
+        public void UnixWhitespacePath(string path)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            Assert.Throws<ArgumentException>(() => Create("\0"));
-            using (Create(Path.Combine(testDir.FullName, "          ")))
-            using (Create(Path.Combine(testDir.FullName, " ")))
-            using (Create(Path.Combine(testDir.FullName, "\n")))
-            using (Create(Path.Combine(testDir.FullName, ">")))
-            using (Create(Path.Combine(testDir.FullName, "<")))
-            using (Create(Path.Combine(testDir.FullName, "\t")))
+            using (Create(Path.Combine(testDir.FullName, path)))
             {
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, "          ")));
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, " ")));
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, "\n")));
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, ">")));
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, "<")));
-                Assert.True(File.Exists(Path.Combine(testDir.FullName, "\t")));
+                Assert.True(File.Exists(Path.Combine(testDir.FullName, path)));
             }
         }
 

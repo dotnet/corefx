@@ -17,15 +17,7 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientHandler_MaxResponseHeadersLength_Test : RemoteExecutorTestBase
     {
-        [Fact]
-        public void Default_MaxResponseHeadersLength()
-        {
-            using (var handler = new HttpClientHandler())
-            {
-                Assert.Equal(64, handler.MaxResponseHeadersLength);
-            }
-        }
-
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -37,6 +29,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
         [InlineData(1)]
         [InlineData(65)]
@@ -62,6 +55,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(ResponseWithManyHeadersData))]
         public async Task ThresholdExceeded_ThrowsException(string responseHeaders, int maxResponseHeadersLength, bool shouldSucceed)

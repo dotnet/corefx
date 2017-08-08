@@ -103,6 +103,9 @@ namespace System.Net
             }
 
             _timer = new Timer(OnTimeout, null, Timeout.Infinite, Timeout.Infinite);
+            if (_sslStream != null) {
+                _sslStream.AuthenticateAsServer (_cert, true, (SslProtocols)ServicePointManager.SecurityProtocol, false);
+            }
             Init();
         }
 
@@ -116,13 +119,13 @@ namespace System.Net
             get { return _clientCert; }
         }
 
+        internal SslStream SslStream
+        {
+            get { return _sslStream; }
+        }
+
         private void Init()
         {
-            if (_sslStream != null)
-            {
-                _sslStream.AuthenticateAsServer(_cert, true, (SslProtocols)ServicePointManager.SecurityProtocol, false);
-            }
-
             _contextBound = false;
             _requestStream = null;
             _responseStream = null;
@@ -289,7 +292,8 @@ namespace System.Net
 
                 if (!_epl.BindContext(_context))
                 {
-                    SendError("Invalid host", 400);
+                    const int NotFoundErrorCode = 404;
+                    SendError(HttpStatusDescription.Get(NotFoundErrorCode), NotFoundErrorCode);
                     Close(true);
                     return;
                 }
@@ -447,7 +451,7 @@ namespace System.Net
                 else
                     str = string.Format("<h1>{0}</h1>", description);
 
-                byte[] error = _context.Response.ContentEncoding.GetBytes(str);
+                byte[] error = Encoding.Default.GetBytes(str);
                 response.Close(error, false);
             }
             catch

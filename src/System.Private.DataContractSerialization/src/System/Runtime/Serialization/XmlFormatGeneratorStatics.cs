@@ -103,7 +103,7 @@ namespace System.Runtime.Serialization
             {
                 if (s_ienumeratorGetCurrentMethod == null)
                 {
-                    s_ienumeratorGetCurrentMethod = typeof(IEnumerator).GetProperty("Current").GetMethod;
+                    s_ienumeratorGetCurrentMethod = typeof(IEnumerator).GetProperty("Current").GetGetMethod();
                     Debug.Assert(s_ienumeratorGetCurrentMethod != null);
                 }
                 return s_ienumeratorGetCurrentMethod;
@@ -498,6 +498,17 @@ namespace System.Runtime.Serialization
                     Debug.Assert(s_getExistingObjectMethod != null);
                 }
                 return s_getExistingObjectMethod;
+            }
+        }
+
+        private static MethodInfo s_getRealObjectMethod;
+        internal static MethodInfo GetRealObjectMethod
+        {
+            get
+            {
+                if (s_getRealObjectMethod == null)
+                    s_getRealObjectMethod = typeof(XmlObjectSerializerReadContext).GetMethod("GetRealObject", Globals.ScanAllMembers);
+                return s_getRealObjectMethod;
             }
         }
 

@@ -901,13 +901,6 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// InvalidOperationException with message like "Cannot cast from type '{0}' to type '{1}"
-        /// </summary>
-        internal static Exception InvalidCast(object p0, object p1)
-        {
-            return new InvalidOperationException(Strings.InvalidCast(p0, p1));
-        }
-        /// <summary>
         /// ArgumentException with message like "Unhandled binary: {0}"
         /// </summary>
         internal static Exception UnhandledBinary(object p0, string paramName)
@@ -939,9 +932,9 @@ namespace System.Linq.Expressions
         /// <summary>
         /// ArgumentException with message like "Unknown binding type"
         /// </summary>
-        internal static Exception UnknownBindingType()
+        internal static Exception UnknownBindingType(int index)
         {
-            return new ArgumentException(Strings.UnknownBindingType);
+            return new ArgumentException(Strings.UnknownBindingType, $"bindings[{index}]");
         }
         /// <summary>
         /// ArgumentException with message like "The user-defined operator method '{1}' for operator '{0}' must have identical parameter and return types."
@@ -1076,13 +1069,7 @@ namespace System.Linq.Expressions
         {
             return new InvalidOperationException(Strings.NonLocalJumpWithValue(p0));
         }
-        /// <summary>
-        /// InvalidOperationException with message like "Extension should have been reduced."
-        /// </summary>
-        internal static Exception ExtensionNotReduced()
-        {
-            return new InvalidOperationException(Strings.ExtensionNotReduced);
-        }
+
 #if FEATURE_COMPILE_TO_METHODBUILDER
         /// <summary>
         /// InvalidOperationException with message like "CompileToMethod cannot compile constant '{0}' because it is a non-trivial value, such as a live object. Instead, create an expression tree that can construct this value."
@@ -1112,13 +1099,6 @@ namespace System.Linq.Expressions
         internal static Exception InvalidLvalue(ExpressionType p0)
         {
             return new InvalidOperationException(Strings.InvalidLvalue(p0));
-        }
-        /// <summary>
-        /// InvalidOperationException with message like "unknown lift type: '{0}'."
-        /// </summary>
-        internal static Exception UnknownLiftType(object p0)
-        {
-            return new InvalidOperationException(Strings.UnknownLiftType(p0));
         }
 
         /// <summary>

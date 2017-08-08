@@ -18,18 +18,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(semanticChecker != null);
             ExprFactory = exprFactory;
             SemanticChecker = semanticChecker;
-            SymbolLoader = semanticChecker.GetSymbolLoader();
+            SymbolLoader = semanticChecker.SymbolLoader;
         }
 
         public BindingContext(BindingContext parent)
         {
             Debug.Assert(parent.SemanticChecker != null);
             ExprFactory = parent.ExprFactory;
-            ReportUnsafeErrors = parent.ReportUnsafeErrors;
             ContextForMemberLookup = parent.ContextForMemberLookup;
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
-            SymbolLoader = (SemanticChecker = parent.SemanticChecker).GetSymbolLoader();
+            SymbolLoader = (SemanticChecker = parent.SemanticChecker).SymbolLoader;
         }
 
 
@@ -40,9 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // PERFORMANCE: Is this cache still necessary?
         public SymbolLoader SymbolLoader { get; }
 
-        public Declaration ContextForMemberLookup { get; set; }
-
-        public bool ReportUnsafeErrors { get; set; } = true;
+        public AggregateDeclaration ContextForMemberLookup { get; set; }
 
         public CSemanticChecker SemanticChecker { get; }
 

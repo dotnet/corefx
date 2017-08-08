@@ -20,6 +20,7 @@ namespace System.Net.Security
     {
         // When reading a frame from the wire first read this many bytes for the header.
         internal const int ReadHeaderSize = 5;
+
         private SafeFreeCredentials _credentialsHandle;
         private SafeDeleteContext _securityContext;
         private readonly string _destination;
@@ -35,7 +36,7 @@ namespace System.Net.Security
         private X509Certificate _selectedClientCertificate;
         private bool _isRemoteCertificateAvailable;
 
-        private readonly X509CertificateCollection _clientCertificates;
+        private X509CertificateCollection _clientCertificates;
         private LocalCertSelectionCallback _certSelectionDelegate;
 
         // These are the MAX encrypt buffer output sizes, not the actual sizes.
@@ -47,6 +48,9 @@ namespace System.Net.Security
         private bool _checkCertName;
 
         private bool _refreshCredentialNeeded;
+
+        private readonly Oid _serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.1");
+        private readonly Oid _clientAuthOid = new Oid("1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.2");
 
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
                                                   bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
@@ -135,14 +139,6 @@ namespace System.Net.Security
             get
             {
                 return _checkCertRevocation;
-            }
-        }
-
-        internal X509CertificateCollection ClientCertificates
-        {
-            get
-            {
-                return _clientCertificates;
             }
         }
 
@@ -380,7 +376,11 @@ namespace System.Net.Security
                 {
                     X509Certificate2Collection dummyCollection;
                     remoteCert = CertificateValidationPal.GetRemoteCertificate(_securityContext, out dummyCollection);
-                    clientCertificate = _certSelectionDelegate(_hostName, ClientCertificates, remoteCert, issuers);
+                    if (_clientCertificates == null)
+                    {
+                        _clientCertificates = new X509CertificateCollection();
+                    }
+                    clientCertificate = _certSelectionDelegate(_hostName, _clientCertificates, remoteCert, issuers);
                 }
                 finally
                 {
@@ -403,7 +403,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    if (ClientCertificates.Count == 0)
+                    if (_clientCertificates == null || _clientCertificates.Count == 0)
                     {
                         if (NetEventSource.IsEnabled) NetEventSource.Log.NoDelegateNoClientCert(this);
 
@@ -419,7 +419,7 @@ namespace System.Net.Security
             {
                 // This is where we attempt to restart a session by picking the FIRST cert from the collection.
                 // Otherwise it is either server sending a client cert request or the session is renegotiated.
-                clientCertificate = ClientCertificates[0];
+                clientCertificate = _clientCertificates[0];
                 sessionRestartAttempt = true;
                 if (clientCertificate != null)
                 {
@@ -1009,6 +1009,10 @@ namespace System.Net.Security
                     chain = new X509Chain();
                     chain.ChainPolicy.RevocationMode = _checkCertRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck;
                     chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+
+                    // Authenticate the remote party: (e.g. when operating in server mode, authenticate the client).
+                    chain.ChainPolicy.ApplicationPolicy.Add(_serverMode ? _clientAuthOid : _serverAuthOid);
+
                     if (remoteCertificateStore != null)
                     {
                         chain.ChainPolicy.ExtraStore.AddRange(remoteCertificateStore);

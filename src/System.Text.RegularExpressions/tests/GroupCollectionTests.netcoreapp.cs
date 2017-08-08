@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
@@ -127,8 +128,8 @@ namespace System.Text.RegularExpressions.Tests
             ICollection<Group> collection = CreateCollection();
             AssertExtensions.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], -1));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 0));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new Group[1], 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new Group[1], 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], 2));
         }
 
@@ -162,8 +163,19 @@ namespace System.Text.RegularExpressions.Tests
         [Fact]
         public static void DebuggerAttributeTests()
         {
-            DebuggerAttributes.ValidateDebuggerDisplayReferences(CreateCollection());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(CreateCollection());
+            GroupCollection col = CreateCollection();
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(col);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(col);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            Group[] items = itemProperty.GetValue(info.Instance) as Group[];
+            Assert.Equal(col, items);
+        }
+
+        [Fact]
+        public static void DebuggerAttributeTests_Null()
+        {
+            TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(GroupCollection), null));
+            Assert.IsType<ArgumentNullException>(ex.InnerException);
         }
     }
 }

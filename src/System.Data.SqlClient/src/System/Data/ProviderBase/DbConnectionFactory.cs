@@ -20,7 +20,6 @@ namespace System.Data.ProviderBase
         private readonly List<DbConnectionPool> _poolsToRelease;
         private readonly List<DbConnectionPoolGroup> _poolGroupsToRelease;
         private readonly Timer _pruningTimer;
-
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
@@ -219,13 +218,22 @@ namespace System.Data.ProviderBase
                             // If it is a new slot or a completed task, this continuation will start right away.
                             newTask = s_pendingOpenNonPooled[idx].ContinueWith((_) =>
                             {
-                                var newConnection = CreateNonPooledConnection(owningConnection, poolGroup, userOptions);
-                                if ((oldConnection != null) && (oldConnection.State == ConnectionState.Open))
+                                Transactions.Transaction originalTransaction = ADP.GetCurrentTransaction();
+                                try
                                 {
-                                    oldConnection.PrepareForReplaceConnection();
-                                    oldConnection.Dispose();
+                                    ADP.SetCurrentTransaction(retry.Task.AsyncState as Transactions.Transaction);
+                                    var newConnection = CreateNonPooledConnection(owningConnection, poolGroup, userOptions);
+                                    if ((oldConnection != null) && (oldConnection.State == ConnectionState.Open))
+                                    {
+                                        oldConnection.PrepareForReplaceConnection();
+                                        oldConnection.Dispose();
+                                    }
+                                    return newConnection;
                                 }
-                                return newConnection;
+                                finally
+                                {
+                                    ADP.SetCurrentTransaction(originalTransaction);
+                                }
                             }, cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, TaskScheduler.Default);
 
                             // Place this new task in the slot so any future work will be queued behind it
@@ -539,6 +547,36 @@ namespace System.Data.ProviderBase
         virtual protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
         {
             return CreateConnection(options, poolKey, poolGroupProviderInfo, pool, owningConnection);
+        }
+
+        internal DbMetaDataFactory GetMetaDataFactory(DbConnectionPoolGroup connectionPoolGroup, DbConnectionInternal internalConnection)
+        {
+            Debug.Assert(connectionPoolGroup != null, "connectionPoolGroup may not be null.");
+
+            // get the matadatafactory from the pool entry. If it does not already have one
+            // create one and save it on the pool entry
+            DbMetaDataFactory metaDataFactory = connectionPoolGroup.MetaDataFactory;
+
+            // consider serializing this so we don't construct multiple metadata factories
+            // if two threads happen to hit this at the same time.  One will be GC'd
+            if (metaDataFactory == null)
+            {
+                bool allowCache = false;
+                metaDataFactory = CreateMetaDataFactory(internalConnection, out allowCache);
+                if (allowCache)
+                {
+                    connectionPoolGroup.MetaDataFactory = metaDataFactory;
+                }
+            }
+            return metaDataFactory;
+        }
+
+        protected virtual DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
+        {
+            // providers that support GetSchema must override this with a method that creates a meta data
+            // factory appropriate for them.
+            cacheMetaDataFactory = false;
+            throw ADP.NotSupported();
         }
 
         abstract protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection);

@@ -20,11 +20,12 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlDateTime : INullable, IComparable, IXmlSerializable
     {
-        private bool _fNotNull;    // false if null
-        private int _day;      // Day from 1900/1/1, could be negative. Range: Jan 1 1753 - Dec 31 9999.
-        private int _time;     // Time in the day in term of ticks
+        private bool m_fNotNull;    // false if null. Do not rename (binary serialization)
+        private int m_day;      // Day from 1900/1/1, could be negative. Range: Jan 1 1753 - Dec 31 9999. Do not rename (binary serialization)
+        private int m_time;     // Time in the day in term of ticks. Do not rename (binary serialization)
 
         // Constants
 
@@ -80,9 +81,9 @@ namespace System.Data.SqlTypes
         // construct a Null
         private SqlDateTime(bool fNull)
         {
-            _fNotNull = false;
-            _day = 0;
-            _time = 0;
+            m_fNotNull = false;
+            m_day = 0;
+            m_time = 0;
         }
 
         public SqlDateTime(DateTime value)
@@ -147,18 +148,17 @@ namespace System.Data.SqlTypes
         {
         }
 
-
         public SqlDateTime(int dayTicks, int timeTicks)
         {
             if (dayTicks < s_minDay || dayTicks > s_maxDay || timeTicks < s_minTime || timeTicks > s_maxTime)
             {
-                _fNotNull = false;
+                m_fNotNull = false;
                 throw new OverflowException(SQLResource.DateTimeOverflowMessage);
             }
 
-            _day = dayTicks;
-            _time = timeTicks;
-            _fNotNull = true;
+            m_day = dayTicks;
+            m_time = timeTicks;
+            m_fNotNull = true;
         }
 
         internal SqlDateTime(double dblVal)
@@ -192,18 +192,16 @@ namespace System.Data.SqlTypes
             this = new SqlDateTime(day, time);
         }
 
-
         // INullable
         public bool IsNull
         {
-            get { return !_fNotNull; }
+            get { return !m_fNotNull; }
         }
-
 
         private static TimeSpan ToTimeSpan(SqlDateTime value)
         {
-            long millisecond = (long)(value._time / s_SQLTicksPerMillisecond + 0.5);
-            return new TimeSpan(value._day * TimeSpan.TicksPerDay +
+            long millisecond = (long)(value.m_time / s_SQLTicksPerMillisecond + 0.5);
+            return new TimeSpan(value.m_day * TimeSpan.TicksPerDay +
                                 millisecond * TimeSpan.TicksPerMillisecond);
         }
 
@@ -293,7 +291,7 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
+                if (m_fNotNull)
                     return ToDateTime(this);
                 else
                     throw new SqlNullValueException();
@@ -305,8 +303,8 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
-                    return _day;
+                if (m_fNotNull)
+                    return m_day;
                 else
                     throw new SqlNullValueException();
             }
@@ -317,8 +315,8 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
-                    return _time;
+                if (m_fNotNull)
+                    return m_time;
                 else
                     throw new SqlNullValueException();
             }
@@ -511,7 +509,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlDateTime x, SqlDateTime y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._day == y._day && x._time == y._time);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_day == y.m_day && x.m_time == y.m_time);
         }
 
         public static SqlBoolean operator !=(SqlDateTime x, SqlDateTime y)
@@ -522,25 +520,25 @@ namespace System.Data.SqlTypes
         public static SqlBoolean operator <(SqlDateTime x, SqlDateTime y)
         {
             return (x.IsNull || y.IsNull) ? SqlBoolean.Null :
-                new SqlBoolean(x._day < y._day || (x._day == y._day && x._time < y._time));
+                new SqlBoolean(x.m_day < y.m_day || (x.m_day == y.m_day && x.m_time < y.m_time));
         }
 
         public static SqlBoolean operator >(SqlDateTime x, SqlDateTime y)
         {
             return (x.IsNull || y.IsNull) ? SqlBoolean.Null :
-                new SqlBoolean(x._day > y._day || (x._day == y._day && x._time > y._time));
+                new SqlBoolean(x.m_day > y.m_day || (x.m_day == y.m_day && x.m_time > y.m_time));
         }
 
         public static SqlBoolean operator <=(SqlDateTime x, SqlDateTime y)
         {
             return (x.IsNull || y.IsNull) ? SqlBoolean.Null :
-                new SqlBoolean(x._day < y._day || (x._day == y._day && x._time <= y._time));
+                new SqlBoolean(x.m_day < y.m_day || (x.m_day == y.m_day && x.m_time <= y.m_time));
         }
 
         public static SqlBoolean operator >=(SqlDateTime x, SqlDateTime y)
         {
             return (x.IsNull || y.IsNull) ? SqlBoolean.Null :
-                new SqlBoolean(x._day > y._day || (x._day == y._day && x._time >= y._time));
+                new SqlBoolean(x.m_day > y.m_day || (x.m_day == y.m_day && x.m_time >= y.m_time));
         }
 
         //--------------------------------------------------
@@ -653,7 +651,7 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _fNotNull = false;
+                m_fNotNull = false;
             }
             else
             {
@@ -668,9 +666,9 @@ namespace System.Data.SqlTypes
                 }
 
                 SqlDateTime st = FromDateTime(dt);
-                _day = st.DayTicks;
-                _time = st.TimeTicks;
-                _fNotNull = true;
+                m_day = st.DayTicks;
+                m_time = st.TimeTicks;
+                m_fNotNull = true;
             }
         }
 

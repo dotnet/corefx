@@ -8,7 +8,6 @@
 
 namespace System.Diagnostics.Tracing
 {
-#if !netfx
     [System.FlagsAttribute]
     public enum EventActivityOptions
     {
@@ -55,12 +54,10 @@ namespace System.Diagnostics.Tracing
         public bool DisableEvent(int eventId) { throw null; }
         public bool EnableEvent(int eventId) { throw null; }
     }
-#endif // !netfx
     public class EventCounter {
         public EventCounter(string name, EventSource eventSource) { }
         public void WriteMetric(float value) { }
     }
-#if !netfx
     [System.AttributeUsageAttribute((System.AttributeTargets)(12), Inherited = false)]
     public partial class EventDataAttribute : System.Attribute
     {
@@ -119,6 +116,10 @@ namespace System.Diagnostics.Tracing
     }
     public abstract partial class EventListener : System.IDisposable
     {
+#if FEATURE_ETLEVENTS
+        public event EventHandler<EventSourceCreatedEventArgs> EventSourceCreated;
+        public event EventHandler<EventWrittenEventArgs> EventWritten;
+#endif
         protected EventListener() { }
         public void DisableEvents(System.Diagnostics.Tracing.EventSource eventSource) { }
         public virtual void Dispose() { }
@@ -127,7 +128,11 @@ namespace System.Diagnostics.Tracing
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword, System.Collections.Generic.IDictionary<string, string> arguments) { }
         protected static int EventSourceIndex(System.Diagnostics.Tracing.EventSource eventSource) { throw null; }
         protected internal virtual void OnEventSourceCreated(System.Diagnostics.Tracing.EventSource eventSource) { }
+#if FEATURE_ETLEVENTS
+        protected internal virtual void OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs eventData) { }
+#else
         protected internal abstract void OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs eventData);
+#endif
     }
     [System.FlagsAttribute]
     public enum EventManifestOptions
@@ -230,6 +235,13 @@ namespace System.Diagnostics.Tracing
         public string LocalizationResources { get { throw null; } set { } }
         public string Name { get { throw null; } set { } }
     }
+#if FEATURE_ETLEVENTS
+    public class EventSourceCreatedEventArgs : EventArgs
+    {
+        public EventSourceCreatedEventArgs() { }
+        public EventSource EventSource { get; }
+    }
+#endif
     public partial class EventSourceException : System.Exception
     {
         public EventSourceException() { }
@@ -287,5 +299,4 @@ namespace System.Diagnostics.Tracing
     {
         public NonEventAttribute() { }
     }
-#endif // !netfx
 }

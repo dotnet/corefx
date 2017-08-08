@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public abstract class ArraySegment_Tests<T>: IList_Generic_Tests<T>
+    public abstract partial class ArraySegment_Tests<T> : IList_Generic_Tests<T>
     {
         #region IList<T> Helper Methods
 
@@ -85,8 +85,8 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("array", () => new ArraySegment<T>(null, -1, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => new ArraySegment<T>(new T[10], -1, 0)); // Offset < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => new ArraySegment<T>(new T[10], 0, -1)); // Count < 0
-            Assert.Throws<ArgumentException>(null, () => new ArraySegment<T>(new T[10], 10, 1)); // Offset + count > array.Length
-            Assert.Throws<ArgumentException>(null, () => new ArraySegment<T>(new T[10], 9, 2)); // Offset + count > array.Length
+            AssertExtensions.Throws<ArgumentException>(null, () => new ArraySegment<T>(new T[10], 10, 1)); // Offset + count > array.Length
+            AssertExtensions.Throws<ArgumentException>(null, () => new ArraySegment<T>(new T[10], 9, 2)); // Offset + count > array.Length
         }
     }
 
@@ -112,7 +112,7 @@ namespace System.Tests
     }
 
 
-    public static class ArraySegment_Tests
+    public static partial class ArraySegment_Tests
     {
         public static IEnumerable<object[]> Equals_TestData()
         {

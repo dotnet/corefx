@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
-#if !uapaot
+#if !FEATURE_SERIALIZATION_UAPAOT
 #if XMLSERIALIZERGENERATOR
 namespace Microsoft.XmlSerializer.Generator
 #else
@@ -845,8 +845,22 @@ namespace System.Xml.Serialization
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     default:
-                        Debug.Assert(false, "UnknownConstantType");
-                        throw new NotSupportedException(SR.Format(SR.UnknownConstantType, valueType.AssemblyQualifiedName));
+                        if (valueType == typeof(TimeSpan))
+                        {
+                            ConstructorInfo TimeSpan_ctor = typeof(TimeSpan).GetConstructor(
+                            CodeGenerator.InstanceBindingFlags,
+                            null,
+                            new Type[] { typeof(Int64) },
+                            null
+                            );
+                            Ldc(((TimeSpan)o).Ticks); // ticks
+                            New(TimeSpan_ctor);
+                            break;
+                        }
+                        else
+                        {
+                            throw new NotSupportedException(SR.Format(SR.UnknownConstantType, valueType.AssemblyQualifiedName));
+                        }
                 }
             }
         }

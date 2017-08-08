@@ -149,10 +149,9 @@ namespace System.Net.Sockets
                 innerSocket.LogRemainingOperations();
 #endif
 
+                InnerReleaseHandle();
                 innerSocket.DangerousRelease();
             }
-
-            InnerReleaseHandle();
 
             return true;
         }
@@ -178,11 +177,12 @@ namespace System.Net.Sockets
                         sw.SpinOnce();
                     }
 
+                    InnerReleaseHandle();
+
                     // Now free it with blocking.
                     innerSocket.BlockingRelease();
                 }
 
-                InnerReleaseHandle();
 #if DEBUG
             }
             catch (Exception exception) when (!ExceptionCheck.IsFatal(exception))

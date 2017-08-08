@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class CreateFileTests : IsoStorageTest
     {
         [Fact]
@@ -18,12 +19,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateFile_ThrowsIsolatedStorageException()
+        public void CreateRemovedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.CreateFile("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.CreateFile("foo"));
             }
         }
 
@@ -39,7 +40,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateFile_ThrowsInvalidOperationException()
+        public void CreateClosedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -53,11 +54,12 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CreateFile("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CreateFile("\0bad"));
             }
         }
 
         [Theory MemberData(nameof(ValidStores))]
+        [ActiveIssue("dotnet/corefx #18268", TargetFrameworkMonikers.NetFramework)]
         public void CreateFile_Existence(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

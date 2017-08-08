@@ -130,34 +130,6 @@ Returns the requested SSL_METHOD.
 extern "C" const SSL_METHOD* CryptoNative_SslV2_3Method();
 
 /*
-Shims the SSLv3_method method.
-
-Returns the requested SSL_METHOD.
-*/
-extern "C" const SSL_METHOD* CryptoNative_SslV3Method();
-
-/*
-Shims the TLSv1_method method.
-
-Returns the requested SSL_METHOD.
-*/
-extern "C" const SSL_METHOD* CryptoNative_TlsV1Method();
-
-/*
-Shims the TLSv1_1_method method.
-
-Returns the requested SSL_METHOD.
-*/
-extern "C" const SSL_METHOD* CryptoNative_TlsV1_1Method();
-
-/*
-Shims the TLSv1_2_method method.
-
-Returns the requested SSL_METHOD.
-*/
-extern "C" const SSL_METHOD* CryptoNative_TlsV1_2Method();
-
-/*
 Shims the SSL_CTX_new method.
 
 Returns the new SSL_CTX instance.
@@ -330,6 +302,11 @@ extern "C" int32_t CryptoNative_SslCtxCheckPrivateKey(SSL_CTX* ctx);
 Shims the SSL_CTX_set_quiet_shutdown method.
 */
 extern "C" void CryptoNative_SslCtxSetQuietShutdown(SSL_CTX* ctx);
+
+/*
+Shims the SSL_set_quiet_shutdown method.
+*/
+extern "C" void CryptoNative_SslSetQuietShutdown(SSL* ctx, int mode);
 
 /*
 Shims the SSL_get_client_CA_list method.

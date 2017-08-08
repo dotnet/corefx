@@ -44,9 +44,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             get
             {
-#if uap
-                yield break;
-#else
                 yield return new object[] {
                     TestData.ECDsabrainpoolP160r1_CertificatePemBytes,
                     "9145C79DD4DF758EB377D13B0DB81F83CE1A63A4099DDC32FE228B06EB1F306423ED61B6B4AF4691".HexToByteArray() };
@@ -54,7 +51,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 yield return new object[] {
                     TestData.ECDsabrainpoolP160r1_ExplicitCertificatePemBytes,
                     "6D74F1C9BCBBA5A25F67E670B3DABDB36C24E8FAC3266847EB2EE7E3239208ADC696BB421AB380B4".HexToByteArray() };
-#endif
             }
         }
 
@@ -335,8 +331,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 // Windows 7, Windows 8, Ubuntu 14, CentOS can fail. Verify known good platforms don't fail.
                 Assert.False(PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10);
-                Assert.False(PlatformDetection.IsUbuntu1604);
-                Assert.False(PlatformDetection.IsUbuntu1610);
+                Assert.False(PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404);
             }
         }
 
@@ -426,8 +421,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 // Windows 7, Windows 8, Ubuntu 14, CentOS can fail. Verify known good platforms don't fail.
                 Assert.False(PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10);
-                Assert.False(PlatformDetection.IsUbuntu1604);
-                Assert.False(PlatformDetection.IsUbuntu1610);
+                Assert.False(PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404);
             }
         }
 
@@ -480,8 +474,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-
-#if netcoreapp
+        
         [Fact]
         public static void TestDSAPublicKey()
         {
@@ -531,7 +524,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(pubKey);
             }
         }
-#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
@@ -566,7 +558,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         private static void TestKey_ECDsaCng(byte[] certBytes, TestData.ECDsaCngKeyValues expected)
         {
-#if !uap
             using (X509Certificate2 cert = new X509Certificate2(certBytes))
             {
                 ECDsaCng e = (ECDsaCng)(cert.GetECDsaPublicKey());
@@ -584,7 +575,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.Equal<byte>(expected.QY, qy);
                 }
             }
-#endif // !uap
         }
     }
 }

@@ -5,12 +5,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using Xunit;
 
 namespace System.Tests
 {
-    public static partial class EnumTests
+    public partial class EnumTests
     {
         public static IEnumerable<object[]> Parse_TestData()
         {
@@ -141,7 +140,7 @@ namespace System.Tests
             yield return new object[] { typeof(SimpleEnum), "1,Blue", false, typeof(ArgumentException) };
             yield return new object[] { typeof(SimpleEnum), "Blue,1", false, typeof(ArgumentException) };
             yield return new object[] { typeof(SimpleEnum), "Blue, 1", false, typeof(ArgumentException) };
-            yield return new object[] { typeof(SimpleEnum), "2147483649", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "2147483649", false, typeof(OverflowException) };
             yield return new object[] { typeof(SimpleEnum), "2147483648", false, typeof(OverflowException) };
 
 #if netcoreapp
@@ -341,7 +340,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("enumType", () => Enum.GetName(null, 1)); // Enum type is null
             AssertExtensions.Throws<ArgumentNullException>("value", () => Enum.GetName(t, null)); // Value is null
 
-            Assert.Throws<ArgumentException>(null, () => Enum.GetName(typeof(object), 1)); // Enum type is not an enum
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.GetName(typeof(object), 1)); // Enum type is not an enum
             AssertExtensions.Throws<ArgumentException>("value", () => Enum.GetName(t, "Red")); // Value is not the type of the enum's raw data
             AssertExtensions.Throws<ArgumentException>("value", () => Enum.GetName(t, (IntPtr)0)); // Value is out of range
         }
@@ -365,6 +364,21 @@ namespace System.Tests
             //      - signed ints sign-extended to 64-bits
             // Then comparison is done on all 64 bits.
             Assert.Equal(expected, Enum.GetName(enumType, value));
+        }
+
+        [Theory]
+        [InlineData(SimpleEnum.Blue, TypeCode.Int32)]
+        [InlineData(ByteEnum.Max, TypeCode.Byte)]
+        [InlineData(SByteEnum.Min, TypeCode.SByte)]
+        [InlineData(UInt16Enum.Max, TypeCode.UInt16)]
+        [InlineData(Int16Enum.Min, TypeCode.Int16)]
+        [InlineData(UInt32Enum.Max, TypeCode.UInt32)]
+        [InlineData(Int32Enum.Min, TypeCode.Int32)]
+        [InlineData(UInt64Enum.Max, TypeCode.UInt64)]
+        [InlineData(Int64Enum.Min, TypeCode.Int64)]
+        public static void GetTypeCode_Enum_ReturnsExpected(Enum e, TypeCode expected)
+        {
+            Assert.Equal(expected, e.GetTypeCode());
         }
 
         public static IEnumerable<object[]> IsDefined_TestData()
@@ -470,11 +484,11 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("enumType", () => Enum.IsDefined(null, 1)); // Enum type is null
             AssertExtensions.Throws<ArgumentNullException>("value", () => Enum.IsDefined(t, null)); // Value is null
 
-            Assert.Throws<ArgumentException>(null, () => Enum.IsDefined(t, Int32Enum.One)); // Value is different enum type
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.IsDefined(t, Int32Enum.One)); // Value is different enum type
 
             // Value is not a valid type (MSDN claims this should throw InvalidOperationException)
-            Assert.Throws<ArgumentException>(null, () => Enum.IsDefined(t, true));
-            Assert.Throws<ArgumentException>(null, () => Enum.IsDefined(t, 'a'));
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.IsDefined(t, true));
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.IsDefined(t, 'a'));
 
             // Non-integers throw InvalidOperationException prior to Win8P.
             Assert.Throws<InvalidOperationException>(() => Enum.IsDefined(t, (IntPtr)0));
@@ -621,7 +635,7 @@ namespace System.Tests
         public static void HasFlag_Invalid()
         {
             AssertExtensions.Throws<ArgumentNullException>("flag", () => Int32Enum.One.HasFlag(null)); // Flag is null
-            Assert.Throws<ArgumentException>(null, () => Int32Enum.One.HasFlag((SimpleEnum)0x3000)); // Enum is not the same type as the instance
+            AssertExtensions.Throws<ArgumentException>(null, () => Int32Enum.One.HasFlag((SimpleEnum)0x3000)); // Enum is not the same type as the instance
         }
 
         public static IEnumerable<object[]> ToObject_TestData()
@@ -732,8 +746,12 @@ namespace System.Tests
         [MemberData(nameof(ToObject_InvalidValue_TestData))]
         public static void ToObject_InvalidValue_ThrowsException(Type enumType, object value, Type exceptionType)
         {
-            ArgumentException ex = (ArgumentException)Assert.Throws(exceptionType, () => Enum.ToObject(enumType, value));
-            Assert.Equal("value", ex.ParamName);
+            if (exceptionType == typeof(ArgumentNullException))
+                AssertExtensions.Throws<ArgumentNullException>("value", () => Enum.ToObject(enumType, value));
+            else if (exceptionType == typeof(ArgumentException))
+                AssertExtensions.Throws<ArgumentException>("value", () => Enum.ToObject(enumType, value));
+            else
+                throw new Exception($"Unexpected exception type in {nameof(ToObject_InvalidValue_TestData)} : {exceptionType}");
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -961,8 +979,8 @@ namespace System.Tests
         [Fact]
         public static void CompareTo_ObjectNotEnum_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo((sbyte)1)); // Target is not an enum type
-            Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo(Int32Enum.One)); // Target is a different enum type
+            AssertExtensions.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo((sbyte)1)); // Target is not an enum type
+            AssertExtensions.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo(Int32Enum.One)); // Target is a different enum type
         }
 
         public static IEnumerable<object[]> GetUnderlyingType_TestData()
@@ -1435,25 +1453,30 @@ namespace System.Tests
             yield return new object[] { AttributeTargets.Class | AttributeTargets.Delegate, "G", "Class, Delegate" };
         }
 
+#pragma warning disable 618 // ToString with IFormatProvider is marked as Obsolete.
         [Theory]
         [MemberData(nameof(ToString_Format_TestData))]
         public static void ToString_Format(Enum e, string format, string expected)
         {
             if (format.ToUpperInvariant() == "G")
             {
-                string nullString = null;
-
                 Assert.Equal(expected, e.ToString());
-                Assert.Equal(expected, e.ToString(""));
-                Assert.Equal(expected, e.ToString(nullString));
+                Assert.Equal(expected, e.ToString(string.Empty));
+                Assert.Equal(expected, e.ToString((string)null));
+
+                Assert.Equal(expected, e.ToString((IFormatProvider)null));
             }
-            // Format string is non-case-sensitive
+
+            // Format string is case-insensitive.
             Assert.Equal(expected, e.ToString(format));
             Assert.Equal(expected, e.ToString(format.ToUpperInvariant()));
             Assert.Equal(expected, e.ToString(format.ToLowerInvariant()));
 
+            Assert.Equal(expected, e.ToString(format, (IFormatProvider)null));
+
             Format(e.GetType(), e, format, expected);
         }
+#pragma warning restore 618
 
         [Fact]
         public static void ToString_Format_MultipleMatches()
@@ -1505,10 +1528,10 @@ namespace System.Tests
 
             AssertExtensions.Throws<ArgumentException>("enumType", () => Enum.Format(typeof(object), 1, "F")); // Enum type is not an enum type
 
-            Assert.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), (Int32Enum)1, "F")); // Value is of the wrong enum type
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), (Int32Enum)1, "F")); // Value is of the wrong enum type
 
-            Assert.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), (short)1, "F")); // Value is of the wrong integral
-            Assert.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), "Red", "F")); // Value is of the wrong integral
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), (short)1, "F")); // Value is of the wrong integral
+            AssertExtensions.Throws<ArgumentException>(null, () => Enum.Format(typeof(SimpleEnum), "Red", "F")); // Value is of the wrong integral
 
             Assert.Throws<FormatException>(() => Enum.Format(typeof(SimpleEnum), SimpleEnum.Red, "")); // Format is empty
             Assert.Throws<FormatException>(() => Enum.Format(typeof(SimpleEnum), SimpleEnum.Red, "   \t")); // Format is whitespace
