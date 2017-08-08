@@ -186,14 +186,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // A description of a method the compiler uses while compiling.
     internal sealed class PredefinedPropertyInfo
     {
-        public PREDEFPROP property;
-        public PredefinedName name;
-        public PREDEFMETH getter;
+        public readonly PREDEFPROP property;
+        public readonly string Name;
+        public readonly PREDEFMETH getter;
 
-        public PredefinedPropertyInfo(PREDEFPROP property, PredefinedName name, PREDEFMETH getter)
+        public PredefinedPropertyInfo(PREDEFPROP property, string name, PREDEFMETH getter)
         {
             this.property = property;
-            this.name = name;
+            Name = name;
             this.getter = getter;
         }
     };
@@ -260,10 +260,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         GetPropGetter(property));
         }
 
-        private string GetPropName(PREDEFPROP property)
-        {
-            return GetPredefName(GetPropPredefName(property));
-        }
+        private string GetPropName(PREDEFPROP property) => GetPropInfo(property).Name;
+
         private PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
             string propertyName,
@@ -516,11 +514,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static readonly int[] s_DelegateCtorSignature1 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_INTPTR };
         private static readonly int[] s_DelegateCtorSignature2 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_UINTPTR };
 
-        private static PredefinedName GetPropPredefName(PREDEFPROP property)
-        {
-            return GetPropInfo(property).name;
-        }
-
         private static PREDEFMETH GetPropGetter(PREDEFPROP property)
         {
             PREDEFMETH result = GetPropInfo(property).getter;
@@ -539,7 +532,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // the list of predefined property definitions.
         // This list must be in the same order as the PREDEFPROP enum.
         private static readonly PredefinedPropertyInfo[] s_predefinedProperties = {
-            new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  PredefinedName.PN_CAP_VALUE,    PREDEFMETH.PM_G_OPTIONAL_GETVALUE)
+            new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  "Value",    PREDEFMETH.PM_G_OPTIONAL_GETVALUE)
         };
 
         private static PredefinedPropertyInfo GetPropInfo(PREDEFPROP property)
