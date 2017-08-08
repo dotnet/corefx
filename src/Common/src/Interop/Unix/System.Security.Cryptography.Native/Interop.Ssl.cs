@@ -298,7 +298,7 @@ namespace Microsoft.Win32.SafeHandles
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
                 Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
-                Interop.Crypto.BioSetFlags(bioHandle, Interop.Crypto.BIO_FLAGS.BIO_FLAGS_READ | Interop.Crypto.BIO_FLAGS.BIO_FLAGS_SHOULD_RETRY);
+                Interop.Crypto.BioSetShoudRetryReadFlag(bioHandle);
             }
 
             public void SetBio(byte[] buffer, int offset, int length)
@@ -311,7 +311,8 @@ namespace Microsoft.Win32.SafeHandles
             public int Read(Span<byte> output)
             {
                 var bytesToCopy = Math.Min(output.Length, _bytesAvailable);
-                if (bytesToCopy == 0) return -1;
+                if (bytesToCopy == 0)
+                    return -1;
                 var span = new Span<byte>(_byteArray, _offset, bytesToCopy);
                 span.CopyTo(output);
                 _offset += bytesToCopy;
@@ -390,7 +391,7 @@ namespace Microsoft.Win32.SafeHandles
                 var bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
-                    Interop.Crypto.BioSetFlags(_bioHandle, Interop.Crypto.BIO_FLAGS.BIO_FLAGS_WRITE);
+                    Interop.Crypto.BioSetWriteFlag(_bioHandle);
                     return -1;
                 }
                 input.Slice(0, bytesToWrite).CopyTo(new Span<byte>(_byteArray, _bytesWritten));

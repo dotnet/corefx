@@ -70,6 +70,11 @@ Gets app data from the extension slot of the bio
 extern "C" void* CryptoNative_BioGetAppData(BIO* bio);
 
 /*
-Shims the Set flags for the custom bio
+Set write flag for the custom bio
 */
-extern "C" void CryptoNative_BioSetFlags(BIO* bio, int32_t flags);
+extern "C" void CryptoNative_BioSetWriteFlag(BIO* bio);
+
+/*
+Set the read and should retry flag for the custom bio
+*/
+extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio);

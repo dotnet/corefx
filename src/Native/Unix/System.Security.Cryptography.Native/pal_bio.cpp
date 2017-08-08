@@ -68,7 +68,18 @@ extern "C" void* CryptoNative_BioGetAppData(BIO* bio)
     return BIO_get_ex_data(bio, 0);
 }
 
-extern "C" void CryptoNative_BioSetFlags(BIO* bio, int32_t flags)
+/*
+Set write flag for the custom bio
+*/
+extern "C" void CryptoNative_BioSetWriteFlag(BIO* bio)
 {
-    BIO_set_flags(bio, flags);
+    BIO_set_flags(bio, BIO_FLAGS_SHOULD_RETRY | BIO_FLAGS_READ);
+}
+
+/*
+Set the read and should retry flag for the custom bio
+*/
+extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio)
+{
+    BIO_set_flags(bio, BIO_FLAGS_WRITE);
 }

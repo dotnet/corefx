@@ -45,20 +45,12 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioGetAppData")]
         internal static extern IntPtr BioGetAppData(IntPtr bio);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetFlags")]
-        internal static extern IntPtr BioSetFlags(SafeBioHandle bio, BIO_FLAGS flags);
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetWriteFlag")]
+        internal static extern void BioSetWriteFlag(SafeBioHandle bio);
 
-        [Flags]
-        internal enum BIO_FLAGS
-        {
-            BIO_FLAGS_NONE = 0x0,
-            BIO_FLAGS_READ = 0x01,
-            BIO_FLAGS_WRITE = 0x02,
-            BIO_FLAGS_IO_SPECIAL = 0x04,
-            BIO_FLAGS_RWS = (BIO_FLAGS_READ | BIO_FLAGS_WRITE | BIO_FLAGS_IO_SPECIAL),
-            BIO_FLAGS_SHOULD_RETRY = 0x08,
-        }
-
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetShoudRetryReadFlag")]
+        internal static extern void BioSetShoudRetryReadFlag(SafeBioHandle bio);
+        
         internal enum BIO_CTRL
         {
             BIO_CTRL_RESET = 1,/* opt - rewind/zero etc */
