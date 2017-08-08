@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics.Hashing;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Diagnostics;
@@ -237,7 +238,7 @@ namespace System.Composition.TypedParts.Discovery
 
             public int GetHashCode(ParameterInfo obj)
             {
-                return obj.Position.GetHashCode();
+                return HashHelpers.Combine(obj.Position.GetHashCode(),  obj.Member.GetHashCode());
             }
 
             public bool Equals(ParameterInfo x, ParameterInfo y)
@@ -257,7 +258,7 @@ namespace System.Composition.TypedParts.Discovery
                     return false;
                 }
 
-                if (!ReferenceEquals(x.Member, y.Member))
+                if (x.Member != y.Member)
                 {
                     return false;
                 }
