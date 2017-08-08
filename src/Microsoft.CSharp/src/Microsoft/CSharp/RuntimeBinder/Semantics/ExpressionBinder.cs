@@ -2057,40 +2057,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        private static readonly PredefinedName[] s_EK2NAME =
+        private static readonly string[] s_expressionKindOperatorNames =
         {
-            PredefinedName.PN_OPEQUALS,
-            PredefinedName.PN_OPCOMPARE,
-            PredefinedName.PN_OPTRUE,
-            PredefinedName.PN_OPFALSE,
-            PredefinedName.PN_OPINCREMENT,
-            PredefinedName.PN_OPDECREMENT,
-            PredefinedName.PN_OPNEGATION,
-            PredefinedName.PN_OPEQUALITY,
-            PredefinedName.PN_OPINEQUALITY,
-            PredefinedName.PN_OPLESSTHAN,
-            PredefinedName.PN_OPLESSTHANOREQUAL,
-            PredefinedName.PN_OPGREATERTHAN,
-            PredefinedName.PN_OPGREATERTHANOREQUAL,
-            PredefinedName.PN_OPPLUS,
-            PredefinedName.PN_OPMINUS,
-            PredefinedName.PN_OPMULTIPLY,
-            PredefinedName.PN_OPDIVISION,
-            PredefinedName.PN_OPMODULUS,
-            PredefinedName.PN_OPUNARYMINUS,
-            PredefinedName.PN_OPUNARYPLUS,
-            PredefinedName.PN_OPBITWISEAND,
-            PredefinedName.PN_OPBITWISEOR,
-            PredefinedName.PN_OPXOR,
-            PredefinedName.PN_OPCOMPLEMENT,
-            PredefinedName.PN_OPLEFTSHIFT,
-            PredefinedName.PN_OPRIGHTSHIFT,
+            "op_Equals",
+            "op_Compare",
+            "op_True",
+            "op_False",
+            "op_Increment",
+            "op_Decrement",
+            "op_LogicalNot",
+            "op_Equality",
+            "op_Inequality",
+            "op_LessThan",
+            "op_LessThanOrEqual",
+            "op_GreaterThan",
+            "op_GreaterThanOrEqual",
+            "op_Addition",
+            "op_Subtraction",
+            "op_Multiply",
+            "op_Division",
+            "op_Modulus",
+            "op_UnaryNegation",
+            "op_UnaryPlus",
+            "op_BitwiseAnd",
+            "op_BitwiseOr",
+            "op_ExclusiveOr",
+            "op_OnesComplement",
+            "op_LeftShift",
+            "op_RightShift"
         };
 
         private string ekName(ExpressionKind ek)
         {
-            Debug.Assert(ek >= ExpressionKind.FirstOp && (ek - ExpressionKind.FirstOp) < (int)s_EK2NAME.Length);
-            return NameManager.GetPredefinedName(s_EK2NAME[ek - ExpressionKind.FirstOp]);
+            Debug.Assert(ek >= ExpressionKind.FirstOp && ek - ExpressionKind.FirstOp < s_expressionKindOperatorNames.Length);
+            return s_expressionKindOperatorNames[ek - ExpressionKind.FirstOp];
         }
 
         private void checkUnsafe(CType type)
