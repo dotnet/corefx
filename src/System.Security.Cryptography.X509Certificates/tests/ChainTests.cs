@@ -14,7 +14,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     public static class ChainTests
     {
         internal static bool CanModifyStores { get; } = TestEnvironmentConfiguration.CanModifyStores;
-        internal static bool CanBuildSelfSignedChainReliably { get; } = !PlatformDetection.IsMacOsHighSierra;
 
         private static bool TrustsMicrosoftDotComRoot
         {
@@ -165,7 +164,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(IntPtr.Zero, chain.ChainContext);
         }
 
-        [ConditionalFact(nameof(CanBuildSelfSignedChainReliably))]
+        [Fact]
         public static void TestResetMethod()
         {
             using (var sampleCert = new X509Certificate2(TestData.DssCer))
