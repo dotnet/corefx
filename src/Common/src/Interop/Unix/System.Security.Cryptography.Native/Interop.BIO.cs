@@ -35,10 +35,7 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioCtrlPending")]
         internal static extern int BioCtrlPending(SafeBioHandle bio);
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CreateCustomBio")]
-        internal static extern SafeBioHandle CreateCustomBio();
-
+        
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetAppData")]
         internal static extern void BioSetAppData(SafeBioHandle bio, IntPtr data);
 

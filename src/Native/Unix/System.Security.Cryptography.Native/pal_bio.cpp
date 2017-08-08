@@ -117,7 +117,7 @@ static BIO_METHOD sslStreamCustomBio = {
     nullptr,
 };
 
-extern "C" void CryptoNative_InitCustomBioMethod(BWriteCallback bwrite, BReadCallback bread)
+extern "C" void CryptoNative_InitCustomBioMethod(BioWriteCallback bwrite, BioReadCallback bread)
 {
     sslStreamCustomBio.bwrite = bwrite;
     sslStreamCustomBio.bread = bread;

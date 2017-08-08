@@ -19,6 +19,9 @@ internal static partial class Interop
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate int WriteDelegate(IntPtr bio, void* buf, int num);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CreateCustomBio")]
+        internal static extern SafeBioHandle CreateCustomBio();
+
         static CustomBio() => Initialize();
 
         internal unsafe static void Initialize()
@@ -42,11 +45,17 @@ internal static partial class Interop
 
         internal static void BioSetGCHandle(SafeBioHandle bio, GCHandle handle)
         {
-            var ptr = GCHandle.ToIntPtr(handle);
-            Crypto.BioSetAppData(bio, ptr);
+            IntPtr pointer;
+            if (handle.IsAllocated)
+            {
+                pointer = GCHandle.ToIntPtr(handle);
+            }
+            else
+            {
+                pointer = IntPtr.Zero;
+            }
+            Crypto.BioSetAppData(bio, pointer);
         }
-
-        internal static SafeBioHandle CreateCustomBio() => Crypto.CreateCustomBio();
 
         private static unsafe int Write(IntPtr bio, void* input, int size)
         {
@@ -56,13 +65,13 @@ internal static partial class Interop
             {
                 return buffer.Write(new Span<byte>(input, size));
             }
-
             return -1;
         }
 
         private static unsafe int Read(IntPtr bio, void* output, int size)
         {
             GCHandle handle = BioGetGCHandle(bio);
+
             if (handle.IsAllocated && handle.Target is SafeSslHandle.ReadBioBuffer buffer)
             {
                 return buffer.Read(new Span<byte>(output, size));
