@@ -27,25 +27,18 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             value = BulkCopySqlDecimalToTable(new SqlDecimal(123.45), 10, 2, 4, 1);
             Assert.Equal("123.4", value.ToString());
 
-            try
-            {
-                BulkCopySqlDecimalToTable(new SqlDecimal(111.00), 7, 2, 2, 0);
-                Assert.True(false);
-            }
-            catch (InvalidOperationException) { }
+            Assert.Throws<InvalidOperationException>(() => BulkCopySqlDecimalToTable(new SqlDecimal(111.00), 7, 2, 2, 0));
         }
-
 
         private static SqlDecimal BulkCopySqlDecimalToTable(SqlDecimal decimalValue, int sourcePrecision, int sourceScale, int targetPrecision, int targetScale)
         {
-            string tableName = TestHelper.GenerateTableName();
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
-            string connectionString = builder.ConnectionString;
+            string tableName = DataTestUtility.GenerateTableName();
+            string connectionString = DataTestUtility.TcpConnStr;
 
             SqlDecimal resultValue;
             try
             {
-                TestHelper.RunNonQuery(connectionString, $"create table {tableName} (target_column decimal({targetPrecision}, {targetScale}))");
+                DataTestUtility.RunNonQuery(connectionString, $"create table {tableName} (target_column decimal({targetPrecision}, {targetScale}))");
 
                 SqlDecimal inputValue = SqlDecimal.ConvertToPrecScale(decimalValue, sourcePrecision, sourceScale);
 
@@ -63,12 +56,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     sbc.WriteToServer(dt);
                 }
 
-                DataTable resultTable = TestHelper.RunQuery(connectionString, $"select * from {tableName}");
+                DataTable resultTable = DataTestUtility.RunQuery(connectionString, $"select * from {tableName}");
                 resultValue = new SqlDecimal((Decimal)resultTable.Rows[0][0]);
             }
             finally
             {
-                TestHelper.RunNonQuery(connectionString, $"drop table {tableName}");
+                DataTestUtility.RunNonQuery(connectionString, $"drop table {tableName}");
             }
 
             return resultValue;

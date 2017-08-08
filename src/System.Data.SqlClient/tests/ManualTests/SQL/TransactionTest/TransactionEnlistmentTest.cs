@@ -62,7 +62,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 txScope.Complete();
             }
 
-            DataTable result = TestHelper.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
+            DataTable result = DataTestUtility.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
             Assert.True(result.Rows.Count == 1);
             Assert.True(string.Equals(result.Rows[0][0], InputCol2));
         }
@@ -86,7 +86,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
 
-            DataTable result = TestHelper.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
+            DataTable result = DataTestUtility.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
             Assert.True(result.Rows.Count == 0);
         }
 
@@ -110,7 +110,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
 
-            DataTable result = TestHelper.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
+            DataTable result = DataTestUtility.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
             Assert.True(result.Rows.Count == 0);
         }
 
@@ -133,7 +133,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
 
-            DataTable result = TestHelper.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
+            DataTable result = DataTestUtility.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
             Assert.True(result.Rows.Count == 1);
             Assert.True(string.Equals(result.Rows[0][0], InputCol2));
         }
@@ -159,7 +159,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
 
-            DataTable result = TestHelper.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
+            DataTable result = DataTestUtility.RunQuery(ConnectionString, $"select col2 from {TestTableName} where col1 = {InputCol1}");
             Assert.True(result.Rows.Count == 1);
             Assert.True(string.Equals(result.Rows[0][0], InputCol2));
         }
@@ -190,15 +190,15 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         private static void RunTestFormat(Action testCase)
         {
-            TestTableName = TestHelper.GenerateTableName();
-            TestHelper.RunNonQuery(ConnectionString, $"create table {TestTableName} (col1 int, col2 text)");
+            TestTableName = DataTestUtility.GenerateTableName();
+            DataTestUtility.RunNonQuery(ConnectionString, $"create table {TestTableName} (col1 int, col2 text)");
             try
             {
                 testCase();
             }
             finally
             {
-                TestHelper.RunNonQuery(ConnectionString, $"drop table {TestTableName}");
+                DataTestUtility.RunNonQuery(ConnectionString, $"drop table {TestTableName}");
             }
         }
     }
