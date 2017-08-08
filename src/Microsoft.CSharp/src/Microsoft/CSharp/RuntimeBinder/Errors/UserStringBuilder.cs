@@ -127,7 +127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             ErrAppendString(string.Format(CultureInfo.InvariantCulture, format, args));
         }
-        private void ErrAppendName(Name name)
+        private void ErrAppendName(string name)
         {
             if (name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
             {
@@ -135,7 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
             else
             {
-                ErrAppendString(name.Text);
+                ErrAppendString(name);
             }
         }
 
@@ -604,7 +604,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_VoidType:
-                    ErrAppendName(GetNameManager().Lookup(TokenFacts.GetText(TokenKind.Void)));
+                    ErrAppendName(TokenFacts.GetText(TokenKind.Void));
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
@@ -664,20 +664,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     EndString(out psz);
                     fUserStrings = true;
                     break;
-                case ErrArgKind.Name:
-                    if (parg.name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
+
+                case ErrArgKind.Str:
+                    if (parg.psz == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
                     {
                         psz = "this";
                     }
                     else
                     {
-                        psz = parg.name.Text;
+                        psz = parg.psz;
                     }
                     break;
 
-                case ErrArgKind.Str:
-                    psz = parg.psz;
-                    break;
                 case ErrArgKind.SymWithType:
                     {
                         SubstContext ctx = new SubstContext(parg.swtMemo.ats, null);
@@ -703,11 +701,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
 
             return result;
-        }
-
-        private NameManager GetNameManager()
-        {
-            return m_globalSymbols.GetNameManager();
         }
 
         private TypeManager GetTypeManager()

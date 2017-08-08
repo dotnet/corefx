@@ -484,7 +484,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
             }
 
-            Name pName = NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL);
+            string pName = NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL);
 
             MemberLookup mem = new MemberLookup();
             if (!mem.Lookup(GetSemanticChecker(), type, pObject, ContextForMemberLookup(), pName, 0,
@@ -682,11 +682,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (fieldType != null)
             {
-                Name getOrCreateMethodName =
+                string getOrCreateMethodName =
                     NameManager.GetPredefinedName(PredefinedName.PN_GETORCREATEEVENTREGISTRATIONTOKENTABLE);
                 GetSymbolLoader()
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
+                        getOrCreateMethodName, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
                     GetSymbolLoader()
                         .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
@@ -699,12 +699,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     new MethWithInst(getOrCreatempwi), pResult, getOrCreateGrp, (MemLookFlags)MemLookFlags.None);
 
                 AggregateSymbol fieldTypeSymbol = fieldType.GetOwningAggregate();
-                Name invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
+                string invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.
                 GetSymbolLoader()
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        invocationListName.Text, null, fieldType.AssociatedSystemType);
+                        invocationListName, null, fieldType.AssociatedSystemType);
                 PropertySymbol invocationList =
                     GetSymbolLoader()
                         .LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
@@ -844,7 +844,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal Expr bindUDUnop(ExpressionKind ek, Expr arg)
         {
-            Name pName = ekName(ek);
+            string pName = ekName(ek);
             Debug.Assert(pName != null);
 
             CType typeSrc = arg.Type;
@@ -1588,7 +1588,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         int index = 0;
                         // If we're named, look for the type of the matching name.
-                        foreach (Name i in mostDerivedMethod.ParameterNames)
+                        foreach (string i in mostDerivedMethod.ParameterNames)
                         {
                             if (i == named.Name)
                             {
@@ -2087,7 +2087,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PredefinedName.PN_OPRIGHTSHIFT,
         };
 
-        private Name ekName(ExpressionKind ek)
+        private string ekName(ExpressionKind ek)
         {
             Debug.Assert(ek >= ExpressionKind.FirstOp && (ek - ExpressionKind.FirstOp) < (int)s_EK2NAME.Length);
             return NameManager.GetPredefinedName(s_EK2NAME[ek - ExpressionKind.FirstOp]);

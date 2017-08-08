@@ -102,7 +102,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ArrayType GetArray(CType elementType, int args, bool isSZArray)
         {
-            Name name;
+            string name;
 
             Debug.Assert(args > 0 && args < 32767);
             Debug.Assert(args == 1 || !isSZArray);
@@ -122,7 +122,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     name = NameManager.GetPredefinedName(PredefinedName.PN_ARRAY0 + args);
                     break;
                 default:
-                    name = _BSymmgr.GetNameManager().Add("[X" + args + 1);
+                    name = "[X" + args + 1;
                     break;
             }
 
@@ -159,7 +159,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(agg.GetTypeVars().Count == typeArgs.Count);
 
-            Name name = _BSymmgr.GetNameFromPtrs(typeArgs, atsOuter);
+            string name = _BSymmgr.GetNameFromPtrs(typeArgs, atsOuter);
             Debug.Assert(name != null);
 
             AggregateType pAggregate = _typeTable.LookupAggregate(name, agg);
@@ -244,7 +244,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
-                Name namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
+                string namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
 
                 pPointer = _typeFactory.CreatePointer(namePtr, baseType);
                 pPointer.InitFromParent();
@@ -272,7 +272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                Name pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
+                string pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
 
                 pNullableType = _typeFactory.CreateNullable(pName, pUnderlyingType, _BSymmgr, this);
                 pNullableType.InitFromParent();
@@ -291,7 +291,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ParameterModifierType GetParameterModifier(CType paramType, bool isOut)
         {
-            Name name = NameManager.GetPredefinedName(isOut ? PredefinedName.PN_OUTPARAM : PredefinedName.PN_REFPARAM);
+            string name = NameManager.GetPredefinedName(isOut ? PredefinedName.PN_OUTPARAM : PredefinedName.PN_REFPARAM);
             ParameterModifierType pParamModifier = _typeTable.LookupParameterModifier(name, paramType);
 
             if (pParamModifier == null)
@@ -316,7 +316,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ErrorType GetErrorType(
                 CType pParentType,
                 AssemblyQualifiedNamespaceSymbol pParentNS,
-                Name nameText,
+                string nameText,
                 TypeArray typeArgs)
         {
             Debug.Assert(nameText != null);
@@ -331,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeArgs = BSYMMGR.EmptyTypeArray();
             }
 
-            Name name = _BSymmgr.GetNameFromPtrs(nameText, typeArgs);
+            string name = _BSymmgr.GetNameFromPtrs(nameText, typeArgs);
             Debug.Assert(name != null);
 
             ErrorType pError = null;

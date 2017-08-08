@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private AggregateDeclaration _pContext;
             private TypeArray _pContainingTypes;
             private CType _pQualifyingType;
-            private Name _pName;
+            private string _pName;
             private int _nArity;
             private symbmask_t _mask;
             private EXPRFLAG _flags;
@@ -35,7 +35,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // this may be false if an applicable instance method was found by bindgrptoArgs
             private bool _bcanIncludeExtensionsInResults;
 
-            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType @object, CType qualifyingType, AggregateDeclaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, symbmask_t mask)
+            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, string name, TypeArray containingTypes, CType @object, CType qualifyingType, AggregateDeclaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, symbmask_t mask)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(symLoader != null);

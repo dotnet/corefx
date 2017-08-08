@@ -25,7 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         // Members from the managed binder.
         private readonly SYMTBL _symbolTable;
         private readonly SymFactory _symFactory;
-        private readonly NameManager _nameManager;
         private readonly TypeManager _typeManager;
         private readonly BSYMMGR _bsymmgr;
         private readonly CSemanticChecker _semanticChecker;
@@ -67,14 +66,12 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal SymbolTable(
             SYMTBL symTable,
             SymFactory symFactory,
-            NameManager nameManager,
             TypeManager typeManager,
             BSYMMGR bsymmgr,
             CSemanticChecker semanticChecker)
         {
             _symbolTable = symTable;
             _symFactory = symFactory;
-            _nameManager = nameManager;
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
             _semanticChecker = semanticChecker;
@@ -340,14 +337,14 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region GetName
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Name GetName(string p)
+        private string GetName(string p)
         {
-            return _nameManager.Add(p ?? "");
+            return p ?? "";
         }
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Name GetName(Type type)
+        private string GetName(Type type)
         {
             string name = type.Name;
             if (type.IsGenericType)
@@ -355,11 +352,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 int idx = name.IndexOf('`');
                 if (idx >= 0)
                 {
-                    return _nameManager.Add(name, idx);
+                    return name.Substring(0, idx);
                 }
             }
 
-            return _nameManager.Add(name);
+            return name;
         }
 
         #endregion
@@ -670,8 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (o is Type)
                 {
                     Type t = o as Type;
-                    Name name = null;
-                    name = GetName(t);
+                    string name = GetName(t);
                     next = _symbolTable.LookupSym(name, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
 
                     // Make sure we match arity as well when we find an aggregate.
@@ -955,7 +951,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private NamespaceSymbol AddNamespaceToSymbolTable(NamespaceOrAggregateSymbol parent, string sz)
         {
-            Name name = GetName(sz);
+            string name = GetName(sz);
             return _symbolTable.LookupSym(name, parent, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol
                 ?? _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
         }
@@ -1341,12 +1337,12 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Properties
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void AddPredefinedPropertyToSymbolTable(AggregateSymbol type, Name property)
+        internal void AddPredefinedPropertyToSymbolTable(AggregateSymbol type, string property)
         {
             AggregateType aggtype = type.getThisType();
             Type t = aggtype.AssociatedSystemType;
 
-            var props = Enumerable.Where(t.GetRuntimeProperties(), x => x.Name == property.Text);
+            var props = Enumerable.Where(t.GetRuntimeProperties(), x => x.Name == property);
 
             foreach (PropertyInfo pi in props)
             {
@@ -1358,7 +1354,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
-            Name name;
+            string name;
             bool isIndexer = property.GetIndexParameters().Length != 0
                              && property.DeclaringType?.GetCustomAttribute<DefaultMemberAttribute>()
                              ?.MemberName == property.Name;
@@ -1505,7 +1501,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Methods
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void AddPredefinedMethodToSymbolTable(AggregateSymbol type, Name methodName)
+        internal void AddPredefinedMethodToSymbolTable(AggregateSymbol type, string methodName)
         {
             Type t = type.getThisType().AssociatedSystemType;
 
@@ -1524,7 +1520,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                var methods = Enumerable.Where(t.GetRuntimeMethods(), m => m.Name == methodName.Text && m.DeclaringType == t);
+                var methods = Enumerable.Where(t.GetRuntimeMethods(), m => m.Name == methodName && m.DeclaringType == t);
 
                 foreach (MethodInfo m in methods)
                 {

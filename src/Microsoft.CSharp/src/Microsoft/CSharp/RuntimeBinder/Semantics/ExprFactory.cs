@@ -36,12 +36,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
-        public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) => 
+        public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, string name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) => 
             new ExprMemberGroup(Types.GetMethGrpType(), flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
 
         public ExprMemberGroup CreateMemGroup(Expr obj, MethPropWithInst method)
         {
-            Name name = method.Sym?.name;
+            string name = method.Sym?.name;
             MethodOrPropertySymbol methProp = method.MethProp();
 
             CType type = method.GetType() ?? (CType)Types.GetErrorSym();
@@ -220,7 +220,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name name, Expr value) =>
+        public ExprNamedArgumentSpecification CreateNamedArgumentSpecification(string name, Expr value) =>
             new ExprNamedArgumentSpecification(name, value);
 
         public ExprWrap CreateWrap(Expr expression) => new ExprWrap(expression);

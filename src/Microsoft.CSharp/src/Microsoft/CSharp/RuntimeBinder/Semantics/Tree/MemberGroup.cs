@@ -9,7 +9,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprMemberGroup : ExprWithType, IExprWithObject
     {
-        public ExprMemberGroup(CType type, EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol pMPS, Expr optionalObject, CMemberLookupResults memberLookupResults)
+        public ExprMemberGroup(CType type, EXPRFLAG flags, string name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol pMPS, Expr optionalObject, CMemberLookupResults memberLookupResults)
             : base(ExpressionKind.MemberGroup, type)
         {
             Debug.Assert(
@@ -25,7 +25,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MemberLookupResults = memberLookupResults;
         }
 
-        public Name Name { get; }
+        public string Name { get; }
 
         public TypeArray TypeArgs { get; }
 

@@ -15,7 +15,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ErrorType : CType
     {
-        public Name nameText;
+        public string nameText;
         public TypeArray typeArgs;
 
         public bool HasParent() { return _pParentType != null || _pParentNS != null; }

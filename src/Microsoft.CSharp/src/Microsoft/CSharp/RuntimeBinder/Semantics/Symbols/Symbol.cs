@@ -62,7 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // If this is true, then we had an error the first time so do not give an error the second time.
 
-        public Name name;         // name of the symbol
+        public string name;         // name of the symbol
         public ParentSymbol parent;  // parent of the symbol
         public Symbol nextChild;     // next child of this parent
         public Symbol nextSameName;  // next child of this parent with same name.

@@ -888,7 +888,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     continue;
                 }
                 Debug.Assert(anonmeth.OptionalBody != null);
-                Expr create = GenerateParameter(local.name.Text, local.GetType());
+                Expr create = GenerateParameter(local.name, local.GetType());
                 local.wrap = GetExprFactory().CreateWrap(create);
                 Expr save = GetExprFactory().CreateSave(local.wrap);
                 if (sequence == null)

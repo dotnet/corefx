@@ -10,8 +10,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class SymbolLoader
     {
-        private readonly NameManager _nameManager;
-
         public PredefinedMembers PredefinedMembers { get; }
         private GlobalSymbolContext GlobalSymbolContext { get; }
         public ErrorHandling ErrorContext { get; }
@@ -19,8 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public SymbolLoader()
         {
-            GlobalSymbolContext globalSymbols = new GlobalSymbolContext(new NameManager());
-            _nameManager = globalSymbols.GetNameManager();
+            GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
             PredefinedMembers = new PredefinedMembers(this);
             ErrorContext = new ErrorHandling(globalSymbols);
             GlobalSymbolContext = globalSymbols;
@@ -50,11 +47,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
             return null;
-        }
-
-        public NameManager GetNameManager()
-        {
-            return _nameManager;
         }
 
         public PredefinedTypes GetPredefindTypes()
@@ -91,7 +83,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
 
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
+        public Symbol LookupAggMember(string name, AggregateSymbol agg, symbmask_t mask)
         {
             return getBSymmgr().LookupAggMember(name, agg, mask);
         }

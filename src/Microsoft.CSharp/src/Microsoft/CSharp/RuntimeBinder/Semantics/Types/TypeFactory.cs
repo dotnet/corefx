@@ -11,7 +11,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // Aggregate
         public AggregateType CreateAggregateType(
-            Name name,
+            string name,
             AggregateSymbol parent,
             TypeArray typeArgsThis,
             AggregateType outerType)
@@ -70,10 +70,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public ErrorType CreateError(
-            Name name,
+            string name,
             CType parent,
             AssemblyQualifiedNamespaceSymbol pParentNS,
-            Name nameText,
+            string nameText,
             TypeArray typeArgs)
         {
             ErrorType e = new ErrorType();
@@ -88,7 +88,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Derived types - parent is base type
-        public ArrayType CreateArray(Name name, CType pElementType, int rank, bool isSZArray)
+        public ArrayType CreateArray(string name, CType pElementType, int rank, bool isSZArray)
         {
             ArrayType type = new ArrayType();
 
@@ -101,7 +101,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public PointerType CreatePointer(Name name, CType pReferentType)
+        public PointerType CreatePointer(string name, CType pReferentType)
         {
             PointerType type = new PointerType();
             type.SetName(name);
@@ -111,7 +111,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public ParameterModifierType CreateParameterModifier(Name name, CType pParameterType)
+        public ParameterModifierType CreateParameterModifier(string name, CType pParameterType)
         {
             ParameterModifierType type = new ParameterModifierType();
             type.SetName(name);
@@ -121,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public NullableType CreateNullable(Name name, CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
+        public NullableType CreateNullable(string name, CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
         {
             NullableType type = new NullableType();
             type.SetName(name);

@@ -187,7 +187,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         continue;
                     }
 
-                    Name pErrorTypeName = err.nameText;
+                    string pErrorTypeName = err.nameText;
                     if (pErrorTypeName != null)
                     {
                         continue;

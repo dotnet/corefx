@@ -204,7 +204,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
         private readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
 
-        private Name GetMethName(PREDEFMETH method)
+        private string GetMethName(PREDEFMETH method)
         {
             return GetPredefName(GetMethPredefName(method));
         }
@@ -262,13 +262,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         GetPropGetter(property));
         }
 
-        private Name GetPropName(PREDEFPROP property)
+        private string GetPropName(PREDEFPROP property)
         {
             return GetPredefName(GetPropPredefName(property));
         }
         private PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
-            Name propertyName,
+            string propertyName,
             PREDEFMETH propertyGetter)
         {
             Debug.Assert(propertyName != null);
@@ -303,7 +303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetSymbolLoader().getBSymmgr();
         }
 
-        private Name GetPredefName(PredefinedName pn)
+        private string GetPredefName(PredefinedName pn)
         {
             return NameManager.GetPredefinedName(pn);
         }
@@ -449,7 +449,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         AggregateSymbol type,
                         int[] signature,
                         int cMethodTyVars,
-                        Name methodName,
+                        string methodName,
                         ACCESS methodAccess,
                         bool isStatic,
                         bool isVirtual
@@ -480,7 +480,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ret;
         }
 
-        private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
+        private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, string methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
         {
             for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;

@@ -94,11 +94,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 )
         };
 
-        private static Dictionary<Name, string> s_operatorsByName;
+        private static Dictionary<string, string> s_operatorsByName;
 
-        private static Dictionary<Name, string> GetOperatorByName()
+        private static Dictionary<string, string> GetOperatorByName()
         {
-            Dictionary<Name, string> dict = new Dictionary<Name, string>(28)
+            Dictionary<string, string> dict = new Dictionary<string, string>(28)
             {
                 {NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS), "equals"},
                 {NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE), "compare" }
@@ -119,7 +119,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static OperatorInfo GetInfo(OperatorKind op) => s_operatorInfos[(int)op];
 
-        public static string OperatorOfMethodName(Name name) =>
+        public static string OperatorOfMethodName(string name) =>
             (s_operatorsByName ?? (s_operatorsByName = GetOperatorByName()))[name];
 
         public static string GetDisplayName(OperatorKind op) => TokenFacts.GetText(GetInfo(op).TokenKind);

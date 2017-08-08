@@ -22,7 +22,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         SymKind,
         Sym,
         Type,
-        Name,
         Str,
         PredefName,
         LocNode,
@@ -62,7 +61,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         internal MessageID ids;
         internal int n;
         internal SYMKIND sk;
-        internal Name name;
         internal Symbol sym;
         internal string psz;
         internal CType pType;
@@ -78,13 +76,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             this.eak = ErrArgKind.Int;
             this.eaf = ErrArgFlags.None;
             this.n = n;
-        }
-
-        public ErrArg(Name name)
-        {
-            this.eak = ErrArgKind.Name;
-            this.eaf = ErrArgFlags.None;
-            this.name = name;
         }
 
         public ErrArg(string psz)
@@ -145,10 +136,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         public static implicit operator ErrArg(string psz)
         {
             return new ErrArg(psz);
-        }
-        public static implicit operator ErrArg(Name name)
-        {
-            return new ErrArg(name);
         }
         public static implicit operator ErrArg(Symbol pSym)
         {

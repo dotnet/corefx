@@ -23,7 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _dictionary = new Dictionary<Key, Symbol>();
         }
 
-        public Symbol LookupSym(Name name, ParentSymbol parent, symbmask_t kindmask)
+        public Symbol LookupSym(string name, ParentSymbol parent, symbmask_t kindmask)
         {
             Key k = new Key(name, parent);
             Symbol sym;
@@ -93,10 +93,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private sealed class Key : IEquatable<Key>
         {
-            private readonly Name _name;
+            private readonly string _name;
             private readonly ParentSymbol _parent;
 
-            public Key(Name name, ParentSymbol parent)
+            public Key(string name, ParentSymbol parent)
             {
                 _name = name;
                 _parent = parent;

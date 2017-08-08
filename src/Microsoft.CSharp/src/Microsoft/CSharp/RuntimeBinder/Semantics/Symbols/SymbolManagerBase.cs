@@ -21,7 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private readonly NamespaceSymbol _rootNS;         // The "root" (unnamed) namespace.
 
-        private NameManager m_nameTable;
         private SYMTBL tableGlobal;
 
         // The hash table for type arrays.
@@ -29,14 +28,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static readonly TypeArray s_taEmpty = new TypeArray(Array.Empty<CType>());
 
-        public BSYMMGR(NameManager nameMgr)
+        public BSYMMGR()
         {
-            this.m_nameTable = nameMgr;
             this.tableGlobal = new SYMTBL();
             _symFactory = new SymFactory(this.tableGlobal);
 
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
-            _rootNS = _symFactory.CreateNamespace(m_nameTable.Lookup(""), null);
+            _rootNS = _symFactory.CreateNamespace("", null);
             GetNsAid(_rootNS);
 
             ////////////////////////////////////////////////////////////////////////////////
@@ -55,17 +53,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (iDot == -1)
                         break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = this.GetNameManager().Add(sub);
-                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
+                    ns = LookupGlobalSymCore(sub, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(sub, ns);
                     start += sub.Length + 1;
                 }
             }
-        }
-
-
-        public NameManager GetNameManager()
-        {
-            return m_nameTable;
         }
 
         public SYMTBL GetSymbolTable()
@@ -183,19 +174,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     int iDot = name.IndexOf('.', start);
                     if (iDot == -1) break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = this.GetNameManager().Add(sub);
-                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
+                    ns = LookupGlobalSymCore(sub, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(sub, ns);
                     start += sub.Length + 1;
                 }
             }
         }
 
-        public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask)
+        public Symbol LookupGlobalSymCore(string name, ParentSymbol parent, symbmask_t kindmask)
         {
             return tableGlobal.LookupSym(name, parent, kindmask);
         }
 
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
+        public Symbol LookupAggMember(string name, AggregateSymbol agg, symbmask_t mask)
         {
             return tableGlobal.LookupSym(name, agg, mask);
         }
@@ -220,22 +210,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        public Name GetNameFromPtrs(object u1, object u2)
-        {
-            // Note: this won't produce the same names as the native logic
-            if (u2 != null)
-            {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}-{1:X}", u1.GetHashCode(), u2.GetHashCode()));
-            }
-            else
-            {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}", u1.GetHashCode()));
-            }
-        }
+        // Note: this won't produce the same names as the native logic
+        public string GetNameFromPtrs(object u1, object u2) =>
+            u2 != null
+            ? string.Format(CultureInfo.InvariantCulture, "{0:X}-{1:X}", u1.GetHashCode(), u2.GetHashCode())
+            : string.Format(CultureInfo.InvariantCulture, "{0:X}", u1.GetHashCode());
 
         private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns)
         {
-            Name name = GetNameFromPtrs(0, 0);
+            string name = GetNameFromPtrs(0, 0);
             Debug.Assert(name != null);
 
             AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol) as AssemblyQualifiedNamespaceSymbol

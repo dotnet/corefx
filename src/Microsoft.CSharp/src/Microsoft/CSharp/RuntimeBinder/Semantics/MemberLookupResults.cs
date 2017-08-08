@@ -16,11 +16,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private TypeArray ContainingTypes { get; }// Types that contain the member we're looking for.
 
-        private readonly Name _pName; // The name that we're looking for.
+        private readonly string _pName; // The name that we're looking for.
 
         public CMemberLookupResults(
                 TypeArray containingTypes,
-                Name name)
+                string name)
         {
             _pName = name;
             ContainingTypes = containingTypes;
