@@ -68,7 +68,7 @@ Set write flag for the custom bio
 */
 extern "C" void CryptoNative_BioSetWriteFlag(BIO* bio)
 {
-    BIO_set_flags(bio, BIO_FLAGS_SHOULD_RETRY | BIO_FLAGS_READ);
+    BIO_set_flags(bio, BIO_FLAGS_WRITE);
 }
 
 /*
@@ -76,7 +76,7 @@ Set the read and should retry flag for the custom bio
 */
 extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio)
 {
-    BIO_set_flags(bio, BIO_FLAGS_WRITE);
+    BIO_set_flags(bio, BIO_FLAGS_SHOULD_RETRY | BIO_FLAGS_READ);
 }
 
 static long ControlCallback(BIO* bio, int cmd, long param, void* ptr)
