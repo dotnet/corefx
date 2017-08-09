@@ -213,7 +213,7 @@ namespace System.Collections.Generic
                 current = current.Left;
             }
 
-            while (stack.Count > 0)
+            while (stack.Count != 0)
             {
                 current = stack.Pop();
                 if (!action(current))
@@ -251,7 +251,7 @@ namespace System.Collections.Generic
             processQueue.Enqueue(root);
 
             Node current;
-            while (processQueue.Count > 0)
+            while (processQueue.Count != 0)
             {
                 current = processQueue.Dequeue();
                 if (!action(current))
@@ -437,7 +437,7 @@ namespace System.Collections.Generic
                     }
                     else
                     {
-                        Node sibling = parent.SiblingOf(current);
+                        Node sibling = parent.GetSibling(current);
                         if (sibling.IsRed)
                         {
                             // If parent is a 3-node, flip the orientation of the red link.
@@ -464,7 +464,7 @@ namespace System.Collections.Generic
                                 parentOfMatch = sibling;
                             }
 
-                            sibling = parent.SiblingOf(current);
+                            sibling = parent.GetSibling(current);
                         }
 
                         Debug.Assert(Node.IsNonNullBlack(sibling));
@@ -1721,7 +1721,7 @@ namespace System.Collections.Generic
                     newCurrent = newCurrent.Left;
                 }
 
-                while (originalNodes.Count > 0)
+                while (originalNodes.Count != 0)
                 {
                     originalCurrent = originalNodes.Pop();
                     newCurrent = newNodes.Pop();
@@ -1757,6 +1757,17 @@ namespace System.Collections.Generic
                 return IsNonNullRed(sibling.Left) ?
                     (currentIsLeftChild ? TreeRotation.RightLeft : TreeRotation.Right) :
                     (currentIsLeftChild ? TreeRotation.Left : TreeRotation.LeftRight);
+            }
+
+            /// <summary>
+            /// Gets the sibling of one of this node's children.
+            /// </summary>
+            public Node GetSibling(Node node)
+            {
+                Debug.Assert(node != null);
+                Debug.Assert(node == Left ^ node == Right);
+
+                return node == Left ? Right : Left;
             }
 
             public Node ShallowClone() => new Node(Item, Color);
@@ -1857,17 +1868,6 @@ namespace System.Collections.Generic
                 child.Left = grandChild.Right;
                 grandChild.Right = child;
                 return grandChild;
-            }
-
-            /// <summary>
-            /// Gets the sibling of one of this node's children.
-            /// </summary>
-            public Node SiblingOf(Node node)
-            {
-                Debug.Assert(node != null);
-                Debug.Assert(node == Left ^ node == Right);
-
-                return node == Left ? Right : Left;
             }
 
             /// <summary>
