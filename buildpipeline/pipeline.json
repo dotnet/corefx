@@ -32,22 +32,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
-          "Parameters": {
-            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
-            "PB_Architecture": "arm",
-            "PB_BuildArguments": "-buildArch=arm -Release -stripSymbols",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Linux",
-            "Platform": "arm",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-RedHat6",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
             "PB_DockerTag": "centos-6-783abde-20171304101322",
             "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
@@ -59,6 +44,21 @@
           "ReportingParameters": {
             "OperatingSystem": "Linux",
             "Platform": "x64",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Release"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
+            "PB_Architecture": "arm",
+            "PB_BuildArguments": "-buildArch=arm -Release -stripSymbols",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Linux",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
@@ -344,22 +344,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
-          "Parameters": {
-            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
-            "PB_Architecture": "arm",
-            "PB_BuildArguments": "-buildArch=arm -Debug",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Linux",
-            "Platform": "arm",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux-RedHat6",
+          "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
             "PB_DockerTag": "centos-6-783abde-20171304101322",
             "PB_BuildArguments": "-buildArch=x64 -Debug",
@@ -371,6 +356,21 @@
           "ReportingParameters": {
             "OperatingSystem": "Linux",
             "Platform": "x64",
+            "Type": "build/product/",
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Linux-Crossbuild",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239",
+            "PB_Architecture": "arm",
+            "PB_BuildArguments": "-buildArch=arm -Debug",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=arm"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Linux",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Debug"
           }
