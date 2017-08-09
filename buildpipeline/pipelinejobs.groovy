@@ -20,6 +20,7 @@ def winPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'build
 
 def configurations = [
     ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'Linux' ,'ForPR':"Release-x64", 'Arch':['x64']],
+    ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'RHEL6' ,'ForPR':"Release-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':osxPipeline, 'Name':'OSX', 'ForPR':"Debug-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':winPipeline, 'Name':'Windows' , 'ForPR':"Debug-x64|Release-x86"],
     ['TGroup':"netfx",      'Pipeline':winPipeline, 'Name':'NETFX', 'ForPR':"Release-x86"],
@@ -32,20 +33,13 @@ configurations.each { config ->
  ['Debug', 'Release'].each { configurationGroup ->
   (config.Arch ?: ['x64', 'x86']).each { archGroup ->
     def triggerName = "${config.Name} ${archGroup} ${configurationGroup} Build"
-	
-	def dockerFullName = config.DockerName
-	def isRhel6Docker = false
-    if (dockerFullName.contains('microsoft/dotnet-buildtools-prereqs:centos-6')) {
-        isRhel6Docker = true
-    }
 
     def pipeline = config.Pipeline
     def params = ['TGroup':config.TGroup,
                   'CGroup':configurationGroup,
                   'AGroup':archGroup,
-                  'TestOuter':false,
-                  'DockerName':dockerFullName,
-                  'IsRedHat6Docker':isRhel6Docker,]
+                  'OSName':config.Name,
+                  'TestOuter':false,]
 
     // Add default PR triggers for particular configurations but manual triggers for all
     if (config.ForPR.contains("${configurationGroup}-${archGroup}")) {
