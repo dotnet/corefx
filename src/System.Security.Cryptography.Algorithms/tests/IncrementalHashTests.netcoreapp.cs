@@ -65,8 +65,8 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             while (position < s_inputBytes.Length - StepB)
             {
-                incrementalHash.AppendData(new ReadOnlySpan<byte>(s_inputBytes, position, StepA));
-                position += StepA;
+                incrementalHash.AppendData(new ReadOnlySpan<byte>(s_inputBytes, position, StepB));
+                position += StepB;
             }
 
             incrementalHash.AppendData(new ReadOnlySpan<byte>(s_inputBytes, position, s_inputBytes.Length - position));

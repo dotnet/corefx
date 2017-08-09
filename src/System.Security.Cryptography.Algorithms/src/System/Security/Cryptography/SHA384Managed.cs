@@ -22,13 +22,13 @@ namespace System.Security.Cryptography
         protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) =>
             _hashProvider.AppendHashData(array, ibStart, cbSize);
 
-        protected override void HashCore(ReadOnlySpan<byte> source) =>
+        protected sealed override void HashCore(ReadOnlySpan<byte> source) =>
             _hashProvider.AppendHashData(source);
 
         protected sealed override byte[] HashFinal() =>
             _hashProvider.FinalizeHashAndReset();
 
-        protected override bool TryHashFinal(Span<byte> destination, out int bytesWritten) =>
+        protected sealed override bool TryHashFinal(Span<byte> destination, out int bytesWritten) =>
             _hashProvider.TryFinalizeHashAndReset(destination, out bytesWritten);
 
         public sealed override void Initialize()

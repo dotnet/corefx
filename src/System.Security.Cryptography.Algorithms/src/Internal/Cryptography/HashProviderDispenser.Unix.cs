@@ -74,26 +74,15 @@ namespace Internal.Cryptography
                 Interop.Crypto.CheckValidOpenSslHandle(_ctx);
             }
 
-            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
+            public override void AppendHashData(ReadOnlySpan<byte> data) =>
+                Check(Interop.Crypto.EvpDigestUpdate(_ctx, data, data.Length));
+
+            public override byte[] FinalizeHashAndReset()
             {
-                fixed (byte* md = &data.DangerousGetPinnableReference())
-                {
-                    Check(Interop.Crypto.EvpDigestUpdate(_ctx, md, data.Length));
-                }
-            }
-
-            public override unsafe byte[] FinalizeHashAndReset()
-            {
-                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
-                uint length = (uint)Interop.Crypto.EVP_MAX_MD_SIZE;
-                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, md, ref length));
-                Debug.Assert(length == _hashSize);
-
-                // Reset the algorithm provider.
-                Check(Interop.Crypto.EvpDigestReset(_ctx, _algorithmEvp));
-
-                byte[] result = new byte[(int)length];
-                Marshal.Copy((IntPtr)md, result, 0, (int)length);
+                var result = new byte[_hashSize];
+                bool success = TryFinalizeHashAndReset(result, out int bytesWritten);
+                Debug.Assert(success);
+                Debug.Assert(result.Length == bytesWritten);
                 return result;
             }
 
@@ -105,20 +94,17 @@ namespace Internal.Cryptography
                     return false;
                 }
 
-                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
-                uint length = (uint)Interop.Crypto.EVP_MAX_MD_SIZE;
-                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, md, ref length));
-                Debug.Assert(length == _hashSize);
+                fixed (byte* ptrDest = &destination.DangerousGetPinnableReference())
+                {
+                    uint length = (uint)destination.Length;
+                    Check(Interop.Crypto.EvpDigestFinalEx(_ctx, ptrDest, ref length));
+                    Debug.Assert(length == _hashSize);
+                    bytesWritten = (int)length;
+                }
 
                 // Reset the algorithm provider.
                 Check(Interop.Crypto.EvpDigestReset(_ctx, _algorithmEvp));
 
-                fixed (byte* ptrDest = &destination.DangerousGetPinnableReference())
-                {
-                    Buffer.MemoryCopy(md, ptrDest, destination.Length, length);
-                }
-
-                bytesWritten = (int)length;
                 return true;
             }
 
@@ -156,26 +142,16 @@ namespace Internal.Cryptography
                 }
             }
 
-            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
+            public override void AppendHashData(ReadOnlySpan<byte> data) =>
+                Check(Interop.Crypto.HmacUpdate(_hmacCtx, data, data.Length));
+
+            public override byte[] FinalizeHashAndReset()
             {
-                fixed (byte* md = &data.DangerousGetPinnableReference())
-                {
-                    Check(Interop.Crypto.HmacUpdate(_hmacCtx, md, data.Length));
-                }
-            }
-
-            public override unsafe byte[] FinalizeHashAndReset()
-            {
-                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
-                int length = Interop.Crypto.EVP_MAX_MD_SIZE;
-                Check(Interop.Crypto.HmacFinal(_hmacCtx, md, ref length));
-                Debug.Assert(length == _hashSize);
-
-                Check(Interop.Crypto.HmacReset(_hmacCtx));
-
-                byte[] result = new byte[length];
-                Marshal.Copy((IntPtr)md, result, 0, length);
-                return result;
+                var hash = new byte[_hashSize];
+                bool success = TryFinalizeHashAndReset(hash, out int bytesWritten);
+                Debug.Assert(success);
+                Debug.Assert(hash.Length == bytesWritten);
+                return hash;
             }
 
             public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
@@ -186,19 +162,15 @@ namespace Internal.Cryptography
                     return false;
                 }
 
-                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
-                int length = Interop.Crypto.EVP_MAX_MD_SIZE;
-                Check(Interop.Crypto.HmacFinal(_hmacCtx, md, ref length));
-                Debug.Assert(length == _hashSize);
-
-                Check(Interop.Crypto.HmacReset(_hmacCtx));
-
                 fixed (byte* ptrDest = &destination.DangerousGetPinnableReference())
                 {
-                    Buffer.MemoryCopy(md, ptrDest, destination.Length, length);
+                    int length = destination.Length;
+                    Check(Interop.Crypto.HmacFinal(_hmacCtx, ptrDest, ref length));
+                    Debug.Assert(length == _hashSize);
+                    bytesWritten = length;
                 }
 
-                bytesWritten = length;
+                Check(Interop.Crypto.HmacReset(_hmacCtx));
                 return true;
             }
 

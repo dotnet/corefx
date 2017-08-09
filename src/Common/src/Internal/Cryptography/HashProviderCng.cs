@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
+using System.Diagnostics;
 using Microsoft.Win32.SafeHandles;
 using NTSTATUS = Interop.BCrypt.NTSTATUS;
 using BCryptOpenAlgorithmProviderFlags = Interop.BCrypt.BCryptOpenAlgorithmProviderFlags;
@@ -68,12 +68,7 @@ namespace Internal.Cryptography
 
         public sealed override unsafe void AppendHashData(ReadOnlySpan<byte> source)
         {
-            NTSTATUS ntStatus;
-            fixed (byte* pRgb = &source.DangerousGetPinnableReference())
-            {
-                ntStatus = Interop.BCrypt.BCryptHashData(_hHash, pRgb, source.Length, 0);
-
-            }
+            NTSTATUS ntStatus = Interop.BCrypt.BCryptHashData(_hHash, source, source.Length, 0);
             if (ntStatus != NTSTATUS.STATUS_SUCCESS)
             {
                 throw Interop.BCrypt.CreateCryptographicException(ntStatus);
@@ -82,18 +77,14 @@ namespace Internal.Cryptography
 
         public sealed override byte[] FinalizeHashAndReset()
         {
-            byte[] hash = new byte[_hashSize];
-            NTSTATUS ntStatus = Interop.BCrypt.BCryptFinishHash(_hHash, hash, hash.Length, 0);
-            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
-            {
-                throw Interop.BCrypt.CreateCryptographicException(ntStatus);
-            }
-
-            ResetHashObject();
+            var hash = new byte[_hashSize];
+            bool success = TryFinalizeHashAndReset(hash, out int bytesWritten);
+            Debug.Assert(success);
+            Debug.Assert(hash.Length == bytesWritten);
             return hash;
         }
 
-        public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
+        public override bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
         {
             if (destination.Length < _hashSize)
             {
@@ -101,11 +92,7 @@ namespace Internal.Cryptography
                 return false;
             }
 
-            NTSTATUS ntStatus;
-            fixed (byte* ptr = &destination.DangerousGetPinnableReference())
-            {
-                ntStatus = Interop.BCrypt.BCryptFinishHash(_hHash, ptr, _hashSize, 0);
-            }
+            NTSTATUS ntStatus = Interop.BCrypt.BCryptFinishHash(_hHash, destination, _hashSize, 0);
             if (ntStatus != NTSTATUS.STATUS_SUCCESS)
             {
                 throw Interop.BCrypt.CreateCryptographicException(ntStatus);

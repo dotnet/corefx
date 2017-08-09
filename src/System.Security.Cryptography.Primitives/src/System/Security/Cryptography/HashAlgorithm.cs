@@ -31,7 +31,7 @@ namespace System.Security.Cryptography
                 if (State != 0)
                     throw new CryptographicUnexpectedOperationException(SR.Cryptography_HashNotYetFinalized);
 
-                return (byte[])HashValue.Clone();
+                return (byte[])HashValue?.Clone();
             }
         }
 
@@ -66,6 +66,7 @@ namespace System.Security.Cryptography
                 // but we checked the size earlier.
                 throw new InvalidOperationException(SR.InvalidOperation_IncorrectImplementation);
             }
+            HashValue = null;
 
             Initialize();
             return true;
@@ -221,17 +222,19 @@ namespace System.Security.Cryptography
 
         protected virtual bool TryHashFinal(Span<byte> destination, out int bytesWritten)
         {
-            if (destination.Length >= HashSizeValue/8)
+            int hashSizeInBytes = HashSizeValue / 8;
+
+            if (destination.Length >= hashSizeInBytes)
             {
                 byte[] final = HashFinal();
-                if (final.Length != HashSizeValue/8)
+                if (final.Length == hashSizeInBytes)
                 {
-                    throw new InvalidOperationException(SR.InvalidOperation_IncorrectImplementation);
+                    new ReadOnlySpan<byte>(final).CopyTo(destination);
+                    bytesWritten = final.Length;
+                    return true;
                 }
 
-                new ReadOnlySpan<byte>(final).CopyTo(destination);
-                bytesWritten = final.Length;
-                return true;
+                throw new InvalidOperationException(SR.InvalidOperation_IncorrectImplementation);
             }
 
             bytesWritten = 0;
