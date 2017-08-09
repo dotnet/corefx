@@ -29,6 +29,7 @@
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\ObjRefSample.cs" />
+    <Compile Include="SerializationTypes.RuntimeOnly.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
