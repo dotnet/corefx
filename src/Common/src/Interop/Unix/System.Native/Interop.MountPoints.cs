@@ -163,6 +163,7 @@ internal static partial class Interop
 
                 case "adfs":
                 case "affs":
+                case "apfs":
                 case "befs":
                 case "bfs":
                 case "btrfs":
