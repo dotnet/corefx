@@ -32,12 +32,20 @@ configurations.each { config ->
  ['Debug', 'Release'].each { configurationGroup ->
   (config.Arch ?: ['x64', 'x86']).each { archGroup ->
     def triggerName = "${config.Name} ${archGroup} ${configurationGroup} Build"
+	
+	def dockerFullName = config.DockerName
+	def isRhel6Docker = false
+    if (dockerFullName.contains('microsoft/dotnet-buildtools-prereqs:centos-6')) {
+        isRhel6Docker = true
+    }
 
     def pipeline = config.Pipeline
     def params = ['TGroup':config.TGroup,
                   'CGroup':configurationGroup,
                   'AGroup':archGroup,
-                  'TestOuter': false]
+                  'TestOuter':false,
+                  'DockerName':dockerFullName,
+                  'IsRedHat6Docker':isRhel6Docker,]
 
     // Add default PR triggers for particular configurations but manual triggers for all
     if (config.ForPR.contains("${configurationGroup}-${archGroup}")) {
