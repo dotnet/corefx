@@ -8,7 +8,16 @@
 
 def submittedHelixJson = null
 
-simpleDockerNode(params.DockerName) {
+def dockerImageName
+if (params.OSName == 'Linux') {
+    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2'
+} else if (params.OSName == 'RHEL6') {
+    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:centos-6-783abde-20171304101322'
+} else {
+    error 'Unknown OS name'
+}
+
+simpleDockerNode(dockerImageName) {
     stage ('Checkout source') {
         checkout scm
     }
@@ -60,7 +69,7 @@ simpleDockerNode(params.DockerName) {
                                       'SLES.12.Amd64.Open',
                                       'Ubuntu.1704.Amd64.Open',]
             }
-            if (params.IsRedHat6Docker) {
+            if (params.OSName == 'RHEL6') {
                 targetHelixQueues = ['RedHat.69.Amd64.Open',]
             }
 
