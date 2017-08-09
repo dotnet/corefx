@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
-using System.Security.Cryptography;
 
 using Microsoft.Win32.SafeHandles;
 using NTSTATUS = Interop.BCrypt.NTSTATUS;
@@ -68,16 +66,17 @@ namespace Internal.Cryptography
             return;
         }
 
-        public sealed override void AppendHashDataCore(byte[] data, int offset, int count)
+        public sealed override unsafe void AppendHashData(ReadOnlySpan<byte> source)
         {
-            unsafe
+            NTSTATUS ntStatus;
+            fixed (byte* pRgb = &source.DangerousGetPinnableReference())
             {
-                fixed (byte* pRgb = data)
-                {
-                    NTSTATUS ntStatus = Interop.BCrypt.BCryptHashData(_hHash, pRgb + offset, count, 0);
-                    if (ntStatus != NTSTATUS.STATUS_SUCCESS)
-                        throw Interop.BCrypt.CreateCryptographicException(ntStatus);
-                }
+                ntStatus = Interop.BCrypt.BCryptHashData(_hHash, pRgb, source.Length, 0);
+
+            }
+            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+            {
+                throw Interop.BCrypt.CreateCryptographicException(ntStatus);
             }
         }
 
@@ -86,10 +85,35 @@ namespace Internal.Cryptography
             byte[] hash = new byte[_hashSize];
             NTSTATUS ntStatus = Interop.BCrypt.BCryptFinishHash(_hHash, hash, hash.Length, 0);
             if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+            {
                 throw Interop.BCrypt.CreateCryptographicException(ntStatus);
+            }
 
             ResetHashObject();
             return hash;
+        }
+
+        public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
+        {
+            if (destination.Length < _hashSize)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            NTSTATUS ntStatus;
+            fixed (byte* ptr = &destination.DangerousGetPinnableReference())
+            {
+                ntStatus = Interop.BCrypt.BCryptFinishHash(_hHash, ptr, _hashSize, 0);
+            }
+            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+            {
+                throw Interop.BCrypt.CreateCryptographicException(ntStatus);
+            }
+
+            bytesWritten = _hashSize;
+            ResetHashObject();
+            return true;
         }
 
         public sealed override void Dispose(bool disposing)
@@ -106,13 +130,7 @@ namespace Internal.Cryptography
             }
         }
 
-        public sealed override int HashSizeInBytes
-        {
-            get
-            {
-                return _hashSize;
-            }
-        }
+        public sealed override int HashSizeInBytes => _hashSize;
 
         private void ResetHashObject()
         {

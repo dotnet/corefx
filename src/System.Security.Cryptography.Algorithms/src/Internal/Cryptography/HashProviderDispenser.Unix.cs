@@ -74,15 +74,15 @@ namespace Internal.Cryptography
                 Interop.Crypto.CheckValidOpenSslHandle(_ctx);
             }
 
-            public sealed override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
+            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
             {
-                fixed (byte* md = data)
+                fixed (byte* md = &data.DangerousGetPinnableReference())
                 {
-                    Check(Interop.Crypto.EvpDigestUpdate(_ctx, md + offset, count));
+                    Check(Interop.Crypto.EvpDigestUpdate(_ctx, md, data.Length));
                 }
             }
 
-            public sealed override unsafe byte[] FinalizeHashAndReset()
+            public override unsafe byte[] FinalizeHashAndReset()
             {
                 byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
                 uint length = (uint)Interop.Crypto.EVP_MAX_MD_SIZE;
@@ -97,12 +97,34 @@ namespace Internal.Cryptography
                 return result;
             }
 
-            public sealed override int HashSizeInBytes
+            public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
             {
-                get { return _hashSize; }
+                if (destination.Length < _hashSize)
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+
+                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
+                uint length = (uint)Interop.Crypto.EVP_MAX_MD_SIZE;
+                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, md, ref length));
+                Debug.Assert(length == _hashSize);
+
+                // Reset the algorithm provider.
+                Check(Interop.Crypto.EvpDigestReset(_ctx, _algorithmEvp));
+
+                fixed (byte* ptrDest = &destination.DangerousGetPinnableReference())
+                {
+                    Buffer.MemoryCopy(md, ptrDest, destination.Length, length);
+                }
+
+                bytesWritten = (int)length;
+                return true;
             }
 
-            public sealed override void Dispose(bool disposing)
+            public override int HashSizeInBytes => _hashSize;
+
+            public override void Dispose(bool disposing)
             {
                 if (disposing)
                 {
@@ -134,15 +156,15 @@ namespace Internal.Cryptography
                 }
             }
 
-            public sealed override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
+            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
             {
-                fixed (byte* md = data)
+                fixed (byte* md = &data.DangerousGetPinnableReference())
                 {
-                    Check(Interop.Crypto.HmacUpdate(_hmacCtx, md + offset, count));
+                    Check(Interop.Crypto.HmacUpdate(_hmacCtx, md, data.Length));
                 }
             }
 
-            public sealed override unsafe byte[] FinalizeHashAndReset()
+            public override unsafe byte[] FinalizeHashAndReset()
             {
                 byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
                 int length = Interop.Crypto.EVP_MAX_MD_SIZE;
@@ -156,20 +178,38 @@ namespace Internal.Cryptography
                 return result;
             }
 
-            public sealed override int HashSizeInBytes 
+            public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
             {
-                get { return _hashSize; } 
+                if (destination.Length < _hashSize)
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+
+                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
+                int length = Interop.Crypto.EVP_MAX_MD_SIZE;
+                Check(Interop.Crypto.HmacFinal(_hmacCtx, md, ref length));
+                Debug.Assert(length == _hashSize);
+
+                Check(Interop.Crypto.HmacReset(_hmacCtx));
+
+                fixed (byte* ptrDest = &destination.DangerousGetPinnableReference())
+                {
+                    Buffer.MemoryCopy(md, ptrDest, destination.Length, length);
+                }
+
+                bytesWritten = length;
+                return true;
             }
 
-            public sealed override void Dispose(bool disposing)
+            public override int HashSizeInBytes => _hashSize;
+
+            public override void Dispose(bool disposing)
             {
-                if (disposing)
+                if (disposing && _hmacCtx != null)
                 {
-                    if (_hmacCtx != null)
-                    {
-                        _hmacCtx.Dispose();
-                        _hmacCtx = null;
-                    }
+                    _hmacCtx.Dispose();
+                    _hmacCtx = null;
                 }
             }
         }

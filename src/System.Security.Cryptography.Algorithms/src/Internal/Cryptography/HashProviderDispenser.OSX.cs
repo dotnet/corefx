@@ -86,14 +86,8 @@ namespace Internal.Cryptography
                 HashSizeInBytes = hashSizeInBytes;
             }
 
-            public override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
+            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
             {
-                Debug.Assert(data != null);
-                Debug.Assert(offset >= 0);
-                Debug.Assert(offset < data.Length);
-                Debug.Assert(count >= 0);
-                Debug.Assert(data.Length - offset > count);
-
                 if (!_running)
                 {
                     SetKey();
@@ -101,10 +95,9 @@ namespace Internal.Cryptography
 
                 int ret;
 
-                fixed (byte* pData = data)
+                fixed (byte* pData = &data.DangerousGetPinnableReference())
                 {
-                    byte* pbData = pData + offset;
-                    ret = Interop.AppleCrypto.HmacUpdate(_ctx, pbData, count);
+                    ret = Interop.AppleCrypto.HmacUpdate(_ctx, pData, data.Length);
                 }
 
                 if (ret != 1)
@@ -154,6 +147,34 @@ namespace Internal.Cryptography
                 return output;
             }
 
+            public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
+            {
+                if (!_running)
+                {
+                    SetKey();
+                }
+
+                if (destination.Length < HashSizeInBytes)
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+
+                int ret;
+                fixed (byte* pbOutput = &destination.DangerousGetPinnableReference())
+                {
+                    ret = Interop.AppleCrypto.HmacFinal(_ctx, pbOutput, destination.Length);
+                }
+                if (ret != 1)
+                {
+                    throw new CryptographicException();
+                }
+
+                bytesWritten = HashSizeInBytes;
+                _running = false;
+                return true;
+            }
+
             public override void Dispose(bool disposing)
             {
                 if (disposing)
@@ -193,20 +214,13 @@ namespace Internal.Cryptography
                 HashSizeInBytes = hashSizeInBytes;
             }
 
-            public override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
+            public override unsafe void AppendHashData(ReadOnlySpan<byte> data)
             {
-                Debug.Assert(data != null);
-                Debug.Assert(offset >= 0);
-                Debug.Assert(offset < data.Length);
-                Debug.Assert(count >= 0);
-                Debug.Assert(data.Length - offset > count);
-
                 int ret;
 
-                fixed (byte* pData = data)
+                fixed (byte* pData = &data.DangerousGetPinnableReference())
                 {
-                    byte* pbData = pData + offset;
-                    ret = Interop.AppleCrypto.DigestUpdate(_ctx, pbData, count);
+                    ret = Interop.AppleCrypto.DigestUpdate(_ctx, pData, data.Length);
                 }
 
                 if (ret != 1)
@@ -233,6 +247,29 @@ namespace Internal.Cryptography
                 }
 
                 return hash;
+            }
+
+            public override unsafe bool TryFinalizeHashAndReset(Span<byte> destination, out int bytesWritten)
+            {
+                if (destination.Length < HashSizeInBytes)
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+
+                int ret;
+                fixed (byte* pHash = &destination.DangerousGetPinnableReference())
+                {
+                    ret = Interop.AppleCrypto.DigestFinal(_ctx, pHash, destination.Length);
+                }
+                if (ret != 1)
+                {
+                    Debug.Assert(ret == 0, $"DigestFinal return value {ret} was not 0 or 1");
+                    throw new CryptographicException();
+                }
+
+                bytesWritten = HashSizeInBytes;
+                return true;
             }
 
             public override void Dispose(bool disposing)
