@@ -47,7 +47,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-RedHat6",
+          "Name": "DotNet-CoreFx-Trusted-Linux-RedHat6",
           "Parameters": {
             "PB_DockerTag": "centos-6-783abde-20171304101322",
             "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
@@ -359,7 +359,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-RedHat6",
+          "Name": "DotNet-CoreFx-Trusted-Linux-RedHat6",
           "Parameters": {
             "PB_DockerTag": "centos-6-783abde-20171304101322",
             "PB_BuildArguments": "-buildArch=x64 -Debug",
