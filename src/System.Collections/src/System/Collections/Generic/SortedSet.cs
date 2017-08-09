@@ -1677,6 +1677,12 @@ namespace System.Collections.Generic
                 Color = color;
             }
 
+            public static bool IsNonNullBlack(Node node) => node != null && node.IsBlack;
+
+            public static bool IsNonNullRed(Node node) => node != null && node.IsRed;
+
+            public static bool IsNullOrBlack(Node node) => node == null || node.IsBlack;
+
             public T Item { get; set; }
 
             public Node Left { get; set; }
@@ -1771,12 +1777,6 @@ namespace System.Collections.Generic
             }
 
             public Node ShallowClone() => new Node(Item, Color);
-
-            public static bool IsNonNullBlack(Node node) => node != null && node.IsBlack;
-
-            public static bool IsNonNullRed(Node node) => node != null && node.IsRed;
-
-            public static bool IsNullOrBlack(Node node) => node == null || node.IsBlack;
 
             public void Split4Node()
             {
