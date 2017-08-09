@@ -32,7 +32,7 @@ OSName=$(uname -s)
             OS=Linux
 
             if [ -e /etc/redhat-release ]; then
-                local redhatRelease=$(</etc/redhat-release)
+                redhatRelease=$(</etc/redhat-release)
                 if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
                     __DOTNET_PKG=dotnet-dev-rhel.6-x64
                 fi

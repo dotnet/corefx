@@ -42,7 +42,7 @@
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
           },
           "ReportingParameters": {
-            "OperatingSystem": "Linux",
+            "OperatingSystem": "RedHat6",
             "Platform": "x64",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
@@ -354,7 +354,7 @@
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
           },
           "ReportingParameters": {
-            "OperatingSystem": "Linux",
+            "OperatingSystem": "Redhat6",
             "Platform": "x64",
             "Type": "build/product/",
             "ConfigurationGroup": "Debug"
