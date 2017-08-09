@@ -243,12 +243,12 @@ namespace Microsoft.CSharp.RuntimeBinder
                                     break;
                             }
 
-                            AddMethodToSymbolTable(member, aggregate, kind);
+                            AddMethodToSymbolTable(method, aggregate, kind);
                             AddParameterConversions(method);
                         }
                         else if (member is ConstructorInfo ctor)
                         {
-                            AddMethodToSymbolTable(member, aggregate, MethodKindEnum.Constructor);
+                            AddMethodToSymbolTable(ctor, aggregate, MethodKindEnum.Constructor);
                             AddParameterConversions(ctor);
                         }
                         else if (member is PropertyInfo prop)
@@ -1538,12 +1538,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private MethodSymbol AddMethodToSymbolTable(MemberInfo member, AggregateSymbol callingAggregate, MethodKindEnum kind)
+        private MethodSymbol AddMethodToSymbolTable(MethodBase member, AggregateSymbol callingAggregate, MethodKindEnum kind)
         {
             MethodInfo method = member as MethodInfo;
-            ConstructorInfo ctor = member as ConstructorInfo;
 
-            Debug.Assert(method != null || ctor != null);
+            Debug.Assert(method != null || member is ConstructorInfo);
 #if UNSUPPORTEDAPI
             Debug.Assert(member.DeclaringType == member.ReflectedType);
 #endif
@@ -1568,7 +1567,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return methodSymbol;
             }
 
-            ParameterInfo[] parameters = method != null ? method.GetParameters() : ctor.GetParameters();
+            ParameterInfo[] parameters = member.GetParameters();
             // First create the method.
             methodSymbol = _symFactory.CreateMethod(GetName(member.Name), callingAggregate);
             methodSymbol.AssociatedMemberInfo = member;
@@ -1579,64 +1578,38 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.SetConvNext(callingAggregate.GetFirstUDConversion());
                 callingAggregate.SetFirstUDConversion(methodSymbol);
             }
+
             ACCESS access;
-            if (method != null)
+            if (member.IsPublic)
             {
-                if (method.IsPublic)
-                {
-                    access = ACCESS.ACC_PUBLIC;
-                }
-                else if (method.IsPrivate)
-                {
-                    access = ACCESS.ACC_PRIVATE;
-                }
-                else if (method.IsFamily)
-                {
-                    access = ACCESS.ACC_PROTECTED;
-                }
-                else if (method.IsAssembly || method.IsFamilyAndAssembly)
-                {
-                    access = ACCESS.ACC_INTERNAL;
-                }
-                else
-                {
-                    Debug.Assert(method.IsFamilyOrAssembly);
-                    access = ACCESS.ACC_INTERNALPROTECTED;
-                }
+                access = ACCESS.ACC_PUBLIC;
+            }
+            else if (member.IsPrivate)
+            {
+                access = ACCESS.ACC_PRIVATE;
+            }
+            else if (member.IsFamily)
+            {
+                access = ACCESS.ACC_PROTECTED;
+            }
+            else if (member.IsFamilyOrAssembly)
+            {
+                access = ACCESS.ACC_INTERNALPROTECTED;
             }
             else
             {
-                Debug.Assert(ctor != null);
-                if (ctor.IsPublic)
-                {
-                    access = ACCESS.ACC_PUBLIC;
-                }
-                else if (ctor.IsPrivate)
-                {
-                    access = ACCESS.ACC_PRIVATE;
-                }
-                else if (ctor.IsFamily)
-                {
-                    access = ACCESS.ACC_PROTECTED;
-                }
-                else if (ctor.IsAssembly || ctor.IsFamilyAndAssembly)
-                {
-                    access = ACCESS.ACC_INTERNAL;
-                }
-                else
-                {
-                    Debug.Assert(ctor.IsFamilyOrAssembly);
-                    access = ACCESS.ACC_INTERNALPROTECTED;
-                }
+                Debug.Assert(member.IsAssembly || member.IsFamilyAndAssembly);
+                access = ACCESS.ACC_INTERNAL;
             }
+
             methodSymbol.SetAccess(access);
+            methodSymbol.isVirtual = member.IsVirtual;
+            methodSymbol.isAbstract = member.IsAbstract;
+            methodSymbol.isStatic = member.IsStatic;
 
             if (method != null)
             {
                 methodSymbol.typeVars = GetMethodTypeParameters(method, methodSymbol);
-                methodSymbol.isVirtual = method.IsVirtual;
-                methodSymbol.isAbstract = method.IsAbstract;
-                methodSymbol.isStatic = method.IsStatic;
                 methodSymbol.isOverride = method.IsVirtual && method.IsHideBySig && method.GetRuntimeBaseDefinition() != method;
                 methodSymbol.isOperator = IsOperator(method);
                 methodSymbol.swtSlot = GetSlotForOverride(method);
@@ -1646,15 +1619,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             else
             {
                 methodSymbol.typeVars = BSYMMGR.EmptyTypeArray();
-                methodSymbol.isVirtual = ctor.IsVirtual;
-                methodSymbol.isAbstract = ctor.IsAbstract;
-                methodSymbol.isStatic = ctor.IsStatic;
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
                 methodSymbol.isVarargs = false;
                 methodSymbol.RetType = _typeManager.GetVoid();
             }
+
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);
 
             methodSymbol.isParamArray = DoesMethodHaveParameterArray(parameters);
