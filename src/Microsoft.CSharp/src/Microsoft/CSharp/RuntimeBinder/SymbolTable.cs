@@ -425,7 +425,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         continue;
                     }
 
-                    CType ctype = null;
+                    CType ctype;
                     if (t.IsGenericParameter && t.DeclaringType == genericDefinition)
                     {
                         ctype = LoadClassTypeParameter(agg, t);
@@ -533,8 +533,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (t.DeclaringMethod != null)
             {
-                MethodBase parentMethod = t.DeclaringMethod;
-
                 if (parentType.GetGenericArguments() == null || pos >= parentType.GetGenericArguments().Length)
                 {
                     return t;
@@ -898,8 +896,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (t.IsGenericParameter && t.DeclaringMethod != null)
                 {
                     MethodBase methodBase = t.DeclaringMethod;
-                    ParameterInfo[] parameters = methodBase.GetParameters();
-
                     bool bAdded = false;
 #if UNSUPPORTEDAPI
                     foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetRuntimeMethods(), m => m.MetadataToken == methodBase.MetadataToken))
@@ -1121,8 +1117,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             agg.SetSealed(type.IsSealed);
-
-            AggregateType baseAggType = agg.getThisType();
             if (type.BaseType != null)
             {
                 // type.BaseType can be null for Object or for interface types.
