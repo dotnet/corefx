@@ -1420,11 +1420,11 @@ namespace System.Data.SqlClient
                             sqlValue = new SqlDecimal((Decimal)value);
                         }
 
-                        SqlDecimal sqlValueBeforeAdjust = sqlValue;
                         if (sqlValue.Scale != metadata.scale)
                         {
                             sqlValue = TdsParser.AdjustSqlDecimalScale(sqlValue, metadata.scale);
                         }
+
                         if (sqlValue.Precision > metadata.precision)
                         {
                             try
@@ -1433,7 +1433,7 @@ namespace System.Data.SqlClient
                             }
                             catch (SqlTruncateException)
                             {
-                                throw SQL.BulkLoadCannotConvertValue(value.GetType(), mt, ADP.ParameterValueOutOfRange(sqlValueBeforeAdjust));
+                                throw SQL.BulkLoadCannotConvertValue(value.GetType(), mt, ADP.ParameterValueOutOfRange(sqlValue));
                             }
                         }
 
