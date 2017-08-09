@@ -17,8 +17,7 @@ namespace Microsoft.XmlSerializer.Generator
         public static int Main(string[] args)
         {
             Sgen sgen = new Sgen();
-            sgen.Run(args);
-            return 0;
+            return sgen.Run(args);
         }
 
         private int Run(string[] args)
@@ -29,9 +28,18 @@ namespace Microsoft.XmlSerializer.Generator
             var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
+            bool caseSensitive = false;
 
             try
             {
+                if (args.Length > 0)
+                {
+                    if (args.Where(s => s.IndexOf("casesensitive", StringComparison.OrdinalIgnoreCase) >= 0).Count() > 0)
+                    {
+                        caseSensitive = true;
+                    }
+                }
+
                 for (int i = 0; i < args.Length; i++)
                 {
                     bool argument = false;
@@ -75,6 +83,11 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out"))
                     {
+                        if (!caseSensitive)
+                        {
+                            value = value.ToLower(CultureInfo.InvariantCulture);
+                        }
+
                         if (codePath != null)
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
@@ -85,6 +98,10 @@ namespace Microsoft.XmlSerializer.Generator
                     else if (ArgumentMatch(arg, "type"))
                     {
                         types.Add(value);
+                    }
+                    else if (ArgumentMatch(arg, "casesensitive"))
+                    {
+                        continue;
                     }
                     else
                     {
@@ -121,6 +138,7 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
+                WriteError(e);
                 return 1;
             }
 
@@ -256,6 +274,10 @@ namespace Microsoft.XmlSerializer.Generator
                     Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
                 }
             }
+            else
+            {
+                Console.Out.WriteLine(FormatMessage(true, SR.Format(SR.InfoNoSerializableTypes, assembly.Location)));
+            }
         }
 
         // assumes all same case.        
@@ -299,6 +321,11 @@ namespace Microsoft.XmlSerializer.Generator
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
             assembly = Assembly.LoadFile(path);
+            if (assembly == null)
+            {
+                throw new InvalidOperationException(SR.Format(SR.ErrLoadAssembly, assemblyName));
+            }
+
             return assembly;
         }
 
@@ -309,7 +336,7 @@ namespace Microsoft.XmlSerializer.Generator
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
-        void WriteHelp()
+        private void WriteHelp()
         {
             //TBD
             Console.WriteLine("In Development");
@@ -323,6 +350,15 @@ namespace Microsoft.XmlSerializer.Generator
         private static string FormatMessage(bool warning, string code, string message)
         {
             return "SGEN: " + (warning ? "warning " : "error ") + code + ": " + message;
+        }
+
+        private static void WriteError(Exception e)
+        {
+            Console.Error.WriteLine(FormatMessage(false, e.Message));
+            if (e.InnerException != null)
+            {
+                WriteError(e.InnerException);
+            }
         }
     }
 }
