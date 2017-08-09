@@ -1103,9 +1103,11 @@
       }
     },
     "System.Data.DataSetExtensions": {
-      "InboxOn": {
-        "net45": "4.0.0.0"
-      }
+        "InboxOn": {
+        },
+        "AssemblyVersionInPackageVersion": {
+            "4.1.1.0": "4.5.0"
+        }
     },
     "System.Data.Entity": {
       "InboxOn": {
