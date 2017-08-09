@@ -387,6 +387,7 @@ namespace System.Net.Security
                     {
                         PinnableBufferCacheEventSource.Log.DebugMessage3("In System.Net._SslStream.StartWriting Using Pinnable", this.GetHashCode(), count, PinnableBufferCacheEventSource.AddressOfByteArray(outBuffer));
                     }
+
                     try
                     {
                         SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
@@ -401,6 +402,7 @@ namespace System.Net.Security
                             ProtocolToken message = new ProtocolToken(null, status);
                             throw new IOException(SR.net_io_encrypt, message.GetException());
                         }
+
                     }
                     catch
                     {
@@ -428,6 +430,7 @@ namespace System.Net.Security
                             }
                             TaskToApm.End(ar);
                         }
+
                     }
                     else
                     {
@@ -442,6 +445,7 @@ namespace System.Net.Security
                     _sslState.FinishWrite();
 
                 } while (count != 0);
+
             }
 
             if (asyncRequest != null)

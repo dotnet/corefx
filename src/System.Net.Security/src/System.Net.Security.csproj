@@ -273,8 +273,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.Custom.cs">
-      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.Custom.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ManagedSslBio.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ManagedSslBio.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs</Link>

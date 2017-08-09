@@ -67,6 +67,7 @@ namespace System.Net.Security
             {
                 count = resultSize;
             }
+
             return retVal;
         }
 

@@ -949,6 +949,7 @@ namespace System.Net.Security
                         break;
                 }
             }
+
             return secStatus;
         }
 

@@ -146,8 +146,8 @@ internal static partial class Interop
                 return false;
             }
 
-            context.InputBio.SetBio(recvBuf, recvOffset, recvCount);
-            context.OutputBio.SetBio(buffer: null, isHandshake: true);
+            context.InputBio.SetData(recvBuf, recvOffset, recvCount);
+            context.OutputBio.SetData(buffer: null, isHandshake: true);
 
             int retVal = Ssl.SslDoHandshake(context);
 
@@ -168,6 +168,7 @@ internal static partial class Interop
             {
                 context.MarkHandshakeCompleted();
             }
+
             return stateOk;
         }
 
@@ -180,7 +181,7 @@ internal static partial class Interop
             Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
-            context.OutputBio.SetBio(output, isHandshake: false);
+            context.OutputBio.SetData(output, isHandshake: false);
 
             int retVal;
             unsafe
@@ -209,14 +210,15 @@ internal static partial class Interop
                         throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                 }
             }
-            return context.OutputBio.TakeBytes(out output);
+
+            return context.OutputBio.TakeBytes();
         }
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
-            context.InputBio.SetBio(outBuffer, offset, count);
+            context.InputBio.SetData(outBuffer, offset, count);
 
             int retVal;
             unsafe

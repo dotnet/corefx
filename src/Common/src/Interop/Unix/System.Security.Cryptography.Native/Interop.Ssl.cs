@@ -191,8 +191,8 @@ namespace Microsoft.Win32.SafeHandles
 
         public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
         {
-            SafeBioHandle readBio = Interop.CustomBio.CreateCustomBio();
-            SafeBioHandle writeBio = Interop.CustomBio.CreateCustomBio();
+            SafeBioHandle readBio = Interop.Crypto.ManagedSslBio.CreateManagedSslBio();
+            SafeBioHandle writeBio = Interop.Crypto.ManagedSslBio.CreateManagedSslBio();
             SafeSslHandle handle = Interop.Ssl.SslCreate(context);
             if (readBio.IsInvalid || writeBio.IsInvalid || handle.IsInvalid)
             {
@@ -297,12 +297,14 @@ namespace Microsoft.Win32.SafeHandles
             {
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
-                Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
+                Interop.Crypto.ManagedSslBio.BioSetGCHandle(_bioHandle, _handle);
                 Interop.Crypto.BioSetShoudRetryReadFlag(bioHandle);
             }
 
-            public void SetBio(byte[] buffer, int offset, int length)
+            public void SetData(byte[] buffer, int offset, int length)
             {
+                Debug.Assert(_bytesAvailable == 0);
+
                 _byteArray = buffer;
                 _offset = offset;
                 _bytesAvailable = length;
@@ -312,7 +314,10 @@ namespace Microsoft.Win32.SafeHandles
             {
                 var bytesToCopy = Math.Min(output.Length, _bytesAvailable);
                 if (bytesToCopy == 0)
+                {
                     return -1;
+                }
+
                 var span = new Span<byte>(_byteArray, _offset, bytesToCopy);
                 span.CopyTo(output);
                 _offset += bytesToCopy;
@@ -331,7 +336,7 @@ namespace Microsoft.Win32.SafeHandles
 
             public void Dispose()
             {
-                Dispose(false);
+                Dispose(true);
                 GC.SuppressFinalize(this);
             }
 
@@ -353,10 +358,10 @@ namespace Microsoft.Win32.SafeHandles
             {
                 _bioHandle = bioHandle;
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
-                Interop.CustomBio.BioSetGCHandle(_bioHandle, _handle);
+                Interop.Crypto.ManagedSslBio.BioSetGCHandle(_bioHandle, _handle);
             }
 
-            public void SetBio(byte[] buffer, bool isHandshake)
+            public void SetData(byte[] buffer, bool isHandshake)
             {
                 _byteArray = buffer;
                 _bytesWritten = 0;
@@ -365,8 +370,13 @@ namespace Microsoft.Win32.SafeHandles
 
             public int TakeBytes(out byte[] output)
             {
-                var bytes = _bytesWritten;
                 output = _byteArray;
+                return TakeBytes();
+            }
+
+            public int TakeBytes()
+            {
+                var bytes = _bytesWritten;
                 _bytesWritten = 0;
                 _byteArray = null;
                 return bytes;
@@ -374,6 +384,11 @@ namespace Microsoft.Win32.SafeHandles
 
             public int Write(Span<byte> input)
             {
+                //Only for the handshake do we dynamically allocate
+                //buffers for normal encrypt operations we use a fixed
+                //size buffer handed to us and loop to do all the needed
+                //writes. This should be changed for the handshake as well
+                //but will require more securechannel/sslstatus changes
                 if (_isHandshake)
                 {
                     if (_byteArray == null)
@@ -381,6 +396,7 @@ namespace Microsoft.Win32.SafeHandles
                         _byteArray = new byte[input.Length];
                         _bytesWritten = 0;
                     }
+
                     else if (_byteArray.Length - _bytesWritten < input.Length)
                     {
                         var oldSpan = new Span<byte>(_byteArray);
@@ -388,12 +404,16 @@ namespace Microsoft.Win32.SafeHandles
                         oldSpan.CopyTo(_byteArray);
                     }
                 }
-                var bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
+
+                int bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
+                    //We need to return -1 to indicate that it is an async method and
+                    //and the write should retry later rather and a zero indicating EOF
                     Interop.Crypto.BioSetWriteFlag(_bioHandle);
                     return -1;
                 }
+
                 input.Slice(0, bytesToWrite).CopyTo(new Span<byte>(_byteArray, _bytesWritten));
                 _bytesWritten += bytesToWrite;
                 return bytesToWrite;
@@ -410,7 +430,7 @@ namespace Microsoft.Win32.SafeHandles
 
             public void Dispose()
             {
-                Dispose(false);
+                Dispose(true);
                 GC.SuppressFinalize(this);
             }
 

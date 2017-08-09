@@ -5,8 +5,8 @@
 #include "pal_types.h"
 #include "opensslshim.h"
 
-typedef int32_t (*BioWriteCallback)(BIO* b, const char* buf, int32_t len);
-typedef int32_t (*BioReadCallback)(BIO* b, char* buf, int32_t len);
+typedef int32_t (*BioWriteCallback)(BIO* b, const char* buf, int32_t len, void* appData);
+typedef int32_t (*BioReadCallback)(BIO* b, char* buf, int32_t len, void* appData);
 
 /*
 Creates a new memory-backed BIO instance.
@@ -57,15 +57,11 @@ Shims the BIO_ctrl_pending method.
 Returns the number of pending characters in the BIOs read and write buffers.
 */
 extern "C" int32_t CryptoNative_BioCtrlPending(BIO* bio);
+
 /*
 Adds app data to the extension slot of the bio
 */
 extern "C" void CryptoNative_BioSetAppData(BIO* bio, void* data);
-
-/*
-Gets app data from the extension slot of the bio
-*/
-extern "C" void* CryptoNative_BioGetAppData(BIO* bio);
 
 /*
 Set write flag for the custom bio
@@ -78,13 +74,13 @@ Set the read and should retry flag for the custom bio
 extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio);
 
 /*
-Creates a custom BIO instance.
+Creates a ManagedSslBio instance.
 */
-extern "C" BIO* CryptoNative_CreateCustomBio();
+extern "C" BIO* CryptoNative_CreateManagedSslBio();
 
 /*
-Sets the managed callbacks that are used by the custom bio
+Sets the managed callbacks that are used by the ManagedSslBio
 for reads and writes
 */
-extern "C" void CryptoNative_InitCustomBioMethod(BioWriteCallback bwrite, BioReadCallback bread);
+extern "C" void CryptoNative_InitManagedSslBioMethod(BioWriteCallback bwrite, BioReadCallback bread);
 
