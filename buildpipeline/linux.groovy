@@ -12,7 +12,7 @@ def dockerImageName
 if (params.OSName == 'Linux') {
     dockerImageName = 'microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2'
 } else if (params.OSName == 'RHEL6') {
-    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:centos-6-783abde-20171304101322'
+    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:centos-6-c8c9b08-20174310104313'
 } else {
     error 'Unknown OS name'
 }
