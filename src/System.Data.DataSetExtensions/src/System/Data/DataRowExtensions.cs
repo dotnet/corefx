@@ -149,13 +149,9 @@ namespace System.Data
             {
                 if (type.IsValueType)
                 {
-                    if (type.IsGenericType && !type.IsGenericTypeDefinition && (typeof(Nullable<>) == type.GetGenericTypeDefinition()))
+                    if (type.IsConstructedGenericType && (typeof(Nullable<>) == type.GetGenericTypeDefinition()))
                     {
-                        return (Converter<object, T>)Delegate.CreateDelegate(
-                            typeof(Converter<object, T>),
-                                typeof(UnboxT<T>)
-                                    .GetMethod("NullableField", Reflection.BindingFlags.Static | Reflection.BindingFlags.NonPublic)
-                                    .MakeGenericMethod(type.GetGenericArguments()[0]));
+                        return NullableField;
                     }
                     return ValueField;
                 }
@@ -176,13 +172,13 @@ namespace System.Data
                 return (T)value;
             }
 
-            private static TElem? NullableField<TElem>(object value) where TElem : struct
+            private static T NullableField(object value)
             {
                 if (DBNull.Value == value)
                 {
-                    return default(TElem?);
+                    return default(T);
                 }
-                return new TElem?((TElem)value);
+                return (T)value;
             }
         }
     }
