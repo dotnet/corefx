@@ -8,13 +8,13 @@ using Xunit;
 
 public class NegativeTesting
 {
-    [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
+    [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardOutNegativeTests_Uap()
     {
         Assert.Same(Stream.Null, Console.OpenStandardOutput());
     }
 
-    [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
+    [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
     public static void OpenStandardErrorNegativeTests_Uap()
     {
         Assert.Same(Stream.Null, Console.OpenStandardError());

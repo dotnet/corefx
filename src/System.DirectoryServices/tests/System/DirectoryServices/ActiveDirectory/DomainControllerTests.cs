@@ -26,7 +26,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentException>("context", () => DomainController.GetDomainController(context));
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop("Takes too long on domain joined machines")]
         [InlineData("\0")]
         [InlineData("server:port")]
@@ -38,7 +38,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer))] 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Access to path is denied when in App container")]
         public void GetDomainController_InvalidIPV6_ThrowsActiveDirectoryObjectNotFoundException()
         {

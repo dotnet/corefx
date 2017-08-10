@@ -45,7 +45,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, "samAccountName", null, enabled: true));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsWindowsNanoServer))] 
         public void Ctor_MachineContext_NoException()
         {
             var context = new PrincipalContext(ContextType.Machine);

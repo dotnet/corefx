@@ -122,7 +122,7 @@ namespace Tests.Collections
             CollectionAssert.Equal(items, items2);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         public void CopyToArrayWithNonZeroBounds()
         {
             object[] items = GenerateItems(16);
