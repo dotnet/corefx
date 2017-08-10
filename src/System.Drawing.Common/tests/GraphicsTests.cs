@@ -2435,6 +2435,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawArc_NullPen_ThrowsArgumentNullException()
         {
@@ -2448,6 +2449,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawArc_DisposedPen_ThrowsArgumentException()
         {
@@ -2517,6 +2519,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawArc_Disposed_ThrowsArgumentException()
         {
@@ -2582,6 +2585,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawBezier_Disposed_ThrowsArgumentException()
         {
