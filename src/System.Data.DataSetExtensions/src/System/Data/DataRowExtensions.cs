@@ -143,22 +143,17 @@ namespace System.Data
 
         private static class UnboxT<T>
         {
-            internal static readonly Converter<object, T> s_unbox = Create(typeof(T));
+            internal static readonly Converter<object, T> s_unbox = Create();
 
-            private static Converter<object, T> Create(Type type)
+            private static Converter<object, T> Create()
             {
-                if (type.IsValueType)
-                {
-                    if (type.IsConstructedGenericType && (typeof(Nullable<>) == type.GetGenericTypeDefinition()))
-                    {
-                        return NullableField;
-                    }
+                if (default(T) == null)
+                    return ReferenceOrNullableField;
+                else
                     return ValueField;
-                }
-                return ReferenceField;
             }
 
-            private static T ReferenceField(object value)
+            private static T ReferenceOrNullableField(object value)
             {
                 return ((DBNull.Value == value) ? default(T) : (T)value);
             }
@@ -168,15 +163,6 @@ namespace System.Data
                 if (DBNull.Value == value)
                 {
                     throw DataSetUtil.InvalidCast(string.Format(SR.DataSetLinq_NonNullableCast, typeof(T).ToString()));
-                }
-                return (T)value;
-            }
-
-            private static T NullableField(object value)
-            {
-                if (DBNull.Value == value)
-                {
-                    return default(T);
                 }
                 return (T)value;
             }
