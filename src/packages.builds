@@ -40,6 +40,9 @@
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
       <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
     </Project>
+    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
