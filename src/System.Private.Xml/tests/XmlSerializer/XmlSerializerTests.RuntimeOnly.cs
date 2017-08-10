@@ -434,6 +434,102 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
+    public static void Xml_WithXElement()
+    {
+        var original = new WithXElement(true);
+        var actual = SerializeAndDeserialize<WithXElement>(original,
+@"<?xml version=""1.0""?>
+<WithXElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <e>
+    <ElementName1 Attribute1=""AttributeValue1"">Value1</ElementName1>
+  </e>
+</WithXElement>");
+
+        VerifyXElementObject(original.e, actual.e);
+    }
+
+    private static void VerifyXElementObject(XElement x1, XElement x2, bool checkFirstAttribute = true)
+    {
+        Assert.StrictEqual(x1.Value, x2.Value);
+        Assert.StrictEqual(x1.Name, x2.Name);
+        if (checkFirstAttribute)
+        {
+            Assert.StrictEqual(x1.FirstAttribute.Name, x2.FirstAttribute.Name);
+            Assert.StrictEqual(x1.FirstAttribute.Value, x2.FirstAttribute.Value);
+        }
+    }
+
+    [Fact]
+    public static void Xml_WithXElementWithNestedXElement()
+    {
+        var original = new WithXElementWithNestedXElement(true);
+        var actual = SerializeAndDeserialize<WithXElementWithNestedXElement>(original,
+@"<?xml version=""1.0""?>
+<WithXElementWithNestedXElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <e1>
+    <ElementName1 Attribute1=""AttributeValue1"">
+      <ElementName2 Attribute2=""AttributeValue2"">Value2</ElementName2>
+    </ElementName1>
+  </e1>
+</WithXElementWithNestedXElement>");
+
+        VerifyXElementObject(original.e1, actual.e1);
+        VerifyXElementObject((XElement)original.e1.FirstNode, (XElement)actual.e1.FirstNode);
+    }
+
+    [Fact]
+    public static void Xml_WithArrayOfXElement()
+    {
+        var original = new WithArrayOfXElement(true);
+        var actual = SerializeAndDeserialize<WithArrayOfXElement>(original,
+@"<?xml version=""1.0""?>
+<WithArrayOfXElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <a>
+    <XElement>
+      <item xmlns=""http://p.com/"">item0</item>
+    </XElement>
+    <XElement>
+      <item xmlns=""http://p.com/"">item1</item>
+    </XElement>
+    <XElement>
+      <item xmlns=""http://p.com/"">item2</item>
+    </XElement>
+  </a>
+</WithArrayOfXElement>");
+
+        Assert.StrictEqual(original.a.Length, actual.a.Length);
+        VerifyXElementObject(original.a[0], actual.a[0], checkFirstAttribute: false);
+        VerifyXElementObject(original.a[1], actual.a[1], checkFirstAttribute: false);
+        VerifyXElementObject(original.a[2], actual.a[2], checkFirstAttribute: false);
+    }
+
+    [Fact]
+    public static void Xml_WithListOfXElement()
+    {
+        var original = new WithListOfXElement(true);
+        var actual = SerializeAndDeserialize<WithListOfXElement>(original,
+@"<?xml version=""1.0""?>
+<WithListOfXElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <list>
+    <XElement>
+      <item xmlns=""http://p.com/"">item0</item>
+    </XElement>
+    <XElement>
+      <item xmlns=""http://p.com/"">item1</item>
+    </XElement>
+    <XElement>
+      <item xmlns=""http://p.com/"">item2</item>
+    </XElement>
+  </list>
+</WithListOfXElement>");
+
+        Assert.StrictEqual(original.list.Count, actual.list.Count);
+        VerifyXElementObject(original.list[0], actual.list[0], checkFirstAttribute: false);
+        VerifyXElementObject(original.list[1], actual.list[1], checkFirstAttribute: false);
+        VerifyXElementObject(original.list[2], actual.list[2], checkFirstAttribute: false);
+    }
+
+    [Fact]
     public static void Xml_JaggedArrayAsRoot()
     {
         int[][] jaggedIntegerArray = new int[][] { new int[] { 1, 3, 5, 7, 9 }, new int[] { 0, 2, 4, 6 }, new int[] { 11, 22 } };

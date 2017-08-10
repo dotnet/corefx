@@ -27,11 +27,9 @@
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
-    <Message Text="Get dotnet version" Importance="high" />
-    <Exec Command="$(ToolsDir)\dotnetcli\dotnet.exe --version"/>
     <Message Text="Running Serialization Tool" Importance="normal" />
     <Exec Command="$(ToolsDir)\dotnetcli\dotnet.exe $(OutputPath)Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force" />
-    <Csc OutputAssembly="$(OutputPath)$(SerializerName).dll;" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)"  Sources="$(OutputPath)$(SerializerName).cs" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)"/>
+    <Csc OutputAssembly="$(OutputPath)$(SerializerName).dll;" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)"  Sources="$(OutputPath)$(SerializerName).cs" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" WarningsAsErrors="false" DisabledWarnings="true"/>
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
