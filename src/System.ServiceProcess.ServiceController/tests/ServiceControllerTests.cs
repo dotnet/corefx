@@ -14,13 +14,11 @@ namespace System.ServiceProcess.Tests
     public class ServiceControllerTests : IDisposable
     {
         private readonly TestServiceProvider _testService;
-        private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
 
+        private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
         protected static bool IsProcessElevated => s_isElevated.Value;
 
         private const int ExpectedDependentServiceCount = 3;
-
-        private readonly ServiceProvider _testService;
 
         public ServiceControllerTests()
         {
