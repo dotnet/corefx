@@ -201,13 +201,6 @@
         ]
     },
     {
-        "Name": "System.Data.DataSetExtensions",
-        "Description": "ToDo: AddDescrption",
-        "CommonTypes": [
-            "AddAType"
-        ]
-    },
-    {
         "Name": "System.CodeDom",
         "Description": "Provides types that can be used to model the structure of a source code document and to output source code for that model in a supported language.",
         "CommonTypes": [
@@ -445,6 +438,16 @@
             "System.Data.Common.DbTransaction",
             "System.Data.Common.DbParameterCollection",
             "System.Data.Common.DbProviderFactory"
+        ]
+    },
+    {
+        "Name": "System.Data.DataSetExtensions",
+        "Description": "Provides extensions to form LINQ expressions and method queries against DataTable objects.",
+        "CommonTypes": [
+            "System.Data.DataTable",
+            "System.Data.EnumerableRowCollection",
+            "System.Data.OrderedEnumerableRowCollection",
+            "System.Data.SortExpressionBuilder"
         ]
     },
     {
