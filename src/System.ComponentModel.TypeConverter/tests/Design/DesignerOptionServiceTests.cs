@@ -273,7 +273,7 @@ namespace System.ComponentModel.Design.Tests
         public void DesignerOptionConverter_ConvertToNonString_ThrowsNotSupportedException()
         {
             TypeConverter converter = TypeDescriptor.GetConverter(typeof(DesignerOptionService.DesignerOptionCollection));
-            Assert.Throws< NotSupportedException>(() => converter.ConvertTo(null, typeof(object)));
+            Assert.Throws<NotSupportedException>(() => converter.ConvertTo(null, typeof(object)));
         }
 
         [Fact]
