@@ -42,13 +42,11 @@ namespace Microsoft.XmlSerializer.Generator
 
                 for (int i = 0; i < args.Length; i++)
                 {
-                    bool argument = false;
                     string arg = args[i];
                     string value = string.Empty;
 
                     if (arg.StartsWith("/") || arg.StartsWith("-"))
                     {
-                        argument = true;
                         int colonPos = arg.IndexOf(":");
                         if (colonPos != -1)
                         {
@@ -63,15 +61,6 @@ namespace Microsoft.XmlSerializer.Generator
                         WriteHeader();
                         WriteHelp();
                         return 0;
-                    }
-                    else if (!argument && (arg.EndsWith(".dll") || arg.EndsWith(".exe")))
-                    {
-                        if (assembly != null)
-                        {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
-                        }
-
-                        assembly = arg;
                     }
                     else if (ArgumentMatch(arg, "force"))
                     {
@@ -105,8 +94,19 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else
                     {
-                        errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
-                        continue;
+                        if (arg.EndsWith(".dll") || arg.EndsWith(".exe"))
+                        {
+                            if (assembly != null)
+                            {
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                            }
+
+                            assembly = arg;
+                        }
+                        else
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
                     }
                 }
 
