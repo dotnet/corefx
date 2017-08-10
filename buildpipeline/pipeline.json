@@ -34,7 +34,7 @@
         {
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "PB_DockerTag": "centos-6-783abde-20171304101322",
+            "PB_DockerTag": "centos-6-c8c9b08-20174310104313",
             "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
             "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
@@ -346,7 +346,7 @@
         {
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "PB_DockerTag": "centos-6-783abde-20171304101322",
+            "PB_DockerTag": "centos-6-c8c9b08-20174310104313",
             "PB_BuildArguments": "-buildArch=x64 -Debug",
             "PB_BuildTestsArguments": "-buildArch=x64 -Debug -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
