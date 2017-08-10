@@ -155,10 +155,11 @@ namespace System.Security.Cryptography
                 }
             }
 
-            public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
-            {
-                return Interop.AppleCrypto.RsaEncrypt(GetKeys().PublicKey, data, padding);
-            }
+            public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding) =>
+                Interop.AppleCrypto.RsaEncrypt(GetKeys().PublicKey, data, padding);
+
+            public override bool TryEncrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten) =>
+                Interop.AppleCrypto.TryRsaEncrypt(GetKeys().PublicKey, source, destination, padding, out bytesWritten);
 
             public override byte[] Decrypt(byte[] data, RSAEncryptionPadding padding)
             {
@@ -170,6 +171,18 @@ namespace System.Security.Cryptography
                 }
 
                 return Interop.AppleCrypto.RsaDecrypt(keys.PrivateKey, data, padding);
+            }
+
+            public override bool TryDecrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten)
+            {
+                SecKeyPair keys = GetKeys();
+
+                if (keys.PrivateKey == null)
+                {
+                    throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+                }
+
+                return Interop.AppleCrypto.TryRsaDecrypt(keys.PrivateKey, source, destination, padding, out bytesWritten);
             }
 
             public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
@@ -210,35 +223,77 @@ namespace System.Security.Cryptography
                     palAlgId);
             }
 
+            public override bool TrySignHash(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten)
+            {
+                if (padding == null)
+                {
+                    throw new ArgumentNullException(nameof(padding));
+                }
+                if (padding != RSASignaturePadding.Pkcs1)
+                {
+                    throw new CryptographicException(SR.Cryptography_InvalidPaddingMode);
+                }
+
+                SecKeyPair keys = GetKeys();
+
+                if (keys.PrivateKey == null)
+                {
+                    throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+                }
+
+                Interop.AppleCrypto.PAL_HashAlgorithm palAlgId = PalAlgorithmFromAlgorithmName(hashAlgorithm, out int expectedSize);
+                if (source.Length != expectedSize)
+                {
+                    // Windows: NTE_BAD_DATA ("Bad Data.")
+                    // OpenSSL: RSA_R_INVALID_MESSAGE_LENGTH ("invalid message length")
+                    throw new CryptographicException(
+                        SR.Format(
+                            SR.Cryptography_BadHashSize_ForAlgorithm,
+                            source.Length,
+                            expectedSize,
+                            hashAlgorithm.Name));
+                }
+
+                return Interop.AppleCrypto.TryGenerateSignature(keys.PrivateKey, source, destination, palAlgId, out bytesWritten);
+            }
+
             public override bool VerifyHash(
                 byte[] hash,
                 byte[] signature,
                 HashAlgorithmName hashAlgorithm,
                 RSASignaturePadding padding)
             {
+                if (hash == null)
+                {
+                    throw new ArgumentNullException(nameof(hash));
+                }
+                if (signature == null)
+                {
+                    throw new ArgumentNullException(nameof(signature));
+                }
+
+                return VerifyHash((ReadOnlySpan<byte>)hash, (ReadOnlySpan<byte>)signature, hashAlgorithm, padding);
+            }
+
+            public override bool VerifyHash(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+            {
                 if (padding != RSASignaturePadding.Pkcs1)
+                {
                     throw new CryptographicException(SR.Cryptography_InvalidPaddingMode);
+                }
 
-                int expectedSize;
-                Interop.AppleCrypto.PAL_HashAlgorithm palAlgId =
-                    PalAlgorithmFromAlgorithmName(hashAlgorithm, out expectedSize);
-
-                return Interop.AppleCrypto.VerifySignature(
-                    GetKeys().PublicKey,
-                    hash,
-                    signature,
-                    palAlgId);
+                Interop.AppleCrypto.PAL_HashAlgorithm palAlgId = PalAlgorithmFromAlgorithmName(hashAlgorithm, out int expectedSize);
+                return Interop.AppleCrypto.VerifySignature(GetKeys().PublicKey, hash, signature, palAlgId);
             }
 
-            protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
-            {
-                return AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
-            }
+            protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm) =>
+                AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
 
-            protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
-            {
-                return AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
-            }
+            protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm) =>
+                AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
+
+            protected override bool TryHashData(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten) =>
+                AsymmetricAlgorithmHelpers.TryHashData(source, destination, hashAlgorithm, out bytesWritten);
 
             protected override void Dispose(bool disposing)
             {
