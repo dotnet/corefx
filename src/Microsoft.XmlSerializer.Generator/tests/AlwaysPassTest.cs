@@ -14,3 +14,9 @@ public static partial class XmlSerializerTests
         Assert.True(true);
     }
 }
+
+//Add dummy class for UWP Run.
+public class DummyClass
+{
+    public string MyString { get; set; }
+}
