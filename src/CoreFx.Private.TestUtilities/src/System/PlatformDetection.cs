@@ -30,8 +30,6 @@ namespace System
         public static bool IsDrawingSupported => (IsNotWindowsNanoServer && IsNotWindowsIoTCore);
         public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
         public static bool IsNotArmProcess => !IsArmProcess;
-        public static int WindowsVersion => GetWindowsVersion();
-
 
         public static bool IsNotWinRT => !IsWinRT;
         public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);

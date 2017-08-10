@@ -24,6 +24,7 @@ namespace System
         public static bool IsNotFedoraOrRedHatOrCentos => true;
         public static bool IsFedora => false;
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && !File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")));
+        public static int WindowsVersion => GetWindowsVersion();
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
