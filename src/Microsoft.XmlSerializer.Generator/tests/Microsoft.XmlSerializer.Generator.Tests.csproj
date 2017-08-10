@@ -23,7 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\src\Microsoft.XmlSerializer.Generator.csproj" />
   </ItemGroup>
-  <Target Name="GenerateSerializationAssembly" AfterTargets="Build">
+  <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition="'$(TargetGroup)' != 'uap'">
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
