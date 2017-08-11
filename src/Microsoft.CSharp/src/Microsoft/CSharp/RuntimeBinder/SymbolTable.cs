@@ -964,20 +964,22 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region CTypeFromType
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal CType[] GetCTypeArrayFromTypes(IList<Type> types)
+        internal CType[] GetCTypeArrayFromTypes(Type[] types)
         {
-            if (types == null)
+            Debug.Assert(types != null);
+
+            int length = types.Length;
+            if (length == 0)
             {
-                return null;
+                return Array.Empty<CType>();
             }
 
-            CType[] ctypes = new CType[types.Count];
-
-            int i = 0;
-            foreach (Type t in types)
+            CType[] ctypes = new CType[length];
+            for (int i = 0; i < types.Length; i++)
             {
+                Type t = types[i];
                 Debug.Assert(t != null);
-                ctypes[i++] = GetCTypeFromType(t);
+                ctypes[i] = GetCTypeFromType(t);
             }
 
             return ctypes;
@@ -1119,7 +1121,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             agg.SetSealed(type.IsSealed);
-            agg.SetHasExternReference(false);
 
             AggregateType baseAggType = agg.getThisType();
             if (type.BaseType != null)
@@ -1629,9 +1630,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
             methodSymbol.SetAccess(access);
-
-            methodSymbol.isExtension = false; // We don't support extension methods.
-            methodSymbol.isExternal = false;
 
             if (method != null)
             {

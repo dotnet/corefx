@@ -117,7 +117,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // In order to make this work, we have to reset the symbol table and begin
                 // the second binding over again when we detect the collision. So this is
                 // something like a longjmp to the beginning of binding. For a single binding,
-                // if we have to do this more than once, we give an ICE--this would be a
+                // if we have to do this more than once, we give an RBE--this would be a
                 // scenario that needs to know about both N.T's simultaneously to work.
 
                 // See SymbolTable.LoadSymbolsFromType for more information.
@@ -136,8 +136,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     catch (ResetBindException)
                     {
                         Reset();
-                        Debug.Assert(false, "More than one symbol table name collision in a single binding");
-                        throw Error.InternalCompilerError();
+                        throw Error.BindingNameCollision();
                     }
                 }
             }
@@ -224,7 +223,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CSharpInvokeMemberBinder callPayload = payload as CSharpInvokeMemberBinder;
             if (callPayload != null)
             {
-                int arity = callPayload.TypeArguments?.Count ?? 0;
+                int arity = callPayload.TypeArguments?.Length ?? 0;
                 MemberLookup mem = new MemberLookup();
                 Expr callingObject = CreateCallingObjectForCall(callPayload, arguments, locals);
 
@@ -615,7 +614,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private ExprMemberGroup CreateMemberGroupEXPR(
             string Name,
-            IList<Type> typeArguments,
+            Type[] typeArguments,
             Expr callingObject,
             SYMKIND kind)
         {
@@ -712,7 +711,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             TypeArray typeArgumentsAsTypeArray = BSYMMGR.EmptyTypeArray();
-            if (typeArguments != null && typeArguments.Count > 0)
+            if (typeArguments != null && typeArguments.Length > 0)
             {
                 typeArgumentsAsTypeArray = _semanticChecker.getBSymmgr().AllocParams(
                     _symbolTable.GetCTypeArrayFromTypes(typeArguments));
@@ -845,7 +844,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.BindInvokeFailedNonDelegate();
             }
 
-            int arity = payload.TypeArguments?.Count ?? 0;
+            int arity = payload.TypeArguments?.Length ?? 0;
             MemberLookup mem = new MemberLookup();
 
             Debug.Assert(_bindingContext.ContextForMemberLookup != null);
@@ -999,7 +998,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             _symbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
-            ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new List<Type> { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             Expr expr = _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
