@@ -140,7 +140,7 @@ namespace System.DirectoryServices.Tests
             Assert.Throws<ObjectDisposedException>(() => entry.CopyTo(disposedEntry, "newName"));
         }
 
-        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
         [ActiveIssue(21346, TargetFrameworkMonikers.UapAot)]
         public void DeleteTree_NoObject_ThrowsCOMException()
         {

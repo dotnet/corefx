@@ -208,7 +208,7 @@ namespace System.Collections.Tests
             }
         }
 
-        [ConditionalTheory("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {

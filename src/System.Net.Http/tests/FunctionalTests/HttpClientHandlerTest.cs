@@ -168,7 +168,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsUap))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsUap))]
         public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
         {
             using (var handler = new HttpClientHandler())

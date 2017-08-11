@@ -180,7 +180,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Same(inner, wse.InnerException);
         }
 
-        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsFullFramework))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsFullFramework))]
         public void GetObjectData_Success()
         {
             var wse = new WebSocketException();

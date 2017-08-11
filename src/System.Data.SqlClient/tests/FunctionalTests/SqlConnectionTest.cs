@@ -27,8 +27,8 @@ namespace System.Data.SqlClient.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Integ auth on Test server is supported on Windows right now
         // https://github.com/dotnet/corefx/issues/19218 And https://github.com/dotnet/corefx/issues/21598
-        [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer), 
-                         "System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotArmProcess))] 
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), 
+                                                    nameof(PlatformDetection.IsNotArmProcess))] 
         public void IntegratedAuthConnectionTest()
         {
             using (TestTdsServer server = TestTdsServer.StartTestServer())

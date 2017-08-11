@@ -139,7 +139,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
         Assert.NotNull(Console.Title);
     }
 
-    [ConditionalTheory("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
+    [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(255)]
@@ -356,7 +356,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [PlatformSpecific(TestPlatforms.Windows)]
-    [ConditionalFact("System.PlatformDetection, CoreFx.Private.TestUtilities!" + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void SetWindowSize_GetWindowSize_ReturnsExpected()
     {
         if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
