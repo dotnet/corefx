@@ -49,6 +49,10 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
+    <ProjectReference Include="..\..\System.Net.Http\src\System.Net.Http.csproj">
+      <Name>System.Net.Http</Name>
+      <Project>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="$(CommonPath)\Interop\Windows\wininet\Interop.wininet_errors.cs">
