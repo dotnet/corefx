@@ -735,13 +735,13 @@ namespace System.Text.Tests
         [Theory]
         [InlineData("Hello", new char[] { 'a' }, "Helloa")]
         [InlineData("Hello", new char[] { 'b', 'c', 'd' }, "Hellobcd")]
+        [InlineData("Hello", new char[] { 'b', '\0', 'd' }, "Hellob\0d")]
         [InlineData("", new char[] { 'e', 'f', 'g' }, "efg")]
         [InlineData("Hello", new char[0], "Hello")]
         public static void Append_CharSpan(string original, char[] value, string expected)
         {
             var builder = new StringBuilder(original);
             builder.Append(new ReadOnlySpan<char>(value));
-            Assert.Equal(expected, builder.ToString());
             Assert.Equal(expected, builder.ToString());
         }
 
