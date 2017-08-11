@@ -167,6 +167,6 @@
     <value>System.IO.Ports is currently only supported on Windows.</value>
   </data>
   <data name="PlatformNotSupported_SerialPort_GetPortNames" xml:space="preserve">
-    <value>Enumeration of serial port names is not supported on the current OS.</value>
+    <value>Enumeration of serial port names is not supported on the current platform.</value>
   </data>
 </root>
