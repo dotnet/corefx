@@ -194,6 +194,7 @@
     </Content>
   </ItemGroup>
   <Target Name="CopyRuntimeConfigJSon" AfterTargets="Build">
+    <Message Text="Copy $(ToolsDir)\csc.runtimeconfig.json to $(OutputPath)Microsoft.XmlSerializer.Generator.runtimeconfig.json" Importance="high"/>
     <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
