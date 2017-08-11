@@ -4,8 +4,8 @@
     <BuildConfigurations>
       netstandard;
       uap;
-      Linux;
-      OSX;
+      netstandard-Linux;
+      netstandard-OSX;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
