@@ -189,6 +189,8 @@ namespace System.Security.Cryptography
             {
                 if (hash == null)
                     throw new ArgumentNullException(nameof(hash));
+                if (string.IsNullOrEmpty(hashAlgorithm.Name))
+                    throw HashAlgorithmNameNullOrEmpty();
                 if (padding == null)
                     throw new ArgumentNullException(nameof(padding));
                 if (padding != RSASignaturePadding.Pkcs1)
@@ -225,6 +227,10 @@ namespace System.Security.Cryptography
 
             public override bool TrySignHash(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten)
             {
+                if (string.IsNullOrEmpty(hashAlgorithm.Name))
+                {
+                    throw HashAlgorithmNameNullOrEmpty();
+                }
                 if (padding == null)
                 {
                     throw new ArgumentNullException(nameof(padding));
@@ -381,6 +387,9 @@ namespace System.Security.Cryptography
                 return Interop.AppleCrypto.ImportEphemeralKey(pkcs1Blob, isPrivateKey);
             }
         }
+
+        private static Exception HashAlgorithmNameNullOrEmpty() =>
+            new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
     }
 
     internal static class RsaKeyBlobHelpers
