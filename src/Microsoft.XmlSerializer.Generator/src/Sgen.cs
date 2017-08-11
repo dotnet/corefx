@@ -55,7 +55,11 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    arg = arg.ToLower(CultureInfo.InvariantCulture);
+                    if (!caseSensitive)
+                    {
+                        arg = arg.ToLower(CultureInfo.InvariantCulture);
+                    }
+
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
                         WriteHeader();
@@ -72,10 +76,10 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out"))
                     {
-                        if (!caseSensitive)
-                        {
-                            value = value.ToLower(CultureInfo.InvariantCulture);
-                        }
+                        //if (!caseSensitive)
+                        //{
+                        //    value = value.ToLower(CultureInfo.InvariantCulture);
+                        //}
 
                         if (codePath != null)
                         {
