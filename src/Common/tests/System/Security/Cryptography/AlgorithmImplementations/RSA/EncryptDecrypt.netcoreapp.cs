@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.Rsa.Tests
@@ -43,15 +42,22 @@ namespace System.Security.Cryptography.Rsa.Tests
                 actual = new byte[TestData.HelloBytes.Length - 1];
                 Assert.False(rsa.TryDecrypt(cipherBytes, actual, RSAEncryptionPadding.OaepSHA1, out bytesWritten));
                 Assert.Equal(0, bytesWritten);
+                Assert.Equal<byte>(new byte[actual.Length], actual);
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                // Just right... but that may be insufficient on Unix, where with padding the output destination
+                // may need to be larger than the actual decrypted content.
+                actual = new byte[TestData.HelloBytes.Length];
+                bool decrypted = rsa.TryDecrypt(cipherBytes, actual, RSAEncryptionPadding.OaepSHA1, out bytesWritten);
+                if (RSAFactory.SupportsDecryptingIntoExactSpaceRequired || decrypted)
                 {
-                    // Just right... but that may be insufficient on Unix, where with padding the output destination
-                    // may need to be larger than the actual decrypted content.
-                    actual = new byte[TestData.HelloBytes.Length];
-                    Assert.True(rsa.TryDecrypt(cipherBytes, actual, RSAEncryptionPadding.OaepSHA1, out bytesWritten));
+                    Assert.True(decrypted);
                     Assert.Equal(TestData.HelloBytes.Length, bytesWritten);
                     Assert.Equal<byte>(TestData.HelloBytes, actual);
+                }
+                else
+                {
+                    Assert.Equal(0, bytesWritten);
+                    Assert.Equal<byte>(new byte[actual.Length], actual);
                 }
 
                 // Bigger than needed

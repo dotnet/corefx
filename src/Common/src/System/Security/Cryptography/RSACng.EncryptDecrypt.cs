@@ -68,7 +68,10 @@ namespace System.Security.Cryptography
                             };
                             return EncryptOrDecrypt(keyHandle, data, AsymmetricPaddingMode.NCRYPT_PAD_OAEP_FLAG, &paddingInfo, encrypt);
                         }
-                        finally { Marshal.FreeHGlobal(namePtr); }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(namePtr);
+                        }
 
                     default:
                         throw new CryptographicException(SR.Cryptography_UnsupportedPaddingMode);
@@ -104,7 +107,10 @@ namespace System.Security.Cryptography
                             };
                             return TryEncryptOrDecrypt(keyHandle, source, destination, AsymmetricPaddingMode.NCRYPT_PAD_OAEP_FLAG, &paddingInfo, encrypt, out bytesWritten);
                         }
-                        finally { Marshal.FreeHGlobal(namePtr); }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(namePtr);
+                        }
 
                     default:
                         throw new CryptographicException(SR.Cryptography_UnsupportedPaddingMode);
@@ -144,9 +150,7 @@ namespace System.Security.Cryptography
         }
 
         // Now that the padding mode and information have been marshaled to their native counterparts, perform the encryption or decryption.
-        private unsafe bool TryEncryptOrDecrypt(
-            SafeNCryptKeyHandle key, ReadOnlySpan<byte> input, Span<byte> output,
-            AsymmetricPaddingMode paddingMode, void* paddingInfo, bool encrypt, out int bytesWritten)
+        private unsafe bool TryEncryptOrDecrypt(SafeNCryptKeyHandle key, ReadOnlySpan<byte> input, Span<byte> output, AsymmetricPaddingMode paddingMode, void* paddingInfo, bool encrypt, out int bytesWritten)
         {
             int numBytesNeeded;
             ErrorCode errorCode = encrypt ?

@@ -32,7 +32,8 @@ internal static partial class Interop
             SafeRsaHandle rsa,
             RsaPadding padding)
         {
-            fixed (byte* fromPtr = &from.DangerousGetPinnableReference(), toPtr = &to.DangerousGetPinnableReference())
+            fixed (byte* fromPtr = &from.DangerousGetPinnableReference())
+            fixed (byte* toPtr = &to.DangerousGetPinnableReference())
             {
                 return RsaPublicEncrypt(flen, fromPtr, toPtr, rsa, padding);
             }
@@ -53,7 +54,8 @@ internal static partial class Interop
             SafeRsaHandle rsa,
             RsaPadding padding)
         {
-            fixed (byte* fromPtr = &from.DangerousGetPinnableReference(), toPtr = &to.DangerousGetPinnableReference())
+            fixed (byte* fromPtr = &from.DangerousGetPinnableReference())
+            fixed (byte* toPtr = &to.DangerousGetPinnableReference())
             {
                 return RsaPrivateDecrypt(flen, fromPtr, toPtr, rsa, padding);
             }
@@ -75,7 +77,8 @@ internal static partial class Interop
 
         internal static unsafe bool RsaSign(int type, ReadOnlySpan<byte> m, int m_len, Span<byte> sigret, out int siglen, SafeRsaHandle rsa)
         {
-            fixed (byte* mPtr = &m.DangerousGetPinnableReference(), sigretPtr = &sigret.DangerousGetPinnableReference())
+            fixed (byte* mPtr = &m.DangerousGetPinnableReference())
+            fixed (byte* sigretPtr = &sigret.DangerousGetPinnableReference())
             {
                 return RsaSign(type, mPtr, m_len, sigretPtr, out siglen, rsa);
             }
@@ -87,7 +90,8 @@ internal static partial class Interop
 
         internal static unsafe bool RsaVerify(int type, ReadOnlySpan<byte> m, int m_len, ReadOnlySpan<byte> sigbuf, int siglen, SafeRsaHandle rsa)
         {
-            fixed (byte* mPtr = &m.DangerousGetPinnableReference(), sigbufPtr = &sigbuf.DangerousGetPinnableReference())
+            fixed (byte* mPtr = &m.DangerousGetPinnableReference())
+            fixed (byte* sigbufPtr = &sigbuf.DangerousGetPinnableReference())
             {
                 return RsaVerify(type, mPtr, m_len, sigbufPtr, siglen, rsa);
             }

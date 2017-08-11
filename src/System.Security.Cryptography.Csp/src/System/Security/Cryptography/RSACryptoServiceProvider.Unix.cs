@@ -61,11 +61,17 @@ namespace System.Security.Cryptography
                 throw PaddingModeNotSupported();
         }
 
-        public override bool TryDecrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten) =>
-            padding == null ? throw new ArgumentNullException(nameof(padding)) :
-            source.Length > (KeySize / 8) ? throw new CryptographicException(SR.Format(SR.Cryptography_Padding_DecDataTooBig, Convert.ToString(KeySize / 8))) :
-            padding == RSAEncryptionPadding.Pkcs1 || padding == RSAEncryptionPadding.OaepSHA1 ? _impl.TryDecrypt(source, destination, padding, out bytesWritten) :
-            throw PaddingModeNotSupported();
+        public override bool TryDecrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten)
+        {
+            if (padding == null)
+                throw new ArgumentNullException(nameof(padding));
+            if (source.Length > (KeySize / 8))
+                throw new CryptographicException(SR.Format(SR.Cryptography_Padding_DecDataTooBig, Convert.ToString(KeySize / 8)));
+            if (padding != RSAEncryptionPadding.Pkcs1 && padding != RSAEncryptionPadding.OaepSHA1)
+                throw PaddingModeNotSupported();
+
+            return _impl.TryDecrypt(source, destination, padding, out bytesWritten);
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -79,9 +85,7 @@ namespace System.Security.Cryptography
         public byte[] Encrypt(byte[] rgb, bool fOAEP)
         {
             if (rgb == null)
-            {
                 throw new ArgumentNullException(nameof(rgb));
-            }
 
             return _impl.Encrypt(rgb, fOAEP ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1);
         }
@@ -99,10 +103,15 @@ namespace System.Security.Cryptography
                 throw PaddingModeNotSupported();
         }
 
-        public override bool TryEncrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten) =>
-            padding == null ? throw new ArgumentNullException(nameof(padding)) :
-            padding == RSAEncryptionPadding.Pkcs1 || padding == RSAEncryptionPadding.OaepSHA1 ? _impl.TryEncrypt(source, destination, padding, out bytesWritten) :
-            throw PaddingModeNotSupported();
+        public override bool TryEncrypt(ReadOnlySpan<byte> source, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten)
+        {
+            if (padding == null)
+                throw new ArgumentNullException(nameof(padding));
+            if (padding != RSAEncryptionPadding.Pkcs1 && padding != RSAEncryptionPadding.OaepSHA1)
+                throw PaddingModeNotSupported();
+
+            return _impl.TryEncrypt(source, destination, padding, out bytesWritten);
+        }
 
         public byte[] ExportCspBlob(bool includePrivateParameters)
         {

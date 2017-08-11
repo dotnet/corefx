@@ -12,7 +12,8 @@ internal static partial class Interop
     {
         internal static unsafe ErrorCode NCryptSignHash(SafeNCryptKeyHandle hKey, void* pPaddingInfo, ReadOnlySpan<byte> pbHashValue, int cbHashValue, Span<byte> pbSignature, int cbSignature, out int pcbResult, AsymmetricPaddingMode dwFlags)
         {
-            fixed (byte* pbHashValuePtr = &pbHashValue.DangerousGetPinnableReference(), pbSignaturePtr = &pbSignature.DangerousGetPinnableReference())
+            fixed (byte* pbHashValuePtr = &pbHashValue.DangerousGetPinnableReference())
+            fixed (byte* pbSignaturePtr = &pbSignature.DangerousGetPinnableReference())
             {
                 return NCryptSignHash(hKey, pPaddingInfo, pbHashValuePtr, cbHashValue, pbSignaturePtr, cbSignature, out pcbResult, dwFlags);
             }
@@ -23,7 +24,8 @@ internal static partial class Interop
 
         internal static unsafe ErrorCode NCryptVerifySignature(SafeNCryptKeyHandle hKey, void* pPaddingInfo, ReadOnlySpan<byte> pbHashValue, int cbHashValue, ReadOnlySpan<byte> pbSignature, int cbSignature, AsymmetricPaddingMode dwFlags)
         {
-            fixed (byte* pbHashValuePtr = &pbHashValue.DangerousGetPinnableReference(), pbSignaturePtr = &pbSignature.DangerousGetPinnableReference())
+            fixed (byte* pbHashValuePtr = &pbHashValue.DangerousGetPinnableReference())
+            fixed (byte* pbSignaturePtr = &pbSignature.DangerousGetPinnableReference())
             {
                 return NCryptVerifySignature(hKey, pPaddingInfo, pbHashValuePtr, cbHashValue, pbSignaturePtr, cbSignature, dwFlags);
             }

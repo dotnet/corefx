@@ -12,7 +12,8 @@ internal static partial class Interop
     {
         internal static unsafe ErrorCode NCryptEncrypt(SafeNCryptKeyHandle hKey, ReadOnlySpan<byte> pbInput, int cbInput, void* pPaddingInfo, Span<byte> pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags)
         {
-            fixed (byte* pbInputPtr = &pbInput.DangerousGetPinnableReference(), pbOutputPtr = &pbOutput.DangerousGetPinnableReference())
+            fixed (byte* pbInputPtr = &pbInput.DangerousGetPinnableReference())
+            fixed (byte* pbOutputPtr = &pbOutput.DangerousGetPinnableReference())
             {
                 return NCryptEncrypt(hKey, pbInputPtr, cbInput, pPaddingInfo, pbOutputPtr, cbOutput, out pcbResult, dwFlags);
             }
@@ -23,7 +24,8 @@ internal static partial class Interop
 
         internal static unsafe ErrorCode NCryptDecrypt(SafeNCryptKeyHandle hKey, ReadOnlySpan<byte> pbInput, int cbInput, void* pPaddingInfo, Span<byte> pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags)
         {
-            fixed (byte* pbInputPtr = &pbInput.DangerousGetPinnableReference(), pbOutputPtr = &pbOutput.DangerousGetPinnableReference())
+            fixed (byte* pbInputPtr = &pbInput.DangerousGetPinnableReference())
+            fixed (byte* pbOutputPtr = &pbOutput.DangerousGetPinnableReference())
             {
                 return NCryptDecrypt(hKey, pbInputPtr, cbInput, pPaddingInfo, pbOutputPtr, cbOutput, out pcbResult, dwFlags);
             }
