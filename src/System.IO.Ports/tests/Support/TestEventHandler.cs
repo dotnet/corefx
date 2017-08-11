@@ -27,6 +27,7 @@ namespace Legacy.Support
         private readonly bool _shouldWait;
         private readonly AutoResetEvent _eventHandlerWait = new AutoResetEvent(false);
         private readonly object _lock = new object();
+        private readonly string _testName;
 
         public int NumEventsHandled { get; private set; }
 
@@ -35,7 +36,7 @@ namespace Legacy.Support
         /// </summary>
         public Predicate<T> EventFilter { get; set; }
 
-        protected TestEventHandler(SerialPort com, bool shouldThrow, bool shouldWait)
+        protected TestEventHandler(SerialPort com, bool shouldThrow, bool shouldWait, string testName = "Not set")
         {
             if (shouldThrow && shouldWait)
             {
@@ -45,6 +46,7 @@ namespace Legacy.Support
             _com = com;
             _shouldThrow = shouldThrow;
             _shouldWait = shouldWait;
+            _testName = testName;
         }
 
         protected void HandleEvent(object source, T eventType)
@@ -78,7 +80,7 @@ namespace Legacy.Support
 
             if (_shouldWait)
             {
-                Assert.True(_eventHandlerWait.WaitOne(10000));
+                Assert.True(_eventHandlerWait.WaitOne(10000), $"Handler type: [{GetType()}] Test name: [{_testName}]");
             }
         }
 
@@ -144,7 +146,7 @@ namespace Legacy.Support
                     }
                 }
             }
-            Assert.True(false, $"Failed to validate event type {eventType}");
+            Assert.True(false, $"Failed to validate event type {eventType}. Received: {string.Join(", ", _eventTypes)}");
         }
 
         public int NumberOfOccurrencesOfType(T eventType)

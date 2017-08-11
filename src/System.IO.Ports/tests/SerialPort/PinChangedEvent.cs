@@ -90,7 +90,7 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem), nameof(HasReliableBreak))]
         public void PinChangedEvent_Break()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -144,20 +144,16 @@ namespace System.IO.Ports.Tests
                 com1.Open();
                 com2.Open();
 
-                com2.BreakState = true;
-                Thread.Sleep(100);
                 com2.DtrEnable = true;
                 Thread.Sleep(100);
                 com2.RtsEnable = true;
 
-                eventHandler.WaitForEvent(MAX_TIME_WAIT, 3);
+                eventHandler.WaitForEvent(MAX_TIME_WAIT, 2);
 
-                eventHandler.Validate(SerialPinChange.Break, 0);
                 eventHandler.Validate(SerialPinChange.DsrChanged, 0);
                 eventHandler.Validate(SerialPinChange.CtsChanged, 0);
 
                 com1.PinChanged -= pinchangedEventHandler;
-                com2.BreakState = false;
                 com2.DtrEnable = false;
                 com2.RtsEnable = false;
             }
