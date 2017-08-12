@@ -14,11 +14,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Linux-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-OSX-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-OSX-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include=".\SGenTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
-    <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
+    <Compile Include=".\SGenTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX' AND '$(TargetGroup)' != 'netcoreapp-OSX'" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX' AND '$(TargetGroup)' != 'netcoreapp-OSX'" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX' AND '$(TargetGroup)' != 'netcoreapp-OSX'" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX' AND '$(TargetGroup)' != 'netcoreapp-OSX'" />
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
@@ -27,7 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\src\Microsoft.XmlSerializer.Generator.csproj" />
   </ItemGroup>
-  <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'">
+  <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX' AND '$(TargetGroup)' != 'netcoreapp-OSX'">
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>

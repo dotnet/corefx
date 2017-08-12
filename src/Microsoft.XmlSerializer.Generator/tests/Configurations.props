@@ -6,6 +6,7 @@
       uap;
       netstandard-Linux;
       netstandard-OSX;
+      netcoreapp-OSX;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
