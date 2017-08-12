@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
@@ -199,7 +200,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal sealed class ObjectWithArrays
+    public sealed class ObjectWithArrays
     {
         public int[] IntArray;
         public string[] StringArray;
@@ -254,6 +255,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
     public class NonSerializableClass
     {
         public int Value;
+    }
+
+    [Serializable]
+    public class SerializableClassDerivedFromNonSerializableClass : NonSerializableClass
+    {
+        public int AnotherValue;
     }
 
     [Serializable]
@@ -450,7 +457,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal sealed class PointEqualityComparer : IEqualityComparer<Point>
+    public sealed class PointEqualityComparer : IEqualityComparer<Point>
     {
         public bool Equals(Point x, Point y) => (x.X == y.X) && (x.Y == y.Y);
 
@@ -458,7 +465,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal class SimpleKeyedCollection : System.Collections.ObjectModel.KeyedCollection<int, Point>
+    public class SimpleKeyedCollection : System.Collections.ObjectModel.KeyedCollection<int, Point>
     {
         protected override int GetKeyForItem(Point item)
         {
@@ -576,4 +583,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return true;
         }
     }
+
+#pragma warning disable 0618 // obsolete warning
+    [Serializable]
+    internal class HashCodeProvider : IHashCodeProvider
+    {
+        public int GetHashCode(object obj)
+        {
+            return 8;
+        }
+    }
+#pragma warning restore 0618
 }

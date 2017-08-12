@@ -2,34 +2,29 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+
 namespace System.Drawing
 {
-    using System.Diagnostics;
-    using System.Runtime.InteropServices;
-
-    /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics"]/*' />
-    /// <devdoc>
-    ///         The BufferedGraphics class can be thought of as a "Token" or "Reference" to the
-    ///         buffer that a BufferedGraphicsContext creates. While a BufferedGraphics is 
-    ///         outstanding, the memory associated with the buffer is locked. The general design
-    ///         is such that under normal conditions a single BufferedGraphics will be in use at
-    ///         one time for a given BufferedGraphicsContext.
-    /// </devdoc>
+    /// <summary>
+    /// The BufferedGraphics class can be thought of as a "Token" or "Reference" to the buffer that a
+    /// BufferedGraphicsContext creates. While a BufferedGraphics is outstanding, the memory associated with the
+    /// buffer is locked. The general designis such that under normal conditions a single BufferedGraphics will be in
+    /// use at one time for a given BufferedGraphicsContext.
+    /// </summary>
     public sealed class BufferedGraphics : IDisposable
     {
         private Graphics _bufferedGraphicsSurface;
-        private Graphics _targetGraphics;
+        private readonly Graphics _targetGraphics;
         private BufferedGraphicsContext _context;
-        private IntPtr _targetDC;
-        private Point _targetLoc;
-        private Size _virtualSize;
-        private bool _disposeContext;
-        private static int s_rop = 0xcc0020; // RasterOp.SOURCE.GetRop();
+        private readonly IntPtr _targetDC;
+        private readonly Point _targetLoc;
+        private readonly Size _virtualSize;
+        private const int RasterOp = 0xcc0020; // RasterOp.SOURCE.GetRop();
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.BufferedGraphics"]/*' />
-        /// <devdoc>
-        ///         Internal constructor, this class is created by the BufferedGraphicsContext.
-        /// </devdoc>
+        /// <summary>
+        /// Internal constructor, this class is created by BufferedGraphicsContext.
+        /// </summary>
         internal BufferedGraphics(Graphics bufferedGraphicsSurface, BufferedGraphicsContext context, Graphics targetGraphics,
                                   IntPtr targetDC, Point targetLoc, Size virtualSize)
         {
@@ -41,19 +36,12 @@ namespace System.Drawing
             _virtualSize = virtualSize;
         }
 
-        ~BufferedGraphics()
-        {
-            Dispose(false);
-        }
+        ~BufferedGraphics() => Dispose(false);
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.Dispose"]/*' />
-        /// <devdoc>
-        ///         Disposes the object and releases the lock on the memory.
-        /// </devdoc>
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        /// <summary>
+        /// Disposes the object and releases the lock on the memory.
+        /// </summary>
+        public void Dispose() => Dispose(true);
 
         private void Dispose(bool disposing)
         {
@@ -69,6 +57,7 @@ namespace System.Drawing
                         _context = null;
                     }
                 }
+
                 if (_bufferedGraphicsSurface != null)
                 {
                     _bufferedGraphicsSurface.Dispose();
@@ -77,39 +66,19 @@ namespace System.Drawing
             }
         }
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.DisposeContext"]/*' />
-        /// <devdoc>
-        ///         Internal property - determines if we need to dispose of the Context when this is disposed
-        /// </devdoc>
-        internal bool DisposeContext
-        {
-            get
-            {
-                return _disposeContext;
-            }
-            set
-            {
-                _disposeContext = value;
-            }
-        }
+        /// <summary>
+        /// Determines if we need to dispose of the Context when this is disposed
+        /// </summary>
+        internal bool DisposeContext { get; set; }
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.Graphics"]/*' />
-        /// <devdoc>
-        ///         Allows access to the Graphics wrapper for the buffer.
-        /// </devdoc>
-        public Graphics Graphics
-        {
-            get
-            {
-                Debug.Assert(_bufferedGraphicsSurface != null, "The BufferedGraphicsSurface is null!");
-                return _bufferedGraphicsSurface;
-            }
-        }
+        /// <summary>
+        /// Allows access to the Graphics wrapper for the buffer.
+        /// </summary>
+        public Graphics Graphics => _bufferedGraphicsSurface;
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.Render"]/*' />
-        /// <devdoc>
-        ///         Renders the buffer to the original graphics used to allocate the buffer.
-        /// </devdoc>
+        /// <summary>
+        /// Renders the buffer to the original graphics used to allocate the buffer.
+        /// </summary>
         public void Render()
         {
             if (_targetGraphics != null)
@@ -122,10 +91,9 @@ namespace System.Drawing
             }
         }
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.Render1"]/*' />
-        /// <devdoc>
-        ///         Renders the buffer to the specified target graphics.
-        /// </devdoc>
+        /// <summary>
+        /// Renders the buffer to the specified target graphics.
+        /// </summary>
         public void Render(Graphics target)
         {
             if (target != null)
@@ -143,19 +111,14 @@ namespace System.Drawing
             }
         }
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.Render2"]/*' />
-        /// <devdoc>
-        ///         Renders the buffer to the specified target HDC.
-        /// </devdoc>
-        public void Render(IntPtr targetDC)
-        {
-            RenderInternal(new HandleRef(null, targetDC), this);
-        }
+        /// <summary>
+        /// Renders the buffer to the specified target HDC.
+        /// </summary>
+        public void Render(IntPtr targetDC) => RenderInternal(new HandleRef(null, targetDC), this);
 
-        /// <include file='doc\BufferedGraphics.uex' path='docs/doc[@for="BufferedGraphics.RenderInternal"]/*' />
-        /// <devdoc>
-        ///         Internal method that renders the specified buffer into the target.
-        /// </devdoc>
+        /// <summary>
+        /// Internal method that renders the specified buffer into the target.
+        /// </summary>
         private void RenderInternal(HandleRef refTargetDC, BufferedGraphics buffer)
         {
             IntPtr sourceDC = buffer.Graphics.GetHdc();
@@ -163,7 +126,7 @@ namespace System.Drawing
             try
             {
                 SafeNativeMethods.BitBlt(refTargetDC, _targetLoc.X, _targetLoc.Y, _virtualSize.Width, _virtualSize.Height,
-                                         new HandleRef(buffer.Graphics, sourceDC), 0, 0, s_rop);
+                                         new HandleRef(buffer.Graphics, sourceDC), 0, 0, RasterOp);
             }
             finally
             {

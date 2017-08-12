@@ -7,7 +7,9 @@
     <RootNamespace>System.Xml</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn),649</NoWarn>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <FeatureCompiledXsl Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'uapaot'">true</FeatureCompiledXsl>
+    <DefineConstants Condition="'$(FeatureCompiledXsl)' == 'true'">$(DefineConstants);FEATURE_COMPILED_XSL</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);FEATURE_SERIALIZATION_UAPAOT;UAPAOT</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -497,11 +499,20 @@
     </EmbeddedResource>-->
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="System\Xml\XmlCharType.bin">
+      <LogicalName>XmlCharType.bin</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
+    <Reference Include="System.Reflection.Emit" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
+    <Reference Include="System.Reflection.Emit.Lightweight" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Threading.Tasks.Extensions\src\System.Threading.Tasks.Extensions.csproj" />
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.Console" />
@@ -511,13 +522,11 @@
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Linq" />
+    <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Requests" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.ObjectModel" />
-    <Reference Include="System.Reflection.Emit" />
-    <Reference Include="System.Reflection.Emit.ILGeneration" />
-    <Reference Include="System.Reflection.Emit.Lightweight" />
     <Reference Include="System.Reflection.Primitives" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
@@ -527,8 +536,9 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Thread" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(FeatureCompiledXsl)' == 'true'">
     <Compile Include="System\Xml\Xsl\IlGen\GenerateHelper.cs" />
     <Compile Include="System\Xml\Xsl\IlGen\IteratorDescriptor.cs" />
     <Compile Include="System\Xml\Xsl\IlGen\OptimizerPatterns.cs" />
@@ -542,6 +552,10 @@
     <Compile Include="System\Xml\Xsl\IlGen\XmlILTrace.cs" />
     <Compile Include="System\Xml\Xsl\IlGen\XmlIlTypeHelper.cs" />
     <Compile Include="System\Xml\Xsl\IlGen\XmlIlVisitor.cs" />
+    <Compile Include="System\Xml\Xsl\XmlIlGenerator.cs" />
+    <Compile Include="System\Xml\Xsl\XmlILCommand.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="System\Xml\Xsl\ISourceLineInfo.cs" />
     <Compile Include="System\Xml\Xsl\ListBase.cs" />
     <Compile Include="System\Xml\Xsl\Pair.cs" />
@@ -617,8 +631,6 @@
     <Compile Include="System\Xml\Xsl\Runtime\XsltFunctions.cs" />
     <Compile Include="System\Xml\Xsl\Runtime\XsltLibrary.cs" />
     <Compile Include="System\Xml\Xsl\SourceLineInfo.cs" />
-    <Compile Include="System\Xml\Xsl\XmlILCommand.cs" />
-    <Compile Include="System\Xml\Xsl\XmlIlGenerator.cs" />
     <Compile Include="System\Xml\Xsl\XmlNodeKindFlags.cs" />
     <Compile Include="System\Xml\Xsl\XmlQualifiedNameTest.cs" />
     <Compile Include="System\Xml\Xsl\XmlQueryCardinality.cs" />
@@ -740,6 +752,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)'=='true'">
     <Compile Include="System\Xml\Xsl\Runtime\XmlCollation.Unix.cs" />
+    <Compile Include="System\Xml\Core\XmlTextReaderImpl.Unix.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -8,77 +8,54 @@ using Xunit;
 
 public class NegativeTesting
 {
-    [Fact]
-    public static void OpenStandardOutNegativeTests()
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
+    public static void OpenStandardOutNegativeTests_Uap()
     {
-        NegativeConsoleOutputTests(Console.OpenStandardOutput());
+        Assert.Same(Stream.Null, Console.OpenStandardOutput());
+    }
+
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWinRT))] // In appcontainer, the stream cannot be opened: there is no Console
+    public static void OpenStandardErrorNegativeTests_Uap()
+    {
+        Assert.Same(Stream.Null, Console.OpenStandardError());
     }
 
     [Fact]
-    public static void OpenStandardErrorNegativeTests()
+    public static void StreamNullTests()
     {
-        NegativeConsoleOutputTests(Console.OpenStandardError());
-    }
+        Stream stream = Stream.Null;
 
-    private static void NegativeConsoleOutputTests(Stream stream)
-    {
-        //ConsoleStream.Length should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => { long x = stream.Length; });
+        Assert.Equal(0L, stream.Length);
 
-        //ConsoleStream.get_Position should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => { long x = stream.Position; });
-        
-        //ConsoleStream.set_Position should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.Position = 50L);
-        
-        //ConsoleStream.SetLength should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.SetLength(50L));
+        Assert.Equal(0L, stream.Position);
+
+        stream.Position = 50L;
+        stream.SetLength(50L);
+        Assert.Equal(0L, stream.Length);
 
         // Flushing a stream is fine.
         stream.Flush();
 
         //Read and write methods
 
-        //ConsoleStream.Read(null) should throw ArgumentNullException
-        Assert.Throws<ArgumentNullException>(() => stream.Read(null, 0, 1));
+        Assert.Equal(0, stream.Read(null, 0, 1));
+        Assert.Equal(0, stream.Read(new byte[] { 0, 1 }, -1, 0));
+        Assert.Equal(0, stream.Read(new byte[] { 0, 1 }, 0, -1));
+        Assert.Equal(0, stream.Read(new byte[] { 0, 1 }, 0, 50));
+        Assert.Equal(0, stream.Read(new byte[] { 0, 1 }, 0, 2));
         
-        //ConsoleStream.Read() should throw ArgumentOutOfRangeException
-        Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[] { 0, 1 }, -1, 0));
-        
-        //ConsoleStream.Read() should throw ArgumentOutOfRangeException
-        Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[] { 0, 1 }, 0, -1));
-        
-        //ConsoleStream.Read() should throw ArgumentException
-        Assert.Throws<ArgumentException>(() => stream.Read(new byte[] { 0, 1 }, 0, 50));
-        
-        //ConsoleStream.Read() should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.Read(new byte[] { 0, 1 }, 0, 2));
-        
-        //ConsoleStream.Write() should throw ArgumentNullException
-        Assert.Throws<ArgumentNullException>(() => stream.Write(null, 0, 1));
-        
-        //ConsoleStream.Write() should throw ArgumentOutOfRangeException
-        Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[] { 0, 1 }, -1, 0));
-        
-        //ConsoleStream.Write() should throw ArgumentOutOfRangeException
-        Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[] { 0, 1 }, 0, -1));
+        stream.Write(null, 0, 1);
+        stream.Write(new byte[] { 0, 1 }, -1, 0);
+        stream.Write(new byte[] { 0, 1 }, 0, -1);
+        stream.Write(new byte[] { 0, 1 }, 0, 50);
 
-        //ConsoleStream.Write() should throw ArgumentException
-        Assert.Throws<ArgumentException>(() => stream.Write(new byte[] { 0, 1 }, 0, 50));
-        
-        //ConsoleStream.Write() should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.Seek(0L, SeekOrigin.Begin));
+        Assert.Equal(0L, stream.Seek(0L, SeekOrigin.Begin));
 
-        // Close the stream and make sure we can no longer read, write or flush
+        // Null stream even ignores Dispose.
         stream.Dispose();
 
-        //ConsoleStream.Read() should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.Read(new byte[] { 0, 1 }, 0, 1));
-
-        //ConsoleStream.Write() should throw NotSupportedException
-        Assert.Throws<NotSupportedException>(() => stream.Write(new byte[] { 0, 1 }, 0, 1));
-        
-        //ConsoleStream.Flush() should throw NotSupportedException
-        Assert.Throws<ObjectDisposedException>(() => stream.Flush());
+        Assert.Equal(0, stream.Read(new byte[] { 0, 1 }, 0, 1));
+        stream.Write(new byte[] { 0, 1 }, 0, 1);
+        stream.Flush();
     }
 }

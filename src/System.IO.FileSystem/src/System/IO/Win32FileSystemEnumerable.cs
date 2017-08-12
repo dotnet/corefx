@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security;
-
-using Microsoft.Win32.SafeHandles;
 
 namespace System.IO
 {
@@ -100,8 +99,8 @@ namespace System.IO
         private SafeFindHandle _hnd = null;
 
         // empty means we know in advance that we won?t find any search results, which can happen if:
-        // 1. we don?t have a search pattern
-        // 2. we?re enumerating only the top directory and found no matches during the first call
+        // 1. we don't have a search pattern
+        // 2. we're enumerating only the top directory and found no matches during the first call
         // This flag allows us to return early for these cases. We can?t know this in advance for
         // SearchOption.AllDirectories because we do a ?*? search for subdirs and then use the
         // searchPattern at each directory level.
@@ -111,8 +110,6 @@ namespace System.IO
         private readonly SearchOption _searchOption;
         private readonly string _fullPath;
         private readonly string _normalizedSearchPath;
-        private readonly uint _oldMode;
-        private readonly bool _setBackOldMode;
 
         [SecuritySafeCritical]
         internal Win32FileSystemEnumerableIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption, SearchResultHandler<TSource> resultHandler)
@@ -122,8 +119,6 @@ namespace System.IO
             Debug.Assert(searchPattern != null);
             Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
             Debug.Assert(resultHandler != null);
-
-            _setBackOldMode = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out _oldMode);
 
             string normalizedSearchPattern = PathHelpers.NormalizeSearchPattern(searchPattern);
 
@@ -166,27 +161,31 @@ namespace System.IO
 
             Interop.Kernel32.WIN32_FIND_DATA data = new Interop.Kernel32.WIN32_FIND_DATA();
 
-            // Open a Find handle
-            _hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
-
-            if (_hnd.IsInvalid)
+            using (new DisableMediaInsertionPrompt())
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND && errorCode != Interop.Errors.ERROR_NO_MORE_FILES)
+                // Open a Find handle
+                _hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
+
+                if (_hnd.IsInvalid)
                 {
-                    HandleError(errorCode, _searchData.FullPath);
-                }
-                else
-                {
-                    // flag this as empty only if we're searching just top directory
-                    // Used in fast path for top directory only
-                    _empty = _searchOption == SearchOption.TopDirectoryOnly;
+                    int errorCode = Marshal.GetLastWin32Error();
+                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND && errorCode != Interop.Errors.ERROR_NO_MORE_FILES)
+                    {
+                        throw HandleError(errorCode, _searchData.FullPath);
+                    }
+                    else
+                    {
+                        // flag this as empty only if we're searching just top directory
+                        // Used in fast path for top directory only
+                        _empty = _searchOption == SearchOption.TopDirectoryOnly;
+                    }
                 }
             }
-            // fast path for TopDirectoryOnly. If we have a result, go ahead and set it to
-            // current. If empty, dispose handle.
+
             if (_searchOption == SearchOption.TopDirectoryOnly)
             {
+                // fast path for TopDirectoryOnly. If we have a result, go ahead and set it to
+                // current. If empty, dispose handle.
                 if (_empty)
                 {
                     _hnd.Dispose();
@@ -200,10 +199,10 @@ namespace System.IO
                     }
                 }
             }
-            // for AllDirectories, we first recurse into dirs, so cleanup and add searchData
-            // to the list
             else
             {
+                // for AllDirectories, we first recurse into dirs, so cleanup and add searchData
+                // to the list
                 _hnd.Dispose();
                 _searchList = new List<PathPair>();
                 _searchList.Add(_searchData);
@@ -245,18 +244,10 @@ namespace System.IO
         {
             try
             {
-                if (_hnd != null)
-                {
-                    _hnd.Dispose();
-                }
+                _hnd?.Dispose();
             }
             finally
             {
-                if (_setBackOldMode)
-                {
-                    uint _ignore;
-                    Interop.Kernel32.SetThreadErrorMode(_oldMode, out _ignore);
-                }
                 base.Dispose(disposing);
             }
         }
@@ -296,6 +287,7 @@ namespace System.IO
                     {
                         Debug.Assert(_searchOption != SearchOption.TopDirectoryOnly, "should not reach this code path if searchOption == TopDirectoryOnly");
                         Debug.Assert(_searchList != null, "_searchList should not be null");
+
                         // Traverse directory structure. We need to get '*'
                         while (_searchList.Count > 0)
                         {
@@ -310,16 +302,25 @@ namespace System.IO
                             // Execute searchCriteria against the current directory
                             string searchPath = Path.Combine(_searchData.FullPath, _searchCriteria);
 
-                            // Open a Find handle
-                            _hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
-                            if (_hnd.IsInvalid)
+                            using (new DisableMediaInsertionPrompt())
                             {
-                                int errorCode = Marshal.GetLastWin32Error();
-                                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND || errorCode == Interop.Errors.ERROR_NO_MORE_FILES || errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND)
-                                    continue;
+                                // Open a Find handle
+                                _hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
 
-                                _hnd.Dispose();
-                                HandleError(errorCode, _searchData.FullPath);
+                                if (_hnd.IsInvalid)
+                                {
+                                    int errorCode = Marshal.GetLastWin32Error();
+                                    switch (errorCode)
+                                    {
+                                        case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                                        case Interop.Errors.ERROR_NO_MORE_FILES:
+                                        case Interop.Errors.ERROR_PATH_NOT_FOUND:
+                                            continue;
+                                    }
+
+                                    _hnd.Dispose();
+                                    throw HandleError(errorCode, _searchData.FullPath);
+                                }
                             }
 
                             state = STATE_FIND_NEXT_FILE;
@@ -342,32 +343,39 @@ namespace System.IO
                     {
                         if (_hnd != null)
                         {
-                            // Keep asking for more matching files/dirs, add it to the list
-                            while (Interop.Kernel32.FindNextFile(_hnd, ref data))
+                            using (new DisableMediaInsertionPrompt())
                             {
-                                TSource result;
-                                if (IsResultIncluded(ref data, out result))
+                                // Keep asking for more matching files/dirs, add it to the list
+                                while (Interop.Kernel32.FindNextFile(_hnd, ref data))
                                 {
-                                    current = result;
-                                    return true;
+                                    TSource result;
+                                    if (IsResultIncluded(ref data, out result))
+                                    {
+                                        current = result;
+                                        return true;
+                                    }
                                 }
                             }
 
                             // Make sure we quit with a sensible error.
                             int errorCode = Marshal.GetLastWin32Error();
+                            _hnd?.Dispose();
 
-                            if (_hnd != null)
-                                _hnd.Dispose();
-
-                            // ERROR_FILE_NOT_FOUND is valid here because if the top level
-                            // dir doesn't contain any subdirs and matching files then
-                            // we will get here with this errorcode from the _searchList walk
-                            if ((errorCode != 0) && (errorCode != Interop.Errors.ERROR_NO_MORE_FILES)
-                                && (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND))
+                            switch (errorCode)
                             {
-                                HandleError(errorCode, _searchData.FullPath);
+                                case Interop.Errors.ERROR_SUCCESS:
+                                case Interop.Errors.ERROR_NO_MORE_FILES:
+
+                                // ERROR_FILE_NOT_FOUND is valid here because if the top level
+                                // dir doesn't contain any subdirs and matching files then
+                                // we will get here with this errorcode from the _searchList walk
+                                case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                                    break;
+                                default:
+                                    throw HandleError(errorCode, _searchData.FullPath);
                             }
                         }
+
                         if (_searchOption == SearchOption.TopDirectoryOnly)
                         {
                             state = STATE_FINISH;
@@ -391,17 +399,17 @@ namespace System.IO
         [SecurityCritical]
         private bool IsResultIncluded(ref Interop.Kernel32.WIN32_FIND_DATA findData, out TSource result)
         {
-            Debug.Assert(findData.cFileName.Length != 0 && !Path.IsPathRooted(findData.cFileName),
+            Debug.Assert(findData.cFileName.Length != 0 && !Path.IsPathRooted(findData.cFileName.GetStringFromFixedBuffer()),
                 "Expected file system enumeration to not have empty file/directory name and not have rooted name");
 
             return _resultHandler.IsResultIncluded(_searchData.FullPath, _searchData.UserPath, ref findData, out result);
         }
 
         [SecurityCritical]
-        private void HandleError(int errorCode, string path)
+        private Exception HandleError(int errorCode, string path)
         {
             Dispose();
-            throw Win32Marshal.GetExceptionForWin32Error(errorCode, path);
+            return Win32Marshal.GetExceptionForWin32Error(errorCode, path);
         }
 
         [SecurityCritical]  // auto-generated
@@ -412,20 +420,28 @@ namespace System.IO
             Interop.Kernel32.WIN32_FIND_DATA data = new Interop.Kernel32.WIN32_FIND_DATA();
             try
             {
-                // Get all files and dirs
-                hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
-
-                if (hnd.IsInvalid)
+                using (new DisableMediaInsertionPrompt())
                 {
-                    int errorCode = Marshal.GetLastWin32Error();
+                    // Get all files and dirs
+                    hnd = Interop.Kernel32.FindFirstFile(searchPath, ref data);
 
-                    // This could happen if the dir doesn't contain any files.
-                    // Continue with the recursive search though, eventually
-                    // _searchList will become empty
-                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND || errorCode == Interop.Errors.ERROR_NO_MORE_FILES || errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND)
-                        return;
+                    if (hnd.IsInvalid)
+                    {
+                        int errorCode = Marshal.GetLastWin32Error();
 
-                    HandleError(errorCode, localSearchData.FullPath);
+                        // This could happen if the dir doesn't contain any files.
+                        // Continue with the recursive search though, eventually
+                        // _searchList will become empty
+                        switch (errorCode)
+                        {
+                            case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                            case Interop.Errors.ERROR_NO_MORE_FILES:
+                            case Interop.Errors.ERROR_PATH_NOT_FOUND:
+                                return;
+                            default:
+                                throw HandleError(errorCode, localSearchData.FullPath);
+                        }
+                    }
                 }
 
                 // Add subdirs to _searchList. Exempt ReparsePoints as appropriate
@@ -435,11 +451,13 @@ namespace System.IO
                 {
                     if (Win32FileSystemEnumerableHelpers.IsDir(ref data))
                     {
-                        Debug.Assert(data.cFileName.Length != 0 && !Path.IsPathRooted(data.cFileName),
+                        string fileName = data.cFileName.GetStringFromFixedBuffer();
+
+                        Debug.Assert(fileName.Length != 0 && !Path.IsPathRooted(fileName),
                             "Expected file system enumeration to not have empty file/directory name and not have rooted name");
 
-                        string tempFullPath = Path.Combine(localSearchData.FullPath, data.cFileName);
-                        string tempUserPath = Path.Combine(localSearchData.UserPath, data.cFileName);
+                        string tempFullPath = Path.Combine(localSearchData.FullPath, fileName);
+                        string tempUserPath = Path.Combine(localSearchData.UserPath, fileName);
 
                         // Setup search data for the sub directory and push it into the list
                         PathPair searchDataSubDir = new PathPair(tempUserPath, tempFullPath);
@@ -458,8 +476,7 @@ namespace System.IO
             }
             finally
             {
-                if (hnd != null)
-                    hnd.Dispose();
+                hnd?.Dispose();
             }
         }
 
@@ -551,7 +568,7 @@ namespace System.IO
                 if ((_includeFiles && Win32FileSystemEnumerableHelpers.IsFile(ref findData)) ||
                     (_includeDirs && Win32FileSystemEnumerableHelpers.IsDir(ref findData)))
                 {
-                    result = Path.Combine(userPath, findData.cFileName);
+                    result = Path.Combine(userPath, findData.cFileName.GetStringFromFixedBuffer());
                     return true;
                 }
 
@@ -567,7 +584,7 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsFile(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
                     result = new FileInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -584,7 +601,7 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsDir(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
                     result = new DirectoryInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -601,13 +618,13 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsFile(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
                     result = new FileInfo(fullPathFinal, ref findData);
                     return true;
                 }
                 else if (Win32FileSystemEnumerableHelpers.IsDir(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName);
+                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
                     result = new DirectoryInfo(fullPathFinal, ref findData);
                     return true;
                 }
@@ -625,7 +642,7 @@ namespace System.IO
         {
             // Don't add "." nor ".."
             return (0 != (data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY))
-                                                && !data.cFileName.Equals(".") && !data.cFileName.Equals("..");
+                                                && !data.cFileName.FixedBufferEqualsString(".") && !data.cFileName.FixedBufferEqualsString("..");
         }
 
         [SecurityCritical]  // auto-generated

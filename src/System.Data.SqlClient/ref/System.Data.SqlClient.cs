@@ -184,6 +184,17 @@ namespace Microsoft.SqlServer.Server
         public static Microsoft.SqlServer.Server.SqlMetaData InferFromValue(object value, string name) { throw null; }
     }
 }
+namespace System.Data.Sql
+{
+    public sealed partial class SqlNotificationRequest
+    {
+        public SqlNotificationRequest() { }
+        public SqlNotificationRequest(string userData, string options, int timeout) { }
+        public string Options { get { throw null; } set { } }
+        public int Timeout { get { throw null; } set { } }
+        public string UserData { get { throw null; } set { } }
+    }
+}
 namespace System.Data.SqlClient
 {
     public enum ApplicationIntent
@@ -249,11 +260,13 @@ namespace System.Data.SqlClient
         public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(int sourceColumnIndex, string destinationColumn) { throw null; }
         public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(string sourceColumn, int destinationColumnIndex) { throw null; }
         public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(string sourceColumn, string destinationColumn) { throw null; }
+        public new void Clear() { }
         public bool Contains(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { throw null; }
         public void CopyTo(System.Data.SqlClient.SqlBulkCopyColumnMapping[] array, int index) { }
         public int IndexOf(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { throw null; }
         public void Insert(int index, System.Data.SqlClient.SqlBulkCopyColumnMapping value) { }
         public void Remove(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { }
+        public new void RemoveAt(int index) { }
     }
     [System.FlagsAttribute]
     public enum SqlBulkCopyOptions
@@ -271,6 +284,7 @@ namespace System.Data.SqlClient
         internal SqlClientFactory() { }
         public static readonly System.Data.SqlClient.SqlClientFactory Instance;
         public override System.Data.Common.DbCommand CreateCommand() { throw null; }
+        public override System.Data.Common.DbCommandBuilder CreateCommandBuilder() { throw null; }
         public override System.Data.Common.DbConnection CreateConnection() { throw null; }
         public override System.Data.Common.DbConnectionStringBuilder CreateConnectionStringBuilder() { throw null; }
         public override System.Data.Common.DbDataAdapter CreateDataAdapter() { throw null; }
@@ -331,6 +345,35 @@ namespace System.Data.SqlClient
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync() { throw null; }
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override void Prepare() { }
+        public System.Data.Sql.SqlNotificationRequest Notification { get { throw null; } set { } }
+        public void ResetCommandTimeout() { }
+    }
+    public sealed class SqlCommandBuilder : System.Data.Common.DbCommandBuilder
+    {
+        public SqlCommandBuilder() { }
+        public SqlCommandBuilder(SqlDataAdapter adapter) { }
+        public override System.Data.Common.CatalogLocation CatalogLocation { get { throw null; } set { } }
+        public override string CatalogSeparator { get { throw null; } set { } }
+        new public SqlDataAdapter DataAdapter { get { throw null; } set { } }
+        public override string QuotePrefix { get { throw null; } set { } }
+        public override string QuoteSuffix { get { throw null; } set { } }
+        public override string SchemaSeparator { get { throw null; } set { } }
+        new public SqlCommand GetInsertCommand() { throw null; }
+        new public SqlCommand GetInsertCommand(bool useColumnsForParameterNames) { throw null; }
+        new public SqlCommand GetUpdateCommand() { throw null; }
+        new public SqlCommand GetUpdateCommand(bool useColumnsForParameterNames) { throw null; }
+        new public SqlCommand GetDeleteCommand() { throw null; }
+        new public SqlCommand GetDeleteCommand(bool useColumnsForParameterNames) { throw null; }
+        protected override void ApplyParameterInfo(System.Data.Common.DbParameter parameter, System.Data.DataRow datarow, System.Data.StatementType statementType, bool whereClause) { }
+        protected override string GetParameterName(int parameterOrdinal) { throw null; }
+        protected override string GetParameterName(string parameterName) { throw null; }
+        protected override string GetParameterPlaceholder(int parameterOrdinal) { throw null; }
+        public static void DeriveParameters(SqlCommand command) { }
+        protected override DataTable GetSchemaTable(System.Data.Common.DbCommand srcCommand) { throw null; }
+        protected override System.Data.Common.DbCommand InitializeCommand(System.Data.Common.DbCommand command) { throw null; }
+        public override string QuoteIdentifier(string unquotedIdentifier) { throw null; }
+        protected override void SetRowUpdatingHandler(System.Data.Common.DbDataAdapter adapter) { }
+        public override string UnquoteIdentifier(string quotedIdentifier) { throw null; }
     }
     public sealed partial class SqlConnection : System.Data.Common.DbConnection, System.ICloneable
     {
@@ -378,6 +421,7 @@ namespace System.Data.SqlClient
         public string CurrentLanguage { get { throw null; } set { } }
         public string DataSource { get { throw null; } set { } }
         public bool Encrypt { get { throw null; } set { } }
+        public bool Enlist { get { throw null; } set { } }
         public string FailoverPartner { get { throw null; } set { } }
         public string InitialCatalog { get { throw null; } set { } }
         public bool IntegratedSecurity { get { throw null; } set { } }
@@ -393,6 +437,7 @@ namespace System.Data.SqlClient
         public bool PersistSecurityInfo { get { throw null; } set { } }
         public bool Pooling { get { throw null; } set { } }
         public bool Replication { get { throw null; } set { } }
+        public string TransactionBinding { get { throw null; } set { } }
         public bool TrustServerCertificate { get { throw null; } set { } }
         public string TypeSystemVersion { get { throw null; } set { } }
         public string UserID { get { throw null; } set { } }
@@ -425,6 +470,70 @@ namespace System.Data.SqlClient
         protected override void OnRowUpdated(System.Data.Common.RowUpdatedEventArgs value) { }
         protected override void OnRowUpdating(System.Data.Common.RowUpdatingEventArgs value) { }
         object System.ICloneable.Clone() { throw null; }
+    }
+    public sealed partial class SqlDependency
+    {
+        public SqlDependency() { }
+        public SqlDependency(SqlCommand command) { }
+        public SqlDependency(SqlCommand command, string options, int timeout) { }
+        public bool HasChanges { get { throw null; } }
+        public string Id { get { throw null; } }
+        public event OnChangeEventHandler OnChange { add { } remove { } }
+        public void AddCommandDependency(SqlCommand command) { }
+        public static bool Start(string connectionString) { throw null; }
+        public static bool Start(string connectionString, string queue) { throw null; }
+        public static bool Stop(string connectionString) { throw null; }
+        public static bool Stop(string connectionString, string queue) { throw null; }
+    }
+    public delegate void OnChangeEventHandler(object sender, SqlNotificationEventArgs e);
+    public partial class SqlNotificationEventArgs : System.EventArgs
+    {
+        public SqlNotificationEventArgs(SqlNotificationType type, SqlNotificationInfo info, SqlNotificationSource source) { }
+        public SqlNotificationType Type { get { throw null; } }
+        public SqlNotificationInfo Info { get { throw null; } }
+        public SqlNotificationSource Source { get { throw null; } }
+    }
+    public enum SqlNotificationInfo
+    {
+        Truncate = 0,
+        Insert = 1,
+        Update = 2,
+        Delete = 3,
+        Drop = 4,
+        Alter = 5,
+        Restart = 6,
+        Error = 7,
+        Query = 8,
+        Invalid = 9,
+        Options = 10,
+        Isolation = 11,
+        Expired = 12,
+        Resource = 13,
+        PreviousFire = 14,
+        TemplateLimit = 15,
+        Merge = 16,
+        Unknown = -1,
+        AlreadyChanged = -2
+    }
+    public enum SqlNotificationSource
+    {
+        Data = 0,
+        Timeout = 1,
+        Object = 2,
+        Database = 3,
+        System = 4,
+        Statement = 5,
+        Environment = 6,
+        Execution = 7,
+        Owner = 8,
+        Unknown = -1,
+        Client = -2
+    }
+    public enum SqlNotificationType
+    {
+        Change = 0,
+        Subscribe = 1,
+        Unknown = -1
     }
     public sealed partial class SqlRowUpdatedEventArgs : System.Data.Common.RowUpdatedEventArgs
     {
@@ -603,6 +712,7 @@ namespace System.Data.SqlClient
         public override int Add(object value) { throw null; }
         public System.Data.SqlClient.SqlParameter Add(string parameterName, System.Data.SqlDbType sqlDbType) { throw null; }
         public System.Data.SqlClient.SqlParameter Add(string parameterName, System.Data.SqlDbType sqlDbType, int size) { throw null; }
+        public System.Data.SqlClient.SqlParameter Add(string parameterName, System.Data.SqlDbType sqlDbType, int size, string sourceColumn) { throw null; }
         public override void AddRange(System.Array values) { }
         public void AddRange(System.Data.SqlClient.SqlParameter[] values) { }
         public System.Data.SqlClient.SqlParameter AddWithValue(string parameterName, object value) { throw null; }

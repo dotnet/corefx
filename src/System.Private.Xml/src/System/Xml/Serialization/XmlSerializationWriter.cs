@@ -41,7 +41,7 @@ namespace System.Xml.Serialization
         private bool _soap12;
         private bool _escapeName = true;
 
-#if uapaot
+#if FEATURE_SERIALIZATION_UAPAOT
         // this method must be called before any generated serialization methods are called
         internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase)
         {
@@ -1402,8 +1402,8 @@ namespace System.Xml.Serialization
                     string ns = (string)entry.Value;
                     if (_namespaces != null)
                     {
-                        string oldNs = _namespaces.Namespaces[prefix] as string;
-                        if (oldNs != null && oldNs != ns)
+                        string oldNs;
+                        if (_namespaces.Namespaces.TryGetValue(prefix, out oldNs) && oldNs != null && oldNs != ns)
                         {
                             throw new InvalidOperationException(SR.Format(SR.XmlDuplicateNs, prefix, ns));
                         }

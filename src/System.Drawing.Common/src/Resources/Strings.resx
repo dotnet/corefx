@@ -176,7 +176,7 @@
     <value>Argument should be a non-empty string.</value>
   </data>
   <data name="IllegalState" xml:space="preserve">
-    <value>Internal state of the {1} class is invalid.</value>
+    <value>Internal state of the {0} class is invalid.</value>
   </data>
   <data name="InterpolationColorsColorBlendNotSet" xml:space="preserve">
     <value>Property must be set to a valid ColorBlend object to use interpolation colors.</value>
@@ -330,5 +330,8 @@
   </data>
   <data name="ConvertInvalidPrimitive" xml:space="preserve">
     <value>{0} is not a valid value for {1}.</value>
+  </data>
+  <data name="LibgdiplusNotFound" xml:space="preserve">
+    <value>The native library "libgdiplus" is not installed on the system, or was otherwise unable to be loaded.</value>
   </data>
 </root>

@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ReferenceFromRuntime Include="CoreFx.Private.TestUtilities" />
     <ReferenceFromRuntime Include="xunit.core" />
     <ReferenceFromRuntime Include="Xunit.NetCore.Extensions" />
     <ReferenceFromRuntime Include="xunit.assert" />
@@ -130,6 +131,7 @@
     <Compile Include="Dynamic\CallSiteBinderDefaultBehaviourTests.cs" />
     <Compile Include="Dynamic\CallSiteTests.cs" />
     <Compile Include="Dynamic\ConvertBinderTests.cs" />
+    <Compile Include="Dynamic\DynamicAttributeTests.cs" />
     <Compile Include="Dynamic\DynamicObjectTests.cs" />
     <Compile Include="Dynamic\DynamicObjectDefaultBehaviorTests.cs" />
     <Compile Include="Dynamic\ExpandoObjectTests.cs" />
@@ -260,12 +262,6 @@
     <Compile Include="Variables\RuntimeVariablesTests.cs" />
     <Compile Include="Variables\VariableTests.cs" />
     <Compile Include="Visitor\VisitorTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(IsInterpreting)' != 'true' ">
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">

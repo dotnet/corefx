@@ -59,7 +59,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19909", TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestThreadCollectionBehavior()
         {
             CreateDefaultProcess();

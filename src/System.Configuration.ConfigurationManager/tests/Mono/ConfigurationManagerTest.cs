@@ -146,14 +146,12 @@ namespace MonoTests.System.Configuration
             string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
             // If there is not ApplicationData folder PerUserRoaming won't work
-            if (string.IsNullOrEmpty(applicationData)) return;
-
-            Assert.True(Directory.Exists(applicationData), "application data should exist");
+            if (string.IsNullOrEmpty(applicationData))
+                return;
 
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             string filePath = config.FilePath;
             Assert.False(string.IsNullOrEmpty(filePath), "should have some file path");
-            Assert.True(filePath.StartsWith(applicationData), "#1:" + filePath);
             Assert.Equal("user.config", Path.GetFileName(filePath));
         }
 
@@ -200,7 +198,7 @@ namespace MonoTests.System.Configuration
             ExeConfigurationFileMap map = new ExeConfigurationFileMap();
             map.RoamingUserConfigFilename = "roaminguser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoaming));
+            AssertExtensions.Throws<ArgumentException>("fileMap.ExeConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoaming));
         }
 
         [Fact]
@@ -225,7 +223,7 @@ namespace MonoTests.System.Configuration
             map.RoamingUserConfigFilename = "roaminguser";
             map.LocalUserConfigFilename = "localuser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
+            AssertExtensions.Throws<ArgumentException>("fileMap.ExeConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
         }
 
         [Fact]
@@ -237,7 +235,7 @@ namespace MonoTests.System.Configuration
             map.ExeConfigFilename = "execonfig";
             map.LocalUserConfigFilename = "localuser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
+            AssertExtensions.Throws<ArgumentException>("fileMap.RoamingUserConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
         }
 
         [Fact]

@@ -22,19 +22,16 @@
     <Compile Include="Drawing\SizeFConverterTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\tests\System\PlatformDetection.cs</Link>
-    </Compile>
+    <Compile Include="AmbientValueAttributeTests.cs" />
     <Compile Include="ArrayConverterTests.cs" />
     <Compile Include="AttributeCollectionTests.cs" />
     <Compile Include="AttributeProviderAttributeTests.cs" />
+    <Compile Include="BindingListTests.cs" />
     <Compile Include="BooleanConverterTests.cs" />
     <Compile Include="ByteConvertersTests.cs" />
     <Compile Include="CharConverterTests.cs" />
     <Compile Include="CollectionConverterTests.cs" />
+    <Compile Include="ComponentResourceManagerTests.cs" />
     <Compile Include="ConverterTestBase.cs" />
     <Compile Include="CustomTypeDescriptorTests.cs" />
     <Compile Include="DateTimeConverterTests.cs" />
@@ -60,6 +57,11 @@
     <Compile Include="PropertyDescriptorCollectionTests.cs" />
     <Compile Include="PropertyDescriptorTests.cs" />
     <Compile Include="ProvidePropertyAttributeTests.cs" />
+    <Compile Include="Resources\TestResx.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestResx.resx</DependentUpon>
+    </Compile>
     <Compile Include="SampleClasses.cs" />
     <Compile Include="SByteConverterTests.cs" />
     <Compile Include="SingleConverterTests.cs" />
@@ -76,7 +78,6 @@
     <Compile Include="UriTypeConverterTests.cs" />
     <Compile Include="Drawing\StringTypeConverterTestBase.cs" />
     <Compile Include="TimerTests.cs" />
-    <Compile Include="BindingListTests.cs" />
     <Compile Include="ContainerTests.cs" />
     <Compile Include="CultureInfoConverterTests.cs" />
     <Compile Include="LicenseManagerTests.cs" />
@@ -85,5 +86,18 @@
     <Compile Include="InstanceDescriptorTests.cs" />
     <Compile Include="Security\Authentication\ExtendedProtection\ExtendedProtectionPolicyTypeConverterTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\TestResx.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestResx.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

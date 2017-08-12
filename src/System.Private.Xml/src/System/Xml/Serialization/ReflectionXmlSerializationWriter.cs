@@ -161,18 +161,31 @@ namespace System.Xml.Serialization
         private void WriteArrayItems(ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc arrayTypeDesc, object o)
         {
             TypeDesc arrayElementTypeDesc = arrayTypeDesc.ArrayElementTypeDesc;
-            var a = o as IEnumerable;
 
-            //  #10593: This assert may not be true. We need more tests for this method.
-            Debug.Assert(a != null);
+            var arr = o as IList;
 
-            IEnumerator e = a.GetEnumerator();
-            if (e != null)
+            if (arr != null)
             {
-                while (e.MoveNext())
+                for (int i = 0; i < arr.Count; i++)
                 {
-                    object ai = e.Current;
+                    object ai = arr[i];
                     WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, true, true);
+                }
+            }
+            else
+            {
+                var a = o as IEnumerable;
+                //  #10593: This assert may not be true. We need more tests for this method.
+                Debug.Assert(a != null);
+
+                IEnumerator e = a.GetEnumerator();
+                if (e != null)
+                {
+                    while (e.MoveNext())
+                    {
+                        object ai = e.Current;
+                        WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, true, true);
+                    }
                 }
             }
         }
@@ -1091,7 +1104,7 @@ namespace System.Xml.Serialization
             {
                 if (!typeDesc.HasCustomFormatter)
                 {
-                    stringValue = CovertPrimitiveToString(o, typeDesc);
+                    stringValue = ConvertPrimitiveToString(o, typeDesc);
                     return true;
                 }
                 else if (o is byte[] && typeDesc.FormatterName == "ByteArrayHex")
@@ -1168,7 +1181,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        private string CovertPrimitiveToString(object o, TypeDesc typeDesc)
+        private string ConvertPrimitiveToString(object o, TypeDesc typeDesc)
         {
             string stringValue;
             switch (typeDesc.FormatterName)
@@ -1387,7 +1400,26 @@ namespace System.Xml.Serialization
             MemberInfo[] memberInfos = declaringType.GetMember(memberName);
             if (memberInfos == null || memberInfos.Length == 0)
             {
-                throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType.ToString()}"));
+                bool foundMatchedMember = false;
+                Type currentType = declaringType.BaseType;
+                while (currentType != null)
+                {
+                    memberInfos = currentType.GetMember(memberName);
+                    if (memberInfos != null && memberInfos.Length != 0)
+                    {
+                        foundMatchedMember = true;
+                        break;
+                    }
+
+                    currentType = currentType.BaseType;
+                }
+
+                if (!foundMatchedMember)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType.ToString()}"));
+                }
+
+                declaringType = currentType;
             }
 
             MemberInfo memberInfo = memberInfos[0];

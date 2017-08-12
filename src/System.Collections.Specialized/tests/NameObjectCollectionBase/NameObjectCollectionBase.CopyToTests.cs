@@ -49,19 +49,19 @@ namespace System.Collections.Specialized.Tests
             ICollection collection = nameObjectCollection;
 
             AssertExtensions.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new string[count, count], 0));
+            AssertExtensions.Throws<ArgumentException>("array", null, () => collection.CopyTo(new string[count, count], 0));
 
             if (count > 0)
             {
-                Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[0], 0));
-                Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count - 1], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new string[0], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count - 1], 0));
 
                 Assert.Throws<InvalidCastException>(() => collection.CopyTo(new Foo[count], 0));
             }
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.CopyTo(new string[count], -1));
-            Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], 1));
-            Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], count + 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], count + 1));
         }
     }
 }

@@ -37,20 +37,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Utility\FileSystemWatcherTest.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

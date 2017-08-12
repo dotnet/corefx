@@ -55,7 +55,7 @@ namespace System.Net.Sockets.Tests
         // TODO: Issue #4887
         // The socket option 'ReuseUnicastPost' only works on Windows 10 systems. In addition, setting the option
         // is a no-op unless specialized network settings using PowerShell configuration are first applied to the
-        // machine. This is currently difficult to test in the CI environment. So, this ests will be disabled for now
+        // machine. This is currently difficult to test in the CI environment. So, this test will be disabled for now
         [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(4887)]
         public void ReuseUnicastPort_CreateSocketSetOptionToOneAndGetOption_SocketsReuseUnicastPortSupport_OptionIsOne()
@@ -83,6 +83,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
+        [Fact]
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
             // On all platforms, index 0 means "any interface"
@@ -92,10 +93,11 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // see comment below
+        [ActiveIssue(21327, TargetFrameworkMonikers.Uap)] // UWP Apps are forbidden to send network traffic to the local Computer.
         public async Task MulticastInterface_Set_Loopback_Succeeds()
         {
-            // On Windows, we can apparently assume interface 1 is "loopback."  On other platforms, this is not a
-            // valid assumption.  We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
+            // On Windows, we can apparently assume interface 1 is "loopback." On other platforms, this is not a
+            // valid assumption. We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
             // this would introduce a dependency on System.Net.NetworkInformation, which depends on System.Net.Sockets,
             // which is what we're testing here....  So for now, we'll just assume "loopback == 1" and run this on
             // Windows only.
@@ -148,7 +150,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
         [InlineData(false)]
         [InlineData(true)]
         public void FailedConnect_GetSocketOption_SocketOptionNameError(bool simpleGet)

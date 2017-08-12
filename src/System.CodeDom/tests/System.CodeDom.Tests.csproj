@@ -91,9 +91,6 @@
     <Compile Include="Other\CodeAttributeArgumentTests.cs" />
     <Compile Include="VBCodeGenerationTests.cs" />
     <Compile Include="CSharpCodeGenerationTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
@@ -108,9 +105,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\TestBase.NonGeneric.cs">
       <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

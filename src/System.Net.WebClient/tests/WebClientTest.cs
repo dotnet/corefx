@@ -387,7 +387,6 @@ namespace System.Net.Tests
             Assert.Equal("ArbitraryValue", wc.ResponseHeaders["ArbitraryHeader"]);
         }
 
-        [ActiveIssue(18680)]
         [OuterLoop("Networking test talking to remote server: issue #11345")]
         [Theory]
         [InlineData("Connection", "close")]

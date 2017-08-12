@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
@@ -19,12 +20,23 @@ namespace System.Collections.ObjectModel.Tests
 
         [Theory]
         [MemberData(nameof(SerializeDeserialize_Roundtrips_MemberData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Serialization still WIP in UapAot: https://github.com/dotnet/corefx/issues/18942")]
         public void SerializeDeserialize_Roundtrips(ObservableCollection<int> c)
         {
             ObservableCollection<int> clone = BinaryFormatterHelpers.Clone(c);
             Assert.NotSame(c, clone);
             Assert.Equal(c, clone);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void OnDeserialized_MonitorNotInitialized_ExpectSuccess()
+        {
+            var observableCollection = new ObservableCollection<int>();
+            MethodInfo onDeserializedMethodInfo = observableCollection.GetType().GetMethod("OnDeserialized",
+                BindingFlags.Instance | Reflection.BindingFlags.NonPublic);
+
+            Assert.NotNull(onDeserializedMethodInfo);
+            onDeserializedMethodInfo.Invoke(observableCollection, new object[] { null });
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     }
 
     // Flags for bindImplicitConversion/bindExplicitConversion
+    [Flags]
     internal enum CONVERTTYPE
     {
         NOUDC = 0x01,  // Do not consider user defined conversions.
@@ -56,15 +57,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         private static long I64(long x) { return x; }
         private static long I64(ulong x) { return (long)x; }
-
-        private static void RETAILVERIFY(bool b)
-        {
-            if (!b)
-            {
-                Debug.Assert(false, "panic!");
-                throw Error.InternalCompilerError();
-            }
-        }
 
         // 13.1.2 Implicit numeric conversions
         //
@@ -235,10 +227,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         (s_simpleTypeBetter[i][j] == right && s_simpleTypeBetter[j][i] == left) ||
                         (s_simpleTypeBetter[i][j] == neither && s_simpleTypeBetter[j][i] == neither));
                     Debug.Assert(
-                        GetOptPDT((PredefinedType)i) == null ||
-                        GetOptPDT((PredefinedType)j) == null ||
-                        (!canConvert(GetOptPDT((PredefinedType)i), GetOptPDT((PredefinedType)j), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[i][j] == left) &&
-                        (!canConvert(GetOptPDT((PredefinedType)j), GetOptPDT((PredefinedType)i), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[j][i] == left));
+                        GetPredefindType((PredefinedType)i) == null ||
+                        GetPredefindType((PredefinedType)j) == null ||
+                        (!canConvert(GetPredefindType((PredefinedType)i), GetPredefindType((PredefinedType)j), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[i][j] == left) &&
+                        (!canConvert(GetPredefindType((PredefinedType)j), GetPredefindType((PredefinedType)i), CONVERTTYPE.NOUDC) || s_simpleTypeBetter[j][i] == left));
                 }
             }
             s_fCheckedBetter = true;
@@ -250,8 +242,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 #if DEBUG
             CheckBetterTable();
 #endif // DEBUG
-            RETAILVERIFY((int)pt1 < NUM_EXT_TYPES);
-            RETAILVERIFY((int)pt2 < NUM_EXT_TYPES);
+            Debug.Assert((int)pt1 < NUM_EXT_TYPES);
+            Debug.Assert((int)pt2 < NUM_EXT_TYPES);
             return (BetterType)s_simpleTypeBetter[(int)pt1][(int)pt2];
         }
 
@@ -288,7 +280,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return BetterType.Right;
             }
-            return WhichTypeIsBetter(GetOptPDT(pt1), GetOptPDT(pt2), typeGiven);
+            return WhichTypeIsBetter(GetPredefindType(pt1), GetPredefindType(pt2), typeGiven);
         }
 
 
@@ -320,9 +312,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return f12 ? BetterType.Left : BetterType.Right;
             }
 
-            if (!type1.IsNullableType() || !type2.IsNullableType() ||
-                !type1.AsNullableType().UnderlyingType.isPredefined() ||
-                !type2.AsNullableType().UnderlyingType.isPredefined())
+            if (!(type1 is NullableType nub1) || !(type2 is NullableType nub2) ||
+                !nub1.UnderlyingType.isPredefined() ||
+                !nub2.UnderlyingType.isPredefined())
             {
                 return BetterType.Neither;
             }
@@ -341,7 +333,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // returns true if an implicit conversion exists from source type to dest type. flags is an optional parameter.
         private bool canConvert(CType src, CType dest, CONVERTTYPE flags)
         {
-            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.CreateClass(dest);
             return BindImplicitConversion(null, src, exprDest, dest, flags);
         }
 
@@ -358,7 +350,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool canConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.CreateClass(dest);
             return BindImplicitConversion(expr, expr.Type, exprDest, dest, flags);
         }
 
@@ -382,7 +374,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return exprResult;
             }
 
-            if (expr.IsOK && !dest.IsErrorType())
+            if (expr.IsOK && !(dest is ErrorType))
             {
                 // don't report cascading error.
 
@@ -399,43 +391,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         // Failed because value was out of range. Report nifty error message.
                         string value = constant.Int64Value.ToString(CultureInfo.InvariantCulture);
-                        ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
-                        exprResult = ExprFactory.CreateCast(0, destExpr, expr);
-                        exprResult.SetError();
-                        return exprResult;
-                    }
-                    else if (ftSrc == FUNDTYPE.FT_R8 && (0 != (expr.Flags & EXPRFLAG.EXF_LITERALCONST)) &&
-                             (dest.isPredefType(PredefinedType.PT_FLOAT) || dest.isPredefType(PredefinedType.PT_DECIMAL)))
-                    {
-                        // Tried to assign a literal of type double (the default) to a float or decimal. Suggest use
-                        // of a 'F' or 'M' suffix.
-                        ErrorContext.Error(ErrorCode.ERR_LiteralDoubleCast, dest.isPredefType(PredefinedType.PT_DECIMAL) ? "M" : "F", dest);
-                        exprResult = ExprFactory.CreateCast(0, destExpr, expr);
-                        exprResult.SetError();
-                        return exprResult;
+                        throw ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
                     }
                 }
 
                 if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
                 {
-                    ErrorContext.Error(dest is TypeParameterType ? ErrorCode.ERR_TypeVarCantBeNull : ErrorCode.ERR_ValueCantBeNull, dest);
+                    throw ErrorContext.Error(dest is TypeParameterType ? ErrorCode.ERR_TypeVarCantBeNull : ErrorCode.ERR_ValueCantBeNull, dest);
                 }
 
-                else if (expr is ExprMemberGroup memGrp)
+                if (expr is ExprMemberGroup memGrp)
                 {
                     BindGrpConversion(memGrp, dest, true);
                 }
-                else if (!TypeManager.TypeContainsAnonymousTypes(dest) && canCast(expr.Type, dest, flags))
-                {
-                    // can't convert, but explicit exists and can be specified by the user (no anonymous types).
-                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConvCast, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
-                }
-                else
-                {
-                    // Generic "can't convert" error.
-                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
-                }
+
+                // canCast => can't convert, but explicit exists and can be specified by the user (no anonymous types).
+                // !canCast => Generic "can't convert" error.
+                throw ErrorContext.Error(canCast(expr.Type, dest, flags) ? ErrorCode.ERR_NoImplicitConvCast : ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
             }
+
             exprResult = ExprFactory.CreateCast(0, destExpr, expr);
             exprResult.SetError();
             return exprResult;
@@ -455,7 +429,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr tryConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
             Expr exprResult;
-            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.CreateClass(dest);
             if (BindImplicitConversion(expr, expr.Type, exprDest, dest, out exprResult, flags))
             {
                 checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
@@ -472,7 +446,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Expr mustConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            ExprClass exprClass = ExprFactory.MakeClass(dest);
+            ExprClass exprClass = ExprFactory.CreateClass(dest);
             return mustConvert(expr, exprClass, flags);
         }
         private Expr mustConvert(Expr expr, ExprClass dest, CONVERTTYPE flags)
@@ -517,7 +491,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // We have a constant decimal that is out of range of the destination type.
                         // In both checked and unchecked contexts we issue an error. No need to recheck conversion in unchecked context.
                         // Decimal is a SimpleType represented in a FT_STRUCT
-                        ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, ((ExprConstant)exprConst).Val.DecimalVal.ToString(CultureInfo.InvariantCulture), dest);
+                        throw ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, ((ExprConstant)exprConst).Val.DecimalVal.ToString(CultureInfo.InvariantCulture), dest);
                     }
                     else if (simpleConstToSimpleDestination && Context.CheckedConstant)
                     {
@@ -548,12 +522,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             Debug.Assert(expr_type == FUNDTYPE.FT_STRUCT);
                             Debug.Assert(false, "Error in constant conversion logic!");
                         }
-                        ErrorContext.Error(ErrorCode.ERR_ConstOutOfRangeChecked, value, dest);
+
+                        throw ErrorContext.Error(ErrorCode.ERR_ConstOutOfRangeChecked, value, dest);
                     }
 
-                    else if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
+                    if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
                     {
-                        ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
+                        throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
                     }
                     else if (expr is ExprMemberGroup memGrp)
                     {
@@ -577,7 +552,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Only report if we don't have an error type.
             if (expr.Type != null && !(expr.Type is ErrorType))
             {
-                ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+                throw ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
             }
         }
         public Expr mustCast(Expr expr, CType dest)
@@ -586,7 +561,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public Expr mustCast(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.CreateClass(dest);
             return mustCastCore(expr, exprDest, flags);
         }
         private Expr mustCastInUncheckedContext(Expr expr, CType dest, CONVERTTYPE flags)
@@ -598,7 +573,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // returns true if an explicit conversion exists from source type to dest type. flags is an optional parameter.
         private bool canCast(CType src, CType dest, CONVERTTYPE flags)
         {
-            ExprClass destExpr = ExprFactory.MakeClass(dest);
+            ExprClass destExpr = ExprFactory.CreateClass(dest);
             return BindExplicitConversion(null, src, destExpr, dest, flags);
         }
 
@@ -665,10 +640,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!typeDst.isDelegateType())
             {
                 if (fReportErrors)
-                    ErrorContext.Error(ErrorCode.ERR_MethGrpToNonDel, grp.Name, typeDst);
+                {
+                    throw ErrorContext.Error(ErrorCode.ERR_MethGrpToNonDel, grp.Name, typeDst);
+                }
+
                 return false;
             }
-            AggregateType type = typeDst.AsAggregateType();
+            AggregateType type = typeDst as AggregateType;
             MethodSymbol methCtor = SymbolLoader.PredefinedMembers.FindDelegateConstructor(type.getAggregate(), fReportErrors);
             if (methCtor == null)
                 return false;
@@ -689,41 +667,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethWithInst mwiWrap = new MethWithInst(mpwiWrap);
             MethWithInst mwiAmbig = new MethWithInst(mpwiAmbig);
 
-            bool isExtensionMethod = false;
-            // If the method we have bound to is an extension method and we are using it as an extension and not as a static method
-            if (methInvoke.Params.Count < @params.Count && mwiWrap.Meth().IsExtension())
-            {
-                isExtensionMethod = true;
-                TypeArray extParams = GetTypes().SubstTypeArray(mwiWrap.Meth().Params, mwiWrap.GetType());
-                // The this parameter must be a reference type.
-                if (extParams[0].IsTypeParameterType() ? !@params[0].IsRefType() : !extParams[0].IsRefType())
-                {
-                    // We should issue a better message here.
-                    // We were only disallowing value types, hence the error message specific to value types.
-                    // Now we are issuing the same error message for not-known to be reference types, not just value types.
-                    ErrorContext.Error(ErrorCode.ERR_ValueTypeExtDelegate, mwiWrap, extParams[0].IsTypeParameterType() ? @params[0] : extParams[0]);
-                }
-            }
-
             // From here on we should only return true.
             if (!fReportErrors && !needDest)
                 return true;
 
             // Note: We report errors below even if fReportErrors is false. Note however that we only
-            // get here if pexprDst is non-null and we'll return true even if we report an error, so this
-            // is really the only chance we'll get to report the error.
-            bool fError = (bool)mwiAmbig;
-
+            // get here if pexprDst is non-null.
             if (mwiAmbig && !fReportErrors)
             {
                 // Report the ambiguity, since BindGrpConversionCore didn't.
-                ErrorContext.Error(ErrorCode.ERR_AmbigCall, mwiWrap, mwiAmbig);
+                throw ErrorContext.Error(ErrorCode.ERR_AmbigCall, mwiWrap, mwiAmbig);
             }
             CType typeRetReal = GetTypes().SubstType(mwiWrap.Meth().RetType, mwiWrap.Ats, mwiWrap.TypeArgs);
             if (typeRet != typeRetReal && !CConversions.FImpRefConv(GetSymbolLoader(), typeRetReal, typeRet))
             {
-                ErrorContext.ErrorRef(ErrorCode.ERR_BadRetType, mwiWrap, typeRetReal);
-                fError = true;
+                throw ErrorContext.Error(ErrorCode.ERR_BadRetType, mwiWrap, typeRetReal);
             }
 
             TypeArray paramsReal = GetTypes().SubstTypeArray(mwiWrap.Meth().Params, mwiWrap.Ats, mwiWrap.TypeArgs);
@@ -736,49 +694,38 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     if (param != paramReal && !CConversions.FImpRefConv(GetSymbolLoader(), param, paramReal))
                     {
-                        ErrorContext.ErrorRef(ErrorCode.ERR_MethDelegateMismatch, mwiWrap, typeDst);
-                        fError = true;
-                        break;
+                        throw ErrorContext.Error(ErrorCode.ERR_MethDelegateMismatch, mwiWrap, typeDst);
                     }
                 }
             }
 
-            Expr obj = !isExtensionMethod ? grp.OptionalObject: null;
-            bool bIsMatchingStatic;
+            Expr obj = grp.OptionalObject;
             bool constrained;
-            PostBindMethod(0 != (grp.Flags & EXPRFLAG.EXF_BASECALL), ref mwiWrap, obj);
-            obj = AdjustMemberObject(mwiWrap, obj, out constrained, out bIsMatchingStatic);
-            if (!bIsMatchingStatic)
-            {
-                grp.SetMismatchedStaticBit();
-            }
-            obj = isExtensionMethod ? grp.OptionalObject: obj;
+            PostBindMethod(ref mwiWrap, obj);
+            obj = AdjustMemberObject(mwiWrap, obj, out constrained);
+
             Debug.Assert(mwiWrap.Meth().getKind() == SYMKIND.SK_MethodSymbol);
             if (mwiWrap.TypeArgs.Count > 0)
             {
                 // Check method type variable constraints.
                 TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), mwiWrap);
             }
-            if (mwiWrap.Meth().MethKind() == MethodKindEnum.Latent)
-            {
-                ErrorContext.ErrorRef(ErrorCode.ERR_PartialMethodToDelegate, mwiWrap);
-            }
 
             if (!needDest)
                 return true;
 
-            ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(grp.Flags & EXPRFLAG.EXF_BASECALL, getVoidType(), null, mwiWrap);
-            if (!mwiWrap.Meth().isStatic || isExtensionMethod)
+            ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(0, getVoidType(), null, mwiWrap);
+            if (!mwiWrap.Meth().isStatic)
             {
                 if (mwiWrap.Meth().getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL))
                 {
-                    ErrorContext.Error(ErrorCode.ERR_DelegateOnNullable, mwiWrap);
+                    throw ErrorContext.Error(ErrorCode.ERR_DelegateOnNullable, mwiWrap);
                 }
                 funcPtr.OptionalObject = obj;
                 if (obj != null && obj.Type.fundType() != FUNDTYPE.FT_REF)
                 {
                     // Must box the object before creating a delegate to it.
-                    obj = mustConvert(obj, GetReqPDT(PredefinedType.PT_OBJECT));
+                    obj = mustConvert(obj, GetPredefindType(PredefinedType.PT_OBJECT));
                 }
             }
             else
@@ -797,46 +744,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool BindGrpConversionCore(out MethPropWithInst pmpwi, BindingFlag bindFlags, ExprMemberGroup grp, ref TypeArray args, AggregateType atsDelegate, bool fReportErrors, out MethPropWithInst pmpwiAmbig)
         {
-            bool retval = false;
-            int carg = args.Count;
-
             ArgInfos argParam = new ArgInfos();
             argParam.carg = args.Count;
             argParam.types = args;
             argParam.fHasExprs = false;
             GroupToArgsBinder binder = new GroupToArgsBinder(this, bindFlags, grp, argParam, null, false, atsDelegate);
-            retval = binder.Bind(fReportErrors);
+            bool retval = binder.Bind(fReportErrors);
             GroupToArgsBinderResult result = binder.GetResultsOfBind();
             pmpwi = result.GetBestResult();
             pmpwiAmbig = result.GetAmbiguousResult();
             return retval;
-        }
-        /*
-         * bindInstanceParamForExtension
-         *
-         * This method is called by canConvert for the case of the instance parameter on the extension method
-         *
-         */
-        private bool canConvertInstanceParamForExtension(Expr exprSrc, CType typeDest)
-        {
-            CType typeSrc = exprSrc?.Type;
-            return typeSrc != null && canConvertInstanceParamForExtension(typeSrc, typeDest);
-        }
-
-        private bool canConvertInstanceParamForExtension(CType typeSrc, CType typeDest)
-        {
-            // 26.2.3 Extension method invocations
-            //
-            // The following conversions are defined of instance params on Extension methods
-            //
-            // *   Identity conversions
-            // *   Implicit reference conversions
-            // *   Boxing conversions
-
-            // Always make sure both types are declared.
-            return CConversions.FIsSameType(typeSrc, typeDest) ||
-                        CConversions.FImpRefConv(GetSymbolLoader(), typeSrc, typeDest) ||
-                        CConversions.FBoxingConv(GetSymbolLoader(), typeSrc, typeDest);
         }
 
         private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
@@ -937,7 +854,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // true exactly when both the source and destination types are nullable.
             bool fLiftSrc = typeSrcBase != typeSrc;
             bool fLiftDst = typeDstBase != typeDst;
-            bool fDstHasNull = fLiftDst || typeDst.IsRefType() || typeDst.IsPointerType();
+            bool fDstHasNull = fLiftDst || typeDst.IsRefType() || typeDst is PointerType;
             AggregateType[] rgats = new AggregateType[2];
             int cats = 0;
 
@@ -951,9 +868,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fIntPtrOverride2 = false;
 
             // Get the list of operators from the source.
-            if (typeSrcBase.IsTypeParameterType())
+            if (typeSrcBase is TypeParameterType typeParamSrc)
             {
-                AggregateType atsBase = typeSrcBase.AsTypeParameterType().GetEffectiveBaseClass();
+                AggregateType atsBase = typeParamSrc.GetEffectiveBaseClass();
                 if (atsBase != null && atsBase.getAggregate().HasConversion(GetSymbolLoader()))
                 {
                     rgats[cats++] = atsBase;
@@ -966,29 +883,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // nullable of it) as its from-type.
                 fImplicitOrExactSrc = true;
             }
-            else if (typeSrcBase.IsAggregateType() && typeSrcBase.getAggregate().HasConversion(GetSymbolLoader()))
+            else if (typeSrcBase is AggregateType atSrcBase && atSrcBase.getAggregate().HasConversion(GetSymbolLoader()))
             {
-                rgats[cats++] = typeSrcBase.AsAggregateType();
-                fIntPtrOverride2 = typeSrcBase.isPredefType(PredefinedType.PT_INTPTR) || typeSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
+                rgats[cats++] = atSrcBase;
+                fIntPtrOverride2 = atSrcBase.isPredefType(PredefinedType.PT_INTPTR) || atSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
             }
 
             // Get the list of operators from the destination.
-            if (typeDstBase.IsTypeParameterType())
+            if (typeDstBase is TypeParameterType typeParamDst)
             {
                 // If an explicit conversion exists from typeSrc to the class bound, then
                 // an explicit conversion exists from typeSrc to typeDst. An implicit is no better
                 // than an explicit.
                 AggregateType atsBase;
-                if (!fImplicitOnly && (atsBase = typeDstBase.AsTypeParameterType().GetEffectiveBaseClass()).getAggregate().HasConversion(GetSymbolLoader()))
+                if (!fImplicitOnly && (atsBase = typeParamDst.GetEffectiveBaseClass()).getAggregate().HasConversion(GetSymbolLoader()))
                 {
                     rgats[cats++] = atsBase;
                 }
             }
-            else if (typeDstBase.IsAggregateType())
+            else if (typeDstBase is AggregateType atDstBase)
             {
                 if (typeDstBase.getAggregate().HasConversion(GetSymbolLoader()))
                 {
-                    rgats[cats++] = typeDstBase.AsAggregateType();
+                    rgats[cats++] = atDstBase;
                 }
 
                 if (fIntPtrOverride2 && !typeDstBase.isPredefType(PredefinedType.PT_LONG) && !typeDstBase.isPredefType(PredefinedType.PT_ULONG))
@@ -1044,8 +961,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (fImplicitOnly && !convCur.isImplicit())
                             continue;
-                        if (GetSemanticChecker().CheckBogus(convCur))
-                            continue;
 
                         // Get the substituted src and dst types.
                         typeFrom = GetTypes().SubstType(convCur.Params[0], atsCur);
@@ -1090,7 +1005,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                                !canConvert(typeFrom, typeSrc, CONVERTTYPE.STANDARDANDNOUDC) &&
                                                // We allow IntPtr and UIntPtr to use non-standard explicit casts as long as they don't involve pointer types.
                                                // This is because the framework uses it and RTM allowed it.
-                                               (!fIntPtrStandard || typeSrc.IsPointerType() || typeFrom.IsPointerType() || !canCast(typeSrc, typeFrom, CONVERTTYPE.NOUDC))))
+                                               (!fIntPtrStandard || typeSrc is PointerType || typeFrom is PointerType || !canCast(typeSrc, typeFrom, CONVERTTYPE.NOUDC))))
                         {
                             continue;
                         }
@@ -1099,7 +1014,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                              !canConvert(typeDst, typeTo, CONVERTTYPE.STANDARDANDNOUDC) &&
                                              // We allow IntPtr and UIntPtr to use non-standard explicit casts as long as they don't involve pointer types.
                                              // This is because the framework uses it and RTM allowed it.
-                                             (!fIntPtrStandard || typeDst.IsPointerType() || typeTo.IsPointerType() || !canCast(typeTo, typeDst, CONVERTTYPE.NOUDC))))
+                                             (!fIntPtrStandard || typeDst is PointerType || typeTo is PointerType || !canCast(typeTo, typeDst, CONVERTTYPE.NOUDC))))
                         {
                             continue;
                         }
@@ -1316,7 +1231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr exprDst;
             Expr pTransformedArgument = exprSrc;
 
-            if (ctypeLiftBest > 0 && !typeFrom.IsNullableType() && fDstHasNull)
+            if (ctypeLiftBest > 0 && !(typeFrom is NullableType) && fDstHasNull)
             {
                 // Create the memgroup.
                 ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
@@ -1349,7 +1264,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        if (typeTo.IsNullableType())
+                        if (typeTo is NullableType)
                         {
                             // We need to generate a nullable value access, the conversion will be used without lifting.
                             pConversionArgument = mustCast(exprSrc, typeFrom);
@@ -1384,11 +1299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count);
             Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count);
-            ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].mwt, prguci[iuciBestDst].mwt, typeSrc, typeDst);
-            ExprClass exprClass = ExprFactory.MakeClass(typeDst);
-            Expr pexprDst = ExprFactory.CreateCast(0, exprClass, exprSrc);
-            pexprDst.SetError();
-            return pexprDst;
+            throw ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].mwt, prguci[iuciBestDst].mwt, typeSrc, typeDst);
         }
 
         private void MarkAsIntermediateConversion(Expr pExpr)
@@ -1429,12 +1340,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Expr BindUDConversionCore(Expr pFrom, CType pTypeFrom, CType pTypeTo, CType pTypeDestination, MethWithInst mwiBest, out Expr ppTransformedArgument)
         {
-            ExprClass pClassFrom = ExprFactory.MakeClass(pTypeFrom);
+            ExprClass pClassFrom = ExprFactory.CreateClass(pTypeFrom);
             Expr pTransformedArgument = mustCastCore(pFrom, pClassFrom, CONVERTTYPE.NOUDC);
             Debug.Assert(pTransformedArgument != null);
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
             ExprCall pCall = ExprFactory.CreateCall(0, pTypeTo, pTransformedArgument, pMemGroup, mwiBest);
-            ExprClass pDestination = ExprFactory.MakeClass(pTypeDestination);
+            ExprClass pDestination = ExprFactory.CreateClass(pTypeDestination);
             Expr pCast = mustCastCore(pCall, pDestination, CONVERTTYPE.NOUDC);
             Debug.Assert(pCast != null);
             ppTransformedArgument = pTransformedArgument;
@@ -1705,7 +1616,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr bindDecimalConstCast(ExprClass exprDestType, CType srcType, ExprConstant src)
         {
             CType destType = exprDestType.Type;
-            CType typeDecimal = SymbolLoader.GetOptPredefType(PredefinedType.PT_DECIMAL);
+            CType typeDecimal = SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
             ConstVal cv;
 
             if (typeDecimal == null)

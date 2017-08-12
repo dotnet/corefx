@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{6E48765E-D6AC-4A79-9C2E-B5EE67EEDECF}</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="UIHintAttributeTests.cs" />
     <Compile Include="FilterUIHintAttributeTests.cs" />
@@ -17,6 +19,9 @@
     <Compile Include="CreditCardAttributeTests.cs" />
     <Compile Include="CustomValidationAttributeTests.cs" />
     <Compile Include="DataTypeAttributeTests.cs" />
+    <Compile Include="DisplayColumnAttributeTests.cs" />
+    <Compile Include="DisplayFormatAttributeTests.cs" />
+    <Compile Include="DisplayFormatAttributeTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="EditableAttributeTests.cs" />
     <Compile Include="EmailAddressAttributeTests.cs" />
     <Compile Include="EnumDataTypeAttributeTests.cs" />
@@ -40,12 +45,6 @@
     <Compile Include="ValidationExceptionTests.cs" />
     <Compile Include="ValidationResultTests.cs" />
     <Compile Include="ValidatorTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

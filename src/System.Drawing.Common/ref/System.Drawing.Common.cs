@@ -59,9 +59,8 @@ namespace System.Drawing
         ~Brush() { }
         protected internal void SetNativeBrush(System.IntPtr brush) { }
     }
-    public sealed partial class Brushes
+    public static partial class Brushes
     {
-        internal Brushes() { }
         public static System.Drawing.Brush AliceBlue { get { throw null; } }
         public static System.Drawing.Brush AntiqueWhite { get { throw null; } }
         public static System.Drawing.Brush Aqua { get { throw null; } }
@@ -225,9 +224,8 @@ namespace System.Drawing
         ~BufferedGraphicsContext() { }
         public void Invalidate() { }
     }
-    public sealed partial class BufferedGraphicsManager
+    public static partial class BufferedGraphicsManager
     {
-        internal BufferedGraphicsManager() { }
         public static System.Drawing.BufferedGraphicsContext Current { get { throw null; } }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -285,7 +283,7 @@ namespace System.Drawing
         Whiteness = 16711778,
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public sealed partial class Font : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
+    public sealed partial class Font : System.MarshalByRefObject, System.ICloneable, System.IDisposable
     {
         public Font(System.Drawing.Font prototype, System.Drawing.FontStyle newStyle) { }
         public Font(System.Drawing.FontFamily family, float emSize) { }
@@ -342,8 +340,6 @@ namespace System.Drawing
         public float GetHeight() { throw null; }
         public float GetHeight(System.Drawing.Graphics graphics) { throw null; }
         public float GetHeight(float dpi) { throw null; }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags=(System.Security.Permissions.SecurityPermissionFlag)(128))]
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
         public System.IntPtr ToHfont() { throw null; }
         public void ToLogFont(object logFont) { }
         public void ToLogFont(object logFont, System.Drawing.Graphics graphics) { }
@@ -649,7 +645,7 @@ namespace System.Drawing
         Point = 3,
         World = 0,
     }
-    public sealed partial class Icon : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
+    public sealed partial class Icon : System.MarshalByRefObject, System.ICloneable, System.IDisposable
     {
         public Icon(System.Drawing.Icon original, System.Drawing.Size size) { }
         public Icon(System.Drawing.Icon original, int width, int height) { }
@@ -674,7 +670,6 @@ namespace System.Drawing
         public static System.Drawing.Icon FromHandle(System.IntPtr handle) { throw null; }
         public void Save(System.IO.Stream outputStream) { }
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags=(System.Security.Permissions.SecurityPermissionFlag)(128))]
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
         public System.Drawing.Bitmap ToBitmap() { throw null; }
         public override string ToString() { throw null; }
     }
@@ -689,7 +684,7 @@ namespace System.Drawing
     }
     [System.ComponentModel.ImmutableObjectAttribute(true)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public abstract partial class Image : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
+    public abstract partial class Image : System.MarshalByRefObject, System.ICloneable, System.IDisposable
     {
         internal Image() { }
         [System.ComponentModel.BrowsableAttribute(false)]
@@ -750,8 +745,6 @@ namespace System.Drawing
         public void SaveAdd(System.Drawing.Imaging.EncoderParameters encoderParams) { }
         public int SelectActiveFrame(System.Drawing.Imaging.FrameDimension dimension, int frameIndex) { throw null; }
         public void SetPropertyItem(System.Drawing.Imaging.PropertyItem propitem) { }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags=(System.Security.Permissions.SecurityPermissionFlag)(128))]
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
         public delegate bool GetThumbnailImageAbort();
     }
     public sealed partial class ImageAnimator
@@ -800,9 +793,8 @@ namespace System.Drawing
         public void TranslateTransform(float dx, float dy) { }
         public void TranslateTransform(float dx, float dy, System.Drawing.Drawing2D.MatrixOrder order) { }
     }
-    public sealed partial class Pens
+    public static partial class Pens
     {
-        internal Pens() { }
         public static System.Drawing.Pen AliceBlue { get { throw null; } }
         public static System.Drawing.Pen AntiqueWhite { get { throw null; } }
         public static System.Drawing.Pen Aqua { get { throw null; } }
@@ -1101,9 +1093,8 @@ namespace System.Drawing
         Point = 3,
         World = 0,
     }
-    public sealed partial class SystemBrushes
+    public static partial class SystemBrushes
     {
-        internal SystemBrushes() { }
         public static System.Drawing.Brush ActiveBorder { get { throw null; } }
         public static System.Drawing.Brush ActiveCaption { get { throw null; } }
         public static System.Drawing.Brush ActiveCaptionText { get { throw null; } }
@@ -1139,9 +1130,8 @@ namespace System.Drawing
         public static System.Drawing.Brush WindowText { get { throw null; } }
         public static System.Drawing.Brush FromSystemColor(System.Drawing.Color c) { throw null; }
     }
-    public sealed partial class SystemColors
+    public static partial class SystemColors
     {
-        internal SystemColors() { }
         public static System.Drawing.Color ActiveBorder { get { throw null; } }
         public static System.Drawing.Color ActiveCaption { get { throw null; } }
         public static System.Drawing.Color ActiveCaptionText { get { throw null; } }
@@ -1176,9 +1166,8 @@ namespace System.Drawing
         public static System.Drawing.Color WindowFrame { get { throw null; } }
         public static System.Drawing.Color WindowText { get { throw null; } }
     }
-    public sealed partial class SystemFonts
+    public static partial class SystemFonts
     {
-        internal SystemFonts() { }
         public static System.Drawing.Font CaptionFont { get { throw null; } }
         public static System.Drawing.Font DefaultFont { get { throw null; } }
         public static System.Drawing.Font DialogFont { get { throw null; } }
@@ -1189,9 +1178,8 @@ namespace System.Drawing
         public static System.Drawing.Font StatusFont { get { throw null; } }
         public static System.Drawing.Font GetFontByName(string systemFontName) { throw null; }
     }
-    public sealed partial class SystemIcons
+    public static partial class SystemIcons
     {
-        internal SystemIcons() { }
         public static System.Drawing.Icon Application { get { throw null; } }
         public static System.Drawing.Icon Asterisk { get { throw null; } }
         public static System.Drawing.Icon Error { get { throw null; } }
@@ -1203,9 +1191,8 @@ namespace System.Drawing
         public static System.Drawing.Icon Warning { get { throw null; } }
         public static System.Drawing.Icon WinLogo { get { throw null; } }
     }
-    public sealed partial class SystemPens
+    public static partial class SystemPens
     {
-        internal SystemPens() { }
         public static System.Drawing.Pen ActiveBorder { get { throw null; } }
         public static System.Drawing.Pen ActiveCaption { get { throw null; } }
         public static System.Drawing.Pen ActiveCaptionText { get { throw null; } }
@@ -2544,9 +2531,6 @@ namespace System.Drawing.Printing
     public partial class InvalidPrinterException : System.SystemException
     {
         public InvalidPrinterException(System.Drawing.Printing.PrinterSettings settings) { }
-        protected InvalidPrinterException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class Margins : System.ICloneable
     {
@@ -3171,16 +3155,6 @@ namespace System.Drawing.Design
     }
     public delegate void ToolboxComponentsCreatingEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatingEventArgs e);
 
-}
-namespace System.Drawing.Configuration
-{
-    public sealed partial class SystemDrawingSection : System.Configuration.ConfigurationSection
-    {
-        public SystemDrawingSection() { }
-        [System.Configuration.ConfigurationPropertyAttribute("bitmapSuffix")]
-        public string BitmapSuffix { get { throw null; } set { } }
-        protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
-    }
 }
 
 */

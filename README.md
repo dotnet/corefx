@@ -1,9 +1,3 @@
-### Latest News and Announcements
-
-* [Announcement: Driving towards zero 2.0 bugs by **2017/5/10** (ZBB)](https://github.com/dotnet/corefx/issues/17619)
-
-
-
 # .NET Core Libraries (CoreFX)
 
 This repo contains the library implementation (called "CoreFX") for .NET Core. It includes System.Collections, System.IO, System.Xml, and many other components.
@@ -14,7 +8,7 @@ Runtime-specific library code ([mscorlib](https://github.com/dotnet/coreclr/tree
 
 ## .NET Core
 
-Great starting page: http://dotnet.github.io
+Official Starting Page: http://dotnet.github.io
 
 * [How to use .NET Core](https://github.com/dotnet/core/#get-started) (with VS, VS Code, command-line CLI)
   * [Install official releases](https://www.microsoft.com/net/core)
@@ -109,6 +103,4 @@ Note: See officially supported [OS versions](https://github.com/dotnet/core/blob
 |**PortableLinux**|[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/portablelinux_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/portablelinux_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/portablelinux_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/portablelinux_release/lastCompletedBuild/testReport)|[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_portablelinux_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_portablelinux_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_portablelinux_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_portablelinux_release/lastCompletedBuild/testReport)|
 |**Windows 7**| | |[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win7_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win7_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win7_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win7_release/lastCompletedBuild/testReport)|
 |**Windows 8.1**|(x86) [![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/windows_nt_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/windows_nt_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/windows_nt_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/windows_nt_release/lastCompletedBuild/testReport)|[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_windows_nt_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_windows_nt_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_windows_nt_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_windows_nt_release/lastCompletedBuild/testReport)|
-|**Windows 10**| | |[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win10_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win10_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win10_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netcoreapp_win10_release/lastCompletedBuild/testReport)|
 |**Code Coverage (Windows)**| | |[![code coverage](https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows/Code_Coverage_Report)|
-|**Desktop**|(x86) [![x86-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/netfx_windows_nt_debug_prtest/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/netfx_windows_nt_debug_prtest/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/netfx_windows_nt_release_prtest/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/netfx_windows_nt_release_prtest/lastCompletedBuild/testReport)|[![x64-debug](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netfx_windows_nt_debug/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netfx_windows_nt_debug/lastCompletedBuild/testReport)|[![x64-release](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netfx_windows_nt_release/badge/icon)](https://ci.dot.net/job/dotnet_corefx/job/master/job/outerloop_netfx_windows_nt_release/lastCompletedBuild/testReport)||

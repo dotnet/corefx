@@ -12,7 +12,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 {
     internal sealed class UserStringBuilder
     {
-        private bool fHadUndisplayableStringInError;
         private bool m_buildingInProgress;
         private GlobalSymbolContext m_globalSymbols;
         private StringBuilder m_strBuilder;
@@ -21,7 +20,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             GlobalSymbolContext globalSymbols)
         {
             Debug.Assert(globalSymbols != null);
-            fHadUndisplayableStringInError = false;
             m_buildingInProgress = false;
             m_globalSymbols = globalSymbols;
         }
@@ -39,17 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             m_buildingInProgress = false;
             s = m_strBuilder.ToString();
             m_strBuilder = null;
-        }
-
-
-        public bool HadUndisplayableString()
-        {
-            return fHadUndisplayableStringInError;
-        }
-
-        public void ResetUndisplayableStringFlag()
-        {
-            fHadUndisplayableStringInError = false;
         }
 
         private void ErrSK(out string psz, SYMKIND sk)
@@ -80,10 +67,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
                 case SYMKIND.SK_TypeParameterSymbol:
                     id = MessageID.SK_TYVAR;
-                    break;
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
-                    Debug.Assert(false, "Illegal sk");
-                    id = MessageID.SK_ALIAS;
                     break;
                 default:
                     Debug.Assert(false, "impossible sk");
@@ -146,8 +129,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         }
         private void ErrAppendName(Name name)
         {
-            CheckDisplayableName(name);
-
             if (name == NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL))
             {
                 ErrAppendString("this");
@@ -171,26 +152,30 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendParentType(CType pType, SubstContext pctx)
         {
-            if (pType.IsErrorType())
+            if (pType is ErrorType err)
             {
-                if (pType.AsErrorType().HasTypeParent())
+                if (err.HasTypeParent())
                 {
-                    ErrAppendType(pType.AsErrorType().GetTypeParent(), null);
+                    ErrAppendType(err.GetTypeParent(), null);
                     ErrAppendChar('.');
                 }
                 else
                 {
-                    ErrAppendParentCore(pType.AsErrorType().GetNSParent(), pctx);
+                    ErrAppendParentCore(err.GetNSParent(), pctx);
                 }
             }
-            else if (pType.IsAggregateType())
+            else if (pType is AggregateType agg)
             {
-                ErrAppendParentCore(pType.AsAggregateType().GetOwningAggregate(), pctx);
+                ErrAppendParentCore(agg.GetOwningAggregate(), pctx);
             }
-            else if (pType.GetBaseOrParameterOrElementType() != null)
+            else
             {
-                ErrAppendType(pType.GetBaseOrParameterOrElementType(), null);
-                ErrAppendChar('.');
+                var part = pType.GetBaseOrParameterOrElementType();
+                if (part != null)
+                {
+                    ErrAppendType(part, null);
+                    ErrAppendChar('.');
+                }
             }
         }
 
@@ -202,9 +187,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             if (parent == getBSymmgr().GetRootNS())
                 return;
 
-            if (pctx != null && !pctx.FNop() && parent.IsAggregateSymbol() && 0 != parent.AsAggregateSymbol().GetTypeVarsAll().Count)
+            if (pctx != null && !pctx.FNop() && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
             {
-                CType pType = GetTypeManager().SubstType(parent.AsAggregateSymbol().getThisType(), pctx);
+                CType pType = GetTypeManager().SubstType(agg.getThisType(), pctx);
                 ErrAppendType(pType, null);
             }
             else
@@ -236,7 +221,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendParentSym(meth, pctx);
 
                 // Get the type args from the explicit impl type and substitute using pctx (if there is one).
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx).AsAggregateType());
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx) as AggregateType);
                 ErrAppendSym(meth.swtSlot.Sym, ctx, fArgs);
 
                 // args already added
@@ -251,13 +236,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendSym(prop, pctx);
 
                 // add accessor name
-                if (prop.methGet == meth)
+                if (prop.GetterMethod == meth)
                 {
                     ErrAppendString(".get");
                 }
                 else
                 {
-                    Debug.Assert(meth == prop.methSet);
+                    Debug.Assert(meth == prop.SetterMethod);
                     ErrAppendString(".set");
                 }
 
@@ -314,32 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // handle user defined operators
                 // map from CLS predefined names to "operator <X>"
                 ErrAppendString("operator ");
-
-                //
-                // This is kinda slow, but the alternative is to add bits to methsym.
-                //
-                string operatorName;
-                OperatorKind op = Operators.OperatorOfMethodName(meth.name);
-                if (Operators.HasDisplayName(op))
-                {
-                    operatorName = Operators.GetDisplayName(op);
-                }
-                else
-                {
-                    //
-                    // either equals or compare
-                    //
-                    if (meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS))
-                    {
-                        operatorName = "equals";
-                    }
-                    else
-                    {
-                        Debug.Assert(meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE));
-                        operatorName = "compare";
-                    }
-                }
-                ErrAppendString(operatorName);
+                ErrAppendString(Operators.OperatorOfMethodName(meth.name));
             }
             else if (meth.IsExpImpl())
             {
@@ -362,14 +322,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // append argument types
                 ErrAppendChar('(');
 
-                if (!meth.computeCurrentBogusState())
-                {
-                    ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isVarargs, meth.isParamArray);
-                }
+                ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isVarargs, meth.isParamArray);
 
                 ErrAppendChar(')');
             }
         }
+
         private void ErrAppendIndexer(IndexerSymbol indexer, SubstContext pctx)
         {
             ErrAppendString("this[");
@@ -381,22 +339,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             ErrAppendParentSym(prop, pctx);
             if (prop.IsExpImpl() && prop.swtSlot.Sym != null)
             {
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx).AsAggregateType());
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx) as AggregateType);
                 ErrAppendSym(prop.swtSlot.Sym, ctx);
             }
             else if (prop.IsExpImpl())
             {
                 if (prop.errExpImpl != null)
                     ErrAppendType(prop.errExpImpl, pctx, false);
-                if (prop.isIndexer())
+                if (prop is IndexerSymbol indexer)
                 {
                     ErrAppendChar('.');
-                    ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                    ErrAppendIndexer(indexer, pctx);
                 }
             }
-            else if (prop.isIndexer())
+            else if (prop is IndexerSymbol indexer)
             {
-                ErrAppendIndexer(prop.AsIndexerSymbol(), pctx);
+                ErrAppendIndexer(indexer, pctx);
             }
             else
             {
@@ -428,43 +386,38 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             switch (sym.getKind())
             {
                 case SYMKIND.SK_AggregateDeclaration:
-                    ErrAppendSym(sym.AsAggregateDeclaration().Agg(), pctx);
+                    ErrAppendSym(((AggregateDeclaration)sym).Agg(), pctx);
                     break;
 
                 case SYMKIND.SK_AggregateSymbol:
                     {
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
-                        string text = PredefinedTypes.GetNiceName(sym.AsAggregateSymbol());
+                        string text = PredefinedTypes.GetNiceName(sym as AggregateSymbol);
                         if (text != null)
                         {
                             // Found a nice name.
                             ErrAppendString(text);
                         }
-                        else if (sym.AsAggregateSymbol().IsAnonymousType())
-                        {
-                            ErrAppendId(MessageID.AnonymousType);
-                            break;
-                        }
                         else
                         {
                             ErrAppendParentSym(sym, pctx);
                             ErrAppendName(sym.name);
-                            ErrAppendTypeParameters(sym.AsAggregateSymbol().GetTypeVars(), pctx, true);
+                            ErrAppendTypeParameters(((AggregateSymbol)sym).GetTypeVars(), pctx, true);
                         }
                         break;
                     }
 
                 case SYMKIND.SK_MethodSymbol:
-                    ErrAppendMethod(sym.AsMethodSymbol(), pctx, fArgs);
+                    ErrAppendMethod((MethodSymbol)sym, pctx, fArgs);
                     break;
 
                 case SYMKIND.SK_PropertySymbol:
-                    ErrAppendProperty(sym.AsPropertySymbol(), pctx);
+                    ErrAppendProperty((PropertySymbol)sym, pctx);
                     break;
 
                 case SYMKIND.SK_EventSymbol:
-                    ErrAppendEvent(sym.AsEventSymbol(), pctx);
+                    ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
                 case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
@@ -488,11 +441,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case SYMKIND.SK_TypeParameterSymbol:
                     if (null == sym.name)
                     {
+                        var parSym = (TypeParameterSymbol)sym;
                         // It's a standard type variable.
-                        if (sym.AsTypeParameterSymbol().IsMethodTypeParameter())
+                        if (parSym.IsMethodTypeParameter())
                             ErrAppendChar('!');
                         ErrAppendChar('!');
-                        ErrAppendPrintf("{0}", sym.AsTypeParameterSymbol().GetIndexInTotalParameters());
+                        ErrAppendPrintf("{0}", parSym.GetIndexInTotalParameters());
                     }
                     else
                         ErrAppendName(sym.name);
@@ -503,8 +457,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_Scope:
-                case SYMKIND.SK_LambdaScope:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, $"Bad symbol kind: {sym.getKind()}");
@@ -533,7 +485,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 case TypeKind.TK_AggregateType:
                     {
-                        AggregateType pAggType = pType.AsAggregateType();
+                        AggregateType pAggType = (AggregateType)pType;
 
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
@@ -542,11 +494,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         {
                             // Found a nice name.
                             ErrAppendString(text);
-                        }
-                        else if (pAggType.getAggregate().IsAnonymousType())
-                        {
-                            ErrAppendPrintf("AnonymousType#{0}", GetTypeID(pAggType));
-                            break;
                         }
                         else
                         {
@@ -569,13 +516,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case TypeKind.TK_TypeParameterType:
                     if (null == pType.GetName())
                     {
+                        var tpType = (TypeParameterType)pType;
                         // It's a standard type variable.
-                        if (pType.AsTypeParameterType().IsMethodTypeParameter())
+                        if (tpType.IsMethodTypeParameter())
                         {
                             ErrAppendChar('!');
                         }
                         ErrAppendChar('!');
-                        ErrAppendPrintf("{0}", pType.AsTypeParameterType().GetIndexInTotalParameters());
+                        ErrAppendPrintf("{0}", tpType.GetIndexInTotalParameters());
                     }
                     else
                     {
@@ -584,17 +532,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_ErrorType:
-                    if (pType.AsErrorType().HasParent())
+                    ErrorType err = (ErrorType)pType;
+                    if (err.HasParent())
                     {
-                        Debug.Assert(pType.AsErrorType().nameText != null && pType.AsErrorType().typeArgs != null);
+                        Debug.Assert(err.nameText != null && err.typeArgs != null);
                         ErrAppendParentType(pType, pctx);
-                        ErrAppendName(pType.AsErrorType().nameText);
-                        ErrAppendTypeParameters(pType.AsErrorType().typeArgs, pctx, true);
+                        ErrAppendName(err.nameText);
+                        ErrAppendTypeParameters(err.typeArgs, pctx, true);
                     }
                     else
                     {
                         // Load the string "<error>".
-                        Debug.Assert(null == pType.AsErrorType().typeArgs);
+                        Debug.Assert(null == err.typeArgs);
                         ErrAppendId(MessageID.ERRORSYM);
                     }
                     break;
@@ -602,18 +551,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case TypeKind.TK_NullType:
                     // Load the string "<null>".
                     ErrAppendId(MessageID.NULL);
-                    break;
-
-                case TypeKind.TK_OpenTypePlaceholderType:
-                    // Leave blank.
-                    break;
-
-                case TypeKind.TK_BoundLambdaType:
-                    ErrAppendId(MessageID.AnonMethod);
-                    break;
-
-                case TypeKind.TK_UnboundLambdaType:
-                    ErrAppendId(MessageID.Lambda);
                     break;
 
                 case TypeKind.TK_MethodGroupType:
@@ -626,7 +563,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_ArrayType:
                     {
-                        CType elementType = pType.AsArrayType().GetBaseElementType();
+                        CType elementType = ((ArrayType)pType).GetBaseElementType();
 
                         if (null == elementType)
                         {
@@ -637,10 +574,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         ErrAppendType(elementType, pctx);
 
                         for (elementType = pType;
-                                elementType != null && elementType.IsArrayType();
-                                elementType = elementType.AsArrayType().GetElementType())
+                                elementType is ArrayType arrType;
+                                elementType = arrType.GetElementType())
                         {
-                            int rank = elementType.AsArrayType().rank;
+                            int rank = arrType.rank;
 
                             // Add [] with (rank-1) commas inside
                             ErrAppendChar('[');
@@ -648,7 +585,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                             // known rank.
                             if (rank == 1)
                             {
-                                if (!elementType.AsArrayType().IsSZArray)
+                                if (!arrType.IsSZArray)
                                 {
                                     ErrAppendChar('*');
                                 }
@@ -671,16 +608,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
+                    ParameterModifierType mod = (ParameterModifierType)pType;
                     // add ref or out
-                    ErrAppendString(pType.AsParameterModifierType().isOut ? "out " : "ref ");
+                    ErrAppendString(mod.isOut ? "out " : "ref ");
 
                     // add base type name
-                    ErrAppendType(pType.AsParameterModifierType().GetParameterType(), pctx);
+                    ErrAppendType(mod.GetParameterType(), pctx);
                     break;
 
                 case TypeKind.TK_PointerType:
                     // Generate the base type.
-                    ErrAppendType(pType.AsPointerType().GetReferentType(), pctx);
+                    ErrAppendType(((PointerType)pType).GetReferentType(), pctx);
                     {
                         // add the trailing *
                         ErrAppendChar('*');
@@ -688,11 +626,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_NullableType:
-                    ErrAppendType(pType.AsNullableType().GetUnderlyingType(), pctx);
+                    ErrAppendType(((NullableType)pType).GetUnderlyingType(), pctx);
                     ErrAppendChar('?');
                     break;
 
-                case TypeKind.TK_NaturalIntegerType:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad type kind");
@@ -766,19 +703,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
 
             return result;
-        }
-
-        private bool IsDisplayableName(Name name)
-        {
-            return name != NameManager.GetPredefinedName(PredefinedName.PN_MISSING);
-        }
-
-        private void CheckDisplayableName(Name name)
-        {
-            if (!IsDisplayableName(name))
-            {
-                fHadUndisplayableStringInError = true;
-            }
         }
 
         private NameManager GetNameManager()

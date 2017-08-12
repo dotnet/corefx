@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -220,7 +221,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             builder = ImmutableSortedDictionary.Create<string, string>()
                 .Add("a", "1").Add("A", "2").Add("b", "3").ToBuilder();
-            Assert.Throws<ArgumentException>(null, () => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
 
             // Force all values to be considered equal.
             builder.ValueComparer = EverythingEqual<string>.Default;
@@ -259,7 +260,22 @@ namespace System.Collections.Immutable.Tests
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedDictionary.CreateBuilder<string, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableSortedDictionary.CreateBuilder<int, string>());
+            ImmutableSortedDictionary<int, string>.Builder builder = ImmutableSortedDictionary.CreateBuilder<int, string>();
+            builder.Add(1, "One");
+            builder.Add(2, "Two");
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(builder);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<int, string>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<int, string>[];
+            Assert.Equal(builder, items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedDictionary.CreateBuilder<int, string>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         protected override IImmutableDictionary<TKey, TValue> GetEmptyImmutableDictionary<TKey, TValue>()

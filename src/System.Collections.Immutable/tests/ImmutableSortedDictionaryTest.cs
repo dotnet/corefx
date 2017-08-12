@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -169,7 +170,7 @@ namespace System.Collections.Immutable.Tests
             };
 
             var map = Empty<string, string>(StringComparer.Ordinal, StringComparer.Ordinal);
-            Assert.Throws<ArgumentException>(null, () => map.AddRange(uniqueEntries));
+            AssertExtensions.Throws<ArgumentException>(null, () => map.AddRange(uniqueEntries));
         }
 
         [Fact]
@@ -294,7 +295,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             map = ImmutableSortedDictionary.Create<string, string>()
               .Add("a", "1").Add("A", "2").Add("b", "3");
-            Assert.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
+            AssertExtensions.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
 
             // Force all values to be considered equal.
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase, EverythingEqual<string>.Default);
@@ -310,7 +311,7 @@ namespace System.Collections.Immutable.Tests
         {
             var map = ImmutableSortedDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
-            var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
+            var exception = AssertExtensions.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
             if (!PlatformDetection.IsNetNative) //.Net Native toolchain removes exception messages.
             {
                 Assert.Contains("firstKey", exception.Message);
@@ -409,10 +410,23 @@ namespace System.Collections.Immutable.Tests
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedDictionary.Create<string, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableSortedDictionary.Create<int, int>());
+            ImmutableSortedDictionary<int, int> dict = ImmutableSortedDictionary.Create<int, int>().Add(1, 2).Add(2, 3).Add(3, 4);
+            var info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(dict);
 
             object rootNode = DebuggerAttributes.GetFieldValue(ImmutableSortedDictionary.Create<string, string>(), "_root");
             DebuggerAttributes.ValidateDebuggerDisplayReferences(rootNode);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<int, int>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<int, int>[];
+            Assert.Equal(dict, items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedDictionary.Create<int, int>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.

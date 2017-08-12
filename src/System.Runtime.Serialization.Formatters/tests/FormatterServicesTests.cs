@@ -58,8 +58,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [MemberData(nameof(GetUninitializedObject_NotSupportedType_TestData))]
         public void GetUninitializedObject_NotSupportedType_ThrowsArgumentException(Type type)
         {
-            Assert.Throws<ArgumentException>(null, () => FormatterServices.GetUninitializedObject(type));
-            Assert.Throws<ArgumentException>(null, () => FormatterServices.GetSafeUninitializedObject(type));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.GetUninitializedObject(type));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.GetSafeUninitializedObject(type));
         }
 
         [Theory]
@@ -103,14 +103,19 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static IEnumerable<object[]> GetUninitializedObject_ByRefLikeType_TestData()
         {
-            yield return new object[] { typeof(RuntimeArgumentHandle) };
             yield return new object[] { typeof(TypedReference) };
 
-            // .NET Standard 2.0 doesn't have ArgIterator, but .NET Core 2.0 does
-            Type argIterator = typeof(object).Assembly.GetType("System.ArgIterator");
-            if (argIterator != null)
+            // These types are stubs on .NET Native and thus not byref-like
+            if (!PlatformDetection.IsNetNative)
             {
-                yield return new object[] { argIterator };
+                yield return new object[] { typeof(RuntimeArgumentHandle) };
+
+                // .NET Standard 2.0 doesn't have ArgIterator, but .NET Core 2.0 does
+                Type argIterator = typeof(object).Assembly.GetType("System.ArgIterator");
+                if (argIterator != null)
+                {
+                    yield return new object[] { argIterator };
+                }
             }
         }
 
@@ -122,6 +127,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
 #pragma warning disable 0169 // The private field 'class member' is never used
+        [System.Runtime.CompilerServices.IsByRefLike]
         private struct StructWithSpanField
         {
             Span<byte> _bytes;
@@ -279,7 +285,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             AssertExtensions.Throws<ArgumentNullException>("obj", () => FormatterServices.PopulateObjectMembers(null, new MemberInfo[0], new object[0]));
             AssertExtensions.Throws<ArgumentNullException>("members", () => FormatterServices.PopulateObjectMembers(new object(), null, new object[0]));
             AssertExtensions.Throws<ArgumentNullException>("data", () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[0], null));
-            Assert.Throws<ArgumentException>(() => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[2]));
+            AssertExtensions.Throws<ArgumentException>(null, () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[2]));
             AssertExtensions.Throws<ArgumentNullException>("members", () => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[1], new object[1]));
             Assert.Throws<SerializationException>(() => FormatterServices.PopulateObjectMembers(new object(), new MemberInfo[] { typeof(object).GetMethod("GetHashCode") }, new object[] { new object() }));
         }
@@ -313,6 +319,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("assem", () => FormatterServices.GetTypeFromAssembly(null, "name"));
             Assert.Null(FormatterServices.GetTypeFromAssembly(GetType().Assembly, Guid.NewGuid().ToString("N"))); // non-existing type doesn't throw
+        }
+    }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    // Local definition of IsByRefLikeAttribute while the real one becomes available in corefx
+    [AttributeUsage(AttributeTargets.Struct)]
+    public sealed class IsByRefLikeAttribute : Attribute
+    {
+        public IsByRefLikeAttribute()
+        {
         }
     }
 }

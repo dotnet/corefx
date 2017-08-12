@@ -37,6 +37,7 @@
     <Compile Include="System\MathF.netcoreapp.cs" />
     <Compile Include="System\StringComparer.netcoreapp.cs" />
     <Compile Include="System\UnloadingAndProcessExitTests.netcoreapp.cs" />
+    <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Environment.UserDomainName.cs" />
@@ -87,23 +88,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\PathFeatures.cs">
       <Link>Common\System\IO\PathFeatures.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

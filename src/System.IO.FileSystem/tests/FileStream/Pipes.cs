@@ -96,7 +96,7 @@ namespace System.IO.Tests
         [InlineData(false)]
         public async Task NamedPipeWriteViaAsyncFileStream(bool asyncWrites)
         {
-            string name = Guid.NewGuid().ToString("N");
+            string name = GetNamedPipeServerStreamName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous))
             {
                 Task serverTask = Task.Run(async () =>
@@ -130,7 +130,7 @@ namespace System.IO.Tests
         [InlineData(false)]
         public async Task NamedPipeReadViaAsyncFileStream(bool asyncReads)
         {
-            string name = Guid.NewGuid().ToString("N");
+            string name = GetNamedPipeServerStreamName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.Out, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous))
             {
                 Task serverTask = Task.Run(async () =>

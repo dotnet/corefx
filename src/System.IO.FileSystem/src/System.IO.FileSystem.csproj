@@ -63,6 +63,7 @@
   </ItemGroup>
   <!-- Windows -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="System\IO\DisableMediaInsertionPrompt.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\DirectoryInfo.Windows.cs" />
     <Compile Include="System\IO\FileInfo.Windows.cs" />
@@ -190,6 +191,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ReplaceFile.cs">
       <Link>Common\Interop\Windows\Interop.ReplaceFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Memory\FixedBufferExtensions.cs">
+      <Link>Common\System\Memory\FixedBufferExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
@@ -235,9 +239,7 @@
     <Compile Include="System\IO\FileSystemInfo.WinRT.cs" />
     <Compile Include="System\IO\MultiplexingWin32WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTIOExtensions.cs" />
-    <Compile Include="System\IO\WinRTFileStream.cs" />
     <Compile Include="System\IO\WinRTFileSystem.cs" />
-    <Compile Include="System\IO\WinRTFileSystemObject.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CopyFile2.cs">
       <Link>Common\Interop\Windows\Interop.CopyFile2.cs</Link>
     </Compile>
@@ -363,6 +365,7 @@
     <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

@@ -53,15 +53,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new RuntimeBinderException(SR.BindInvokeFailedNonDelegate);
         }
 
-        internal static Exception BindImplicitConversionRequireOneArgument()
-        {
-            return new ArgumentException(SR.BindImplicitConversionRequireOneArgument);
-        }
-
-        internal static Exception BindExplicitConversionRequireOneArgument()
-        {
-            return new ArgumentException(SR.BindExplicitConversionRequireOneArgument);
-        }
+        internal static Exception BindStaticRequiresType(string paramName) =>
+            new ArgumentException(SR.TypeArgumentRequiredForStaticCall, paramName);
 
         internal static Exception BindBinaryAssignmentFailedNullReference()
         {
@@ -82,5 +75,12 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             return new RuntimeBinderException(SR.BindToVoidMethodButExpectResult);
         }
+
+        internal static Exception ArgumentNull(string paramName) => new ArgumentNullException(paramName);
+
+        internal static Exception DynamicArgumentNeedsValue(string paramName) =>
+            new ArgumentException(SR.DynamicArgumentNeedsValue, paramName);
+
+        internal static Exception BindingNameCollision() => new RuntimeBinderException(SR.BindingNameCollision);
     }
 }

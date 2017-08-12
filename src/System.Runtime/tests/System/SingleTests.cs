@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class SingleTests
+    public partial class SingleTests : RemoteExecutorTestBase
     {
         [Fact]
         public static void Ctor_Empty()
@@ -47,13 +47,28 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(float.PositiveInfinity, true)]
-        [InlineData(float.NegativeInfinity, true)]
-        [InlineData(float.NaN, false)]
-        [InlineData(0.0, false)]
-        public static void IsInfinity(float f, bool expected)
+        [InlineData(float.NegativeInfinity, true)]      // Negative Infinity
+        [InlineData(float.MinValue, false)]             // Min Negative Normal
+        [InlineData(-1.17549435E-38f, false)]           // Max Negative Normal
+        [InlineData(-1.17549421E-38f, false)]           // Min Negative Subnormal
+        [InlineData(-1.401298E-45, false)]              // Max Negative Subnormal
+        [InlineData(-0.0f, false)]                      // Negative Zero
+        [InlineData(float.NaN, false)]                  // NaN
+        [InlineData(0.0f, false)]                       // Positive Zero
+        [InlineData(1.401298E-45, false)]               // Min Positive Subnormal
+        [InlineData(1.17549421E-38f, false)]            // Max Positive Subnormal
+        [InlineData(1.17549435E-38f, false)]            // Min Positive Normal
+        [InlineData(float.MaxValue, false)]             // Max Positive Normal
+        [InlineData(float.PositiveInfinity, true)]      // Positive Infinity
+        public static void IsInfinity(float d, bool expected)
         {
-            Assert.Equal(expected, float.IsInfinity(f));
+            Assert.Equal(expected, float.IsInfinity(d));
+        }
+
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsSingle()
+        {
+            Assert.Equal(TypeCode.Single, 0.0f.GetTypeCode());
         }
 
         [Fact]
@@ -63,13 +78,22 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(float.NegativeInfinity, false)]
-        [InlineData(float.PositiveInfinity, false)]
-        [InlineData(float.NaN, true)]
-        [InlineData(0.0, false)]
-        public static void IsNaN(float f, bool expected)
+        [InlineData(float.NegativeInfinity, false)]     // Negative Infinity
+        [InlineData(float.MinValue, false)]             // Min Negative Normal
+        [InlineData(-1.17549435E-38f, false)]           // Max Negative Normal
+        [InlineData(-1.17549421E-38f, false)]           // Min Negative Subnormal
+        [InlineData(-1.401298E-45, false)]              // Max Negative Subnormal
+        [InlineData(-0.0f, false)]                      // Negative Zero
+        [InlineData(float.NaN, true)]                   // NaN
+        [InlineData(0.0f, false)]                       // Positive Zero
+        [InlineData(1.401298E-45, false)]               // Min Positive Subnormal
+        [InlineData(1.17549421E-38f, false)]            // Max Positive Subnormal
+        [InlineData(1.17549435E-38f, false)]            // Min Positive Normal
+        [InlineData(float.MaxValue, false)]             // Max Positive Normal
+        [InlineData(float.PositiveInfinity, false)]     // Positive Infinity
+        public static void IsNaN(float d, bool expected)
         {
-            Assert.Equal(expected, float.IsNaN(f));
+            Assert.Equal(expected, float.IsNaN(d));
         }
 
         [Fact]
@@ -79,13 +103,22 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(float.NegativeInfinity, true)]
-        [InlineData(float.PositiveInfinity, false)]
-        [InlineData(float.NaN, false)]
-        [InlineData(0.0, false)]
-        public static void IsNegativeInfinity(float f, bool expected)
+        [InlineData(float.NegativeInfinity, true)]      // Negative Infinity
+        [InlineData(float.MinValue, false)]             // Min Negative Normal
+        [InlineData(-1.17549435E-38f, false)]           // Max Negative Normal
+        [InlineData(-1.17549421E-38f, false)]           // Min Negative Subnormal
+        [InlineData(-1.401298E-45, false)]              // Max Negative Subnormal
+        [InlineData(-0.0f, false)]                      // Negative Zero
+        [InlineData(float.NaN, false)]                  // NaN
+        [InlineData(0.0f, false)]                       // Positive Zero
+        [InlineData(1.401298E-45, false)]               // Min Positive Subnormal
+        [InlineData(1.17549421E-38f, false)]            // Max Positive Subnormal
+        [InlineData(1.17549435E-38f, false)]            // Min Positive Normal
+        [InlineData(float.MaxValue, false)]             // Max Positive Normal
+        [InlineData(float.PositiveInfinity, false)]     // Positive Infinity
+        public static void IsNegativeInfinity(float d, bool expected)
         {
-            Assert.Equal(expected, float.IsNegativeInfinity(f));
+            Assert.Equal(expected, float.IsNegativeInfinity(d));
         }
 
         [Fact]
@@ -95,13 +128,22 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(float.PositiveInfinity, true)]
-        [InlineData(float.NegativeInfinity, false)]
-        [InlineData(float.NaN, false)]
-        [InlineData(0.0, false)]
-        public static void IsPositiveInfinity(float f, bool expected)
+        [InlineData(float.NegativeInfinity, false)]     // Negative Infinity
+        [InlineData(float.MinValue, false)]             // Min Negative Normal
+        [InlineData(-1.17549435E-38f, false)]           // Max Negative Normal
+        [InlineData(-1.17549421E-38f, false)]           // Min Negative Subnormal
+        [InlineData(-1.401298E-45, false)]              // Max Negative Subnormal
+        [InlineData(-0.0f, false)]                      // Negative Zero
+        [InlineData(float.NaN, false)]                  // NaN
+        [InlineData(0.0f, false)]                       // Positive Zero
+        [InlineData(1.401298E-45, false)]               // Min Positive Subnormal
+        [InlineData(1.17549421E-38f, false)]            // Max Positive Subnormal
+        [InlineData(1.17549435E-38f, false)]            // Min Positive Normal
+        [InlineData(float.MaxValue, false)]             // Max Positive Normal
+        [InlineData(float.PositiveInfinity, true)]      // Positive Infinity
+        public static void IsPositiveInfinity(float d, bool expected)
         {
-            Assert.Equal(expected, float.IsPositiveInfinity(f));
+            Assert.Equal(expected, float.IsPositiveInfinity(d));
         }
 
         [Theory]
@@ -116,11 +158,10 @@ namespace System.Tests
         [InlineData(float.NaN, float.NaN, 0)]
         [InlineData(float.NaN, (float)0, -1)]
         [InlineData((float)234, null, 1)]
-        public static void CompareTo(float f1, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(float f1, object value, int expected)
         {
-            if (value is float)
+            if (value is float f2)
             {
-                float f2 = (float)value;
                 Assert.Equal(expected, Math.Sign(f1.CompareTo(f2)));
                 if (float.IsNaN(f1) || float.IsNaN(f2))
                 {
@@ -153,16 +194,16 @@ namespace System.Tests
                     }
                 }
             }
-            IComparable comparable = f1;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(f1.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotFloat_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData((double)234)]
+        public void CompareTo_ObjectNotFloat_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (float)234;
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo((double)234)); // Obj is not a float
-            AssertExtensions.Throws<ArgumentException>(null, () => comparable.CompareTo("234")); // Obj is not a float
+            AssertExtensions.Throws<ArgumentException>(null, () => ((float)123).CompareTo(value));
         }
 
         [Theory]
@@ -174,9 +215,8 @@ namespace System.Tests
         [InlineData((float)789, "789", false)]
         public static void Equals(float f1, object value, bool expected)
         {
-            if (value is float)
+            if (value is float f2)
             {
-                float f2 = (float)value;
                 Assert.Equal(expected, f1.Equals(f2));
 
                 if (float.IsNaN(f1) && float.IsNaN(f2))
@@ -230,39 +270,49 @@ namespace System.Tests
             };
             yield return new object[] { (float)-2468, "N", customNegativeSignGroupSeparatorNegativePattern, "(2*468.00)" };
 
-            var invariantFormat = NumberFormatInfo.InvariantInfo;
+            NumberFormatInfo invariantFormat = NumberFormatInfo.InvariantInfo;
             yield return new object[] { float.Epsilon, "G", invariantFormat, "1.401298E-45" };
             yield return new object[] { float.NaN, "G", invariantFormat, "NaN" };
             yield return new object[] { float.PositiveInfinity, "G", invariantFormat, "Infinity" };
             yield return new object[] { float.NegativeInfinity, "G", invariantFormat, "-Infinity" };
         }
 
-        [Theory]
-        [MemberData(nameof(ToString_TestData))]
-        public static void ToString(float f, string format, IFormatProvider provider, string expected)
+        [Fact]
+        public static void Test_ToString()
         {
-            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            RemoteInvoke(() =>
             {
-                bool isDefaultProvider = provider == null;
-                if (string.IsNullOrEmpty(format) || format.ToUpperInvariant() == "G")
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                foreach (var testdata in ToString_TestData())
                 {
-                    if (isDefaultProvider)
-                    {
-                        Assert.Equal(expected, f.ToString());
-                        Assert.Equal(expected, f.ToString((IFormatProvider)null));
-                    }
-                    Assert.Equal(expected, f.ToString(provider));
+                    ToString((float)testdata[0], (string)testdata[1], (IFormatProvider)testdata[2], (string)testdata[3]);
                 }
+                return SuccessExitCode;
+            }).Dispose();
+        }
+        
+        private static void ToString(float f, string format, IFormatProvider provider, string expected)
+        {
+            bool isDefaultProvider = provider == null;
+            if (string.IsNullOrEmpty(format) || format.ToUpperInvariant() == "G")
+            {
                 if (isDefaultProvider)
                 {
-                    Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant())); // If format is upper case, then exponents are printed in upper case
-                    Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant())); // If format is lower case, then exponents are printed in lower case
-                    Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), null));
-                    Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), null));
+                    Assert.Equal(expected, f.ToString());
+                    Assert.Equal(expected, f.ToString((IFormatProvider)null));
                 }
-                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), provider));
-                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), provider));
-            });
+                Assert.Equal(expected, f.ToString(provider));
+            }
+            if (isDefaultProvider)
+            {
+                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant())); // If format is upper case, then exponents are printed in upper case
+                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant())); // If format is lower case, then exponents are printed in lower case
+                Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), null));
+                Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), null));
+            }
+            Assert.Equal(expected.Replace('e', 'E'), f.ToString(format.ToUpperInvariant(), provider));
+            Assert.Equal(expected.Replace('E', 'e'), f.ToString(format.ToLowerInvariant(), provider));
         }
 
         [Fact]

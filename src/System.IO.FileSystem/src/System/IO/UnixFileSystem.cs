@@ -15,15 +15,6 @@ namespace System.IO
     {
         internal const int DefaultBufferSize = 4096;
 
-        public override int MaxPath { get { return Interop.Sys.MaxPath; } }
-
-        public override int MaxDirectoryPath { get { return Interop.Sys.MaxPath; } }
-
-        public override FileStream Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
-        {
-            return new FileStream(fullPath, mode, access, share, bufferSize, options);
-        }
-
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
             // The destination path may just be a directory into which the file should be copied.
@@ -159,12 +150,31 @@ namespace System.IO
             if (Interop.Sys.Unlink(fullPath) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-                // ENOENT means it already doesn't exist; nop
-                if (errorInfo.Error != Interop.Error.ENOENT)
+                switch (errorInfo.Error)
                 {
-                    if (errorInfo.Error == Interop.Error.EISDIR)
+                    case Interop.Error.ENOENT:
+                        // ENOENT means it already doesn't exist; nop
+                        return;
+                    case Interop.Error.EROFS:
+                        // EROFS means the file system is read-only
+                        // Need to manually check file existence
+                        // github.com/dotnet/corefx/issues/21273
+                        Interop.ErrorInfo fileExistsError;
+
+                        // Input allows trailing separators in order to match Windows behavior
+                        // Unix does not accept trailing separators, so must be trimmed
+                        if (!FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath),
+                            Interop.Sys.FileTypes.S_IFREG, out fileExistsError) &&
+                            fileExistsError.Error == Interop.Error.ENOENT)
+                        {
+                            return;
+                        }
+                        goto default;
+                    case Interop.Error.EISDIR:
                         errorInfo = Interop.Error.EACCES.Info();
-                    throw Interop.GetExceptionForIoErrno(errorInfo, fullPath);
+                        goto default;
+                    default: 
+                        throw Interop.GetExceptionForIoErrno(errorInfo, fullPath);
                 }
             }
         }
@@ -238,10 +248,6 @@ namespace System.IO
             while (stackDir.Count > 0)
             {
                 string name = stackDir.Pop();
-                if (name.Length >= MaxDirectoryPath)
-                {
-                    throw new PathTooLongException(SR.IO_PathTooLong);
-                }
 
                 // The mkdir command uses 0777 by default (it'll be AND'd with the process umask internally).
                 // We do the same.
@@ -408,7 +414,8 @@ namespace System.IO
         {
             Interop.ErrorInfo ignored;
 
-            // Windows doesn't care about the trailing separator
+            // Input allows trailing separators in order to match Windows behavior
+            // Unix does not accept trailing separators, so must be trimmed
             return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
@@ -448,14 +455,27 @@ namespace System.IO
             {
                 case SearchTarget.Files:
                     return new FileSystemEnumerable<FileInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new FileInfo(path, null));
+                        {
+                            var info = new FileInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
                 case SearchTarget.Directories:
                     return new FileSystemEnumerable<DirectoryInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new DirectoryInfo(path, null));
+                        {
+                            var info = new DirectoryInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
                 default:
-                    return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) => isDir ?
-                        (FileSystemInfo)new DirectoryInfo(path, null) :
-                        (FileSystemInfo)new FileInfo(path, null));
+                    return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
+                        {
+                            var info = isDir ?
+                                (FileSystemInfo)new DirectoryInfo(path, null) :
+                                (FileSystemInfo)new FileInfo(path, null);
+                            info.Refresh();
+                            return info;
+                        });
             }
         }
 
@@ -479,7 +499,7 @@ namespace System.IO
                 {
                     throw new ArgumentNullException("path");
                 }
-                if (string.IsNullOrWhiteSpace(userPath))
+                if (string.IsNullOrEmpty(userPath))
                 {
                     throw new ArgumentException(SR.Argument_EmptyPath, "path");
                 }
@@ -504,6 +524,21 @@ namespace System.IO
                         }
                         searchPattern = searchPattern.Substring(lastSlash + 1);
                     }
+
+                    // Typically we shouldn't see either of these cases, an upfront check is much faster
+                    foreach (char c in searchPattern)
+                    {
+                        if (c == '\\' || c == '[')
+                        {
+                            // We need to escape any escape characters in the search pattern
+                            searchPattern = searchPattern.Replace(@"\", @"\\");
+
+                            // And then escape '[' to prevent it being picked up as a wildcard
+                            searchPattern = searchPattern.Replace(@"[", @"\[");
+                            break;
+                        }
+                    }
+
                     string fullPath = Path.GetFullPath(userPath);
 
                     // Store everything for the enumerator
@@ -638,6 +673,7 @@ namespace System.IO
                 {
                     searchPattern += "*";
                 }
+
                 return searchPattern;
             }
 

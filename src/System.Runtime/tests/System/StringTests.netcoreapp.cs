@@ -12,6 +12,142 @@ namespace System.Tests
     public partial class StringTests
     {
         [Theory]
+        [InlineData(0, 0)]
+        [InlineData(3, 1)]
+        public static void Ctor_CharSpan_EmptyString(int length, int offset)
+        {
+            Assert.Same(string.Empty, new string(new ReadOnlySpan<char>(new char[length], offset, 0)));
+        }
+
+        [Theory]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, 0, 8, "abcdefgh")]
+        [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0', 'i', 'j', 'k' }, 0, 12, "abcdefgh\0ijk")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 0, 0, "")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 0, 1, "a")]
+        [InlineData(new char[] { 'a', 'b', 'c' }, 2, 1, "c")]
+        [InlineData(new char[] { '\u8001', '\u8002', '\ufffd', '\u1234', '\ud800', '\udfff' }, 0, 6, "\u8001\u8002\ufffd\u1234\ud800\udfff")]
+        public static void Ctor_CharSpan(char[] valueArray, int startIndex, int length, string expected)
+        {
+            var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
+            Assert.Equal(expected, new string(span));
+        }
+
+        [Theory]
+        // CurrentCulture
+        [InlineData("Hello", "ello", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "ELL", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "ElLo", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "Larger Hello", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.CurrentCulture, false)]
+        [InlineData("", "", StringComparison.CurrentCulture, true)]
+        [InlineData("", "hello", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.CurrentCulture, false)]
+        // CurrentCultureIgnoreCase
+        [InlineData("Hello", "ello", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "ELL", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "ElLo", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Larger Hello", StringComparison.CurrentCultureIgnoreCase, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.CurrentCultureIgnoreCase, false)]
+        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.CurrentCultureIgnoreCase, false)]
+        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
+        // InvariantCulture
+        [InlineData("Hello", "ello", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "ELL", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "ElLo", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "Larger Hello", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.InvariantCulture, false)]
+        [InlineData("", "", StringComparison.InvariantCulture, true)]
+        [InlineData("", "hello", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.InvariantCulture, false)]
+        // InvariantCultureIgnoreCase
+        [InlineData("Hello", "ello", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "ELL", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "ElLo", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Larger Hello", StringComparison.InvariantCultureIgnoreCase, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.InvariantCultureIgnoreCase, false)]
+        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.InvariantCultureIgnoreCase, false)]
+        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
+        // Ordinal
+        [InlineData("Hello", "ello", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "ELL", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "ElLo", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Larger Hello", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.Ordinal, false)]
+        [InlineData("", "", StringComparison.Ordinal, true)]
+        [InlineData("", "hello", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.Ordinal, false)]
+        // OrdinalIgnoreCase
+        [InlineData("Hello", "ello", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "ELL", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "ElLo", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Larger Hello", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "Goodbye", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
+        public static void Contains(string s, string value, StringComparison comparisonType, bool expected)
+        {
+            Assert.Equal(expected, s.Contains(value, comparisonType));
+        }
+
+        [Fact]
+        public static void Contains_StringComparison_TurkishI()
+        {
+            string str = "\u0069\u0130";
+            RemoteInvoke((source) =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+                Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }, str).Dispose();
+
+            RemoteInvoke((source) =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                Assert.False(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }, str).Dispose();
+        }
+
+        [Theory]
+        [InlineData(StringComparison.CurrentCulture)]
+        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(StringComparison.InvariantCulture)]
+        [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData(StringComparison.Ordinal)]
+        [InlineData(StringComparison.OrdinalIgnoreCase)]
+        public static void Contains_NullValue_ThrowsArgumentNullException(StringComparison comparisonType)
+        {
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".Contains(null, comparisonType));
+        }
+
+        [Theory]
+        [InlineData(StringComparison.CurrentCulture - 1)]
+        [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
+        public static void Contains_InvalidComparisonType_ThrowsArgumentOutOfRangeException(StringComparison comparisonType)
+        {
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "ab".Contains("a", comparisonType));
+        }
+
+        [Theory]
         [InlineData("Hello", 'o', true)]
         [InlineData("Hello", 'O', false)]
         [InlineData("o", 'o', true)]
@@ -191,36 +327,38 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Replace_StringComparison_TestData))]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_ReturnsExpected(string original, string oldValue, string newValue, StringComparison comparisonType, string expected)
         {
             Assert.Equal(expected, original.Replace(oldValue, newValue, comparisonType));
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_TurkishI()
         {
-            string source = "\u0069\u0130";
-            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            string src = "\u0069\u0130";
+
+            RemoteInvoke((source) =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
                 Assert.True("\u0069".Equals("\u0130", StringComparison.CurrentCultureIgnoreCase));
-            
+
                 Assert.Equal("a\u0130", source.Replace("\u0069", "a", StringComparison.CurrentCulture));
                 Assert.Equal("aa", source.Replace("\u0069", "a", StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("aa", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
-            });
 
-            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
-            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
                 Assert.False("\u0069".Equals("\u0130", StringComparison.CurrentCultureIgnoreCase));
 
                 Assert.Equal("a\u0130", source.Replace("\u0069", "a", StringComparison.CurrentCulture));
                 Assert.Equal("a\u0130", source.Replace("\u0069", "a", StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
-            });
+
+                return SuccessExitCode;
+            }, src).Dispose();
         }
 
         public static IEnumerable<object[]> Replace_StringComparisonCulture_TestData()
@@ -248,7 +386,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Replace_StringComparisonCulture_TestData))]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparisonCulture_ReturnsExpected(string original, string oldValue, string newValue, bool ignoreCase, CultureInfo culture, string expected)
         {
             Assert.Equal(expected, original.Replace(oldValue, newValue, ignoreCase, culture));
@@ -259,8 +396,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_NullOldValue_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", StringComparison.CurrentCulture));
@@ -268,8 +403,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3647 - String.Replace(String, String, bool, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_StringComparison_EmptyOldValue_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", StringComparison.CurrentCulture));
@@ -279,7 +412,6 @@ namespace System.Tests
         [Theory]
         [InlineData(StringComparison.CurrentCulture - 1)]
         [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3646 - String.Replace(String, String, StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public void Replace_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
         {
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".Replace("abc", "def", comparisonType));
@@ -293,7 +425,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(GetHashCode_StringComparison_Data))]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3645 - String.GetHashCode(StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public static void GetHashCode_StringComparison(StringComparison comparisonType)
         {
             Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), "abc".GetHashCode(comparisonType));
@@ -308,7 +439,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data))]
-        [ActiveIssue("https://github.com/dotnet/corert/issues/3645 - String.GetHashCode(StringComparison) not yet ported", TargetFrameworkMonikers.UapAot)]
         public static void GetHashCode_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
         {
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".GetHashCode(comparisonType));

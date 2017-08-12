@@ -10,6 +10,7 @@ static_assert(PAL_X509_V_OK == X509_V_OK, "");
 static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT, "");
 static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_CRL == X509_V_ERR_UNABLE_TO_GET_CRL, "");
 static_assert(PAL_X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE == X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE, "");
+static_assert(PAL_X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY == X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY, "");
 static_assert(PAL_X509_V_ERR_CERT_SIGNATURE_FAILURE == X509_V_ERR_CERT_SIGNATURE_FAILURE, "");
 static_assert(PAL_X509_V_ERR_CRL_SIGNATURE_FAILURE == X509_V_ERR_CRL_SIGNATURE_FAILURE, "");
 static_assert(PAL_X509_V_ERR_CERT_NOT_YET_VALID == X509_V_ERR_CERT_NOT_YET_VALID, "");
@@ -207,7 +208,14 @@ extern "C" void CryptoNative_X509StoreCtxDestroy(X509_STORE_CTX* v)
 
 extern "C" int32_t CryptoNative_X509StoreCtxInit(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509, X509Stack* extraStore)
 {
-    return X509_STORE_CTX_init(ctx, store, x509, extraStore);
+    int32_t val = X509_STORE_CTX_init(ctx, store, x509, extraStore);
+
+    if (val != 0)
+    {
+        X509_STORE_CTX_set_flags(ctx, X509_V_FLAG_CHECK_SS_SIGNATURE);
+    }
+
+    return val;
 }
 
 extern "C" int32_t CryptoNative_X509VerifyCert(X509_STORE_CTX* ctx)
