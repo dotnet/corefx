@@ -9,25 +9,27 @@ namespace System.Net.Http
 {
     internal sealed partial class HttpConnection : IDisposable
     {
-        public sealed class ContentLengthWriteStream : HttpContentWriteStream
+        private sealed class ContentLengthWriteStream : HttpContentWriteStream
         {
-            public ContentLengthWriteStream(HttpConnection connection)
-                : base(connection)
+            public ContentLengthWriteStream(HttpConnection connection, CancellationToken cancellationToken) :
+                base(connection, cancellationToken)
             {
             }
 
-            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ignored)
             {
                 ValidateBufferArgs(buffer, offset, count);
-                return _connection.WriteAsync(buffer, offset, count, cancellationToken);
+                return _connection._currentRequest != null ?
+                    _connection.WriteAsync(buffer, offset, count, _cancellationToken) :
+                    Task.CompletedTask;
             }
 
-            public override Task FlushAsync(CancellationToken cancellationToken)
+            public override Task FlushAsync(CancellationToken ignored)
             {
-                return _connection.FlushAsync(cancellationToken);
+                return _connection.FlushAsync(_cancellationToken);
             }
 
-            public override Task FinishAsync(CancellationToken cancellationToken)
+            public override Task FinishAsync()
             {
                 _connection = null;
                 return Task.CompletedTask;
