@@ -34,7 +34,8 @@ public sealed class MinimalEventCounterSource : EventSource
         //      using an EventAttribute for this method
         //   2. Each counter supports a single float value, so conceptually it maps to a single
         //      measurement in the code.
-        //   3. You don't have to have 
+        //   3. You don't have to have log with WriteEvent if you don't think you will ever care about details
+        //       of individual requests (that counter data is sufficient).  
         WriteEvent(1, url, elapsedMSec);    // This logs it to the event stream if events are on.    
         this.requestCounter.WriteMetric(elapsedMSec);        // This adds it to the PerfCounter called 'Request' if PerfCounters are on
     }
