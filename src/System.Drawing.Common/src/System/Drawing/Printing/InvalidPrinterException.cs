@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.Serialization;
 using System.Security;
 
 namespace System.Drawing.Printing
@@ -21,11 +20,6 @@ namespace System.Drawing.Printing
         : base(GenerateMessage(settings))
         {
             _settings = settings;
-        }
-
-        protected InvalidPrinterException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-
         }
 
         private static string GenerateMessage(PrinterSettings settings)
