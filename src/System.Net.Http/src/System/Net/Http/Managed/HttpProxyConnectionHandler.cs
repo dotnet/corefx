@@ -55,7 +55,7 @@ namespace System.Net.Http
         {
             if (proxyUri.Scheme != UriScheme.Http)
             {
-                throw new InvalidOperationException($"invalid scheme {proxyUri.Scheme} for proxy");
+                throw new InvalidOperationException(SR.Format(SR.net_http_proxy_invalid_scheme, proxyUri.Scheme));
             }
 
             if (request.RequestUri.Scheme == UriScheme.Https)

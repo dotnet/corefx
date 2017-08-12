@@ -67,13 +67,13 @@ namespace System.Net.Http
                             {
                                 break;
                             }
-                            throw new IOException("Invalid chunk size in response stream");
+                            throw new IOException(SR.net_http_invalid_chunk_size);
                         }
                     }
                 }
                 catch (OverflowException e)
                 {
-                    throw new IOException("Invalid chunk size in response stream", e);
+                    throw new IOException(SR.net_http_invalid_chunk_size, e);
                 }
                 return size;
             }
@@ -117,7 +117,7 @@ namespace System.Net.Http
                 if (bytesRead <= 0)
                 {
                     // Unexpected end of response stream
-                    throw new IOException("Unexpected end of content stream while processing chunked response body");
+                    throw new IOException(SR.net_http_content_unexpected_end);
                 }
 
                 await ConsumeChunkBytes((ulong)bytesRead, cancellationToken).ConfigureAwait(false);
