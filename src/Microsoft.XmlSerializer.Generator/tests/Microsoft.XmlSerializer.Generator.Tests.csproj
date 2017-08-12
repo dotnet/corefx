@@ -15,7 +15,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-OSX-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-OSX-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include=".\SGenTests.cs" Condition="'$(TargetGroup)' != 'uap'" />
+    <Compile Include=".\SGenTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
     <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
     <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
     <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard-Linux' AND '$(TargetGroup)' != 'netstandard-OSX'" />
