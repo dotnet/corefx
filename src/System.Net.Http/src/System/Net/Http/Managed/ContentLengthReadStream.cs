@@ -52,7 +52,7 @@ namespace System.Net.Http
                 if (bytesRead <= 0)
                 {
                     // Unexpected end of response stream
-                    throw new IOException(SR.net_http_content_unexpected_end);
+                    throw new IOException(SR.net_http_invalid_response);
                 }
 
                 Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
