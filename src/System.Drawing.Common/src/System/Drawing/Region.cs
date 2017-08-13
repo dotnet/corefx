@@ -198,18 +198,20 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(regionHandle));
             }
 
-            Status status = Status.Ok;
+            int status = SafeNativeMethods.Gdip.Ok;
 
             if (GDIPlus.RunningOnUnix())
             {
                 // for libgdiplus HRGN == GpRegion* 
-                status = (Status)SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
+                status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
             }
             else
             {
                 // ... but on Windows HRGN are (old) GDI objects
-                if (SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle)) != 0)
-                    status = Status.InvalidParameter;
+                if (SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle)) != SafeNativeMethods.Gdip.Ok)
+                {
+                    status = SafeNativeMethods.Gdip.InvalidParameter;
+                }
             }
 
             SafeNativeMethods.Gdip.CheckStatus(status);
