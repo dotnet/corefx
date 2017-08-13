@@ -57,9 +57,20 @@ namespace System.Drawing.Text
         /// </summary>
         public void AddFontFile(string filename)
         {
-            Path.GetFullPath(filename);
+            if (filename == null)
+            {
+                throw new ArgumentNullException(nameof(filename));
+            }
 
-            int status = SafeNativeMethods.Gdip.GdipPrivateAddFontFile(new HandleRef(this, _nativeFontCollection), filename);
+            // this ensure the filename is valid (or throw the correct exception)
+            string fullPath = Path.GetFullPath(filename);
+
+            if (!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException();
+            }
+
+            int status = SafeNativeMethods.Gdip.GdipPrivateAddFontFile(new HandleRef(this, _nativeFontCollection), fullPath);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             // Register private font with GDI as well so pure GDI-based controls (TextBox, Button for instance) can access it.
