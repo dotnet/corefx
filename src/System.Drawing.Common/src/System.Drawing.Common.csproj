@@ -86,6 +86,7 @@
     <Compile Include="System\Drawing\Drawing2D\SmoothingMode.cs" />
     <Compile Include="System\Drawing\Drawing2D\WrapMode.cs" />
     <Compile Include="System\Drawing\Drawing2D\WarpMode.cs" />
+    <Compile Include="System\Drawing\CopyPixelOperation.cs" />
     <Compile Include="System\Drawing\Imaging\ColorAdjustType.cs" />
     <Compile Include="System\Drawing\Imaging\ColorChannelFlags.cs" />
     <Compile Include="System\Drawing\Imaging\ColorMap.cs" />
@@ -193,7 +194,6 @@
     <Compile Include="System\Drawing\BufferedGraphicsManager.cs" />
     <Compile Include="System\Drawing\ColorTranslator.cs" />
     <Compile Include="System\Drawing\ContentAlignment.cs" />
-    <Compile Include="System\Drawing\CopyPixelOperation.cs" />
     <Compile Include="System\Drawing\Drawing2D\CustomLineCap.Windows.cs" />
     <Compile Include="System\Drawing\Drawing2D\GraphicsPath.cs" />
     <Compile Include="System\Drawing\Drawing2D\LinearGradientBrush.cs" />
@@ -293,7 +293,6 @@
     <Compile Include="Unix\System.Drawing\ComIStreamMarshaler.cs" />
     <Compile Include="Unix\System.Drawing\ComIStreamWrapper.cs" />
     <Compile Include="Unix\System.Drawing\ContentAlignment.cs" />
-    <Compile Include="Unix\System.Drawing\CopyPixelOperation.cs" />
     <Compile Include="Unix\System.Drawing\Font.cs" />
     <Compile Include="Unix\System.Drawing\FontFamily.cs" />
     <Compile Include="Unix\System.Drawing\Graphics.cs" />
