@@ -178,6 +178,8 @@ namespace System.Net.Http.Functional.Tests
                 var ep = (IPEndPoint)listener.LocalEndPoint;
 
                 var clientToServerStream = new ProducerConsumerStream();
+                clientToServerStream.WriteByte(0);
+
                 var reqMsg = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"http://{ep.Address}:{ep.Port}/"),
@@ -214,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         // Send a byte from the client to the server.  The server will receive
                         // the byte as a chunk.
-                        clientToServerStream.WriteByte(i);
+                        if (i > 0) clientToServerStream.WriteByte(i); // 0 was already seeded when the stream was created above
                         Assert.Equal('1', serverStream.ReadByte());
                         Assert.Equal('\r', serverStream.ReadByte());
                         Assert.Equal('\n', serverStream.ReadByte());

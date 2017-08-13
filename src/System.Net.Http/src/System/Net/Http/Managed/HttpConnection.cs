@@ -250,15 +250,19 @@ namespace System.Net.Http
                 // CRLF for end of headers.
                 await WriteTwoBytesAsync((byte)'\r', (byte)'\n', cancellationToken).ConfigureAwait(false);
 
-                // Flush out anything buffered from the request headers to finish sending them.
-                await FlushAsync(cancellationToken).ConfigureAwait(false);
-
                 Debug.Assert(_sendRequestContentTask == null);
-                if (request.Content != null)
+                if (request.Content == null)
+                {
+                    // Flush out any headers we haven't sent.
+                    await FlushAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
                 {
                     // TODO #23144: Support Expect: 100-continue
 
-                    // Asynchronously send the body if there is one.  This can run concurrently with receiving the response.
+                    // Asynchronously send the body if there is one.  This can run concurrently with receiving
+                    // the response. The write content streams will handle ensuring appropriate flushes are done
+                    // to ensure the headers and content are sent.
                     bool transferEncodingChunked = request.HasHeaders && request.Headers.TransferEncodingChunked == true;
                     HttpContentWriteStream stream = transferEncodingChunked ? (HttpContentWriteStream)
                         new ChunkedEncodingWriteStream(this, cancellationToken) :
@@ -365,7 +369,7 @@ namespace System.Net.Http
             }
             catch (Exception e)
             {
-                Trace($"Error while sending request content: {e}");
+                if (NetEventSource.IsEnabled) Trace($"Error while sending request content: {e}");
                 Dispose();
                 throw;
             }
@@ -523,6 +527,37 @@ namespace System.Net.Http
                 // Copy remainder into buffer
                 WriteToBuffer(buffer, offset, count);
             }
+        }
+
+        private Task WriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (_writeOffset == 0)
+            {
+                // There's nothing in the write buffer we need to flush.
+                // Just write the supplied data out to the stream.
+                return WriteToStreamAsync(buffer, offset, count, cancellationToken);
+            }
+
+            int remaining = _writeBuffer.Length - _writeOffset;
+            if (count <= remaining)
+            {
+                // There's something already in the write buffer, but the content
+                // we're writing can also fit after it in the write buffer.  Copy
+                // the content to the write buffer and then flush it, so that we
+                // can do a single send rather than two.
+                WriteToBuffer(buffer, offset, count);
+                return FlushAsync(cancellationToken);
+            }
+
+            // There's data in the write buffer and the data we're writing doesn't fit after it.
+            // Do two writes, one to flush the buffer and then another to write the supplied content.
+            return FlushThenWriteWithoutBufferingAsync(buffer, offset, count, cancellationToken);
+        }
+
+        private async Task FlushThenWriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await FlushAsync(cancellationToken).ConfigureAwait(false);
+            await WriteToStreamAsync(buffer, offset, count, cancellationToken);
         }
 
         private Task WriteByteAsync(byte b, CancellationToken cancellationToken)
@@ -941,7 +976,7 @@ namespace System.Net.Http
             Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
             Debug.Assert(_currentRequest != null, "Expected the connection to be associated with a request.");
 
-            // Unassociated the connection from a request.  If there's an in-flight request content still
+            // Disassociate the connection from a request.  If there's an in-flight request content still
             // being sent, it'll see this nulled out and stop sending.
             _currentRequest = null;
 

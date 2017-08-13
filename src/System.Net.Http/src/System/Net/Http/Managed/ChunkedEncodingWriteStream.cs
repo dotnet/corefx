@@ -21,16 +21,25 @@ namespace System.Net.Http
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ignored)
             {
                 ValidateBufferArgs(buffer, offset, count);
+                
+                if (count == 0)
+                {
+                    // Don't write if nothing was given, especially since we don't want to accidentally send a 0 chunk,
+                    // which would indicate end of body.  Instead, just ensure no content is stuck in the buffer.
+                    return _connection.FlushAsync(_cancellationToken);
+                }
 
-                // Don't write if nothing was given, especially since we don't want to accidentally send a 0 chunk,
-                // which would indicate end of body.  We also avoid sending if the response has already completed,
-                // in which case there's no point sending further data (this might happen, for example, on a redirect.)
-                return count != 0 && _connection._currentRequest != null ?
-                    WriteAsyncCore(buffer, offset, count) :
-                    Task.CompletedTask;
+                if (_connection._currentRequest == null)
+                {
+                    // Avoid sending anything if the response has already completed, in which case there's no point
+                    // sending further data (this might happen, for example, on a redirect.)
+                    return Task.CompletedTask;
+                }
+
+                return WriteChunkAsync(buffer, offset, count);
             }
 
-            private async Task WriteAsyncCore(byte[] buffer, int offset, int count)
+            private async Task WriteChunkAsync(byte[] buffer, int offset, int count)
             {
                 // Write chunk length -- hex representation of count
                 bool digitWritten = false;
@@ -56,7 +65,9 @@ namespace System.Net.Http
                 // Flush the chunk.  This is reasonable from the standpoint of having just written a standalone piece
                 // of data, but is also necessary to support duplex communication, where a CopyToAsync is taking the
                 // data from content and writing it here; if there was no flush, we might not send the data until the
-                // source was empty, and it might be kept open to enable subsequent communication.
+                // source was empty, and it might be kept open to enable subsequent communication.  And it's necessary
+                // in general for at least the first write, as we need to ensure if it's the entirety of the content
+                // and if all of the headers and content fit in the write buffer that we've actually sent the request.
                 await _connection.FlushAsync(_cancellationToken);
             }
 
