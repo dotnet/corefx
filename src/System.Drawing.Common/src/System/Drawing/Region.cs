@@ -198,7 +198,21 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(regionHandle));
             }
 
-            SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle));
+            Status status = Status.Ok;
+
+            if (GDIPlus.RunningOnUnix())
+            {
+                // for libgdiplus HRGN == GpRegion* 
+                status = (Status)SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
+            }
+            else
+            {
+                // ... but on Windows HRGN are (old) GDI objects
+                if (SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle)) != 0)
+                    status = Status.InvalidParameter;
+            }
+
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         public void Union(RectangleF rect)
