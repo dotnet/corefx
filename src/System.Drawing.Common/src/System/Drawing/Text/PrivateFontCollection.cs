@@ -63,7 +63,12 @@ namespace System.Drawing.Text
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             // Register private font with GDI as well so pure GDI-based controls (TextBox, Button for instance) can access it.
-            SafeNativeMethods.AddFontFile(filename);
+            // Do this on Windows only as Unix only has GDI+ (libgdiplus), not GDI; and we don't have System.Windows.Forms
+            // on Unix.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                SafeNativeMethods.AddFontFile(filename);
+            }
         }
 
         /// <summary>
