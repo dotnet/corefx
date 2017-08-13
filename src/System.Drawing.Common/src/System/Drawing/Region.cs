@@ -198,23 +198,18 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(regionHandle));
             }
 
-            int status = SafeNativeMethods.Gdip.Ok;
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // On Windows HRGN are (old) GDI objects
-                if (SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle)) != SafeNativeMethods.Gdip.Ok)
-                {
-                    status = SafeNativeMethods.Gdip.InvalidParameter;
-                }
+                // On Windows HRGN are (old) GDI objects. Deskop .NET does not check the return code of IntDeleteObject
+                SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle));
             }
             else
             {
-                // for libgdiplus HRGN == GpRegion* 
-                status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
+                // for libgdiplus HRGN == GpRegion*, and we check the return code
+                int status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
+                SafeNativeMethods.Gdip.CheckStatus(status);
             }
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         public void Union(RectangleF rect)
