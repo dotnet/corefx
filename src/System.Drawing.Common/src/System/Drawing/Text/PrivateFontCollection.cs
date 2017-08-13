@@ -57,9 +57,18 @@ namespace System.Drawing.Text
         /// </summary>
         public void AddFontFile(string filename)
         {
+            if (_nativeFontCollection == IntPtr.Zero)
+            {
+                // This is the default behavior on Desktop. The ArgumentException originates from GdipPrivateAddFontFile which would
+                // refuse the null pointer.
+                throw new ArgumentException();
+            }
+
             if (filename == null)
             {
-                throw new ArgumentNullException(nameof(filename));
+                // This is the default behavior on Desktop. The name "path" originates from Path.GetFullPath or similar which would refuse
+                // a null value.
+                throw new ArgumentNullException("path");
             }
 
             // this ensure the filename is valid (or throw the correct exception)
