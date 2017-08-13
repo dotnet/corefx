@@ -200,18 +200,18 @@ namespace System.Drawing
 
             int status = SafeNativeMethods.Gdip.Ok;
 
-            if (GDIPlus.RunningOnUnix())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // for libgdiplus HRGN == GpRegion* 
-                status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
-            }
-            else
-            {
-                // ... but on Windows HRGN are (old) GDI objects
+                // On Windows HRGN are (old) GDI objects
                 if (SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle)) != SafeNativeMethods.Gdip.Ok)
                 {
                     status = SafeNativeMethods.Gdip.InvalidParameter;
                 }
+            }
+            else
+            {
+                // for libgdiplus HRGN == GpRegion* 
+                status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
             }
 
             SafeNativeMethods.Gdip.CheckStatus(status);
