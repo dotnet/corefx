@@ -208,6 +208,11 @@ namespace System.Security.Cryptography
                     if (signature == null)
                         throw new ArgumentNullException(nameof(signature));
 
+                    return VerifySignature((ReadOnlySpan<byte>)hash, (ReadOnlySpan<byte>)signature);
+                }
+
+                public override bool VerifySignature(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature)
+                {
                     byte[] derFormatSignature = AsymmetricAlgorithmHelpers.ConvertIeee1363ToDer(signature);
 
                     return Interop.AppleCrypto.VerifySignature(
@@ -227,10 +232,11 @@ namespace System.Security.Cryptography
                     return AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
                 }
 
-                protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
-                {
-                    return AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
-                }
+                protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm) =>
+                    AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
+
+                protected override bool TryHashData(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten) =>
+                    AsymmetricAlgorithmHelpers.TryHashData(source, destination, hashAlgorithm, out bytesWritten);
 
                 protected override void Dispose(bool disposing)
                 {

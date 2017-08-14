@@ -17,7 +17,7 @@ namespace Internal.Cryptography
         /// <summary>
         /// Convert Ieee1363 format of (r, s) to Der format
         /// </summary>
-        public static byte[] ConvertIeee1363ToDer(byte[] input)
+        public static byte[] ConvertIeee1363ToDer(ReadOnlySpan<byte> input)
         {
             Debug.Assert(input != null);
             Debug.Assert(input.Length % 2 == 0);
@@ -27,8 +27,8 @@ namespace Internal.Cryptography
             // Output is the DER encoded value of CONSTRUCTEDSEQUENCE(INTEGER(r), INTEGER(s)). 
             int halfLength = input.Length / 2;
 
-            byte[][] rEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input, 0, halfLength);
-            byte[][] sEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input, halfLength, halfLength);
+            byte[][] rEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input.Slice(0, halfLength));
+            byte[][] sEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input.Slice(halfLength, halfLength));
 
             return DerEncoder.ConstructSequence(rEncoded, sEncoded);
         }

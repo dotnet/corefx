@@ -175,11 +175,12 @@ namespace System.Security.Cryptography
 
                 return AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
             }
+            
+            protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm) =>
+                AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
 
-            protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
-            {
-                return AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
-            }
+            protected override bool TryHashData(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten) =>
+                AsymmetricAlgorithmHelpers.TryHashData(source, destination, hashAlgorithm, out bytesWritten);
 
             public override byte[] CreateSignature(byte[] rgbHash)
             {
@@ -208,6 +209,40 @@ namespace System.Security.Cryptography
                 return converted;
             }
 
+            public override bool TryCreateSignature(ReadOnlySpan<byte> source, Span<byte> destination, out int bytesWritten)
+            {
+                SafeDsaHandle key = _key.Value;
+                byte[] signature = new byte[Interop.Crypto.DsaEncodedSignatureSize(key)];
+
+                int signatureSize;
+                bool success = Interop.Crypto.DsaSign(key, source, source.Length, signature, out signatureSize);
+                if (!success)
+                {
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                }
+
+                Debug.Assert(
+                    signatureSize <= signature.Length,
+                    "DSA_sign reported an unexpected signature size",
+                    "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
+                    signatureSize,
+                    signature.Length);
+
+                int signatureFieldSize = Interop.Crypto.DsaSignatureFieldSize(key) * BitsPerByte;
+                byte[] converted = AsymmetricAlgorithmHelpers.ConvertDerToIeee1363(signature, 0, signatureSize, signatureFieldSize);
+                if (converted.Length <= destination.Length)
+                {
+                    new ReadOnlySpan<byte>(converted).CopyTo(destination);
+                    bytesWritten = converted.Length;
+                    return true;
+                }
+                else
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+            }
+
             public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
             {
                 if (rgbHash == null)
@@ -215,6 +250,11 @@ namespace System.Security.Cryptography
                 if (rgbSignature == null)
                     throw new ArgumentNullException(nameof(rgbSignature));
 
+                return VerifySignature((ReadOnlySpan<byte>)rgbHash, (ReadOnlySpan<byte>)rgbSignature);
+            }
+
+            public override bool VerifySignature(ReadOnlySpan<byte> rgbHash, ReadOnlySpan<byte> rgbSignature)
+            {
                 SafeDsaHandle key = _key.Value;
 
                 int expectedSignatureBytes = Interop.Crypto.DsaSignatureFieldSize(key) * 2;

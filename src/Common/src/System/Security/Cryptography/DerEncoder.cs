@@ -135,30 +135,10 @@ namespace System.Security.Cryptography
         /// </summary>
         /// <param name="bigEndianBytes">The value to encode, in big integer representation.</param>
         /// <returns>The encoded segments { tag, length, value }</returns>
-        internal static byte[][] SegmentedEncodeUnsignedInteger(byte[] bigEndianBytes)
+        internal static byte[][] SegmentedEncodeUnsignedInteger(ReadOnlySpan<byte> bigEndianBytes)
         {
-            Debug.Assert(bigEndianBytes != null);
-
-            return SegmentedEncodeUnsignedInteger(bigEndianBytes, 0, bigEndianBytes.Length);
-        }
-
-        /// <summary>
-        /// Encode the segments { tag, length, value } of an unsigned integer represented within a bounded array.
-        /// </summary>
-        /// <param name="bigEndianBytes">The value to encode, in big integer representation.</param>
-        /// <param name="offset">The offset into bigEndianBytes to read</param>
-        /// <param name="count">The count of bytes to read, must be greater than 0</param>
-        /// <returns>The encoded segments { tag, length, value }</returns>
-        internal static byte[][] SegmentedEncodeUnsignedInteger(byte[] bigEndianBytes, int offset, int count)
-        {
-            Debug.Assert(bigEndianBytes != null);
-            Debug.Assert(offset >= 0);
-            Debug.Assert(count > 0);
-            Debug.Assert(bigEndianBytes.Length > 0);
-            Debug.Assert(bigEndianBytes.Length >= count - offset);
-
-            int start = offset;
-            int end = start + count;
+            int start = 0;
+            int end = start + bigEndianBytes.Length;
 
             // Remove any leading zeroes.
             while (start < end && bigEndianBytes[start] == 0)
@@ -170,7 +150,7 @@ namespace System.Security.Cryptography
             if (start == end)
             {
                 start--;
-                Debug.Assert(start >= offset);
+                Debug.Assert(start >= 0);
             }
 
             int length = end - start;
@@ -189,7 +169,7 @@ namespace System.Security.Cryptography
                 dataBytes = new byte[length];
             }
 
-            Buffer.BlockCopy(bigEndianBytes, start, dataBytes, writeStart, length);
+            bigEndianBytes.Slice(start, length).CopyTo(new Span<byte>(dataBytes, writeStart));
 
             return new[]
             {
