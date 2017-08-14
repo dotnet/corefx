@@ -26,7 +26,16 @@ namespace System.Net.Http
                 Debug.Assert(_chunkBytesRemaining == 0);
 
                 // Start of chunk, read chunk size.
-                ulong chunkSize = ParseHexSize(await _connection.ReadNextLineAsync(cancellationToken).ConfigureAwait(false));
+                ArraySegment<byte> line;
+                while (!_connection.TryReadNextLine(out line))
+                {
+                    if (!await _connection.FillAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        throw new IOException(SR.net_http_invalid_response);
+                    }
+                }
+
+                ulong chunkSize = ParseHexSize(line);
                 _chunkBytesRemaining = chunkSize;
 
                 if (chunkSize > 0)

@@ -275,14 +275,33 @@ namespace System.Net.Http
 
                 // Parse the response status line and headers
                 var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
-                ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
+
+                ArraySegment<byte> line;
+                while (!TryReadNextLine(out line))
+                {
+                    if (!await FillAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        throw new IOException(SR.net_http_invalid_response);
+                    }
+                }
+
+                ParseStatusLine(line, response);
+
                 while (true)
                 {
-                    ArraySegment<byte> line = await ReadNextLineAsync(cancellationToken).ConfigureAwait(false);
+                    while (!TryReadNextLine(out line))
+                    {
+                        if (!await FillAsync(cancellationToken).ConfigureAwait(false))
+                        {
+                            throw new IOException(SR.net_http_invalid_response);
+                        }
+                    }
+
                     if (line[0] == '\r')
                     {
                         break;
                     }
+
                     ParseHeaderNameValue(line, response);
                 }
 
@@ -639,44 +658,33 @@ namespace System.Net.Http
             return _stream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        private async ValueTask<ArraySegment<byte>> ReadNextLineAsync(CancellationToken cancellationToken)
+        private bool TryReadNextLine(out ArraySegment<byte> line)
         {
-            int searchOffset = 0;
-            while (true)
+            int remaining = _readLength - _readOffset;
+            int crPos = Array.IndexOf(_readBuffer, (byte)'\r', _readOffset, remaining);
+            if (crPos < 0)
             {
-                int remaining = _readLength - _readOffset;
-                int startIndex = _readOffset + searchOffset;
-                int length = _readLength - startIndex;
-                int crPos = Array.IndexOf(_readBuffer, (byte)'\r', startIndex, length);
-                if (crPos < 0)
-                {
-                    // Couldn't find a \r.  Read more.
-                    searchOffset = length;
-                    await FillAsync(cancellationToken);
-                }
-                else if (crPos + 1 >= _readLength)
-                {
-                    // We found a \r, but we don't have enough data buffered to read the \n.
-                    searchOffset = length - 1;
-                    await FillAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else if (_readBuffer[crPos + 1] == '\n')
-                {
-                    // We found a \r\n.  Return the data up to and including it.
-                    int lineLength = crPos - _readOffset + 2;
-                    var result = new ArraySegment<byte>(_readBuffer, _readOffset, lineLength);
-                    _readOffset += lineLength;
-                    return result;
-                }
-                else
-                {
-                    ThrowInvalidHttpResponse();
-                }
-
-                if (remaining == _readLength - _readOffset)
-                {
-                    throw new IOException(SR.net_http_invalid_response);
-                }
+                // Couldn't find a \r.
+                line = default(ArraySegment<byte>);
+                return false;
+            }
+            else if (crPos + 1 >= _readLength)
+            {
+                // We found a \r, but we don't have enough data buffered to read the \n.
+                line = default(ArraySegment<byte>);
+                return false;
+            }
+            else if (_readBuffer[crPos + 1] == '\n')
+            {
+                // We found a \r\n.  Return the data up to and including it.
+                int lineLength = crPos - _readOffset + 2;
+                line = new ArraySegment<byte>(_readBuffer, _readOffset, lineLength);
+                _readOffset += lineLength;
+                return true;
+            }
+            else
+            {
+                throw new HttpRequestException(SR.net_http_invalid_response);
             }
         }
 
@@ -714,7 +722,8 @@ namespace System.Net.Http
             throw new IOException(SR.net_http_invalid_response);
         }
 
-        private Task FillAsync(CancellationToken cancellationToken)
+        // Returns false on EOF.
+        private Task<bool> FillAsync(CancellationToken cancellationToken)
         {
             int remaining = _readLength - _readOffset;
             Debug.Assert(remaining >= 0);
@@ -771,7 +780,7 @@ namespace System.Net.Http
                 int bytesRead = t.GetAwaiter().GetResult();
                 if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
                 _readLength += bytesRead;
-                return Task.CompletedTask;
+                return Task.FromResult(bytesRead > 0);
             }
             else
             {
@@ -783,6 +792,7 @@ namespace System.Net.Http
                     int bytesRead = completed.GetAwaiter().GetResult();
                     if (NetEventSource.IsEnabled) innerConnection.Trace($"Received {bytesRead} bytes.");
                     innerConnection._readLength += bytesRead;
+                    return (bytesRead > 0);
                 }, this, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             }
         }
