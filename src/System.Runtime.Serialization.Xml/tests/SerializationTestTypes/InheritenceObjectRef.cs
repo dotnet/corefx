@@ -278,20 +278,6 @@ namespace SerializationTestTypes
         }
     }
 
-    public class DerivedPOCOBaseDCISRef : BaseDC
-    {
-        public SimpleDCWithRef SimpleDCWithRefData;
-        public SimpleDCWithRef RefData;
-
-        public DerivedPOCOBaseDCISRef() { }
-        public DerivedPOCOBaseDCISRef(bool init)
-            : base(init)
-        {
-            SimpleDCWithRefData = new SimpleDCWithRef(true);
-            RefData = SimpleDCWithRefData;
-        }
-    }
-
     [DataContract]
     public class BaseDCNoIsRef
     {

@@ -197,19 +197,6 @@ namespace SerializationTestTypes
         }
     }
 
-    [DataContract]
-    public class DerivedWithIsRefFalseNoRefdObjects : BaseWithIsRefTrue
-    {
-        [DataMember]
-        public SimpleDC RefData;
-        public DerivedWithIsRefFalseNoRefdObjects() { }
-        public DerivedWithIsRefFalseNoRefdObjects(bool init)
-            : base(init)
-        {
-            RefData = new SimpleDC(true);
-        }
-    }
-
     [DataContract()]
     public class BaseNoIsRef
     {
@@ -232,19 +219,6 @@ namespace SerializationTestTypes
             : base(true)
         {
             RefData = Data;
-        }
-    }
-
-    [DataContract(IsReference = true)]
-    public class DerivedWithIsRefTrueNoRefdObjects : BaseNoIsRef
-    {
-        [DataMember]
-        public SimpleDC RefData;
-        public DerivedWithIsRefTrueNoRefdObjects() { }
-        public DerivedWithIsRefTrueNoRefdObjects(bool init)
-            : base(true)
-        {
-            RefData = new SimpleDC(true);
         }
     }
 
@@ -609,37 +583,6 @@ namespace SerializationTestTypes
         }
     }
 
-    [DataContract]
-    public class TestInheritence13
-    {
-        public BaseSerializable baseDC;
-        public DerivedSerializable derivedDC;
-        public Derived2Serializable derived2DC;
-
-        public TestInheritence13()
-        {
-        }
-
-        public TestInheritence13(bool init)
-        {
-            baseDC = new BaseSerializable(true);
-            derivedDC = new DerivedSerializable(true);
-            derived2DC = new Derived2Serializable(true);
-            derived2DC.data = derivedDC.data;
-            derivedDC.Data = "String1";
-            derived2DC.Data = derivedDC.Data;
-            derived2DC.data = derivedDC.data3;
-            derivedDC.Data3 = "String2";
-            derived2DC.Data = derivedDC.Data3;
-            derived2DC.data4 = derivedDC.data1;
-            derivedDC.Data1 = "String3";
-            derived2DC.Data4 = derivedDC.Data1;
-            derived2DC.data1 = derived2DC.data2;
-            derived2DC.Data2 = "String4";
-            derived2DC.Data1 = derived2DC.Data2;
-        }
-    }
-
     [DataContract(IsReference = true)]
     [KnownType(typeof(Derived2DC))]
     public class TestInheritence7
@@ -710,29 +653,6 @@ namespace SerializationTestTypes
         {
             derived2DC = new Derived2DC(true);
             baseDC = new BaseDC(true);
-            baseDC.data = derived2DC.data;
-            derived2DC.Data = "String1";
-            baseDC.Data = derived2DC.Data;
-            baseDC.data = derived2DC.data1;
-            derived2DC.Data1 = "String2";
-            baseDC.Data = derived2DC.Data1;
-        }
-    }
-
-    [DataContract]
-    public class TestInheritence15
-    {
-        public BaseSerializable baseDC;
-        public Derived2Serializable derived2DC;
-
-        public TestInheritence15()
-        {
-        }
-
-        public TestInheritence15(bool init)
-        {
-            derived2DC = new Derived2Serializable(true);
-            baseDC = new BaseSerializable(true);
             baseDC.data = derived2DC.data;
             derived2DC.Data = "String1";
             baseDC.Data = derived2DC.Data;
