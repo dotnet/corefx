@@ -154,15 +154,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             if (pType is ErrorType err)
             {
-                if (err.HasTypeParent())
-                {
-                    ErrAppendType(err.GetTypeParent(), null);
-                    ErrAppendChar('.');
-                }
-                else
-                {
-                    ErrAppendParentCore(err.GetNSParent(), pctx);
-                }
+                ErrAppendParentCore(err.GetNSParent(), pctx);
             }
             else if (pType is AggregateType agg)
             {

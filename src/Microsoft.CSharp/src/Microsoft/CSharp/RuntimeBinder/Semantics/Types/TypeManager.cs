@@ -489,19 +489,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (err.HasParent())
                     {
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
-
-                        CType pParentType = null;
-                        if (err.HasTypeParent())
-                        {
-                            pParentType = SubstTypeCore(err.GetTypeParent(), pctx);
-                        }
-
                         TypeArray typeArgs = SubstTypeArray(err.typeArgs, pctx);
-                        if (typeArgs != err.typeArgs || (err.HasTypeParent() && pParentType != err.GetTypeParent()))
+                        if (typeArgs != err.typeArgs)
                         {
                             return GetErrorType(err.GetNSParent(), err.nameText, typeArgs);
                         }
                     }
+
                     return type;
 
                 case TypeKind.TK_TypeParameterType:
@@ -643,43 +637,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ErrorType errSrc = (ErrorType)typeSrc;
                     if (!(typeDst is ErrorType errDst) || !errSrc.HasParent() || !errDst.HasParent())
                         return false;
+
+                {
+                    Debug.Assert(errSrc.nameText != null && errSrc.typeArgs != null);
+                    Debug.Assert(errDst.nameText != null && errDst.typeArgs != null);
+
+                    if (errSrc.nameText != errDst.nameText || errSrc.typeArgs.Count != errDst.typeArgs.Count
+                        || errSrc.GetNSParent() != errDst.GetNSParent())
                     {
-                        Debug.Assert(errSrc.nameText != null && errSrc.typeArgs != null);
-                        Debug.Assert(errDst.nameText != null && errDst.typeArgs != null);
-
-                        if (errSrc.nameText != errDst.nameText || errSrc.typeArgs.Count != errDst.typeArgs.Count)
-                            return false;
-
-                        if (errSrc.HasTypeParent() != errDst.HasTypeParent())
-                        {
-                            return false;
-                        }
-                        if (errSrc.HasTypeParent())
-                        {
-                            if (errSrc.GetTypeParent() != errDst.GetTypeParent())
-                            {
-                                return false;
-                            }
-                            if (!SubstEqualTypesCore(errDst.GetTypeParent(), errSrc.GetTypeParent(), pctx))
-                            {
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (errSrc.GetNSParent() != errDst.GetNSParent())
-                            {
-                                return false;
-                            }
-                        }
-
-                        // All the args must unify.
-                        for (int i = 0; i < errSrc.typeArgs.Count; i++)
-                        {
-                            if (!SubstEqualTypesCore(errDst.typeArgs[i], errSrc.typeArgs[i], pctx))
-                                return false;
-                        }
+                        return false;
                     }
+
+                    // All the args must unify.
+                    for (int i = 0; i < errSrc.typeArgs.Count; i++)
+                    {
+                        if (!SubstEqualTypesCore(errDst.typeArgs[i], errSrc.typeArgs[i], pctx))
+                            return false;
+                    }
+                }
+
                     return true;
 
                 case TypeKind.TK_TypeParameterType:
@@ -774,12 +750,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             if (TypeContainsType(err.typeArgs[i], typeFind))
                                 return true;
                         }
-                        if (err.HasTypeParent())
-                        {
-                            type = err.GetTypeParent();
-                            goto LRecurse;
-                        }
                     }
+
                     return false;
 
                 case TypeKind.TK_TypeParameterType:
@@ -835,12 +807,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 return true;
                             }
                         }
-                        if (err.HasTypeParent())
-                        {
-                            type = err.GetTypeParent();
-                            goto LRecurse;
-                        }
                     }
+
                     return false;
 
                 case TypeKind.TK_TypeParameterType:
