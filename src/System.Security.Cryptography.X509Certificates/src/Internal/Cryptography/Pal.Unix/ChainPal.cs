@@ -58,7 +58,6 @@ namespace Internal.Cryptography.Pal
             IChainPal chain = OpenSslX509ChainProcessor.BuildChain(
                 leaf,
                 candidates,
-                downloaded,
                 systemTrusted,
                 applicationPolicy,
                 certificatePolicy,

@@ -212,6 +212,11 @@ extern "C" int32_t CryptoNative_X509StoreCtxInit(X509_STORE_CTX* ctx, X509_STORE
     return X509_STORE_CTX_init(ctx, store, x509, nullptr);
 }
 
+extern "C" int32_t CryptoNative_X509StoreCtxInit2(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509, X509Stack* extraStore)
+{
+    return X509_STORE_CTX_init(ctx, store, x509, extraStore);
+}
+
 extern "C" int32_t CryptoNative_X509VerifyCert(X509_STORE_CTX* ctx)
 {
     return X509_verify_cert(ctx);

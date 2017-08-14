@@ -223,6 +223,11 @@ Shims the X509_STORE_CTX_init method.
 extern "C" int32_t CryptoNative_X509StoreCtxInit(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509);
 
 /*
+Shims the X509_STORE_CTX_init method.
+*/
+extern "C" int32_t CryptoNative_X509StoreCtxInit2(X509_STORE_CTX* ctx, X509_STORE* store, X509* x509, X509Stack* extraStore);
+
+/*
 Shims the X509_verify_cert method.
 */
 extern "C" int32_t CryptoNative_X509VerifyCert(X509_STORE_CTX* ctx);
