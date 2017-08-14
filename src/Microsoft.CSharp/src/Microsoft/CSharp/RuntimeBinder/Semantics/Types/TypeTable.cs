@@ -48,7 +48,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // Two way hashes
         private readonly Dictionary<KeyPair<AggregateSymbol, Name>, AggregateType> _pAggregateTable;
-        private readonly Dictionary<KeyPair<CType, Name>, ErrorType> _pErrorWithTypeParentTable;
         private readonly Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, Name>, ErrorType> _pErrorWithNamespaceParentTable;
         private readonly Dictionary<KeyPair<CType, Name>, ArrayType> _pArrayTable;
         private readonly Dictionary<KeyPair<CType, Name>, ParameterModifierType> _pParameterModifierTable;
@@ -62,7 +61,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             _pAggregateTable = new Dictionary<KeyPair<AggregateSymbol, Name>, AggregateType>();
             _pErrorWithNamespaceParentTable = new Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, Name>, ErrorType>();
-            _pErrorWithTypeParentTable = new Dictionary<KeyPair<CType, Name>, ErrorType>();
             _pArrayTable = new Dictionary<KeyPair<CType, Name>, ArrayType>();
             _pParameterModifierTable = new Dictionary<KeyPair<CType, Name>, ParameterModifierType>();
             _pPointerTable = new Dictionary<CType, PointerType>();
@@ -90,17 +88,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _pAggregateTable.Add(new KeyPair<AggregateSymbol, Name>(pAggregateSymbol, pName), pAggregate);
         }
 
-        public ErrorType LookupError(Name pName, CType pParentType)
-        {
-            var key = new KeyPair<CType, Name>(pParentType, pName);
-            ErrorType result;
-            if (_pErrorWithTypeParentTable.TryGetValue(key, out result))
-            {
-                return result;
-            }
-            return null;
-        }
-
         public ErrorType LookupError(Name pName, AssemblyQualifiedNamespaceSymbol pParentNS)
         {
             var key = new KeyPair<AssemblyQualifiedNamespaceSymbol, Name>(pParentNS, pName);
@@ -110,12 +97,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return result;
             }
             return null;
-        }
-
-        public void InsertError(Name pName, CType pParentType, ErrorType pError)
-        {
-            Debug.Assert(LookupError(pName, pParentType) == null);
-            _pErrorWithTypeParentTable.Add(new KeyPair<CType, Name>(pParentType, pName), pError);
         }
 
         public void InsertError(Name pName, AssemblyQualifiedNamespaceSymbol pParentNS, ErrorType pError)
