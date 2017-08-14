@@ -195,7 +195,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 _pFixedResults[iParam] = GetTypeManager().GetErrorType(
-                                        null,
                                         ((TypeParameterType)_pMethodTypeParameters[iParam]).GetName(),
                                         BSYMMGR.EmptyTypeArray());
             }

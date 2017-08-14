@@ -18,12 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Name nameText;
         public TypeArray typeArgs;
 
-        public bool HasParent() { return _pParentNS != null; }
-
-        public AssemblyQualifiedNamespaceSymbol GetNSParent() { return _pParentNS; }
-
-        public void SetNSParent(AssemblyQualifiedNamespaceSymbol pNS) { _pParentNS = pNS; }
-
-        private AssemblyQualifiedNamespaceSymbol _pParentNS;
+        public bool HasParent { get; set; }
     }
 }

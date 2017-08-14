@@ -71,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ErrorType CreateError(
             Name name,
-            AssemblyQualifiedNamespaceSymbol pParentNS,
+            bool hasParent,
             Name nameText,
             TypeArray typeArgs)
         {
@@ -79,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             e.SetName(name);
             e.nameText = nameText;
             e.typeArgs = typeArgs;
-            e.SetNSParent(pParentNS);
+            e.HasParent = hasParent;
 
             e.SetTypeKind(TypeKind.TK_ErrorType);
             return e;

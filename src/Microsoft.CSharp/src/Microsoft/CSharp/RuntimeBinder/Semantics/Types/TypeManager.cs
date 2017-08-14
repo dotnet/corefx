@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeTable = new TypeTable();
 
             // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null, null, null, null);
+            _errorType = _typeFactory.CreateError(null, false, null, null);
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
@@ -314,16 +314,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public ErrorType GetErrorType(
-                AssemblyQualifiedNamespaceSymbol pParentNS,
                 Name nameText,
                 TypeArray typeArgs)
         {
             Debug.Assert(nameText != null);
-            if (pParentNS == null)
-            {
-                // Use the root namespace as the parent.
-                pParentNS = _BSymmgr.GetRootNsAid();
-            }
             if (typeArgs == null)
             {
                 typeArgs = BSYMMGR.EmptyTypeArray();
@@ -332,13 +326,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = _BSymmgr.GetNameFromPtrs(nameText, typeArgs);
             Debug.Assert(name != null);
 
-            Debug.Assert(pParentNS != null);
             ErrorType pError = _typeTable.LookupError(name);
 
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(name, pParentNS, nameText, typeArgs);
+                pError = _typeFactory.CreateError(name, true, nameText, typeArgs);
                 pError.SetErrors(true);
                 _typeTable.InsertError(name, pError);
             }
@@ -486,13 +479,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ErrorType:
                     ErrorType err = (ErrorType)type;
-                    if (err.HasParent())
+                    if (err.HasParent)
                     {
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
                         TypeArray typeArgs = SubstTypeArray(err.typeArgs, pctx);
                         if (typeArgs != err.typeArgs)
                         {
-                            return GetErrorType(err.GetNSParent(), err.nameText, typeArgs);
+                            return GetErrorType(err.nameText, typeArgs);
                         }
                     }
 
@@ -635,7 +628,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ErrorType:
                     ErrorType errSrc = (ErrorType)typeSrc;
-                    if (!(typeDst is ErrorType errDst) || !errSrc.HasParent() || !errDst.HasParent())
+                    if (!(typeDst is ErrorType errDst) || !errSrc.HasParent || !errDst.HasParent)
                         return false;
 
                 {
@@ -643,7 +636,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(errDst.nameText != null && errDst.typeArgs != null);
 
                     if (errSrc.nameText != errDst.nameText || errSrc.typeArgs.Count != errDst.typeArgs.Count
-                        || errSrc.GetNSParent() != errDst.GetNSParent())
+                        || errSrc.HasParent != errDst.HasParent)
                     {
                         return false;
                     }
@@ -741,7 +734,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ErrorType:
                     ErrorType err = (ErrorType)type;
-                    if (err.HasParent())
+                    if (err.HasParent)
                     {
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 
@@ -796,7 +789,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ErrorType:
                     ErrorType err = (ErrorType)type;
-                    if (err.HasParent())
+                    if (err.HasParent)
                     {
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
 

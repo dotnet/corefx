@@ -504,7 +504,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_ErrorType:
                     ErrorType err = (ErrorType)pType;
-                    if (err.HasParent())
+                    if (err.HasParent)
                     {
                         Debug.Assert(err.nameText != null && err.typeArgs != null);
                         ErrAppendName(err.nameText);
