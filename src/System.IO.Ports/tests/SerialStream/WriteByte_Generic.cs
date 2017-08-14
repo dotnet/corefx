@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 using Xunit.NetCore.Extensions;
+using ThreadState = System.Threading.ThreadState;
 
 namespace System.IO.Ports.Tests
 {
@@ -123,7 +124,9 @@ namespace System.IO.Ports.Tests
             {
                 var rndGen = new Random(-55);
                 var asyncEnableRts = new AsyncEnableRts();
-                var t = new Task(asyncEnableRts.EnableRTS);
+                var t = new Thread(asyncEnableRts.EnableRTS);
+
+                int waitTime;
 
                 com1.WriteTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
                 com1.Handshake = Handshake.RequestToSend;
@@ -137,7 +140,15 @@ namespace System.IO.Ports.Tests
                 // Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
                 // before the timeout is reached
                 t.Start();
-                TCSupport.WaitForTaskToStart(t);
+                waitTime = 0;
+
+                while (t.ThreadState == ThreadState.Unstarted && waitTime < 2000)
+                {
+                    // Wait for the thread to start
+                    Thread.Sleep(50);
+                    waitTime += 50;
+                }
+
                 try
                 {
                     com1.BaseStream.WriteByte(DEFAULT_BYTE);
@@ -147,7 +158,10 @@ namespace System.IO.Ports.Tests
                 }
 
                 asyncEnableRts.Stop();
-                TCSupport.WaitForTaskCompletion(t);
+
+                while (t.IsAlive)
+                    Thread.Sleep(100);
+
                 VerifyTimeout(com1);
             }
         }

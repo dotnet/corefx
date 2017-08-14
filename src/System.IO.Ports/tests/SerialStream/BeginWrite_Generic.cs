@@ -5,9 +5,9 @@
 using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Threading;
-using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
+using ThreadState = System.Threading.ThreadState;
 
 namespace System.IO.Ports.Tests
 {
@@ -268,7 +268,8 @@ namespace System.IO.Ports.Tests
             using (var com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
             {
                 var asyncRead = new AsyncWrite(com1);
-                var asyncEndWrite = new Task(asyncRead.EndWrite);
+                var asyncEndWrite = new Thread(asyncRead.EndWrite);
+                int waitTime;
                 var asyncCallbackCalled = false;
 
                 com1.Open();
@@ -289,11 +290,24 @@ namespace System.IO.Ports.Tests
                 }
 
                 asyncEndWrite.Start();
-                TCSupport.WaitForTaskToStart(asyncEndWrite);
+
+                waitTime = 0;
+                while (asyncEndWrite.ThreadState == ThreadState.Unstarted && waitTime < MAX_WAIT_THREAD)
+                {
+                    // Wait for the thread to start
+                    Thread.Sleep(50);
+                    waitTime += 50;
+                }
+
+                if (MAX_WAIT_THREAD <= waitTime)
+                {
+                    Fail("Err_018158ajied!!!: Expected EndRead to have returned");
+                }
+
                 Thread.Sleep(100 < com1.WriteTimeout ? 2 * com1.WriteTimeout : 200);
                 // Sleep for 200ms or 2 times the WriteTimeout
 
-                if (asyncEndWrite.IsCompleted)
+                if (!asyncEndWrite.IsAlive)
                 {
                     // Verify EndRead is blocking and is still alive
                     Fail("Err_4085858aiehe!!!: Expected read to not have completed");
@@ -306,8 +320,19 @@ namespace System.IO.Ports.Tests
 
                 com2.RtsEnable = true;
 
-                TCSupport.WaitForTaskCompletion(asyncEndWrite);
-                var waitTime = 0;
+                waitTime = 0;
+                while (asyncEndWrite.IsAlive && waitTime < MAX_WAIT_THREAD)
+                {
+                    Thread.Sleep(50);
+                    waitTime += 50;
+                }
+
+                if (MAX_WAIT_THREAD <= waitTime)
+                {
+                    Fail("Err_018158ajied!!!: Expected EndRead to have returned");
+                }
+
+                waitTime = 0;
                 while (!asyncCallbackCalled && waitTime < 5000)
                 {
                     Thread.Sleep(50);

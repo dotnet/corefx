@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -74,7 +73,7 @@ namespace System.IO.Ports.Tests
                 byte[] byteXmitBuffer = TCSupport.GetRandomBytes(512);
                 byte[] byteRcvBuffer = new byte[byteXmitBuffer.Length];
                 ASyncRead asyncRead = new ASyncRead(com1);
-                var asyncReadTask = new Task(asyncRead.Read);
+                Thread asyncReadThread = new Thread(asyncRead.Read);
 
                 Debug.WriteLine(
                     "Verifying that ReadByte() will read bytes that have been received after the call to Read was made");
@@ -88,7 +87,7 @@ namespace System.IO.Ports.Tests
                 if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
 
-                asyncReadTask.Start();
+                asyncReadThread.Start();
                 asyncRead.ReadStartedEvent.WaitOne();
                 //This only tells us that the thread has started to execute code in the method
                 Thread.Sleep(2000); //We need to wait to guarentee that we are executing code in SerialPort
@@ -128,8 +127,6 @@ namespace System.IO.Ports.Tests
                         }
                     }
                 }
-
-                TCSupport.WaitForTaskCompletion(asyncReadTask);
             }
         }
         #endregion

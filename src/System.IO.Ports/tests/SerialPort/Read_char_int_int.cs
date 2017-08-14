@@ -7,7 +7,6 @@ using System.IO.PortsTests;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -381,7 +380,7 @@ namespace System.IO.Ports.Tests
                 char[] charXmitBuffer = TCSupport.GetRandomChars(512, TCSupport.CharacterOptions.None);
                 char[] charRcvBuffer = new char[charXmitBuffer.Length];
                 ASyncRead asyncRead = new ASyncRead(com1, charRcvBuffer, 0, charRcvBuffer.Length);
-                var asyncReadTask = new Task(asyncRead.Read);
+                Thread asyncReadThread = new Thread(asyncRead.Read);
 
 
                 Debug.WriteLine(
@@ -396,7 +395,7 @@ namespace System.IO.Ports.Tests
                 if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
 
-                asyncReadTask.Start();
+                asyncReadThread.Start();
                 asyncRead.ReadStartedEvent.WaitOne();
                 // The WaitOne only tells us that the thread has started to execute code in the method
                 Thread.Sleep(2000); // We need to wait to guarantee that we are executing code in SerialPort
@@ -420,8 +419,6 @@ namespace System.IO.Ports.Tests
                     Assert.Equal(charXmitBuffer.Length, receivedLength);
                     Assert.Equal(charXmitBuffer, charRcvBuffer);
                 }
-
-                TCSupport.WaitForTaskCompletion(asyncReadTask);
             }
         }
 

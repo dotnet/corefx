@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -354,7 +353,7 @@ namespace System.IO.Ports.Tests
             {
                 char[] charXmitBuffer = TCSupport.GetRandomChars(512, TCSupport.CharacterOptions.None);
                 var asyncRead = new ASyncRead(com1);
-                var asyncReadTask = new Task(asyncRead.Read);
+                var asyncReadThread = new Thread(new ThreadStart(asyncRead.Read));
 
                 char endLineChar = com1.NewLine[0];
                 char notEndLineChar = TCSupport.GetRandomOtherChar(endLineChar, TCSupport.CharacterOptions.None);
@@ -381,7 +380,7 @@ namespace System.IO.Ports.Tests
                 if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
 
-                asyncReadTask.Start();
+                asyncReadThread.Start();
                 asyncRead.ReadStartedEvent.WaitOne();
                 //This only tells us that the thread has started to execute code in the method
                 Thread.Sleep(2000); //We need to wait to guarentee that we are executing code in SerialPort
@@ -463,7 +462,7 @@ namespace System.IO.Ports.Tests
 
                 var continueRunning = true;
                 var numberOfIterations = 0;
-                var writeToCom2Task = new Task(delegate ()
+                var writeToCom2Thread = new Thread(delegate ()
                 {
                     while (continueRunning)
                     {
@@ -499,12 +498,12 @@ namespace System.IO.Ports.Tests
                 if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
 
-                writeToCom2Task.Start();
+                writeToCom2Thread.Start();
 
                 Assert.Throws<TimeoutException>(() => com2.ReadLine());
 
                 continueRunning = false;
-                writeToCom2Task.Wait();
+                writeToCom2Thread.Join();
 
                 com1.Write(com1.NewLine);
 

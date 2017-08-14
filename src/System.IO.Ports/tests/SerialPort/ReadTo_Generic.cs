@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -123,7 +122,7 @@ namespace System.IO.Ports.Tests
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {
                 Random rndGen = new Random(-55);
-                var t = new Task(WriteToCom1);
+                Thread t = new Thread(WriteToCom1);
 
                 com1.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
                 com1.Encoding = new UTF8Encoding();
@@ -143,7 +142,9 @@ namespace System.IO.Ports.Tests
                 {
                 }
 
-                TCSupport.WaitForTaskCompletion(t);
+                //Wait for the thread to finish
+                while (t.IsAlive)
+                    Thread.Sleep(50);
 
                 //Make sure there is no bytes in the buffer so the next call to read will timeout
                 com1.DiscardInBuffer();
