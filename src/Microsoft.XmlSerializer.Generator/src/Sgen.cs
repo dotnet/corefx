@@ -34,7 +34,7 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 if (args.Length > 0)
                 {
-                    if (args.Where(s => s.IndexOf("casesensitive", StringComparison.OrdinalIgnoreCase) >= 0).Count() > 0)
+                    if (args.Any(s => s.IndexOf("casesensitive", StringComparison.OrdinalIgnoreCase) >= 0))
                     {
                         caseSensitive = true;
                     }
