@@ -356,7 +356,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.23-x64.runtime.native.System": {
       "StableVersions": [
@@ -392,7 +392,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.native.System": {
       "StableVersions": [
@@ -435,7 +435,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System": {
       "StableVersions": [
@@ -471,7 +471,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.osx.10.10-x64.runtime.native.System": {
       "StableVersions": [
@@ -507,7 +507,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.rhel.7-x64.runtime.native.System": {
       "StableVersions": [
@@ -543,7 +543,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System": {
       "StableVersions": [
@@ -579,7 +579,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System": {
       "StableVersions": [
@@ -615,7 +615,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.unix.Microsoft.Win32.Primitives": {
       "StableVersions": [
@@ -2098,7 +2098,8 @@
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.1.0",
         "4.1.0.0": "4.1.0",
-        "4.1.1.0": "4.3.0"
+        "4.1.1.0": "4.3.0",
+        "4.1.1.1": "4.3.1"
       }
     },
     "System.Security.Principal": {
@@ -2529,28 +2530,28 @@
       "StableVersions": [
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.24-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
@@ -2581,21 +2582,21 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
@@ -2626,48 +2627,48 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple": {
       "StableVersions": [
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
@@ -2698,14 +2699,14 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.win10-arm64.runtime.native.System.Data.SqlClient.sni": {
       "BaselineVersion": "4.3.0"
