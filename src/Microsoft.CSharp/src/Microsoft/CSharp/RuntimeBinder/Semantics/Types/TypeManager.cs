@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeTable = new TypeTable();
 
             // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null, false, null, null);
+            _errorType = _typeFactory.CreateError(null, null, null);
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
@@ -331,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(name, true, nameText, typeArgs);
+                pError = _typeFactory.CreateError(name, nameText, typeArgs);
                 pError.SetErrors(true);
                 _typeTable.InsertError(name, pError);
             }

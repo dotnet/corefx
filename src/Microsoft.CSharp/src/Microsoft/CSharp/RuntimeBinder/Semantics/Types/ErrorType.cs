@@ -18,6 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Name nameText;
         public TypeArray typeArgs;
 
-        public bool HasParent { get; set; }
+        public bool HasParent => nameText != null;
     }
 }
