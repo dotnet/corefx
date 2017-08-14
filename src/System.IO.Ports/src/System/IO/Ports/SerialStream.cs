@@ -801,7 +801,6 @@ namespace System.IO.Ports
                             _handle.Close();
                             _handle = null;
                             _threadPoolBinding.Dispose();
-                            _threadPoolBinding = null;
                         }
 #pragma warning restore CA2002
                     }
@@ -810,7 +809,6 @@ namespace System.IO.Ports
                         _handle.Close();
                         _handle = null;
                         _threadPoolBinding.Dispose();
-                        _threadPoolBinding = null;
                     }
                     base.Dispose(disposing);
                 }
@@ -956,7 +954,12 @@ namespace System.IO.Ports
             // Free memory, GC handles.
             NativeOverlapped* overlappedPtr = afsar._overlapped;
             if (overlappedPtr != null)
+            {
+                // Legacy behavior as indicated by tests (e.g.: System.IO.Ports.Tests.SerialStream_EndRead.EndReadAfterClose)
+                // expects to be able to call EndRead after Close/Dispose - even if disposed _threadPoolBinding can free the
+                // native overlapped.
                 _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
+            }
 
             // Check for non-timeout errors during the read.
             if (afsar._errorCode != 0)
@@ -1015,7 +1018,12 @@ namespace System.IO.Ports
             // Free memory, GC handles.
             NativeOverlapped* overlappedPtr = afsar._overlapped;
             if (overlappedPtr != null)
+            {
+                // Legacy behavior as indicated by tests (e.g.: System.IO.Ports.Tests.SerialStream_EndWrite.EndWriteAfterSerialStreamClose)
+                // expects to be able to call EndWrite after Close/Dispose - even if disposed _threadPoolBinding can free the
+                // native overlapped.
                 _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
+            }
 
             // Now check for any error during the write.
             if (afsar._errorCode != 0)
@@ -1690,6 +1698,7 @@ namespace System.IO.Ports
 
                         waitCommEventWaitHandle.Reset();
                         intOverlapped = threadPoolBinding.AllocateNativeOverlapped(freeNativeOverlappedCallback, asyncResult, null);
+                        intOverlapped->EventHandle = waitCommEventWaitHandle.SafeWaitHandle.DangerousGetHandle();
                     }
 
                     fixed (int* eventsOccurredPtr = &eventsOccurred)

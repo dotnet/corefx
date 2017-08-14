@@ -22,7 +22,7 @@ namespace Legacy.Support
         {
             if (PlatformDetection.IsUap)
             {
-                return new [] { "COM3", "COM4", "COM5" }; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap https://github.com/dotnet/corefx/issues/21156
+                return new [] { "COM3", "COM4", "COM5", "COM6", "COM7" }; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap https://github.com/dotnet/corefx/issues/21156
             }
 
             List<string> ports = new List<string>();

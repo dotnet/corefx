@@ -28,7 +28,7 @@ namespace System.IO.Ports.Tests
         /// 3. Verify that the fAbortOnError flag is clear
         /// 
         /// </summary>
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotUap))]
         public void AbortOnErrorShouldBeClearedOnOpen()
         {
             // Open the port, set the fAbortOnError flag and then close the port
