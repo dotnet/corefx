@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -38,6 +39,7 @@ namespace System.Net.Http
         private ValueStringBuilder _sb; // mutable struct, do not make this readonly
 
         private HttpRequestMessage _currentRequest;
+        private Task _sendRequestContentTask;
         private readonly byte[] _writeBuffer;
         private int _writeOffset;
 
@@ -47,8 +49,7 @@ namespace System.Net.Http
         private int _readLength;
 
         private bool _connectionClose; // Connection: close was seen on last response
-
-        private bool _disposed;
+        private int _disposed; // 1 yes, 0 no
 
         public HttpConnection(
             HttpConnectionPool pool,
@@ -75,24 +76,34 @@ namespace System.Net.Http
             _sb = new ValueStringBuilder(DefaultCapacity);
 
             _writeBuffer = new byte[InitialWriteBufferSize];
-            _writeOffset = 0;
-
             _readBuffer = new byte[InitialReadBufferSize];
-            _readLength = 0;
-            _readOffset = 0;
 
-            _connectionClose = false;
-            _disposed = false;
-
-            if (NetEventSource.IsEnabled) Trace("Connection created.");
+            if (NetEventSource.IsEnabled)
+            {
+                if (_stream is SslStream sslStream)
+                {
+                    Trace(
+                        $"Secure connection created to {key.Host}:{key.Port}. " +
+                        $"SslProtocol:{sslStream.SslProtocol}, " +
+                        $"CipherAlgorithm:{sslStream.CipherAlgorithm}, CipherStrength:{sslStream.CipherStrength}, " +
+                        $"HashAlgorithm:{sslStream.HashAlgorithm}, HashStrength:{sslStream.HashStrength}, " +
+                        $"KeyExchangeAlgorithm:{sslStream.KeyExchangeAlgorithm}, KeyExchangeStrength:{sslStream.KeyExchangeStrength}, " +
+                        $"LocalCert:{sslStream.LocalCertificate}, RemoteCert:{sslStream.RemoteCertificate}");
+                }
+                else
+                {
+                    Trace($"Connection created to {key.Host}:{key.Port}.");
+                }
+            }
         }
 
         public void Dispose()
         {
-            if (!_disposed)
+            // Ensure we're only disposed once.  Dispose could be called concurrently, for example,
+            // if the request and the response were running concurrently and both incurred an exception.
+            if (Interlocked.Exchange(ref _disposed, 1) == 0)
             {
                 if (NetEventSource.IsEnabled) Trace("Connection closing.");
-                _disposed = true;
                 _pool.DecrementConnectionCount();
                 _stream.Dispose();
             }
@@ -186,8 +197,8 @@ namespace System.Net.Http
 
                 if (request.Version.Major != 1 || request.Version.Minor != 1)
                 {
-                    // TODO #21452: Support 1.0
-                    // TODO #21452: Support 2.0
+                    // TODO #23132: Support 1.0
+                    // TODO #23134: Support 2.0
                     throw new PlatformNotSupportedException($"Only HTTP 1.1 supported -- request.Version was {request.Version}");
                 }
 
@@ -239,22 +250,34 @@ namespace System.Net.Http
                 // CRLF for end of headers.
                 await WriteTwoBytesAsync((byte)'\r', (byte)'\n', cancellationToken).ConfigureAwait(false);
 
-                // Write body, if any
-                if (request.Content != null)
+                Debug.Assert(_sendRequestContentTask == null);
+                if (request.Content == null)
                 {
-                    HttpContentWriteStream stream = (request.HasHeaders && request.Headers.TransferEncodingChunked == true ?
-                        (HttpContentWriteStream)new ChunkedEncodingWriteStream(this) :
-                        (HttpContentWriteStream)new ContentLengthWriteStream(this));
-
-                    // TODO #21452: CopyToAsync doesn't take a CancellationToken, how do we deal with Cancellation here?
-                    // TODO #21452: We need to enable duplex communication, which means not waiting here until all data is sent.
-                    // TODO #21452: Support Expect: 100-continue
-                    await request.Content.CopyToAsync(stream, _transportContext).ConfigureAwait(false);
-                    await stream.FinishAsync(cancellationToken).ConfigureAwait(false);
+                    // Flush out any headers we haven't sent.
+                    await FlushAsync(cancellationToken).ConfigureAwait(false);
                 }
+                else
+                {
+                    // TODO #23144: Support Expect: 100-continue
 
-                // Flush out anything buffered from the request to finish sending it.
-                await FlushAsync(cancellationToken).ConfigureAwait(false);
+                    // Asynchronously send the body if there is one.  This can run concurrently with receiving
+                    // the response. The write content streams will handle ensuring appropriate flushes are done
+                    // to ensure the headers and content are sent.
+                    bool transferEncodingChunked = request.HasHeaders && request.Headers.TransferEncodingChunked == true;
+                    HttpContentWriteStream stream = transferEncodingChunked ? (HttpContentWriteStream)
+                        new ChunkedEncodingWriteStream(this, cancellationToken) :
+                        new ContentLengthWriteStream(this, cancellationToken);
+
+                    // Start the copy from the request.  We do this here in case it synchronously throws
+                    // an exception, e.g. StreamContent throwing for non-rewindable content, and because if
+                    // we did it in SendRequestContentAsync, that exception would get trapped in the returned
+                    // task... at that point, we might get stuck waiting to receive a response from the server
+                    // that'll never come, as the server is still expecting us to send data.
+                    _sendRequestContentTask = SendRequestContentAsync(
+                        request.Content.CopyToAsync(stream, _transportContext),
+                        stream,
+                        cancellationToken);
+                }
 
                 // Parse the response status line and headers
                 var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
@@ -275,6 +298,17 @@ namespace System.Net.Http
                     _connectionClose = true;
                 }
 
+                // Before creating the response stream, check to see if we're done sending any content,
+                // and propagate any exceptions that may have occurred.  The most common case is that
+                // the server won't send back response content until it's received the whole request,
+                // so the majority of the time this task will be complete.
+                Task sendRequestContentTask = _sendRequestContentTask;
+                if (sendRequestContentTask != null && sendRequestContentTask.IsCompleted)
+                {
+                    sendRequestContentTask.GetAwaiter().GetResult();
+                    _sendRequestContentTask = null;
+                }
+
                 // Create the response stream.
                 HttpContentReadStream responseStream;
                 if (request.Method == HttpMethod.Head || (int)response.StatusCode == 204 || (int)response.StatusCode == 304)
@@ -285,14 +319,14 @@ namespace System.Net.Http
                 else if (response.Content.Headers.ContentLength != null)
                 {
                     long contentLength = response.Content.Headers.ContentLength.GetValueOrDefault();
-                    if (contentLength == 0)
+                    if (contentLength <= 0)
                     {
                         responseStream = EmptyReadStream.Instance;
                         ReturnConnectionToPool();
                     }
                     else
                     {
-                        responseStream = new ContentLengthReadStream(this, contentLength);
+                        responseStream = new ContentLengthReadStream(this, (ulong)contentLength);
                     }
                 }
                 else if (response.Headers.TransferEncodingChunked == true)
@@ -316,6 +350,27 @@ namespace System.Net.Http
                 {
                     throw new HttpRequestException(SR.net_http_client_execution_error, error);
                 }
+                throw;
+            }
+        }
+
+        private async Task SendRequestContentAsync(Task copyTask, HttpContentWriteStream stream, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Wait for all of the data to be copied to the server.
+                await copyTask.ConfigureAwait(false);
+
+                // Finish the content; with a chunked upload, this includes writing the terminating chunk.
+                await stream.FinishAsync().ConfigureAwait(false);
+
+                // Flush any content that might still be buffered.
+                await FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                if (NetEventSource.IsEnabled) Trace($"Error while sending request content: {e}");
+                Dispose();
                 throw;
             }
         }
@@ -394,7 +449,7 @@ namespace System.Net.Http
 
         private void ParseHeaderNameValue(Span<byte> line, HttpResponseMessage response)
         {
-            // TODO: Use Span to get the header name and value rather than going through ValueStringBuilder
+            // TODO #23147: Use Span to get the header name and value rather than going through ValueStringBuilder
 
             _sb.Clear();
             int pos = 0;
@@ -472,6 +527,37 @@ namespace System.Net.Http
                 // Copy remainder into buffer
                 WriteToBuffer(buffer, offset, count);
             }
+        }
+
+        private Task WriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (_writeOffset == 0)
+            {
+                // There's nothing in the write buffer we need to flush.
+                // Just write the supplied data out to the stream.
+                return WriteToStreamAsync(buffer, offset, count, cancellationToken);
+            }
+
+            int remaining = _writeBuffer.Length - _writeOffset;
+            if (count <= remaining)
+            {
+                // There's something already in the write buffer, but the content
+                // we're writing can also fit after it in the write buffer.  Copy
+                // the content to the write buffer and then flush it, so that we
+                // can do a single send rather than two.
+                WriteToBuffer(buffer, offset, count);
+                return FlushAsync(cancellationToken);
+            }
+
+            // There's data in the write buffer and the data we're writing doesn't fit after it.
+            // Do two writes, one to flush the buffer and then another to write the supplied content.
+            return FlushThenWriteWithoutBufferingAsync(buffer, offset, count, cancellationToken);
+        }
+
+        private async Task FlushThenWriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await FlushAsync(cancellationToken).ConfigureAwait(false);
+            await WriteToStreamAsync(buffer, offset, count, cancellationToken);
         }
 
         private Task WriteByteAsync(byte b, CancellationToken cancellationToken)
@@ -559,7 +645,7 @@ namespace System.Net.Http
                 {
                     if ((c & 0xFF80) != 0)
                     {
-                        throw new HttpRequestException("Non-ASCII characters found");
+                        throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }
                     writeBuffer[offset++] = (byte)c;
                 }
@@ -599,7 +685,7 @@ namespace System.Net.Http
                 char c = s[i];
                 if ((c & 0xFF80) != 0)
                 {
-                    throw new HttpRequestException("Non-ASCII characters found");
+                    throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
                 await WriteByteAsync((byte)c, cancellationToken).ConfigureAwait(false);
             }
@@ -844,7 +930,7 @@ namespace System.Net.Http
         }
 
         // Copy *exactly* [length] bytes into destination; throws on end of stream.
-        private async Task CopyChunkToAsync(Stream destination, long length, CancellationToken cancellationToken)
+        private async Task CopyChunkToAsync(Stream destination, ulong length, CancellationToken cancellationToken)
         {
             Debug.Assert(destination != null);
             Debug.Assert(length > 0);
@@ -852,10 +938,13 @@ namespace System.Net.Http
             int remaining = _readLength - _readOffset;
             if (remaining > 0)
             {
-                remaining = (int)Math.Min(remaining, length);
+                if ((ulong)remaining > length)
+                {
+                    remaining = (int)length;
+                }
                 await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
 
-                length -= remaining;
+                length -= (ulong)remaining;
                 if (length == 0)
                 {
                     return;
@@ -870,10 +959,10 @@ namespace System.Net.Http
                     ThrowInvalidHttpResponse();
                 }
 
-                remaining = (int)Math.Min(_readLength, length);
+                remaining = (ulong)_readLength < length ? _readLength : (int)length;
                 await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
 
-                length -= remaining;
+                length -= (ulong)remaining;
                 if (length == 0)
                 {
                     return;
@@ -885,14 +974,67 @@ namespace System.Net.Http
         {
             Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
             Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
+            Debug.Assert(_currentRequest != null, "Expected the connection to be associated with a request.");
+
+            // Disassociate the connection from a request.  If there's an in-flight request content still
+            // being sent, it'll see this nulled out and stop sending.
+            _currentRequest = null;
+
+            // Check to see if we're still sending request content.
+            Task sendRequestContentTask = _sendRequestContentTask;
+            if (sendRequestContentTask != null)
+            {
+                if (!sendRequestContentTask.IsCompleted)
+                {
+                    // We're still transferring request content.  Only put the connection back into the
+                    // pool when we're done transferring.
+                    if (NetEventSource.IsEnabled) Trace("Still transferring request content. Delaying returning connection to pool.");
+                    sendRequestContentTask.ContinueWith((_, state) =>
+                    {
+                        var innerConnection = (HttpConnection)state;
+                        if (NetEventSource.IsEnabled) innerConnection.Trace("Request content send completed.");
+                        innerConnection.ReturnConnectionToPoolCore();
+                    }, this, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+                    return;
+                }
+
+                // We're done transferring request content.  Check whether we incurred an exception,
+                // and if we did, propagate it to our caller.
+                if (!sendRequestContentTask.IsCompletedSuccessfully)
+                {
+                    sendRequestContentTask.GetAwaiter().GetResult();
+                }
+            }
+
+            ReturnConnectionToPoolCore();
+        }
+
+        private void ReturnConnectionToPoolCore()
+        {
+            Debug.Assert(_sendRequestContentTask == null || _sendRequestContentTask.IsCompleted);
+
+            if (NetEventSource.IsEnabled)
+            {
+                if (_connectionClose)
+                {
+                    Trace("Server requested connection be closed.");
+                }
+                if (_sendRequestContentTask != null && _sendRequestContentTask.IsFaulted)
+                {
+                    Trace($"Sending request content incurred an exception: {_sendRequestContentTask.Exception.InnerException}");
+                }
+            }
 
             // If server told us it's closing the connection, don't put this back in the pool.
-            if (!_connectionClose)
+            // And if we incurred an error while transferring request content, also skip the pool.
+            if (!_connectionClose &&
+                (_sendRequestContentTask == null || _sendRequestContentTask.IsCompletedSuccessfully))
             {
                 try
                 {
                     // Null out the associated request before the connection is potentially reused by another.
                     _currentRequest = null;
+                    _sendRequestContentTask = null;
 
                     // When putting a connection back into the pool, we initiate a pre-emptive
                     // read on the stream.  When the connection is subsequently taken out of the
