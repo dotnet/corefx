@@ -28,6 +28,10 @@ namespace System.IO.Ports.Tests
         /// 3. Verify that the fAbortOnError flag is clear
         /// 
         /// </summary>
+        /// <remarks>
+        /// This test is excluded from Uap since it requires reflection to access the internal methods GetDcbFlag/SetDcbFlag,
+        /// and that fails on Uap.
+        /// </remarks>
         [ConditionalFact(nameof(HasOneSerialPort), nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotUap))]
         public void AbortOnErrorShouldBeClearedOnOpen()
         {
