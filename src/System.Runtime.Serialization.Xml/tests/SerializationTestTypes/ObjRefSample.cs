@@ -11,7 +11,7 @@ namespace SerializationTestTypes
         public SimpleDC() { }
         public SimpleDC(bool init)
         {
-            Data = DateTime.MaxValue.ToLongTimeString();
+            Data = "This is a string";
         }
     }
 
@@ -27,7 +27,7 @@ namespace SerializationTestTypes
         public SimpleDCWithSimpleDMRef() { }
         public SimpleDCWithSimpleDMRef(bool init)
         {
-            Data = DateTime.MaxValue.ToLongTimeString();
+            Data = "This is a string";
             RefData = Data;
         }
     }
@@ -74,7 +74,7 @@ namespace SerializationTestTypes
 
         public SimpleStructDC(bool init)
         {
-            Data = DateTime.MaxValue.ToLongTimeString();
+            Data = "This is a string";
         }
     }
 
@@ -124,7 +124,7 @@ namespace SerializationTestTypes
         public SimpleDCWithIsRequiredFalse() { }
         public SimpleDCWithIsRequiredFalse(bool init)
         {
-            Data = DateTime.MaxValue.ToLongTimeString();
+            Data = "This is a string";
         }
     }
 

@@ -418,13 +418,13 @@ namespace SerializationTestTypes
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
             baseDC.data = derivedDC.data;
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             baseDC.Data = derivedDC.Data;
             baseDC.data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String2";
             baseDC.Data = derivedDC.Data1;
             baseDC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String3";
             baseDC.Data = baseDC.Data2;
         }
     }
@@ -446,13 +446,13 @@ namespace SerializationTestTypes
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
             baseDC.data = derivedDC.data;
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             baseDC.Data = derivedDC.Data;
             baseDC.data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String2";
             baseDC.Data = derivedDC.Data1;
             baseDC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String3";
             baseDC.Data = baseDC.Data2;
         }
     }
@@ -476,13 +476,13 @@ namespace SerializationTestTypes
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
             derivedDC.data = baseDC.data;
-            baseDC.Data = new DateTime().ToLongTimeString();
+            baseDC.Data = "String1";
             derivedDC.Data = baseDC.Data;
             derivedDC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String2";
             baseDC.Data2 = baseDC.Data2;
             derivedDC.data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String3";
             derivedDC.Data = derivedDC.Data1;
         }
     }
@@ -504,13 +504,13 @@ namespace SerializationTestTypes
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
             derivedDC.data = baseDC.data;
-            baseDC.Data = new DateTime().ToLongTimeString();
+            baseDC.Data = "String1";
             derivedDC.Data = baseDC.Data;
             derivedDC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String2";
             baseDC.Data2 = baseDC.Data2;
             derivedDC.data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String3";
             derivedDC.Data = derivedDC.Data1;
         }
     }
@@ -533,13 +533,13 @@ namespace SerializationTestTypes
         {
             derivedDC = new DerivedDC(true);
             baseDC = new BaseDC(true);
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             ((BaseDC)derivedDC).Data = derivedDC.Data;
             ((BaseDC)derivedDC).data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String2";
             ((BaseDC)derivedDC).Data = derivedDC.Data1;
             ((BaseDC)derivedDC).data = ((BaseDC)derivedDC).data2;
-            ((BaseDC)derivedDC).Data2 = new DateTime().ToLongTimeString();
+            ((BaseDC)derivedDC).Data2 = "String3";
             ((BaseDC)derivedDC).Data = ((BaseDC)derivedDC).Data2;
         }
     }
@@ -560,13 +560,13 @@ namespace SerializationTestTypes
         {
             derivedDC = new DerivedSerializable(true);
             baseDC = new BaseSerializable(true);
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             ((BaseSerializable)derivedDC).Data = derivedDC.Data;
             ((BaseSerializable)derivedDC).data = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String2";
             ((BaseSerializable)derivedDC).Data = derivedDC.Data1;
             ((BaseSerializable)derivedDC).data = ((BaseSerializable)derivedDC).data2;
-            ((BaseSerializable)derivedDC).Data2 = new DateTime().ToLongTimeString();
+            ((BaseSerializable)derivedDC).Data2 = "String3";
             ((BaseSerializable)derivedDC).Data = ((BaseSerializable)derivedDC).Data2;
         }
     }
@@ -595,16 +595,16 @@ namespace SerializationTestTypes
             derivedDC = new DerivedDC(true);
             derived2DC = new Derived2DC(true);
             derived2DC.data = derivedDC.data;
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             derived2DC.Data = derivedDC.Data;
             derived2DC.data = derivedDC.data3;
-            derivedDC.Data3 = new DateTime().ToLongTimeString();
+            derivedDC.Data3 = "String2";
             derived2DC.Data = derivedDC.Data3;
             derived2DC.data4 = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String3";
             derived2DC.Data4 = derivedDC.Data1;
             derived2DC.data1 = derived2DC.data2;
-            derived2DC.Data2 = new DateTime().ToLongTimeString();
+            derived2DC.Data2 = "String4";
             derived2DC.Data1 = derived2DC.Data2;
         }
     }
@@ -626,16 +626,16 @@ namespace SerializationTestTypes
             derivedDC = new DerivedSerializable(true);
             derived2DC = new Derived2Serializable(true);
             derived2DC.data = derivedDC.data;
-            derivedDC.Data = new DateTime().ToLongTimeString();
+            derivedDC.Data = "String1";
             derived2DC.Data = derivedDC.Data;
             derived2DC.data = derivedDC.data3;
-            derivedDC.Data3 = new DateTime().ToLongTimeString();
+            derivedDC.Data3 = "String2";
             derived2DC.Data = derivedDC.Data3;
             derived2DC.data4 = derivedDC.data1;
-            derivedDC.Data1 = new DateTime().ToLongTimeString();
+            derivedDC.Data1 = "String3";
             derived2DC.Data4 = derivedDC.Data1;
             derived2DC.data1 = derived2DC.data2;
-            derived2DC.Data2 = new DateTime().ToLongTimeString();
+            derived2DC.Data2 = "String4";
             derived2DC.Data1 = derived2DC.Data2;
         }
     }
@@ -659,10 +659,10 @@ namespace SerializationTestTypes
             baseDC = new BaseDC(true);
             derived2DC = new Derived2DC(true);
             derived2DC.data = baseDC.data;
-            baseDC.Data = new DateTime().ToLongTimeString();
+            baseDC.Data = "String1";
             derived2DC.Data = baseDC.Data;
             derived2DC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String2";
             derived2DC.Data = baseDC.Data2;
         }
     }
@@ -684,10 +684,10 @@ namespace SerializationTestTypes
             baseDC = new BaseSerializable(true);
             derived2DC = new Derived2Serializable(true);
             derived2DC.data = baseDC.data;
-            baseDC.Data = new DateTime().ToLongTimeString();
+            baseDC.Data = "String1";
             derived2DC.Data = baseDC.Data;
             derived2DC.data = baseDC.data2;
-            baseDC.Data2 = new DateTime().ToLongTimeString();
+            baseDC.Data2 = "String2";
             derived2DC.Data = baseDC.Data2;
         }
     }
@@ -711,10 +711,10 @@ namespace SerializationTestTypes
             derived2DC = new Derived2DC(true);
             baseDC = new BaseDC(true);
             baseDC.data = derived2DC.data;
-            derived2DC.Data = new DateTime().ToLongTimeString();
+            derived2DC.Data = "String1";
             baseDC.Data = derived2DC.Data;
             baseDC.data = derived2DC.data1;
-            derived2DC.Data1 = new DateTime().ToLongTimeString();
+            derived2DC.Data1 = "String2";
             baseDC.Data = derived2DC.Data1;
         }
     }
@@ -734,10 +734,10 @@ namespace SerializationTestTypes
             derived2DC = new Derived2Serializable(true);
             baseDC = new BaseSerializable(true);
             baseDC.data = derived2DC.data;
-            derived2DC.Data = new DateTime().ToLongTimeString();
+            derived2DC.Data = "String1";
             baseDC.Data = derived2DC.Data;
             baseDC.data = derived2DC.data1;
-            derived2DC.Data1 = new DateTime().ToLongTimeString();
+            derived2DC.Data1 = "String2";
             baseDC.Data = derived2DC.Data1;
         }
     }
