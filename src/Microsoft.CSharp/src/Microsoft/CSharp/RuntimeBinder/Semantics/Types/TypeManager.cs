@@ -333,14 +333,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(name != null);
 
             Debug.Assert(pParentNS != null);
-            ErrorType pError = _typeTable.LookupError(name, pParentNS);
+            ErrorType pError = _typeTable.LookupError(name);
 
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
                 pError = _typeFactory.CreateError(name, pParentNS, nameText, typeArgs);
                 pError.SetErrors(true);
-                _typeTable.InsertError(name, pParentNS, pError);
+                _typeTable.InsertError(name, pError);
             }
             else
             {
