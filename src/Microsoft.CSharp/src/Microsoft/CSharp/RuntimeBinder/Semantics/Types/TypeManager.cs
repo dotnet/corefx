@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeTable = new TypeTable();
 
             // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null, null, null, null, null);
+            _errorType = _typeFactory.CreateError(null, null, null, null);
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
@@ -314,14 +314,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public ErrorType GetErrorType(
-                CType pParentType,
                 AssemblyQualifiedNamespaceSymbol pParentNS,
                 Name nameText,
                 TypeArray typeArgs)
         {
             Debug.Assert(nameText != null);
-            Debug.Assert(pParentType == null || pParentNS == null);
-            if (pParentType == null && pParentNS == null)
+            if (pParentNS == null)
             {
                 // Use the root namespace as the parent.
                 pParentNS = _BSymmgr.GetRootNsAid();
@@ -334,30 +332,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = _BSymmgr.GetNameFromPtrs(nameText, typeArgs);
             Debug.Assert(name != null);
 
-            ErrorType pError = null;
-            if (pParentType != null)
-            {
-                pError = _typeTable.LookupError(name, pParentType);
-            }
-            else
-            {
-                Debug.Assert(pParentNS != null);
-                pError = _typeTable.LookupError(name, pParentNS);
-            }
+            Debug.Assert(pParentNS != null);
+            ErrorType pError = _typeTable.LookupError(name, pParentNS);
 
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(name, pParentType, pParentNS, nameText, typeArgs);
+                pError = _typeFactory.CreateError(name, pParentNS, nameText, typeArgs);
                 pError.SetErrors(true);
-                if (pParentType != null)
-                {
-                    _typeTable.InsertError(name, pParentType, pError);
-                }
-                else
-                {
-                    _typeTable.InsertError(name, pParentNS, pError);
-                }
+                _typeTable.InsertError(name, pParentNS, pError);
             }
             else
             {
@@ -516,7 +499,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         TypeArray typeArgs = SubstTypeArray(err.typeArgs, pctx);
                         if (typeArgs != err.typeArgs || (err.HasTypeParent() && pParentType != err.GetTypeParent()))
                         {
-                            return GetErrorType(pParentType, err.GetNSParent(), err.nameText, typeArgs);
+                            return GetErrorType(err.GetNSParent(), err.nameText, typeArgs);
                         }
                     }
                     return type;
