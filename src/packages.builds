@@ -29,6 +29,12 @@
     <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.Requests\pkg\System.Net.Requests.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
@@ -39,12 +45,6 @@
     <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography.Apple\runtime.native.System.Security.Cryptography.Apple.builds">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
       <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
-    </Project>
-    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="System.Net.Requests\pkg\System.Net.Requests.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
 
