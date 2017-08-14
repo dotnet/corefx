@@ -76,11 +76,6 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out"))
                     {
-                        //if (!caseSensitive)
-                        //{
-                        //    value = value.ToLower(CultureInfo.InvariantCulture);
-                        //}
-
                         if (codePath != null)
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
