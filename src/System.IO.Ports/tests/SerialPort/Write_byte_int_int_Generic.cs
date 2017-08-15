@@ -13,7 +13,6 @@ using Xunit.NetCore.Extensions;
 
 namespace System.IO.Ports.Tests
 {
-    [Trait("Crash", "True")]
     public class Write_byte_int_int_generic : PortsTest
     {
         //Set bounds fore random timeout values.
