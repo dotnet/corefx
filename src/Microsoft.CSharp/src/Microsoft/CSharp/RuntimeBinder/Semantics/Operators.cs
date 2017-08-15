@@ -1004,22 +1004,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // The reference type equality operators only handle reference types.
-            FUNDTYPE ft1 = type1.fundType();
-            FUNDTYPE ft2 = type2.fundType();
-
-            switch (ft1)
+            Debug.Assert(type1.fundType() != FUNDTYPE.FT_VAR);
+            if (type1.fundType() != FUNDTYPE.FT_REF)
             {
-                default:
-                    return false;
-                case FUNDTYPE.FT_REF:
-                    break;
-                case FUNDTYPE.FT_VAR:
-                    TypeParameterType parameterType1 = (TypeParameterType)type1;
-                    if (parameterType1.IsValueType() || (!parameterType1.IsReferenceType() && !(type2 is NullType)))
-                        return false;
-                    type1 = parameterType1.GetEffectiveBaseClass();
-                    break;
+                return false;
             }
+
             if (type2 is NullType)
             {
                 fRet = true;
@@ -1029,19 +1019,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 goto LRecord;
             }
 
-            switch (ft2)
+            Debug.Assert(type2.fundType() != FUNDTYPE.FT_VAR);
+            if (type2.fundType() != FUNDTYPE.FT_REF)
             {
-                default:
-                    return false;
-                case FUNDTYPE.FT_REF:
-                    break;
-                case FUNDTYPE.FT_VAR:
-                    TypeParameterType typeParam2 = (TypeParameterType)type2;
-                    if (typeParam2.IsValueType() || (!typeParam2.IsReferenceType() && !(type1 is NullType)))
-                        return false;
-                    type2 = typeParam2.GetEffectiveBaseClass();
-                    break;
+                return false;
             }
+
             if (type1 is NullType)
             {
                 fRet = true;
