@@ -32,9 +32,6 @@
     <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="System.Net.Requests\pkg\System.Net.Requests.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
     <Project Include="System.Security.Cryptography.X509Certificates\pkg\System.Security.Cryptography.X509Certificates.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
