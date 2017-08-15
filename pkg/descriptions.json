@@ -444,10 +444,14 @@
     "Name": "System.Data.DataSetExtensions",
     "Description": "Provides extensions to form LINQ expressions and method queries against DataTable objects.",
     "CommonTypes": [
-      "System.Data.DataTable",
-      "System.Data.EnumerableRowCollection",
-      "System.Data.OrderedEnumerableRowCollection",
-      "System.Data.SortExpressionBuilder"
+        "System.Data.DataRowComparer",
+        "System.Data.DataRowExtensions",
+        "System.Data.DataTableExtensions",
+        "System.Data.EnumerableRowCollection",
+        "System.Data.EnumerableRowCollectionExtensions",
+        "System.Data.OrderedEnumerableRowCollection",
+        "System.Data.TypedTableBase",
+        "System.Data.TypedTableBaseExtensions"
     ]
   },
   {
