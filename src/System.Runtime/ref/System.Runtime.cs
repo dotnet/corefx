@@ -6500,6 +6500,9 @@ namespace System.Runtime.CompilerServices
     }
     public static class RuntimeFeature
     {
+#if netcoreapp
+        public const string DefaultImplementationsOfInterfaces = nameof(DefaultImplementationsOfInterfaces);
+#endif
         public static bool IsSupported(string feature) { throw null; }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
