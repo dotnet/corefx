@@ -444,48 +444,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pExpr;
         }
 
-        private Expr bindIndexer(Expr pObject, Expr args, BindingFlag bindFlags)
-        {
-            CType type = pObject.Type;
-
-            if (!(type is AggregateType) && !(type is TypeParameterType))
-            {
-                throw ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
-            }
-
-            Name pName = NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL);
-
-            MemberLookup mem = new MemberLookup();
-            if (!mem.Lookup(GetSemanticChecker(), type, pObject, ContextForMemberLookup(), pName, 0,
-                            MemLookFlags.Indexer))
-            {
-                throw mem.ReportErrors();
-            }
-
-            Debug.Assert(mem.SymFirst() is IndexerSymbol);
-
-            ExprMemberGroup grp = GetExprFactory().CreateMemGroup((EXPRFLAG)mem.GetFlags(),
-                pName, BSYMMGR.EmptyTypeArray(), mem.SymFirst().getKind(), mem.GetSourceType(), null/*pMPS*/, mem.GetObject(), mem.GetResults());
-
-            Expr pResult = BindMethodGroupToArguments(bindFlags, grp, args);
-            IExprWithObject exprWithObject = pResult as IExprWithObject;
-            Debug.Assert(exprWithObject != null);
-            if (exprWithObject?.OptionalObject == null)
-            {
-                // We must be in an error scenario where the object was not allowed. 
-                // This can happen if the user tries to access the indexer off the
-                // type and not an instance or if the incorrect type/number of arguments 
-                // were passed for binding.
-                if (exprWithObject != null)
-                {
-                    exprWithObject.OptionalObject = pObject;
-                }
-
-                pResult.SetError();
-            }
-            return pResult;
-        }
-
         ////////////////////////////////////////////////////////////////////////////////
         // Create a cast node with the given expression flags. 
         private void bindSimpleCast(Expr exprSrc, ExprClass typeDest, out Expr pexprDest)
