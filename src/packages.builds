@@ -35,6 +35,9 @@
     <Project Include="System.Net.Requests\pkg\System.Net.Requests.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Security.Cryptography.X509Certificates\pkg\System.Security.Cryptography.X509Certificates.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
@@ -42,7 +45,15 @@
     <Project Include=".\Native\pkg\runtime.native.System.IO.Compression\runtime.native.System.IO.Compression.builds">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true;SkipUnix=true</AdditionalProperties>
     </Project>
+    <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography\runtime.native.System.Security.Cryptography.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
     <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography.Apple\runtime.native.System.Security.Cryptography.Apple.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
+    <Project Include=".\Native\pkg\runtime.native.System.Security.Cryptography.OpenSsl\runtime.native.System.Security.Cryptography.OpenSsl.builds">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
       <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
     </Project>
