@@ -8,7 +8,7 @@
     <ProjectGuid>{5EE76DCC-9FD5-47FD-AB45-BD0F0857740F}</ProjectGuid>
     <RootNamespace>System.Net.Requests</RootNamespace>
     <AssemblyName>System.Net.Requests</AssemblyName>
-    <AssemblyVersion>4.0.10.1</AssemblyVersion>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
     <AssemblyVersion Condition="'$(AssemblyVersionTransition)' == 'true'">4.0.11.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
@@ -52,10 +52,6 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
-    <ProjectReference Include="..\..\System.Net.Http\pkg\System.Net.Http.pkgproj">
-      <Name>System.Net.Http</Name>
-      <Project>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="$(CommonPath)\Interop\Windows\wininet\Interop.wininet_errors.cs">
