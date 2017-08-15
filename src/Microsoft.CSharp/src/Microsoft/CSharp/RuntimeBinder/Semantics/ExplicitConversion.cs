@@ -141,12 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false; // Can't convert to a method group or anon method.
                     case TypeKind.TK_NullType:
                         return false;  // Can never convert TO the null type.
-                    case TypeKind.TK_TypeParameterType:
-                        if (bindExplicitConversionToTypeVar())
-                        {
-                            return true;
-                        }
-                        break;
+
                     case TypeKind.TK_ArrayType:
                         if (bindExplicitConversionToArray((ArrayType)_typeDest))
                         {
@@ -261,50 +256,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_needsExprDest)
                     _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);
                 return true;
-            }
-
-            private bool bindExplicitConversionToTypeVar()
-            {
-                // 13.2.3 Explicit reference conversions
-                //
-                // For a type-parameter T that is known to be a reference type (25.7), the following
-                // explicit reference conversions exist:
-                //
-                // * From the effective base class C of T to T and from any base class of C to T.
-                // * From any interface-type to T.
-                // * From a type-parameter U to T provided that T depends on U (25.7).
-
-                Debug.Assert(_typeSrc != null);
-                Debug.Assert(_typeDest != null);
-
-                // NOTE: for the flags, we have to use EXPRFLAG.EXF_FORCE_UNBOX (not EXPRFLAG.EXF_REFCHECK) even when
-                // we know that the type is a reference type. The verifier expects all code for
-                // type parameters to behave as if the type parameter is a value type.
-                // The jitter should be smart about it....
-                if (_typeSrc.isInterfaceType() || _binder.canConvert(_typeDest, _typeSrc, CONVERTTYPE.NOUDC))
-                {
-                    if (!_needsExprDest)
-                    {
-                        return true;
-                    }
-
-                    // There is an explicit, possibly unboxing, conversion from Object or any interface to
-                    // a type variable. This will involve a type check and possibly an unbox.
-                    // There is an explicit conversion from non-interface X to the type var iff there is an
-                    // implicit conversion from the type var to X.
-                    if (_typeSrc is TypeParameterType)
-                    {
-                        // Need to box first before unboxing.
-                        Expr exprT;
-                        ExprClass exprObj = GetExprFactory().CreateClass(_binder.GetPredefindType(PredefinedType.PT_OBJECT));
-                        _binder.bindSimpleCast(_exprSrc, exprObj, out exprT, EXPRFLAG.EXF_FORCE_BOX);
-                        _exprSrc = exprT;
-                    }
-                    if (_needsExprDest)
-                        _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_FORCE_UNBOX);
-                    return true;
-                }
-                return false;
             }
 
             private bool bindExplicitConversionFromIListToArray(ArrayType arrayDest)
@@ -760,30 +711,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return AggCastResult.Success;
             }
 
-            private AggCastResult bindExplicitConversionFromTypeVarToAggregate(AggregateType aggTypeDest)
-            {
-                // 13.2.3 Explicit reference conversions
-                //
-                // For a type-parameter T that is known to be a reference type (25.7), the following
-                // explicit reference conversions exist:
-                //
-                // * From T to any interface-type I provided there isn't already an implicit reference
-                //   conversion from T to I.
-
-                if (!(_typeSrc is TypeParameterType))
-                {
-                    return AggCastResult.Failure;
-                }
-                if (aggTypeDest.getAggregate().IsInterface())
-                {
-                    // Explicit conversion of type variables to interfaces.
-                    if (_needsExprDest)
-                        _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_FORCE_BOX | EXPRFLAG.EXF_REFCHECK);
-                    return AggCastResult.Success;
-                }
-                return AggCastResult.Failure;
-            }
-
             private AggCastResult bindExplicitConversionToAggregate(AggregateType aggTypeDest)
             {
                 Debug.Assert(_typeSrc != null);
@@ -824,12 +751,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // No conversion is allowed to or from a void type (user defined or otherwise)
                     // This is most likely the result of a failed anonymous method or member group conversion
                     return AggCastResult.Abort;
-                }
-
-                result = bindExplicitConversionFromTypeVarToAggregate(aggTypeDest);
-                if (result != AggCastResult.Failure)
-                {
-                    return result;
                 }
 
                 return AggCastResult.Failure;
