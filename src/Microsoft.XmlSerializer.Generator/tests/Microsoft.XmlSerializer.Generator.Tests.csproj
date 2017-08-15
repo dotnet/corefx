@@ -14,11 +14,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <ItemGroup Condition=" '$(SkipTestsOnPlatform)' != 'true' ">
+    <Compile Include=".\SGenTests.cs" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />
+    <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" />
+  </ItemGroup>
   <ItemGroup>
-    <Compile Include=".\SGenTests.cs" Condition=" '$(SkipTestsOnPlatform)' != 'true' " />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" Condition=" '$(SkipTestsOnPlatform)' != 'true' " />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" Condition=" '$(SkipTestsOnPlatform)' != 'true' " />
-    <Compile Include="$(TestSourceFolder)..\..\System.Private.Xml\tests\XmlSerializer\XmlSerializerTests.cs" Condition=" '$(SkipTestsOnPlatform)' != 'true' " />
     <Compile Include=".\AlwaysPassTest.cs" />
   </ItemGroup>
   <ItemGroup>
