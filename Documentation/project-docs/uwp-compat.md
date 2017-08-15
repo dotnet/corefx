@@ -38,8 +38,16 @@ This document contains list of not supported APIs on UWP but supported on .NET C
 - [StackFrame](#stackframe)
 - [MemoryMappedFiles](#memorymappedfiles)
 - [System.Threading](#systemthreading)
+    - [Members](#members-6)
 - [System.Runtime*](#systemruntime)
+- [Serialization related APIs](#serialization-related-apis)
+- [System.Reflection](#systemreflection)
+    - [Other APIs throwing PlatformNotSupportedException](#other-apis-throwing-platformnotsupportedexception)
+- [System.Runtime.InteropServices](#systemruntimeinteropservices)
+    - [Other not supported APIs](#other-not-supported-apis)
+- [System.Diagnostics.Debugger](#systemdiagnosticsdebugger)
 - [System.Private.CoreLib](#systemprivatecorelib)
+    - [Other not supported APIs](#other-not-supported-apis-1)
 
 <!-- /MarkdownTOC -->
 
@@ -230,6 +238,13 @@ Note: This data was collected from comments on UWP specific disabled tests
 Note: This data was collected from comments on UWP specific disabled tests
 - [uapaot] ThreadPool.SetMinThreads is not supported
 
+## Members
+
+```
+[System.Private.CoreLib] System.Threading.ThreadPool::BindHandle(IntPtr)
+[System.Private.CoreLib] System.Threading.ThreadPool::BindHandle(SafeHandle)
+```
+
 # System.Runtime*
 Note: This data was collected from comments on UWP specific disabled tests
 - [uapaot] Assembly.Load(byte[])")] not supported
@@ -237,89 +252,9 @@ Note: This data was collected from comments on UWP specific disabled tests
 - [uapaot] Non-zero lower-bounded arrays not supported 
 - [uapaot] Exception.TargetSite always returns null
 
-# System.Private.CoreLib
+# Serialization related APIs
 
 ```
-[System.Private.CoreLib] Internal.Runtime.Augments.EnvironmentAugments::Exit(int)
-[System.Private.CoreLib] Internal.Runtime.Augments.RuntimeAugments::NewMultiDimArray(RuntimeTypeHandle, int[], int[])
-[System.Private.CoreLib] Internal.Runtime.CompilerHelpers.ThrowHelpers::ThrowPlatformNotSupportedException()
-[System.Private.Reflection.Core] System.Reflection.Runtime.TypeInfos.RuntimeTypeInfo::InvokeMember(string, BindingFlags, Binder, object, object[], ParameterModifier[], CultureInfo, string[])
-[System.Private.Reflection.Core] System.Reflection.Runtime.TypeInfos.RuntimeTypeInfo::MakeGenericType(Type[])
-[System.Private.Reflection.Core] System.Reflection.Runtime.TypeInfos.RuntimeTypeInfo::TypeHandle.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.ExecutionEnvironmentImplementation::GetManifestResourceInfo(Assembly, string)
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.IntPtrConstructorMethodInvoker::.ctor(MetadataReader, MethodHandle)
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.IntPtrConstructorMethodInvoker::LdFtnResult.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.NullableInstanceMethodInvoker::LdFtnResult.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.StringConstructorMethodInvoker::LdFtnResult.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.SyntheticMethodInvoker::CreateDelegate(RuntimeTypeHandle, object, bool, bool, bool)
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.SyntheticMethodInvoker::LdFtnResult.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.VirtualMethodInvoker::LdFtnResult.get()
-[System.Private.Reflection.Execution] Internal.Reflection.Execution.ReflectionDomainSetupImplementation::CreateNonInvokabilityException(MemberInfo)
-[System.Private.TypeLoader] Internal.Reflection.Execution.AssemblyBinderImplementation::Bind(byte[], byte[], AssemblyBindResult, Exception)
-[System.Private.CoreLib] System.ArgIterator::.ctor(RuntimeArgumentHandle)
-[System.Private.CoreLib] System.ArgIterator::.ctor(RuntimeArgumentHandle, void*)
-[System.Private.CoreLib] System.ArgIterator::End()
-[System.Private.CoreLib] System.ArgIterator::Equals(object)
-[System.Private.CoreLib] System.ArgIterator::GetHashCode()
-[System.Private.CoreLib] System.ArgIterator::GetNextArg()
-[System.Private.CoreLib] System.ArgIterator::GetNextArg(RuntimeTypeHandle)
-[System.Private.CoreLib] System.ArgIterator::GetNextArgType()
-[System.Private.CoreLib] System.ArgIterator::GetRemainingCount()
-[System.Private.CoreLib] System.ByReference`1::.ctor(T)
-[System.Private.CoreLib] System.ByReference`1::Value.get()
-[System.Private.CoreLib] System.InvokeUtils.CalliIntrinsics::Call(IntPtr, IntPtr, object, IntPtr, ArgSetupState, bool)
-[System.Private.CoreLib] System.InvokeUtils.CalliIntrinsics::Call(IntPtr, object, IntPtr, ArgSetupState, bool)
-[System.Private.CoreLib] System.InvokeUtils.CalliIntrinsics::Call(IntPtr, object, object, IntPtr, ArgSetupState)
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveField(int, Type[], Type[])
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveMember(int, Type[], Type[])
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveMethod(int, Type[], Type[])
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveSignature(int)
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveString(int)
-[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveType(int, Type[], Type[])
-[System.Private.Debug] Internal.Runtime.TypeLoader.Intrinsics::AddrOf(T)
-[System.Private.Debug] Internal.Runtime.TypeLoader.Intrinsics::Call(IntPtr, object)
-[System.Private.Debug] Internal.Runtime.DebuggerSupport.AddrofIntrinsics::AddrOf(T)
-[System.Private.CoreLib] System.Runtime.InteropServices.AddrofIntrinsics::AddrOf(T)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::.ctor(Type, string)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::AddEventHandler(object, Delegate)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::Attributes.get()
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::DeclaringType.get()
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetAddMethod(bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributes(bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributes(Type, bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributesData()
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetRaiseMethod(bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetRemoveMethod(bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::IsDefined(Type, bool)
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::Name.get()
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::ReflectedType.get()
-[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::RemoveEventHandler(object, Delegate)
-[System.Private.Interop] System.Runtime.InteropServices.ComEventsHelper::Combine(object, Guid, int, Delegate)
-[System.Private.Interop] System.Runtime.InteropServices.ComEventsHelper::Remove(object, Guid, int, Delegate)
-[System.Private.Interop] System.Runtime.InteropServices.DispatchWrapper::.ctor(object)
-[System.Private.Interop] System.Runtime.InteropServices.DispatchWrapper::WrappedObject.get()
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadByte(object, int)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt16(object, int)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt32(object, int)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt64(object, int)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteByte(object, int, byte)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt16(object, int, short)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt32(object, int, int)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt64(object, int, long)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetExceptionForHR(int, IntPtr)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::BindToMoniker(string)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::AreComObjectsAvailableForCleanup()
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::CreateAggregatedObject(IntPtr, object)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetComInterfaceForObject(object, Type, CustomQueryInterfaceMode)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetStartComSlot(Type)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetTypeInfoName(ITypeInfo)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetUniqueObjectForIUnknown(IntPtr)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetExceptionCode()
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::ChangeWrapperHandleStrength(object, bool)
-[System.Private.Interop] System.Runtime.InteropServices.Marshal::CreateWrapperOfType(object, Type)
-[System.Private.Interop] System.Runtime.InteropServices.ReversePInvokeCallInterceptor::.ctor(IntPtr, object, CallingConvention, LocalVariableType[], LocalVariableType[], BaseMarshaller[], MarshallerArgumentInfo[])
-[System.Private.CoreLib] System.Type::GetCLSIDFromProgID(string, Guid)
-[System.Private.CoreLib] System.Diagnostics.Debugger::Launch()
 [System.Private.CoreLib] System.MulticastDelegate::GetObjectData(SerializationInfo, StreamingContext)
 [System.Private.CoreLib] System.NotFiniteNumberException::.ctor(SerializationInfo, StreamingContext)
 [System.Private.CoreLib] System.NotImplementedException::.ctor(SerializationInfo, StreamingContext)
@@ -414,8 +349,53 @@ Note: This data was collected from comments on UWP specific disabled tests
 [System.Private.Reflection.Core] System.Reflection.Runtime.Assemblies.RuntimeAssembly::GetObjectData(SerializationInfo, StreamingContext)
 [System.Private.CoreLib] System.Exception::add_SerializeObjectState(EventHandler<SafeSerializationEventArgs>)
 [System.Private.CoreLib] System.Exception::remove_SerializeObjectState(EventHandler<SafeSerializationEventArgs>)
-[System.Private.CoreLib] System.Reflection.AssemblyName::EscapeCodeBase(string)
-[System.Private.CoreLib] System.Reflection.AssemblyName::GetAssemblyName(string)
+```
+
+# System.Reflection
+
+- Type.InvokeMember will throw PlatformNotSupportedException when passed a wrapped COM object
+- Passing a type not implemented by the runtime type to System.Reflection.Runtime.TypeInfos.RuntimeTypeInfo::MakeGenericType(Type[]) on runtime type types is not supported (on CoreCLR, you could do this to produce a RefEmit.TypeBuilder)
+- Type.TypeHandle throws PlatformNotSupportedException on open types or types created by Type.GetTypeFromCLSID()
+- Loading assembly from byte array or file paths is not supported
+- Late-bound invoking delegate constructors is not supported
+- Reflecting over IL bodies is not supported
+- MethodBase.MethodHandle is not supported on array constructor
+- `System.Reflection.Assembly::GetCallingAssembly()` is not supported
+- Multi-modules assemblies are not supported
+- Loading modules from paths not supported
+- Sattelite assemblies are not supported
+- Loading StrongNameKeyPair from path is not supported
+- Reflection support for global members is not supported:
+
+```
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveField(int, Type[], Type[])
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveMember(int, Type[], Type[])
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveMethod(int, Type[], Type[])
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveSignature(int)
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveString(int)
+[System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::ResolveType(int, Type[], Type[])
+```
+
+- ProgID is not supported:
+
+```
+[System.Private.CoreLib] System.Type::GetCLSIDFromProgID(string, Guid)
+```
+
+- `System.Reflection.AssemblyName::GetAssemblyName(string)` and `System.Reflection.AssemblyName::EscapeCodeBase(string)` are not supported
+
+
+## Other APIs throwing PlatformNotSupportedException
+
+```
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.ExecutionEnvironmentImplementation::GetManifestResourceInfo(Assembly, string)
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.IntPtrConstructorMethodInvoker::.ctor(MetadataReader, MethodHandle)
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.IntPtrConstructorMethodInvoker::LdFtnResult.get()
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.NullableInstanceMethodInvoker::LdFtnResult.get()
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.StringConstructorMethodInvoker::LdFtnResult.get()
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.SyntheticMethodInvoker::CreateDelegate(RuntimeTypeHandle, object, bool, bool, bool)
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.SyntheticMethodInvoker::LdFtnResult.get()
+[System.Private.Reflection.Execution] Internal.Reflection.Execution.MethodInvokers.VirtualMethodInvoker::LdFtnResult.get()
 [System.Private.Reflection.Core] System.Reflection.Runtime.MethodInfos.RuntimeCLSIDNullaryConstructorInfo::MethodHandle.get()
 [System.Private.Reflection.Core] System.Reflection.Runtime.MethodInfos.RuntimeCLSIDNullaryConstructorInfo::UncachedMethodInvoker.get()
 [System.Private.Reflection.Core] System.Reflection.Runtime.MethodInfos.RuntimeConstructorInfo::GetMethodBody()
@@ -428,10 +408,6 @@ Note: This data was collected from comments on UWP specific disabled tests
 [System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::GetMethodImpl(string, BindingFlags, Binder, CallingConventions, Type[], ParameterModifier[])
 [System.Private.Reflection.Core] System.Reflection.Runtime.Modules.RuntimeModule::GetMethods(BindingFlags)
 [System.Private.Reflection.Core] System.ActivatorImplementation::CreateInstance(Type, BindingFlags, Binder, object[], CultureInfo, object[])
-[System.Private.CoreLib] System.Reflection.Assembly::GetCallingAssembly()
-[System.Private.CoreLib] System.Reflection.Assembly::LoadFile(string)
-[System.Private.CoreLib] System.Reflection.Assembly::LoadFrom(string)
-[System.Private.CoreLib] System.Reflection.Assembly::LoadFrom(string, byte[], AssemblyHashAlgorithm)
 [System.Private.CoreLib] System.Type::ReflectionOnlyGetType(string, bool, bool)
 [System.Private.CoreLib] System.Reflection.Assembly::ReflectionOnlyLoad(byte[])
 [System.Private.CoreLib] System.Reflection.Assembly::ReflectionOnlyLoad(string)
@@ -454,11 +430,89 @@ Note: This data was collected from comments on UWP specific disabled tests
 [System.Private.Reflection.Core] System.Reflection.Runtime.TypeInfos.RuntimeTypeInfo::GetInterfaceMap(Type)
 [System.Private.CoreLib] System.Reflection.StrongNameKeyPair::.ctor(string)
 [System.Private.CoreLib] System.Reflection.StrongNameKeyPair::PublicKey.get()
+```
+
+# System.Runtime.InteropServices
+
+- PIA/IDispatch not supported
+
+```
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::.ctor(Type, string)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::AddEventHandler(object, Delegate)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::Attributes.get()
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::DeclaringType.get()
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetAddMethod(bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributes(bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributes(Type, bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetCustomAttributesData()
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetRaiseMethod(bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::GetRemoveMethod(bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::IsDefined(Type, bool)
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::Name.get()
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::ReflectedType.get()
+[System.Private.Interop] System.Runtime.InteropServices.ComAwareEventInfo::RemoveEventHandler(object, Delegate)
+[System.Private.Interop] System.Runtime.InteropServices.ComEventsHelper::Combine(object, Guid, int, Delegate)
+[System.Private.Interop] System.Runtime.InteropServices.ComEventsHelper::Remove(object, Guid, int, Delegate)
+[System.Private.Interop] System.Runtime.InteropServices.DispatchWrapper::.ctor(object)
+[System.Private.Interop] System.Runtime.InteropServices.DispatchWrapper::WrappedObject.get()
+```
+
+- binding to moniker is not supported: `System.Runtime.InteropServices.Marshal::BindToMoniker(string)` (not in WACK)
+- Interop feature UnmanagedType.AsAny not supported
+
+```
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadByte(object, int)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt16(object, int)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt32(object, int)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::ReadInt64(object, int)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteByte(object, int, byte)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt16(object, int, short)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt32(object, int, int)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::WriteInt64(object, int, long)
+```
+
+-  `System.Runtime.InteropServices.Marshal::GetExceptionForHR(int, IntPtr)` is not supported for non-null pointers
+- `System.Runtime.InteropServices.ReversePInvokeCallInterceptor::.ctor(IntPtr, object, CallingConvention, LocalVariableType[], LocalVariableType[], BaseMarshaller[], MarshallerArgumentInfo[])` throws for not supported calling conventions
+
+## Other not supported APIs
+
+```
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::ChangeWrapperHandleStrength(object, bool)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::CreateWrapperOfType(object, Type)
+
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::AreComObjectsAvailableForCleanup()
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::CreateAggregatedObject(IntPtr, object)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetComInterfaceForObject(object, Type, CustomQueryInterfaceMode)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetStartComSlot(Type)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetTypeInfoName(ITypeInfo)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetUniqueObjectForIUnknown(IntPtr)
+[System.Private.Interop] System.Runtime.InteropServices.Marshal::GetExceptionCode()
+```
+
+# System.Diagnostics.Debugger
+
+- `System.Diagnostics.Debugger::Launch()` is not supported
+
+# System.Private.CoreLib
+
+- System.Environment.Exit(int) is not supported
+- System.ArgIterator is not supported (removed from NetStandard 2.0)
+- Remoting not supported
+
+```
 [System.Private.CoreLib] System.MarshalByRefObject::GetLifetimeService()
 [System.Private.CoreLib] System.MarshalByRefObject::InitializeLifetimeService()
-[System.Private.CoreLib] System.Threading.ThreadPool::BindHandle(IntPtr)
-[System.Private.CoreLib] System.Threading.ThreadPool::BindHandle(SafeHandle)
+```
+
+- Loading assemblies from paths not supported
+
+```
 [System.Private.CoreLib] System.Runtime.Loader.AssemblyLoadContext::LoadFromAssemblyPath(string)
+```
+
+- Inspecting underlying PE is not supported. IL metadata is gone after native compilation and so are tokens
+
+```
 [System.Private.CoreLib] System.ModuleHandle::GetRuntimeFieldHandleFromMetadataToken(int)
 [System.Private.CoreLib] System.ModuleHandle::GetRuntimeMethodHandleFromMetadataToken(int)
 [System.Private.CoreLib] System.ModuleHandle::GetRuntimeTypeHandleFromMetadataToken(int)
@@ -468,7 +522,11 @@ Note: This data was collected from comments on UWP specific disabled tests
 [System.Private.CoreLib] System.ModuleHandle::ResolveMethodHandle(int, RuntimeTypeHandle[], RuntimeTypeHandle[])
 [System.Private.CoreLib] System.ModuleHandle::ResolveTypeHandle(int)
 [System.Private.CoreLib] System.ModuleHandle::ResolveTypeHandle(int, RuntimeTypeHandle[], RuntimeTypeHandle[])
-[System.Private.CoreLib] System.Delegate::Equals(object)
+```
+
+## Other not supported APIs
+
+```
 [System.Private.CoreLib] System.Delegate::.ctor(object, string)
 [System.Private.CoreLib] System.Delegate::.ctor(Type, string)
 [System.Private.CoreLib] System.MulticastDelegate::.ctor(object, string)
