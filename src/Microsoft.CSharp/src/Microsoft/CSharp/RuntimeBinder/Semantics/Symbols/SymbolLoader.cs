@@ -554,83 +554,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-
-        private bool HasImplicitBoxingTypeParameterConversion(
-            TypeParameterType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            if (pSource.IsRefType())
-            {
-                // Not a boxing conversion; both source and destination are references.
-                return false;
-            }
-
-            // The following implicit conversions exist for a given type parameter T:
-            //
-            // * From T to its effective base class C.
-            AggregateType pEBC = pSource.GetEffectiveBaseClass();
-            if (pDest == pEBC)
-            {
-                return true;
-            }
-            // * From T to any base class of C.
-            if (IsBaseClass(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface implemented by C.
-            if (IsBaseInterface(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface type I in T's effective interface set, and
-            //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
-            {
-                if (pInterfaces[i] == pDest)
-                {
-                    return true;
-                }
-            }
-            // * The conversion from T to a type parameter U, provided T depends on U, is not
-            //   classified as a boxing conversion because it is not guaranteed to box.
-            //   (If both T and U are value types then it is an identity conversion.)
-
-            return false;
-        }
-
-        private bool HasImplicitTypeParameterBaseConversion(
-            TypeParameterType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            if (HasImplicitReferenceTypeParameterConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (HasImplicitBoxingTypeParameterConversion(pSource, pDest))
-            {
-                return true;
-            }
-
-            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
-        }
-
         public bool HasImplicitBoxingConversion(CType pSource, CType pDest)
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-
-            // Certain type parameter conversions are classified as boxing conversions.
-
-            if (pSource is TypeParameterType srcParType && HasImplicitBoxingTypeParameterConversion(srcParType, pDest))
-            {
-                return true;
-            }
+            Debug.Assert(!(pSource is TypeParameterType));
 
             // The rest of the boxing conversions only operate when going from a value type
             // to a reference type.
@@ -707,16 +635,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (HasIdentityOrImplicitReferenceConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (HasImplicitBoxingConversion(pSource, pDest))
-            {
-                return true;
-            }
-
-            return pSource is TypeParameterType srcParType && HasImplicitTypeParameterBaseConversion(srcParType, pDest);
+            return HasIdentityOrImplicitReferenceConversion(pSource, pDest) || HasImplicitBoxingConversion(pSource, pDest);
         }
 
         public bool IsBaseAggregate(AggregateSymbol derived, AggregateSymbol @base)
