@@ -991,75 +991,89 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 typeCls = typeObj;
                 fRet = true;
-                goto LRecord;
             }
-
-            // Check for: operator ==(System.Delegate, System.Delegate).
-            CType typeDel = GetPredefindType(PredefinedType.PT_DELEGATE);
-
-            if (canConvert(info.arg1, typeDel) && canConvert(info.arg2, typeDel) &&
-                !type1.isDelegateType() && !type2.isDelegateType())
+            else
             {
-                prgbofs.Add(new BinOpFullSig(typeDel, typeDel, BindDelBinOp, OpSigFlags.Convert, LiftFlags.None, BinOpFuncKind.DelBinOp));
+
+                // Check for: operator ==(System.Delegate, System.Delegate).
+                CType typeDel = GetPredefindType(PredefinedType.PT_DELEGATE);
+                if (canConvert(info.arg1, typeDel) && canConvert(info.arg2, typeDel) && !type1.isDelegateType()
+                    && !type2.isDelegateType())
+                {
+                    prgbofs.Add(
+                        new BinOpFullSig(
+                            typeDel, typeDel, BindDelBinOp, OpSigFlags.Convert, LiftFlags.None,
+                            BinOpFuncKind.DelBinOp));
+                }
+
+                // The reference type equality operators only handle reference types.
+                Debug.Assert(type1.fundType() != FUNDTYPE.FT_VAR);
+                if (type1.fundType() != FUNDTYPE.FT_REF)
+                {
+                    return false;
+                }
+
+                if (type2 is NullType)
+                {
+                    fRet = true;
+
+                    // We don't need to determine the actual best type since we're
+                    // returning true - indicating that we've found the best operator.
+                    typeCls = typeObj;
+                }
+                else
+                {
+                    Debug.Assert(type2.fundType() != FUNDTYPE.FT_VAR);
+                    if (type2.fundType() != FUNDTYPE.FT_REF)
+                    {
+                        return false;
+                    }
+
+                    if (type1 is NullType)
+                    {
+                        fRet = true;
+
+                        // We don't need to determine the actual best type since we're
+                        // returning true - indicating that we've found the best operator.
+                        typeCls = typeObj;
+                    }
+                    else
+                    {
+                        if (!canCast(type1, type2, CONVERTTYPE.NOUDC) && !canCast(type2, type1, CONVERTTYPE.NOUDC))
+                            return false;
+
+                        if (type1.isInterfaceType() || type1.isPredefType(PredefinedType.PT_STRING)
+                            || GetSymbolLoader().HasBaseConversion(type1, typeDel))
+                            type1 = typeObj;
+                        else if (type1 is ArrayType)
+                            type1 = GetPredefindType(PredefinedType.PT_ARRAY);
+                        else if (!type1.isClassType())
+                            return false;
+
+                        if (type2.isInterfaceType() || type2.isPredefType(PredefinedType.PT_STRING)
+                            || GetSymbolLoader().HasBaseConversion(type2, typeDel))
+                            type2 = typeObj;
+                        else if (type2 is ArrayType)
+                            type2 = GetPredefindType(PredefinedType.PT_ARRAY);
+                        else if (!type2.isClassType())
+                            return false;
+
+                        Debug.Assert(
+                            type1.isClassType() && !type1.isPredefType(PredefinedType.PT_STRING)
+                            && !type1.isPredefType(PredefinedType.PT_DELEGATE));
+                        Debug.Assert(
+                            type2.isClassType() && !type2.isPredefType(PredefinedType.PT_STRING)
+                            && !type2.isPredefType(PredefinedType.PT_DELEGATE));
+
+                        if (GetSymbolLoader().HasBaseConversion(type2, type1))
+                            typeCls = type1;
+                        else if (GetSymbolLoader().HasBaseConversion(type1, type2))
+                            typeCls = type2;
+
+                    }
+                }
             }
 
-            // The reference type equality operators only handle reference types.
-            Debug.Assert(type1.fundType() != FUNDTYPE.FT_VAR);
-            if (type1.fundType() != FUNDTYPE.FT_REF)
-            {
-                return false;
-            }
-
-            if (type2 is NullType)
-            {
-                fRet = true;
-                // We don't need to determine the actual best type since we're
-                // returning true - indicating that we've found the best operator.
-                typeCls = typeObj;
-                goto LRecord;
-            }
-
-            Debug.Assert(type2.fundType() != FUNDTYPE.FT_VAR);
-            if (type2.fundType() != FUNDTYPE.FT_REF)
-            {
-                return false;
-            }
-
-            if (type1 is NullType)
-            {
-                fRet = true;
-                // We don't need to determine the actual best type since we're
-                // returning true - indicating that we've found the best operator.
-                typeCls = typeObj;
-                goto LRecord;
-            }
-
-            if (!canCast(type1, type2, CONVERTTYPE.NOUDC) && !canCast(type2, type1, CONVERTTYPE.NOUDC))
-                return false;
-
-            if (type1.isInterfaceType() || type1.isPredefType(PredefinedType.PT_STRING) || GetSymbolLoader().HasBaseConversion(type1, typeDel))
-                type1 = typeObj;
-            else if (type1 is ArrayType)
-                type1 = GetPredefindType(PredefinedType.PT_ARRAY);
-            else if (!type1.isClassType())
-                return false;
-
-            if (type2.isInterfaceType() || type2.isPredefType(PredefinedType.PT_STRING) || GetSymbolLoader().HasBaseConversion(type2, typeDel))
-                type2 = typeObj;
-            else if (type2 is ArrayType)
-                type2 = GetPredefindType(PredefinedType.PT_ARRAY);
-            else if (!type2.isClassType())
-                return false;
-
-            Debug.Assert(type1.isClassType() && !type1.isPredefType(PredefinedType.PT_STRING) && !type1.isPredefType(PredefinedType.PT_DELEGATE));
-            Debug.Assert(type2.isClassType() && !type2.isPredefType(PredefinedType.PT_STRING) && !type2.isPredefType(PredefinedType.PT_DELEGATE));
-
-            if (GetSymbolLoader().HasBaseConversion(type2, type1))
-                typeCls = type1;
-            else if (GetSymbolLoader().HasBaseConversion(type1, type2))
-                typeCls = type2;
-
-            LRecord:
             prgbofs.Add(new BinOpFullSig(typeCls, typeCls, BindRefCmpOp, OpSigFlags.None, LiftFlags.None, BinOpFuncKind.RefCmpOp));
             return fRet;
         }
