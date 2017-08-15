@@ -125,7 +125,8 @@ namespace System.Xml.Serialization
         {
             CodeGenOnly,
             ReflectionOnly,
-            ReflectionAsBackup
+            ReflectionAsBackup,
+            PreGenOnly
         }
 
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
@@ -273,6 +274,13 @@ namespace System.Xml.Serialization
                             Assembly assembly = TempAssembly.LoadGeneratedAssembly(type, defaultNamespace, out contract);
                             if (assembly == null)
                             {
+                                if (Mode == SerializationMode.PreGenOnly)
+                                {
+                                    AssemblyName name = type.Assembly.GetName();
+                                    var serializerName = Compiler.GetTempAssemblyName(name, defaultNamespace);
+                                    throw new FileLoadException(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
+                                }
+
                                 // need to reflect and generate new serialization assembly
                                 XmlReflectionImporter importer = new XmlReflectionImporter(defaultNamespace);
                                 _mapping = importer.ImportTypeMapping(type, null, defaultNamespace);
