@@ -38,6 +38,15 @@
     <Project Include="System.Security.Cryptography.X509Certificates\pkg\System.Security.Cryptography.X509Certificates.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.Security\pkg\System.Net.Security.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.IO.FileSystem.DriveInfo\pkg\System.IO.FileSystem.DriveInfo.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
