@@ -11,7 +11,9 @@ internal partial class Interop
 {
     internal partial class KernelBase
     {
-#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors, needed until buildtools can be updated to remove kernel32.dll!OpenCommPort
+// Disable Pinvoke analyzer errors, needed until buildtools can be updated to remove kernel32.dll!OpenCommPort
+// Tracking issue https://github.com/dotnet/corefx/issues/23264
+#pragma warning disable BCL0015
         [DllImport(Libraries.KernelBase, SetLastError = true)]
         internal static extern SafeFileHandle OpenCommPort(
              uint uPortNumber,
