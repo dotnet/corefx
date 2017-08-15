@@ -105,5 +105,91 @@ namespace System.Reflection.Tests
         {
             Assert.Equal(expected, AssemblyName.ReferenceMatchesDefinition(a1, a2));
         }
+
+        private static IEnumerable<object[]> Constructor_String_InvalidVersionTest_MemberData()
+        {
+            // No components
+            yield return new object[] { "a, Version=" };
+
+            // Too long
+            yield return new object[] { "a, Version=...." };
+            yield return new object[] { "a, Version=.1.1.1." };
+            yield return new object[] { "a, Version=1..1.1." };
+            yield return new object[] { "a, Version=1.1..1." };
+            yield return new object[] { "a, Version=1.1.1.." };
+
+            // Invalid component
+            foreach (var invalidComponent in new string[] { "-1", "65536", "foo" })
+            {
+                yield return new object[] { "a, Version=" + invalidComponent };
+                yield return new object[] { "a, Version=." + invalidComponent };
+                yield return new object[] { "a, Version=1." + invalidComponent };
+                yield return new object[] { "a, Version=1.." + invalidComponent };
+                yield return new object[] { "a, Version=1.1." + invalidComponent };
+                yield return new object[] { "a, Version=1.1.." + invalidComponent };
+                yield return new object[] { "a, Version=1.1.1." + invalidComponent };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Constructor_String_InvalidVersionTest_MemberData))]
+        public static void Constructor_String_InvalidVersionTest(string assemblyNameStr)
+        {
+            Assert.Throws<FileLoadException>(() => new AssemblyName(assemblyNameStr));
+        }
+
+        private static IEnumerable<object[]> Constructor_String_VersionTest_MemberData()
+        {
+            // No components
+            yield return new object[] { null, "a, Version=." };
+            yield return new object[] { null, "a, Version=.." };
+            yield return new object[] { null, "a, Version=..." };
+
+            // No major version
+            yield return new object[] { null, "a, Version=.1" };
+            yield return new object[] { null, "a, Version=.1.1" };
+            yield return new object[] { null, "a, Version=.1.1.1" };
+
+            // No minor version
+            yield return new object[] { null, "a, Version=1" };
+            yield return new object[] { null, "a, Version=1." };
+            yield return new object[] { null, "a, Version=1.." };
+            yield return new object[] { null, "a, Version=1..1" };
+            yield return new object[] { null, "a, Version=1..1.1" };
+
+            // No build
+            var expectedVersion = new Version(1, 1, 0, 0);
+            yield return new object[] { expectedVersion, "a, Version=1.1" };
+            yield return new object[] { expectedVersion, "a, Version=1.1." };
+            yield return new object[] { expectedVersion, "a, Version=1.1.." };
+            yield return new object[] { expectedVersion, "a, Version=1.1..1" };
+
+            // No revision
+            expectedVersion = new Version(1, 1, 1, 0);
+            yield return new object[] { expectedVersion, "a, Version=1.1.1" };
+            yield return new object[] { expectedVersion, "a, Version=1.1.1." };
+
+            // All components
+            yield return new object[] { new Version(1, 1, 1, 1), "a, Version=1.1.1.1" };
+            // 65535 for the major or minor version cause the component to be considered unspecified due to a side effect of
+            // CoreCLR's implementation. That's not very interesting, so using 65534 instead.
+            yield return new object[] { new Version(65534, 65534, 65535, 65535), "a, Version=65534.65534.65535.65535" };
+        }
+
+        [Theory]
+        [MemberData(nameof(Constructor_String_VersionTest_MemberData))]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/4321", TargetFrameworkMonikers.UapAot)]
+        public static void Constructor_String_VersionTest(Version expectedVersion, string assemblyNameStr)
+        {
+            var assemblyName = new AssemblyName(assemblyNameStr);
+            if (expectedVersion == null)
+            {
+                Assert.Null(assemblyName.Version);
+            }
+            else
+            {
+                Assert.Equal(expectedVersion, assemblyName.Version);
+            }
+        }
     }
 }
