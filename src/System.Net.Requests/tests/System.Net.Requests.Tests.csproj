@@ -42,6 +42,10 @@
       <Name>System.Net.Requests</Name>
       <Project>{5EE76DCC-9FD5-47FD-AB45-BD0F0857740F}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\System.Net.Http\src\System.Net.Http.csproj">
+      <Name>System.Net.Http</Name>
+      <Project>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</Project>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
