@@ -435,7 +435,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Allocate a new expression, the type is the element type of the array.
             // Array index operations are always lvalues.
             Expr pExpr = GetExprFactory().CreateArrayIndex(elementType, pOp1, transformedIndices);
-            pExpr.Flags |= EXPRFLAG.EXF_LVALUE | EXPRFLAG.EXF_ASSGOP;
 
             if (bIsError)
             {
