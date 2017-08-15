@@ -51,7 +51,7 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        [ConditionalFact(nameof(HasNullModem), nameof(HasReliableBreak))]
+        [ConditionalFact(nameof(HasNullModem))]
         public void BreakState_true()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -73,7 +73,7 @@ namespace System.IO.Ports.Tests
         }
 
  
-        [ConditionalFact(nameof(HasNullModem), nameof(HasReliableBreak))]
+        [ConditionalFact(nameof(HasNullModem))]
         public void BreakState_false()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -97,7 +97,7 @@ namespace System.IO.Ports.Tests
         }
 
 
-        [ConditionalFact(nameof(HasNullModem), nameof(HasReliableBreak))]
+        [ConditionalFact(nameof(HasNullModem))]
         public void BreakState_true_false()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -125,7 +125,7 @@ namespace System.IO.Ports.Tests
         }
 
 
-        [ConditionalFact(nameof(HasNullModem), nameof(HasReliableBreak))]
+        [ConditionalFact(nameof(HasNullModem))]
         public void BreakState_true_false_true()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))

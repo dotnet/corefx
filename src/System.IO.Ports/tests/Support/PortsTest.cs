@@ -20,8 +20,6 @@ namespace System.IO.PortsTests
 
         public static bool HasLoopbackOrNullModem => TCSupport.SufficientHardwareRequirements(TCSupport.SerialPortRequirements.LoopbackOrNullModem);
 
-        public static bool HasReliableBreak => false;
-
         /// <summary>
         /// Shows that we can retain a single byte in the transmit queue if flow control doesn't permit transmission
         /// This is true for traditional PC ports, but will be false if there is additional driver/hardware buffering in the system

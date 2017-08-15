@@ -27,16 +27,17 @@ namespace Legacy.Support
         private readonly bool _shouldWait;
         private readonly AutoResetEvent _eventHandlerWait = new AutoResetEvent(false);
         private readonly object _lock = new object();
-        private readonly string _testName;
+        private bool _successfulWait;
 
         public int NumEventsHandled { get; private set; }
+        public bool SuccessfulWait => !_shouldWait || _successfulWait;
 
         /// <summary>
         /// If you set this filter, then it must return 'true' to record an event
         /// </summary>
         public Predicate<T> EventFilter { get; set; }
 
-        protected TestEventHandler(SerialPort com, bool shouldThrow, bool shouldWait, string testName = "Not set")
+        protected TestEventHandler(SerialPort com, bool shouldThrow, bool shouldWait)
         {
             if (shouldThrow && shouldWait)
             {
@@ -46,7 +47,6 @@ namespace Legacy.Support
             _com = com;
             _shouldThrow = shouldThrow;
             _shouldWait = shouldWait;
-            _testName = testName;
         }
 
         protected void HandleEvent(object source, T eventType)
@@ -80,7 +80,7 @@ namespace Legacy.Support
 
             if (_shouldWait)
             {
-                Assert.True(_eventHandlerWait.WaitOne(10000), $"Handler type: [{GetType()}] Test name: [{_testName}]");
+                _successfulWait = _eventHandlerWait.WaitOne(10000);
             }
         }
 
