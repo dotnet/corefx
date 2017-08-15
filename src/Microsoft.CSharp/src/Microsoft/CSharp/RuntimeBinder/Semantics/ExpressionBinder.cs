@@ -411,26 +411,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal Expr BindArrayIndexCore(BindingFlag bindFlags, Expr pOp1, Expr pOp2)
         {
             Expr pExpr;
-            bool bIsError = false;
-            if (!pOp1.IsOK || !pOp2.IsOK)
-            {
-                bIsError = true;
-            }
+            bool bIsError = !pOp1.IsOK || !pOp2.IsOK;
 
             CType pIntType = GetPredefindType(PredefinedType.PT_INT);
 
-            // Array indexing must occur on an array type.
-            if (!(pOp1.Type is ArrayType pArrayType))
-            {
-                Debug.Assert(!(pOp1.Type is PointerType));
-                pExpr = bindIndexer(pOp1, pOp2, bindFlags);
-                if (bIsError)
-                {
-                    pExpr.SetError();
-                }
-                return pExpr;
-            }
-
+            ArrayType pArrayType = pOp1.Type as ArrayType;
+            Debug.Assert(pArrayType != null);
             checkUnsafe(pArrayType.GetElementType()); // added to the binder so we don't bind to pointer ops
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
@@ -443,24 +429,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pDestType = pIntType;
             }
 
-            int rank = pArrayType.rank;
-            int cIndices = 0;
-
             Expr transformedIndices = pOp2.Map(GetExprFactory(),
-                (Expr x) =>
+                x =>
                 {
-                    cIndices++;
                     Expr pTemp = mustConvert(x, pDestType);
                     if (pDestType == pIntType)
                         return pTemp;
                     ExprClass exprType = GetExprFactory().CreateClass(pDestType);
                     return GetExprFactory().CreateCast(EXPRFLAG.EXF_INDEXEXPR, exprType, pTemp);
                 });
-
-            if (cIndices != rank)
-            {
-                throw ErrorContext.Error(ErrorCode.ERR_BadIndexCount, rank);
-            }
 
             // Allocate a new expression, the type is the element type of the array.
             // Array index operations are always lvalues.
