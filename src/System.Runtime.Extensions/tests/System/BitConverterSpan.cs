@@ -108,18 +108,16 @@ namespace System.Tests
             Assert.Equal(byteArr, span.ToArray());
         }
 
-        public override void ToChar(int index, char character)
+        public override void ToChar(int index, char expected)
         {
-            byte[] byteArray = { 0x20, 0x00, 0x00, 0x2A, 0x00, 0x41, 0x00, 0x7D, 0x00, 0xC5, 0x00, 0xA8, 0x03, 0x29, 0x04, 0xAC, 0x20 };
-            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(byteArray);
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toCharByteArray);
             BitConverter.ToChar(span);
-            Assert.Equal(character, BitConverter.ToChar(span.Slice(index)));
+            Assert.Equal(expected, BitConverter.ToChar(span.Slice(index)));
         }
 
         public override void ToInt16(int index, short expected)
         {
-            byte[] byteArray = { 15, 0, 0, 128, 16, 39, 240, 216, 241, 255, 127 };
-            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(byteArray);
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toInt16ByteArray);
             Assert.Equal(expected, BitConverter.ToInt16(span.Slice(index)));
         }
 
@@ -131,13 +129,44 @@ namespace System.Tests
 
         public override void ToInt64(int index, long expected)
         {
-            byte[] byteArray =
-                { 0x00, 0x36, 0x65, 0xC4, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0xCA, 0x9A,
-            0x3B, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x56, 0x55, 0x55, 0x55, 0x55, 0x55, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0x00,
-            0x00, 0x64, 0xA7, 0xB3, 0xB6, 0xE0, 0x0D, 0x00, 0x00, 0x9C, 0x58, 0x4C, 0x49, 0x1F, 0xF2 };
-            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(byteArray);
-            Assert.Equal(expected, BitConverter.ToInt32(span.Slice(index)));
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toInt64ByteArray);
+            Assert.Equal(expected, BitConverter.ToInt64(span.Slice(index)));
+        }
+
+        public override void ToUInt16(int index, ushort expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toUInt16ByteArray);
+            Assert.Equal(expected, BitConverter.ToUInt16(span.Slice(index)));
+        }
+
+        public override void ToUInt32(int index, uint expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toUInt32ByteArray);
+            Assert.Equal(expected, BitConverter.ToUInt32(span.Slice(index)));
+        }
+
+        public override void ToUInt64(int index, ulong expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toUInt64ByteArray);
+            Assert.Equal(expected, BitConverter.ToUInt64(span.Slice(index)));
+        }
+
+        public override void ToSingle(int index, float expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toSingleByteArray);
+            Assert.Equal(expected, BitConverter.ToSingle(span.Slice(index)));
+        }
+
+        public override void ToDouble(int index, double expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toDoubleByteArray);
+            Assert.Equal(expected, BitConverter.ToDouble(span.Slice(index)));
+        }
+
+        public override void ToBoolean(int index, bool expected)
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(s_toBooleanByteArray);
+            Assert.Equal(expected, BitConverter.ToBoolean(span.Slice(index)));
         }
     }
 }
