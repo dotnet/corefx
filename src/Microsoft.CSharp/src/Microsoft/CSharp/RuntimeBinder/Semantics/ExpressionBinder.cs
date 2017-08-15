@@ -416,7 +416,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             ArrayType pArrayType = pOp1.Type as ArrayType;
             Debug.Assert(pArrayType != null);
-            checkUnsafe(pArrayType.GetElementType()); // added to the binder so we don't bind to pointer ops
+            CType elementType = pArrayType.GetElementType();
+            checkUnsafe(elementType); // added to the binder so we don't bind to pointer ops
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
 
@@ -433,7 +434,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Allocate a new expression, the type is the element type of the array.
             // Array index operations are always lvalues.
-            Expr pExpr = GetExprFactory().CreateArrayIndex(pOp1, transformedIndices);
+            Expr pExpr = GetExprFactory().CreateArrayIndex(elementType, pOp1, transformedIndices);
             pExpr.Flags |= EXPRFLAG.EXF_LVALUE | EXPRFLAG.EXF_ASSGOP;
 
             if (bIsError)
