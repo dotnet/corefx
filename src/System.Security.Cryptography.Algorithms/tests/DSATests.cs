@@ -4,12 +4,15 @@
 
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.Dsa.Tests;
 using Xunit;
 
 namespace System.Security.Cryptography.Algorithms.Tests
 {
     public class DSATests
     {
+        public static bool SupportsKeyGeneration => DSAFactory.SupportsKeyGeneration;
+
         [Fact]
         public void BaseVirtualsNotImplementedException()
         {
@@ -18,7 +21,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             Assert.Throws<NotImplementedException>(() => dsa.HashData(null, 0, 0, HashAlgorithmName.SHA1));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public void TryCreateSignature_UsesCreateSignature()
         {
             var input = new byte[1024];
@@ -59,7 +62,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public void TrySignData_UsesTryHashDataAndTryCreateSignature()
         {
             var input = new byte[1024];
@@ -84,7 +87,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public void VerifyData_Array_UsesHashDataAndVerifySignature()
         {
             var input = new byte[1024];
@@ -108,7 +111,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public void VerifyData_Stream_UsesHashDataAndVerifySignature()
         {
             var input = new byte[1024];
@@ -127,7 +130,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public void VerifyData_Span_UsesTryHashDataAndVerifySignature()
         {
             var input = new byte[1024];
