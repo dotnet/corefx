@@ -766,7 +766,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expr CreateArray(Expr callingObject, Expr optionalIndexerArguments)
         {
-            return _binder.BindArrayIndexCore(0, callingObject, optionalIndexerArguments);
+            return _binder.BindArrayIndexCore(callingObject, optionalIndexerArguments);
         }
 
         /////////////////////////////////////////////////////////////////////////////////

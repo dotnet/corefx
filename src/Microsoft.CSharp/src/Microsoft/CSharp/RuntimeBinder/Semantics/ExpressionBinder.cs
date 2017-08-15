@@ -408,7 +408,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateOptimizedAssignment(op1, op2);
         }
 
-        internal Expr BindArrayIndexCore(BindingFlag bindFlags, Expr pOp1, Expr pOp2)
+        internal Expr BindArrayIndexCore(Expr pOp1, Expr pOp2)
         {
             Expr pExpr;
             bool bIsError = !pOp1.IsOK || !pOp2.IsOK;
