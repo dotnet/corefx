@@ -30,7 +30,8 @@
     <Compile Include="System\Reflection\AssemblyNameProxyTests.cs" />
     <Compile Include="System\MarshalByRefObjectTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)'!='netfx'">
+    <Compile Include="System\BitConverter.netcoreapp.cs" />
     <Compile Include="System\BitConverterSpan.cs" />
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
     <Compile Include="System\MathTests.netcoreapp.cs" />
@@ -40,7 +41,6 @@
     <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="System\BitConverter.netcoreapp.cs" />
     <Compile Include="System\BitConverterArray.cs" />
     <Compile Include="System\BitConverterBase.cs" />
     <Compile Include="System\Environment.UserDomainName.cs" />
