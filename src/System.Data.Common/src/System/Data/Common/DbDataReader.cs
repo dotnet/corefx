@@ -67,6 +67,8 @@ namespace System.Data.Common
             get;
         }
 
+        public virtual void Close() { }
+
         public void Dispose()
         {
             Dispose(true);
@@ -76,6 +78,7 @@ namespace System.Data.Common
         {
             if (disposing)
             {
+                Close();
             }
         }
 
@@ -283,10 +286,6 @@ namespace System.Data.Common
                     return TaskHelpers.FromException<bool>(e);
                 }
             }
-        }
-
-        public virtual void Close()
-        {
         }
 
         virtual public DataTable GetSchemaTable()

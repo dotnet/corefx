@@ -318,6 +318,7 @@ namespace System.Data.Common
         public abstract object this[string name] { get; }
         public abstract int RecordsAffected { get; }
         public virtual int VisibleFieldCount { get { return default(int); } }
+        public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public abstract bool GetBoolean(int ordinal);
@@ -361,7 +362,6 @@ namespace System.Data.Common
         public System.Threading.Tasks.Task<bool> ReadAsync() { return default(System.Threading.Tasks.Task<bool>); }
         public virtual System.Threading.Tasks.Task<bool> ReadAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<bool>); }
         System.Data.IDataReader System.Data.IDataRecord.GetData(int ordinal) { return default(System.Data.IDataReader); }
-        void System.Data.IDataReader.Close() { }
         System.Data.DataTable System.Data.IDataReader.GetSchemaTable() { return default(System.Data.DataTable); }
     }
     public abstract partial class DbDataRecord : System.Data.IDataRecord
