@@ -34,7 +34,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public bool IsChecked => false;
 
-        private readonly List<CSharpArgumentInfo> _argumentInfo;
+        private readonly CSharpArgumentInfo[] _argumentInfo;
 
         CSharpArgumentInfo ICSharpBinder.GetArgumentInfo(int index) => _argumentInfo[index];
 
@@ -51,7 +51,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             base(BinderHelper.CreateCallInfo(argumentInfo, 1)) // discard 1 argument: the target object
         {
             CallingContext = callingContext;
-            _argumentInfo = BinderHelper.ToList(argumentInfo);
+            _argumentInfo = BinderHelper.ToArray(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }
 
@@ -71,6 +71,8 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return com;
             }
 #endif
+            BinderHelper.ValidateBindArgument(target, nameof(target));
+            BinderHelper.ValidateBindArgument(indexes, nameof(indexes));
             return BinderHelper.Bind(this, _binder, BinderHelper.Cons(target, indexes), _argumentInfo, errorSuggestion);
         }
     }
