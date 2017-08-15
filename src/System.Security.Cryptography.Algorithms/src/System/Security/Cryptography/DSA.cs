@@ -132,7 +132,7 @@ namespace System.Security.Cryptography
         public virtual bool TryCreateSignature(ReadOnlySpan<byte> source, Span<byte> destination, out int bytesWritten)
         {
             byte[] sig = CreateSignature(source.ToArray());
-            if (destination.Length >= sig.Length)
+            if (sig.Length <= destination.Length)
             {
                 new ReadOnlySpan<byte>(sig).CopyTo(destination);
                 bytesWritten = sig.Length;

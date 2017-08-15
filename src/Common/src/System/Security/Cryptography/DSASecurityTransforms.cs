@@ -176,10 +176,10 @@ namespace System.Security.Cryptography
                     return Interop.AppleCrypto.ImportEphemeralKey(blob, hasPrivateKey);
                 }
 
-                public override byte[] CreateSignature(byte[] hash)
+                public override byte[] CreateSignature(byte[] rgbHash)
                 {
-                    if (hash == null)
-                        throw new ArgumentNullException(nameof(hash));
+                    if (rgbHash == null)
+                        throw new ArgumentNullException(nameof(rgbHash));
 
                     SecKeyPair keys = GetKeys();
 
@@ -188,7 +188,7 @@ namespace System.Security.Cryptography
                         throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
                     }
 
-                    byte[] derFormatSignature = Interop.AppleCrypto.GenerateSignature(keys.PrivateKey, hash);
+                    byte[] derFormatSignature = Interop.AppleCrypto.GenerateSignature(keys.PrivateKey, rgbHash);
 
                     // Since the AppleCrypto implementation is limited to FIPS 186-2, signature field sizes
                     // are always 160 bits / 20 bytes (the size of SHA-1, and the only legal length for Q).

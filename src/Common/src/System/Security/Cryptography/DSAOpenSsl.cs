@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Internal.Cryptography;
-using Microsoft.Win32.SafeHandles;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using Internal.Cryptography;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
@@ -188,48 +189,63 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(rgbHash));
 
                 SafeDsaHandle key = _key.Value;
-                byte[] signature = new byte[Interop.Crypto.DsaEncodedSignatureSize(key)];
-
-                int signatureSize;
-                bool success = Interop.Crypto.DsaSign(key, rgbHash, rgbHash.Length, signature, out signatureSize);
-                if (!success)
+                int signatureSize = Interop.Crypto.DsaEncodedSignatureSize(key);
+                byte[] signature = ArrayPool<byte>.Shared.Rent(signatureSize);
+                try
                 {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    bool success = Interop.Crypto.DsaSign(key, rgbHash, rgbHash.Length, new Span<byte>(signature, 0, signatureSize), out signatureSize);
+                    if (!success)
+                    {
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    }
+
+                    Debug.Assert(
+                        signatureSize <= signature.Length,
+                        "DSA_sign reported an unexpected signature size",
+                        "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
+                        signatureSize,
+                        signature.Length);
+
+                    int signatureFieldSize = Interop.Crypto.DsaSignatureFieldSize(key) * BitsPerByte;
+                    return AsymmetricAlgorithmHelpers.ConvertDerToIeee1363(signature, 0, signatureSize, signatureFieldSize);
                 }
-
-                Debug.Assert(
-                    signatureSize <= signature.Length,
-                    "DSA_sign reported an unexpected signature size",
-                    "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
-                    signatureSize,
-                    signature.Length);
-
-                int signatureFieldSize = Interop.Crypto.DsaSignatureFieldSize(key) * BitsPerByte;
-                byte[] converted = AsymmetricAlgorithmHelpers.ConvertDerToIeee1363(signature, 0, signatureSize, signatureFieldSize);
-                return converted;
+                finally
+                {
+                    Array.Clear(signature, 0, signatureSize);
+                    ArrayPool<byte>.Shared.Return(signature);
+                }
             }
 
             public override bool TryCreateSignature(ReadOnlySpan<byte> source, Span<byte> destination, out int bytesWritten)
             {
+                byte[] converted;
                 SafeDsaHandle key = _key.Value;
-                byte[] signature = new byte[Interop.Crypto.DsaEncodedSignatureSize(key)];
-
-                int signatureSize;
-                bool success = Interop.Crypto.DsaSign(key, source, source.Length, signature, out signatureSize);
-                if (!success)
+                int signatureSize = Interop.Crypto.DsaEncodedSignatureSize(key);
+                byte[] signature = ArrayPool<byte>.Shared.Rent(signatureSize);
+                try
                 {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    bool success = Interop.Crypto.DsaSign(key, source, source.Length, new Span<byte>(signature, 0, signatureSize), out signatureSize);
+                    if (!success)
+                    {
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    }
+
+                    Debug.Assert(
+                        signatureSize <= signature.Length,
+                        "DSA_sign reported an unexpected signature size",
+                        "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
+                        signatureSize,
+                        signature.Length);
+
+                    int signatureFieldSize = Interop.Crypto.DsaSignatureFieldSize(key) * BitsPerByte;
+                    converted = AsymmetricAlgorithmHelpers.ConvertDerToIeee1363(signature, 0, signatureSize, signatureFieldSize);
+                }
+                finally
+                {
+                    Array.Clear(signature, 0, signatureSize);
+                    ArrayPool<byte>.Shared.Return(signature);
                 }
 
-                Debug.Assert(
-                    signatureSize <= signature.Length,
-                    "DSA_sign reported an unexpected signature size",
-                    "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
-                    signatureSize,
-                    signature.Length);
-
-                int signatureFieldSize = Interop.Crypto.DsaSignatureFieldSize(key) * BitsPerByte;
-                byte[] converted = AsymmetricAlgorithmHelpers.ConvertDerToIeee1363(signature, 0, signatureSize, signatureFieldSize);
                 if (converted.Length <= destination.Length)
                 {
                     new ReadOnlySpan<byte>(converted).CopyTo(destination);
@@ -275,13 +291,10 @@ namespace System.Security.Cryptography
                 // with the already loaded key.
                 ForceSetKeySize(BitsPerByte * Interop.Crypto.DsaKeySize(newKey));
 
-                _key = new Lazy<SafeDsaHandle>(() => newKey, isThreadSafe:true);
-
-                // Have Lazy<T> consider the key to be loaded
-                var dummy = _key.Value;
+                _key = new Lazy<SafeDsaHandle>(newKey);
             }
 
-            private static KeySizes[] s_legalKeySizes = new KeySizes[] { new KeySizes(minSize: 512, maxSize: 3072, skipSize: 64) };
+            private static readonly KeySizes[] s_legalKeySizes = new KeySizes[] { new KeySizes(minSize: 512, maxSize: 3072, skipSize: 64) };
         }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
     }

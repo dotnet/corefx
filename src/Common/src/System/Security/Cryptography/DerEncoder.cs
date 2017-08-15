@@ -137,6 +137,8 @@ namespace System.Security.Cryptography
         /// <returns>The encoded segments { tag, length, value }</returns>
         internal static byte[][] SegmentedEncodeUnsignedInteger(ReadOnlySpan<byte> bigEndianBytes)
         {
+            Debug.Assert(!bigEndianBytes.IsEmpty, "The span must not be empty.");
+
             int start = 0;
             int end = start + bigEndianBytes.Length;
 
@@ -153,22 +155,11 @@ namespace System.Security.Cryptography
                 Debug.Assert(start >= 0);
             }
 
-            int length = end - start;
-            byte[] dataBytes;
-            int writeStart = 0;
-
             // If the first byte is bigger than 0x7F it will look like a negative number, since
             // we're unsigned, insert a zero-padding byte.
-            if (bigEndianBytes[start] > 0x7F)
-            {
-                dataBytes = new byte[length + 1];
-                writeStart = 1;
-            }
-            else
-            {
-                dataBytes = new byte[length];
-            }
-
+            int length = end - start;
+            int writeStart = bigEndianBytes[start] > 0x7F ? 1 : 0;
+            var dataBytes = new byte[length + writeStart];
             bigEndianBytes.Slice(start, length).CopyTo(new Span<byte>(dataBytes, writeStart));
 
             return new[]

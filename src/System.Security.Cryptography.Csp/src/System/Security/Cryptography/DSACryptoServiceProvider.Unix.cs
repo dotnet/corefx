@@ -46,7 +46,7 @@ namespace System.Security.Cryptography
         {
             throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspParameters)));
         }
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "This is the implementation of DSACryptoServiceProvider")]
         public override byte[] CreateSignature(byte[] rgbHash) => _impl.CreateSignature(rgbHash);
 
@@ -55,7 +55,7 @@ namespace System.Security.Cryptography
 
         public CspKeyContainerInfo CspKeyContainerInfo
         {
-            get {throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspKeyContainerInfo))); }
+            get { throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspKeyContainerInfo))); }
         }
 
         protected override void Dispose(bool disposing)

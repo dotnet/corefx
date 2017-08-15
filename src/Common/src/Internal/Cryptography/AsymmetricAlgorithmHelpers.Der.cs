@@ -19,7 +19,6 @@ namespace Internal.Cryptography
         /// </summary>
         public static byte[] ConvertIeee1363ToDer(ReadOnlySpan<byte> input)
         {
-            Debug.Assert(input != null);
             Debug.Assert(input.Length % 2 == 0);
             Debug.Assert(input.Length > 1);
 
