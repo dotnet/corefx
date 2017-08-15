@@ -125,31 +125,18 @@ namespace System
         public static readonly bool IsLittleEndian;
         public static long DoubleToInt64Bits(double value) { throw null; }
         public static byte[] GetBytes(bool value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, bool value) { throw null; }
         public static byte[] GetBytes(char value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, char value) { throw null; }
         public static byte[] GetBytes(double value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, double value) { throw null; }
         public static byte[] GetBytes(short value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, short value) { throw null; }
         public static byte[] GetBytes(int value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, int value) { throw null; }
         public static byte[] GetBytes(long value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, long value) { throw null; }
         public static byte[] GetBytes(float value) { throw null; }
-        public static bool TryWriteBytes(Span<byte> destination, float value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static byte[] GetBytes(ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteBytes(Span<byte> destination, ushort value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static byte[] GetBytes(uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteBytes(Span<byte> destination, uint value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static byte[] GetBytes(ulong value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteBytes(Span<byte> destination, ulong value) { throw null; }
         public static float Int32BitsToSingle(int value) { throw null; }
         public static double Int64BitsToDouble(long value) { throw null; }
         public static int SingleToInt32Bits(float value) { throw null; }
@@ -182,6 +169,19 @@ namespace System
         public static ulong ToUInt64(byte[] value, int startIndex) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static ulong ToUInt64(ReadOnlySpan<byte> value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, bool value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, char value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, double value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, short value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, int value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, long value) { throw null; }
+        public static bool TryWriteBytes(Span<byte> destination, float value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static bool TryWriteBytes(Span<byte> destination, ushort value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static bool TryWriteBytes(Span<byte> destination, uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static bool TryWriteBytes(Span<byte> destination, ulong value) { throw null; }
     }
     public static partial class Convert
     {

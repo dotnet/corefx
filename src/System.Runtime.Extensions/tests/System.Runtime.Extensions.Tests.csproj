@@ -31,7 +31,7 @@
     <Compile Include="System\MarshalByRefObjectTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
-    <Compile Include="System\BitConverter.netcoreapp.cs" />
+    <Compile Include="System\BitConverterSpan.cs" />
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
     <Compile Include="System\MathTests.netcoreapp.cs" />
     <Compile Include="System\MathF.netcoreapp.cs" />
@@ -40,6 +40,9 @@
     <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\BitConverter.netcoreapp.cs" />
+    <Compile Include="System\BitConverterArray.cs" />
+    <Compile Include="System\BitConverterBase.cs" />
     <Compile Include="System\Environment.UserDomainName.cs" />
     <Compile Include="System\Environment.UserName.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
