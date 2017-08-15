@@ -410,7 +410,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal Expr BindArrayIndexCore(Expr pOp1, Expr pOp2)
         {
-            Expr pExpr;
             bool bIsError = !pOp1.IsOK || !pOp2.IsOK;
 
             CType pIntType = GetPredefindType(PredefinedType.PT_INT);
@@ -421,14 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
 
-            CType pDestType = chooseArrayIndexType(pOp2);
-
-            if (null == pDestType)
-            {
-                // using int as the type will allow us to give a better error...
-                pDestType = pIntType;
-            }
-
+            CType pDestType = ChooseArrayIndexType(pOp2);
             Expr transformedIndices = pOp2.Map(GetExprFactory(),
                 x =>
                 {
@@ -441,7 +433,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Allocate a new expression, the type is the element type of the array.
             // Array index operations are always lvalues.
-            pExpr = GetExprFactory().CreateArrayIndex(pOp1, transformedIndices);
+            Expr pExpr = GetExprFactory().CreateArrayIndex(pOp1, transformedIndices);
             pExpr.Flags |= EXPRFLAG.EXF_LVALUE | EXPRFLAG.EXF_ASSGOP;
 
             if (bIsError)
@@ -1745,12 +1737,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
 
-        internal CType chooseArrayIndexType(Expr args)
+        internal CType ChooseArrayIndexType(Expr args)
         {
             // first, select the allowable types
-            for (int ipt = 0; ipt < s_rgptIntOp.Length; ipt++)
+            foreach (PredefinedType predef in s_rgptIntOp)
             {
-                CType type = GetPredefindType(s_rgptIntOp[ipt]);
+                CType type = GetPredefindType(predef);
                 foreach (Expr arg in args.ToEnumerable())
                 {
                     if (!canConvert(arg, type))
@@ -1758,11 +1750,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         goto NEXTI;
                     }
                 }
+
                 return type;
-            NEXTI:
+
+             NEXTI:
                 ;
             }
-            return null;
+
+            // Provide better error message in attempting cast to int.
+            return GetPredefindType(PredefinedType.PT_INT);
         }
 
         internal void FillInArgInfoFromArgList(ArgInfos argInfo, Expr args)

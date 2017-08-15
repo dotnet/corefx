@@ -1432,12 +1432,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // user defined conversions (since the convert is guaranteed to return one of
                 // the primitive types), and we check for overflow since we don't want truncation.
 
-                CType pDestType = _binder.chooseArrayIndexType(argument);
-                if (null == pDestType)
-                {
-                    pDestType = SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
-                }
-
+                CType pDestType = _binder.ChooseArrayIndexType(argument);
                 return _binder.mustCast(
                     _binder.mustConvert(argument, pDestType),
                     destinationType,
