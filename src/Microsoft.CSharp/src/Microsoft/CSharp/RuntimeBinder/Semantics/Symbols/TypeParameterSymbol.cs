@@ -9,8 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class TypeParameterSymbol : Symbol
     {
         private bool _bIsMethodTypeParameter;
-        private bool _bHasRefBound;
-        private bool _bHasValBound;
         private SpecCons _constraints;
 
         private TypeParameterType _pTypeParameterType;
@@ -22,7 +20,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray _pInterfaceBounds;
 
         private AggregateType _pEffectiveBaseClass;
-        private CType _pDeducedBaseClass; // This may be a NullableType or an ArrayType etc, for error reporting.
 
         public bool Covariant;
         public bool Invariant { get { return !Covariant && !Contravariant; } }
@@ -79,9 +76,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _pBounds = pBounds;
             _pInterfaceBounds = null;
             _pEffectiveBaseClass = null;
-            _pDeducedBaseClass = null;
-            _bHasRefBound = false;
-            _bHasValBound = false;
         }
 
         public TypeArray GetBounds()
@@ -101,17 +95,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsValueType()
         {
-            return (_constraints & SpecCons.Val) > 0 || _bHasValBound;
+            return (_constraints & SpecCons.Val) > 0;
         }
 
         public bool IsReferenceType()
         {
-            return (_constraints & SpecCons.Ref) > 0 || _bHasRefBound;
+            return (_constraints & SpecCons.Ref) > 0;
         }
 
         public bool IsNonNullableValueType()
         {
-            return (_constraints & SpecCons.Val) > 0 || _bHasValBound && !(_pDeducedBaseClass is NullableType);
+            return (_constraints & SpecCons.Val) > 0;
         }
 
         public bool HasNewConstraint()
