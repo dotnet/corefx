@@ -21,8 +21,9 @@
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
+    <PlatformPackageVersion>2.0.0</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>servicing-25608-01</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>servicing-25614-03</CoreClrExpectedPrerelease>
+    <CoreClrPackageVersion>2.0.1-servicing-25614-01</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25307-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-25317-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25317-00</ProjectNTfsTestILCExpectedPrerelease>
@@ -93,10 +94,15 @@
       <ElementName>CoreFxExpectedPrerelease</ElementName>
       <BuildInfoName>CoreFx</BuildInfoName>
     </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreFx">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>PlatformPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.Platforms</PackageId>
+    </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>CoreClrExpectedPrerelease</ElementName>
-      <BuildInfoName>CoreClr</BuildInfoName>
+      <ElementName>CoreClrPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
