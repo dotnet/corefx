@@ -106,8 +106,6 @@ MembersMustExist : Member 'System.DirectoryServices.Protocols.ModifyDNRequest.To
 MembersMustExist : Member 'System.DirectoryServices.Protocols.ModifyRequest.ToXmlNode(System.Xml.XmlDocument)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.DirectoryServices.Protocols.SearchRequest..ctor(System.String, System.Xml.XmlDocument, System.DirectoryServices.Protocols.SearchScope, System.String[])' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.DirectoryServices.Protocols.SearchRequest.ToXmlNode(System.Xml.XmlDocument)' does not exist in the implementation but it does exist in the contract.
-Compat issues with assembly System.Drawing:
-CannotMakeTypeAbstract : Type 'System.Drawing.BufferedGraphicsManager' is abstract in the implementation but is not abstract in the contract.
 Compat issues with assembly System.Security:
 MembersMustExist : Member 'System.Security.Cryptography.CryptographicAttributeObjectCollection.IsSynchronized.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Security.Cryptography.CryptographicAttributeObjectCollection.SyncRoot.get()' does not exist in the implementation but it does exist in the contract.
@@ -314,4 +312,4 @@ TypesMustExist : Type 'System.Windows.Threading.DispatcherUnhandledExceptionEven
 TypesMustExist : Type 'System.Windows.Threading.DispatcherUnhandledExceptionEventHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Windows.Threading.DispatcherUnhandledExceptionFilterEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Windows.Threading.DispatcherUnhandledExceptionFilterEventHandler' does not exist in the implementation but it does exist in the contract.
-Total Issues: 301
+Total Issues: 300
