@@ -39,7 +39,7 @@
             "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
             "PB_TargetQueue": "RedHat.69.Amd64",
-            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux /p:EnableDumpling=false"
           },
           "ReportingParameters": {
             "OperatingSystem": "RedHat6",
@@ -351,7 +351,7 @@
             "PB_BuildTestsArguments": "-buildArch=x64 -Debug -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
             "PB_TargetQueue": "RedHat.69.Amd64",
-            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux /p:EnableDumpling=false"
           },
           "ReportingParameters": {
             "OperatingSystem": "Redhat6",
