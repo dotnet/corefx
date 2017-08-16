@@ -17,7 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private int _nIndexInTotalParameters;
 
         private TypeArray _pBounds;
-        private TypeArray _pInterfaceBounds;
 
         private AggregateType _pEffectiveBaseClass;
 
@@ -66,15 +65,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _nIndexInTotalParameters = index;
         }
 
-        public TypeArray GetInterfaceBounds()
-        {
-            return _pInterfaceBounds;
-        }
-
         public void SetBounds(TypeArray pBounds)
         {
             _pBounds = pBounds;
-            _pInterfaceBounds = null;
             _pEffectiveBaseClass = null;
         }
 
