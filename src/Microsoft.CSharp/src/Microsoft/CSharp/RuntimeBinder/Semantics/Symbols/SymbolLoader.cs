@@ -287,71 +287,71 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (pDest is AggregateType aggDest)
                 {
-                    if (aggSource.isClassType())
+                    switch (aggSource.GetOwningAggregate().AggKind())
                     {
-                        // * From any class type S to any class type T provided S is derived from T.
-                        if (aggDest.isClassType() && IsBaseClass(aggSource, aggDest))
-                        {
-                            return true;
-                        }
+                        case AggKindEnum.Class:
+                            switch (aggDest.GetOwningAggregate().AggKind())
+                            {
+                                case AggKindEnum.Class:
+                                    // * From any class type S to any class type T provided S is derived from T.
+                                    return IsBaseClass(aggSource, aggDest);
 
-                        // ORIGINAL RULES:
-                        //    // * From any class type S to any interface type T provided S implements T.
-                        //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-                        //    {
-                        //        return true;
-                        //    }
-                        //    // * from any interface type S to any interface type T, provided S is derived from T.
-                        //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-                        //    {
-                        //        return true;
-                        //    }
+                                case AggKindEnum.Interface:
+                                    // ORIGINAL RULES:
+                                    //    // * From any class type S to any interface type T provided S implements T.
+                                    //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                                    //    {
+                                    //        return true;
+                                    //    }
+                                    //    // * from any interface type S to any interface type T, provided S is derived from T.
+                                    //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                                    //    {
+                                    //        return true;
+                                    //    }
 
-                        // VARIANCE EXTENSIONS:
-                        // * From any class type S to any interface type T provided S implements an interface
-                        //   convertible to T.
-                        // * From any interface type S to any interface type T provided S implements an interface
-                        //   convertible to T.
-                        // * From any interface type S to any interface type T provided S is not T and S is 
-                        //   an interface convertible to T.
+                                    // VARIANCE EXTENSIONS:
+                                    // * From any class type S to any interface type T provided S implements an interface
+                                    //   convertible to T.
+                                    // * From any interface type S to any interface type T provided S implements an interface
+                                    //   convertible to T.
+                                    // * From any interface type S to any interface type T provided S is not T and S is 
+                                    //   an interface convertible to T.
 
-                        return aggDest.isInterfaceType() && HasAnyBaseInterfaceConversion(aggSource, aggDest);
-                    }
+                                    return HasAnyBaseInterfaceConversion(aggSource, aggDest);
+                            }
 
-                    if (aggSource.isInterfaceType())
-                    {
-                        if (aggDest.isInterfaceType())
-                        {
-                            if (HasAnyBaseInterfaceConversion(aggSource, aggDest))
+                            break;
+
+                        case AggKindEnum.Interface:
+                            if (aggDest.isInterfaceType())
+                            {
+                                return HasAnyBaseInterfaceConversion(aggSource, aggDest)
+                                       || HasInterfaceConversion(aggSource, aggDest);
+                            }
+
+                            break;
+
+                        case AggKindEnum.Delegate:
+                            // * From any delegate type to System.Delegate
+                            // 
+                            // SPEC OMISSION:
+                            // 
+                            // The spec should actually say
+                            //
+                            // * From any delegate type to System.Delegate 
+                            // * From any delegate type to System.MulticastDelegate
+                            // * From any delegate type to any interface implemented by System.MulticastDelegate
+                            if (aggDest.isPredefType(PredefinedType.PT_MULTIDEL)
+                                || aggDest.isPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
+                                    GetPredefindType(PredefinedType.PT_MULTIDEL), aggDest))
                             {
                                 return true;
                             }
 
-                            return HasInterfaceConversion(aggSource, aggDest);
-                        }
-                    }
-                    else if (pSource.isDelegateType())
-                    {
-                        // * From any delegate type to System.Delegate
-                        // 
-                        // SPEC OMISSION:
-                        // 
-                        // The spec should actually say
-                        //
-                        // * From any delegate type to System.Delegate 
-                        // * From any delegate type to System.MulticastDelegate
-                        // * From any delegate type to any interface implemented by System.MulticastDelegate
-                        if (aggDest.isPredefType(PredefinedType.PT_MULTIDEL)
-                            || aggDest.isPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
-                                GetPredefindType(PredefinedType.PT_MULTIDEL), aggDest))
-                        {
-                            return true;
-                        }
-
-                        // VARIANCE EXTENSION:
-                        // * From any delegate type S to a delegate type T provided S is not T and
-                        //   S is a delegate convertible to T
-                        return pDest.isDelegateType() && HasDelegateConversion(aggSource, aggDest);
+                            // VARIANCE EXTENSION:
+                            // * From any delegate type S to a delegate type T provided S is not T and
+                            //   S is a delegate convertible to T
+                            return pDest.isDelegateType() && HasDelegateConversion(aggSource, aggDest);
                     }
                 }
             }
