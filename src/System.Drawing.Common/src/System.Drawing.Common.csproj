@@ -135,6 +135,7 @@
     <Compile Include="System\Drawing\PropertyItemInternal.cs" />
     <Compile Include="System\Drawing\Printing\Duplex.cs" />
     <Compile Include="System\Drawing\Printing\InvalidPrinterException.cs" />
+    <Compile Include="System\Drawing\Printing\InvalidPrinterException.NotSerializable.cs" />
     <Compile Include="System\Drawing\Printing\Margins.cs" />
     <Compile Include="System\Drawing\Printing\PaperKinds.cs" />
     <Compile Include="System\Drawing\Printing\PaperSize.cs" />
@@ -217,7 +218,6 @@
     <Compile Include="System\Drawing\Pen.cs" />
     <Compile Include="System\Drawing\Pens.cs" />
     <Compile Include="System\Drawing\Printing\DefaultPrintController.cs" />
-    <Compile Include="System\Drawing\Printing\InvalidPrinterException.NotSerializable.cs" />
     <Compile Include="System\Drawing\Printing\ModeField.cs" />
     <Compile Include="System\Drawing\Printing\PageSettings.cs" />
     <Compile Include="System\Drawing\Printing\PreviewPrintController.cs" />
