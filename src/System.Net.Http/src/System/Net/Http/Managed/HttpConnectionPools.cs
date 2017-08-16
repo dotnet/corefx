@@ -25,10 +25,10 @@ namespace System.Net.Http
         /// <summary>The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</summary>
         private readonly int _maxConnectionsPerServer;
         /// <summary>
-        /// Cached value of whether or not the pool is empty in order to avoid the expensive
+        /// Keeps track of whether or not the cleanup timer is running. It helps us avoid the expensive
         /// <see cref="ConcurrentDictionary{TKey,TValue}.IsEmpty"/> call.
         /// </summary>
-        private bool _poolIsEmpty;
+        private bool _timerIsRunning;
         /// <summary>Object used to synchronize access to state in the pool.</summary>
         private object SyncObj => _pools;
 
@@ -40,7 +40,7 @@ namespace System.Net.Http
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
             // Start out with the timer not running, since we have no pools.
             _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
-            _poolIsEmpty = true;
+            _timerIsRunning = false;
         }
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
@@ -54,14 +54,14 @@ namespace System.Net.Http
                 pool = new HttpConnectionPool(_maxConnectionsPerServer);
                 if (_pools.TryAdd(key, pool))
                 {
-                    // If we currently don't have any pools, a new one will be added for this
-                    // connection. We should then start reaping stale pools.
+                    // We need to ensure the cleanup timer is running if it isn't
+                    // already now that we added a new connection pool.
                     lock (SyncObj)
                     {
-                        if (_poolIsEmpty)
+                        if (!_timerIsRunning)
                         {
                             _cleaningTimer.Change(CleanPoolTimeoutMilliseconds, CleanPoolTimeoutMilliseconds);
-                            _poolIsEmpty = false;
+                            _timerIsRunning = true;
                         }
                     }
                     break;
@@ -103,7 +103,7 @@ namespace System.Net.Http
                 if (_pools.IsEmpty)
                 {
                     _cleaningTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                    _poolIsEmpty = true;
+                    _timerIsRunning = false;
                 }
             }
 
