@@ -593,7 +593,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert((flags & ~MemLookFlags.All) == 0);
             Debug.Assert(obj == null || obj.Type != null);
-            Debug.Assert(typeSrc is AggregateType || typeSrc is TypeParameterType);
+            Debug.Assert(typeSrc is AggregateType);
             Debug.Assert(checker != null);
 
             _prgtype = _rgtypeStart;
@@ -616,16 +616,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray ifaces = BSYMMGR.EmptyTypeArray();
             AggregateType typeCls2 = null;
 
-            if (typeSrc is TypeParameterType typeParamSrc)
-            {
-                Debug.Assert((_flags & (MemLookFlags.Ctor | MemLookFlags.NewObj | MemLookFlags.Operator | MemLookFlags.BaseCall | MemLookFlags.TypeVarsAllowed)) == 0);
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
-                ifaces = typeParamSrc.GetInterfaceBounds();
-                typeCls1 = typeParamSrc.GetEffectiveBaseClass();
-                if (ifaces.Count > 0 && typeCls1.isPredefType(PredefinedType.PT_OBJECT))
-                    typeCls1 = null;
-            }
-            else if (!typeSrc.isInterfaceType())
+            if (!typeSrc.isInterfaceType())
             {
                 typeCls1 = (AggregateType)typeSrc;
 
