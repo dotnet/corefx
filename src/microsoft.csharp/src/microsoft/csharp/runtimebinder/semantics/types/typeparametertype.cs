@@ -29,7 +29,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public int GetIndexInOwnParameters() { return _pTypeParameterSymbol.GetIndexInOwnParameters(); }
         public int GetIndexInTotalParameters() { return _pTypeParameterSymbol.GetIndexInTotalParameters(); }
         public TypeArray GetBounds() { return _pTypeParameterSymbol.GetBounds(); }
-        public AggregateType GetEffectiveBaseClass() { return _pTypeParameterSymbol.GetEffectiveBaseClass(); }
 
         private TypeParameterSymbol _pTypeParameterSymbol;
     }

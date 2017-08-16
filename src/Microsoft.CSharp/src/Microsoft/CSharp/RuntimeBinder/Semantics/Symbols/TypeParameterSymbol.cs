@@ -18,8 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private TypeArray _pBounds;
 
-        private AggregateType _pEffectiveBaseClass;
-
         public bool Covariant;
         public bool Invariant { get { return !Covariant && !Contravariant; } }
         public bool Contravariant;
@@ -68,7 +66,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void SetBounds(TypeArray pBounds)
         {
             _pBounds = pBounds;
-            _pEffectiveBaseClass = null;
         }
 
         public TypeArray GetBounds()
@@ -79,11 +76,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void SetConstraints(SpecCons constraints)
         {
             _constraints = constraints;
-        }
-
-        public AggregateType GetEffectiveBaseClass()
-        {
-            return _pEffectiveBaseClass;
         }
 
         public bool IsValueType()

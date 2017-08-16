@@ -106,7 +106,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(typeSym != null);
             Debug.Assert(typeSym is AggregateType ||
-                   typeSym is TypeParameterType ||
                    typeSym is ArrayType ||
                    typeSym is NullableType);
 
@@ -116,8 +115,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (AggregateType)typeSym;
                 case TypeKind.TK_ArrayType:
                     return GetPredefindType(PredefinedType.PT_ARRAY);
-                case TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)typeSym).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
                     return ((NullableType)typeSym).GetAts();
             }

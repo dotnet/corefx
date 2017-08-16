@@ -2514,9 +2514,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case TypeKind.TK_NullableType:
                         type = type.StripNubs();
                         break;
-                    case TypeKind.TK_TypeParameterType:
-                        type = (type as TypeParameterType).GetEffectiveBaseClass();
-                        break;
                     case TypeKind.TK_AggregateType:
                         AggregateType ats = (AggregateType)type;
                         if ((ats.isClassType() || ats.isStructType()) && !ats.getAggregate().IsSkipUDOps())
