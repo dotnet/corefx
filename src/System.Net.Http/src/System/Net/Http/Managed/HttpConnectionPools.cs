@@ -24,6 +24,13 @@ namespace System.Net.Http
         private readonly Timer _cleaningTimer;
         /// <summary>The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</summary>
         private readonly int _maxConnectionsPerServer;
+        /// <summary>
+        /// Cached value of whether or not the pool is empty in order to avoid the expensive
+        /// <see cref="ConcurrentDictionary{TKey,TValue}.IsEmpty"/> call.
+        /// </summary>
+        private bool _poolIsEmpty;
+        /// <summary>Object used to synchronize access to state in the pool.</summary>
+        private object SyncObj => _pools;
 
         /// <summary>Initializes the pools.</summary>
         /// <param name="maxConnectionsPerServer">The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</param>
@@ -33,6 +40,7 @@ namespace System.Net.Http
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
             // Start out with the timer not running, since we have no pools.
             _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+            _poolIsEmpty = true;
         }
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
@@ -40,15 +48,27 @@ namespace System.Net.Http
         /// <returns>The retrieved pool.</returns>
         public HttpConnectionPool GetOrAddPool(HttpConnectionKey key)
         {
-            // If we currently don't have any pools, a new one will be added for this
-            // connection. We should then start reaping stale pools.
-            if (_pools.IsEmpty)
+            HttpConnectionPool pool;
+            while (!_pools.TryGetValue(key, out pool))
             {
-                _cleaningTimer.Change(CleanPoolTimeoutMilliseconds, CleanPoolTimeoutMilliseconds);
+                pool = new HttpConnectionPool(_maxConnectionsPerServer);
+                if (_pools.TryAdd(key, pool))
+                {
+                    // If we currently don't have any pools, a new one will be added for this
+                    // connection. We should then start reaping stale pools.
+                    lock (SyncObj)
+                    {
+                        if (_poolIsEmpty)
+                        {
+                            _cleaningTimer.Change(CleanPoolTimeoutMilliseconds, CleanPoolTimeoutMilliseconds);
+                            _poolIsEmpty = false;
+                        }
+                    }
+                    break;
+                }
             }
 
-            return _pools.GetOrAdd(key, (k, s) => new HttpConnectionPool(s),
-                _maxConnectionsPerServer);
+            return pool;
         }
 
         /// <summary>Disposes of the pools, disposing of each individual pool.</summary>
@@ -78,9 +98,13 @@ namespace System.Net.Http
             }
 
             // Stop running the timer if we don't have any pools to clean up.
-            if (_pools.IsEmpty)
+            lock (SyncObj)
             {
-                _cleaningTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                if (_pools.IsEmpty)
+                {
+                    _cleaningTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                    _poolIsEmpty = true;
+                }
             }
 
             // NOTE: There is a possible race condition with regards to a pool getting cleaned up at the same
