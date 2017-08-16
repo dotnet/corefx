@@ -9,7 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Program_1_0_0_0.cs" />
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAssemblyAttribute.cs">
       <Link>Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAssemblyAttribute.cs</Link>
     </Compile>

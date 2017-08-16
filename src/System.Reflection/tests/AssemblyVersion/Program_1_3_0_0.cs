@@ -3,3 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAssembly]
+
+namespace System.Reflection.Tests.AssemblyVersion
+{
+    public class Program_1_3_0_0
+    {
+    }
+}

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -429,7 +430,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Dynamic assembly loads are not supported")]
+        [ActiveIssue("https://github.com/dotnet/corert/issues/4321", TargetFrameworkMonikers.UapAot)]
         [SkipOnTargetFramework(
             TargetFrameworkMonikers.NetFramework,
             ".NET Core behavior differs from .NET Framework since it does not want to replicate some bugs")]
@@ -455,6 +456,27 @@ namespace System.Reflection.Tests
             // Requested version 1.1.1.1 does not load 1.1.1.0, but loads 1.1.1.3
             Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_3, Version=1.1.1.1")));
+
+            Constructor_String_LoadVersionTest_ReferenceVersionAssemblies();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // delay type loading so that the test above can run first
+        private static void Constructor_String_LoadVersionTest_ReferenceVersionAssemblies()
+        {
+            // The purpose of this function is only to have a static reference to each of the test assemblies required by
+            // Constructor_String_LoadVersionTest so that the compiler does not optimize away the project references and ILC can
+            // include them in the closure. Otherwise, the test does not work on UapAot.
+            Assert.NotNull(typeof(AssemblyVersion.Program_0_0_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_0_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_2));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_3));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_2_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_3_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_2_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_3_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_3_0_0_0));
         }
 
         [Theory]
