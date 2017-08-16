@@ -25,10 +25,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // All EXF flags are < 0x01000000
         MustBeInvocable = 0x20000000,
-        TypeVarsAllowed = 0x40000000,
-        ExtensionCall = 0x80000000,
 
-        All = Ctor | NewObj | Operator | Indexer | UserCallable | BaseCall | MustBeInvocable | TypeVarsAllowed | ExtensionCall
+        All = Ctor | NewObj | Operator | Indexer | UserCallable | BaseCall | MustBeInvocable
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -420,7 +418,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bool fHideByName = false;
 
                 SearchSingleType(typeCur, out fHideByName);
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
 
                 if (_swtFirst && !_fMulti)
                 {
@@ -509,7 +506,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (fHideByName)
                         fHideObject = true;
                 }
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
 
                 if (itypeNext >= types.Count)
                     return !fHideObject;
