@@ -40,7 +40,7 @@ using System.Text;
 
 namespace System.Data.Tests
 {
-    public class DataSetTest : DataSetAssertion, IDisposable
+    public class DataSetTest : IDisposable
     {
         private CultureInfo _currentCultureBackup;
 
@@ -186,7 +186,7 @@ namespace System.Data.Tests
             TextWriter writer = new StringWriter();
             ds.WriteXmlSchema(writer);
 
-            string TextString = GetNormalizedSchema(writer.ToString());
+            string TextString = DataSetAssertion.GetNormalizedSchema(writer.ToString());
             //			string TextString = writer.ToString ();
 
             string substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
@@ -523,7 +523,7 @@ namespace System.Data.Tests
             ds.WriteXmlSchema(writer);
 
 
-            string TextString = GetNormalizedSchema(writer.ToString());
+            string TextString = DataSetAssertion.GetNormalizedSchema(writer.ToString());
             //			string TextString = writer.ToString ();
 
             string substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
@@ -1037,11 +1037,11 @@ namespace System.Data.Tests
             string xml = "<FullTextResponse><Domains><AvailResponse info='y' name='novell-ximian-group' /><AvailResponse info='n' name='ximian' /></Domains></FullTextResponse>";
             var ds = new DataSet();
             ds.ReadXml(new StringReader(xml));
-            AssertDataSet("ds", ds, "FullTextResponse", 2, 1);
+            DataSetAssertion.AssertDataSet("ds", ds, "FullTextResponse", 2, 1);
             DataTable dt = ds.Tables[0];
-            AssertDataTable("dt1", dt, "Domains", 1, 1, 0, 1, 1, 1);
+            DataSetAssertion.AssertDataTable("dt1", dt, "Domains", 1, 1, 0, 1, 1, 1);
             dt = ds.Tables[1];
-            AssertDataTable("dt2", dt, "AvailResponse", 3, 2, 1, 0, 1, 0);
+            DataSetAssertion.AssertDataTable("dt2", dt, "AvailResponse", 3, 2, 1, 0, 1, 0);
             StringWriter sw = new StringWriter();
             XmlTextWriter xtw = new XmlTextWriter(sw);
             xtw.QuoteChar = '\'';

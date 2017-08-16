@@ -27,26 +27,12 @@ using System.ComponentModel;
 using System.Globalization;
 
 
-
 using Xunit;
 
 namespace System.Data.Tests
 {
-    public class DataColumnTest2 : IDisposable
+    public class DataColumnTest2
     {
-        private CultureInfo _originalCulture;
-
-        public DataColumnTest2()
-        {
-            _originalCulture = CultureInfo.CurrentCulture; ;
-            CultureInfo.CurrentCulture = new CultureInfo("en-US");
-        }
-
-        public void Dispose()
-        {
-            CultureInfo.CurrentCulture = _originalCulture;
-        }
-
         [Fact]
         public void AllowDBNull()
         {
@@ -68,7 +54,7 @@ namespace System.Data.Tests
             Assert.Throws<DataException>(() =>
             {
                 dc.AllowDBNull = false; //the exisiting row contains null value
-            });
+                });
 
             dt.Rows.Clear();
             dc.AllowDBNull = false;

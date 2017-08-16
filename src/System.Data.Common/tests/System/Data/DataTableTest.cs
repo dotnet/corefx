@@ -41,7 +41,7 @@ using Xunit;
 
 namespace System.Data.Tests
 {
-    public class DataTableTest : DataSetAssertion
+    public class DataTableTest
     {
         public DataTableTest()
         {
@@ -3332,7 +3332,7 @@ Assert.False(true);
                 TextWriter writer = new StringWriter();
                 ds.Tables[0].WriteXmlSchema(writer);
 
-                string TextString = GetNormalizedSchema(writer.ToString());
+                string TextString = DataSetAssertion.GetNormalizedSchema(writer.ToString());
                 //string TextString = writer.ToString ();
 
                 string substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
