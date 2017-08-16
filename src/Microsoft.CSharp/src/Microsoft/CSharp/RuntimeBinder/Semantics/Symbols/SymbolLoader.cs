@@ -325,8 +325,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return true;
                         }
 
-                        return pSource != pDest
-                               && HasInterfaceConversion(pSource as AggregateType, pDest as AggregateType);
+                        return HasInterfaceConversion(aggSource, pDest as AggregateType);
                     }
                 }
                 else if (pSource.isDelegateType())
