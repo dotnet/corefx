@@ -17,14 +17,17 @@ usage()
     echo
 }
 
-if [ "$1" == "-?" ]; then
+if [ "$1" == "-?" ] || [ "$1" == "-h" ]; then
     usage
+    if [ "$1" == "-h" ]; then
+        set -- "-?"
+    fi
 fi
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __workingDir=$(pwd -P)
 
-if [ "$1" != "" ]; then
+if [ "$1" != "" ] && [[ "$1" != -* ]]; then
     if [ -d $__workingDir/$1 ]; then
         $__scriptpath/run.sh build-directory -directory:$__workingDir/$*
         exit $?
@@ -35,10 +38,10 @@ if [ "$1" != "" ]; then
     fi
 fi
 
-"$__scriptpath/build-native.sh" $*
+"$__scriptpath/build-native.sh" "$@"
 if [ $? -ne 0 ];then
    exit 1
 fi
 
-"$__scriptpath/build-managed.sh" -BuildPackages=true $*
+"$__scriptpath/build-managed.sh" -BuildPackages=true "$@"
 exit $?
