@@ -40,7 +40,6 @@ namespace System.Net.Http
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
             // Start out with the timer not running, since we have no pools.
             _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
-            _timerIsRunning = false;
         }
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
