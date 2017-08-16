@@ -15,32 +15,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ParentSymbol GetOwningSymbol() { return _pTypeParameterSymbol.parent; }
 
-
-        public bool DependsOn(TypeParameterType pType)
-        {
-            Debug.Assert(pType != null);
-
-            // * If a type parameter T is used as a constraint for type parameter S
-            //   then S depends on T.
-            // * If a type parameter S depends on a type parameter T and T depends on
-            //   U then S depends on U.
-
-            TypeArray pConstraints = GetBounds();
-            for (int iConstraint = 0; iConstraint < pConstraints.Count; ++iConstraint)
-            {
-                CType pConstraint = pConstraints[iConstraint];
-                if (pConstraint == pType)
-                {
-                    return true;
-                }
-                if (pConstraint is TypeParameterType typeConstraint && typeConstraint.DependsOn(pType))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         // Forward calls into the symbol.
         public bool Covariant { get { return _pTypeParameterSymbol.Covariant; } }
         public bool Invariant { get { return _pTypeParameterSymbol.Invariant; } }

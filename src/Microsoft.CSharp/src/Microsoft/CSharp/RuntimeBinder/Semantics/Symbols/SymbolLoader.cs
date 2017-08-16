@@ -278,6 +278,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
+            Debug.Assert(!(pSource is TypeParameterType));
 
             // The implicit reference conversions are:
             // * From any reference type to Object.
@@ -394,52 +395,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            // * Implicit conversions involving type parameters that are known to be reference types.
-            return pSource is TypeParameterType srcParType && HasImplicitReferenceTypeParameterConversion(srcParType, pDest);
-        }
-
-        private bool HasImplicitReferenceTypeParameterConversion(
-            TypeParameterType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            if (!pSource.IsRefType())
-            {
-                // Not a reference conversion.
-                return false;
-            }
-
-            // The following implicit conversions exist for a given type parameter T:
-            //
-            // * From T to its effective base class C.
-            AggregateType pEBC = pSource.GetEffectiveBaseClass();
-            if (pDest == pEBC)
-            {
-                return true;
-            }
-            // * From T to any base class of C.
-            if (IsBaseClass(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface implemented by C.
-            if (IsBaseInterface(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface type I in T's effective interface set, and
-            //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
-            {
-                if (pInterfaces[i] == pDest)
-                {
-                    return true;
-                }
-            }
-            // * From T to a type parameter U, provided T depends on U.
-            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
+            return false;
         }
 
         private bool HasAnyBaseInterfaceConversion(CType pDerived, CType pBase)
