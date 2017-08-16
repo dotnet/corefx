@@ -285,52 +285,52 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource is AggregateType aggSource)
             {
-                if (aggSource.isClassType())
+                if (pDest is AggregateType aggDest)
                 {
-                    // * From any class type S to any class type T provided S is derived from T.
-                    if (pDest.isClassType() && IsBaseClass(pSource, pDest))
+                    if (aggSource.isClassType())
                     {
-                        return true;
-                    }
-
-                    // ORIGINAL RULES:
-                    //    // * From any class type S to any interface type T provided S implements T.
-                    //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-                    //    {
-                    //        return true;
-                    //    }
-                    //    // * from any interface type S to any interface type T, provided S is derived from T.
-                    //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-                    //    {
-                    //        return true;
-                    //    }
-
-                    // VARIANCE EXTENSIONS:
-                    // * From any class type S to any interface type T provided S implements an interface
-                    //   convertible to T.
-                    // * From any interface type S to any interface type T provided S implements an interface
-                    //   convertible to T.
-                    // * From any interface type S to any interface type T provided S is not T and S is 
-                    //   an interface convertible to T.
-
-                    return pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest);
-                }
-
-                if (aggSource.isInterfaceType())
-                {
-                    if (pDest.isInterfaceType())
-                    {
-                        if (HasAnyBaseInterfaceConversion(pSource, pDest))
+                        // * From any class type S to any class type T provided S is derived from T.
+                        if (aggDest.isClassType() && IsBaseClass(aggSource, aggDest))
                         {
                             return true;
                         }
 
-                        return HasInterfaceConversion(aggSource, pDest as AggregateType);
+                        // ORIGINAL RULES:
+                        //    // * From any class type S to any interface type T provided S implements T.
+                        //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                        //    {
+                        //        return true;
+                        //    }
+                        //    // * from any interface type S to any interface type T, provided S is derived from T.
+                        //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                        //    {
+                        //        return true;
+                        //    }
+
+                        // VARIANCE EXTENSIONS:
+                        // * From any class type S to any interface type T provided S implements an interface
+                        //   convertible to T.
+                        // * From any interface type S to any interface type T provided S implements an interface
+                        //   convertible to T.
+                        // * From any interface type S to any interface type T provided S is not T and S is 
+                        //   an interface convertible to T.
+
+                        return aggDest.isInterfaceType() && HasAnyBaseInterfaceConversion(aggSource, aggDest);
                     }
-                }
-                else if (pSource.isDelegateType())
-                {
-                    if (pDest is AggregateType aggDest)
+
+                    if (aggSource.isInterfaceType())
+                    {
+                        if (aggDest.isInterfaceType())
+                        {
+                            if (HasAnyBaseInterfaceConversion(aggSource, aggDest))
+                            {
+                                return true;
+                            }
+
+                            return HasInterfaceConversion(aggSource, aggDest);
+                        }
+                    }
+                    else if (pSource.isDelegateType())
                     {
                         // * From any delegate type to System.Delegate
                         // 
