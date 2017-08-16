@@ -1640,16 +1640,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (parameters.Length > 0)
             {
                 // See if we have a param array.
-                var attributes = parameters[parameters.Length - 1].GetCustomAttributes(false);
-                if (attributes != null)
+                if (parameters[parameters.Length - 1].GetCustomAttribute(typeof(ParamArrayAttribute), false) != null)
                 {
-                    foreach (object o in attributes)
-                    {
-                        if (o is ParamArrayAttribute)
-                        {
-                            methProp.isParamArray = true;
-                        }
-                    }
+                    methProp.isParamArray = true;
                 }
 
                 // Mark the names of the parameters, and their default values.
@@ -1674,139 +1667,133 @@ namespace Microsoft.CSharp.RuntimeBinder
                 PopulateSymbolTableWithName("Value", new Type[] { typeof(Missing) }, typeof(Missing)); // We might need this later
             }
 
-            object[] attrs;
-
             // Get MarshalAsAttribute
             if ((parameter.Attributes & ParameterAttributes.HasFieldMarshal) != 0)
             {
-                if ((attrs = parameter.GetCustomAttributes(typeof(MarshalAsAttribute), false).ToArray()) != null
-                    && attrs.Length > 0)
+                MarshalAsAttribute attr = parameter.GetCustomAttribute<MarshalAsAttribute>(false);
+                if (attr != null)
                 {
-                    MarshalAsAttribute attr = (MarshalAsAttribute)attrs[0];
                     methProp.SetMarshalAsParameter(i, attr.Value);
                 }
             }
 
+            DateTimeConstantAttribute dateAttr = parameter.GetCustomAttribute<DateTimeConstantAttribute>(false);
             // Get the various kinds of default values
-            if ((attrs = parameter.GetCustomAttributes(typeof(DateTimeConstantAttribute), false).ToArray()) != null
-                && attrs.Length > 0)
+            if (dateAttr != null)
             {
                 // Get DateTimeConstant
-
-                DateTimeConstantAttribute attr = (DateTimeConstantAttribute)attrs[0];
-
-                ConstVal cv = ConstVal.Get(((DateTime)attr.Value).Ticks);
+                ConstVal cv = ConstVal.Get(((DateTime)dateAttr.Value).Ticks);
                 CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
-            else if ((attrs = parameter.GetCustomAttributes(typeof(DecimalConstantAttribute), false).ToArray()) != null
-                && attrs.Length > 0)
+            else
             {
-                // Get DecimalConstant
+                DecimalConstantAttribute decAttr = parameter.GetCustomAttribute<DecimalConstantAttribute>();
+                if (decAttr != null)
+                {
+                    // Get DecimalConstant
+                    ConstVal cv = ConstVal.Get(decAttr.Value);
+                    CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
+                    methProp.SetDefaultParameterValue(i, cvType, cv);
+                }
+                else if ((parameter.Attributes & ParameterAttributes.HasDefault) != 0 && !parameter.ParameterType.IsByRef)
+                {
+                    // Only set a default value if we have one, and the type that we're
+                    // looking at isn't a by ref type or a type parameter.
 
-                DecimalConstantAttribute attr = (DecimalConstantAttribute)attrs[0];
+                    ConstVal cv = default(ConstVal);
+                    CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT);
 
-                ConstVal cv = ConstVal.Get(attr.Value);
-                CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
-                methProp.SetDefaultParameterValue(i, cvType, cv);
-            }
-            else if ((parameter.Attributes & ParameterAttributes.HasDefault) != 0 && !parameter.ParameterType.IsByRef)
-            {
-                // Only set a default value if we have one, and the type that we're
-                // looking at isn't a by ref type or a type parameter.
-
-                ConstVal cv = default(ConstVal);
-                CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT);
-
-                // We need to use RawDefaultValue, because DefaultValue is too clever.
+                    // We need to use RawDefaultValue, because DefaultValue is too clever.
 #if UNSUPPORTEDAPI
-                if (parameter.RawDefaultValue != null)
-                {
-                    object defValue = parameter.RawDefaultValue;
-#else
-                if (parameter.DefaultValue != null)
-                {
-                    object defValue = parameter.DefaultValue;
-#endif
-                    switch (Type.GetTypeCode(defValue.GetType()))
+                    if (parameter.RawDefaultValue != null)
                     {
+                        object defValue = parameter.RawDefaultValue;
+#else
+                    if (parameter.DefaultValue != null)
+                    {
+                        object defValue = parameter.DefaultValue;
+#endif
+                        switch (Type.GetTypeCode(defValue.GetType()))
+                        {
 
-                        case TypeCode.Byte:
-                            cv = ConstVal.Get((byte)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BYTE);
-                            break;
+                            case TypeCode.Byte:
+                                cv = ConstVal.Get((byte)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BYTE);
+                                break;
 
-                        case TypeCode.Int16:
-                            cv = ConstVal.Get((short)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SHORT);
-                            break;
+                            case TypeCode.Int16:
+                                cv = ConstVal.Get((short)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SHORT);
+                                break;
 
-                        case TypeCode.Int32:
-                            cv = ConstVal.Get((int)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
-                            break;
+                            case TypeCode.Int32:
+                                cv = ConstVal.Get((int)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
+                                break;
 
-                        case TypeCode.Int64:
-                            cv = ConstVal.Get((long)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_LONG);
-                            break;
+                            case TypeCode.Int64:
+                                cv = ConstVal.Get((long)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_LONG);
+                                break;
 
-                        case TypeCode.Single:
-                            cv = ConstVal.Get((float)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FLOAT);
-                            break;
+                            case TypeCode.Single:
+                                cv = ConstVal.Get((float)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FLOAT);
+                                break;
 
-                        case TypeCode.Double:
-                            cv = ConstVal.Get((double)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
-                            break;
+                            case TypeCode.Double:
+                                cv = ConstVal.Get((double)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
+                                break;
 
-                        case TypeCode.Decimal:
-                            cv = ConstVal.Get((decimal)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
-                            break;
+                            case TypeCode.Decimal:
+                                cv = ConstVal.Get((decimal)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
+                                break;
 
-                        case TypeCode.Char:
-                            cv = ConstVal.Get((char)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_CHAR);
-                            break;
+                            case TypeCode.Char:
+                                cv = ConstVal.Get((char)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_CHAR);
+                                break;
 
-                        case TypeCode.Boolean:
-                            cv = ConstVal.Get((bool)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL);
-                            break;
+                            case TypeCode.Boolean:
+                                cv = ConstVal.Get((bool)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL);
+                                break;
 
-                        case TypeCode.SByte:
-                            cv = ConstVal.Get((sbyte)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SBYTE);
-                            break;
+                            case TypeCode.SByte:
+                                cv = ConstVal.Get((sbyte)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SBYTE);
+                                break;
 
-                        case TypeCode.UInt16:
-                            cv = ConstVal.Get((ushort)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_USHORT);
-                            break;
+                            case TypeCode.UInt16:
+                                cv = ConstVal.Get((ushort)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_USHORT);
+                                break;
 
-                        case TypeCode.UInt32:
-                            cv = ConstVal.Get((uint)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_UINT);
-                            break;
+                            case TypeCode.UInt32:
+                                cv = ConstVal.Get((uint)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_UINT);
+                                break;
 
-                        case TypeCode.UInt64:
-                            cv = ConstVal.Get((ulong)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ULONG);
-                            break;
+                            case TypeCode.UInt64:
+                                cv = ConstVal.Get((ulong)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ULONG);
+                                break;
 
-                        case TypeCode.String:
-                            cv = ConstVal.Get((string)defValue);
-                            cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);
-                            break;
+                            case TypeCode.String:
+                                cv = ConstVal.Get((string)defValue);
+                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);
+                                break;
+                        }
+
+                        // if we hit no case in the switch, we get object/null
+                        // because that's how we initialized the constval.
                     }
 
-                    // if we hit no case in the switch, we get object/null
-                    // because that's how we initialized the constval.
+                    methProp.SetDefaultParameterValue(i, cvType, cv);
                 }
-
-                methProp.SetDefaultParameterValue(i, cvType, cv);
             }
         }
 
