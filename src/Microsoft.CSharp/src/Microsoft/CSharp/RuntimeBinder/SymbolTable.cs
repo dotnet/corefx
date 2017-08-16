@@ -1667,8 +1667,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void SetParameterAttributes(MethodOrPropertySymbol methProp, ParameterInfo[] parameters, int i)
         {
-            if (((parameters[i].Attributes & ParameterAttributes.Optional) != 0) &&
-                !parameters[i].ParameterType.IsByRef)
+            ParameterInfo parameter = parameters[i];
+            if ((parameter.Attributes & ParameterAttributes.Optional) != 0 && !parameter.ParameterType.IsByRef)
             {
                 methProp.SetOptionalParameter(i);
                 PopulateSymbolTableWithName("Value", new Type[] { typeof(Missing) }, typeof(Missing)); // We might need this later
@@ -1677,9 +1677,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             object[] attrs;
 
             // Get MarshalAsAttribute
-            if ((parameters[i].Attributes & ParameterAttributes.HasFieldMarshal) != 0)
+            if ((parameter.Attributes & ParameterAttributes.HasFieldMarshal) != 0)
             {
-                if ((attrs = parameters[i].GetCustomAttributes(typeof(MarshalAsAttribute), false).ToArray()) != null
+                if ((attrs = parameter.GetCustomAttributes(typeof(MarshalAsAttribute), false).ToArray()) != null
                     && attrs.Length > 0)
                 {
                     MarshalAsAttribute attr = (MarshalAsAttribute)attrs[0];
@@ -1688,7 +1688,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // Get the various kinds of default values
-            if ((attrs = parameters[i].GetCustomAttributes(typeof(DateTimeConstantAttribute), false).ToArray()) != null
+            if ((attrs = parameter.GetCustomAttributes(typeof(DateTimeConstantAttribute), false).ToArray()) != null
                 && attrs.Length > 0)
             {
                 // Get DateTimeConstant
@@ -1699,7 +1699,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
-            else if ((attrs = parameters[i].GetCustomAttributes(typeof(DecimalConstantAttribute), false).ToArray()) != null
+            else if ((attrs = parameter.GetCustomAttributes(typeof(DecimalConstantAttribute), false).ToArray()) != null
                 && attrs.Length > 0)
             {
                 // Get DecimalConstant
@@ -1710,8 +1710,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
-            else if (((parameters[i].Attributes & ParameterAttributes.HasDefault) != 0) &&
-                !parameters[i].ParameterType.IsByRef)
+            else if ((parameter.Attributes & ParameterAttributes.HasDefault) != 0 && !parameter.ParameterType.IsByRef)
             {
                 // Only set a default value if we have one, and the type that we're
                 // looking at isn't a by ref type or a type parameter.
@@ -1721,13 +1720,13 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 // We need to use RawDefaultValue, because DefaultValue is too clever.
 #if UNSUPPORTEDAPI
-                if (parameters[i].RawDefaultValue != null)
+                if (parameter.RawDefaultValue != null)
                 {
-                    object defValue = parameters[i].RawDefaultValue;
+                    object defValue = parameter.RawDefaultValue;
 #else
-                if (parameters[i].DefaultValue != null)
+                if (parameter.DefaultValue != null)
                 {
-                    object defValue = parameters[i].DefaultValue;
+                    object defValue = parameter.DefaultValue;
 #endif
                     switch (Type.GetTypeCode(defValue.GetType()))
                     {
