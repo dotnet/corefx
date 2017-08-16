@@ -125,31 +125,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        private bool IsBaseInterface(CType pDerived, CType pBase)
+        private bool IsBaseInterface(AggregateType atsDer, AggregateType pBase)
         {
-            Debug.Assert(pDerived != null);
+            Debug.Assert(atsDer != null);
             Debug.Assert(pBase != null);
-            if (!pBase.isInterfaceType())
+            if (pBase.isInterfaceType())
             {
-                return false;
-            }
-            if (!(pDerived is AggregateType atsDer))
-            {
-                return false;
+                while (atsDer != null)
+                {
+                    TypeArray ifacesAll = atsDer.GetIfacesAll();
+                    for (int i = 0; i < ifacesAll.Count; i++)
+                    {
+                        if (AreTypesEqualForConversion(ifacesAll[i], pBase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    atsDer = atsDer.GetBaseClass();
+                }
             }
 
-            while (atsDer != null)
-            {
-                TypeArray ifacesAll = atsDer.GetIfacesAll();
-                for (int i = 0; i < ifacesAll.Count; i++)
-                {
-                    if (AreTypesEqualForConversion(ifacesAll[i], pBase))
-                    {
-                        return true;
-                    }
-                }
-                atsDer = atsDer.GetBaseClass();
-            }
             return false;
         }
 
@@ -286,113 +282,117 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            // * From any class type S to any class type T provided S is derived from T.
-            if (pSource.isClassType() && pDest.isClassType() && IsBaseClass(pSource, pDest))
-            {
-                return true;
-            }
 
-            // ORIGINAL RULES:
-            //    // * From any class type S to any interface type T provided S implements T.
-            //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-            //    {
-            //        return true;
-            //    }
-            //    // * from any interface type S to any interface type T, provided S is derived from T.
-            //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-            //    {
-            //        return true;
-            //    }
-
-            // VARIANCE EXTENSIONS:
-            // * From any class type S to any interface type T provided S implements an interface
-            //   convertible to T.
-            // * From any interface type S to any interface type T provided S implements an interface
-            //   convertible to T.
-            // * From any interface type S to any interface type T provided S is not T and S is 
-            //   an interface convertible to T.
-
-            if (pSource.isClassType() && pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest))
+            if (pSource is AggregateType aggSource)
             {
-                return true;
-            }
-            if (pSource.isInterfaceType() && pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (pSource.isInterfaceType() && pDest.isInterfaceType() && pSource != pDest &&
-                HasInterfaceConversion(pSource as AggregateType, pDest as AggregateType))
-            {
-                return true;
-            }
+                if (aggSource.isClassType())
+                {
+                    // * From any class type S to any class type T provided S is derived from T.
+                    if (pDest.isClassType() && IsBaseClass(pSource, pDest))
+                    {
+                        return true;
+                    }
 
-            if (pSource is ArrayType arrSource)
+                    // ORIGINAL RULES:
+                    //    // * From any class type S to any interface type T provided S implements T.
+                    //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                    //    {
+                    //        return true;
+                    //    }
+                    //    // * from any interface type S to any interface type T, provided S is derived from T.
+                    //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                    //    {
+                    //        return true;
+                    //    }
+
+                    // VARIANCE EXTENSIONS:
+                    // * From any class type S to any interface type T provided S implements an interface
+                    //   convertible to T.
+                    // * From any interface type S to any interface type T provided S implements an interface
+                    //   convertible to T.
+                    // * From any interface type S to any interface type T provided S is not T and S is 
+                    //   an interface convertible to T.
+
+                    return pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest);
+                }
+
+                if (aggSource.isInterfaceType())
+                {
+                    if (pDest.isInterfaceType())
+                    {
+                        if (HasAnyBaseInterfaceConversion(pSource, pDest))
+                        {
+                            return true;
+                        }
+
+                        return pSource != pDest
+                               && HasInterfaceConversion(pSource as AggregateType, pDest as AggregateType);
+                    }
+                }
+                else if (pSource.isDelegateType())
+                {
+                    if (pDest is AggregateType aggDest)
+                    {
+                        // * From any delegate type to System.Delegate
+                        // 
+                        // SPEC OMISSION:
+                        // 
+                        // The spec should actually say
+                        //
+                        // * From any delegate type to System.Delegate 
+                        // * From any delegate type to System.MulticastDelegate
+                        // * From any delegate type to any interface implemented by System.MulticastDelegate
+                        if (aggDest.isPredefType(PredefinedType.PT_MULTIDEL)
+                            || aggDest.isPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
+                                GetPredefindType(PredefinedType.PT_MULTIDEL), aggDest))
+                        {
+                            return true;
+                        }
+
+                        // VARIANCE EXTENSION:
+                        // * From any delegate type S to a delegate type T provided S is not T and
+                        //   S is a delegate convertible to T
+                        return pDest.isDelegateType() && HasDelegateConversion(aggSource, aggDest);
+                    }
+                }
+            }
+            else if (pSource is ArrayType arrSource)
             {
                 // * From an array type S with an element type SE to an array type T with element type TE
                 //   provided that all of the following are true:
                 //   * S and T differ only in element type. In other words, S and T have the same number of dimensions.
                 //   * Both SE and TE are reference types.
                 //   * An implicit reference conversion exists from SE to TE.
-                if (pDest is ArrayType arrDest && HasCovariantArrayConversion(arrSource, arrDest))
+                if (pDest is ArrayType arrDest)
                 {
-                    return true;
+                    return HasCovariantArrayConversion(arrSource, arrDest);
                 }
 
-                // * From any array type to System.Array or any interface implemented by System.Array.
-                if (pDest.isPredefType(PredefinedType.PT_ARRAY) || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), pDest))
+                if (pDest is AggregateType aggDest)
                 {
-                    return true;
-                }
+                    // * From any array type to System.Array or any interface implemented by System.Array.
+                    if (aggDest.isPredefType(PredefinedType.PT_ARRAY)
+                        || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), aggDest))
+                    {
+                        return true;
+                    }
 
-                // * From a single-dimensional array type S[] to IList<T> and its base
-                //   interfaces, provided that there is an implicit identity or reference
-                //   conversion from S to T.
-                if (HasArrayConversionToInterface(arrSource, pDest))
-                {
-                    return true;
+                    // * From a single-dimensional array type S[] to IList<T> and its base
+                    //   interfaces, provided that there is an implicit identity or reference
+                    //   conversion from S to T.
+                    return HasArrayConversionToInterface(arrSource, pDest);
                 }
             }
-
-            // * From any delegate type to System.Delegate
-            // 
-            // SPEC OMISSION:
-            // 
-            // The spec should actually say
-            //
-            // * From any delegate type to System.Delegate 
-            // * From any delegate type to System.MulticastDelegate
-            // * From any delegate type to any interface implemented by System.MulticastDelegate
-            if (pSource.isDelegateType() &&
-                (pDest.isPredefType(PredefinedType.PT_MULTIDEL) ||
-                pDest.isPredefType(PredefinedType.PT_DELEGATE) ||
-                IsBaseInterface(GetPredefindType(PredefinedType.PT_MULTIDEL), pDest)))
+            else if (pSource is NullType)
             {
-                return true;
-            }
-
-            // VARIANCE EXTENSION:
-            // * From any delegate type S to a delegate type T provided S is not T and
-            //   S is a delegate convertible to T
-
-            if (pSource.isDelegateType() && pDest.isDelegateType() &&
-                HasDelegateConversion(pSource as AggregateType, pDest as AggregateType))
-            {
-                return true;
-            }
-
-            // * From the null literal to any reference type
-            // NOTE: We extend the specification here. The C# 3.0 spec does not describe
-            // a "null type". Rather, it says that the null literal is typeless, and is
-            // convertible to any reference or nullable type. However, the C# 2.0 and 3.0
-            // implementations have a "null type" which some expressions other than the
-            // null literal may have. (For example, (null??null), which is also an
-            // extension to the specification.)
-            if (pSource is NullType)
-            {
-                if (pDest.IsRefType() || pDest is NullableType)
-                {
-                    return true;
-                }
+                // * From the null literal to any reference type
+                // NOTE: We extend the specification here. The C# 3.0 spec does not describe
+                // a "null type". Rather, it says that the null literal is typeless, and is
+                // convertible to any reference or nullable type. However, the C# 2.0 and 3.0
+                // implementations have a "null type" which some expressions other than the
+                // null literal may have. (For example, (null??null), which is also an
+                // extension to the specification.)
+                return pDest.IsRefType() || pDest is NullableType;
             }
 
             return false;
