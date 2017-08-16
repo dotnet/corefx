@@ -7,6 +7,9 @@
     </ProjectReference>
     <ProjectReference Include="..\src\System.IO.FileSystem.DriveInfo.builds" />
   </ItemGroup>
+  <PropertyGroup>
+    <Version>4.0.1</Version>
+  </PropertyGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
