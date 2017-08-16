@@ -164,17 +164,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         break;
 
-                    case SYMKIND.SK_TypeParameterSymbol:
-                        if ((_flags & MemLookFlags.TypeVarsAllowed) == 0)
-                            continue;
-                        if (_arity > 0)
-                        {
-                            if (!_swtBadArity)
-                                _swtBadArity.Set(symCur, typeCur);
-                            continue;
-                        }
-                        break;
-
                     default:
                         // All others are only considered when arity is zero.
                         if (_arity > 0)
