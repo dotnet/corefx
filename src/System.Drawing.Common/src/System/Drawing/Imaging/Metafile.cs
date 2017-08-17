@@ -5,7 +5,6 @@
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing.Internal;
-using System.Runtime.Serialization;
 
 namespace System.Drawing.Imaging
 {

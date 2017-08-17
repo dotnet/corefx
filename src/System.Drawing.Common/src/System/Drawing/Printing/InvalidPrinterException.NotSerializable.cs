@@ -10,6 +10,7 @@ namespace System.Drawing.Printing
     {
         protected InvalidPrinterException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
     }
 }

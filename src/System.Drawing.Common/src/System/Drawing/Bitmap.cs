@@ -8,7 +8,6 @@ using System.Drawing.Internal;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
-using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
