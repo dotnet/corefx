@@ -16,6 +16,8 @@ namespace System.Security.Cryptography
     {
         internal const byte ContextSpecificTagFlag = 0x80;
 
+        internal const byte TagNumberMask = 0x1F;
+
         private readonly byte[] _data;
         private readonly int _end;
         private int _position;
@@ -46,8 +48,9 @@ namespace System.Security.Cryptography
 
             Debug.Assert(data != null, "Data is null");
             Debug.Assert(offset >= 0, "Offset is negative");
-            Debug.Assert(length > 2, "Length is too short");
-            Debug.Assert(data.Length >= offset + length, "Array is too short");
+
+            if (length < 2 || length > data.Length - offset)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             _position = offset;
             EatTag(DerTag.Sequence);
@@ -66,6 +69,9 @@ namespace System.Security.Cryptography
 
         internal byte PeekTag()
         {
+            if (!HasData)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
             return _data[_position];
         }
 
@@ -105,6 +111,9 @@ namespace System.Security.Cryptography
         {
             EatTag(DerTag.ObjectIdentifier);
             int contentLength = EatLength();
+
+            if (contentLength < 1)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             // Each byte could cause 3 decimal characters to be written, plus a period. Over-allocate
             // and avoid re-alloc.
@@ -201,12 +210,18 @@ namespace System.Security.Cryptography
 
         private void EatTag(DerTag expected)
         {
+            if (!HasData)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
             CheckTag(expected, _data, _position);
             _position++;
         }
 
         private static void CheckTag(DerTag expected, byte[] data, int position)
         {
+            if (position >= data.Length)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
             byte actual = data[position];
 
             // Context-specific datatypes cannot be tag-verified
@@ -215,15 +230,21 @@ namespace System.Security.Cryptography
                 return;
             }
 
-            byte relevant = (byte)(actual & 0x1F);
-            byte expectedByte = (byte)expected;
+            byte relevant = (byte)(actual & TagNumberMask);
+            byte expectedByte = (byte)((byte)expected & TagNumberMask);
 
             if (expectedByte != relevant)
             {
-                throw new InvalidOperationException(
-                    "Expected tag '0x" + expectedByte.ToString("X2") +
-                        "', got '0x" + actual.ToString("X2") +
-                        "' at position " + position);
+                throw new CryptographicException(
+                    SR.Cryptography_Der_Invalid_Encoding
+#if DEBUG
+                    ,
+                    new InvalidOperationException(
+                        "Expected tag '0x" + expectedByte.ToString("X2") +
+                            "', got '0x" + actual.ToString("X2") +
+                            "' at position " + position)
+#endif
+                    );
             }
         }
 
@@ -233,21 +254,38 @@ namespace System.Security.Cryptography
             int answer = ScanContentLength(_data, _position, out bytesConsumed);
 
             _position += bytesConsumed;
+
+            if (answer > _end - _position)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
             return answer;
         }
 
         private static int ScanContentLength(byte[] data, int offset, out int bytesConsumed)
         {
+            if (offset >= data.Length)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
             byte lengthOrLengthLength = data[offset];
 
             if (lengthOrLengthLength < 0x80)
             {
+                if (lengthOrLengthLength > data.Length - offset)
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
                 bytesConsumed = 1;
                 return lengthOrLengthLength;
             }
 
             // The one byte which was lengthLength, plus the number of bytes it said to consume.
             bytesConsumed = 1 + (lengthOrLengthLength & 0x7F);
+
+            if (bytesConsumed > data.Length - offset)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+
+            // CER indefinite length is not supported.
+            if (bytesConsumed == 1)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             int end = offset + bytesConsumed;
             int accum = 0;
@@ -259,6 +297,9 @@ namespace System.Security.Cryptography
                 accum <<= 8;
                 accum += data[i];
             }
+
+            if (accum > data.Length - offset - bytesConsumed)
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             return accum;
         }
