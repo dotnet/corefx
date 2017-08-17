@@ -22,6 +22,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".\AlwaysPassTest.cs" />
+    <Content Include="Microsoft.XmlSerializer.Generator.runtimeconfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="Microsoft.XmlSerializer.Generator" />

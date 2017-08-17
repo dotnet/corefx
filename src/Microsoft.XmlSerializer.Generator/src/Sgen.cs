@@ -253,9 +253,18 @@ namespace Microsoft.XmlSerializer.Generator
                         File.Delete(codePath);
                     }
 
-                    using (FileStream fs = File.Create(codePath))
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
+                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, ms);
+                        if (success)
+                        {
+                            ms.Position = 0;
+                            using (FileStream fs = File.Create(codePath))
+                            {
+                                fs.Write(ms.ToArray(), 0, ms.ToArray().Length);
+                                fs.Flush();
+                            }
+                        }
                     }
                 }
                 catch (UnauthorizedAccessException)
