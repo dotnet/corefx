@@ -18,7 +18,7 @@ namespace System.IO.Compression.Tests
             await TestCreateDirectory(zfolder("normal"), true);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOSX))]
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // Jenkins fails with unicode characters [JENKINS-12610]
         public async Task CreateFromDirectoryUnicodel()
         {
@@ -79,7 +79,7 @@ namespace System.IO.Compression.Tests
             TestExtract(zfile("noexplicitdir.zip"), zfolder("explicitdir"));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotMacOsHighSierraOrHigher))]
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // Jenkins fails with unicode characters [JENKINS-12610]
         public void ExtractToDirectoryUnicode()
         {
@@ -173,7 +173,7 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotMacOsHighSierraOrHigher))]
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // Jenkins fails with unicode characters [JENKINS-12610]
         public void ExtractToDirectoryTest_Unicode()
         {
