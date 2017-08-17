@@ -3,18 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
     internal partial class Kernel32
     {
-#pragma warning disable CS0649 // never assigned to warning
+        [StructLayout(LayoutKind.Sequential)]
         internal struct SECURITY_ATTRIBUTES
         {
             internal uint nLength;
             internal IntPtr lpSecurityDescriptor;
             internal BOOL bInheritHandle;
         }
-#pragma warning restore CS0649
     }
 }

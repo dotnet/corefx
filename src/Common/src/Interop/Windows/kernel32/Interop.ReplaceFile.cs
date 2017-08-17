@@ -21,10 +21,7 @@ internal partial class Interop
         {
             replacedFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(replacedFileName);
             replacementFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(replacementFileName);
-            if (backupFileName != null)
-            {
-                backupFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(backupFileName);
-            }
+            backupFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(backupFileName);
 
             return ReplaceFilePrivate(
                 replacedFileName, replacementFileName, backupFileName,
