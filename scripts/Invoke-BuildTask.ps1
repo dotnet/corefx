@@ -5,9 +5,9 @@
     Command to run. String passed as the command should include the arguments.
 .PARAMETER RetryCount
     Number of times to retry the command until the command run successfully.
-    If not specified, then command is retried a maximum of 5 times. 
+    If not specified, then command is retried a maximum of 5 times.
 .PARAMETER WaitFactor
-    A multiplier that determine  the time (seconds) to wait between retries. Wait time is WaitFactor times the retry attempt.
+    A multiplier that determines the time (seconds) to wait between retries. Wait time is WaitFactor times the retry attempt.
     If not specified, then WaitFactor is 6.
 #>
 
@@ -37,7 +37,6 @@ do
 
         if ([string]::IsNullOrWhiteSpace($errVar))
         {
-            Write-Host "Command executed successfully."
             return
         }
     }
@@ -50,11 +49,12 @@ do
     if ($attempt -le $RetryCount)
     {
         $waitTime = $WaitFactor * $attempt
-        Write-Host "Waiting for $waitTime seconds before retry. Attempt $attempt of $RetryCount."
+        Write-Host "Attempt $attempt of $RetryCount. Retrying in $waitTime seconds..."
         sleep -Seconds ($waitTime)
     }
     else
     {
+        Write-Host "No more retries left."
         Write-Error "Command `"$Command`" failed."
         return $?
     }
