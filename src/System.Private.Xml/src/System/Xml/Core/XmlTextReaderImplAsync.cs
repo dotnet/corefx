@@ -993,20 +993,7 @@ namespace System.Xml
             SetupEncoding(encoding);
 
             // eat preamble
-            ReadOnlySpan<byte> preamble = _ps.encoding.Preamble;
-            int preambleLen = preamble.Length;
-            int i;
-            for (i = 0; i < preambleLen && i < _ps.bytesUsed; i++)
-            {
-                if (_ps.bytes[i] != preamble[i])
-                {
-                    break;
-                }
-            }
-            if (i == preambleLen)
-            {
-                _ps.bytePos = preambleLen;
-            }
+            EatPreamble();
 
             _documentStartBytePos = _ps.bytePos;
 
