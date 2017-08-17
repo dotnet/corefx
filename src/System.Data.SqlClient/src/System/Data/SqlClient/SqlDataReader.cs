@@ -497,7 +497,7 @@ namespace System.Data.SqlClient
             base.Dispose(disposing);
         }
 
-        public override void Close()
+        internal void Close()
         {
             SqlStatistics statistics = null;
             try
