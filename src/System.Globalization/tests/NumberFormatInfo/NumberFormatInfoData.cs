@@ -40,6 +40,10 @@ namespace System.Globalization.Tests
                     {
                         return (PlatformDetection.WindowsVersion < 10) ? new int[] { 3 } : new int[] { 6, 3 };
                     }
+                    else if (PlatformDetection.IsMacOsHighSierraOrHigher)
+                    {
+                        return new int[] { 8 };
+                    }
                     else
                     {
                         return new int[] { 1, 0 };
