@@ -55,21 +55,29 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
-        public void SqlConnectionEmptyParameters()
+        public void SqlConnectionValidParameters()
         {
-            // valid parameters
-            var con = new SqlConnection("Timeout=1234;packet Size=5678;");
+            var con = new SqlConnection("Timeout=1234;packet Size=5678 ;;; ;");
             Assert.Equal(1234, con.ConnectionTimeout);
             Assert.Equal(5678, con.PacketSize);
+        }
 
-            // empty parameters
-            con = new SqlConnection("Timeout=;packet Size= ;");
+        [Fact]
+        public void SqlConnectionEmptyParameters()
+        {
+            var con = new SqlConnection("Timeout=;packet Size= ;");
             //default values are defined in internal class DbConnectionStringDefaults
             Assert.Equal(15, con.ConnectionTimeout);
             Assert.Equal(8000, con.PacketSize);
+        }
 
-            // invalid parameters
+        [Fact]
+        public void SqlConnectionInvalidParameters()
+        {
             Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout=null;"));
+            Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout= null;"));
+            Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout=1 1;"));
+            Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout=1a;"));
         }
     }
 }
