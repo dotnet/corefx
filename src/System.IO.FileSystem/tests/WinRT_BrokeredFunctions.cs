@@ -32,7 +32,6 @@ namespace System.IO.Tests
             }
             finally
             {
-                File.Delete(testFile);
                 File.Delete(destination);
             }
         }
@@ -68,11 +67,12 @@ namespace System.IO.Tests
         {
             string subFolder = Path.Combine(s_musicFolder, "FindFirstFile_SubFolder_" + Path.GetRandomFileName());
             Directory.CreateDirectory(subFolder);
-            string testFile = Path.Combine(subFolder, "FindFirstFile_SubFile_" + Path.GetRandomFileName());
-            CreateFileInBrokeredLocation(testFile);
+            string testFile = null;
 
             try
             {
+                testFile = Path.Combine(subFolder, "FindFirstFile_SubFile_" + Path.GetRandomFileName());
+                CreateFileInBrokeredLocation(testFile);
                 Assert.True(File.Exists(testFile), "testFile should exist");
             }
             finally
@@ -91,7 +91,7 @@ namespace System.IO.Tests
             try
             {
                 FileAttributes attr = File.GetAttributes(destination);
-                Assert.False(((attr & FileAttributes.ReadOnly) > 0 ), "new file in brokered location should not be readonly");
+                Assert.False((attr & FileAttributes.ReadOnly) == 0, "new file in brokered location should not be readonly");
             }
             finally
             {
@@ -183,7 +183,7 @@ namespace System.IO.Tests
         {
             // Temporary hack until FileStream is updated to support brokering
             string testFile = GetTestFilePath();
-            File.Create(testFile).Dispose();
+            File.WriteAllText(testFile, "CoreFX test file");
             File.Copy(testFile, path);
         }
 
