@@ -85,6 +85,9 @@
     <Compile Include="System\ValueTypeTests.cs" />
     <Compile Include="System\VersionTests.cs" />
     <Compile Include="System\WeakReferenceTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>    
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>

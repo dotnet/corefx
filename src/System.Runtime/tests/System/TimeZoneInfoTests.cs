@@ -1670,7 +1670,8 @@ namespace System.Tests
             VerifyInv(s_amsterdamTz, new DateTime(2006, 12, 15, 12, 15, 44), false);
         }
 
-        [Fact]
+        // Hight Sierra supported the new tzfile version which we supported in 2.0
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotMacOsHighSierraOrHigher))]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public static void IsDaylightSavingTime_CatamarcaMultiYearDaylightSavings()
         {
@@ -2000,7 +2001,7 @@ namespace System.Tests
         {
             if (timeZoneId == s_strPacific)
             {
-                if (s_isWindows || s_isOSX)
+                if (s_isWindows || (s_isOSX && !PlatformDetection.IsMacOsHighSierraOrHigher))
                 {
                     return TimeSpan.FromHours(-8);
                 }
@@ -2015,7 +2016,7 @@ namespace System.Tests
                 {
                     return TimeSpan.FromHours(11);
                 }
-                else if (s_isOSX)
+                else if (s_isOSX && !PlatformDetection.IsMacOsHighSierraOrHigher)
                 {
                     return TimeSpan.FromHours(10);
                 }
