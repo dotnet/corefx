@@ -188,9 +188,61 @@ namespace System
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
 
-        // If we need this long-term hopefully we can come up with a better detection than the kernel verison.
-        public static bool IsMacOsHighSierra { get; } =
-            IsOSX && RuntimeInformation.OSDescription.StartsWith("Darwin 17.0.0");
+        private static readonly Version s_osxProductVersion = GetOSXProductVersion();
+ 
+        public static bool IsMacOsHighSierraOrHigher { get; } =
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
+ 
+        public static bool IsNotMacOsHighSierraOrHigher { get; } = !IsMacOsHighSierraOrHigher;
+
+        private static Version GetOSXProductVersion()
+        {
+            try
+            {
+                if (IsOSX)
+                {
+                    // <plist version="1.0">
+                    // <dict>
+                    //         <key>ProductBuildVersion</key>
+                    //         <string>17A330h</string>
+                    //         <key>ProductCopyright</key>
+                    //         <string>1983-2017 Apple Inc.</string>
+                    //         <key>ProductName</key>
+                    //         <string>Mac OS X</string>
+                    //         <key>ProductUserVisibleVersion</key>
+                    //         <string>10.13</string>
+                    //         <key>ProductVersion</key>
+                    //         <string>10.13</string>
+                    // </dict>
+                    // </plist>
+
+                    // not using Xml parsers here to avoid having every test project using PlatformDetection 
+                    // to include a reference to the Xml assemblies
+
+                    string s = File.ReadAllText("/System/Library/CoreServices/SystemVersion.plist");
+                    int index = s.IndexOf(@"ProductVersion", StringComparison.OrdinalIgnoreCase);
+                    if (index > 0)
+                    {
+                        index = s.IndexOf(@"<string>", index + 14, StringComparison.OrdinalIgnoreCase);
+                        if (index > 0)
+                        {
+                            int endIndex = s.IndexOf(@"</string>", index + 8, StringComparison.OrdinalIgnoreCase);
+                            if (endIndex > 0)
+                            {
+                                string versionString = s.Substring(index + 8, endIndex - index - 8);
+                                return Version.Parse(versionString);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            // In case of exception or couldn't get the version 
+            return new Version(0, 0, 0);
+        }
 
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.
