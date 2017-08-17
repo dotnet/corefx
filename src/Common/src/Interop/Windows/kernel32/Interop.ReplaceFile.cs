@@ -28,7 +28,6 @@ internal partial class Interop
                 dwReplaceFlags, lpExclude, lpReserved);
         }
 
-        internal const int REPLACEFILE_WRITE_THROUGH = 0x1;
         internal const int REPLACEFILE_IGNORE_MERGE_ERRORS = 0x2;
     }
 }
