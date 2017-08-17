@@ -28,9 +28,25 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            if (first is ICollection<TSource> firstCol && second is ICollection<TSource> secondCol && firstCol.Count != secondCol.Count)
+            if (first is ICollection<TSource> firstCol && second is ICollection<TSource> secondCol)
             {
-                return false;
+                if (firstCol.Count != secondCol.Count)
+                {
+                    return false;
+                }
+
+                if (firstCol is IReadOnlyList<TSource> firstList && secondCol is IReadOnlyList<TSource> secondList)
+                {
+                    for (int i = 0; i < firstCol.Count; i++)
+                    {
+                        if (!comparer.Equals(firstList[i], secondList[i]))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             }
 
             using (IEnumerator<TSource> e1 = first.GetEnumerator())
