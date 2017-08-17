@@ -992,8 +992,8 @@ namespace System.Xml
             }
             SetupEncoding(encoding);
 
-            // eat preamble 
-            byte[] preamble = _ps.encoding.GetPreamble();
+            // eat preamble
+            ReadOnlySpan<byte> preamble = _ps.encoding.Preamble;
             int preambleLen = preamble.Length;
             int i;
             for (i = 0; i < preambleLen && i < _ps.bytesUsed; i++)
