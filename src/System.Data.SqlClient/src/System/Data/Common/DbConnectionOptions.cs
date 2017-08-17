@@ -75,7 +75,7 @@ namespace System.Data.Common
         public int ConvertValueToInt32(string keyName, int defaultValue)
         {
             string value;
-            return _parsetable.TryGetValue(keyName, out value) ?
+            return _parsetable.TryGetValue(keyName, out value) && !string.IsNullOrWhiteSpace(value) ?
                 ConvertToInt32Internal(keyName, value) :
                 defaultValue;
         }
