@@ -43,18 +43,21 @@ namespace System.Security.Cryptography
 
         internal DerSequenceReader(byte[] data, int offset, int length)
         {
-            _data = data;
-            _end = offset + length;
-
             Debug.Assert(data != null, "Data is null");
-            Debug.Assert(offset >= 0, "Offset is negative");
 
-            if (length < 2 || length > data.Length - offset)
+            if (offset < 0 || length < 2 || length > data.Length - offset)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
+            _data = data;
+            _end = offset + length;
             _position = offset;
             EatTag(DerTag.Sequence);
-            ContentLength = EatLength();
+            int contentLength = EatLength();
+            Debug.Assert(_end - contentLength >= _position);
+            ContentLength = contentLength;
+
+            // If the sequence reports being smaller than the buffer, shrink the end-of-validity.
+            _end = _position + contentLength;
         }
 
         internal static DerSequenceReader CreateForPayload(byte[] payload)
@@ -72,7 +75,14 @@ namespace System.Security.Cryptography
             if (!HasData)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
-            return _data[_position];
+            byte tag = _data[_position];
+
+            if ((tag & TagNumberMask) == TagNumberMask)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            return tag;
         }
 
         internal void SkipValue()
@@ -176,7 +186,7 @@ namespace System.Security.Cryptography
             CheckTag(DerTag.Sequence, _data, _position);
 
             int lengthLength;
-            int contentLength = ScanContentLength(_data, _position + 1, out lengthLength);
+            int contentLength = ScanContentLength(_data, _position + 1, _end, out lengthLength);
             int totalLength = 1 + lengthLength + contentLength;
 
             DerSequenceReader reader = new DerSequenceReader(_data, _position, totalLength);
@@ -223,6 +233,13 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             byte actual = data[position];
+            byte relevant = (byte)(actual & TagNumberMask);
+
+            // Multi-byte tags are not supported by this implementation.
+            if (relevant == TagNumberMask)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
 
             // Context-specific datatypes cannot be tag-verified
             if ((actual & ContextSpecificTagFlag) != 0)
@@ -230,7 +247,6 @@ namespace System.Security.Cryptography
                 return;
             }
 
-            byte relevant = (byte)(actual & TagNumberMask);
             byte expectedByte = (byte)((byte)expected & TagNumberMask);
 
             if (expectedByte != relevant)
@@ -251,54 +267,69 @@ namespace System.Security.Cryptography
         private int EatLength()
         {
             int bytesConsumed;
-            int answer = ScanContentLength(_data, _position, out bytesConsumed);
+            int answer = ScanContentLength(_data, _position, _end, out bytesConsumed);
 
             _position += bytesConsumed;
-
-            if (answer > _end - _position)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-
             return answer;
         }
 
-        private static int ScanContentLength(byte[] data, int offset, out int bytesConsumed)
+        private static int ScanContentLength(byte[] data, int offset, int end, out int bytesConsumed)
         {
-            if (offset >= data.Length)
+            Debug.Assert(end <= data.Length);
+
+            if (offset >= end)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             byte lengthOrLengthLength = data[offset];
 
             if (lengthOrLengthLength < 0x80)
             {
-                if (lengthOrLengthLength > data.Length - offset)
+                bytesConsumed = 1;
+
+                if (lengthOrLengthLength > end - offset - bytesConsumed)
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
-                bytesConsumed = 1;
                 return lengthOrLengthLength;
             }
 
-            // The one byte which was lengthLength, plus the number of bytes it said to consume.
-            bytesConsumed = 1 + (lengthOrLengthLength & 0x7F);
+            int lengthLength = (lengthOrLengthLength & 0x7F);
 
-            if (bytesConsumed > data.Length - offset)
+            if (lengthLength > sizeof(int))
+            {
+                // .NET Arrays cannot exceed int.MaxValue in length. Since we're bounded by an
+                // array we know that this is invalid data.
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            // The one byte which was lengthLength, plus the number of bytes it said to consume.
+            bytesConsumed = 1 + lengthLength;
+
+            if (bytesConsumed > end - offset)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             // CER indefinite length is not supported.
             if (bytesConsumed == 1)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
-            int end = offset + bytesConsumed;
+            int lengthEnd = offset + bytesConsumed;
             int accum = 0;
             
             // data[offset] is lengthLength, so start at data[offset + 1] and stop before
             // data[offset + 1 + lengthLength], aka data[end].
-            for (int i = offset + 1; i < end; i++)
+            for (int i = offset + 1; i < lengthEnd; i++)
             {
                 accum <<= 8;
-                accum += data[i];
+                accum |= data[i];
             }
 
-            if (accum > data.Length - offset - bytesConsumed)
+            if (accum < 0)
+            {
+                // .NET Arrays cannot exceed int.MaxValue in length. Since we're bounded by an
+                // array we know that this is invalid data.
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            if (accum > end - offset - bytesConsumed)
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
 
             return accum;
