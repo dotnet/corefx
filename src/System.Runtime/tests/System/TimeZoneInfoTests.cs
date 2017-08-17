@@ -1670,7 +1670,7 @@ namespace System.Tests
             VerifyInv(s_amsterdamTz, new DateTime(2006, 12, 15, 12, 15, 44), false);
         }
 
-        // Hight Sierra supported the new tzfile version which we supported in 2.0
+        // High Sierra supported the new tzfile version which we supported in 2.0
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotMacOsHighSierraOrHigher))]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public static void IsDaylightSavingTime_CatamarcaMultiYearDaylightSavings()

@@ -175,7 +175,7 @@ namespace System
         private static readonly Version s_osxProductVersion = GetOSXProductVersion();
 
         public static bool IsMacOsHighSierraOrHigher { get; } =
-            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));    
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
 
         public static bool IsNotMacOsHighSierraOrHigher { get; } = !IsMacOsHighSierraOrHigher;
 
