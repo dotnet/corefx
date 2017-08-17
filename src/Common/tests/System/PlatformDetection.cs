@@ -27,6 +27,7 @@ namespace System
         public static bool IsWindows8x => IsWindows && GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
         public static bool IsNotWindows8x => !IsWindows8x;
         public static bool IsOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        public static bool IsNotOSX { get; } = !IsOSX;
         public static bool IsNetBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD"));
         public static bool IsNotWindowsNanoServer { get; } = (IsWindows &&
             File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
@@ -216,6 +217,54 @@ namespace System
 
         public static Version OSXKernelVersion { get; } = GetOSXKernelVersion();
 
+        private static Version GetOSXProductVersion()
+        {
+            try
+            {
+                if (IsOSX)
+                {
+                    // <plist version="1.0">
+                    // <dict>
+                    //         <key>ProductBuildVersion</key>
+                    //         <string>17A330h</string>
+                    //         <key>ProductCopyright</key>
+                    //         <string>1983-2017 Apple Inc.</string>
+                    //         <key>ProductName</key>
+                    //         <string>Mac OS X</string>
+                    //         <key>ProductUserVisibleVersion</key>
+                    //         <string>10.13</string>
+                    //         <key>ProductVersion</key>
+                    //         <string>10.13</string>
+                    // </dict>
+                    // </plist>
+
+                    // not using Xml parsers here to avoid having every test project using PlatformDetection 
+                    // to include a reference to the Xml assemblies
+
+                    string s = File.ReadAllText("/System/Library/CoreServices/SystemVersion.plist");
+                    int index = s.IndexOf(@"ProductVersion", StringComparison.OrdinalIgnoreCase);
+                    if (index > 0)
+                    {
+                        index = s.IndexOf(@"<string>", index + 14, StringComparison.OrdinalIgnoreCase);
+                        if (index > 0)
+                        {
+                            int endIndex = s.IndexOf(@"</string>", index + 8, StringComparison.OrdinalIgnoreCase);
+                            if (endIndex > 0)
+                            {
+                                string versionString = s.Substring(index + 8, endIndex - index - 8);
+                                return Version.Parse(versionString);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            // In case of exception or couldn't get the version 
+            return new Version(0, 0, 0);
+        }
         public static string GetDistroVersionString()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -336,6 +385,13 @@ namespace System
 
             return new Version(0, 0, 0);
         }
+
+        private static readonly Version s_osxProductVersion = GetOSXProductVersion();
+ 
+        public static bool IsMacOsHighSierraOrHigher { get; } =
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
+ 
+        public static bool IsNotMacOsHighSierraOrHigher { get; } = !IsMacOsHighSierraOrHigher;
 
         [DllImport("libc", SetLastError = true)]
         private static extern int sysctlbyname(string ctlName, byte[] oldp, ref IntPtr oldpLen, byte[] newp, IntPtr newpLen);

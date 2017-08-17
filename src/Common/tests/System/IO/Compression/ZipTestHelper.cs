@@ -262,6 +262,9 @@ namespace System.IO.Compression.Tests
                 String aName = Path.GetFileName(aEntry);
 
                 var bData = expectedList.Where(f => String.Equals(f.Name, aName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                if (bData == null)
+                    continue;
+
                 String bEntry = Path.GetFullPath(Path.Combine(bData.OrigFolder, bData.FullName));
                 String bName = Path.GetFileName(bEntry);
                 // expected 'emptydir' folder doesn't exist because MSBuild doesn't copy empty dir
