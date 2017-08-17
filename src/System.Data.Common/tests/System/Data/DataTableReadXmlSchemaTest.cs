@@ -30,7 +30,7 @@ using Xunit;
 
 namespace System.Data.Tests
 {
-    public class DataTableReadXmlSchemaTest : IDisposable
+    public class DataTableReadXmlSchemaTest
     {
         private DataSet CreateTestSet()
         {
@@ -49,17 +49,6 @@ namespace System.Data.Tests
         }
 
         private CultureInfo _currentCultureBackup;
-
-        public DataTableReadXmlSchemaTest()
-        {
-            _currentCultureBackup = CultureInfo.CurrentCulture; ;
-            CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-        }
-
-        public void Dispose()
-        {
-            CultureInfo.CurrentCulture = _currentCultureBackup;
-        }
 
         [Fact]
         public void SuspiciousDataSetElement()
