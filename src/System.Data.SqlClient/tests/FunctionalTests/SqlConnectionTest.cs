@@ -65,10 +65,11 @@ namespace System.Data.SqlClient.Tests
         [Fact]
         public void SqlConnectionEmptyParameters()
         {
-            var con = new SqlConnection("Timeout=;packet Size= ;");
+            var con = new SqlConnection("Timeout=;packet Size= ;Integrated Security=;");
             //default values are defined in internal class DbConnectionStringDefaults
             Assert.Equal(15, con.ConnectionTimeout);
             Assert.Equal(8000, con.PacketSize);
+            Assert.False(new SqlConnectionStringBuilder(con.ConnectionString).IntegratedSecurity);
         }
 
         [Fact]
@@ -78,6 +79,7 @@ namespace System.Data.SqlClient.Tests
             Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout= null;"));
             Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout=1 1;"));
             Assert.Throws<ArgumentException>(() => new SqlConnection("Timeout=1a;"));
+            Assert.Throws<ArgumentException>(() => new SqlConnection("Integrated Security=truee"));
         }
     }
 }

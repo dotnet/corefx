@@ -47,7 +47,7 @@ namespace System.Data.Common
         public bool ConvertValueToIntegratedSecurity()
         {
             string value;
-            return _parsetable.TryGetValue(KEY.Integrated_Security, out value) ?
+            return _parsetable.TryGetValue(KEY.Integrated_Security, out value) && value != null ?
                 ConvertValueToIntegratedSecurityInternal(value) :
                 false;
         }
