@@ -15,6 +15,7 @@ showHelp() {
     echo "command: Command to run. String passed as the command should include the arguments."
     echo
     echo "Options:"
+    echo "  -r, --retryCount    Number of times to retry the command until the command runs successfully."
     echo "                      If not specified, then command is retried a maximum of 5 times"
     echo "  -w, --waitFactor    A multiplier that determines the time (seconds) to wait between retries." 
     echo "                      Wait time is WaitFactor times the retry attempt. If not specified, then WaitFactor is 6."
@@ -23,10 +24,9 @@ showHelp() {
     echo "If the command fails, then the command is retried specified number of times or until the command succeeds."
 }
 
-# Executes a command and retries if it fails.
 execute() {
     local count=0
-
+echo "$@"
     until "$@"; do
         local exit=$?
         count=$(( $count + 1 ))
@@ -50,7 +50,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-commandName="$1"
+cmd="$1"
 retries=5
 waitFactor=6
 
@@ -81,6 +81,8 @@ done
 
 if [ $retries -le 0 ] || [ $waitFactor -le 0 ]; then
     say_err "retryCount and waitFactor should be greater than 0."
+    exit 1
 fi
 
-execute "$commandName"
+echo "Attempting to invoke command $cmd with retry count $retries and wait factor $waitFactor."
+execute $cmd

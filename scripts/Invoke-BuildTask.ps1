@@ -4,7 +4,7 @@
 .PARAMETER Command
     Command to run. String passed as the command should include the arguments.
 .PARAMETER RetryCount
-    Number of times to retry the command until the command run successfully.
+    Number of times to retry the command until the command runs successfully.
     If not specified, then command is retried a maximum of 5 times.
 .PARAMETER WaitFactor
     A multiplier that determines the time (seconds) to wait between retries. Wait time is WaitFactor times the retry attempt.
