@@ -44,6 +44,9 @@
     <Project Include="System.IO.FileSystem.DriveInfo\pkg\System.IO.FileSystem.DriveInfo.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Data.Common\pkg\System.Data.Common.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
