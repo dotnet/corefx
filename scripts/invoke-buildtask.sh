@@ -26,7 +26,6 @@ showHelp() {
 
 execute() {
     local count=0
-echo "$@"
     until "$@"; do
         local exit=$?
         count=$(( $count + 1 ))
