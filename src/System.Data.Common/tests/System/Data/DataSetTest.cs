@@ -43,8 +43,6 @@ namespace System.Data.Tests
 {
     public class DataSetTest : RemoteExecutorTestBase
     {
-        private CultureInfo _currentCultureBackup;
-
         public DataSetTest()
         {
             MyDataSet.count = 0;
@@ -1570,8 +1568,6 @@ namespace System.Data.Tests
             RemoteInvoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-
-
                 string SerializedDataTable =
 @"<rdData>
   <MyDataTable CustomerID='VINET' CompanyName='Vins et alcools Chevalier' ContactName='Paul Henriot' />

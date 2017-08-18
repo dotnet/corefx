@@ -48,8 +48,6 @@ namespace System.Data.Tests
             return ds;
         }
 
-        private CultureInfo _currentCultureBackup;
-
         [Fact]
         public void SuspiciousDataSetElement()
         {
