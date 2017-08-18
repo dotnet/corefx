@@ -6,6 +6,72 @@
 
 #include <assert.h>
 
+typedef struct ReadWriteMethodStruct
+{
+    BioWriteCallback write;
+    BioReadCallback read;
+} ReadWriteMethodStruct;
+
+static ReadWriteMethodStruct managedMethods = {nullptr, nullptr};
+
+static long ControlCallback(BIO* bio, int cmd, long param, void* ptr)
+{
+    (void)bio, (void)param, (void)ptr; // deliberately unused parameters
+    switch (cmd)
+    {
+        case BIO_CTRL_FLUSH:
+        case BIO_CTRL_POP:
+        case BIO_CTRL_PUSH:
+            return 1;
+    }
+    return 0;
+}
+
+static int DestroyCallback(BIO* bio)
+{
+    (void)bio; // deliberately unused parameter
+    return -1;
+}
+
+static int CreateCallback(BIO* bio)
+{
+    bio->init = 1;
+    return 1;
+}
+
+static int WriteCallback(BIO* b, const char* buf, int32_t len)
+{
+    void* ptr = BIO_get_ex_data(b, 0);
+    if (ptr == nullptr)
+    {
+        return -1;
+    }
+    return managedMethods.write(b, buf, len, ptr);
+}
+
+static int ReadCallback(BIO* b, char* buf, int32_t len)
+{
+    void* ptr = BIO_get_ex_data(b, 0);
+    if (ptr == nullptr)
+    {
+        return -1;
+    }
+    return managedMethods.read(b, buf, len, ptr);
+}
+
+static BIO_METHOD managedSslBio = {
+    BIO_TYPE_SOURCE_SINK,
+    "Managed Ssl Bio",
+    WriteCallback,
+    ReadCallback,
+    nullptr,
+    nullptr,
+    ControlCallback,
+    CreateCallback,
+    DestroyCallback,
+    nullptr,
+};
+
 extern "C" BIO* CryptoNative_CreateMemoryBio()
 {
     return BIO_new(BIO_s_mem());
@@ -67,75 +133,6 @@ extern "C" void CryptoNative_BioSetShoudRetryReadFlag(BIO* bio)
 {
     BIO_set_flags(bio, BIO_FLAGS_SHOULD_RETRY | BIO_FLAGS_READ);
 }
-
-typedef struct ReadWriteMethodStruct
-{
-    BioWriteCallback write;
-    BioReadCallback read;
-} ReadWriteMethodStruct;
-
-static ReadWriteMethodStruct managedMethods = {
-    nullptr,
-    nullptr
-};
-
-static long ControlCallback(BIO* bio, int cmd, long param, void* ptr)
-{
-    (void)bio, (void)param, (void)ptr; // deliberately unused parameters
-    switch (cmd)
-    {
-        case BIO_CTRL_FLUSH:
-        case BIO_CTRL_POP:
-        case BIO_CTRL_PUSH:
-            return 1;
-    }
-    return 0;
-}
-
-static int DestroyCallback(BIO* bio)
-{
-    (void)bio; // deliberately unused parameter
-    return -1;
-}
-
-static int CreateCallback(BIO* bio)
-{
-    bio->init = 1;
-    return 1;
-}
-
-static int WriteCallback(BIO* b, const char* buf, int32_t len)
-{
-    void* ptr = BIO_get_ex_data(b, 0);
-    if(ptr == nullptr)
-    {
-        return -1;
-    }
-    return managedMethods.write(b, buf, len, ptr);
-}
-
-static int ReadCallback(BIO* b, char* buf, int32_t len)
-{
-    void* ptr = BIO_get_ex_data(b, 0);
-    if(ptr == nullptr)
-    {
-        return -1;
-    }
-    return managedMethods.read(b, buf, len, ptr);
-}
-
-static BIO_METHOD managedSslBio = {
-    BIO_TYPE_SOURCE_SINK,
-    "Managed Ssl Bio",
-    WriteCallback,
-    ReadCallback,
-    nullptr,
-    nullptr,
-    ControlCallback,
-    CreateCallback,
-    DestroyCallback,
-    nullptr,
-};
 
 extern "C" void CryptoNative_InitManagedSslBioMethod(BioWriteCallback bwrite, BioReadCallback bread)
 {
