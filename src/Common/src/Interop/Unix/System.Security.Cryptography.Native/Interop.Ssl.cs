@@ -389,7 +389,6 @@ namespace Microsoft.Win32.SafeHandles
                         _byteArray = new byte[input.Length];
                         _bytesWritten = 0;
                     }
-
                     else if (_byteArray.Length - _bytesWritten < input.Length)
                     {
                         var oldSpan = new Span<byte>(_byteArray);
@@ -397,6 +396,7 @@ namespace Microsoft.Win32.SafeHandles
                         oldSpan.CopyTo(_byteArray);
                     }
                 }
+
                 int bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
