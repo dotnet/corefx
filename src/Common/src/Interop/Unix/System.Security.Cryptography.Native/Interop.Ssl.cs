@@ -287,7 +287,7 @@ namespace Microsoft.Win32.SafeHandles
 
         internal class ReadBioBuffer : IDisposable
         {
-            private SafeBioHandle _bioHandle;
+            private readonly SafeBioHandle _bioHandle;
             private GCHandle _handle;
             private int _bytesAvailable;
             private byte[] _byteArray;
@@ -326,29 +326,18 @@ namespace Microsoft.Win32.SafeHandles
             }
 
             // Bio is already released by the ssl object
-            private void Dispose(bool isDisposing)
+            public void Dispose()
             {
                 if (_handle.IsAllocated)
                 {
                     _handle.Free();
                 }
             }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            ~ReadBioBuffer()
-            {
-                Dispose(false);
-            }
         }
 
         internal class WriteBioBuffer : IDisposable
         {
-            private SafeBioHandle _bioHandle;
+            private readonly SafeBioHandle _bioHandle;
             private GCHandle _handle;
             private byte[] _byteArray;
             private int _bytesWritten;
@@ -375,7 +364,7 @@ namespace Microsoft.Win32.SafeHandles
             public int TakeBytes(out byte[] output)
             {
                 output = _byteArray;
-                var bytes = _bytesWritten;
+                int bytes = _bytesWritten;
                 Reset();
                 return bytes;
             }
@@ -389,7 +378,7 @@ namespace Microsoft.Win32.SafeHandles
             public int Write(Span<byte> input)
             {
                 // Only for the handshake do we dynamically allocate
-                // buffers for normal encrypt operations we use a fixed
+                // buffers. For normal encrypt operations we use a fixed
                 // size buffer handed to us and loop to do all the needed
                 // writes. This should be changed for the handshake as well
                 // but will require more securechannel/sslstatus changes
@@ -408,7 +397,6 @@ namespace Microsoft.Win32.SafeHandles
                         oldSpan.CopyTo(_byteArray);
                     }
                 }
-
                 int bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
@@ -424,23 +412,12 @@ namespace Microsoft.Win32.SafeHandles
             }
 
             // Bio is already released by the ssl object
-            private void Dispose(bool isDisposing)
+            public void Dispose()
             {
                 if (_handle.IsAllocated)
                 {
                     _handle.Free();
                 }
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            ~WriteBioBuffer()
-            {
-                Dispose(false);
             }
         }
     }

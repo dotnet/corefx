@@ -13,7 +13,7 @@ internal static partial class Interop
             private unsafe readonly static WriteDelegate s_writeDelegate;
 
             internal static SafeBioHandle CreateManagedSslBio() => Crypto.CreateManagedSslBio();
-            
+
             unsafe static ManagedSslBio()
             {
                 s_writeDelegate = Write;
@@ -30,8 +30,9 @@ internal static partial class Interop
             private static unsafe int Write(IntPtr bio, void* input, int size, IntPtr data)
             {
                 GCHandle handle = GCHandle.FromIntPtr(data);
+                Debug.Assert(handle.IsAllocated);
 
-                if (handle.IsAllocated && handle.Target is SafeSslHandle.WriteBioBuffer buffer)
+                if (handle.Target is SafeSslHandle.WriteBioBuffer buffer)
                 {
                     return buffer.Write(new Span<byte>(input, size));
                 }
@@ -42,8 +43,9 @@ internal static partial class Interop
             private static unsafe int Read(IntPtr bio, void* output, int size, IntPtr data)
             {
                 GCHandle handle = GCHandle.FromIntPtr(data);
+                Debug.Assert(handle.IsAllocated);
 
-                if (handle.IsAllocated && handle.Target is SafeSslHandle.ReadBioBuffer buffer)
+                if (handle.Target is SafeSslHandle.ReadBioBuffer buffer)
                 {
                     return buffer.Read(new Span<byte>(output, size));
                 }
