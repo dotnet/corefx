@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime;
 
 namespace System.Reflection.Metadata
 {
@@ -65,9 +64,12 @@ namespace System.Reflection.Metadata
             }
         }
 
-        public AssemblyName GetAssemblyName() 
+        public AssemblyName AssemblyName
         {
-            return _reader.GetAssemblyName();
+            get
+            {
+                return _reader.GetAssemblyName();
+            }
         }
 
         public CustomAttributeHandleCollection GetCustomAttributes()
