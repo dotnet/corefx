@@ -75,6 +75,7 @@ namespace System.Net.WebSockets.Client.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/22904", TargetFrameworkMonikers.UapAot)]
         public async Task CloseAsync_Cancel_Success(Uri server)
         {
             await TestCancellation(async (cws) =>

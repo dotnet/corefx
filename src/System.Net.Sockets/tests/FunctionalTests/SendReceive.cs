@@ -309,6 +309,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/23364", TargetFrameworkMonikers.UapAot)]
         public async Task SendRecv_Stream_TCP_AlternateBufferAndBufferList(IPAddress listenAt)
         {
             const int BytesToSend = 123456;
