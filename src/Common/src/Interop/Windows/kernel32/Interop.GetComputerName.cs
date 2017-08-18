@@ -20,7 +20,7 @@ internal partial class Interop
             char* buffer = stackalloc char[(int)length];
 
             return GetComputerName(buffer, ref length) != 0 ?
-                new string(buffer, 0, (int)length) :
+                new string(buffer, 0, checked((int)length)) :
                 null;
         }
     }
