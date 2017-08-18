@@ -32,7 +32,7 @@ public static partial class XmlSerializerTests
             method.Invoke(null, new object[] { 1 });
 #endif
 #if XMLSERIALIZERGENERATORTESTS
-            string path = Path.GetDirectoryName(typeof(TypeWithDateTimeStringProperty).Assembly.Location);
+            string path = Path.GetDirectoryName(typeof(XmlSerializerTests).Assembly.Location);
             string serializername = typeof(TypeWithDateTimeStringProperty).Assembly.GetName().Name + ".XmlSerializers.dll";
             string serializerPath = Path.Combine(path, serializername);
             if (File.Exists(serializerPath))
