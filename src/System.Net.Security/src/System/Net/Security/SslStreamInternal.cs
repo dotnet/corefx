@@ -53,7 +53,11 @@ namespace System.Net.Security
 
             _decryptedBytesOffset = 0;
             _decryptedBytesCount = 0;
-            _freeBufferAction = (_, buffer) => FreeBuffer((byte[])buffer);
+            _freeBufferAction = (task, buffer) =>
+            {
+                FreeBuffer((byte[])buffer);
+                task.GetAwaiter().GetResult(); // propagate any exception
+            };
         }
 
         // If we have a read buffer from the pinnable cache, return it.
@@ -415,14 +419,15 @@ namespace System.Net.Security
                     {
                         // Prepare for the next request.
                         asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, s_resumeAsyncWriteCallback);
-                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes)
-                            .ContinueWith(_freeBufferAction, outBuffer);
+                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
                         if (t.IsCompleted)
                         {
+                            FreeBuffer(outBuffer);
                             t.GetAwaiter().GetResult();
                         }
                         else
                         {
+                            t = t.ContinueWith(_freeBufferAction, outBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                             IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
                             if (!ar.CompletedSynchronously)
                             {
@@ -434,8 +439,14 @@ namespace System.Net.Security
                     }
                     else
                     {
-                        _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
-                        FreeBuffer(outBuffer);
+                        try
+                        {
+                            _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
+                        }
+                        finally
+                        {
+                            FreeBuffer(outBuffer);
+                        }
                     }
 
                     offset += chunkBytes;
@@ -447,11 +458,7 @@ namespace System.Net.Security
                 } while (count != 0);
 
             }
-
-            if (asyncRequest != null)
-            {
-                asyncRequest.CompleteUser();
-            }
+            asyncRequest?.CompleteUser();
         }
 
         private void FreeBuffer(byte[] buffer)
@@ -814,7 +821,8 @@ namespace System.Net.Security
         private int ProcessReadErrorCode(SecurityStatusPal status, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
             ProtocolToken message = new ProtocolToken(null, status);
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
 
             if (message.Renegotiate)
             {

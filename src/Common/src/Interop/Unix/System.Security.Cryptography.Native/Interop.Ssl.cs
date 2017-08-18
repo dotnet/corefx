@@ -391,8 +391,9 @@ namespace Microsoft.Win32.SafeHandles
                     }
                     else if (_byteArray.Length - _bytesWritten < input.Length)
                     {
-                        var oldSpan = new Span<byte>(_byteArray);
+                        byte[] oldArray = _byteArray;
                         _byteArray = new byte[input.Length + _bytesWritten];
+                        Buffer.BlockCopy(oldArray, 0, _byteArray, 0, _bytesWritten);
                         oldSpan.CopyTo(_byteArray);
                     }
                 }
