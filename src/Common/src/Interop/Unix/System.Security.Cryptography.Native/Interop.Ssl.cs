@@ -394,7 +394,6 @@ namespace Microsoft.Win32.SafeHandles
                         byte[] oldArray = _byteArray;
                         _byteArray = new byte[input.Length + _bytesWritten];
                         Buffer.BlockCopy(oldArray, 0, _byteArray, 0, _bytesWritten);
-                        oldSpan.CopyTo(_byteArray);
                     }
                 }
 
