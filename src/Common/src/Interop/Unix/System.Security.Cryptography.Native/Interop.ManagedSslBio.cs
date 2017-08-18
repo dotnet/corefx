@@ -9,14 +9,12 @@ internal static partial class Interop
     {
         internal static class ManagedSslBio
         {
-            private unsafe static ReadDelegate s_readDelegate;
-            private unsafe static WriteDelegate s_writeDelegate;
-
-            static ManagedSslBio() => Initialize();
+            private unsafe readonly static ReadDelegate s_readDelegate;
+            private unsafe readonly static WriteDelegate s_writeDelegate;
 
             internal static SafeBioHandle CreateManagedSslBio() => Crypto.CreateManagedSslBio();
             
-            private unsafe static void Initialize()
+            unsafe static ManagedSslBio()
             {
                 s_writeDelegate = Write;
                 s_readDelegate = Read;
