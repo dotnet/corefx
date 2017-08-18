@@ -35,9 +35,10 @@ namespace System.Linq
                     return false;
                 }
 
-                if (firstCol is IReadOnlyList<TSource> firstList && secondCol is IReadOnlyList<TSource> secondList)
+                if (firstCol is IList<TSource> firstList && secondCol is IList<TSource> secondList)
                 {
-                    for (int i = 0; i < firstCol.Count; i++)
+                    int count = firstCol.Count;
+                    for (int i = 0; i < count; i++)
                     {
                         if (!comparer.Equals(firstList[i], secondList[i]))
                         {
