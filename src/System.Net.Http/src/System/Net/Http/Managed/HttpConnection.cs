@@ -841,7 +841,7 @@ namespace System.Net.Http
         {
             while (true)
             {
-                await FillAsync(cancellationToken);
+                await FillAsync(cancellationToken).ConfigureAwait(false);
                 (bool success, ArraySegment<byte> result) = TryReadNextLine();
                 if (success)
                 {
@@ -883,7 +883,7 @@ namespace System.Net.Http
         {
             while (true)
             {
-                await FillAsync(cancellationToken);
+                await FillAsync(cancellationToken).ConfigureAwait(false);
                 if (TryReadCrLf())
                 {
                     return;
