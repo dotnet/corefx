@@ -1117,6 +1117,35 @@ namespace System.Reflection.Metadata
             return new AssemblyReference(this, handle.Value);
         }
 
+        public AssemblyName GetAssemblyName()
+        {
+            StringHandle nameHandle = AssemblyTable.GetName();
+            string name = (!nameHandle.IsNil) ? GetString(nameHandle) : null;
+            Version version = AssemblyTable.GetVersion();
+
+            StringHandle cultureHandle = AssemblyTable.GetCulture();
+            string cultureName = (!cultureHandle.IsNil) ? GetString(cultureHandle) : null;
+
+            AssemblyFlags flags = AssemblyTable.GetFlags();
+
+            bool hasPublicKey = (flags & AssemblyFlags.PublicKey) != 0;
+            BlobHandle publicKeyHandle = AssemblyTable.GetPublicKey();
+            byte[] publicKeyOrToken = !publicKeyHandle.IsNil
+                ? GetBlobBytes(publicKeyHandle)
+                : null;
+            
+            var assemblyName = new AssemblyName(name)
+            {
+                Version = version,
+                CultureName = cultureName
+            };
+
+            assemblyName.SetPublicKey(publicKeyOrToken);
+            //assemblyName.Flags = AssemblyTable.GetFlags();
+            //assemblyName.HashAlgorithm = AssemblyTable.GetHashAlgorithm();
+            return assemblyName;
+        }
+
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
         {
             // PERF: This code pattern is JIT friendly and results in very efficient code.

@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime;
 
 namespace System.Reflection.Metadata
 {
@@ -120,6 +121,11 @@ namespace System.Reflection.Metadata
 
                 return _reader.AssemblyRefTable.GetHashValue(RowId);
             }
+        }
+
+        public AssemblyName GetAssemblyName() 
+        {
+            return _reader.GetAssemblyName();
         }
 
         public CustomAttributeHandleCollection GetCustomAttributes()

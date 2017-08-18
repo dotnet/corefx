@@ -99,6 +99,7 @@ namespace System.Reflection.Metadata
         public System.Reflection.Metadata.StringHandle Name { get { throw null; } }
         public System.Reflection.Metadata.BlobHandle PublicKey { get { throw null; } }
         public System.Version Version { get { throw null; } }
+        public System.Reflection.AssemblyName GetAssemblyName() { throw null; }
         public System.Reflection.Metadata.CustomAttributeHandleCollection GetCustomAttributes() { throw null; }
         public System.Reflection.Metadata.DeclarativeSecurityAttributeHandleCollection GetDeclarativeSecurityAttributes() { throw null; }
     }
@@ -164,6 +165,7 @@ namespace System.Reflection.Metadata
         public System.Reflection.Metadata.StringHandle Name { get { throw null; } }
         public System.Reflection.Metadata.BlobHandle PublicKeyOrToken { get { throw null; } }
         public System.Version Version { get { throw null; } }
+        public System.Reflection.AssemblyName GetAssemblyName() { throw null; }
         public System.Reflection.Metadata.CustomAttributeHandleCollection GetCustomAttributes() { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
