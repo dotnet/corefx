@@ -7,6 +7,7 @@ namespace System.Tests
 {
     public class UnloadingAndProcessExitTests : RemoteExecutorTestBase
     {
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/23307", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void UnloadingEventMustHappenBeforeProcessExitEvent()
         {
