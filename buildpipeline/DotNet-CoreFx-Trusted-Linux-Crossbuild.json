@@ -364,8 +364,19 @@
     "PB_ConfigurationGroup": {
       "value": "Release"
     },
+    "PB_VsoAccountName": {
+      "value": "dn-bot"
+    },
+    "VsoPassword": {
+      "value": null,
+      "isSecret": true
+    },
+    "PB_VsoRepositoryName": {
+      "value": "DotNet-CoreFX-Trusted",
+      "allowOverride": true
+    },
     "PB_VsoCorefxGitUrl": {
-      "value": "http://github.com/dotnet/corefx.git"
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/"
     },
     "PB_GitDirectory": {
       "value": "/root/corefx"
