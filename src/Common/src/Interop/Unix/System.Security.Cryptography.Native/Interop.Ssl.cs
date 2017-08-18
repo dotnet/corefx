@@ -312,7 +312,7 @@ namespace Microsoft.Win32.SafeHandles
 
             public int Read(Span<byte> output)
             {
-                var bytesToCopy = Math.Min(output.Length, _bytesAvailable);
+                int bytesToCopy = Math.Min(output.Length, _bytesAvailable);
                 if (bytesToCopy == 0)
                 {
                     return -1;
@@ -325,7 +325,7 @@ namespace Microsoft.Win32.SafeHandles
                 return bytesToCopy;
             }
 
-            //Bio is already released by the ssl object
+            // Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {
                 if (_handle.IsAllocated)
@@ -363,6 +363,8 @@ namespace Microsoft.Win32.SafeHandles
 
             public void SetData(byte[] buffer, bool isHandshake)
             {
+                Debug.Assert(_byteArray == null);
+
                 _byteArray = buffer;
                 _bytesWritten = 0;
                 _isHandshake = isHandshake;
@@ -384,11 +386,11 @@ namespace Microsoft.Win32.SafeHandles
 
             public int Write(Span<byte> input)
             {
-                //Only for the handshake do we dynamically allocate
-                //buffers for normal encrypt operations we use a fixed
-                //size buffer handed to us and loop to do all the needed
-                //writes. This should be changed for the handshake as well
-                //but will require more securechannel/sslstatus changes
+                // Only for the handshake do we dynamically allocate
+                // buffers for normal encrypt operations we use a fixed
+                // size buffer handed to us and loop to do all the needed
+                // writes. This should be changed for the handshake as well
+                // but will require more securechannel/sslstatus changes
                 if (_isHandshake)
                 {
                     if (_byteArray == null)
@@ -408,8 +410,8 @@ namespace Microsoft.Win32.SafeHandles
                 int bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
-                    //We need to return -1 to indicate that it is an async method and
-                    //and the write should retry later rather and a zero indicating EOF
+                    // We need to return -1 to indicate that it is an async method and
+                    // and the write should retry later rather and a zero indicating EOF
                     Interop.Crypto.BioSetWriteFlag(_bioHandle);
                     return -1;
                 }
@@ -419,7 +421,7 @@ namespace Microsoft.Win32.SafeHandles
                 return bytesToWrite;
             }
 
-            //Bio is already released by the ssl object
+            // Bio is already released by the ssl object
             private void Dispose(bool isDisposing)
             {
                 if (_handle.IsAllocated)

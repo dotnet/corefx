@@ -97,7 +97,7 @@ internal static partial class Interop
                     Ssl.SslCtxSetVerify(innerContext,
                         s_verifyClientCertificate);
 
-                    //update the client CA list 
+                    // update the client CA list 
                     UpdateCAListFromRootStore(innerContext);
                 }
 
@@ -203,7 +203,7 @@ internal static partial class Interop
                     case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
                     case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
                         break;
-                    //indicates we need to write the out buffer and write again
+                    // indicates we need to write the out buffer and write again
                     case Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE:
                         break;
                     default:
@@ -216,6 +216,9 @@ internal static partial class Interop
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
+            Debug.Assert(offset >= 0);
+            Debug.Assert(offset <= outBuffer.Length);
+
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             context.InputBio.SetData(outBuffer, offset, count);
@@ -225,7 +228,7 @@ internal static partial class Interop
             {
                 fixed (byte* fixedBuffer = outBuffer)
                 {
-                    retVal = Ssl.SslRead(context, fixedBuffer + offset, outBuffer.Length);
+                    retVal = Ssl.SslRead(context, fixedBuffer + offset, outBuffer.Length - offset);
                 }
             }
 
@@ -327,8 +330,8 @@ internal static partial class Interop
 
                 foreach (X509Certificate2 certificate in store.Certificates)
                 {
-                    //Check if issuer name is already present
-                    //Avoiding duplicate names
+                    // Check if issuer name is already present
+                    // Avoiding duplicate names
                     if (!issuerNameHashSet.Add(certificate.Issuer))
                     {
                         continue;
@@ -438,7 +441,7 @@ internal static partial class Interop
                 throw CreateSslException(SR.net_ssl_use_private_key_failed);
             }
 
-            //check private key
+            // check private key
             retVal = Ssl.SslCtxCheckPrivateKey(contextPtr);
 
             if (1 != retVal)
