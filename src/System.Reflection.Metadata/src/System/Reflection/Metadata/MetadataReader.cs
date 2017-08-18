@@ -1131,6 +1131,9 @@ namespace System.Reflection.Metadata
             BlobHandle publicKeyHandle = AssemblyTable.GetPublicKey();
             byte[] publicKeyOrToken = !publicKeyHandle.IsNil ? GetBlobBytes(publicKeyHandle) : null;
 
+            AssemblyHashAlgorithm assemblyHashAlgorithm = AssemblyTable.GetHashAlgorithm();
+            AssemblyFlags flags = AssemblyTable.GetFlags();
+
             var assemblyName = new AssemblyName(name)
             {
                 Version = version,
@@ -1138,85 +1141,10 @@ namespace System.Reflection.Metadata
             };
 
             assemblyName.SetPublicKey(publicKeyOrToken);
-            SetAssemblyNameFlags(assemblyName);
-            SetAssemblyNameHashAlgorithm(assemblyName);
+            assemblyName.SetFlags(flags);
+            assemblyName.SetHashAlgorithm(assemblyHashAlgorithm);
 
             return assemblyName;
-        }
-
-        private void SetAssemblyNameFlags(AssemblyName assemblyName)
-        {
-            var flagMappings = new Dictionary<AssemblyFlags, AssemblyNameFlags>()
-            {
-                [AssemblyFlags.PublicKey] = AssemblyNameFlags.PublicKey,
-                [AssemblyFlags.Retargetable] = AssemblyNameFlags.Retargetable,
-                [AssemblyFlags.EnableJitCompileTracking] = AssemblyNameFlags.EnableJITcompileTracking
-            };
-
-            AssemblyFlags flags = AssemblyTable.GetFlags();
-
-            foreach (var flagItem in flagMappings)
-            {
-                bool flagExists = (flags & flagItem.Key) != 0;
-
-                if (flagExists)
-                {
-                    assemblyName.Flags |= flagItem.Value;
-                }
-                else
-                {
-                    assemblyName.Flags &= ~flagItem.Value;
-                }
-            }
-            
-            SetJitCompileOptimizerEnabled(assemblyName, flags);
-
-            // the following two flags have no match in AssemblyNameFlags
-            bool hasContentTypeMask = (flags & AssemblyFlags.ContentTypeMask) != 0;
-            bool hasWindowsRuntime = (flags & AssemblyFlags.WindowsRuntime) != 0;
-        }
-
-        private void SetAssemblyNameHashAlgorithm(AssemblyName assemblyName)
-        {
-            var hashAlgorithmMappings = new Dictionary<AssemblyHashAlgorithm, Configuration.Assemblies.AssemblyHashAlgorithm>()
-            {
-                [AssemblyHashAlgorithm.MD5] = Configuration.Assemblies.AssemblyHashAlgorithm.MD5,
-                [AssemblyHashAlgorithm.Sha1] = Configuration.Assemblies.AssemblyHashAlgorithm.SHA1,
-                [AssemblyHashAlgorithm.Sha256] = Configuration.Assemblies.AssemblyHashAlgorithm.SHA256,
-                [AssemblyHashAlgorithm.Sha384] = Configuration.Assemblies.AssemblyHashAlgorithm.SHA384,
-                [AssemblyHashAlgorithm.Sha512] = Configuration.Assemblies.AssemblyHashAlgorithm.SHA512
-            };
-
-            AssemblyHashAlgorithm assemblyHashAlgorithm = AssemblyTable.GetHashAlgorithm();
-
-            foreach (var hashAlgorithmItem in hashAlgorithmMappings)
-            {
-                bool hasValue = (assemblyHashAlgorithm & hashAlgorithmItem.Key) != 0;
-
-                if (hasValue)
-                {
-                    assemblyName.HashAlgorithm |= hashAlgorithmItem.Value;
-                }
-                else
-                {
-                    assemblyName.HashAlgorithm &= ~hashAlgorithmItem.Value;
-                }
-            }
-        }
-
-        private void SetJitCompileOptimizerEnabled(AssemblyName assemblyName, AssemblyFlags flags)
-        {
-            // notice we are setting EnableJITcompileOptimizer from DisableJitCompileOptimizer. Logic is flipped
-            bool jitCompileTrackingDisabled = (flags & AssemblyFlags.DisableJitCompileOptimizer) != 0;
-
-            if (!jitCompileTrackingDisabled)
-            {
-                assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
-            }
-            else
-            {
-                assemblyName.Flags &= ~AssemblyNameFlags.EnableJITcompileOptimizer;
-            }
         }
 
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
