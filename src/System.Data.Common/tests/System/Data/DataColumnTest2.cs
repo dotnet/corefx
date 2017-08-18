@@ -54,7 +54,7 @@ namespace System.Data.Tests
             Assert.Throws<DataException>(() =>
             {
                 dc.AllowDBNull = false; //the exisiting row contains null value
-                });
+            });
 
             dt.Rows.Clear();
             dc.AllowDBNull = false;

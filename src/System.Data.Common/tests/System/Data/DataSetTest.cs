@@ -522,7 +522,7 @@ namespace System.Data.Tests
 
 
                 string TextString = DataSetAssertion.GetNormalizedSchema(writer.ToString());
-                //			string TextString = writer.ToString ();
+                // string TextString = writer.ToString ();
 
                 string substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
                 TextString = TextString.Substring(TextString.IndexOf('\n') + 1);
@@ -531,7 +531,7 @@ namespace System.Data.Tests
                 substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
                 TextString = TextString.Substring(TextString.IndexOf('\n') + 1);
                 // This is original DataSet.WriteXmlSchema() output
-                //			Assert.Equal ("<xs:schema id=\"Root\" xmlns=\"\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:msdata=\"urn:schemas-microsoft-com:xml-msdata\">", substring);
+                // Assert.Equal ("<xs:schema id=\"Root\" xmlns=\"\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:msdata=\"urn:schemas-microsoft-com:xml-msdata\">", substring);
                 Assert.Equal("<xs:schema id=\"Root\" xmlns:msdata=\"urn:schemas-microsoft-com:xml-msdata\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">", substring);
 
                 substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
@@ -561,13 +561,13 @@ namespace System.Data.Tests
                 substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
                 TextString = TextString.Substring(TextString.IndexOf('\n') + 1);
                 // This is original DataSet.WriteXmlSchema() output
-                //			Assert.Equal ("              <xs:element name=\"RegionID\" type=\"xs:string\" minOccurs=\"0\" />", substring);
+                // Assert.Equal ("              <xs:element name=\"RegionID\" type=\"xs:string\" minOccurs=\"0\" />", substring);
                 Assert.Equal("              <xs:element minOccurs=\"0\" name=\"RegionID\" type=\"xs:string\" />", substring);
 
                 substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
                 TextString = TextString.Substring(TextString.IndexOf('\n') + 1);
                 // This is original DataSet.WriteXmlSchema() output
-                //			Assert.Equal ("              <xs:element name=\"RegionDescription\" type=\"xs:string\" minOccurs=\"0\" />", substring);
+                // Assert.Equal ("              <xs:element name=\"RegionDescription\" type=\"xs:string\" minOccurs=\"0\" />", substring);
                 Assert.Equal("              <xs:element minOccurs=\"0\" name=\"RegionDescription\" type=\"xs:string\" />", substring);
 
                 substring = TextString.Substring(0, TextString.IndexOfAny(new[] { '\r', '\n' }));
