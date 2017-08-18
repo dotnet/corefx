@@ -23,16 +23,7 @@ internal static partial class Interop
 
             internal static void BioSetGCHandle(SafeBioHandle bio, GCHandle handle)
             {
-                IntPtr pointer;
-                if (handle.IsAllocated)
-                {
-                    pointer = GCHandle.ToIntPtr(handle);
-                }
-                else
-                {
-                    pointer = IntPtr.Zero;
-                }
-
+                IntPtr pointer = handle.IsAllocated ? GCHandle.ToIntPtr(handle) : IntPtr.Zero;
                 Crypto.BioSetAppData(bio, pointer);
             }
 
