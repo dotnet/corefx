@@ -211,7 +211,7 @@ internal static partial class Interop
                 }
             }
 
-            var bytesWritten = context.OutputBio.BytesWritten;
+            int bytesWritten = context.OutputBio.BytesWritten;
             context.OutputBio.Reset();
             return bytesWritten;
         }
