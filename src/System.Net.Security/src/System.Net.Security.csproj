@@ -6,7 +6,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.Security</AssemblyName>
-    <AssemblyVersion>4.0.0.1</AssemblyVersion>
+    <AssemblyVersion>4.0.0.2</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'net46'">4.0.0.1</AssemblyVersion>
     <ProjectGuid>{89F37791-6254-4D60-AB96-ACD3CCA0E771}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
