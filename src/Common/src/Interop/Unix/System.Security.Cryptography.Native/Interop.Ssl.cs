@@ -361,6 +361,8 @@ namespace Microsoft.Win32.SafeHandles
                 Interop.Crypto.ManagedSslBio.BioSetGCHandle(_bioHandle, _handle);
             }
 
+            public int BytesWritten => _bytesWritten;
+
             public void SetData(byte[] buffer, bool isHandshake)
             {
                 Debug.Assert(_byteArray == null);
@@ -373,15 +375,15 @@ namespace Microsoft.Win32.SafeHandles
             public int TakeBytes(out byte[] output)
             {
                 output = _byteArray;
-                return TakeBytes();
+                var bytes = _bytesWritten;
+                Reset();
+                return bytes;
             }
 
-            public int TakeBytes()
+            public void Reset()
             {
-                var bytes = _bytesWritten;
                 _bytesWritten = 0;
                 _byteArray = null;
-                return bytes;
             }
 
             public int Write(Span<byte> input)

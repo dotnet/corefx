@@ -211,7 +211,9 @@ internal static partial class Interop
                 }
             }
 
-            return context.OutputBio.TakeBytes();
+            var bytesWritten = context.OutputBio.BytesWritten;
+            context.OutputBio.Reset();
+            return bytesWritten;
         }
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
