@@ -16,8 +16,8 @@ internal partial class Interop
 
         internal static unsafe string GetComputerName()
         {
-            char* buffer = stackalloc char[MAX_COMPUTERNAME_LENGTH + 1];
             uint length = MAX_COMPUTERNAME_LENGTH + 1;
+            char* buffer = stackalloc char[(int)length];
 
             return GetComputerName(buffer, ref length) != 0 ?
                 new string(buffer, 0, (int)length) :
