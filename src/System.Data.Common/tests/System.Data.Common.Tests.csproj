@@ -8,6 +8,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\Data\Common\DataColumnMappingTest.cs" />
     <Compile Include="System\Data\Common\DbCommandTests.cs" />
     <Compile Include="System\Data\Common\DbConnectionTests.cs" />
     <Compile Include="System\Data\Common\DbExceptionTests.cs" />
@@ -73,7 +74,9 @@
     <Compile Include="System\Data\InRowChangingEventExceptionTest.cs" />
     <Compile Include="System\Data\InvalidConstraintExceptionTest.cs" />
     <Compile Include="System\Data\MissingPrimaryKeyExceptionTest.cs" />
-    <Compile Include="System\Data\MonkeyDataSet.cs" />
+    <Compile Include="System\Data\MonkeyDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\NoNullAllowedExceptionTest.cs" />
     <Compile Include="System\Data\ReadOnlyExceptionTest.cs" />
     <Compile Include="System\Data\RowNotInTableExceptionTest.cs" />
