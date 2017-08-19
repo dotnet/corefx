@@ -108,5 +108,38 @@ namespace System.Collections.Immutable
         /// </remarks>
         [Pure]
         bool TryGetKey(TKey equalKey, out TKey actualKey);
+        
+        /// <summary>
+        /// Creates an immutable dictionary that contains entries with keys that exist in both this dictionary and the specified collection of key value entries.
+        /// An <paramref name="resolveValue"/> function is used to determine an entry value of a returned dictionary.
+        /// </summary>
+        /// <param name="other">A collection of key value entries used to intersect with current dictionary.</param>
+        /// <param name="resolveValue">
+        /// A function used to determine a value for a key found in both current dictionary and input collection parameter. It takes a key of a matched entries, 
+        /// value of a current dictionary entry and a value of <paramref name="other"/> collection entry as an input parameters.
+        /// </param>
+        /// <returns>
+        /// A new immutable dictionary with keys found in both current dictionary and provided collection and values for the corresponding 
+        /// keys resolved using <paramref name="resolveValue"/> function parameter.
+        /// </returns>
+        [Pure]
+        IImmutableDictionary<TKey, TValue> Intersect(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue);
+
+        /// <summary>
+        /// Creates an immutable dictionary that contains entries with keys that exist in either this dictionary or the specified collection of key value entries.
+        /// An <paramref name="resolveValue"/> function is used to determine an entry value of a returned dictionary in case when entries with the same key can be
+        /// found in either of collections.
+        /// </summary>
+        /// <param name="other">A collection of key value entries used to merge with current dictionary.</param>
+        /// <param name="resolveValue">
+        /// A function used to determine a value for a key found in both current dictionary and input collection parameter. It takes a key of a matched entries, 
+        /// value of a current dictionary entry and a value of <paramref name="other"/> collection entry as an input parameters.
+        /// </param>
+        /// <returns>
+        /// A new immutable dictionary with keys found in either current dictionary or provided collection and values for the corresponding 
+        /// keys resolved using <paramref name="resolveValue"/> function parameter in case, when a key was found in both collections.
+        /// </returns>
+        [Pure]
+        IImmutableDictionary<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue);
     }
 }
