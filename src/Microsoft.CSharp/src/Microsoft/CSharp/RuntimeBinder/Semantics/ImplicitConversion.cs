@@ -117,7 +117,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case TypeKind.TK_MethodGroupType:
                         VSFAIL("Something is wrong with Type.IsNeverSameType()");
                         return false;
-                    case TypeKind.TK_NaturalIntegerType:
                     case TypeKind.TK_ArgumentListType:
                         return _typeSrc == _typeDest;
                     case TypeKind.TK_VoidType:
@@ -307,9 +306,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_exprSrc == null || _exprSrc.Type == _typeSrc);
                 Debug.Assert(!_needsExprDest || _exprSrc != null);
                 Debug.Assert(_typeSrc != nubDst); // BindImplicitConversion should have taken care of this already.
-                AggregateType atsDst = nubDst.GetAts(GetErrorContext());
-                if (atsDst == null)
-                    return false;
+                AggregateType atsDst = nubDst.GetAts();
 
                 // Check for the unboxing conversion. This takes precedence over the wrapping conversions.
                 if (GetSymbolLoader().HasBaseConversion(nubDst.GetUnderlyingType(), _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
@@ -490,11 +487,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Otherwise, the result is obtained by boxing the result of evaluating the Value property on
                 // the nullable value.
 
-                AggregateType atsNub = nubSrc.GetAts(GetErrorContext());
-                if (atsNub == null)
-                {
-                    return false;
-                }
+                AggregateType atsNub = nubSrc.GetAts();
                 if (atsNub == _typeDest)
                 {
                     if (_needsExprDest)
@@ -877,10 +870,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private ExprFactory GetExprFactory()
             {
                 return _binder.GetExprFactory();
-            }
-            private ErrorHandling GetErrorContext()
-            {
-                return _binder.GetErrorContext();
             }
         }
     }

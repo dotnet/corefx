@@ -286,14 +286,6 @@
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">El operando de un operador de incremento o decremento debe ser una variable, una propiedad o un indizador</target>
         </trans-unit>
-        <trans-unit id="NoSuchMemberOrExtension" translate="yes" xml:space="preserve">
-          <source>'{0}' does not contain a definition for '{1}' and no extension method '{1}' accepting a first argument of type '{0}' could be found (are you missing a using directive or an assembly reference?)</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' no contiene una definición para '{1}' ni se encuentra ningún método de extensión '{1}' que acepte un primer argumento del tipo '{0}' (¿falta una directiva de uso o una referencia de ensamblado?).</target>
-        </trans-unit>
-        <trans-unit id="ValueTypeExtDelegate" translate="yes" xml:space="preserve">
-          <source>Extension methods '{0}' defined on value type '{1}' cannot be used to create delegates</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Los métodos de extensión '{0}' definidos en el tipo de valor '{1}' no se pueden usar para crear delegados.</target>
-        </trans-unit>
         <trans-unit id="BadArgCount" translate="yes" xml:space="preserve">
           <source>No overload for method '{0}' takes '{1}' arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Ninguna sobrecarga del método '{0}' toma argumentos '{1}'</target>
@@ -301,10 +293,6 @@
         <trans-unit id="BadArgTypes" translate="yes" xml:space="preserve">
           <source>The best overloaded method match for '{0}' has some invalid arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">La mejor coincidencia de método sobrecargado para '{0}' tiene algunos argumentos no válidos</target>
-        </trans-unit>
-        <trans-unit id="BadArgType" translate="yes" xml:space="preserve">
-          <source>Argument '{0}': cannot convert from '{1}' to '{2}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Argumento '{0}': no se puede convertir de '{1}' a '{2}'</target>
         </trans-unit>
         <trans-unit id="RefLvalueExpected" translate="yes" xml:space="preserve">
           <source>A ref or out argument must be an assignable variable</source>
@@ -342,14 +330,6 @@
           <source>Cannot modify the return value of '{0}' because it is not a variable</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">No se puede modificar el valor devuelto de '{0}' porque no es una variable.</target>
         </trans-unit>
-        <trans-unit id="BadArgExtraRef" translate="yes" xml:space="preserve">
-          <source>Argument '{0}' should not be passed with the '{1}' keyword</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">No se debe pasar el argumento '{0}' con la palabra clave '{1}'</target>
-        </trans-unit>
-        <trans-unit id="BadArgRef" translate="yes" xml:space="preserve">
-          <source>Argument '{0}' must be passed with the '{1}' keyword</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">El argumento '{0}' se debe pasar con la palabra clave '{1}'</target>
-        </trans-unit>
         <trans-unit id="AssgReadonly2" translate="yes" xml:space="preserve">
           <source>Members of readonly field '{0}' cannot be modified (except in a constructor or a variable initializer)</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Los miembros del campo de solo lectura '{0}' no se pueden modificar (excepto en un constructor o inicializador de variable)</target>
@@ -381,14 +361,6 @@
         <trans-unit id="BadCtorArgCount" translate="yes" xml:space="preserve">
           <source>'{0}' does not contain a constructor that takes '{1}' arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' no contiene un constructor que tome '{1}' argumentos</target>
-        </trans-unit>
-        <trans-unit id="BadExtensionArgTypes" translate="yes" xml:space="preserve">
-          <source>'{0}' does not contain a definition for '{1}' and the best extension method overload '{2}' has some invalid arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' no contiene una definición para '{1}' y la mejor sobrecarga del método de extensión '{2}' tiene algunos argumentos no válidos</target>
-        </trans-unit>
-        <trans-unit id="BadInstanceArgType" translate="yes" xml:space="preserve">
-          <source>Instance argument: cannot convert from '{0}' to '{1}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Argumento de instancia: no se puede convertir de '{0}' a '{1}'</target>
         </trans-unit>
         <trans-unit id="NonInvocableMemberCalled" translate="yes" xml:space="preserve">
           <source>Non-invocable member '{0}' cannot be used like a method.</source>

@@ -222,20 +222,11 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>Операндом оператора инкремента или декремента должна быть переменная, свойство или индексатор</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>"{0}" не содержит определения для "{1}", а найти метод расширения "{1}", принимающий первый аргумент типа "{0}", не удалось (возможно, пропущена директива using или ссылка на сборку)</value>
-  </data>
-  <data name="ValueTypeExtDelegate" xml:space="preserve">
-    <value>Методы расширения "{0}", определенные для типа значения "{1}", не могут применяться для создания делегатов</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Отсутствие перегрузки для метода "{0}" принимает"{1}" аргументы</value>
   </data>
   <data name="BadArgTypes" xml:space="preserve">
     <value>Наиболее подходящий перегруженный метод для "{0}" имеет несколько недопустимых аргументов</value>
-  </data>
-  <data name="BadArgType" xml:space="preserve">
-    <value>Аргумент "{0}": невозможно преобразовать из "{1}" в "{2}"</value>
   </data>
   <data name="RefLvalueExpected" xml:space="preserve">
     <value>Аргумент с ключевым словом ref или out должен быть переменной, которой можно присвоить значение</value>
@@ -264,12 +255,6 @@
   <data name="ReturnNotLValue" xml:space="preserve">
     <value>Cannot modify the return value of "{0}" because it is not a variable</value>
   </data>
-  <data name="BadArgExtraRef" xml:space="preserve">
-    <value>Аргумент "{0}" должен быть передан с ключевым словом "{1}"</value>
-  </data>
-  <data name="BadArgRef" xml:space="preserve">
-    <value>Аргумент "{0}" должен быть передан с ключевым словом "{1}"</value>
-  </data>
   <data name="AssgReadonly2" xml:space="preserve">
     <value>Члены поля "{0}", предназначенного только для чтения, могут быть изменены только в конструкторе или инициализаторе переменных</value>
   </data>
@@ -293,12 +278,6 @@
   </data>
   <data name="BadCtorArgCount" xml:space="preserve">
     <value>"{0}" не содержит конструктор, принимающий аргументов: {1}</value>
-  </data>
-  <data name="BadExtensionArgTypes" xml:space="preserve">
-    <value>"{0}" не содержит определения для "{1}", наилучшая перегрузка метода расширения "{2}" имеет такие же недопустимые аргументы</value>
-  </data>
-  <data name="BadInstanceArgType" xml:space="preserve">
-    <value>Instance argument: невозможно преобразовать из "{0}" в "{1}"</value>
   </data>
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>Невызываемый член "{0}" не может использоваться как метод.</value>

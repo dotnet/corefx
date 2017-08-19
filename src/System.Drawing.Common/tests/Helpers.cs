@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using System.Drawing.Printing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,8 +11,9 @@ using Xunit.Sdk;
 namespace System.Drawing
 {
     public static class Helpers
-    {
+    {        
         public const string GdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetGdiplusIsAvailable);
+        public const string AnyInstalledPrinters = nameof(Helpers) + "." + nameof(IsAnyInstalledPrinters);
 
         public static bool GetGdiplusIsAvailable()
         {
@@ -29,6 +31,11 @@ namespace System.Drawing
 
                 return nativeLib != IntPtr.Zero;
             }
+        }
+
+        public static bool IsAnyInstalledPrinters()
+        {
+            return PrinterSettings.InstalledPrinters.Count == 0;
         }
 
         [DllImport("libdl")]
@@ -166,6 +173,24 @@ namespace System.Drawing
             public int Top;
             public int Right;
             public int Bottom;
+        }
+
+        public static void VerifyBitmapNotBlank(Bitmap bmp)
+        {
+            Color emptyColor = Color.FromArgb(0);
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    Color pixel = bmp.GetPixel(x, y);
+                    if (!pixel.Equals(emptyColor))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            throw new XunitException("The entire image was blank.");
         }
     }
 }

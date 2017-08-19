@@ -17,14 +17,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ErrorHandling ErrorContext { get; }
         public SymbolTable RuntimeBinderSymbolTable { get; private set; }
 
-        public SymbolLoader(
-            GlobalSymbolContext globalSymbols,
-            ErrorHandling errorContext
-        )
+        public SymbolLoader()
         {
+            GlobalSymbolContext globalSymbols = new GlobalSymbolContext(new NameManager());
             _nameManager = globalSymbols.GetNameManager();
             PredefinedMembers = new PredefinedMembers(this);
-            ErrorContext = errorContext;
+            ErrorContext = new ErrorHandling(globalSymbols);
             GlobalSymbolContext = globalSymbols;
             Debug.Assert(GlobalSymbolContext != null);
         }
@@ -89,11 +87,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GlobalSymbolContext.GetGlobalSymbolFactory();
         }
 
-        public MiscSymFactory GetGlobalMiscSymFactory()
-        {
-            return GlobalSymbolContext.GetGlobalMiscSymFactory();
-        }
-
         public AggregateSymbol GetPredefAgg(PredefinedType pt) => GetTypeManager().GetPredefAgg(pt);
 
         public AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
@@ -126,7 +119,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_TypeParameterType:
                     return ((TypeParameterType)typeSym).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
-                    return ((NullableType)typeSym).GetAts(ErrorContext);
+                    return ((NullableType)typeSym).GetAts();
             }
             Debug.Assert(false, "Bad typeSym!");
             return null;
@@ -186,11 +179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             if (pDerived is NullableType derivedNub)
             {
-                pDerived = derivedNub.GetAts(ErrorContext);
-                if (pDerived == null)
-                {
-                    return false;
-                }
+                pDerived = derivedNub.GetAts();
             }
 
             if (!(pDerived is AggregateType atsDer))

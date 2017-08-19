@@ -58,7 +58,7 @@ namespace System.Net.Http
 
             try
             {
-                // TODO #21452: No cancellationToken?
+                // TODO https://github.com/dotnet/corefx/issues/23077#issuecomment-321807131: No cancellationToken?
                 await sslStream.AuthenticateAsClientAsync(host, _settings._clientCertificates, _settings._sslProtocols, _settings._checkCertificateRevocationList).ConfigureAwait(false);
             }
             catch (Exception e)
@@ -66,8 +66,7 @@ namespace System.Net.Http
                 sslStream.Dispose();
                 if (e is AuthenticationException || e is IOException)
                 {
-                    // TODO #21452: Tests expect HttpRequestException here.  Is that correct behavior?
-                    throw new HttpRequestException("could not establish SSL connection", e);
+                    throw new HttpRequestException(SR.net_http_ssl_connection_failed, e);
                 }
                 throw;
             }

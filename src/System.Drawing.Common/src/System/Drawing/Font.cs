@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing.Internal;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
@@ -14,7 +15,7 @@ namespace System.Drawing
     /// Defines a particular format for text, including font face, size, and style attributes.
     /// </summary>
     [ComVisible(true)]
-    public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable
+    public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
         private const int LogFontCharSetOffset = 23;
         private const int LogFontNameOffset = 28;
@@ -105,7 +106,7 @@ namespace System.Drawing
         /// </summary>
         public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont)
         {
-            if (!float.IsFinite(emSize) || emSize <= 0)
+            if (float.IsNaN(emSize) || float.IsInfinity(emSize) || emSize <= 0)
             {
                 throw new ArgumentException(SR.Format(SR.InvalidBoundArgument, "emSize", emSize, 0, "System.Single.MaxValue"), "emSize");
             }
@@ -222,7 +223,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(family));
             }
 
-            if (!float.IsFinite(emSize) || emSize <= 0)
+            if (float.IsNaN(emSize) || float.IsInfinity(emSize) || emSize <= 0)
             {
                 throw new ArgumentException(SR.Format(SR.InvalidBoundArgument, nameof(emSize), emSize, 0, "System.Single.MaxValue"), nameof(emSize));
             }

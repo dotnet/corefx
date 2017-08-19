@@ -222,20 +222,11 @@
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>El operando de un operador de incremento o decremento debe ser una variable, una propiedad o un indizador</value>
   </data>
-  <data name="NoSuchMemberOrExtension" xml:space="preserve">
-    <value>'{0}' no contiene una definición para '{1}' ni se encuentra ningún método de extensión '{1}' que acepte un primer argumento del tipo '{0}' (¿falta una directiva de uso o una referencia de ensamblado?).</value>
-  </data>
-  <data name="ValueTypeExtDelegate" xml:space="preserve">
-    <value>Los métodos de extensión '{0}' definidos en el tipo de valor '{1}' no se pueden usar para crear delegados.</value>
-  </data>
   <data name="BadArgCount" xml:space="preserve">
     <value>Ninguna sobrecarga del método '{0}' toma argumentos '{1}'</value>
   </data>
   <data name="BadArgTypes" xml:space="preserve">
     <value>La mejor coincidencia de método sobrecargado para '{0}' tiene algunos argumentos no válidos</value>
-  </data>
-  <data name="BadArgType" xml:space="preserve">
-    <value>Argumento '{0}': no se puede convertir de '{1}' a '{2}'</value>
   </data>
   <data name="RefLvalueExpected" xml:space="preserve">
     <value>Un argumento out o ref debe ser una variable asignable</value>
@@ -264,12 +255,6 @@
   <data name="ReturnNotLValue" xml:space="preserve">
     <value>No se puede modificar el valor devuelto de '{0}' porque no es una variable.</value>
   </data>
-  <data name="BadArgExtraRef" xml:space="preserve">
-    <value>No se debe pasar el argumento '{0}' con la palabra clave '{1}'</value>
-  </data>
-  <data name="BadArgRef" xml:space="preserve">
-    <value>El argumento '{0}' se debe pasar con la palabra clave '{1}'</value>
-  </data>
   <data name="AssgReadonly2" xml:space="preserve">
     <value>Los miembros del campo de solo lectura '{0}' no se pueden modificar (excepto en un constructor o inicializador de variable)</value>
   </data>
@@ -293,12 +278,6 @@
   </data>
   <data name="BadCtorArgCount" xml:space="preserve">
     <value>'{0}' no contiene un constructor que tome '{1}' argumentos</value>
-  </data>
-  <data name="BadExtensionArgTypes" xml:space="preserve">
-    <value>'{0}' no contiene una definición para '{1}' y la mejor sobrecarga del método de extensión '{2}' tiene algunos argumentos no válidos</value>
-  </data>
-  <data name="BadInstanceArgType" xml:space="preserve">
-    <value>Argumento de instancia: no se puede convertir de '{0}' a '{1}'</value>
   </data>
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>No se puede usar como método el miembro '{0}' no invocable.</value>

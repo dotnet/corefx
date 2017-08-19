@@ -25,32 +25,30 @@ namespace System.Net.Http
 
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
-
+            HttpResponseMessage response;
             uint redirectCount = 0;
             while (true)
             {
+                response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
                 bool needRedirect = false;
                 bool forceGet = false;
                 switch (response.StatusCode)
                 {
-                    case HttpStatusCode.Moved:
                     case HttpStatusCode.TemporaryRedirect:
                         needRedirect = true;
                         break;
 
+                    case HttpStatusCode.Moved:
                     case HttpStatusCode.Found:
                     case HttpStatusCode.SeeOther:
                         needRedirect = true;
-                        forceGet = true;
+                        forceGet = request.Method == HttpMethod.Post;
                         break;
 
                     case HttpStatusCode.MultipleChoices:
-                        // Don't redirect if no Location specified
-                        if (response.Headers.Location != null)
-                        {
-                            needRedirect = true;
-                        }
+                        needRedirect = response.Headers.Location != null; // Don't redirect if no Location specified
+                        forceGet = request.Method == HttpMethod.Post;
                         break;
                 }
 
@@ -62,7 +60,7 @@ namespace System.Net.Http
                 Uri location = response.Headers.Location;
                 if (location == null)
                 {
-                    throw new HttpRequestException("no Location header for redirect");
+                    throw new HttpRequestException(SR.net_http_headers_missing_location);
                 }
 
                 if (!location.IsAbsoluteUri)
@@ -82,7 +80,7 @@ namespace System.Net.Http
                 redirectCount++;
                 if (redirectCount > _maxAutomaticRedirections)
                 {
-                    throw new HttpRequestException("max redirects exceeded");
+                    throw new HttpRequestException(SR.net_http_max_redirects);
                 }
 
                 // Set up for the automatic redirect
@@ -96,7 +94,6 @@ namespace System.Net.Http
 
                 // Do the redirect.
                 response.Dispose();
-                response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
 
             return response;

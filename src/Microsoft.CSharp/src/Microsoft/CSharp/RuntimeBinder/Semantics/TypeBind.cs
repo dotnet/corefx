@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -12,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Defines the structure used when binding types
 
     // CheckConstraints options.
-
+    [Flags]
     internal enum CheckConstraintsFlags
     {
         None = 0x00,
@@ -38,11 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (type is NullableType nub)
             {
-                CType typeT = nub.GetAts(checker.GetErrorContext());
-                if (typeT != null)
-                    type = typeT;
-                else
-                    type = type.GetNakedType(true);
+                type = nub.GetAts();
             }
 
             if (!(type is AggregateType ats))
@@ -146,11 +143,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
-            if (arg is OpenTypePlaceholderType)
-            {
-                return true;
-            }
-
             if (arg is ErrorType)
             {
                 // Error should have been reported previously.
@@ -161,7 +153,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (fReportErrors)
                 {
-                    errHandling.Error(ErrorCode.ERR_BadTypeArgument, arg);
+                    throw errHandling.Error(ErrorCode.ERR_BadTypeArgument, arg);
                 }
 
                 return false;
@@ -182,13 +174,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (fReportErrors)
                 {
-                    errHandling.ErrorRef(ErrorCode.ERR_RefConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                    throw errHandling.Error(ErrorCode.ERR_RefConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                 }
 
                 fError = true;
             }
 
-            TypeArray bnds = checker.GetSymbolLoader().GetTypeManager().SubstTypeArray(var.GetBounds(), typeArgsCls, typeArgsMeth);
+            TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.GetBounds(), typeArgsCls, typeArgsMeth);
             int itypeMin = 0;
 
             if (var.HasValConstraint())
@@ -216,7 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (fReportErrors)
                     {
-                        errHandling.ErrorRef(ErrorCode.ERR_ValConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                        throw errHandling.Error(ErrorCode.ERR_ValConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                     }
 
                     fError = true;
@@ -253,7 +245,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // to which they have an implicit reference conversion
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedRefType;
                         }
-                        else if (arg is NullableType nubArg && checker.GetSymbolLoader().HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
+                        else if (arg is NullableType nubArg && checker.SymbolLoader.HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
@@ -289,8 +281,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Note that the exceptional case of Nullable types and boxing is handled above.
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedValType;
                         }
-                        errHandling.Error(error, new ErrArgRef(symErr), new ErrArg(typeBnd, ErrArgFlags.Unique), var, new ErrArgRef(arg, ErrArgFlags.Unique));
+
+                        throw errHandling.Error(error, new ErrArg(symErr), new ErrArg(typeBnd, ErrArgFlags.Unique), var, new ErrArg(arg, ErrArgFlags.Unique));
                     }
+
                     fError = true;
                 }
             }
@@ -309,7 +303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // have all the information necessary yet, if it is not fully bound.
                 // by calling LookupAggMember, it will ensure that we will update all the
                 // information necessary at least for the given method.
-                checker.GetSymbolLoader().LookupAggMember(NameManager.GetPredefinedName(PredefinedName.PN_CTOR), agg, symbmask_t.MASK_ALL);
+                checker.SymbolLoader.LookupAggMember(NameManager.GetPredefinedName(PredefinedName.PN_CTOR), agg, symbmask_t.MASK_ALL);
 
                 if (agg.HasPubNoArgCtor() && !agg.IsAbstract())
                 {
@@ -323,7 +317,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (fReportErrors)
             {
-                errHandling.ErrorRef(ErrorCode.ERR_NewConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
+                throw errHandling.Error(ErrorCode.ERR_NewConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
             }
 
             return false;
@@ -355,9 +349,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case TypeKind.TK_NullableType:
-                    typeBnd = ((NullableType)typeBnd).GetAts(checker.GetErrorContext());
-                    if (null == typeBnd)
-                        return true;
+                    typeBnd = ((NullableType)typeBnd).GetAts();
                     break;
 
                 case TypeKind.TK_AggregateType:
@@ -374,15 +366,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_PointerType:
                     return false;
                 case TypeKind.TK_NullableType:
-                    arg = ((NullableType)arg).GetAts(checker.GetErrorContext());
-                    if (null == arg)
-                        return true;
+                    arg = ((NullableType)arg).GetAts();
                     // Fall through.
                     goto case TypeKind.TK_TypeParameterType;
                 case TypeKind.TK_TypeParameterType:
                 case TypeKind.TK_ArrayType:
                 case TypeKind.TK_AggregateType:
-                    return checker.GetSymbolLoader().HasBaseConversion(arg, typeBnd);
+                    return checker.SymbolLoader.HasBaseConversion(arg, typeBnd);
             }
         }
     }

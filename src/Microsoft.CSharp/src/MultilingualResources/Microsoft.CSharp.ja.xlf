@@ -286,14 +286,6 @@
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">インクリメント演算子またはデクリメント演算子のオペランドには、変数、プロパティ、またはインデクサーを指定してください。</target>
         </trans-unit>
-        <trans-unit id="NoSuchMemberOrExtension" translate="yes" xml:space="preserve">
-          <source>'{0}' does not contain a definition for '{1}' and no extension method '{1}' accepting a first argument of type '{0}' could be found (are you missing a using directive or an assembly reference?)</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' に '{1}' の定義が含まれておらず、型 '{0}' の最初の引数を受け付ける拡張メソッド '{1}' が見つかりませんでした。using ディレクティブまたはアセンブリ参照が不足しています</target>
-        </trans-unit>
-        <trans-unit id="ValueTypeExtDelegate" translate="yes" xml:space="preserve">
-          <source>Extension methods '{0}' defined on value type '{1}' cannot be used to create delegates</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">値の型 '{1}' で定義された拡張メソッド '{0}' は、デリゲートを作成するために使用できません</target>
-        </trans-unit>
         <trans-unit id="BadArgCount" translate="yes" xml:space="preserve">
           <source>No overload for method '{0}' takes '{1}' arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">引数を '{1}' 個指定できる、メソッド '{0}' のオーバーロードはありません</target>
@@ -301,10 +293,6 @@
         <trans-unit id="BadArgTypes" translate="yes" xml:space="preserve">
           <source>The best overloaded method match for '{0}' has some invalid arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' に最も適しているオーバーロード メソッドには無効な引数がいくつか含まれています</target>
-        </trans-unit>
-        <trans-unit id="BadArgType" translate="yes" xml:space="preserve">
-          <source>Argument '{0}': cannot convert from '{1}' to '{2}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">引数 '{0}': '{1}' から '{2}' へ変換できません</target>
         </trans-unit>
         <trans-unit id="RefLvalueExpected" translate="yes" xml:space="preserve">
           <source>A ref or out argument must be an assignable variable</source>
@@ -342,14 +330,6 @@
           <source>Cannot modify the return value of '{0}' because it is not a variable</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">変数ではないため、'{0}' の戻り値を変更できません</target>
         </trans-unit>
-        <trans-unit id="BadArgExtraRef" translate="yes" xml:space="preserve">
-          <source>Argument '{0}' should not be passed with the '{1}' keyword</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">引数 '{0}' を '{1}' キーワードと共に渡すことはできません</target>
-        </trans-unit>
-        <trans-unit id="BadArgRef" translate="yes" xml:space="preserve">
-          <source>Argument '{0}' must be passed with the '{1}' keyword</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">引数 '{0}' は '{1}' キーワードと共に渡されなければなりません</target>
-        </trans-unit>
         <trans-unit id="AssgReadonly2" translate="yes" xml:space="preserve">
           <source>Members of readonly field '{0}' cannot be modified (except in a constructor or a variable initializer)</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">読み取り専用フィールド '{0}' のメンバーは変更できません (コンストラクターまたは変数初期化子では可)。</target>
@@ -381,14 +361,6 @@
         <trans-unit id="BadCtorArgCount" translate="yes" xml:space="preserve">
           <source>'{0}' does not contain a constructor that takes '{1}' arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' に、引数を '{1}' 個指定できるコンストラクターがありません</target>
-        </trans-unit>
-        <trans-unit id="BadExtensionArgTypes" translate="yes" xml:space="preserve">
-          <source>'{0}' does not contain a definition for '{1}' and the best extension method overload '{2}' has some invalid arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}' に '{1}' の定義が含まれておらず、最も適している拡張メソッド オーバーロード '{2}' には無効な引数がいくつか含まれています</target>
-        </trans-unit>
-        <trans-unit id="BadInstanceArgType" translate="yes" xml:space="preserve">
-          <source>Instance argument: cannot convert from '{0}' to '{1}'</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">インスタンス引数: '{0}' から '{1}' へ変換できません</target>
         </trans-unit>
         <trans-unit id="NonInvocableMemberCalled" translate="yes" xml:space="preserve">
           <source>Non-invocable member '{0}' cannot be used like a method.</source>

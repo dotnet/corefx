@@ -29,6 +29,8 @@
     <Compile Include="IconTests.cs" />
     <Compile Include="ImageTests.cs" />
     <Compile Include="Imaging\ImageAttributesTests.cs" />
+    <Compile Include="Imaging\MetafileTests.cs" />
+    <Compile Include="Imaging\PropertyItemTests.cs" />
     <Compile Include="PenTests.cs" />
     <Compile Include="PensTests.cs" />
     <Compile Include="Imaging\BitmapDataTests.cs" />
@@ -42,6 +44,7 @@
     <Compile Include="Imaging\ImageFormatTests.cs" />
     <Compile Include="Imaging\MetaHeaderTests.cs" />
     <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
+    <Compile Include="Printing\PrintDocumentTests.cs" />
     <Compile Include="RegionTests.cs" />
     <Compile Include="SolidBrushTests.cs" />
     <Compile Include="StringFormatTests.cs" />
@@ -61,9 +64,6 @@
     <Compile Include="Text\PrivateFontCollectionTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
       <Link>Common\System\ThreadCultureChange.cs</Link>

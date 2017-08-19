@@ -299,32 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // handle user defined operators
                 // map from CLS predefined names to "operator <X>"
                 ErrAppendString("operator ");
-
-                //
-                // This is kinda slow, but the alternative is to add bits to methsym.
-                //
-                string operatorName;
-                OperatorKind op = Operators.OperatorOfMethodName(meth.name);
-                if (Operators.HasDisplayName(op))
-                {
-                    operatorName = Operators.GetDisplayName(op);
-                }
-                else
-                {
-                    //
-                    // either equals or compare
-                    //
-                    if (meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS))
-                    {
-                        operatorName = "equals";
-                    }
-                    else
-                    {
-                        Debug.Assert(meth.name == NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE));
-                        operatorName = "compare";
-                    }
-                }
-                ErrAppendString(operatorName);
+                ErrAppendString(Operators.OperatorOfMethodName(meth.name));
             }
             else if (meth.IsExpImpl())
             {
@@ -578,18 +553,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendId(MessageID.NULL);
                     break;
 
-                case TypeKind.TK_OpenTypePlaceholderType:
-                    // Leave blank.
-                    break;
-
-                case TypeKind.TK_BoundLambdaType:
-                    ErrAppendId(MessageID.AnonMethod);
-                    break;
-
-                case TypeKind.TK_UnboundLambdaType:
-                    ErrAppendId(MessageID.Lambda);
-                    break;
-
                 case TypeKind.TK_MethodGroupType:
                     ErrAppendId(MessageID.MethodGroup);
                     break;
@@ -667,7 +630,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendChar('?');
                     break;
 
-                case TypeKind.TK_NaturalIntegerType:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad type kind");
