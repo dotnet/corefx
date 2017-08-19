@@ -419,15 +419,13 @@ namespace System.Net.Security
                     {
                         // Prepare for the next request.
                         asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, s_resumeAsyncWriteCallback);
-                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
+                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes).ContinueWith(_freeBufferAction, outBuffer);
                         if (t.IsCompleted)
                         {
-                            FreeBuffer(outBuffer);
                             t.GetAwaiter().GetResult();
                         }
                         else
                         {
-                            t = t.ContinueWith(_freeBufferAction, outBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                             IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
                             if (!ar.CompletedSynchronously)
                             {
