@@ -99,7 +99,7 @@ namespace System.Reflection.Metadata
         public System.Reflection.Metadata.StringHandle Name { get { throw null; } }
         public System.Reflection.Metadata.BlobHandle PublicKey { get { throw null; } }
         public System.Version Version { get { throw null; } }
-        public System.Reflection.AssemblyName AssemblyName { get { throw null; } }
+        public System.Reflection.AssemblyName GetAssemblyName() { throw null; }
         public System.Reflection.Metadata.CustomAttributeHandleCollection GetCustomAttributes() { throw null; }
         public System.Reflection.Metadata.DeclarativeSecurityAttributeHandleCollection GetDeclarativeSecurityAttributes() { throw null; }
     }
@@ -165,7 +165,7 @@ namespace System.Reflection.Metadata
         public System.Reflection.Metadata.StringHandle Name { get { throw null; } }
         public System.Reflection.Metadata.BlobHandle PublicKeyOrToken { get { throw null; } }
         public System.Version Version { get { throw null; } }
-        public System.Reflection.AssemblyName AssemblyName { get { throw null; } }
+        public System.Reflection.AssemblyName GetAssemblyName() { throw null; }
         public System.Reflection.Metadata.CustomAttributeHandleCollection GetCustomAttributes() { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1610,7 +1610,6 @@ namespace System.Reflection.Metadata
         public System.Reflection.Metadata.AssemblyDefinition GetAssemblyDefinition() { throw null; }
         public System.Reflection.Metadata.AssemblyFile GetAssemblyFile(System.Reflection.Metadata.AssemblyFileHandle handle) { throw null; }
         public System.Reflection.Metadata.AssemblyReference GetAssemblyReference(System.Reflection.Metadata.AssemblyReferenceHandle handle) { throw null; }
-        public System.Reflection.AssemblyName GetAssemblyName() { throw null; }
         public byte[] GetBlobBytes(System.Reflection.Metadata.BlobHandle handle) { throw null; }
         public System.Collections.Immutable.ImmutableArray<byte> GetBlobContent(System.Reflection.Metadata.BlobHandle handle) { throw null; }
         public System.Reflection.Metadata.BlobReader GetBlobReader(System.Reflection.Metadata.BlobHandle handle) { throw null; }

@@ -64,12 +64,9 @@ namespace System.Reflection.Metadata
             }
         }
 
-        public AssemblyName AssemblyName
+        public AssemblyName GetAssemblyName()
         {
-            get
-            {
-                return _reader.GetAssemblyName();
-            }
+            return _reader.GetAssemblyName();
         }
 
         public CustomAttributeHandleCollection GetCustomAttributes()

@@ -1117,7 +1117,7 @@ namespace System.Reflection.Metadata
             return new AssemblyReference(this, handle.Value);
         }
 
-        public AssemblyName GetAssemblyName()
+        internal AssemblyName GetAssemblyName()
         {
             StringHandle nameHandle = AssemblyTable.GetName();
 
@@ -1132,19 +1132,43 @@ namespace System.Reflection.Metadata
             byte[] publicKeyOrToken = !publicKeyHandle.IsNil ? GetBlobBytes(publicKeyHandle) : null;
 
             AssemblyHashAlgorithm assemblyHashAlgorithm = AssemblyTable.GetHashAlgorithm();
+
             AssemblyFlags flags = AssemblyTable.GetFlags();
 
             var assemblyName = new AssemblyName(name)
             {
                 Version = version,
-                CultureName = cultureName
+                CultureName = cultureName,
+                HashAlgorithm = (Configuration.Assemblies.AssemblyHashAlgorithm)assemblyHashAlgorithm
             };
-
             assemblyName.SetPublicKey(publicKeyOrToken);
-            assemblyName.SetFlags(flags);
-            assemblyName.SetHashAlgorithm(assemblyHashAlgorithm);
+            SetFlags(assemblyName, flags);
 
             return assemblyName;
+        }
+
+        private void SetFlags(AssemblyName assemblyName, AssemblyFlags flags)
+        {
+            if ((flags & AssemblyFlags.PublicKey) != 0)
+                assemblyName.Flags |= AssemblyNameFlags.PublicKey;
+            else
+                assemblyName.Flags &= AssemblyNameFlags.PublicKey;
+
+            if ((flags & AssemblyFlags.Retargetable) != 0)
+                assemblyName.Flags |= AssemblyNameFlags.Retargetable;
+            else
+                assemblyName.Flags &= AssemblyNameFlags.Retargetable;
+
+            if ((flags & AssemblyFlags.EnableJitCompileTracking) != 0)
+                assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileTracking;
+            else
+                assemblyName.Flags &= AssemblyNameFlags.EnableJITcompileTracking;
+
+            // notice we are setting EnableJITcompileOptimizer from DisableJitCompileOptimizer. hasFlag Logic is flipped
+            if ((flags & AssemblyFlags.DisableJitCompileOptimizer) == 0)
+                assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
+            else
+                assemblyName.Flags &= AssemblyNameFlags.EnableJITcompileOptimizer;
         }
 
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
