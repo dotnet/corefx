@@ -38,6 +38,7 @@ Project Docs
 - [Public Signing](project-docs/public-signing.md)
 - [Repo Organization](project-docs/repo-organization.md)
 - [Project NuGet Dependencies](https://github.com/dotnet/buildtools/blob/master/Documentation/project-nuget-dependencies.md)
+- [Using Nightly Builds](project-docs/using-nightly-builds.md)
 
 Coding Guidelines
 =================
@@ -57,6 +58,7 @@ Coding Guidelines
 Building from Source
 ====================
 
+- [Building CoreFX on Windows](building/windows-instructions.md)
 - [Building CoreFX on FreeBSD, Linux and OS X](building/unix-instructions.md)
 - [Code Coverage](building/code-coverage.md)
 - [Cross Building](building/cross-building.md)
