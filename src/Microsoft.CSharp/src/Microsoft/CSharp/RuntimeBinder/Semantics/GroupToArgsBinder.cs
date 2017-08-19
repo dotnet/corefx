@@ -47,9 +47,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly MethPropWithInst _mpwiBogus;
             private readonly MethPropWithInst _mpwiCantInferInstArg;
             private readonly MethWithType _mwtBadArity;
-            private Name _pInvalidSpecifiedName;
-            private Name _pNameUsedInPositionalArgument;
-            private Name _pDuplicateSpecifiedName;
+            private string _pInvalidSpecifiedName;
+            private string _pNameUsedInPositionalArgument;
+            private string _pDuplicateSpecifiedName;
             // When we find a type with an interface, then we want to mark all other interfaces that it 
             // implements as being hidden. We also want to mark object as being hidden. So stick them
             // all in this list, and then for subsequent types, if they're in this list, then we
@@ -461,7 +461,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pCurrentParameters,
                     pCurrentType,
                     pGroup.TypeArgs);
-                foreach (Name name in methprop.ParameterNames)
+                foreach (string name in methprop.ParameterNames)
                 {
                     // This can happen if we had expanded our param array to size 0.
                     if (index >= pCurrentParameters.Count)
@@ -610,8 +610,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Otherwise, we generate Type.Missing
 
                             AggregateSymbol agg = symbolLoader.GetPredefAgg(PredefinedType.PT_MISSING);
-                            Name name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
-                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
+                            FieldSymbol field = symbolLoader.LookupAggMember("Value", agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             ExprField exprField = exprFactory.CreateField(agg.getThisType(), null, fwt, false);
 
@@ -790,7 +789,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             /////////////////////////////////////////////////////////////////////////////////
 
-            private static Expr FindArgumentWithName(ArgInfos pArguments, Name pName)
+            private static Expr FindArgumentWithName(ArgInfos pArguments, string pName)
             {
                 List<Expr> prgexpr = pArguments.prgexpr;
                 for (int i = 0; i < pArguments.carg; i++)
@@ -814,8 +813,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // containment from this point onwards as well as complete containment. This is 
                 // for error reporting. The user cannot specify a named argument for a parameter
                 // that has a fixed argument value.
-                List<Name> currentPosition = methprop.ParameterNames;
-                HashSet<Name> names = new HashSet<Name>();
+                List<string> currentPosition = methprop.ParameterNames;
+                HashSet<string> names = new HashSet<string>();
                 for (int i = 0; i < _pArguments.carg; i++)
                 {
                     if (!(_pArguments.prgexpr[i] is ExprNamedArgumentSpecification named))
@@ -827,7 +826,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         continue;
                     }
 
-                    Name name = named.Name;
+                    string name = named.Name;
                     if (!methprop.ParameterNames.Contains(name))
                     {
                         if (_pInvalidSpecifiedName == null)
@@ -1220,13 +1219,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 bool bUseDelegateErrors = false;
-                Name nameErr = _pGroup.Name;
+                string nameErr = _pGroup.Name;
 
                 // Check for an invoke.
                 if (_pGroup.OptionalObject != null &&
                         _pGroup.OptionalObject.Type != null &&
                         _pGroup.OptionalObject.Type.isDelegateType() &&
-                        _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
+                        _pGroup.Name == "Invoke")
                 {
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().MethProp().getClass().IsDelegate());
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().getAggregate().IsDelegate());
@@ -1311,7 +1310,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return GetErrorContext().Error(ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
             }
 
-            private RuntimeBinderException ReportErrorsForBestMatching(bool bUseDelegateErrors, Name nameErr)
+            private RuntimeBinderException ReportErrorsForBestMatching(bool bUseDelegateErrors, string nameErr)
             {
                 // Best matching overloaded method 'name' had some invalid arguments.
                 if (_pDelegate != null)

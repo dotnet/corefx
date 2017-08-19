@@ -13,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal abstract class CType
     {
         private TypeKind _typeKind;
-        private Name _pName;
+        private string _pName;
 
         private bool _fHasErrors;  // Whether anyituents have errors. This is immutable.
 
@@ -149,8 +149,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeKind GetTypeKind() { return _typeKind; }
         public void SetTypeKind(TypeKind kind) { _typeKind = kind; }
 
-        public Name GetName() { return _pName; }
-        public void SetName(Name pName) { _pName = pName; }
+        public string GetName() { return _pName; }
+        public void SetName(string pName) { _pName = pName; }
 
         // This call switches on the kind and dispatches accordingly. This should really only be 
         // used when dereferencing TypeArrays. We should consider refactoring our code to not 

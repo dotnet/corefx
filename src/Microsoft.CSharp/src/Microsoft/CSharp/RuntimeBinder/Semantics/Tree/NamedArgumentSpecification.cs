@@ -10,14 +10,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private Expr _value;
 
-        public ExprNamedArgumentSpecification(Name name, Expr value)
+        public ExprNamedArgumentSpecification(string name, Expr value)
             : base(ExpressionKind.NamedArgumentSpecification)
         {
             Name = name;
             Value = value;
         }
 
-        public Name Name { get; }
+        public string Name { get; }
 
         public Expr Value
         {

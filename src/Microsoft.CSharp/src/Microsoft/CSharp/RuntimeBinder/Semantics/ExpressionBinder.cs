@@ -484,7 +484,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw ErrorContext.Error(ErrorCode.ERR_BadIndexLHS, type);
             }
 
-            Name pName = NameManager.GetPredefinedName(PredefinedName.PN_INDEXERINTERNAL);
+            const string pName = "$Item$";
 
             MemberLookup mem = new MemberLookup();
             if (!mem.Lookup(GetSemanticChecker(), type, pObject, ContextForMemberLookup(), pName, 0,
@@ -682,11 +682,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (fieldType != null)
             {
-                Name getOrCreateMethodName =
-                    NameManager.GetPredefinedName(PredefinedName.PN_GETORCREATEEVENTREGISTRATIONTOKENTABLE);
+                const string getOrCreateMethodName = "GetOrCreateEventRegistrationTokenTable";
                 GetSymbolLoader()
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
+                        getOrCreateMethodName, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
                     GetSymbolLoader()
                         .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
@@ -699,12 +698,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     new MethWithInst(getOrCreatempwi), pResult, getOrCreateGrp, (MemLookFlags)MemLookFlags.None);
 
                 AggregateSymbol fieldTypeSymbol = fieldType.GetOwningAggregate();
-                Name invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
+                const string invocationListName = "InvocationList";
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.
                 GetSymbolLoader()
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        invocationListName.Text, null, fieldType.AssociatedSystemType);
+                        invocationListName, null, fieldType.AssociatedSystemType);
                 PropertySymbol invocationList =
                     GetSymbolLoader()
                         .LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
@@ -844,7 +843,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal Expr bindUDUnop(ExpressionKind ek, Expr arg)
         {
-            Name pName = ekName(ek);
+            string pName = ekName(ek);
             Debug.Assert(pName != null);
 
             CType typeSrc = arg.Type;
@@ -1588,7 +1587,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         int index = 0;
                         // If we're named, look for the type of the matching name.
-                        foreach (Name i in mostDerivedMethod.ParameterNames)
+                        foreach (string i in mostDerivedMethod.ParameterNames)
                         {
                             if (i == named.Name)
                             {
@@ -2057,40 +2056,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        private static readonly PredefinedName[] s_EK2NAME =
+        private static readonly string[] s_expressionKindOperatorNames =
         {
-            PredefinedName.PN_OPEQUALS,
-            PredefinedName.PN_OPCOMPARE,
-            PredefinedName.PN_OPTRUE,
-            PredefinedName.PN_OPFALSE,
-            PredefinedName.PN_OPINCREMENT,
-            PredefinedName.PN_OPDECREMENT,
-            PredefinedName.PN_OPNEGATION,
-            PredefinedName.PN_OPEQUALITY,
-            PredefinedName.PN_OPINEQUALITY,
-            PredefinedName.PN_OPLESSTHAN,
-            PredefinedName.PN_OPLESSTHANOREQUAL,
-            PredefinedName.PN_OPGREATERTHAN,
-            PredefinedName.PN_OPGREATERTHANOREQUAL,
-            PredefinedName.PN_OPPLUS,
-            PredefinedName.PN_OPMINUS,
-            PredefinedName.PN_OPMULTIPLY,
-            PredefinedName.PN_OPDIVISION,
-            PredefinedName.PN_OPMODULUS,
-            PredefinedName.PN_OPUNARYMINUS,
-            PredefinedName.PN_OPUNARYPLUS,
-            PredefinedName.PN_OPBITWISEAND,
-            PredefinedName.PN_OPBITWISEOR,
-            PredefinedName.PN_OPXOR,
-            PredefinedName.PN_OPCOMPLEMENT,
-            PredefinedName.PN_OPLEFTSHIFT,
-            PredefinedName.PN_OPRIGHTSHIFT,
+            "op_Equals",
+            "op_Compare",
+            "op_True",
+            "op_False",
+            "op_Increment",
+            "op_Decrement",
+            "op_LogicalNot",
+            "op_Equality",
+            "op_Inequality",
+            "op_LessThan",
+            "op_LessThanOrEqual",
+            "op_GreaterThan",
+            "op_GreaterThanOrEqual",
+            "op_Addition",
+            "op_Subtraction",
+            "op_Multiply",
+            "op_Division",
+            "op_Modulus",
+            "op_UnaryNegation",
+            "op_UnaryPlus",
+            "op_BitwiseAnd",
+            "op_BitwiseOr",
+            "op_ExclusiveOr",
+            "op_OnesComplement",
+            "op_LeftShift",
+            "op_RightShift"
         };
 
-        private Name ekName(ExpressionKind ek)
+        private string ekName(ExpressionKind ek)
         {
-            Debug.Assert(ek >= ExpressionKind.FirstOp && (ek - ExpressionKind.FirstOp) < (int)s_EK2NAME.Length);
-            return NameManager.GetPredefinedName(s_EK2NAME[ek - ExpressionKind.FirstOp]);
+            Debug.Assert(ek >= ExpressionKind.FirstOp && ek - ExpressionKind.FirstOp < s_expressionKindOperatorNames.Length);
+            return s_expressionKindOperatorNames[ek - ExpressionKind.FirstOp];
         }
 
         private void checkUnsafe(CType type)

@@ -46,7 +46,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr _obj;
         private CType _typeQual;
         private ParentSymbol _symWhere;
-        private Name _name;
+        private string _name;
         private int _arity;
         private MemLookFlags _flags;
         private CMemberLookupResults _results;
@@ -203,8 +203,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If its an indexed property method symbol, let it through.
                     if (meth != null &&
                         meth.isPropertyAccessor() &&
-                        ((symCur.name.Text.StartsWith("set_", StringComparison.Ordinal) && meth.Params.Count > 1) ||
-                        (symCur.name.Text.StartsWith("get_", StringComparison.Ordinal) && meth.Params.Count > 0)))
+                        ((symCur.name.StartsWith("set_", StringComparison.Ordinal) && meth.Params.Count > 1) ||
+                        (symCur.name.StartsWith("get_", StringComparison.Ordinal) && meth.Params.Count > 0)))
                     {
                         if (!_swtInaccess)
                         {
@@ -589,7 +589,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             flags - See MemLookFlags.
                 TypeVarsAllowed only applies to the most derived type (not base types).
         ***************************************************************************************************/
-        public bool Lookup(CSemanticChecker checker, CType typeSrc, Expr obj, ParentSymbol symWhere, Name name, int arity, MemLookFlags flags)
+        public bool Lookup(CSemanticChecker checker, CType typeSrc, Expr obj, ParentSymbol symWhere, string name, int arity, MemLookFlags flags)
         {
             Debug.Assert((flags & ~MemLookFlags.All) == 0);
             Debug.Assert(obj == null || obj.Type != null);

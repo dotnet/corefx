@@ -167,11 +167,7 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Semantics\WithType.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\SpecialNames.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\SymbolTable.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\NameManager.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\Names.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\NameTable.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\Operators.cs" />
-    <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\PredefinedName.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\PredefinedType.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\TokenFacts.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\TokenKind.cs" />

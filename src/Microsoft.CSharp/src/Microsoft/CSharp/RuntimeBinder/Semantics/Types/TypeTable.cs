@@ -47,11 +47,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class TypeTable
     {
         // Two way hashes
-        private readonly Dictionary<KeyPair<AggregateSymbol, Name>, AggregateType> _pAggregateTable;
-        private readonly Dictionary<KeyPair<CType, Name>, ErrorType> _pErrorWithTypeParentTable;
-        private readonly Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, Name>, ErrorType> _pErrorWithNamespaceParentTable;
-        private readonly Dictionary<KeyPair<CType, Name>, ArrayType> _pArrayTable;
-        private readonly Dictionary<KeyPair<CType, Name>, ParameterModifierType> _pParameterModifierTable;
+        private readonly Dictionary<KeyPair<AggregateSymbol, string>, AggregateType> _pAggregateTable;
+        private readonly Dictionary<KeyPair<CType, string>, ErrorType> _pErrorWithTypeParentTable;
+        private readonly Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, string>, ErrorType> _pErrorWithNamespaceParentTable;
+        private readonly Dictionary<KeyPair<CType, string>, ArrayType> _pArrayTable;
+        private readonly Dictionary<KeyPair<CType, string>, ParameterModifierType> _pParameterModifierTable;
 
         // One way hashes
         private readonly Dictionary<CType, PointerType> _pPointerTable;
@@ -60,19 +60,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeTable()
         {
-            _pAggregateTable = new Dictionary<KeyPair<AggregateSymbol, Name>, AggregateType>();
-            _pErrorWithNamespaceParentTable = new Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, Name>, ErrorType>();
-            _pErrorWithTypeParentTable = new Dictionary<KeyPair<CType, Name>, ErrorType>();
-            _pArrayTable = new Dictionary<KeyPair<CType, Name>, ArrayType>();
-            _pParameterModifierTable = new Dictionary<KeyPair<CType, Name>, ParameterModifierType>();
+            _pAggregateTable = new Dictionary<KeyPair<AggregateSymbol, string>, AggregateType>();
+            _pErrorWithNamespaceParentTable = new Dictionary<KeyPair<AssemblyQualifiedNamespaceSymbol, string>, ErrorType>();
+            _pErrorWithTypeParentTable = new Dictionary<KeyPair<CType, string>, ErrorType>();
+            _pArrayTable = new Dictionary<KeyPair<CType, string>, ArrayType>();
+            _pParameterModifierTable = new Dictionary<KeyPair<CType, string>, ParameterModifierType>();
             _pPointerTable = new Dictionary<CType, PointerType>();
             _pNullableTable = new Dictionary<CType, NullableType>();
             _pTypeParameterTable = new Dictionary<TypeParameterSymbol, TypeParameterType>();
         }
 
-        public AggregateType LookupAggregate(Name pName, AggregateSymbol pAggregate)
+        public AggregateType LookupAggregate(string pName, AggregateSymbol pAggregate)
         {
-            var key = new KeyPair<AggregateSymbol, Name>(pAggregate, pName);
+            var key = new KeyPair<AggregateSymbol, string>(pAggregate, pName);
             AggregateType result;
             if (_pAggregateTable.TryGetValue(key, out result))
             {
@@ -82,17 +82,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public void InsertAggregate(
-                Name pName,
+                string pName,
                 AggregateSymbol pAggregateSymbol,
                 AggregateType pAggregate)
         {
             Debug.Assert(LookupAggregate(pName, pAggregateSymbol) == null);
-            _pAggregateTable.Add(new KeyPair<AggregateSymbol, Name>(pAggregateSymbol, pName), pAggregate);
+            _pAggregateTable.Add(new KeyPair<AggregateSymbol, string>(pAggregateSymbol, pName), pAggregate);
         }
 
-        public ErrorType LookupError(Name pName, CType pParentType)
+        public ErrorType LookupError(string pName, CType pParentType)
         {
-            var key = new KeyPair<CType, Name>(pParentType, pName);
+            var key = new KeyPair<CType, string>(pParentType, pName);
             ErrorType result;
             if (_pErrorWithTypeParentTable.TryGetValue(key, out result))
             {
@@ -101,9 +101,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        public ErrorType LookupError(Name pName, AssemblyQualifiedNamespaceSymbol pParentNS)
+        public ErrorType LookupError(string pName, AssemblyQualifiedNamespaceSymbol pParentNS)
         {
-            var key = new KeyPair<AssemblyQualifiedNamespaceSymbol, Name>(pParentNS, pName);
+            var key = new KeyPair<AssemblyQualifiedNamespaceSymbol, string>(pParentNS, pName);
             ErrorType result;
             if (_pErrorWithNamespaceParentTable.TryGetValue(key, out result))
             {
@@ -112,21 +112,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        public void InsertError(Name pName, CType pParentType, ErrorType pError)
+        public void InsertError(string pName, CType pParentType, ErrorType pError)
         {
             Debug.Assert(LookupError(pName, pParentType) == null);
-            _pErrorWithTypeParentTable.Add(new KeyPair<CType, Name>(pParentType, pName), pError);
+            _pErrorWithTypeParentTable.Add(new KeyPair<CType, string>(pParentType, pName), pError);
         }
 
-        public void InsertError(Name pName, AssemblyQualifiedNamespaceSymbol pParentNS, ErrorType pError)
+        public void InsertError(string pName, AssemblyQualifiedNamespaceSymbol pParentNS, ErrorType pError)
         {
             Debug.Assert(LookupError(pName, pParentNS) == null);
-            _pErrorWithNamespaceParentTable.Add(new KeyPair<AssemblyQualifiedNamespaceSymbol, Name>(pParentNS, pName), pError);
+            _pErrorWithNamespaceParentTable.Add(new KeyPair<AssemblyQualifiedNamespaceSymbol, string>(pParentNS, pName), pError);
         }
 
-        public ArrayType LookupArray(Name pName, CType pElementType)
+        public ArrayType LookupArray(string pName, CType pElementType)
         {
-            var key = new KeyPair<CType, Name>(pElementType, pName);
+            var key = new KeyPair<CType, string>(pElementType, pName);
             ArrayType result;
             if (_pArrayTable.TryGetValue(key, out result))
             {
@@ -135,15 +135,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        public void InsertArray(Name pName, CType pElementType, ArrayType pArray)
+        public void InsertArray(string pName, CType pElementType, ArrayType pArray)
         {
             Debug.Assert(LookupArray(pName, pElementType) == null);
-            _pArrayTable.Add(new KeyPair<CType, Name>(pElementType, pName), pArray);
+            _pArrayTable.Add(new KeyPair<CType, string>(pElementType, pName), pArray);
         }
 
-        public ParameterModifierType LookupParameterModifier(Name pName, CType pElementType)
+        public ParameterModifierType LookupParameterModifier(string pName, CType pElementType)
         {
-            var key = new KeyPair<CType, Name>(pElementType, pName);
+            var key = new KeyPair<CType, string>(pElementType, pName);
             ParameterModifierType result;
             if (_pParameterModifierTable.TryGetValue(key, out result))
             {
@@ -153,12 +153,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public void InsertParameterModifier(
-                Name pName,
+                string pName,
                 CType pElementType,
                 ParameterModifierType pParameterModifier)
         {
             Debug.Assert(LookupParameterModifier(pName, pElementType) == null);
-            _pParameterModifierTable.Add(new KeyPair<CType, Name>(pElementType, pName), pParameterModifier);
+            _pParameterModifierTable.Add(new KeyPair<CType, string>(pElementType, pName), pParameterModifier);
         }
 
         public PointerType LookupPointer(CType pElementType)

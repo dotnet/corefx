@@ -107,7 +107,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // There is no failure case; we require that the name actually
         // be on the list
 
-        private static int FindName(List<Name> names, Name name)
+        private static int FindName(List<string> names, string name)
         {
             int index = names.IndexOf(name);
             Debug.Assert(index != -1);

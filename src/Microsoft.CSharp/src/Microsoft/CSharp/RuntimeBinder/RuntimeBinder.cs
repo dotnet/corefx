@@ -54,12 +54,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             _semanticChecker = new CSemanticChecker();
 
             BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
-            NameManager nameManager = _semanticChecker.GetNameManager();
 
             _symbolTable = new SymbolTable(
                 bsymmgr.GetSymbolTable(),
                 bsymmgr.GetSymFactory(),
-                nameManager,
                 _semanticChecker.GetTypeManager(),
                 bsymmgr,
                 _semanticChecker);
@@ -457,7 +455,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 LocalVariableSymbol local =
                     _semanticChecker.GetGlobalSymbolFactory()
-                        .CreateLocalVar(_semanticChecker.GetNameManager().Add("p" + i), pScope, type);
+                        .CreateLocalVar("p" + i, pScope, type);
                 local.fUsedInAnonMeth = true;
                 locals[i] = local;
             }
@@ -474,7 +472,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // We don't actually need the real delegate type here - we just need SOME delegate type.
             // This is because we never attempt any conversions on the lambda itself.
             AggregateType delegateType = _symbolTable.GetCTypeFromType(typeof(Func<>)) as AggregateType;
-            LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(_semanticChecker.GetNameManager().Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
+            LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar("this", pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
             ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
             ExprReturn returnStatement = _exprFactory.CreateReturn(call);
@@ -583,7 +581,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (argument.Info.NamedArgument)
             {
                 Debug.Assert(argument.Info.Name != null);
-                arg = _exprFactory.CreateNamedArgumentSpecification(_semanticChecker.GetNameManager().Add(argument.Info.Name), arg);
+                arg = _exprFactory.CreateNamedArgumentSpecification(argument.Info.Name, arg);
             }
 
             // If we have an object that was "dynamic" at compile time, we need
@@ -613,12 +611,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
 
         private ExprMemberGroup CreateMemberGroupEXPR(
-            string Name,
+            string name,
             Type[] typeArguments,
             Expr callingObject,
             SYMKIND kind)
         {
-            Name name = _semanticChecker.GetNameManager().Add(Name);
             AggregateType callingType;
 
             CType callingObjectType = callingObject.Type;
@@ -661,10 +658,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // If we have a constructor, only find its type.
-            bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
+            bool bIsConstructor = name == ".ctor";
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), name, mask))
                 {
                     callingTypes.Add(t);
                 }
@@ -684,7 +681,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), name, mask))
                     {
                         callingTypes.Add(t);
                     }
@@ -693,19 +690,19 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             EXPRFLAG flags = EXPRFLAG.EXF_USERCALLABLE;
             // If its a delegate, mark that on the memgroup.
-            if (Name == SpecialNames.Invoke && callingObject.Type.isDelegateType())
+            if (name == SpecialNames.Invoke && callingObject.Type.isDelegateType())
             {
                 flags |= EXPRFLAG.EXF_DELEGATE;
             }
 
             // For a constructor, we need to seed the memgroup with the constructor flag.
-            if (Name == SpecialNames.Constructor)
+            if (name == SpecialNames.Constructor)
             {
                 flags |= EXPRFLAG.EXF_CTOR;
             }
 
             // If we have an indexer, mark that.
-            if (Name == SpecialNames.Indexer)
+            if (name == SpecialNames.Indexer)
             {
                 flags |= EXPRFLAG.EXF_INDEXER;
             }
@@ -744,7 +741,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             PropertySymbol property = swt.Prop();
             AggregateType propertyType = swt.GetType();
             PropWithType pwt = new PropWithType(property, propertyType);
-            ExprMemberGroup pMemGroup = CreateMemberGroupEXPR(property.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            ExprMemberGroup pMemGroup = CreateMemberGroupEXPR(property.name, null, callingObject, SYMKIND.SK_PropertySymbol);
 
             return _binder.BindToProperty(// For a static property instance, don't set the object.
                     callingObject is ExprClass ? null : callingObject, pwt, flags, null, null, pMemGroup);
@@ -756,7 +753,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
             AggregateType ctype = swt.GetType();
-            ExprMemberGroup memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            ExprMemberGroup memgroup = CreateMemberGroupEXPR(index.name, null, callingObject, SYMKIND.SK_PropertySymbol);
 
             Expr result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
             return ReorderArgumentsForNamedAndOptional(callingObject, result);
@@ -986,12 +983,12 @@ namespace Microsoft.CSharp.RuntimeBinder
                 Expr addMethArg = _binder.mustConvert(addMethGrp, _symbolTable.GetCTypeFromType(funcType));
 
                 args = _exprFactory.CreateList(addMethArg, removeMethArg, delegateVal);
-                methodName = NameManager.GetPredefinedName(PredefinedName.PN_ADDEVENTHANDLER).Text;
+                methodName = "AddEventHandler";
             }
             else
             {
                 args = _exprFactory.CreateList(removeMethArg, delegateVal);
-                methodName = NameManager.GetPredefinedName(PredefinedName.PN_REMOVEEVENTHANDLER).Text;
+                methodName = "RemoveEventHandler";
             }
 
             // WindowsRuntimeMarshal.Add\RemoveEventHandler(...)

@@ -32,7 +32,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool isOperator;             // a user defined operator (or default indexed property)
         public bool isParamArray;           // new style varargs
         public bool isHideByName;           // this property hides all below it regardless of signature
-        public List<Name> ParameterNames { get; private set; }
+        public List<string> ParameterNames { get; private set; }
         private bool[] _optionalParameterIndex;
         private bool[] _defaultParameterIndex;
         private ConstVal[] _defaultParameters;
@@ -72,7 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodOrPropertySymbol()
         {
-            ParameterNames = new List<Name>();
+            ParameterNames = new List<string>();
         }
 
         /////////////////////////////////////////////////////////////////////////////////

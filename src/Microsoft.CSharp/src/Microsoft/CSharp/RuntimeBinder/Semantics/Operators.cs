@@ -2654,7 +2654,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             List<CandidateFunctionMember> candidateList, ExpressionKind ek, AggregateType type,
             Expr arg1, Expr arg2, bool fDontLift)
         {
-            Name name = ekName(ek);
+            string name = ekName(ek);
             Debug.Assert(name != null);
             bool foundSome = false;
             for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
