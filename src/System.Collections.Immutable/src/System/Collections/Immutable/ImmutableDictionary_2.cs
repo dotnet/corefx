@@ -396,6 +396,97 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
+        /// Creates an immutable dictionary that contains entries with keys that exist in both this dictionary and the specified collection of key value entries.
+        /// An <paramref name="resolveValue"/> function is used to determine an entry value of a returned dictionary.
+        /// </summary>
+        /// <param name="other">A collection of key value entries used to intersect with current dictionary.</param>
+        /// <param name="resolveValue">
+        /// A function used to determine a value for a key found in both current dictionary and input collection parameter. It takes a key of a matched entries, 
+        /// value of a current dictionary entry and a value of <paramref name="other"/> collection entry as an input parameters.
+        /// </param>
+        /// <returns>
+        /// A new immutable dictionary with keys found in both current dictionary and provided collection and values for the corresponding 
+        /// keys resolved using <paramref name="resolveValue"/> function parameter.
+        /// </returns>
+        [Pure]
+        ImmutableDictionary<TKey, TValue> Intersect(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue)
+        {
+            Requires.NotNull(other, nameof(other));
+            Requires.NotNull(resolveValue, nameof(resolveValue));
+            Contract.Ensures(Contract.Result<ImmutableSortedDictionary<TKey, TValue>>() != null);
+
+            var builder = new Builder(ImmutableDictionary<TKey, TValue>.Empty);
+            foreach (KeyValuePair<TKey, TValue> entry in other)
+            {
+                var key = entry.Key;
+                int hashCode = this.KeyComparer.GetHashCode(key);
+                HashBucket bucket;
+                TValue value;
+
+                if (_root.TryGetValue(hashCode, out bucket) && bucket.TryGetValue(key, this.Origin.KeyOnlyComparer, out value))
+                {
+                    var resolvedValue = resolveValue(key, value, entry.Value);
+                    builder.Add(new KeyValuePair<TKey, TValue>(key, resolvedValue));
+                }
+            }
+
+            return builder.ToImmutable();
+        }
+
+        /// <summary>
+        /// Creates an immutable dictionary that contains entries with keys that exist in either this dictionary or the specified collection of key value entries.
+        /// An <paramref name="resolveValue"/> function is used to determine an entry value of a returned dictionary in case when entries with the same key can be
+        /// found in either of collections.
+        /// </summary>
+        /// <param name="other">A collection of key value entries used to merge with current dictionary.</param>
+        /// <param name="resolveValue">
+        /// A function used to determine a value for a key found in both current dictionary and input collection parameter. It takes a key of a matched entries, 
+        /// value of a current dictionary entry and a value of <paramref name="other"/> collection entry as an input parameters.
+        /// </param>
+        /// <returns>
+        /// A new immutable dictionary with keys found in either current dictionary or provided collection and values for the corresponding 
+        /// keys resolved using <paramref name="resolveValue"/> function parameter in case, when a key was found in both collections.
+        /// </returns>
+        [Pure]
+        ImmutableDictionary<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue)
+        {
+            Requires.NotNull(other, nameof(other));
+            Requires.NotNull(resolveValue, nameof(resolveValue));
+            Contract.Ensures(Contract.Result<ImmutableSortedDictionary<TKey, TValue>>() != null);
+
+            var root = _root;
+            var count = _count;
+            var keyOnlyComparer = this.Origin.KeyOnlyComparer;
+            foreach (KeyValuePair<TKey, TValue> entry in other)
+            {
+                var key = entry.Key;
+                int hashCode = this.KeyComparer.GetHashCode(key);
+                HashBucket bucket;
+                TValue value;
+                OperationResult operationResult;
+
+                if (root.TryGetValue(hashCode, out bucket) && bucket.TryGetValue(key, keyOnlyComparer, out value))
+                {
+                    var resolvedValue = resolveValue(entry.Key, value, entry.Value);
+
+                    var newBucket = bucket.Add(key, resolvedValue, keyOnlyComparer, this.ValueComparer, KeyCollisionBehavior.SetValue, out operationResult);
+                    root = UpdateRoot(root, hashCode, newBucket, _comparers.HashBucketEqualityComparer);
+                }
+                else
+                {
+                    var newBucket = bucket.Add(key, entry.Value, keyOnlyComparer, this.ValueComparer, KeyCollisionBehavior.SetValue, out operationResult);
+                    root = UpdateRoot(root, hashCode, newBucket, _comparers.HashBucketEqualityComparer);
+                    if (operationResult == OperationResult.SizeChanged)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return this.Wrap(root, count);
+        }
+
+        /// <summary>
         /// Determines whether the specified key contains key.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -580,6 +671,24 @@ namespace System.Collections.Immutable
         IImmutableDictionary<TKey, TValue> IImmutableDictionary<TKey, TValue>.Remove(TKey key)
         {
             return this.Remove(key);
+        }
+
+        /// <summary>
+        /// See the <see cref="IImmutableDictionary{TKey, TValue}"/> interface.
+        /// </summary>
+        [ExcludeFromCodeCoverage]
+        IImmutableDictionary<TKey, TValue> IImmutableDictionary<TKey, TValue>.Intersect(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue)
+        {
+            return this.Intersect(other, resolveValue);
+        }
+
+        /// <summary>
+        /// See the <see cref="IImmutableDictionary{TKey, TValue}"/> interface.
+        /// </summary>
+        [ExcludeFromCodeCoverage]
+        IImmutableDictionary<TKey, TValue> IImmutableDictionary<TKey, TValue>.Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> resolveValue)
+        {
+            return this.Merge(other, resolveValue);
         }
 
         #endregion
