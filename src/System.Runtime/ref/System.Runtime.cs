@@ -7057,6 +7057,7 @@ namespace System.Text
         public System.Text.StringBuilder Append(uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public System.Text.StringBuilder Append(ulong value) { throw null; }
+        public System.Text.StringBuilder Append(System.ReadOnlySpan<char> value) { throw null; }
         public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0) { throw null; }
         public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0, object arg1) { throw null; }
         public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0, object arg1, object arg2) { throw null; }
@@ -7075,6 +7076,7 @@ namespace System.Text
         public StringBuilder AppendJoin(char separator, params string[] values) { throw null; }
         public System.Text.StringBuilder Clear() { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
+        public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
         public int EnsureCapacity(int capacity) { throw null; }
         public bool Equals(System.Text.StringBuilder sb) { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
@@ -7083,6 +7085,7 @@ namespace System.Text
         public System.Text.StringBuilder Insert(int index, char value) { throw null; }
         public System.Text.StringBuilder Insert(int index, char[] value) { throw null; }
         public System.Text.StringBuilder Insert(int index, char[] value, int startIndex, int charCount) { throw null; }
+        public System.Text.StringBuilder Insert(int index, System.ReadOnlySpan<char> value) { throw null; }
         public System.Text.StringBuilder Insert(int index, decimal value) { throw null; }
         public System.Text.StringBuilder Insert(int index, double value) { throw null; }
         public System.Text.StringBuilder Insert(int index, short value) { throw null; }
@@ -7291,6 +7294,7 @@ namespace System.Text
         public virtual bool IsMailNewsSave { get { throw null; } }
         public bool IsReadOnly { get { throw null; } }
         public virtual bool IsSingleByte { get { throw null; } }
+        public virtual ReadOnlySpan<byte> Preamble { get { throw null; } }
         public static System.Text.Encoding Unicode { get { throw null; } }
         public static System.Text.Encoding UTF32 { get { throw null; } }
         public static System.Text.Encoding UTF7 { get { throw null; } }
@@ -7304,6 +7308,7 @@ namespace System.Text
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe virtual int GetByteCount(char* chars, int count) { throw null; }
+        public virtual int GetByteCount(ReadOnlySpan<char> chars) { throw null; }
         public virtual int GetByteCount(char[] chars) { throw null; }
         public abstract int GetByteCount(char[] chars, int index, int count);
         public virtual int GetByteCount(string s) { throw null; }
@@ -7311,6 +7316,7 @@ namespace System.Text
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe virtual int GetBytes(char* chars, int charCount, byte* bytes, int byteCount) { throw null; }
+        public virtual int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes) { throw null; }
         public virtual byte[] GetBytes(char[] chars) { throw null; }
         public virtual byte[] GetBytes(char[] chars, int index, int count) { throw null; }
         public abstract int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex);
@@ -7320,11 +7326,13 @@ namespace System.Text
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe virtual int GetCharCount(byte* bytes, int count) { throw null; }
+        public virtual int GetCharCount(ReadOnlySpan<byte> bytes) { throw null; }
         public virtual int GetCharCount(byte[] bytes) { throw null; }
         public abstract int GetCharCount(byte[] bytes, int index, int count);
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe virtual int GetChars(byte* bytes, int byteCount, char* chars, int charCount) { throw null; }
+        public virtual int GetChars(ReadOnlySpan<byte> bytes, Span<char> chars) { throw null; }
         public virtual char[] GetChars(byte[] bytes) { throw null; }
         public virtual char[] GetChars(byte[] bytes, int index, int count) { throw null; }
         public abstract int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex);
@@ -7342,6 +7350,7 @@ namespace System.Text
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe string GetString(byte* bytes, int byteCount) { throw null; }
+        public string GetString(ReadOnlySpan<byte> bytes) { throw null; }
         public virtual string GetString(byte[] bytes) { throw null; }
         public virtual string GetString(byte[] bytes, int index, int count) { throw null; }
         public bool IsAlwaysNormalized() { throw null; }
