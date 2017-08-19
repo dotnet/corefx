@@ -1152,23 +1152,22 @@ namespace System.Reflection.Metadata
             if ((flags & AssemblyFlags.PublicKey) != 0)
                 assemblyName.Flags |= AssemblyNameFlags.PublicKey;
             else
-                assemblyName.Flags &= AssemblyNameFlags.PublicKey;
+                assemblyName.Flags &= ~AssemblyNameFlags.PublicKey;
 
             if ((flags & AssemblyFlags.Retargetable) != 0)
                 assemblyName.Flags |= AssemblyNameFlags.Retargetable;
             else
-                assemblyName.Flags &= AssemblyNameFlags.Retargetable;
+                assemblyName.Flags &= ~AssemblyNameFlags.Retargetable;
 
             if ((flags & AssemblyFlags.EnableJitCompileTracking) != 0)
                 assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileTracking;
             else
-                assemblyName.Flags &= AssemblyNameFlags.EnableJITcompileTracking;
-
-            // notice we are setting EnableJITcompileOptimizer from DisableJitCompileOptimizer. hasFlag Logic is flipped
-            if ((flags & AssemblyFlags.DisableJitCompileOptimizer) == 0)
+                assemblyName.Flags &= ~AssemblyNameFlags.EnableJITcompileTracking;
+            
+            if ((flags & AssemblyFlags.DisableJitCompileOptimizer) != 0)
                 assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
             else
-                assemblyName.Flags &= AssemblyNameFlags.EnableJITcompileOptimizer;
+                assemblyName.Flags &= ~AssemblyNameFlags.EnableJITcompileOptimizer;
         }
 
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
