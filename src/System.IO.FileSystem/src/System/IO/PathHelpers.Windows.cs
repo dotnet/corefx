@@ -8,12 +8,8 @@ namespace System.IO
 {
     internal static partial class PathHelpers
     {
-        // Trim trailing whitespace, tabs etc but don't be aggressive in removing everything that has UnicodeCategory of trailing space.
-        // string.WhitespaceChars will trim more aggressively than what the underlying FS does (for ex, NTFS, FAT).    
-        internal static readonly char[] TrimEndChars = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
-        internal static readonly char[] TrimStartChars = { ' ' };
 
-        internal static bool ShouldReviseDirectoryPathToCurrent(string path)
+	internal static bool ShouldReviseDirectoryPathToCurrent(string path)
         {
             // In situations where this method is invoked, "<DriveLetter>:" should be special-cased 
             // to instead go to the current directory.
@@ -82,19 +78,13 @@ namespace System.IO
         internal static string NormalizeSearchPattern(string searchPattern)
         {
             Debug.Assert(searchPattern != null);
-
-            // Win32 normalization trims only U+0020.
-            string tempSearchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
-
-            // Make this corner case more useful, like dir
-            if (tempSearchPattern.Equals("."))
-            {
-                tempSearchPattern = "*";
-            }
-
-            CheckSearchPattern(tempSearchPattern);
-            return tempSearchPattern;
-        }
+            
+			// Make this corner case more useful, like dir
+			searchPattern = searchPattern.Equals(".") ? "*" : searchPattern;
+			
+            CheckSearchPattern(searchPattern);
+            return searchPattern;
+        }			
 
         internal static string GetFullSearchString(string fullPath, string searchPattern)
         {
