@@ -8,16 +8,7 @@
 
 def submittedHelixJson = null
 
-def dockerImageName
-if (params.OSName == 'Linux') {
-    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2'
-} else if (params.OSName == 'RHEL6') {
-    dockerImageName = 'microsoft/dotnet-buildtools-prereqs:centos-6-c8c9b08-20174310104313'
-} else {
-    error 'Unknown OS name'
-}
-
-simpleDockerNode(dockerImageName) {
+simpleDockerNode('microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2') {
     stage ('Checkout source') {
         checkout scm
     }
@@ -68,9 +59,6 @@ simpleDockerNode(dockerImageName) {
                                       'Fedora.26.Amd64.Open',
                                       'SLES.12.Amd64.Open',
                                       'Ubuntu.1704.Amd64.Open',]
-            }
-            if (params.OSName == 'RHEL6') {
-                targetHelixQueues = ['RedHat.69.Amd64.Open',]
             }
 
             sh "./Tools/msbuild.sh src/upload-tests.proj /p:ArchGroup=x64 /p:ConfigurationGroup=${params.CGroup} /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux /p:HelixJobType=test/functional/cli/ /p:HelixSource=${helixSource} /p:BuildMoniker=${helixBuild} /p:HelixCreator=${helixCreator} /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken=\$CloudDropAccessToken /p:CloudResultsAccessToken=\$OutputCloudResultsAccessToken /p:HelixApiEndpoint=https://helix.dot.net/api/2017-04-14/jobs /p:TargetQueues=${targetHelixQueues.join('+')} /p:HelixLogFolder=${WORKSPACE}/${logFolder}/ /p:HelixCorrelationInfoFileName=SubmittedHelixRuns.txt"

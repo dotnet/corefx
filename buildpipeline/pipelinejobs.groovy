@@ -19,8 +19,7 @@ def osxPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'build
 def winPipeline = Pipeline.createPipelineForGithub(this, project, branch, 'buildpipeline/windows.groovy')
 
 def configurations = [
-    ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'Linux', 'ForPR':"Release-x64", 'Arch':['x64']],
-    ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'RHEL6', 'ForPR':"Release-x64", 'Arch':['x64']],
+    ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'Linux' ,'ForPR':"Release-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':osxPipeline, 'Name':'OSX', 'ForPR':"Debug-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':winPipeline, 'Name':'Windows' , 'ForPR':"Debug-x64|Release-x86"],
     ['TGroup':"netfx",      'Pipeline':winPipeline, 'Name':'NETFX', 'ForPR':"Release-x86"],
@@ -38,8 +37,7 @@ configurations.each { config ->
     def params = ['TGroup':config.TGroup,
                   'CGroup':configurationGroup,
                   'AGroup':archGroup,
-                  'OSName':config.Name,
-                  'TestOuter':false,]
+                  'TestOuter': false]
 
     // Add default PR triggers for particular configurations but manual triggers for all
     if (config.ForPR.contains("${configurationGroup}-${archGroup}")) {
