@@ -396,8 +396,7 @@ namespace Microsoft.Win32.SafeHandles
                         Buffer.BlockCopy(oldArray, 0, _byteArray, 0, _bytesWritten);
                     }
                 }
-
-                int bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
+                int bytesToWrite = Math.Min(input.Length, _byteArray?.Length ?? 0 - _bytesWritten);
                 if (bytesToWrite < 1)
                 {
                     // We need to return -1 to indicate that it is an async method and
