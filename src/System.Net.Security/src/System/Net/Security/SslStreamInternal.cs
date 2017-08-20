@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -21,17 +22,21 @@ namespace System.Net.Security
         private static readonly AsyncProtocolCallback s_readHeaderCallback = new AsyncProtocolCallback(ReadHeaderCallback);
         private static readonly AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
 
-        private const int PinnableReadBufferSize = 4096 * 4 + 32;         // We read in 16K chunks + headers.
-        private static PinnableBufferCache s_PinnableReadBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableReadBufferSize);
-        private const int PinnableWriteBufferSize = 4096 + 1024;        // We write in 4K chunks + encryption overhead.
-        private static PinnableBufferCache s_PinnableWriteBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableWriteBufferSize);
+        private const int ReadBufferSize = 4096 * 4 + 32;         // We read in 16K chunks + headers.
+        private const int WriteBufferSize = 4096 + 1024;        // We write in 4K chunks + encryption overhead.
+
+        private static readonly ArrayPool<byte> BufferCache = ArrayPool<byte>.Shared;
 
         private SslState _sslState;
         private int _nestedWrite;
         private int _nestedRead;
         private AsyncProtocolRequest _readProtocolRequest; // cached, reusable AsyncProtocolRequest used for read operations
         private AsyncProtocolRequest _writeProtocolRequest; // cached, reusable AsyncProtocolRequest used for write operations
-        private Action<Task, object> _freeBufferAction;
+        private static Action<Task, object> s_freeBufferAction = (task, buffer) =>
+        {
+            FreeBuffer((byte[])buffer);
+            task.GetAwaiter().GetResult(); // propagate any exception
+        };
 
         // Never updated directly, special properties are used.  This is the read buffer.
         private byte[] _internalBuffer;
@@ -45,19 +50,10 @@ namespace System.Net.Security
 
         internal SslStreamInternal(SslState sslState)
         {
-            if (PinnableBufferCacheEventSource.Log.IsEnabled())
-            {
-                PinnableBufferCacheEventSource.Log.DebugMessage1("CTOR: In System.Net._SslStream.SslStream", this.GetHashCode());
-            }
             _sslState = sslState;
 
             _decryptedBytesOffset = 0;
             _decryptedBytesCount = 0;
-            _freeBufferAction = (task, buffer) =>
-            {
-                FreeBuffer((byte[])buffer);
-                task.GetAwaiter().GetResult(); // propagate any exception
-            };
         }
 
         // If we have a read buffer from the pinnable cache, return it.
@@ -65,7 +61,7 @@ namespace System.Net.Security
         {
             if (_internalBufferFromPinnableCache)
             {
-                s_PinnableReadBufferCache.FreeBuffer(_internalBuffer);
+                BufferCache.Return(_internalBuffer);
                 _internalBufferFromPinnableCache = false;
             }
 
@@ -76,11 +72,6 @@ namespace System.Net.Security
         {
             if (_internalBufferFromPinnableCache)
             {
-                if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                {
-                    PinnableBufferCacheEventSource.Log.DebugMessage2("DTOR: In System.Net._SslStream.~SslStream Freeing Read Buffer", this.GetHashCode(), PinnableBufferCacheEventSource.AddressOfByteArray(_internalBuffer));
-                }
-
                 FreeReadBuffer();
             }
         }
@@ -224,23 +215,13 @@ namespace System.Net.Security
                 bool wasPinnable = _internalBufferFromPinnableCache;
                 byte[] saved = _internalBuffer;
 
-                if (newSize <= PinnableReadBufferSize)
+                if (newSize <= ReadBufferSize)
                 {
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage2("In System.Net._SslStream.EnsureInternalBufferSize IS pinnable", this.GetHashCode(), newSize);
-                    }
-
                     _internalBufferFromPinnableCache = true;
-                    _internalBuffer = s_PinnableReadBufferCache.AllocateBuffer();
+                    _internalBuffer = BufferCache.Rent(ReadBufferSize);
                 }
                 else
                 {
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage2("In System.Net._SslStream.EnsureInternalBufferSize NOT pinnable", this.GetHashCode(), newSize);
-                    }
-
                     _internalBufferFromPinnableCache = false;
                     _internalBuffer = new byte[newSize];
                 }
@@ -252,7 +233,7 @@ namespace System.Net.Security
 
                 if (wasPinnable)
                 {
-                    s_PinnableReadBufferCache.FreeBuffer(saved);
+                    BufferCache.Return(saved);
                 }
             }
             else if (_internalOffset > 0 && _internalBufferCount > 0)
@@ -386,11 +367,7 @@ namespace System.Net.Security
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     int encryptedBytes;
-                    byte[] outBuffer = s_PinnableWriteBufferCache.AllocateBuffer();
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage3("In System.Net._SslStream.StartWriting Using Pinnable", this.GetHashCode(), count, PinnableBufferCacheEventSource.AddressOfByteArray(outBuffer));
-                    }
+                    byte[] outBuffer = BufferCache.Rent(WriteBufferSize);
 
                     try
                     {
@@ -419,13 +396,15 @@ namespace System.Net.Security
                     {
                         // Prepare for the next request.
                         asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, s_resumeAsyncWriteCallback);
-                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes).ContinueWith(_freeBufferAction, outBuffer);
+                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
                         if (t.IsCompleted)
                         {
+                            FreeBuffer(outBuffer);
                             t.GetAwaiter().GetResult();
                         }
                         else
                         {
+                            t = t.ContinueWith(s_freeBufferAction, outBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                             IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
                             if (!ar.CompletedSynchronously)
                             {
@@ -459,13 +438,9 @@ namespace System.Net.Security
             asyncRequest?.CompleteUser();
         }
 
-        private void FreeBuffer(byte[] buffer)
+        private static void FreeBuffer(byte[] buffer)
         {
-            s_PinnableWriteBufferCache.FreeBuffer(buffer);
-            if (PinnableBufferCacheEventSource.Log.IsEnabled())
-            {
-                PinnableBufferCacheEventSource.Log.DebugMessage1("In System.Net._SslStream.StartWriting Freeing buffer.", this.GetHashCode());
-            }
+            BufferCache.Return(buffer);
         }
 
         // Fill the buffer up to the minimum specified size (or more, if possible).
