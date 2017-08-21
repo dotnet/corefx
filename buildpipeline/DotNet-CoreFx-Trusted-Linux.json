@@ -90,7 +90,7 @@
         "args": "",
         "cwd": "",
         "failOnStandardError": "false",
-        "script": "if command -v curl > /dev/null; then\n    curl --retry 10 -sSL -o cleanup-docker.sh $(PB_VsoDockerFileDirUrl)cleanup-docker.sh\n    curl --retry 10 -sSL -o init-docker.sh $(PB_VsoDockerFileDirUrl)init-docker.sh\nelse\n    wget $(PB_VsoDockerFileDirUrl)cleanup-docker.sh -q -O cleanup-docker.sh\n    wget $(PB_VsoDockerFileDirUrl)init-docker.sh -q -O init-docker.sh\nfi"
+        "script": "if [[ ! -d $(DockerFileDir) ]]; then\n    mkdir -p $(DockerFileDir)\nfi\n\nif command -v curl > /dev/null; then\n    curl --retry 10 -sSL -o $(DockerFileDir)/cleanup-docker.sh $(VsoDockerFileDirUrl)cleanup-docker.sh\n    curl --retry 10 -sSL -o $(DockerFileDir)/init-docker.sh $(VsoDockerFileDirUrl)init-docker.sh\nelse\n    wget $(VsoDockerFileDirUrl)cleanup-docker.sh -q -O $(DockerFileDir)/cleanup-docker.sh\n    wget $(VsoDockerFileDirUrl)init-docker.sh -q -O $(DockerFileDir)/init-docker.sh\nfi"
       }
     },
     {
@@ -105,7 +105,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(Build.SourcesDirectory)/corefx/Tools/scripts/docker/init-docker.sh",
+        "filename": "$(DockerFileDir)/init-docker.sh",
         "arguments": "$(PB_DockerImageName)",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -407,7 +407,10 @@
     "PB_VsoRepositoryName": {
       "value": "DotNet-CoreFX-Trusted"
     },
-    "PB_VsoDockerFileDirUrl": {
+    "DockerFileDir": {
+      "value": "tools/dockerscripts"
+    },
+    "VsoDockerFileDirUrl": {
       "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Buildtools-Trusted/src/Microsoft.DotNet.Build.Tasks/PackageFiles/scripts/docker/"
     },
     "SourceVersion": {
