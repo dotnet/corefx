@@ -19,15 +19,15 @@ namespace System.Reflection.Metadata
                 CultureName = cultureName,
                 HashAlgorithm = hashAlgorithm
             };
-            assemblyName.SetPublicKey(publicKeyOrToken);
 
-            assemblyName.Flags = GetFlagsFromAssemblyFlags(flags);
+            assemblyName.SetPublicKey(publicKeyOrToken);
+            assemblyName.Flags = GetAssemblyNameFlags(flags);
             assemblyName.ContentType = GetContentTypeFromAssemblyFlags(flags);
 
             return assemblyName;
         }
 
-        private AssemblyNameFlags GetFlagsFromAssemblyFlags(AssemblyFlags flags)
+        private AssemblyNameFlags GetAssemblyNameFlags(AssemblyFlags flags)
         {
             AssemblyNameFlags assemblyNameFlags = AssemblyNameFlags.None;
 

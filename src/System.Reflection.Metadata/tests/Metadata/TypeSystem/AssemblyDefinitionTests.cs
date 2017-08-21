@@ -14,10 +14,10 @@ namespace System.Reflection.Metadata.Tests
         {
             var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
 
-            // 1 based
             AssemblyDefinition assemblyDefinition = reader.GetAssemblyDefinition();
             AssemblyName assemblyName = assemblyDefinition.GetAssemblyName();
 
+            // Name
             Assert.Equal(reader.GetString(assemblyDefinition.Name), assemblyName.Name);
             Assert.Equal("AppCS", assemblyName.Name);
 
@@ -26,10 +26,10 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal((uint)0, (uint)assemblyName.Flags); // AssemblyFlags
 
             // Locale
-            Assert.Equal(null, assemblyName.CultureName);
+            Assert.Null(assemblyName.CultureName);
 
             // PublicKey
-            Assert.Equal(null, assemblyName.GetPublicKey());
+            Assert.Null(assemblyName.GetPublicKey());
 
             // Version
             Assert.Equal(assemblyDefinition.Version, assemblyName.Version);

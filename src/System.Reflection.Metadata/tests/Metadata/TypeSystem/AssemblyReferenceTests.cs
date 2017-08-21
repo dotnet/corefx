@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(refVersion, assemblyName.Version);
 
             // Culture
-            Assert.Equal(null, assemblyName.CultureName);
+            Assert.Null(assemblyName.CultureName);
 
             // PublicKey
             var refPublicKey = reader.GetBlobBytes(assemblyRef.PublicKeyOrToken);
@@ -88,7 +88,7 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(refVersion, assemblyName.Version);
 
                 // Culture
-                Assert.Equal(null, assemblyName.CultureName);
+                Assert.Null(assemblyName.CultureName);
 
                 // PublicKey
                 var refPublicKey = reader.GetBlobBytes(assemblyRef.PublicKeyOrToken);

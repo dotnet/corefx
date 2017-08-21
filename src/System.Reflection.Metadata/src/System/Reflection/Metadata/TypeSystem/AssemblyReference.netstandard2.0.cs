@@ -6,7 +6,6 @@ namespace System.Reflection.Metadata
 {
     public partial struct AssemblyReference
     {
-
         public AssemblyName GetAssemblyName()
         {
             return _reader.GetAssemblyName(Name, Version, Culture, PublicKeyOrToken, AssemblyHashAlgorithm.None, Flags);
