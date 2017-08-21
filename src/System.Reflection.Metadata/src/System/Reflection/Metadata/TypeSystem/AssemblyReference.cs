@@ -7,7 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct AssemblyReference
+    public partial struct AssemblyReference
     {
         private readonly MetadataReader _reader;
 
@@ -120,11 +120,6 @@ namespace System.Reflection.Metadata
 
                 return _reader.AssemblyRefTable.GetHashValue(RowId);
             }
-        }
-
-        public AssemblyName GetAssemblyName()
-        {
-            return _reader.GetAssemblyName();
         }
 
         public CustomAttributeHandleCollection GetCustomAttributes()
