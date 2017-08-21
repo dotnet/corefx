@@ -56,7 +56,7 @@ namespace System.Reflection.Metadata
 
         private AssemblyContentType GetContentTypeFromAssemblyFlags(AssemblyFlags flags)
         {
-            return (AssemblyContentType)(((int)flags & 0x0E00) >> 9);
+            return (AssemblyContentType)(((int)flags & (int)AssemblyFlags.ContentTypeMask) >> 9);
         }
     }
 }
