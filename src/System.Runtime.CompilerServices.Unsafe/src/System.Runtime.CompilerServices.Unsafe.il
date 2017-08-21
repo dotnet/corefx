@@ -262,6 +262,11 @@
   .method public hidebysig static !!T& AsRef<T>(void* source) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+#ifdef NETCORE20
+        .maxstack 1
+        ldarg.0
+        ret
+#else
         .locals (int32&)
         .maxstack 1
         ldarg.0
@@ -269,6 +274,7 @@
         stloc.0
         ldloc.0
         ret
+#endif
   } // end of method Unsafe::AsRef
 
   .method public hidebysig static !!TTo& As<TFrom, TTo>(!!TFrom& source) cil managed aggressiveinlining
