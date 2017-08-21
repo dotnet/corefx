@@ -14,31 +14,31 @@ namespace System.Reflection.Metadata.Tests
         {
             var reader = MetadataReaderTests.GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
             var handle = reader.AssemblyReferences.Skip(3).First();
+            var assemblyDef = reader.GetAssemblyDefinition();
             var assemblyRef = reader.GetAssemblyReference(handle);
 
             var assemblyName = assemblyRef.GetAssemblyName();
 
             // Name
-            var refName = reader.GetString(assemblyRef.Name);
             Assert.Equal("System.Runtime", assemblyName.Name);
-            Assert.Equal(refName, assemblyName.Name);
+            Assert.Equal(reader.GetString(assemblyRef.Name), assemblyName.Name);
+            Assert.NotEqual(reader.GetString(assemblyDef.Name), assemblyName.Name);
 
             // Version
-            var refVersion = assemblyRef.Version;
             Assert.Equal(new Version(4, 0, 0, 0), assemblyName.Version);
-            Assert.Equal(refVersion, assemblyName.Version);
+            Assert.Equal(assemblyRef.Version, assemblyName.Version);
+            Assert.NotEqual(assemblyDef.Version, assemblyName.Version);
 
             // Culture
             Assert.Null(assemblyName.CultureName);
 
             // PublicKey
-            var refPublicKey = reader.GetBlobBytes(assemblyRef.PublicKeyOrToken);
-            Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, assemblyName.GetPublicKey());
-            Assert.Equal(refPublicKey, assemblyName.GetPublicKey());
-            
+            Assert.Null(assemblyName.GetPublicKey());
+            Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, assemblyName.GetPublicKeyToken());
+            Assert.Equal(reader.GetBlobBytes(assemblyRef.PublicKeyOrToken), assemblyName.GetPublicKeyToken());
+
             // HashAlgorithm
-            var refHashAlgorithm = Configuration.Assemblies.AssemblyHashAlgorithm.None;
-            Assert.Equal(refHashAlgorithm, assemblyName.HashAlgorithm);
+            Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.None, assemblyName.HashAlgorithm);
 
             // Flags
             Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
@@ -75,32 +75,32 @@ namespace System.Reflection.Metadata.Tests
             foreach (var assemblyRefHandle in reader.AssemblyReferences)
             {
                 var assemblyRef = reader.GetAssemblyReference(assemblyRefHandle);
+                var assemblyDef = reader.GetAssemblyDefinition();
                 var assemblyName = assemblyRef.GetAssemblyName();
                 
                 // Name
-                var refName = reader.GetString(assemblyRef.Name);
                 Assert.Equal(expRefs[i], assemblyName.Name);
-                Assert.Equal(refName, assemblyName.Name);
+                Assert.Equal(reader.GetString(assemblyRef.Name), assemblyName.Name);
+                Assert.NotEqual(reader.GetString(assemblyDef.Name), assemblyName.Name);
 
                 // Version
-                var refVersion = assemblyRef.Version;
                 Assert.Equal(expVers[i], assemblyName.Version);
-                Assert.Equal(refVersion, assemblyName.Version);
+                Assert.Equal(assemblyRef.Version, assemblyName.Version);
+                Assert.NotEqual(assemblyDef.Version, assemblyName.Version);
 
                 // Culture
                 Assert.Null(assemblyName.CultureName);
 
                 // PublicKey
-                var refPublicKey = reader.GetBlobBytes(assemblyRef.PublicKeyOrToken);
-                Assert.Equal(expKeys[i], assemblyName.GetPublicKey());
-                Assert.Equal(refPublicKey, assemblyName.GetPublicKey());
+                Assert.Null(assemblyName.GetPublicKey());
+                Assert.Equal(expKeys[i], assemblyName.GetPublicKeyToken());
+                Assert.Equal(reader.GetBlobBytes(assemblyRef.PublicKeyOrToken), assemblyName.GetPublicKeyToken());
 
                 // HashAlgorithm
-                var refHashAlgorithm = Configuration.Assemblies.AssemblyHashAlgorithm.None;
-                Assert.Equal(refHashAlgorithm, assemblyName.HashAlgorithm);
+                Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.None, assemblyName.HashAlgorithm);
 
                 // Flags
-                Assert.Equal((uint)0, (uint)assemblyRef.Flags);
+                Assert.Equal((uint)0, (uint)assemblyName.Flags);
                 Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
 
                 // ContentType

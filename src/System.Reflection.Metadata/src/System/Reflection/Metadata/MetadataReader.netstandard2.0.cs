@@ -8,7 +8,7 @@ namespace System.Reflection.Metadata
     {
         internal AssemblyName GetAssemblyName(StringHandle nameHandle, Version version, StringHandle cultureHandle, BlobHandle publicKeyHandle, AssemblyHashAlgorithm assemblyHashAlgorithm, AssemblyFlags flags)
         {
-            string name = (!nameHandle.IsNil) ? GetString(nameHandle) : null;
+            string name = GetString(nameHandle);
             string cultureName = (!cultureHandle.IsNil) ? GetString(cultureHandle) : null;
             var hashAlgorithm = (Configuration.Assemblies.AssemblyHashAlgorithm)assemblyHashAlgorithm;
             byte[] publicKeyOrToken = !publicKeyHandle.IsNil ? GetBlobBytes(publicKeyHandle) : null;
@@ -17,13 +17,21 @@ namespace System.Reflection.Metadata
             {
                 Version = version,
                 CultureName = cultureName,
-                HashAlgorithm = hashAlgorithm
+                HashAlgorithm = hashAlgorithm,
+                Flags = GetAssemblyNameFlags(flags),
+                ContentType = GetContentTypeFromAssemblyFlags(flags)
             };
 
-            assemblyName.SetPublicKey(publicKeyOrToken);
-            assemblyName.Flags = GetAssemblyNameFlags(flags);
-            assemblyName.ContentType = GetContentTypeFromAssemblyFlags(flags);
-
+            bool hasPublicKey = (flags & AssemblyFlags.PublicKey) != 0;
+            if (hasPublicKey)
+            {
+                assemblyName.SetPublicKey(publicKeyOrToken);
+            }
+            else
+            {
+                assemblyName.SetPublicKeyToken(publicKeyOrToken);
+            }
+            
             return assemblyName;
         }
 
@@ -33,23 +41,15 @@ namespace System.Reflection.Metadata
 
             if ((flags & AssemblyFlags.PublicKey) != 0)
                 assemblyNameFlags |= AssemblyNameFlags.PublicKey;
-            else
-                assemblyNameFlags &= ~AssemblyNameFlags.PublicKey;
 
             if ((flags & AssemblyFlags.Retargetable) != 0)
                 assemblyNameFlags |= AssemblyNameFlags.Retargetable;
-            else
-                assemblyNameFlags &= ~AssemblyNameFlags.Retargetable;
 
             if ((flags & AssemblyFlags.EnableJitCompileTracking) != 0)
                 assemblyNameFlags |= AssemblyNameFlags.EnableJITcompileTracking;
-            else
-                assemblyNameFlags &= ~AssemblyNameFlags.EnableJITcompileTracking;
 
             if ((flags & AssemblyFlags.DisableJitCompileOptimizer) != 0)
                 assemblyNameFlags |= AssemblyNameFlags.EnableJITcompileOptimizer;
-            else
-                assemblyNameFlags &= ~AssemblyNameFlags.EnableJITcompileOptimizer;
 
             return assemblyNameFlags;
         }
