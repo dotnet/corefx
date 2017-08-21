@@ -71,21 +71,26 @@
       }
     },
     {
+      "environment": {},
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Initialize tools",
+      "displayName": "Download docker files",
       "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "refName": "Shell1",
       "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(PB_GitDirectory)/init-tools.sh",
-        "arguments": "",
-        "workingFolder": "$(PB_GitDirectory)",
-        "failOnStandardError": "false"
+        "type": "InlineScript",
+        "scriptPath": "",
+        "args": "",
+        "cwd": "",
+        "failOnStandardError": "false",
+        "script": "if command -v curl > /dev/null; then\n    curl --retry 10 -sSL -o cleanup-docker.sh $(PB_VsoDockerFileDirUrl)cleanup-docker.sh\n    curl --retry 10 -sSL -o init-docker.sh $(PB_VsoDockerFileDirUrl)init-docker.sh\nelse\n    wget $(PB_VsoDockerFileDirUrl)cleanup-docker.sh -q -O cleanup-docker.sh\n    wget $(PB_VsoDockerFileDirUrl)init-docker.sh -q -O init-docker.sh\nfi"
       }
     },
     {
@@ -401,6 +406,9 @@
     },
     "PB_VsoRepositoryName": {
       "value": "DotNet-CoreFX-Trusted"
+    },
+    "PB_VsoDockerFileDirUrl": {
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Buildtools-Trusted/src/Microsoft.DotNet.Build.Tasks/PackageFiles/scripts/docker/"
     },
     "SourceVersion": {
       "value": "HEAD",
