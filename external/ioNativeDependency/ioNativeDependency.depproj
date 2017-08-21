@@ -4,6 +4,7 @@
   <PropertyGroup>
     <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
+    <OutputPath>$(RuntimePath)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FileApiInterop">
