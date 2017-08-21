@@ -160,6 +160,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(23444)]
         public void SetFileAttributes()
         {
             string destination = Path.Combine(s_musicFolder, "SetFileAttributes_" + Path.GetRandomFileName());
