@@ -15,6 +15,8 @@ namespace System.IO.Compression.Tests
 {
     public partial class ZipFileTest_ConvenienceMethods : ZipFileTestBase
     {
+        public static bool IsNotMacOsHighSierraOrHigher => PlatformDetection.IsNotMacOsHighSierraOrHigher;
+        
         [Fact]
         public async Task CreateFromDirectoryNormal()
         {
@@ -89,7 +91,7 @@ namespace System.IO.Compression.Tests
             AssertExtensions.Throws<ArgumentNullException>("sourceArchiveFileName", () => ZipFile.ExtractToDirectory(null, GetTestFilePath()));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNotMacOsHighSierraOrHigher))]
         public void ExtractToDirectoryUnicode()
         {
             string zipFileName = zfile("unicode.zip");
@@ -175,7 +177,7 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNotMacOsHighSierraOrHigher))]
         public void ExtractToDirectoryExtension_Unicode()
         {
             using (ZipArchive archive = ZipFile.OpenRead(zfile("unicode.zip")))
