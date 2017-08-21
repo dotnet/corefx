@@ -65,10 +65,6 @@ namespace System.Reflection.Metadata.Tests
             Assert.Null(assemblyName.CultureName);
 
             // PublicKey
-            //Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, assemblyName.GetPublicKey());
-            Assert.Null(assemblyName.GetPublicKey());
-            Assert.Null(assemblyName.GetPublicKeyToken());
-            //Assert.Equal(reader.GetBlobBytes(assemblyRef.PublicKeyOrToken), assemblyName.GetPublicKey());
             Assert.Null(assemblyName.GetPublicKey());
             Assert.Null(assemblyName.GetPublicKeyToken());
 
@@ -88,26 +84,8 @@ namespace System.Reflection.Metadata.Tests
         [Fact]
         public void ValidateAssemblyNameForMultipleAssemblyDefinition()
         {
-            byte[][] expKeys = new byte[][]
-            {
-                new byte[] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
-                new byte[] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
-                new byte[] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
-
-                // VB: B0 3F 5F 7F 11 D5 0A 3A
-                new byte[] { 0xb0, 0x3f, 0x5f, 0x7f, 0x11, 0xd5, 0x0a, 0x3a }
-            };
-            var expVers = new Version[]
-            {
-                new Version(4, 0, 0, 0),
-                new Version(4, 0, 0, 0),
-                new Version(4, 0, 0, 0),
-                new Version(/*VB*/10, 0, 0, 0),
-            };
-
             var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
-
-            int i = 0;
+            
             foreach (var assemblyRefHandle in reader.AssemblyReferences)
             {
                 var assemblyDef = reader.GetAssemblyDefinition();
@@ -123,10 +101,6 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Null(assemblyName.CultureName);
 
                 // PublicKey
-                //Assert.Equal(expKeys[i], assemblyName.GetPublicKey());
-                Assert.Null(assemblyName.GetPublicKey());
-                Assert.Null(assemblyName.GetPublicKeyToken());
-                //Assert.Equal(reader.GetBlobBytes(assemblyRef.PublicKeyOrToken), assemblyName.GetPublicKey());
                 Assert.Null(assemblyName.GetPublicKey());
                 Assert.Null(assemblyName.GetPublicKeyToken());
 
@@ -140,8 +114,6 @@ namespace System.Reflection.Metadata.Tests
 
                 // ContentType
                 Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
-
-                i++;
             }
         }
     }
