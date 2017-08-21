@@ -746,17 +746,19 @@ namespace System.Collections.Generic
             return null;
         }
 
-        // Used with BitHelper class. Note that this implementation is completely different from
-        // TreeSubSet's. The two should not be mixed. This gets the index as if the tree were an array.
-        // http://en.wikipedia.org/wiki/Binary_Tree#Methods_for_storing_binary_trees
         /// <summary>
         /// Searches for an item and returns its zero-based index in this set.
         /// </summary>
         /// <param name="item">The item.</param>
         /// <returns>The item's zero-based index in this set, or -1 if it isn't found.</returns>
         /// <remarks>
+        /// <para>
+        /// This implementation is based off of http://en.wikipedia.org/wiki/Binary_Tree#Methods_for_storing_binary_trees.
+        /// </para>
+        /// <para>
         /// This method is used with the <see cref="BitHelper"/> class. Note that this implementation is
         /// completely different from <see cref="TreeSubSet"/>'s, and that the two should not be mixed.
+        /// </para>
         /// </remarks>
         internal virtual int InternalIndexOf(T item)
         {
