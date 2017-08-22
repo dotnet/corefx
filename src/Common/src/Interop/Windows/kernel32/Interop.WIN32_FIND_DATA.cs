@@ -20,13 +20,10 @@ internal partial class Interop
             internal uint nFileSizeLow;
             internal uint dwReserved0;
             internal uint dwReserved1;
-            private fixed char _cFileName[MAX_PATH];
-            private fixed char _cAlternateFileName[14];
-
-            internal ReadOnlySpan<char> cFileName
-            {
-                get { fixed (char* c = _cFileName) return new ReadOnlySpan<char>(c, MAX_PATH); }
-            }
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            internal string cFileName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
+            internal string cAlternateFileName;
         }
     }
 }
