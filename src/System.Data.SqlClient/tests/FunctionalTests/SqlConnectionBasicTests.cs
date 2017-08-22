@@ -24,7 +24,7 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotArmProcess))] 
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotArmProcess))]
         [ActiveIssue("dotnet/corefx #23435", TestPlatforms.Any)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void IntegratedAuthConnectionTest()
