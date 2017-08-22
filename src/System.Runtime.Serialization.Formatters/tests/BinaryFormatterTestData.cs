@@ -200,14 +200,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
             dt1.Columns.Add("col2");
             dt1.Rows.Add("foo", "bar");
             dt1.Rows.Add("asdasd", "fffffffff");
+            dt1.Locale = CultureInfo.InvariantCulture;
 
             var dt2 = new DataTable("sdfsdf");
             dt2.Columns.Add("kkk");
             dt2.Columns.Add("jfjfjf");
             dt2.Rows.Add("ff1", "ff2");
             dt2.Rows.Add("ooo", "sdflkjsdflkjsd");
+            dt2.Locale = CultureInfo.InvariantCulture;
 
             var ds = new DataSet("DataSet123");
+            ds.Locale = CultureInfo.InvariantCulture;
             ds.Tables.Add(dt1);
             ds.Tables.Add(dt2);
 
