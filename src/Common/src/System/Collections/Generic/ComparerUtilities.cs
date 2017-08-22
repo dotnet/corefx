@@ -106,6 +106,21 @@ namespace System.Collections.Generic
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool FastGetHashCode<T>(this IEqualityComparer<T> equalityComparer, T obj)
+        {
+            Debug.Assert(equalityComparer != null);
+
+            // TODO: For .NET Framework, Enum.GetHashCode() boxes. Check default(T) == null?
+            // (Nullable enums will still box?)
+            if (equalityComparer == EqualityComparer<T>.Default)
+            {
+                return obj?.GetHashCode() ?? 0;
+            }
+
+            return equalityComparer.GetHashCode(obj);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsWellKnownType<T>()
         {
             if (default(T) != null)

@@ -248,7 +248,7 @@ namespace System.Linq
         private int InternalGetHashCode(TKey key)
         {
             // Handle comparer implementations that throw when passed null
-            return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            return (key == null) ? 0 : _comparer.FastGetHashCode(key) & 0x7FFFFFFF;
         }
 
         internal Grouping<TKey, TElement> GetGrouping(TKey key, bool create)
