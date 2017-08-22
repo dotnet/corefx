@@ -8,9 +8,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-// Disable unreachable code warning for trace code
-#pragma warning disable CS0162
-
 namespace System.Net.Sockets
 {
     // Note on asynchronous behavior here:
@@ -70,11 +67,11 @@ namespace System.Net.Sockets
 
             public bool TryComplete(SocketAsyncContext context)
             {
-                if (TraceEnabled) TraceWithContext(context, "Enter");
+                TraceWithContext(context, "Enter");
 
                 bool result = DoTryComplete(context);
 
-                if (TraceEnabled) TraceWithContext(context, $"Exit, result={result}");
+                TraceWithContext(context, $"Exit, result={result}");
 
                 return result;
             }
@@ -85,7 +82,7 @@ namespace System.Net.Sockets
                 if (oldState == State.Cancelled)
                 {
                     // This operation has already been cancelled, and had its completion processed.
-                    // Simply return true to indicate no further processing is needed.
+                    // Simply return false to indicate no further processing is needed.
                     return false;
                 }
 
@@ -131,7 +128,7 @@ namespace System.Net.Sockets
 
             public bool TryCancel()
             {
-                if (TraceEnabled) Trace("Enter");
+                Trace("Enter");
 
                 // Try to transition from Waiting to Cancelled
                 var spinWait = new SpinWait();
@@ -143,13 +140,13 @@ namespace System.Net.Sockets
                     {
                         case State.Running:
                             // A completion attempt is in progress. Keep busy-waiting.
-                            if (TraceEnabled) Trace("Busy wait");
+                            Trace("Busy wait");
                             spinWait.SpinOnce();
                             break;
 
                         case State.Complete:
                             // A completion attempt succeeded. Consider this operation as having completed within the timeout.
-                            if (TraceEnabled) Trace("Exit, previously completed");
+                            Trace("Exit, previously completed");
                             return false;
 
                         case State.Waiting:
@@ -162,12 +159,12 @@ namespace System.Net.Sockets
                             // Someone else cancelled the operation.
                             // Just return true to indicate the operation was cancelled.
                             // The previous canceller will have fired the completion, etc.
-                            if (TraceEnabled) Trace("Exit, previously cancelled");
+                            Trace("Exit, previously cancelled");
                             return true;
                     }
                 }
 
-                if (TraceEnabled) Trace("Cancelled, processing completion");
+                Trace("Cancelled, processing completion");
 
                 // The operation successfully cancelled.  
                 // It's our responsibility to set the error code and queue the completion.
@@ -187,7 +184,7 @@ namespace System.Net.Sockets
                     ThreadPool.QueueUserWorkItem(o => ((AsyncOperation)o).InvokeCallback(), this);
                 }
 
-                if (TraceEnabled) Trace("Exit");
+                Trace("Exit");
 
                 // Note, we leave the operation in the OperationQueue.
                 // When we get around to processing it, we'll see it's cancelled and skip it.
@@ -207,11 +204,13 @@ namespace System.Net.Sockets
 
             protected abstract void InvokeCallback();
 
+            [Conditional("SOCKETASYNCCONTEXT_TRACE")]
             public void Trace(string message, [CallerMemberName] string memberName = null)
             {
                 OutputTrace($"{IdOf(this)}.{memberName}: {message}");
             }
 
+            [Conditional("SOCKETASYNCCONTEXT_TRACE")]
             public void TraceWithContext(SocketAsyncContext context, string message, [CallerMemberName] string memberName = null)
             {
                 OutputTrace($"{IdOf(context)}, {IdOf(this)}.{memberName}: {message}");
@@ -423,7 +422,7 @@ namespace System.Net.Sockets
         // (2) Deadlock, by setting a reasonably large timeout
         private struct LockToken : IDisposable
         {
-            private object _lockObject;
+            private readonly object _lockObject;
 
             public LockToken(object lockObject)
             {
@@ -435,7 +434,7 @@ namespace System.Net.Sockets
 
 #if DEBUG
                 bool success = Monitor.TryEnter(_lockObject, 10000);
-                Debug.Assert(success);
+                Debug.Assert(success, "Timed out waiting for queue lock");
 #else
                 Monitor.Enter(_lockObject);
 #endif
@@ -466,7 +465,7 @@ namespace System.Net.Sockets
             // If we successfully process all enqueued operations, then the state becomes Ready;
             // otherwise, the state becomes Waiting and we wait for another epoll notification.
 
-            private enum QueueState
+            private enum QueueState : byte
             {
                 Ready = 0,          // Indicates that data MAY be available on the socket.
                                     // Queue must be empty.
@@ -519,7 +518,7 @@ namespace System.Net.Sockets
                     observedSequenceNumber = _sequenceNumber;
                     bool isReady = (_state == QueueState.Ready);
 
-                    if (TraceEnabled) Trace(context, $"{isReady}");
+                    Trace(context, $"{isReady}");
 
                     return isReady;
                 }
@@ -528,7 +527,7 @@ namespace System.Net.Sockets
             // Return true for pending, false for completed synchronously (including failure and abort)
             public bool StartAsyncOperation(SocketAsyncContext context, TOperation operation, int observedSequenceNumber)
             {
-                if (TraceEnabled) Trace(context, $"Enter");
+                Trace(context, $"Enter");
 
                 if (!context._registered)
                 {
@@ -569,7 +568,7 @@ namespace System.Net.Sockets
 
                                 _tail = operation;
 
-                                if (TraceEnabled) Trace(context, $"Leave, enqueued {IdOf(operation)}");
+                                Trace(context, $"Leave, enqueued {IdOf(operation)}");
                                 return true;
 
                             case QueueState.Stopped:
@@ -586,14 +585,14 @@ namespace System.Net.Sockets
                     if (doAbort)
                     {
                         operation.DoAbort();
-                        if (TraceEnabled) Trace(context, $"Leave, queue stopped");
+                        Trace(context, $"Leave, queue stopped");
                         return false;
                     }
 
                     // Retry the operation.
                     if (operation.TryComplete(context))
                     {
-                        if (TraceEnabled) Trace(context, $"Leave, retry succeeded");
+                        Trace(context, $"Leave, retry succeeded");
                         return false;
                     }
                 }
@@ -604,14 +603,14 @@ namespace System.Net.Sockets
             {
                 using (Lock())
                 {
-                    if (TraceEnabled) Trace(context, $"Enter");
+                    Trace(context, $"Enter");
 
                     switch (_state)
                     {
                         case QueueState.Ready:
                             Debug.Assert(_tail == null, "State == Ready but queue is not empty!");
                             _sequenceNumber++;
-                            if (TraceEnabled) Trace(context, $"Exit (previously ready)");
+                            Trace(context, $"Exit (previously ready)");
                             return;
 
                         case QueueState.Waiting:
@@ -623,12 +622,12 @@ namespace System.Net.Sockets
                         case QueueState.Processing:
                             Debug.Assert(_tail != null, "State == Processing but queue is empty!");
                             _sequenceNumber++;
-                            if (TraceEnabled) Trace(context, $"Exit (currently processing)");
+                            Trace(context, $"Exit (currently processing)");
                             return;
 
                         case QueueState.Stopped:
                             Debug.Assert(_tail == null);
-                            if (TraceEnabled) Trace(context, $"Exit (stopped)");
+                            Trace(context, $"Exit (stopped)");
                             return;
 
                         default:
@@ -649,12 +648,12 @@ namespace System.Net.Sockets
                 AsyncOperation op;
                 using (Lock())
                 {
-                    if (TraceEnabled) Trace(context, $"Enter");
+                    Trace(context, $"Enter");
 
                     if (_state == QueueState.Stopped)
                     {
                         Debug.Assert(_tail == null);
-                        if (TraceEnabled) Trace(context, $"Exit (stopped)");
+                        Trace(context, $"Exit (stopped)");
                         return;
                     }
                     else
@@ -671,8 +670,12 @@ namespace System.Net.Sockets
                 while (true)
                 {
                     bool wasCompleted = false;
-                    bool wasCancelled = !op.TrySetRunning();
-                    if (!wasCancelled)
+
+                    // Try to change the op state to Running.  
+                    // If this fails, it means the operation was previously cancelled,
+                    // and we should just remove it from the queue without further processing.
+                    bool isRunning = op.TrySetRunning();
+                    if (isRunning)
                     {
                         // Try to perform the IO
                         wasCompleted = op.TryComplete(context);
@@ -687,7 +690,7 @@ namespace System.Net.Sockets
                     }
 
                     nextOp = null;
-                    if (wasCompleted || wasCancelled)
+                    if (wasCompleted || !isRunning)
                     {
                         // Remove the op from the queue and see if there's more to process.
 
@@ -696,11 +699,12 @@ namespace System.Net.Sockets
                             if (_state == QueueState.Stopped)
                             {
                                 Debug.Assert(_tail == null);
-                                if (TraceEnabled) Trace(context, $"Exit (stopped)");
+                                Trace(context, $"Exit (stopped)");
                             }
                             else
                             {
                                 Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
+                                Debug.Assert(_tail.Next == op, "Queue modified while processing queue");
 
                                 if (op == _tail)
                                 {
@@ -708,7 +712,7 @@ namespace System.Net.Sockets
                                     _tail = null;
                                     _state = QueueState.Ready;
                                     _sequenceNumber++;
-                                    if (TraceEnabled) Trace(context, $"Exit (finished queue)");
+                                    Trace(context, $"Exit (finished queue)");
                                 }
                                 else
                                 {
@@ -727,7 +731,7 @@ namespace System.Net.Sockets
                             if (_state == QueueState.Stopped)
                             {
                                 Debug.Assert(_tail == null);
-                                if (TraceEnabled) Trace(context, $"Exit (stopped)");
+                                Trace(context, $"Exit (stopped)");
                             }
                             else
                             {
@@ -744,7 +748,7 @@ namespace System.Net.Sockets
                                 else
                                 {
                                     _state = QueueState.Waiting;
-                                    if (TraceEnabled) Trace(context, $"Exit (received EAGAIN)");
+                                    Trace(context, $"Exit (received EAGAIN)");
                                 }
                             }
                         }
@@ -784,7 +788,7 @@ namespace System.Net.Sockets
 
                 using (Lock())
                 {
-                    if (TraceEnabled) Trace(context, $"Enter");
+                    Trace(context, $"Enter");
 
                     Debug.Assert(_state != QueueState.Stopped);
 
@@ -802,10 +806,11 @@ namespace System.Net.Sockets
 
                     _tail = null;
 
-                    if (TraceEnabled) Trace(context, $"Exit");
+                    Trace(context, $"Exit");
                 }
             }
 
+            [Conditional("SOCKETASYNCCONTEXT_TRACE")]
             public void Trace(SocketAsyncContext context, string message, [CallerMemberName] string memberName = null)
             {
                 string queueType =
@@ -861,7 +866,7 @@ namespace System.Net.Sockets
                     _asyncEngineToken = token;
                     _registered = true;
 
-                    if (TraceEnabled) Trace("Registered");
+                    Trace("Registered");
                 }
             }
         }
@@ -999,7 +1004,8 @@ namespace System.Net.Sockets
             Debug.Assert(timeout == -1 || timeout > 0, $"Unexpected timeout: {timeout}");
 
             // Connect is different than the usual "readiness" pattern of other operations.
-            // We need to initiate the connect before we try to complete it. 
+            // We need to call TryStartConnect to initiate the connect with the OS, 
+            // before we try to complete it via epoll notification. 
             // Thus, always call TryStartConnect regardless of readiness.
             SocketError errorCode;
             int observedSequenceNumber;
@@ -1601,17 +1607,13 @@ namespace System.Net.Sockets
         // (1) Add reference to System.Console in the csproj
         // (2) #define SOCKETASYNCCONTEXT_TRACE
 
-#if SOCKETASYNCCONTEXT_TRACE
-        public const bool TraceEnabled = true;
-#else
-        public const bool TraceEnabled = false;
-#endif
-
+        [Conditional("SOCKETASYNCCONTEXT_TRACE")]
         public void Trace(string message, [CallerMemberName] string memberName = null)
         {
             OutputTrace($"{IdOf(this)}.{memberName}: {message}");
         }
 
+        [Conditional("SOCKETASYNCCONTEXT_TRACE")]
         public static void OutputTrace(string s)
         {
             // CONSIDER: Change to NetEventSource
