@@ -41,6 +41,11 @@ extern "C" SSL_CTX* CryptoNative_SslCtxCreate(SSL_METHOD* method)
     return ctx;
 }
 
+extern "C" void CryptoNative_SslCtxSetAcceptMovingWriteBuffer(SSL_CTX* ctx)
+{
+    SSL_CTX_ctrl(ctx, SSL_CTRL_MODE, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER, nullptr);
+}
+
 extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
 {
     // protocols may be 0, meaning system default, in which case let OpenSSL do what OpenSSL wants.

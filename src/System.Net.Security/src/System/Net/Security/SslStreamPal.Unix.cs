@@ -67,6 +67,7 @@ namespace System.Net.Security
             {
                 count = resultSize;
             }
+
             return retVal;
         }
 
@@ -167,6 +168,8 @@ namespace System.Net.Security
                     case Interop.Ssl.SslErrorCode.SSL_ERROR_NONE:
                     case Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
                         return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+                    case Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE:
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.ContinueNeeded);
                     default:
                         return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, new Interop.OpenSsl.SslException((int)errorCode));
                 }

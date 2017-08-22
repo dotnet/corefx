@@ -83,7 +83,7 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionDelegate;
             _refreshCredentialNeeded = true;
             _encryptionPolicy = encryptionPolicy;
-            
+
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
@@ -845,7 +845,7 @@ namespace System.Net.Security
             }
 
             output = outgoingSecurity.token;
-            
+
             return status;
         }
 
@@ -905,8 +905,6 @@ namespace System.Net.Security
                 NetEventSource.DumpBuffer(this, buffer, 0, Math.Min(buffer.Length, 128));
             }
 
-            byte[] writeBuffer = output;
-
             try
             {
                 if (offset < 0 || offset > (buffer == null ? 0 : buffer.Length))
@@ -934,17 +932,22 @@ namespace System.Net.Security
                 size,
                 _headerSize,
                 _trailerSize,
-                ref writeBuffer,
+                ref output,
                 out resultSize);
-
-            if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
+            if (NetEventSource.IsEnabled)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"ERROR {secStatus}");
-            }
-            else
-            {
-                output = writeBuffer;
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"OK data size:{resultSize}");
+                switch (secStatus.ErrorCode)
+                {
+                    case SecurityStatusPalErrorCode.OK:
+                        NetEventSource.Exit(this, $"OK data size:{resultSize}");
+                        break;
+                    case SecurityStatusPalErrorCode.ContinueNeeded:
+                        NetEventSource.Exit(this, $"OK but more writes needed data size:{resultSize}");
+                        break;
+                    default:
+                        NetEventSource.Exit(this, $"ERROR {secStatus}");
+                        break;
+                }
             }
 
             return secStatus;
@@ -1151,7 +1154,7 @@ namespace System.Net.Security
 
             return token;
         }
-        
+
         private static TlsAlertMessage GetAlertMessageFromChain(X509Chain chain)
         {
             foreach (X509ChainStatus chainStatus in chain.ChainStatus)
@@ -1169,7 +1172,7 @@ namespace System.Net.Security
                 }
 
                 if ((chainStatus.Status &
-                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation )) != 0)
+                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation)) != 0)
                 {
                     return TlsAlertMessage.CertificateRevoked;
                 }
@@ -1183,7 +1186,7 @@ namespace System.Net.Security
 
                 if ((chainStatus.Status & X509ChainStatusFlags.CtlNotValidForUsage) != 0)
                 {
-                    return TlsAlertMessage.UnsupportedCert; 
+                    return TlsAlertMessage.UnsupportedCert;
                 }
 
                 if ((chainStatus.Status &

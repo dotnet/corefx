@@ -68,11 +68,14 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(BIO_ctrl, true) \
     PER_FUNCTION_BLOCK(BIO_ctrl_pending, true) \
     PER_FUNCTION_BLOCK(BIO_free, true) \
+    PER_FUNCTION_BLOCK(BIO_get_ex_data, true) \
     PER_FUNCTION_BLOCK(BIO_gets, true) \
     PER_FUNCTION_BLOCK(BIO_new, true) \
     PER_FUNCTION_BLOCK(BIO_new_file, true) \
     PER_FUNCTION_BLOCK(BIO_read, true) \
     PER_FUNCTION_BLOCK(BIO_s_mem, true) \
+    PER_FUNCTION_BLOCK(BIO_set_ex_data, true) \
+    PER_FUNCTION_BLOCK(BIO_set_flags, true) \
     PER_FUNCTION_BLOCK(BIO_write, true) \
     PER_FUNCTION_BLOCK(BN_bin2bn, true) \
     PER_FUNCTION_BLOCK(BN_bn2bin, true) \
@@ -359,11 +362,14 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define BIO_ctrl BIO_ctrl_ptr
 #define BIO_ctrl_pending BIO_ctrl_pending_ptr
 #define BIO_free BIO_free_ptr
+#define BIO_get_ex_data BIO_get_ex_data_ptr
 #define BIO_gets BIO_gets_ptr
 #define BIO_new BIO_new_ptr
 #define BIO_new_file BIO_new_file_ptr
 #define BIO_read BIO_read_ptr
 #define BIO_s_mem BIO_s_mem_ptr
+#define BIO_set_ex_data BIO_set_ex_data_ptr
+#define BIO_set_flags BIO_set_flags_ptr
 #define BIO_write BIO_write_ptr
 #define BN_bin2bn BN_bin2bn_ptr
 #define BN_bn2bin BN_bn2bin_ptr

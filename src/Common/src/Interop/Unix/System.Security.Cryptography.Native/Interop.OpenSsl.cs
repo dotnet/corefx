@@ -73,6 +73,10 @@ internal static partial class Interop
                 // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
                 Ssl.SslCtxSetQuietShutdown(innerContext);
 
+                // This allows the write buffer to move during a multi call write, this stops us having to pin it
+                // across multiple calls where there is an async output to the innerstream inbetween
+                Ssl.SslCtxSetAcceptMovingWriteBuffer(innerContext);
+
                 if (!Ssl.SetEncryptionPolicy(innerContext, policy))
                 {
                     throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
@@ -93,7 +97,7 @@ internal static partial class Interop
                     Ssl.SslCtxSetVerify(innerContext,
                         s_verifyClientCertificate);
 
-                    //update the client CA list 
+                    // update the client CA list 
                     UpdateCAListFromRootStore(innerContext);
                 }
 
@@ -135,17 +139,21 @@ internal static partial class Interop
         {
             sendBuf = null;
             sendCount = 0;
-            if ((recvBuf != null) && (recvCount > 0))
+
+            sendCount = context.OutputBio.TakeBytes(out sendBuf);
+            if (recvBuf == null && sendCount > 0)
             {
-                BioWrite(context.InputBio, recvBuf, recvOffset, recvCount);
+                return false;
             }
+
+            context.InputBio.SetData(recvBuf, recvOffset, recvCount);
+            context.OutputBio.SetData(buffer: null, isHandshake: true);
 
             int retVal = Ssl.SslDoHandshake(context);
 
             if (retVal != 1)
             {
-                Exception innerError;
-                Ssl.SslErrorCode error = GetSslError(context, retVal, out innerError);
+                Ssl.SslErrorCode error = GetSslError(context, retVal, out Exception innerError);
 
                 if ((retVal != -1) || (error != Ssl.SslErrorCode.SSL_ERROR_WANT_READ))
                 {
@@ -153,31 +161,14 @@ internal static partial class Interop
                 }
             }
 
-            sendCount = Crypto.BioCtrlPending(context.OutputBio);
-
-            if (sendCount > 0)
-            {
-                sendBuf = new byte[sendCount];
-
-                try
-                {
-                    sendCount = BioRead(context.OutputBio, sendBuf, sendCount);
-                }
-                finally
-                {
-                    if (sendCount <= 0)
-                    {
-                        sendBuf = null;
-                        sendCount = 0;
-                    }
-                }
-            }
+            sendCount = context.OutputBio.TakeBytes(out sendBuf);
 
             bool stateOk = Ssl.IsSslStateOK(context);
             if (stateOk)
             {
                 context.MarkHandshakeCompleted();
             }
+
             return stateOk;
         }
 
@@ -190,6 +181,7 @@ internal static partial class Interop
             Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
+            context.OutputBio.SetData(output, isHandshake: false);
 
             int retVal;
             unsafe
@@ -202,8 +194,7 @@ internal static partial class Interop
 
             if (retVal != count)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)
@@ -212,52 +203,46 @@ internal static partial class Interop
                     case Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
                     case Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
                         break;
-
+                    // indicates we need to write the out buffer and write again
+                    case Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE:
+                        break;
                     default:
                         throw new SslException(SR.Format(SR.net_ssl_encrypt_failed, errorCode), innerError);
                 }
             }
-            else
-            {
-                int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
 
-                if (output == null || output.Length < capacityNeeded)
-                {
-                    output = new byte[capacityNeeded];
-                }
-
-                retVal = BioRead(context.OutputBio, output, capacityNeeded);
-            }
-
-            return retVal;
+            int bytesWritten = context.OutputBio.BytesWritten;
+            context.OutputBio.Reset();
+            return bytesWritten;
         }
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
+            Debug.Assert(offset >= 0);
+            Debug.Assert(offset <= outBuffer.Length);
+
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
-            int retVal = BioWrite(context.InputBio, outBuffer, offset, count);
+            context.InputBio.SetData(outBuffer, offset, count);
 
-            if (retVal == count)
+            int retVal;
+            unsafe
             {
-                unsafe
+                fixed (byte* fixedBuffer = outBuffer)
                 {
-                    fixed (byte* fixedBuffer = outBuffer)
-                    {
-                        retVal = Ssl.SslRead(context, fixedBuffer + offset, outBuffer.Length);
-                    }
-                }
-
-                if (retVal > 0)
-                {
-                    count = retVal;
+                    retVal = Ssl.SslRead(context, fixedBuffer + offset, outBuffer.Length - offset);
                 }
             }
 
+            if (retVal > 0)
+            {
+                count = retVal;
+            }
+
+
             if (retVal != count)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)
@@ -345,10 +330,10 @@ internal static partial class Interop
             {
                 store.Open(OpenFlags.ReadOnly);
 
-                foreach (var certificate in store.Certificates)
+                foreach (X509Certificate2 certificate in store.Certificates)
                 {
-                    //Check if issuer name is already present
-                    //Avoiding duplicate names
+                    // Check if issuer name is already present
+                    // Avoiding duplicate names
                     if (!issuerNameHashSet.Add(certificate.Issuer))
                     {
                         continue;
@@ -458,7 +443,7 @@ internal static partial class Interop
                 throw CreateSslException(SR.net_ssl_use_private_key_failed);
             }
 
-            //check private key
+            // check private key
             retVal = Ssl.SslCtxCheckPrivateKey(contextPtr);
 
             if (1 != retVal)

@@ -178,6 +178,11 @@ Always succeeds.
 extern "C" void CryptoNative_SslCtxDestroy(SSL_CTX* ctx);
 
 /*
+Shims the SSL_ctx_change_mode with the flag SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
+*/
+extern "C" void CryptoNative_SslCtxSetAcceptMovingWriteBuffer(SSL_CTX* ctx);
+
+/*
 Shims the SSL_set_connect_state method.
 */
 extern "C" void CryptoNative_SslSetConnectState(SSL* ssl);

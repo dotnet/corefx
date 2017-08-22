@@ -35,5 +35,8 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxSetClientCAList")]
         internal static extern void SslCtxSetClientCAList(SafeSslContextHandle ctx, SafeX509NameStackHandle x509NameStackPtr);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxSetAcceptMovingWriteBuffer")]
+        internal static extern void SslCtxSetAcceptMovingWriteBuffer(SafeSslContextHandle ctx);
     }
 }

@@ -35,5 +35,27 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioCtrlPending")]
         internal static extern int BioCtrlPending(SafeBioHandle bio);
+        
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetAppData")]
+        internal static extern void BioSetAppData(SafeBioHandle bio, IntPtr data);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetWriteFlag")]
+        internal static extern void BioSetWriteFlag(SafeBioHandle bio);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_BioSetShoudRetryReadFlag")]
+        internal static extern void BioSetShoudRetryReadFlag(SafeBioHandle bio);
+
+        //These need to be here and private to ensure the static constructor is run to init the bio on the class
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CreateManagedSslBio")]
+        private static extern SafeBioHandle CreateManagedSslBio();
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_InitManagedSslBioMethod")]
+        private static extern void InitManagedSslBioMethod(WriteDelegate bwrite, ReadDelegate bread);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate int ReadDelegate(IntPtr bio, void* buf, int size, IntPtr data);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate int WriteDelegate(IntPtr bio, void* buf, int num, IntPtr data);
     }
 }

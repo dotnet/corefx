@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
@@ -156,12 +157,12 @@ internal static partial class Interop
             SSL_ERROR_WANT_WRITE = 3,
             SSL_ERROR_SYSCALL = 5,
             SSL_ERROR_ZERO_RETURN = 6,
-            
+
             // NOTE: this SslErrorCode value doesn't exist in OpenSSL, but
             // we use it to distinguish when a renegotiation is pending.
             // Choosing an arbitrarily large value that shouldn't conflict
             // with any actual OpenSSL error codes
-            SSL_ERROR_RENEGOTIATE = 29304 
+            SSL_ERROR_RENEGOTIATE = 29304
         }
     }
 }
@@ -170,8 +171,8 @@ namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeSslHandle : SafeHandle
     {
-        private SafeBioHandle _readBio;
-        private SafeBioHandle _writeBio;
+        private ReadBioBuffer _readBio;
+        private WriteBioBuffer _writeBio;
         private bool _isServer;
         private bool _handshakeCompleted = false;
 
@@ -180,21 +181,8 @@ namespace Microsoft.Win32.SafeHandles
             get { return _isServer; }
         }
 
-        public SafeBioHandle InputBio
-        {
-            get
-            {
-                return _readBio;
-            }
-        }
-
-        public SafeBioHandle OutputBio
-        {
-            get
-            {
-                return _writeBio;
-            }
-        }
+        public ReadBioBuffer InputBio => _readBio;
+        public WriteBioBuffer OutputBio => _writeBio;
 
         internal void MarkHandshakeCompleted()
         {
@@ -203,8 +191,8 @@ namespace Microsoft.Win32.SafeHandles
 
         public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
         {
-            SafeBioHandle readBio = Interop.Crypto.CreateMemoryBio();
-            SafeBioHandle writeBio = Interop.Crypto.CreateMemoryBio();
+            SafeBioHandle readBio = Interop.Crypto.ManagedSslBio.CreateManagedSslBio();
+            SafeBioHandle writeBio = Interop.Crypto.ManagedSslBio.CreateManagedSslBio();
             SafeSslHandle handle = Interop.Ssl.SslCreate(context);
             if (readBio.IsInvalid || writeBio.IsInvalid || handle.IsInvalid)
             {
@@ -220,8 +208,8 @@ namespace Microsoft.Win32.SafeHandles
             {
                 readBio.TransferOwnershipToParent(handle);
                 writeBio.TransferOwnershipToParent(handle);
-                handle._readBio = readBio;
-                handle._writeBio = writeBio;
+                handle._readBio = new ReadBioBuffer(readBio);
+                handle._writeBio = new WriteBioBuffer(writeBio);
                 Interop.Ssl.SslSetBio(handle, readBio, writeBio);
             }
             catch (Exception exc)
@@ -295,6 +283,149 @@ namespace Microsoft.Win32.SafeHandles
         internal SafeSslHandle(IntPtr validSslPointer, bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
         {
             handle = validSslPointer;
+        }
+
+        internal class ReadBioBuffer : IDisposable
+        {
+            private readonly SafeBioHandle _bioHandle;
+            private GCHandle _handle;
+            private int _bytesAvailable;
+            private byte[] _byteArray;
+            private int _offset;
+
+            internal ReadBioBuffer(SafeBioHandle bioHandle)
+            {
+                _bioHandle = bioHandle;
+                _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                Interop.Crypto.ManagedSslBio.BioSetGCHandle(_bioHandle, _handle);
+                Interop.Crypto.BioSetShoudRetryReadFlag(bioHandle);
+            }
+
+            public void SetData(byte[] buffer, int offset, int length)
+            {
+                Debug.Assert(_bytesAvailable == 0);
+
+                _byteArray = buffer;
+                _offset = offset;
+                _bytesAvailable = length;
+            }
+
+            public int Read(Span<byte> output)
+            {
+                int bytesToCopy = Math.Min(output.Length, _bytesAvailable);
+                if (bytesToCopy == 0)
+                {
+                    return -1;
+                }
+
+                var span = new Span<byte>(_byteArray, _offset, bytesToCopy);
+                span.CopyTo(output);
+                _offset += bytesToCopy;
+                _bytesAvailable -= bytesToCopy;
+                return bytesToCopy;
+            }
+
+            // Bio is already released by the ssl object
+            public void Dispose()
+            {
+                if (_handle.IsAllocated)
+                {
+                    _handle.Free();
+                }
+            }
+        }
+
+        internal class WriteBioBuffer : IDisposable
+        {
+            private readonly SafeBioHandle _bioHandle;
+            private GCHandle _handle;
+            private byte[] _byteArray;
+            private int _bytesWritten;
+            private bool _isHandshake;
+
+            internal WriteBioBuffer(SafeBioHandle bioHandle)
+            {
+                _bioHandle = bioHandle;
+                _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                Interop.Crypto.ManagedSslBio.BioSetGCHandle(_bioHandle, _handle);
+            }
+
+            public int BytesWritten => _bytesWritten;
+
+            public void SetData(byte[] buffer, bool isHandshake)
+            {
+                Debug.Assert(_byteArray == null);
+
+                _byteArray = buffer;
+                _bytesWritten = 0;
+                _isHandshake = isHandshake;
+            }
+
+            public int TakeBytes(out byte[] output)
+            {
+                output = _byteArray;
+                int bytes = _bytesWritten;
+                Reset();
+                return bytes;
+            }
+
+            public void Reset()
+            {
+                _bytesWritten = 0;
+                _byteArray = null;
+            }
+
+            public int Write(Span<byte> input)
+            {
+                // Only for the handshake do we dynamically allocate
+                // buffers. For normal encrypt operations we use a fixed
+                // size buffer handed to us and loop to do all the needed
+                // writes. This should be changed for the handshake as well
+                // but will require more securechannel/sslstatus changes
+                if (_isHandshake)
+                {
+                    if (_byteArray == null)
+                    {
+                        _byteArray = new byte[input.Length];
+                        _bytesWritten = 0;
+                    }
+                    else if (_byteArray.Length - _bytesWritten < input.Length)
+                    {
+                        byte[] oldArray = _byteArray;
+                        _byteArray = new byte[input.Length + _bytesWritten];
+                        Buffer.BlockCopy(oldArray, 0, _byteArray, 0, _bytesWritten);
+                    }
+                }
+                int bytesToWrite;
+                if (_byteArray == null)
+                {
+                    bytesToWrite = -1;
+                }
+                else
+                {
+                    bytesToWrite = Math.Min(input.Length, _byteArray.Length - _bytesWritten);
+                }
+                if (bytesToWrite < 1)
+                {
+                    // We need to return -1 to indicate that it is an async method and
+                    // and the write should retry later rather and a zero indicating EOF
+                    Interop.Crypto.BioSetWriteFlag(_bioHandle);
+                    return -1;
+                }
+
+                input.Slice(0, bytesToWrite).CopyTo(new Span<byte>(_byteArray, _bytesWritten));
+                _bytesWritten += bytesToWrite;
+                return bytesToWrite;
+            }
+
+            // Bio is already released by the ssl object
+            public void Dispose()
+            {
+                if (_handle.IsAllocated)
+                {
+                    _handle.Free();
+                }
+            }
         }
     }
 }

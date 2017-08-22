@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -21,23 +22,25 @@ namespace System.Net.Security
         private static readonly AsyncProtocolCallback s_readHeaderCallback = new AsyncProtocolCallback(ReadHeaderCallback);
         private static readonly AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
 
-        private const int PinnableReadBufferSize = 4096 * 4 + 32;         // We read in 16K chunks + headers.
-        private static PinnableBufferCache s_PinnableReadBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableReadBufferSize);
-        private const int PinnableWriteBufferSize = 4096 + 1024;        // We write in 4K chunks + encryption overhead.
-        private static PinnableBufferCache s_PinnableWriteBufferCache = new PinnableBufferCache("System.Net.SslStream", PinnableWriteBufferSize);
+        private const int ReadBufferSize = 4096 * 4 + 32;         // We read in 16K chunks + headers.
+        private const int WriteBufferSize = 4096 + 1024;        // We write in 4K chunks + encryption overhead.
+
+        private static readonly ArrayPool<byte> BufferCache = ArrayPool<byte>.Shared;
 
         private SslState _sslState;
         private int _nestedWrite;
         private int _nestedRead;
         private AsyncProtocolRequest _readProtocolRequest; // cached, reusable AsyncProtocolRequest used for read operations
         private AsyncProtocolRequest _writeProtocolRequest; // cached, reusable AsyncProtocolRequest used for write operations
+        private static Action<Task, object> s_freeBufferAction = (task, buffer) =>
+        {
+            FreeBuffer((byte[])buffer);
+            task.GetAwaiter().GetResult(); // propagate any exception
+        };
 
         // Never updated directly, special properties are used.  This is the read buffer.
         private byte[] _internalBuffer;
         private bool _internalBufferFromPinnableCache;
-
-        private byte[] _pinnableOutputBuffer;                        // Used for writes when we can do it. 
-        private byte[] _pinnableOutputBufferInUse;                   // Remembers what UNENCRYPTED buffer is using _PinnableOutputBuffer.
 
         private int _internalOffset;
         private int _internalBufferCount;
@@ -47,11 +50,6 @@ namespace System.Net.Security
 
         internal SslStreamInternal(SslState sslState)
         {
-            if (PinnableBufferCacheEventSource.Log.IsEnabled())
-            {
-                PinnableBufferCacheEventSource.Log.DebugMessage1("CTOR: In System.Net._SslStream.SslStream", this.GetHashCode());
-            }
-
             _sslState = sslState;
 
             _decryptedBytesOffset = 0;
@@ -63,7 +61,7 @@ namespace System.Net.Security
         {
             if (_internalBufferFromPinnableCache)
             {
-                s_PinnableReadBufferCache.FreeBuffer(_internalBuffer);
+                BufferCache.Return(_internalBuffer);
                 _internalBufferFromPinnableCache = false;
             }
 
@@ -74,21 +72,7 @@ namespace System.Net.Security
         {
             if (_internalBufferFromPinnableCache)
             {
-                if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                {
-                    PinnableBufferCacheEventSource.Log.DebugMessage2("DTOR: In System.Net._SslStream.~SslStream Freeing Read Buffer", this.GetHashCode(), PinnableBufferCacheEventSource.AddressOfByteArray(_internalBuffer));
-                }
-
                 FreeReadBuffer();
-            }
-            if (_pinnableOutputBuffer != null)
-            {
-                if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                {
-                    PinnableBufferCacheEventSource.Log.DebugMessage2("DTOR: In System.Net._SslStream.~SslStream Freeing Write Buffer", this.GetHashCode(), PinnableBufferCacheEventSource.AddressOfByteArray(_pinnableOutputBuffer));
-                }
-
-                s_PinnableWriteBufferCache.FreeBuffer(_pinnableOutputBuffer);
             }
         }
 
@@ -231,23 +215,13 @@ namespace System.Net.Security
                 bool wasPinnable = _internalBufferFromPinnableCache;
                 byte[] saved = _internalBuffer;
 
-                if (newSize <= PinnableReadBufferSize)
+                if (newSize <= ReadBufferSize)
                 {
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage2("In System.Net._SslStream.EnsureInternalBufferSize IS pinnable", this.GetHashCode(), newSize);
-                    }
-
                     _internalBufferFromPinnableCache = true;
-                    _internalBuffer = s_PinnableReadBufferCache.AllocateBuffer();
+                    _internalBuffer = BufferCache.Rent(ReadBufferSize);
                 }
                 else
                 {
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage2("In System.Net._SslStream.EnsureInternalBufferSize NOT pinnable", this.GetHashCode(), newSize);
-                    }
-
                     _internalBufferFromPinnableCache = false;
                     _internalBuffer = new byte[newSize];
                 }
@@ -259,7 +233,7 @@ namespace System.Net.Security
 
                 if (wasPinnable)
                 {
-                    s_PinnableReadBufferCache.FreeBuffer(saved);
+                    BufferCache.Return(saved);
                 }
             }
             else if (_internalOffset > 0 && _internalBufferCount > 0)
@@ -325,7 +299,7 @@ namespace System.Net.Security
         //
         private void ProcessWrite(byte[] buffer, int offset, int count, LazyAsyncResult asyncResult)
         {
-            _sslState.CheckThrow(authSuccessCheck:true, shutdownCheck:true);
+            _sslState.CheckThrow(authSuccessCheck: true, shutdownCheck: true);
             ValidateParameters(buffer, offset, count);
 
             if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
@@ -373,31 +347,8 @@ namespace System.Net.Security
 
             // We loop to this method from the callback.
             // If the last chunk was just completed from async callback (count < 0), we complete user request.
-            if (count >= 0 )
+            if (count >= 0)
             {
-                byte[] outBuffer = null;
-                if (_pinnableOutputBufferInUse == null)
-                {
-                    if (_pinnableOutputBuffer == null)
-                    {
-                        _pinnableOutputBuffer = s_PinnableWriteBufferCache.AllocateBuffer();
-                    }
-
-                    _pinnableOutputBufferInUse = buffer;
-                    outBuffer = _pinnableOutputBuffer;
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage3("In System.Net._SslStream.StartWriting Trying Pinnable", this.GetHashCode(), count, PinnableBufferCacheEventSource.AddressOfByteArray(outBuffer));
-                    }
-                }
-                else
-                {
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage2("In System.Net._SslStream.StartWriting BufferInUse", this.GetHashCode(), count);
-                    }
-                }
-
                 do
                 {
                     if (count == 0 && !SslStreamPal.CanEncryptEmptyMessage)
@@ -416,19 +367,30 @@ namespace System.Net.Security
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     int encryptedBytes;
-                    SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
-                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+                    byte[] outBuffer = BufferCache.Rent(WriteBufferSize);
+
+                    try
                     {
-                        // Re-handshake status is not supported.
-                        ProtocolToken message = new ProtocolToken(null, status);
-                        throw new IOException(SR.net_io_encrypt, message.GetException());
+                        SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+
+                        if (status.ErrorCode == SecurityStatusPalErrorCode.ContinueNeeded)
+                        {
+                            chunkBytes = 0;
+                        }
+                        else if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+                        {
+                            // Re-handshake status is not supported.
+                            ProtocolToken message = new ProtocolToken(null, status);
+                            throw new IOException(SR.net_io_encrypt, message.GetException());
+                        }
+
+                    }
+                    catch
+                    {
+                        FreeBuffer(outBuffer);
+                        throw;
                     }
 
-                    if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                    {
-                        PinnableBufferCacheEventSource.Log.DebugMessage3("In System.Net._SslStream.StartWriting Got Encrypted Buffer",
-                            this.GetHashCode(), encryptedBytes, PinnableBufferCacheEventSource.AddressOfByteArray(outBuffer));
-                    }
 
                     if (asyncRequest != null)
                     {
@@ -437,10 +399,12 @@ namespace System.Net.Security
                         Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
                         if (t.IsCompleted)
                         {
+                            FreeBuffer(outBuffer);
                             t.GetAwaiter().GetResult();
                         }
                         else
                         {
+                            t = t.ContinueWith(s_freeBufferAction, outBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                             IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
                             if (!ar.CompletedSynchronously)
                             {
@@ -448,10 +412,18 @@ namespace System.Net.Security
                             }
                             TaskToApm.End(ar);
                         }
+
                     }
                     else
                     {
-                        _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
+                        try
+                        {
+                            _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
+                        }
+                        finally
+                        {
+                            FreeBuffer(outBuffer);
+                        }
                     }
 
                     offset += chunkBytes;
@@ -461,21 +433,14 @@ namespace System.Net.Security
                     _sslState.FinishWrite();
 
                 } while (count != 0);
-            }
 
-            if (asyncRequest != null) 
-            {
-                asyncRequest.CompleteUser();
             }
+            asyncRequest?.CompleteUser();
+        }
 
-            if (buffer == _pinnableOutputBufferInUse)
-            {
-                _pinnableOutputBufferInUse = null;
-                if (PinnableBufferCacheEventSource.Log.IsEnabled())
-                {
-                    PinnableBufferCacheEventSource.Log.DebugMessage1("In System.Net._SslStream.StartWriting Freeing buffer.", this.GetHashCode());
-                }
-            }
+        private static void FreeBuffer(byte[] buffer)
+        {
+            BufferCache.Return(buffer);
         }
 
         // Fill the buffer up to the minimum specified size (or more, if possible).
@@ -652,7 +617,7 @@ namespace System.Net.Security
 
             if (Interlocked.Exchange(ref _nestedRead, 1) == 1)
             {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, (asyncResult!=null? "BeginRead":"Read"), "read"));
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, (asyncResult != null ? "BeginRead" : "Read"), "read"));
             }
 
             // If this is an async operation, get the AsyncProtocolRequest to use.
@@ -666,9 +631,9 @@ namespace System.Net.Security
                 if (_decryptedBytesCount != 0)
                 {
                     int copyBytes = CopyDecryptedData(buffer, offset, count);
-                    
+
                     asyncRequest?.CompleteUser(copyBytes);
-                    
+
                     return copyBytes;
                 }
 
@@ -743,7 +708,7 @@ namespace System.Net.Security
                 Debug.Assert(asyncRequest != null);
                 return 0;
             }
-            
+
             return StartFrameBody(readBytes, buffer, offset, count, asyncRequest);
         }
 
@@ -772,7 +737,7 @@ namespace System.Net.Security
             }
 
             Debug.Assert(readBytes == 0 || readBytes == SecureChannel.ReadHeaderSize + payloadBytes);
-            
+
             return ProcessFrameBody(readBytes, buffer, offset, count, asyncRequest);
         }
 
@@ -829,7 +794,8 @@ namespace System.Net.Security
         private int ProcessReadErrorCode(SecurityStatusPal status, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
             ProtocolToken message = new ProtocolToken(null, status);
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
 
             if (message.Renegotiate)
             {
