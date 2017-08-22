@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -10,58 +11,38 @@ namespace System.Reflection.Metadata.Tests
     public class AssemblyDefinitionTests
     {
         [Fact]
-        public void ValidateAssemblyNameForSingleAssemblyDefinitionExe()
+        public void ValidateAssemblyNameForAssemblyDefinition()
         {
-            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
-            var assemblyDef = reader.GetAssemblyDefinition();
-            var assemblyName = assemblyDef.GetAssemblyName();
+            var assemblyItems = new[] {
+                new { Assembly = WinRT.Lib, Name = "Lib", Version = new Version(1, 0, 0, 0), ContentType = AssemblyContentType.WindowsRuntime },
+                new { Assembly = NetModule.AppCS, Name = "AppCS", Version = new Version(1, 2, 3, 4), ContentType = AssemblyContentType.Default },
+                new { Assembly = Namespace.NamespaceTests, Name = "NamespaceTests", Version = new Version(0, 0, 0, 0), ContentType = AssemblyContentType.Default },
+                new { Assembly = PortablePdbs.DocumentsDll, Name = "Documents", Version = new Version(0, 0, 0, 0), ContentType = AssemblyContentType.Default }
+            };
 
-            Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
-            Assert.Equal("AppCS", assemblyName.Name);
-            Assert.Equal(new Version(1, 2, 3, 4), assemblyName.Version);
-
-            ValidateDefinitionAssemblyNameDefaults(assemblyName);
-            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
-        }
-
-        [Fact]
-        public void ValidateAssemblyNameForSingleAssemblyDefinition()
-        {
-            var reader = MetadataReaderTests.GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
-            var handle = reader.AssemblyReferences.Skip(3).First();
-            var assemblyDef = reader.GetAssemblyDefinition();
-            var assemblyRef = reader.GetAssemblyReference(handle);
-            var assemblyName = assemblyDef.GetAssemblyName();
-
-            Assert.Equal(new Version(1, 0, 0, 0), assemblyName.Version);
-            Assert.Equal("Lib", assemblyName.Name);
-            Assert.Equal(AssemblyContentType.WindowsRuntime, assemblyName.ContentType);
-
-            ValidateDefinitionAssemblyNameDefaults(assemblyName);
-            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
-            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyRef);
-        }
-
-        [Fact]
-        public void ValidateAssemblyNameForMultipleAssemblyDefinitionExe()
-        {
-            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
-
-            foreach (var assemblyRefHandle in reader.AssemblyReferences)
+            foreach (var item in assemblyItems)
             {
-                var assemblyDef = reader.GetAssemblyDefinition();
-                var assemblyRef = reader.GetAssemblyReference(assemblyRefHandle);
-                var assemblyName = assemblyDef.GetAssemblyName();
+                var reader = MetadataReaderTests.GetMetadataReader(item.Assembly, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+                
+                foreach (var assemblyRefHandle in reader.AssemblyReferences)
+                {
+                    var assemblyDef = reader.GetAssemblyDefinition();
+                    var assemblyRef = reader.GetAssemblyReference(assemblyRefHandle);
+                    var assemblyName = assemblyDef.GetAssemblyName();
 
-                ValidateDefinitionAssemblyNameDefaults(assemblyName);
-                ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
-                ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyRef);
+                    Assert.Equal(item.Version, assemblyName.Version);
+                    Assert.Equal(item.Name, assemblyName.Name);
+                    Assert.Equal(item.ContentType, assemblyName.ContentType);
 
-                Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
+                    ValidateDefinitionAssemblyNameDefaults(assemblyName);
+                    ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
+
+                    Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
+                }
             }
         }
 
-        public void ValidateDefinitionAssemblyNameDefaults(AssemblyName assemblyName)
+        private void ValidateDefinitionAssemblyNameDefaults(AssemblyName assemblyName)
         {
             // Culture
             Assert.Null(assemblyName.CultureName);
@@ -77,7 +58,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
         }
 
-        public void ValidateDefinitionAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyDefinition assemblyDef)
+        private void ValidateDefinitionAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyDefinition assemblyDef)
         {
             // Name
             Assert.Equal(reader.GetString(assemblyDef.Name), assemblyName.Name);
@@ -90,15 +71,6 @@ namespace System.Reflection.Metadata.Tests
 
             // ContentType
             Assert.Equal((AssemblyContentType)(((int)assemblyDef.Flags & (int)AssemblyFlags.ContentTypeMask) >> 9), assemblyName.ContentType);
-        }
-
-        public void ValidateDefinitionAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyReference assemblyRef)
-        {
-            // Name
-            Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
-
-            // Version
-            Assert.NotEqual(assemblyRef.Version, assemblyName.Version);
         }
     }
 }

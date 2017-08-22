@@ -71,7 +71,7 @@ namespace System.Reflection.Metadata.Tests
             }
         }
 
-        public void ValidateReferenceAssemblyNameDefaults(AssemblyName assemblyName)
+        private void ValidateReferenceAssemblyNameDefaults(AssemblyName assemblyName)
         {
             // Culture
             Assert.Null(assemblyName.CultureName);
@@ -89,7 +89,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
         }
 
-        public void ValidateReferenceAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyReference assemblyRef)
+        private void ValidateReferenceAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyReference assemblyRef)
         {
             // Name
             Assert.Equal(reader.GetString(assemblyRef.Name), assemblyName.Name);
@@ -101,7 +101,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(reader.GetBlobBytes(assemblyRef.PublicKeyOrToken), assemblyName.GetPublicKeyToken());
         }
 
-        public void ValidateReferenceAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyDefinition assemblyDef)
+        private void ValidateReferenceAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyDefinition assemblyDef)
         {
             // Name
             Assert.NotEqual(reader.GetString(assemblyDef.Name), assemblyName.Name);
