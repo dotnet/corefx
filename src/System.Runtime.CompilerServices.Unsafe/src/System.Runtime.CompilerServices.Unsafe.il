@@ -262,7 +262,7 @@
   .method public hidebysig static !!T& AsRef<T>(void* source) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-#ifdef NETCORE20
+#ifdef netcoreapp
         .maxstack 1
         ldarg.0
         ret
