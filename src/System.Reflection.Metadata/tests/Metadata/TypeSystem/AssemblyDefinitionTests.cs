@@ -10,35 +10,18 @@ namespace System.Reflection.Metadata.Tests
     public class AssemblyDefinitionTests
     {
         [Fact]
-        public void ValidateAssemblyNameForAssemblyDefinitionExe()
+        public void ValidateAssemblyNameForSingleAssemblyDefinitionExe()
         {
             var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
+            var assemblyDef = reader.GetAssemblyDefinition();
+            var assemblyName = assemblyDef.GetAssemblyName();
 
-            AssemblyDefinition assemblyDefinition = reader.GetAssemblyDefinition();
-            AssemblyName assemblyName = assemblyDefinition.GetAssemblyName();
-
-            // Name
-            Assert.Equal(reader.GetString(assemblyDefinition.Name), assemblyName.Name);
+            Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
             Assert.Equal("AppCS", assemblyName.Name);
-
-            // Flags
-            Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
-            Assert.Equal((uint)0, (uint)assemblyName.Flags); // AssemblyFlags
-
-            // Locale
-            Assert.Null(assemblyName.CultureName);
-
-            // PublicKey
-            Assert.Null(assemblyName.GetPublicKey());
-            Assert.Null(assemblyName.GetPublicKeyToken());
-
-            // Version
-            Assert.Equal(assemblyDefinition.Version, assemblyName.Version);
             Assert.Equal(new Version(1, 2, 3, 4), assemblyName.Version);
-            
-            // HashAlgorithm
-            Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
-            Assert.Equal((Configuration.Assemblies.AssemblyHashAlgorithm)assemblyDefinition.HashAlgorithm, assemblyName.HashAlgorithm);
+
+            ValidateDefinitionAssemblyNameDefaults(assemblyName);
+            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
         }
 
         [Fact]
@@ -48,73 +31,74 @@ namespace System.Reflection.Metadata.Tests
             var handle = reader.AssemblyReferences.Skip(3).First();
             var assemblyDef = reader.GetAssemblyDefinition();
             var assemblyRef = reader.GetAssemblyReference(handle);
-
             var assemblyName = assemblyDef.GetAssemblyName();
 
-            // Name
-            Assert.Equal("Lib", assemblyName.Name);
-            Assert.Equal(reader.GetString(assemblyDef.Name), assemblyName.Name);
-            Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
-
-            // Version
             Assert.Equal(new Version(1, 0, 0, 0), assemblyName.Version);
-            Assert.Equal(assemblyDef.Version, assemblyName.Version);
-            Assert.NotEqual(assemblyRef.Version, assemblyName.Version);
+            Assert.Equal("Lib", assemblyName.Name);
+            Assert.Equal(AssemblyContentType.WindowsRuntime, assemblyName.ContentType);
 
+            ValidateDefinitionAssemblyNameDefaults(assemblyName);
+            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
+            ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyRef);
+        }
+
+        [Fact]
+        public void ValidateAssemblyNameForMultipleAssemblyDefinitionExe()
+        {
+            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
+
+            foreach (var assemblyRefHandle in reader.AssemblyReferences)
+            {
+                var assemblyDef = reader.GetAssemblyDefinition();
+                var assemblyRef = reader.GetAssemblyReference(assemblyRefHandle);
+                var assemblyName = assemblyDef.GetAssemblyName();
+
+                ValidateDefinitionAssemblyNameDefaults(assemblyName);
+                ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
+                ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyRef);
+
+                Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
+            }
+        }
+
+        public void ValidateDefinitionAssemblyNameDefaults(AssemblyName assemblyName)
+        {
             // Culture
             Assert.Null(assemblyName.CultureName);
+
+            // HashAlgorithm
+            Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
 
             // PublicKey
             Assert.Null(assemblyName.GetPublicKey());
             Assert.Null(assemblyName.GetPublicKeyToken());
 
-
-            // HashAlgorithm
-            Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
-            Assert.Equal((Configuration.Assemblies.AssemblyHashAlgorithm)assemblyDef.HashAlgorithm, assemblyName.HashAlgorithm);
-
             // Flags
             Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
-
-            // ContentType
-            Assert.Equal(AssemblyContentType.WindowsRuntime, assemblyName.ContentType);
-            Assert.Equal((AssemblyContentType)(((int)assemblyDef.Flags & 0x0E00) >> 9), assemblyName.ContentType);
         }
 
-        [Fact]
-        public void ValidateAssemblyNameForMultipleAssemblyDefinition()
+        public void ValidateDefinitionAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyDefinition assemblyDef)
         {
-            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS);
-            
-            foreach (var assemblyRefHandle in reader.AssemblyReferences)
-            {
-                var assemblyDef = reader.GetAssemblyDefinition();
-                var assemblyName = assemblyDef.GetAssemblyName();
+            // Name
+            Assert.Equal(reader.GetString(assemblyDef.Name), assemblyName.Name);
 
-                // Name
-                Assert.Equal(reader.GetString(assemblyDef.Name), assemblyName.Name);
+            // Version
+            Assert.Equal(assemblyDef.Version, assemblyName.Version);
 
-                // Version
-                Assert.Equal(assemblyDef.Version, assemblyName.Version);
+            // HashAlgorithm
+            Assert.Equal((Configuration.Assemblies.AssemblyHashAlgorithm)assemblyDef.HashAlgorithm, assemblyName.HashAlgorithm);
 
-                // Culture
-                Assert.Null(assemblyName.CultureName);
+            // ContentType
+            Assert.Equal((AssemblyContentType)(((int)assemblyDef.Flags & (int)AssemblyFlags.ContentTypeMask) >> 9), assemblyName.ContentType);
+        }
 
-                // PublicKey
-                Assert.Null(assemblyName.GetPublicKey());
-                Assert.Null(assemblyName.GetPublicKeyToken());
+        public void ValidateDefinitionAssemblyNameAgainst(AssemblyName assemblyName, MetadataReader reader, AssemblyReference assemblyRef)
+        {
+            // Name
+            Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
 
-                // HashAlgorithm
-                Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
-                Assert.Equal((Configuration.Assemblies.AssemblyHashAlgorithm)assemblyDef.HashAlgorithm, assemblyName.HashAlgorithm);
-
-                // Flags
-                Assert.Equal((uint)0, (uint)assemblyName.Flags);
-                Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
-
-                // ContentType
-                Assert.Equal(AssemblyContentType.Default, assemblyName.ContentType);
-            }
+            // Version
+            Assert.NotEqual(assemblyRef.Version, assemblyName.Version);
         }
     }
 }
