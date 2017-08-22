@@ -74,7 +74,7 @@ namespace System.Linq
             int hashCode = InternalGetHashCode(value);
             for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
             {
-                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
+                if (_slots[i]._hashCode == hashCode && _comparer.FastEquals(_slots[i]._value, value))
                 {
                     return false;
                 }
@@ -112,7 +112,7 @@ namespace System.Linq
             int last = -1;
             for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i]._next)
             {
-                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
+                if (_slots[i]._hashCode == hashCode && _comparer.FastEquals(_slots[i]._value, value))
                 {
                     if (last < 0)
                     {

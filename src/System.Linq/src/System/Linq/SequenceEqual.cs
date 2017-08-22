@@ -38,7 +38,7 @@ namespace System.Linq
             {
                 while (e1.MoveNext())
                 {
-                    if (!(e2.MoveNext() && comparer.Equals(e1.Current, e2.Current)))
+                    if (!(e2.MoveNext() && comparer.FastEquals(e1.Current, e2.Current)))
                     {
                         return false;
                     }
