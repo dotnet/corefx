@@ -660,15 +660,18 @@ namespace Microsoft.CSharp.RuntimeBinder
                 Debug.Assert(false, "MemberGroup on non-array, non-aggregate");
             }
 
-            List<CType> callingTypes = new List<CType>();
-
             // The C# binder expects that only the base virtual method is inserted
             // into the list of candidates, and only the type containing the base
             // virtual method is inserted into the list of types. However, since we
             // don't want to do all the logic, we're just going to insert every type
             // that has a member of the given name, and allow the C# binder to filter
             // out all overrides.
-            //
+
+            // CONSIDER: using a hashset to filter out duplicate interface types.
+            // Adopt a smarter algorithm to filter types before creating the exception.
+            HashSet<CType> distinctCallingTypes = new HashSet<CType>();
+            List<CType> callingTypes = new List<CType>();
+
             // Find that set of types now.
             symbmask_t mask = symbmask_t.MASK_MethodSymbol;
             switch (kind)
@@ -689,7 +692,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             for (AggregateType t = callingType; t != null; t = t.GetBaseClass())
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -713,7 +716,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // Collection interfaces will be aggregates.
                     Debug.Assert(t.IsAggregateType());
 
-                    if (_symbolTable.AggregateContainsMethod(t.AsAggregateType().GetOwningAggregate(), Name, mask))
+                    if (_symbolTable.AggregateContainsMethod(t.AsAggregateType().GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }
