@@ -84,6 +84,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(23444)]
         public void GetFileAttributesEx()
         {
             string destination = Path.Combine(s_musicFolder, "GetFileAttributesEx_" + Path.GetRandomFileName());
