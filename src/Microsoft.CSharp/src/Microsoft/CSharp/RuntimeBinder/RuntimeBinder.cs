@@ -641,11 +641,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             // don't want to do all the logic, we're just going to insert every type
             // that has a member of the given name, and allow the C# binder to filter
             // out all overrides.
-            
+
             // CONSIDER: using a hashset to filter out duplicate interface types.
             // Adopt a smarter algorithm to filter types before creating the exception.
-            HashSet<CType> callingTypes = new HashSet<CType>();
-            
+            HashSet<CType> distinctCallingTypes = new HashSet<CType>();
+            List<CType> callingTypes = new List<CType>();
+
             // Find that set of types now.
             symbmask_t mask = symbmask_t.MASK_MethodSymbol;
             switch (kind)
@@ -666,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -686,7 +687,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }
