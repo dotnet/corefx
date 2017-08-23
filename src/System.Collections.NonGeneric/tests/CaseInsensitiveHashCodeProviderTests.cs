@@ -41,13 +41,13 @@ namespace System.Collections.Tests
             RemoteInvoke((ra, rb, rexpected) =>
             {
                 var cultureNames = new string[]
-{
-            "cs-CZ","da-DK","de-DE","el-GR","en-US",
-            "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
-            "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
-            "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
-            "zh-CN","zh-HK","zh-TW"
-};
+                {
+                    "cs-CZ","da-DK","de-DE","el-GR","en-US",
+                    "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
+                    "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
+                    "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
+                    "zh-CN","zh-HK","zh-TW"
+                };
 
                 bool.TryParse(rexpected, out bool expectedResult);
 
