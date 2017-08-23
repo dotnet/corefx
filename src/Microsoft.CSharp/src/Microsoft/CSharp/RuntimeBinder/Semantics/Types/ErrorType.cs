@@ -18,6 +18,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Name nameText;
         public TypeArray typeArgs;
 
+        // ErrorTypes are always either the per-TypeManager singleton ErrorType
+        // that has a null nameText and no namespace parent, or else have a
+        // non-null nameText and have the root namespace as the namespace parent,
+        // so checking that nameText isn't null is equivalent to checking if the
+        // type has a parent.
         public bool HasParent => nameText != null;
     }
 }
