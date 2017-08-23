@@ -104,7 +104,7 @@
       "inputs": {
         "filename": "$(DockerHost_Sandbox)/init-tools.sh",
         "arguments": "",
-        "workingFolder": "$(DockerHost_Sandbox)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -122,7 +122,7 @@
       "inputs": {
         "filename": "$(DockerHost_ToolsDirectory)/scripts/docker/init-docker.sh",
         "arguments": "$(PB_DockerImageName)",
-        "workingFolder": "$(DockerHost_Sandbox)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
