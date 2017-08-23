@@ -18,12 +18,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <Import Project="System.Net.Http.WinHttpHandler.msbuild" Condition="'$(TargetsWindows)' == 'true'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
-    <!-- Need to compile it here since the NET46 target here is building against System.Runtime whereas the
-         the list of other files in System.Net.Http.WinHttpHandler.msbuild is also used by System.Net.Http
-         library and the NET46 target there uses framework assembly references instead. -->
-    <CompileItem Include="$(CommonPath)\System\Net\HttpStatusDescription.cs" />
-  </ItemGroup>
   <!--  For source files to be shown within the visual tree in Solution Explorer, the items must be
          included directly in the project file. We have the *.msbuild define the Compile items in a made
          up item called CompileItem and then just include it here. -->
@@ -40,7 +34,7 @@
     <Reference Include="System.Buffers" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />

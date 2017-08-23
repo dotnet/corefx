@@ -3,15 +3,12 @@
   <PropertyGroup>
     <PackageConfigurations>
       netstandard;
-      netstandard1.3;
-      netstandard1.4;
-      netfx-Windows_NT;
       netcoreapp-Windows_NT;
-      net462-Windows_NT;
       net47-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations)
+      netfx-Windows_NT;
       uap-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>

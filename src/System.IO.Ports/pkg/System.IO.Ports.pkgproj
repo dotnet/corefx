@@ -3,11 +3,18 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.IO.Ports.csproj">
-      <SupportedFramework>net461;netcoreapp2.0;$(AllXamarinFrameworks);$(UAPvNextTFM)</SupportedFramework>
+      <SupportedFramework>netcoreapp2.0;$(AllXamarinFrameworks);$(UAPvNextTFM)</SupportedFramework>
     </ProjectReference>
     <File Include="$(PlaceHolderFile)"> 
       <TargetPath>runtimes/win/lib/$(UAPvNextTFM)</TargetPath> 
     </File> 
+    <HarvestIncludePaths Include="ref/net461" />
+    <HarvestIncludePaths Include="lib/net461">
+      <!-- previous version of package had a bug where netstandard 
+           facade would apply to desktop when a RID was specified -->
+      <AdditionalTargetPath>runtimes/win/lib/net461</AdditionalTargetPath>
+    </HarvestIncludePaths>
+
     <InboxOnTargetFramework Include="$(UAPvNextTFM)" /> 
     <ProjectReference Include="..\src\System.IO.Ports.csproj" />
   </ItemGroup>

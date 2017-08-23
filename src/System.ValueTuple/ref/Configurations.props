@@ -3,12 +3,11 @@
   <PropertyGroup>
     <PackageConfigurations>
       portable_net40+sl4+win8+wp8;
-      netfx;
-      net47;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
       netcoreapp;
+      netfx;
       uap;
     </BuildConfigurations>
   </PropertyGroup>

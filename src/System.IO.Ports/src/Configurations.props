@@ -4,11 +4,11 @@
     <PackageConfigurations>
       netstandard-Windows_NT;
       netstandard;
-      netfx;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations)
       uap-Windows_NT;
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
