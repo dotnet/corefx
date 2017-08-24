@@ -135,8 +135,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 // WeakReference<Point> and HybridDictionary with default constructor are generating
                 // different blobs at runtime for some obscure reason. Excluding those from the check.
                 !(obj is WeakReference<Point>) &&
-                !(obj is Collections.Specialized.HybridDictionary) &&
-                !(obj is System.Net.CookieContainer))
+                !(obj is Collections.Specialized.HybridDictionary))
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
 
