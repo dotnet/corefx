@@ -915,6 +915,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Message == other.Message &&
                 @this.Source == other.Source &&
                 @this.HResult == other.HResult &&
+                @this.HelpLink == other.HelpLink &&
                 BinaryFormatterTests.CheckEquals(@this.InnerException, other.InnerException);
         }
 
