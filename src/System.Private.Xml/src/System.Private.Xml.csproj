@@ -6,7 +6,7 @@
     <AssemblyName>System.Private.Xml</AssemblyName>
     <RootNamespace>System.Xml</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn),649</NoWarn>
+    <NoWarn>$(NoWarn),649,169,414</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
