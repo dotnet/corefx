@@ -903,6 +903,20 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.MinorRevision == other.MinorRevision;
         }
 
+        public static bool IsEqual(this Exception @this, Exception other)
+        {
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                (PlatformDetection.IsFullFramework ? true :
+                (@this.StackTrace == other.StackTrace &&
+                @this.ToString() == other.ToString())) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Data, other.Data) &&
+                @this.Message == other.Message &&
+                @this.Source == other.Source &&
+                @this.HResult == other.HResult;
+        }
+
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
         {
             public bool Equals(T x, T y)
