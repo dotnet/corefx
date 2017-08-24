@@ -914,7 +914,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 BinaryFormatterTests.CheckSequenceEquals(@this.Data, other.Data) &&
                 @this.Message == other.Message &&
                 @this.Source == other.Source &&
-                @this.HResult == other.HResult;
+                @this.HResult == other.HResult &&
+                BinaryFormatterTests.CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this AggregateException @this, AggregateException other)
+        {
+            return IsEqual(@this as Exception, other as Exception) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.InnerExceptions, other.InnerExceptions);
         }
 
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
