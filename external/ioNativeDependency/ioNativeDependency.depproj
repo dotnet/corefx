@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FileApiInterop">
-      <Version>1.0.0-preview-01</Version>
+      <Version>1.0.0-preview-02</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
