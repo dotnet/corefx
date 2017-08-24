@@ -3,17 +3,31 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{FD6AA2B9-56DB-4BCC-85E0-7727506562B0}</ProjectGuid>
-    <!-- UAPvNext is not yet mapped to netstandard2.0, manually duplicate this ref -->
-    <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard'">netstandard2.0;$(UAPvNextTFM)</PackageTargetFramework>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
     <Compile Include="System.Configuration.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\ref\System.Diagnostics.Debug.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Specialized\ref\System.Collections.Specialized.csproj" />
+    <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
+    <ProjectReference Include="..\..\System.ObjectModel\ref\System.ObjectModel.csproj" />
+    <ProjectReference Include="..\..\System.ComponentModel\ref\System.ComponentModel.csproj" />
+    <ProjectReference Include="..\..\System.ComponentModel.Primitives\ref\System.ComponentModel.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.ComponentModel.TypeConverter\ref\System.ComponentModel.TypeConverter.csproj" />
+    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\ref\System.Security.Cryptography.Algorithms.csproj" />
+    <ProjectReference Include="..\..\System.Xml.ReaderWriter\ref\System.Xml.ReaderWriter.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)'  == 'true'">
     <Reference Include="mscorlib" />

@@ -1596,6 +1596,7 @@ namespace System.Configuration.Provider
         public ProviderException(string message, System.Exception innerException) { }
     }
 }
+#if !uap
 namespace System.Drawing.Configuration
 {
     public sealed partial class SystemDrawingSection : System.Configuration.ConfigurationSection
@@ -1606,6 +1607,7 @@ namespace System.Drawing.Configuration
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
     }
 }
+#endif //#if !uap
 
 #pragma warning restore CS0618
 
