@@ -569,7 +569,7 @@ namespace System.IO.Tests
 
             using (Stream memoryStream = CreateStream())
             {
-                using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+                using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream, Encoding.Unicode))
                 {
                     binaryWriter.Write(byteSpan);
                     binaryWriter.Write(charSpan);
