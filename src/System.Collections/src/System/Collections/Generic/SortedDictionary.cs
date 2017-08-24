@@ -68,7 +68,7 @@ namespace System.Collections.Generic
             }
             else
             {
-                return EqualityComparer<TValue>.Default.Equals(node.Item.Value, keyValuePair.Value);
+                return ComparerUtilities.DefaultEquals(node.Item.Value, keyValuePair.Value);
             }
         }
 
@@ -80,7 +80,7 @@ namespace System.Collections.Generic
                 return false;
             }
 
-            if (EqualityComparer<TValue>.Default.Equals(node.Item.Value, keyValuePair.Value))
+            if (ComparerUtilities.DefaultEquals(node.Item.Value, keyValuePair.Value))
             {
                 _set.Remove(keyValuePair);
                 return true;
@@ -240,10 +240,9 @@ namespace System.Collections.Generic
             }
             else
             {
-                EqualityComparer<TValue> valueComparer = EqualityComparer<TValue>.Default;
                 _set.InOrderTreeWalk(delegate (TreeSet<KeyValuePair<TKey, TValue>>.Node node)
                 {
-                    if (valueComparer.Equals(node.Item.Value, value))
+                    if (ComparerUtilities.DefaultEquals(node.Item.Value, value))
                     {
                         found = true;
                         return false;  // stop the walk

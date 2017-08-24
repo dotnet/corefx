@@ -256,7 +256,7 @@ namespace System.Linq
             int hashCode = InternalGetHashCode(key);
             for (Grouping<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
             {
-                if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
+                if (g._hashCode == hashCode && _comparer.FastEquals(g._key, key))
                 {
                     return g;
                 }

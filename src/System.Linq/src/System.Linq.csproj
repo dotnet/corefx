@@ -20,6 +20,9 @@
     <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
       <Link>System\Collections\Generic\ArrayBuilder.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Collections\Generic\ComparerUtilities.cs">
+      <Link>System\Collections\Generic\ComparerUtilities.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>System\Collections\Generic\EnumerableHelpers.cs</Link>
     </Compile>

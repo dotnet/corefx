@@ -83,7 +83,7 @@ namespace System.Collections.Generic
         #region Constructors
 
         public HashSet()
-            : this(EqualityComparer<T>.Default)
+            : this((IEqualityComparer<T>)null)
         { }
 
         public HashSet(IEqualityComparer<T> comparer)
@@ -94,18 +94,15 @@ namespace System.Collections.Generic
             }
 
             _comparer = comparer;
-            _lastIndex = 0;
-            _count = 0;
             _freeList = -1;
-            _version = 0;
         }
 
         public HashSet(int capacity)
-            : this(capacity, EqualityComparer<T>.Default)
+            : this(capacity, null)
         { }
 
         public HashSet(IEnumerable<T> collection)
-            : this(collection, EqualityComparer<T>.Default)
+            : this(collection, null)
         { }
 
         /// <summary>
@@ -264,7 +261,7 @@ namespace System.Collections.Generic
                 // see note at "HashSet" level describing why "- 1" appears in for loop
                 for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
                 {
-                    if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
+                    if (_slots[i].hashCode == hashCode && _comparer.FastEquals(_slots[i].value, item))
                     {
                         return true;
                     }
@@ -298,7 +295,7 @@ namespace System.Collections.Generic
                 int last = -1;
                 for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].next)
                 {
-                    if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
+                    if (_slots[i].hashCode == hashCode && _comparer.FastEquals(_slots[i].value, item))
                     {
                         if (last < 0)
                         {
@@ -1212,7 +1209,7 @@ namespace System.Collections.Generic
 #endif
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
-                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
+                if (_slots[i].hashCode == hashCode && _comparer.FastEquals(_slots[i].value, value))
                 {
                     return false;
                 }
@@ -1403,7 +1400,7 @@ namespace System.Collections.Generic
             int hashCode = InternalGetHashCode(item);
             for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
             {
-                if ((_slots[i].hashCode) == hashCode && _comparer.Equals(_slots[i].value, item))
+                if ((_slots[i].hashCode) == hashCode && _comparer.FastEquals(_slots[i].value, item))
                 {
                     return i;
                 }
@@ -1526,7 +1523,7 @@ namespace System.Collections.Generic
             int bucket = hashCode % _buckets.Length;
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
-                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
+                if (_slots[i].hashCode == hashCode && _comparer.FastEquals(_slots[i].value, value))
                 {
                     location = i;
                     return false; //already present
@@ -1700,7 +1697,7 @@ namespace System.Collections.Generic
                     bool found = false;
                     foreach (T set1Item in set1)
                     {
-                        if (comparer.Equals(set2Item, set1Item))
+                        if (comparer.FastEquals(set2Item, set1Item))
                         {
                             found = true;
                             break;

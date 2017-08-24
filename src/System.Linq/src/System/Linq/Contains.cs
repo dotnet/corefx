@@ -27,7 +27,7 @@ namespace System.Linq
 
             foreach (TSource element in source)
             {
-                if (comparer.Equals(element, value))
+                if (comparer.FastEquals(element, value))
                 {
                     return true;
                 }
