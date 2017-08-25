@@ -12,7 +12,7 @@ namespace System.Drawing.Text
     /// <summary>
     /// Encapsulates a collection of <see cref='System.Drawing.Font'/> objecs.
     /// </summary>
-    public sealed class PrivateFontCollection : FontCollection
+    public sealed partial class PrivateFontCollection : FontCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.Text.PrivateFontCollection'/> class.
@@ -83,12 +83,9 @@ namespace System.Drawing.Text
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             // Register private font with GDI as well so pure GDI-based controls (TextBox, Button for instance) can access it.
-            // Do this on Windows only as Unix only has GDI+ (libgdiplus), not GDI; and we don't have System.Windows.Forms
+            // This is a no-op on Unix which has GDI+ (libgdiplus), not GDI; and we don't have System.Windows.Forms
             // on Unix.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                SafeNativeMethods.AddFontFile(filename);
-            }
+            this.GdiAddFontFile(filename);
         }
 
         /// <summary>
