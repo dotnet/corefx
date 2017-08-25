@@ -58,7 +58,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18268")]
         public void CreateFile_Existence(PresetScopes scope)
         {
