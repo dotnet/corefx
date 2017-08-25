@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-    public sealed class Region : MarshalByRefObject, IDisposable
+    public sealed partial class Region : MarshalByRefObject, IDisposable
     {
 #if FINALIZATION_WATCH
         private string allocationSite = Graphics.GetAllocationStack();
@@ -188,28 +188,6 @@ namespace System.Drawing
 
             int status = SafeNativeMethods.Gdip.GdipCombineRegionRegion(new HandleRef(this, _nativeRegion), new HandleRef(region, region._nativeRegion), CombineMode.Intersect);
             SafeNativeMethods.Gdip.CheckStatus(status);
-        }
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        public void ReleaseHrgn(IntPtr regionHandle)
-        {
-            if (regionHandle == IntPtr.Zero)
-            {
-                throw new ArgumentNullException(nameof(regionHandle));
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // On Windows HRGN are (old) GDI objects. Deskop .NET does not check the return code of IntDeleteObject
-                SafeNativeMethods.IntDeleteObject(new HandleRef(this, regionHandle));
-            }
-            else
-            {
-                // for libgdiplus HRGN == GpRegion*, and we check the return code
-                int status = SafeNativeMethods.Gdip.GdipDeleteRegion(new HandleRef(this, regionHandle));
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-
         }
 
         public void Union(RectangleF rect)
