@@ -328,6 +328,22 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Equal("a", match.Value);
         }
 
+        [Fact]
+        public void Match_Timeout_Throws()
+        {
+            RemoteInvoke(() =>
+            {
+                const string DefaultMatchTimeout_ConfigKeyName = "REGEX_DEFAULT_MATCH_TIMEOUT";
+                const string Pattern = @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@(([0-9a-zA-Z])+([-\w]*[0-9a-zA-Z])*\.)+[a-zA-Z]{2,9})$"; // 723 msec
+                const string Input = "aaaaaaaaaaaaaaaaaaaa@a.a";
+
+                AppDomain.CurrentDomain.SetData(DefaultMatchTimeout_ConfigKeyName, TimeSpan.FromMilliseconds(100));
+                Assert.Throws<RegexMatchTimeoutException>(() => new Regex(Pattern).Match(Input));
+
+                return SuccessExitCode;
+            });
+        }
+
         public static IEnumerable<object[]> Match_Advanced_TestData()
         {
             // \B special character escape: ".*\\B(SUCCESS)\\B.*"
@@ -596,7 +612,7 @@ namespace System.Text.RegularExpressions.Tests
             bool isDefaultCount = RegexHelpers.IsDefaultStart(input, options, length);
             if (options == RegexOptions.None)
             {
-                if (isDefaultStart  && isDefaultCount)
+                if (isDefaultStart && isDefaultCount)
                 {
                     // Use Match(string) or Match(string, string)
                     VerifyMatch(new Regex(pattern).Match(input), true, expected);
