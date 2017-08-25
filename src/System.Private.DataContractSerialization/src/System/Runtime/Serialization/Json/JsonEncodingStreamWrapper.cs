@@ -223,6 +223,48 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
+        public override int Read(Span<byte> destination)
+        {
+            try
+            {
+                if (_byteCount == 0)
+                {
+                    if (_encodingCode == SupportedEncoding.UTF8)
+                    {
+                        return _stream.Read(destination);
+                    }
+
+                    // No more bytes than can be turned into characters
+                    _byteOffset = 0;
+                    _byteCount = _stream.Read(_bytes, _byteCount, (_chars.Length - 1) * 2);
+
+                    // Check for end of stream
+                    if (_byteCount == 0)
+                    {
+                        return 0;
+                    }
+
+                    // Fix up incomplete chars
+                    CleanupCharBreak();
+
+                    // Change encoding
+                    int charCount = _encoding.GetChars(_bytes, 0, _byteCount, _chars, 0);
+                    _byteCount = Encoding.UTF8.GetBytes(_chars, 0, charCount, _bytes, 0);
+                }
+
+                // Give them bytes
+                int count = Math.Min(_byteCount, destination.Length);
+                new ReadOnlySpan<byte>(_bytes, _byteOffset, count).CopyTo(destination);
+                _byteOffset += count;
+                _byteCount -= count;
+                return count;
+            }
+            catch (DecoderFallbackException ex)
+            {
+                throw new XmlException(SR.JsonInvalidBytes, ex);
+            }
+        }
+
         public override int ReadByte()
         {
             if (_byteCount == 0 && _encodingCode == SupportedEncoding.UTF8)
@@ -264,6 +306,25 @@ namespace System.Runtime.Serialization.Json
                 _stream.Write(_bytes, 0, _byteCount);
                 offset += size;
                 count -= size;
+            }
+        }
+
+        public override void Write(ReadOnlySpan<byte> source)
+        {
+            // Optimize UTF-8 case
+            if (_encodingCode == SupportedEncoding.UTF8)
+            {
+                _stream.Write(source);
+                return;
+            }
+
+            while (source.Length > 0)
+            {
+                int size = Math.Min(_chars.Length, source.Length);
+                int charCount = _dec.GetChars(source.Slice(0, size), _chars, false);
+                _byteCount = _enc.GetBytes(_chars, 0, charCount, _bytes, 0, false);
+                _stream.Write(_bytes, 0, _byteCount);
+                source = source.Slice(size);
             }
         }
 
