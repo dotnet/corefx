@@ -52,9 +52,6 @@
     <Compile Include="File\ReadWriteAllBytesAsync.cs" />
     <Compile Include="File\ReadWriteAllTextAsync.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
-    <Compile Include="WinRT_BrokeredFunctions.cs" />
-  </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
     <Compile Include="DirectoryInfo\GetSetAttributes.cs" />
