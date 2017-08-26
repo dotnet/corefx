@@ -12,7 +12,7 @@ namespace System.Data.Tests.Common
 
             string dataSetColumn = dataColumnMapping.DataSetColumn;
 
-            Assert.Equal("", dataSetColumn);
+            Assert.Equal(string.Empty, dataSetColumn);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace System.Data.Tests.Common
 
             string sourceColumn = dataColumnMapping.SourceColumn;
 
-            Assert.Equal("", sourceColumn);
+            Assert.Equal(string.Empty, sourceColumn);
         }
 
         [Fact]
@@ -43,12 +43,12 @@ namespace System.Data.Tests.Common
         public void GetDataColumnBySchemaAction_String_String_DataTable_Type_MissingSchemaAction_DataColumnExpressionExistsThrowsException()
         {
             DataColumn priceColumn = new DataColumn();
-            priceColumn.DataType = Type.GetType("System.Decimal");
+            priceColumn.DataType = typeof(decimal);
             priceColumn.ColumnName = "price";
             priceColumn.DefaultValue = 50;
 
             DataColumn taxColumn = new DataColumn();
-            taxColumn.DataType = Type.GetType("System.Decimal");
+            taxColumn.DataType = typeof(decimal);
             taxColumn.ColumnName = "tax";
             taxColumn.Expression = "price * 0.0862";
 
