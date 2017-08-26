@@ -288,7 +288,7 @@ namespace System.Web
 
         public static string JavaScriptStringEncode(string value)
         {
-            return JavaScriptStringEncode(value, false);
+            return HttpEncoder.JavaScriptStringEncode(value);
         }
 
         public static string JavaScriptStringEncode(string value, bool addDoubleQuotes)
