@@ -269,7 +269,7 @@ namespace System.Web
          )]
         public static string UrlEncodeUnicode(string str)
         {
-            return HttpEncoder.UrlEncodeUnicode(str, ignoreAscii: false);
+            return HttpEncoder.UrlEncodeUnicode(str);
         }
 
         public static string UrlDecode(string str, Encoding e)

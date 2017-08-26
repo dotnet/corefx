@@ -522,11 +522,11 @@ namespace System.Web.Util
             if (e == null)
                 e = Encoding.UTF8;
             byte[] bytes = e.GetBytes(str);
-            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
+            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length);
             return Encoding.ASCII.GetString(encodedBytes);
         }
 
-        private static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        private static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count)
         {
             if (!ValidateUrlEncodingParameters(bytes, offset, count))
             {
@@ -543,7 +543,7 @@ namespace System.Web.Util
             }
 
             // nothing to expand?
-            if (!alwaysCreateNewReturnValue && cNonAscii == 0)
+            if (cNonAscii == 0)
                 return bytes;
 
             // expand not 'safe' characters into %XX, spaces to +s
