@@ -30,9 +30,8 @@ namespace System.Web
                 {
                     sb.AppendFormat("{0}={1}&", keys[i], UrlEncode(this[keys[i]]));
                 }
-                if (sb.Length > 0)
-                    sb.Length--;
-                return sb.ToString();
+
+                return sb.ToString(0, sb.Length - 1);
             }
         }
 
