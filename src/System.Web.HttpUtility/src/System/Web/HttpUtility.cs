@@ -248,7 +248,7 @@ namespace System.Web
         {
             if (bytes == null)
                 return null;
-            return UrlDecodeToBytes(bytes, 0, bytes != null ? bytes.Length : 0);
+            return UrlDecodeToBytes(bytes, 0, bytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(string str, Encoding e)
