@@ -256,12 +256,12 @@ namespace System.Web
             if (str == null)
                 return null;
             var bytes = e.GetBytes(str);
-            return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] bytes, int offset, int count)
         {
-            return HttpEncoder.UrlEncode(bytes, offset, count, true /* alwaysCreateNewReturnValue */);
+            return HttpEncoder.UrlEncode(bytes, offset, count, alwaysCreateNewReturnValue: true);
         }
 
         [Obsolete(
@@ -269,7 +269,7 @@ namespace System.Web
          )]
         public static string UrlEncodeUnicode(string str)
         {
-            return HttpEncoder.UrlEncodeUnicode(str, false /* ignoreAscii */);
+            return HttpEncoder.UrlEncodeUnicode(str, ignoreAscii: false);
         }
 
         public static string UrlDecode(string str, Encoding e)

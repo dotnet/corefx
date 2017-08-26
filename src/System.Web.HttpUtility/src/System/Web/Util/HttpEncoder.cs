@@ -522,7 +522,7 @@ namespace System.Web.Util
             if (e == null)
                 e = Encoding.UTF8;
             byte[] bytes = e.GetBytes(str);
-            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
             return Encoding.ASCII.GetString(encodedBytes);
         }
 
