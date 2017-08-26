@@ -528,11 +528,6 @@ namespace System.Web.Util
 
         private static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count)
         {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-
             int cNonAscii = 0;
 
             // count them first
