@@ -570,7 +570,7 @@ namespace System.Web.Util
         }
 
         [Obsolete("This method produces non-standards-compliant output and has interoperability issues. The preferred alternative is UrlEncode(*).")]
-        internal static string UrlEncodeUnicode(string value, bool ignoreAscii)
+        internal static string UrlEncodeUnicode(string value)
         {
             if (value == null)
             {
@@ -586,7 +586,7 @@ namespace System.Web.Util
 
                 if ((ch & 0xff80) == 0)
                 {  // 7 bit?
-                    if (ignoreAscii || HttpEncoderUtility.IsUrlSafeChar(ch))
+                    if (HttpEncoderUtility.IsUrlSafeChar(ch))
                     {
                         sb.Append(ch);
                     }
