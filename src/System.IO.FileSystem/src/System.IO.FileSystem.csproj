@@ -192,15 +192,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteVolumeMountPoint.cs">
       <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.cs</Link>
     </Compile>
-<<<<<<< HEAD
     <Compile Include="$(CommonPath)\System\Memory\FixedBufferExtensions.cs">
       <Link>Common\System\Memory\FixedBufferExtensions.cs</Link>
     </Compile>
-  </ItemGroup>
-  <!-- Windows : Win32 only -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
-=======
->>>>>>> afc02699fd... Don't use FromApp apis in UAP
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteFile.cs">
       <Link>Common\Interop\Windows\Interop.DeleteFile.cs</Link>
     </Compile>
