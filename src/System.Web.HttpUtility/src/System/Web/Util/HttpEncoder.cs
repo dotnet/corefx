@@ -211,41 +211,38 @@ namespace System.Web.Util
 
                     startIndex = i + 1;
                     count = 0;
-                }
 
-                switch (c)
-                {
-                    case '\r':
-                        b.Append("\\r");
-                        break;
-                    case '\t':
-                        b.Append("\\t");
-                        break;
-                    case '\"':
-                        b.Append("\\\"");
-                        break;
-                    case '\\':
-                        b.Append("\\\\");
-                        break;
-                    case '\n':
-                        b.Append("\\n");
-                        break;
-                    case '\b':
-                        b.Append("\\b");
-                        break;
-                    case '\f':
-                        b.Append("\\f");
-                        break;
-                    default:
-                        if (CharRequiresJavaScriptEncoding(c))
-                        {
+                    switch (c)
+                    {
+                        case '\r':
+                            b.Append("\\r");
+                            break;
+                        case '\t':
+                            b.Append("\\t");
+                            break;
+                        case '\"':
+                            b.Append("\\\"");
+                            break;
+                        case '\\':
+                            b.Append("\\\\");
+                            break;
+                        case '\n':
+                            b.Append("\\n");
+                            break;
+                        case '\b':
+                            b.Append("\\b");
+                            break;
+                        case '\f':
+                            b.Append("\\f");
+                            break;
+                        default:
                             AppendCharAsUnicodeJavaScript(b, c);
-                        }
-                        else
-                        {
-                            count++;
-                        }
-                        break;
+                            break;
+                    }
+                }
+                else
+                {
+                    count++;
                 }
             }
 
