@@ -384,10 +384,14 @@ namespace System.Web.Tests
             ParseQueryStringData.Select(a => new object[] { "?" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
 
         public static IEnumerable<object[]> ParseQueryStringDataEscapedQ =>
-            ParseQueryStringData.Select(a => new object[] { "&#x3F;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
+            PlatformDetection.IsFullFramework
+                ? Enumerable.Empty<object[]>()
+                : ParseQueryStringData.Select(a => new object[] { "&#x3F;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
 
         public static IEnumerable<object[]> ParseQueryStringDataDecimalEscapedQ =>
-            ParseQueryStringData.Select(a => new object[] { "&#63;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
+            PlatformDetection.IsFullFramework
+                ? Enumerable.Empty<object[]>()
+                : ParseQueryStringData.Select(a => new object[] { "&#63;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
 
         [Theory]
         [MemberData(nameof(ParseQueryStringData))]
@@ -406,7 +410,7 @@ namespace System.Web.Tests
             }
         }
 
-        [Fact]
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Issue #23574 isn't fixed on NetFX")]
         public void ParseQueryStringWithNameBeginningWithQuestionMark()
         {
             NameValueCollection parsed = HttpUtility.ParseQueryString("??name=value");
