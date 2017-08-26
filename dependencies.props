@@ -10,11 +10,11 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>70336e12b1f42723e22b3844c46fdd70932212cb</CoreFxCurrentRef>
-    <CoreClrCurrentRef>cc2b83584c714beb0071c17bfa0abfb2c9abbb31</CoreClrCurrentRef>
+    <CoreClrCurrentRef>154fd0869f9462f56fee89cc8e1c5e10674185a7</CoreClrCurrentRef>
     <CoreSetupCurrentRef>70336e12b1f42723e22b3844c46fdd70932212cb</CoreSetupCurrentRef>
     <ExternalCurrentRef>d0ecf8c1b0e66f51eae4cfd79f851fd0812554d7</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>70336e12b1f42723e22b3844c46fdd70932212cb</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>70336e12b1f42723e22b3844c46fdd70932212cb</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>154fd0869f9462f56fee89cc8e1c5e10674185a7</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>154fd0869f9462f56fee89cc8e1c5e10674185a7</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
     <StandardCurrentRef>cc2b83584c714beb0071c17bfa0abfb2c9abbb31</StandardCurrentRef>
   </PropertyGroup>
@@ -23,11 +23,11 @@
   <PropertyGroup>
     <PlatformPackageVersion>2.1.0-preview1-25625-01</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>preview1-25625-01</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-preview1-25625-02</CoreClrPackageVersion>
+    <CoreClrPackageVersion>2.1.0-preview1-25626-01</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25624-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>rel-25625-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>rel-25625-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-25625-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>rel-25626-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>rel-25626-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-25626-00</ProjectNTfsTestILCPackageVersion>
     <NETStandardPackageVersion>2.1.0-preview1-25625-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25625-01</MicrosoftNETCoreAppPackageVersion>
