@@ -48,6 +48,8 @@ namespace System.Web
             if (encoding == null)
                 throw new ArgumentNullException(nameof(encoding));
 
+            query = HtmlDecode(query);
+
             if ((query.Length > 0) && (query[0] == '?'))
                 query = query.Substring(1);
 
@@ -56,15 +58,13 @@ namespace System.Web
             return result;
         }
 
-        private static void ParseQueryString(string query, Encoding encoding, NameValueCollection result)
+        private static void ParseQueryString(string decoded, Encoding encoding, NameValueCollection result)
         {
-            if (query.Length == 0)
+            if (decoded.Length == 0)
                 return;
 
-            var decoded = HtmlDecode(query);
             var decodedLength = decoded.Length;
             var namePos = 0;
-            var first = true;
             while (namePos <= decodedLength)
             {
                 int valuePos = -1, valueEnd = -1;
@@ -79,13 +79,6 @@ namespace System.Web
                         break;
                     }
 
-                if (first)
-                {
-                    first = false;
-                    if (decoded[namePos] == '?')
-                        namePos++;
-                }
-
                 string name;
                 if (valuePos == -1)
                 {
@@ -98,18 +91,13 @@ namespace System.Web
                 }
                 if (valueEnd < 0)
                 {
-                    namePos = -1;
                     valueEnd = decoded.Length;
                 }
-                else
-                {
-                    namePos = valueEnd + 1;
-                }
+
+                namePos = valueEnd + 1;
                 var value = UrlDecode(decoded.Substring(valuePos, valueEnd - valuePos), encoding);
 
                 result.Add(name, value);
-                if (namePos == -1)
-                    break;
             }
         }
 

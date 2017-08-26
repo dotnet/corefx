@@ -30,6 +30,7 @@
 //
 
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -382,9 +383,17 @@ namespace System.Web.Tests
         public static IEnumerable<object[]> ParseQueryStringDataQ =>
             ParseQueryStringData.Select(a => new object[] { "?" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
 
+        public static IEnumerable<object[]> ParseQueryStringDataEscapedQ =>
+            ParseQueryStringData.Select(a => new object[] { "&#x3F;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
+
+        public static IEnumerable<object[]> ParseQueryStringDataDecimalEscapedQ =>
+            ParseQueryStringData.Select(a => new object[] { "&#63;" + (string)a[0] }.Concat(a.Skip(1)).ToArray());
+
         [Theory]
         [MemberData(nameof(ParseQueryStringData))]
         [MemberData(nameof(ParseQueryStringDataQ))]
+        [MemberData(nameof(ParseQueryStringDataEscapedQ))]
+        [MemberData(nameof(ParseQueryStringDataDecimalEscapedQ))]
         public void ParseQueryString(string input, IList<string> keys, IList<IList<string>> values)
         {
             var parsed = HttpUtility.ParseQueryString(input);
@@ -395,6 +404,13 @@ namespace System.Web.Tests
                 string[] actualValues = parsed.GetValues(i);
                 Assert.Equal<string>(values[i], actualValues);
             }
+        }
+
+        [Fact]
+        public void ParseQueryStringWithNameBeginningWithQuestionMark()
+        {
+            NameValueCollection parsed = HttpUtility.ParseQueryString("??name=value");
+            Assert.Equal("value", parsed["?name"]);
         }
 
         [Fact]
