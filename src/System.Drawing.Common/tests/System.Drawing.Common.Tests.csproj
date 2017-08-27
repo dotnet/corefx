@@ -37,6 +37,40 @@
     <Compile Include="mono\System.Drawing\GraphicsTests.cs" />
     <Compile Include="mono\System.Imaging\MetafileTest.cs" />
     <Compile Include="mono\System.Drawing\BitmapTests.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\GraphicsPathIteratorTest.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\GraphicsPathTest.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\LinearGradientBrushTest.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\PathDataTest.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\PathGradientBrushTest.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\TestBlend.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\TestColorBlend.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\TestHatchBrush.cs" />
+    <Compile Include="mono\System.Drawing.Drawing2D\TestMatrix.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\EmfPlusRecordTypeTest.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\FrameDimensionTest.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\TestColorMatrix.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\TestImageAttributes.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\TestImageCodecInfo.cs" />
+    <Compile Include="mono\System.Drawing.Printing\PrintingServicesUnixTest.cs" />
+    <Compile Include="mono\System.Drawing\ColorTranslator.cs" />
+    <Compile Include="mono\System.Drawing\FontFamilyTest.cs" />
+    <Compile Include="mono\System.Drawing\PenTest.cs" />
+    <Compile Include="mono\System.Drawing\RegionDataTest.cs" />
+    <Compile Include="mono\System.Drawing\RegionNonRectTest.cs" />
+    <Compile Include="mono\System.Drawing\SolidBrushTest.cs" />
+    <Compile Include="mono\System.Drawing\SystemFontsTest.cs" />
+    <Compile Include="mono\System.Drawing\SystemIconsTest.cs" />
+    <Compile Include="mono\System.Drawing\TestBitmap.cs" />
+    <Compile Include="mono\System.Drawing\TestBrushes.cs" />
+    <Compile Include="mono\System.Drawing\TestFont.cs" />
+    <Compile Include="mono\System.Drawing\TestIcon.cs" />
+    <Compile Include="mono\System.Drawing\TestImage.cs" />
+    <Compile Include="mono\System.Drawing\TestPens.cs" />
+    <Compile Include="mono\System.Drawing\TestRegion.cs" />
+    <Compile Include="mono\System.Drawing\TestStringFormat.cs" />
+    <Compile Include="mono\System.Drawing\TestSystemBrushes.cs" />
+    <Compile Include="mono\System.Drawing\TestSystemPens.cs" />
+    <Compile Include="mono\System.Drawing\TextureBrushTest.cs" />
     <Compile Include="PenTests.cs" />
     <Compile Include="PensTests.cs" />
     <Compile Include="Imaging\BitmapDataTests.cs" />
@@ -107,6 +141,9 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="mono\resources\" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

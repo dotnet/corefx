@@ -37,6 +37,7 @@ namespace System
         public static bool IsNotRedHat => true;
         public static bool IsRedHat69 => false;
         public static bool IsNotRedHat69 => true;
+        public static bool IsRedHat73 => false;
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
