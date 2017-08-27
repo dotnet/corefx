@@ -30,9 +30,8 @@ namespace System.Web
                 {
                     sb.AppendFormat("{0}={1}&", keys[i], UrlEncode(this[keys[i]]));
                 }
-                if (sb.Length > 0)
-                    sb.Length--;
-                return sb.ToString();
+
+                return sb.ToString(0, sb.Length - 1);
             }
         }
 
@@ -49,6 +48,8 @@ namespace System.Web
             if (encoding == null)
                 throw new ArgumentNullException(nameof(encoding));
 
+            query = HtmlDecode(query);
+
             if ((query.Length > 0) && (query[0] == '?'))
                 query = query.Substring(1);
 
@@ -57,15 +58,13 @@ namespace System.Web
             return result;
         }
 
-        private static void ParseQueryString(string query, Encoding encoding, NameValueCollection result)
+        private static void ParseQueryString(string decoded, Encoding encoding, NameValueCollection result)
         {
-            if (query.Length == 0)
+            if (decoded.Length == 0)
                 return;
 
-            var decoded = HtmlDecode(query);
             var decodedLength = decoded.Length;
             var namePos = 0;
-            var first = true;
             while (namePos <= decodedLength)
             {
                 int valuePos = -1, valueEnd = -1;
@@ -80,13 +79,6 @@ namespace System.Web
                         break;
                     }
 
-                if (first)
-                {
-                    first = false;
-                    if (decoded[namePos] == '?')
-                        namePos++;
-                }
-
                 string name;
                 if (valuePos == -1)
                 {
@@ -99,18 +91,13 @@ namespace System.Web
                 }
                 if (valueEnd < 0)
                 {
-                    namePos = -1;
                     valueEnd = decoded.Length;
                 }
-                else
-                {
-                    namePos = valueEnd + 1;
-                }
+
+                namePos = valueEnd + 1;
                 var value = UrlDecode(decoded.Substring(valuePos, valueEnd - valuePos), encoding);
 
                 result.Add(name, value);
-                if (namePos == -1)
-                    break;
             }
         }
 
@@ -164,7 +151,6 @@ namespace System.Web
                 return null;
             return UrlEncode(str, Encoding.UTF8);
         }
-
 
         public static string UrlPathEncode(string str)
         {
@@ -248,7 +234,7 @@ namespace System.Web
         {
             if (bytes == null)
                 return null;
-            return UrlDecodeToBytes(bytes, 0, bytes != null ? bytes.Length : 0);
+            return UrlDecodeToBytes(bytes, 0, bytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(string str, Encoding e)
@@ -256,12 +242,12 @@ namespace System.Web
             if (str == null)
                 return null;
             var bytes = e.GetBytes(str);
-            return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] bytes, int offset, int count)
         {
-            return HttpEncoder.UrlEncode(bytes, offset, count, true /* alwaysCreateNewReturnValue */);
+            return HttpEncoder.UrlEncode(bytes, offset, count, alwaysCreateNewReturnValue: true);
         }
 
         [Obsolete(
@@ -269,7 +255,7 @@ namespace System.Web
          )]
         public static string UrlEncodeUnicode(string str)
         {
-            return HttpEncoder.UrlEncodeUnicode(str, false /* ignoreAscii */);
+            return HttpEncoder.UrlEncodeUnicode(str);
         }
 
         public static string UrlDecode(string str, Encoding e)
@@ -289,7 +275,7 @@ namespace System.Web
 
         public static string JavaScriptStringEncode(string value)
         {
-            return JavaScriptStringEncode(value, false);
+            return HttpEncoder.JavaScriptStringEncode(value);
         }
 
         public static string JavaScriptStringEncode(string value, bool addDoubleQuotes)

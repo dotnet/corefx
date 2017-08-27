@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Web.Util
 {
     internal static class UriUtil
@@ -50,13 +52,11 @@ namespace System.Web.Util
                     // To retain the same string as originally given, find the authority in the original url and include
                     // everything up to that.
                     int authorityIndex = inputWithoutQueryFragment.IndexOf(authority, StringComparison.OrdinalIgnoreCase);
-                    if (authorityIndex != -1)
-                    {
-                        int schemeAndAuthorityLength = authorityIndex + authority.Length;
-                        schemeAndAuthority = inputWithoutQueryFragment.Substring(0, schemeAndAuthorityLength);
-                        path = inputWithoutQueryFragment.Substring(schemeAndAuthorityLength);
-                        return true;
-                    }
+                    Debug.Assert(authorityIndex != -1); // Otherwise authority would be null or empty.
+                    int schemeAndAuthorityLength = authorityIndex + authority.Length;
+                    schemeAndAuthority = inputWithoutQueryFragment.Substring(0, schemeAndAuthorityLength);
+                    path = inputWithoutQueryFragment.Substring(schemeAndAuthorityLength);
+                    return true;
                 }
             }
 

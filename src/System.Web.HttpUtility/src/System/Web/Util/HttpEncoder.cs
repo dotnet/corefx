@@ -211,41 +211,38 @@ namespace System.Web.Util
 
                     startIndex = i + 1;
                     count = 0;
-                }
 
-                switch (c)
-                {
-                    case '\r':
-                        b.Append("\\r");
-                        break;
-                    case '\t':
-                        b.Append("\\t");
-                        break;
-                    case '\"':
-                        b.Append("\\\"");
-                        break;
-                    case '\\':
-                        b.Append("\\\\");
-                        break;
-                    case '\n':
-                        b.Append("\\n");
-                        break;
-                    case '\b':
-                        b.Append("\\b");
-                        break;
-                    case '\f':
-                        b.Append("\\f");
-                        break;
-                    default:
-                        if (CharRequiresJavaScriptEncoding(c))
-                        {
+                    switch (c)
+                    {
+                        case '\r':
+                            b.Append("\\r");
+                            break;
+                        case '\t':
+                            b.Append("\\t");
+                            break;
+                        case '\"':
+                            b.Append("\\\"");
+                            break;
+                        case '\\':
+                            b.Append("\\\\");
+                            break;
+                        case '\n':
+                            b.Append("\\n");
+                            break;
+                        case '\b':
+                            b.Append("\\b");
+                            break;
+                        case '\f':
+                            b.Append("\\f");
+                            break;
+                        default:
                             AppendCharAsUnicodeJavaScript(b, c);
-                        }
-                        else
-                        {
-                            count++;
-                        }
-                        break;
+                            break;
+                    }
+                }
+                else
+                {
+                    count++;
                 }
             }
 
@@ -517,22 +514,15 @@ namespace System.Web.Util
         //  Helper to encode the non-ASCII url characters only
         private static string UrlEncodeNonAscii(string str, Encoding e)
         {
-            if (string.IsNullOrEmpty(str))
-                return str;
-            if (e == null)
-                e = Encoding.UTF8;
+            Debug.Assert(!string.IsNullOrEmpty(str));
+            Debug.Assert(e != null);
             byte[] bytes = e.GetBytes(str);
-            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length);
             return Encoding.ASCII.GetString(encodedBytes);
         }
 
-        private static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        private static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count)
         {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-
             int cNonAscii = 0;
 
             // count them first
@@ -543,7 +533,7 @@ namespace System.Web.Util
             }
 
             // nothing to expand?
-            if (!alwaysCreateNewReturnValue && cNonAscii == 0)
+            if (cNonAscii == 0)
                 return bytes;
 
             // expand not 'safe' characters into %XX, spaces to +s
@@ -570,7 +560,7 @@ namespace System.Web.Util
         }
 
         [Obsolete("This method produces non-standards-compliant output and has interoperability issues. The preferred alternative is UrlEncode(*).")]
-        internal static string UrlEncodeUnicode(string value, bool ignoreAscii)
+        internal static string UrlEncodeUnicode(string value)
         {
             if (value == null)
             {
@@ -586,7 +576,7 @@ namespace System.Web.Util
 
                 if ((ch & 0xff80) == 0)
                 {  // 7 bit?
-                    if (ignoreAscii || HttpEncoderUtility.IsUrlSafeChar(ch))
+                    if (HttpEncoderUtility.IsUrlSafeChar(ch))
                     {
                         sb.Append(ch);
                     }
