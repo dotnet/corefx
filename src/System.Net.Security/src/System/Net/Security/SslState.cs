@@ -21,6 +21,7 @@ namespace System.Net.Security
         private static AsyncProtocolCallback s_partialFrameCallback = new AsyncProtocolCallback(PartialFrameCallback);
         private static AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
         private static AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
+        private static WaitCallback s_completeWaitCallback = new WaitCallback(CompleteRequestWaitCallback);
 
         private RemoteCertValidationCallback _certValidationDelegate;
         private LocalCertSelectionCallback _certSelectionDelegate;
@@ -580,8 +581,7 @@ namespace System.Net.Security
                 // Not aync so the connection is completed at this point.
                 if (lazyResult == null && NetEventSource.IsEnabled)
                 {
-                    if (NetEventSource.IsEnabled)
-                        NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
+                    if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
                         SslProtocol,
                         CipherAlgorithm,
                         CipherStrength,
@@ -715,8 +715,7 @@ namespace System.Net.Security
             // Connection is completed at this point.
             if (NetEventSource.IsEnabled)
             {
-                if (NetEventSource.IsEnabled)
-                    NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
+                if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
                     SslProtocol,
                     CipherAlgorithm,
                     CipherStrength,
@@ -1016,8 +1015,7 @@ namespace System.Net.Security
         //
         private bool CompleteHandshake(ref ProtocolToken alertToken)
         {
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Enter(this);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
 
             Context.ProcessHandshakeSuccess();
 
@@ -1026,16 +1024,14 @@ namespace System.Net.Security
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
 
-                if (NetEventSource.IsEnabled)
-                    NetEventSource.Exit(this, false);
+                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, false);
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
 
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Exit(this, true);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, true);
             return true;
         }
 
@@ -1093,8 +1089,7 @@ namespace System.Net.Security
 
         private static void PartialFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1118,8 +1113,7 @@ namespace System.Net.Security
         //
         private static void ReadFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1190,7 +1184,22 @@ namespace System.Net.Security
                 }
 
                 _lockReadState = LockRead;
-                ProcessPendingWrite();
+                object obj = _queuedReadStateRequest;
+                if (obj == null)
+                {
+                    // Other thread did not get under the lock yet.
+                    return;
+                }
+
+                _queuedReadStateRequest = null;
+                if (obj is LazyAsyncResult)
+                {
+                    ((LazyAsyncResult)obj).InvokeCallback();
+                }
+                else
+                {
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(CompleteRequestWaitCallback), obj);
+                }
             }
         }
 
@@ -1279,6 +1288,7 @@ namespace System.Net.Security
             {
                 return Task.CompletedTask;
             }
+
             lock (this)
             {
                 if (_lockWriteState != LockHandshake)
@@ -1288,7 +1298,7 @@ namespace System.Net.Security
                 }
 
                 _lockWriteState = LockPendingWrite;
-                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
+                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
                 _queuedWriteStateRequest = completionSource;
                 return completionSource.Task;
             }
@@ -1422,6 +1432,8 @@ namespace System.Net.Security
 
         private void ProcessPendingWrite()
         {
+            Debug.Assert(_lockWriteState == LockPendingWrite || _lockWriteState == LockHandshake);
+
             object obj = _queuedWriteStateRequest;
             _queuedWriteStateRequest = null;
 
@@ -1435,14 +1447,13 @@ namespace System.Net.Security
                     lazy.InvokeCallback();
                     return;
                 case TaskCompletionSource<int> completionSource:
-                    //Async write is pending, should it be started on another thread?
-                    //Or is it fine to do it here
+                    //Async write is pending, it will start async due to the TaskCompletionOptions
                     completionSource.SetResult(0);
                     return;
                 default:
                     // Async write is pending, start it on other thread.
                     // Consider: we could start it in on this thread but that will delay THIS handshake completion
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(CompleteRequestWaitCallback), obj);
+                    ThreadPool.QueueUserWorkItem(s_completeWaitCallback, obj);
                     return;
             }
         }
@@ -1663,8 +1674,7 @@ namespace System.Net.Security
         // This is called from SslStream class too.
         internal int GetRemainingFrameSize(byte[] buffer, int offset, int dataSize)
         {
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Enter(this, buffer, offset, dataSize);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, buffer, offset, dataSize);
 
             int payloadSize = -1;
             switch (_Framing)
@@ -1704,8 +1714,7 @@ namespace System.Net.Security
                     break;
             }
 
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Exit(this, payloadSize);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, payloadSize);
             return payloadSize;
         }
 
@@ -1761,7 +1770,7 @@ namespace System.Net.Security
         //
         // Called with no user stack.
         //
-        private void CompleteRequestWaitCallback(object state)
+        private static void CompleteRequestWaitCallback(object state)
         {
             AsyncProtocolRequest request = (AsyncProtocolRequest)state;
 

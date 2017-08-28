@@ -229,7 +229,7 @@ namespace System.Net.Security
             {
                 try
                 {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -251,15 +251,15 @@ namespace System.Net.Security
 
         private async Task WaitForWriteIOSlot(Task lockTask, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            await lockTask;
-            await WriteSingleChunk(buffer, offset, count, cancellationToken);
+            await lockTask.ConfigureAwait(false);
+            await WriteSingleChunk(buffer, offset, count, cancellationToken).ConfigureAwait(false);
         }
 
         internal Task WriteSingleChunk(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             // Request a write IO slot.
             Task ioSlot = _sslState.CheckEnqueueWriteAsync();
-            if (!ioSlot.IsCompleted)
+            if (!ioSlot.IsCompletedSuccessfully)
             {
                 // Operation is async and has been queued, return.
                 return WaitForWriteIOSlot(ioSlot, buffer, offset, count, cancellationToken);
@@ -269,6 +269,7 @@ namespace System.Net.Security
             byte[] outBuffer = rentedBuffer;
 
             SecurityStatusPal status = _sslState.EncryptData(buffer, offset, count, ref outBuffer, out int encryptedBytes);
+
             if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 // Re-handshake status is not supported.
@@ -276,6 +277,7 @@ namespace System.Net.Security
                 ArrayPool<byte>.Shared.Return(rentedBuffer);
                 throw new IOException(SR.net_io_encrypt, message.GetException());
             }
+
             Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes, cancellationToken);
             if (t.IsCompleted)
             {
@@ -285,14 +287,14 @@ namespace System.Net.Security
             }
             else
             {
-                return CompleteAwait(t, rentedBuffer);
+                return CompleteAsync(t, rentedBuffer);
             }
 
-            async Task CompleteAwait(Task writeTask, byte[] bufferToReturn)
+            async Task CompleteAsync(Task writeTask, byte[] bufferToReturn)
             {
                 try
                 {
-                    await t;
+                    await writeTask.ConfigureAwait(false);
                 }
                 finally
                 {
@@ -309,7 +311,7 @@ namespace System.Net.Security
                 do
                 {
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
-                    await WriteSingleChunk(buffer, offset, chunkBytes, cancellationToken);
+                    await WriteSingleChunk(buffer, offset, chunkBytes, cancellationToken).ConfigureAwait(false);
                     offset += chunkBytes;
                     count -= chunkBytes;
 
@@ -420,6 +422,7 @@ namespace System.Net.Security
                     int encryptedBytes = 0;
 
                     SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+
                     if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
@@ -798,13 +801,11 @@ namespace System.Net.Security
         private int ProcessReadErrorCode(SecurityStatusPal status, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
             ProtocolToken message = new ProtocolToken(null, status);
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
 
             if (message.Renegotiate)
             {
                 _sslState.ReplyOnReAuthentication(extraBuffer);
-
                 // Loop on read.
                 return -1;
             }
