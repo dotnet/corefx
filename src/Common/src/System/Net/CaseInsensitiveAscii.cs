@@ -101,30 +101,31 @@ namespace System.Net
         {
             string firstString = firstObject as string;
             string secondString = secondObject as string;
-            if (firstString == null)
+            if ((object)firstString == (object)secondString)
             {
-                return secondString == null;
+                return true;
             }
-            if (secondString != null)
+
+            if (firstString == null | secondString == null)
             {
-                int index = firstString.Length;
-                if (index == secondString.Length)
+                return false;
+            }
+
+            int index = firstString.Length;
+            if (index == secondString.Length && FastGetHashCode(firstString) == FastGetHashCode(secondString))
+            {
+                while (index > 0)
                 {
-                    if (FastGetHashCode(firstString) == FastGetHashCode(secondString))
+                    index--;
+                    if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
                     {
-                        int comparisons = firstString.Length;
-                        while (index > 0)
-                        {
-                            index--;
-                            if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
+                        return false;
                     }
                 }
+
+                return true;
             }
+
             return false;
         }
     }
