@@ -46,11 +46,7 @@ namespace System.IO
 
         public override void ReplaceFile(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors)
         {
-            int flags = Interop.Kernel32.REPLACEFILE_WRITE_THROUGH;
-            if (ignoreMetadataErrors)
-            {
-                flags |= Interop.Kernel32.REPLACEFILE_IGNORE_MERGE_ERRORS;
-            }
+            int flags = ignoreMetadataErrors ? Interop.Kernel32.REPLACEFILE_IGNORE_MERGE_ERRORS : 0;
 
             if (!Interop.Kernel32.ReplaceFile(destFullPath, sourceFullPath, destBackupFullPath, flags, IntPtr.Zero, IntPtr.Zero))
             {
@@ -227,7 +223,7 @@ namespace System.IO
             // Neither GetFileAttributes or FindFirstFile like trailing separators
             path = path.TrimEnd(PathHelpers.DirectorySeparatorChars);
 
-            using (new DisableMediaInsertionPrompt())
+            using (DisableMediaInsertionPrompt.Create())
             {
                 if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {

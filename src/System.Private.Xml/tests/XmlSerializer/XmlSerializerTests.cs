@@ -32,7 +32,13 @@ public static partial class XmlSerializerTests
             method.Invoke(null, new object[] { 1 });
 #endif
 #if XMLSERIALIZERGENERATORTESTS
-            method.Invoke(null, new object[] { 3 });
+            string path = Path.GetDirectoryName(typeof(XmlSerializerTests).Assembly.Location);
+            string serializername = typeof(TypeWithDateTimeStringProperty).Assembly.GetName().Name + ".XmlSerializers.dll";
+            string serializerPath = Path.Combine(path, serializername);
+            if (File.Exists(serializerPath))
+            {
+                method.Invoke(null, new object[] { 3 });
+            }
 #endif
         }
     }
@@ -1595,6 +1601,22 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(actual);
         Assert.NotNull(actual.Collection);
         Assert.True(value.Collection.SequenceEqual(actual.Collection));
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToNaNTest()
+    {
+        var value = new DefaultValuesSetToNaN();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNaN xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToNaN>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";

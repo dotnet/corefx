@@ -635,15 +635,18 @@ namespace Microsoft.CSharp.RuntimeBinder
                 callingType = (AggregateType)callingObjectType;
             }
 
-            List<CType> callingTypes = new List<CType>();
-
             // The C# binder expects that only the base virtual method is inserted
             // into the list of candidates, and only the type containing the base
             // virtual method is inserted into the list of types. However, since we
             // don't want to do all the logic, we're just going to insert every type
             // that has a member of the given name, and allow the C# binder to filter
             // out all overrides.
-            //
+
+            // CONSIDER: using a hashset to filter out duplicate interface types.
+            // Adopt a smarter algorithm to filter types before creating the exception.
+            HashSet<CType> distinctCallingTypes = new HashSet<CType>();
+            List<CType> callingTypes = new List<CType>();
+
             // Find that set of types now.
             symbmask_t mask = symbmask_t.MASK_MethodSymbol;
             switch (kind)
@@ -664,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -684,7 +687,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }
@@ -766,7 +769,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expr CreateArray(Expr callingObject, Expr optionalIndexerArguments)
         {
-            return _binder.BindArrayIndexCore(0, callingObject, optionalIndexerArguments);
+            return _binder.BindArrayIndexCore(callingObject, optionalIndexerArguments);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -1357,13 +1360,15 @@ namespace Microsoft.CSharp.RuntimeBinder
                     int numIndexArguments = ExpressionIterator.Count(optionalIndexerArguments);
                     // We could have an array access here. See if its just an array.
                     Type type = argument.Type;
-                    if (type.IsArray || type == typeof(string))
+                    Debug.Assert(type != typeof(string));
+                    if (type.IsArray)
                     {
                         if (type.IsArray && type.GetArrayRank() != numIndexArguments)
                         {
                             throw _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
                         
+                        Debug.Assert(callingObject.Type is ArrayType);
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
                 }
@@ -1430,12 +1435,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // user defined conversions (since the convert is guaranteed to return one of
                 // the primitive types), and we check for overflow since we don't want truncation.
 
-                CType pDestType = _binder.chooseArrayIndexType(argument);
-                if (null == pDestType)
-                {
-                    pDestType = SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
-                }
-
+                CType pDestType = _binder.ChooseArrayIndexType(argument);
                 return _binder.mustCast(
                     _binder.mustConvert(argument, pDestType),
                     destinationType,
