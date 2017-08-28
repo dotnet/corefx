@@ -24,7 +24,7 @@
     <Compile Include="System\Reflection\DispatchProxy.cs" />
     <Compile Include="System\Reflection\DispatchProxyGenerator.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -33,7 +33,7 @@
     <ReferenceFromRuntime Include="System.Private.Interop" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetGroup)' != 'netstandard' AND '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetGroup)' != 'netstandard' AND '$(TargetsNetFx)' != 'true'">
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Linq" />

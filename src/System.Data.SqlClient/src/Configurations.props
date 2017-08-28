@@ -7,11 +7,11 @@
       netstandard1.2;
       netstandard1.3;
       netstandard;
-      netfx-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations)
       uap-Windows_NT;
+      netfx-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

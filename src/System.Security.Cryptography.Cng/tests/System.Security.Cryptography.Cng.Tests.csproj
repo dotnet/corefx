@@ -149,7 +149,7 @@
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\RSA\SignVerify.netcoreapp.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net462' OR '$(TargetGroup)' == 'net47' OR '$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetGroup)' == 'netcoreapp'">
     <Compile Condition="'$(TargetsWindows)' == 'true'" Include="AesCngTests.cs" />
     <Compile Condition="'$(TargetsWindows)' == 'true'" Include="TripleDESCngTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\AES\AesContractTests.cs">
