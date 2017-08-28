@@ -297,7 +297,7 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
         [InlineData(false)]
         public static void MultipleBlockDecryptTransform(bool blockAlignedOutput)
         {
-            const string expectedOutput = "This is a test";
+            const string ExpectedOutput = "This is a test";
 
             int outputPadding = blockAlignedOutput ? 0 : 3;
             byte[] key = "0123456789ABCDEF".HexToByteArray();
@@ -317,7 +317,7 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
             }
 
             string decrypted = Encoding.ASCII.GetString(outputBytes, 0, outputOffset);
-            Assert.Equal(expectedOutput, decrypted);
+            Assert.Equal(ExpectedOutput, decrypted);
         }
     }
 }

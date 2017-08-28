@@ -232,7 +232,7 @@ namespace System.Security.Cryptography.Encryption.Rijndael.Tests
         [InlineData(false)]
         public static void MultipleBlockDecryptTransform(bool blockAlignedOutput)
         {
-            const string expectedOutput = "This is a 128-bit block test";
+            const string ExpectedOutput = "This is a 128-bit block test";
 
             int outputPadding = blockAlignedOutput ? 0 : 3;
             byte[] key = "0123456789ABCDEFFEDCBA9876543210".HexToByteArray();
@@ -252,7 +252,7 @@ namespace System.Security.Cryptography.Encryption.Rijndael.Tests
             }
 
             string decrypted = Encoding.ASCII.GetString(outputBytes, 0, outputOffset);
-            Assert.Equal(expectedOutput, decrypted);
+            Assert.Equal(ExpectedOutput, decrypted);
         }
 
         private class RijndaelLegalSizesBreaker : RijndaelMinimal
