@@ -333,7 +333,17 @@ namespace System.Security.Cryptography.Encryption.TripleDes.Tests
                 // 3 blocks of 0x00
                 byte[] input = new byte[3 * (alg.BlockSize / 8)];
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                Type exceptionType = typeof(ArgumentOutOfRangeException);
+
+                // TripleDESCryptoServiceProvider doesn't throw the ArgumentOutOfRangeException,
+                // giving a CryptographicException when CAPI reports the destination too small.
+                if (PlatformDetection.IsFullFramework)
+                {
+                    exceptionType = typeof(CryptographicException);
+                }
+
+                Assert.Throws(
+                    exceptionType,
                     () => xform.TransformBlock(input, 0, input.Length, output, 0));
 
                 Assert.Equal(new byte[output.Length], output);

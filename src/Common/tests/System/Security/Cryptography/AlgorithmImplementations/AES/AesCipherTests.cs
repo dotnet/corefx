@@ -665,8 +665,10 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
         [InlineData(false, false)]
         public static void TransformWithTooShortOutputBuffer(bool encrypt, bool blockAlignedOutput)
         {
+            // The CreateDecryptor call reads the Key/IV property to initialize them, bypassing an
+            // uninitialized state protection.
             using (Aes alg = AesFactory.Create())
-            using (ICryptoTransform xform = encrypt ? alg.CreateEncryptor() : alg.CreateDecryptor())
+            using (ICryptoTransform xform = encrypt ? alg.CreateEncryptor() : alg.CreateDecryptor(alg.Key, alg.IV))
             {
                 // 1 block, plus maybe three bytes
                 int outputPadding = blockAlignedOutput ? 0 : 3;
