@@ -16,7 +16,6 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     public abstract partial class PipeTest_Read : PipeTestBase
     {
-
         protected virtual bool ShouldSkipTest() => false;
 
         [Fact]

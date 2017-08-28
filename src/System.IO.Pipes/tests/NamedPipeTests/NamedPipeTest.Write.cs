@@ -8,7 +8,6 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
-    
     public class NamedPipeTest_Write_ServerOut_ClientIn : PipeTest_Write
     {
         protected override bool ShouldSkipTest() => PlatformDetection.IsWinRT && !PlatformDetection.IsWindows10Version16256OrGreater;
@@ -30,7 +29,6 @@ namespace System.IO.Pipes.Tests
         }
     }
     
-    
     public class NamedPipeTest_Write_ServerIn_ClientOut : PipeTest_Write
     {
         protected override bool ShouldSkipTest() => PlatformDetection.IsWinRT && !PlatformDetection.IsWindows10Version16256OrGreater;
@@ -51,7 +49,6 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
     
     public class NamedPipeTest_Write_ServerInOut_ClientInOut : PipeTest_Write
     {
