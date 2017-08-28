@@ -85,17 +85,6 @@ namespace System.Net
             return result;
         }
 
-        // ASCII string case insensitive hash function
-        private int FastGetHashCode(string myString)
-        {
-            int myHashCode = myString.Length;
-            if (myHashCode != 0)
-            {
-                myHashCode ^= AsciiToLower[(byte)myString[0]] << 24 ^ AsciiToLower[(byte)myString[myHashCode - 1]] << 16;
-            }
-            return myHashCode;
-        }
-
         // ASCII string case insensitive comparer
         public new bool Equals(object firstObject, object secondObject)
         {
@@ -112,18 +101,21 @@ namespace System.Net
             }
 
             int index = firstString.Length;
-            if (index == secondString.Length && FastGetHashCode(firstString) == FastGetHashCode(secondString))
+            if (index == secondString.Length)
             {
-                while (index > 0)
+                if (index == 0 || AsciiToLower[firstString[0]] == AsciiToLower[secondString[0]])
                 {
-                    index--;
-                    if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
+                    while (index > 1)
                     {
-                        return false;
+                        index--;
+                        if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
+                        {
+                            return false;
+                        }
                     }
-                }
 
-                return true;
+                    return true;
+                }
             }
 
             return false;
