@@ -283,6 +283,11 @@ namespace System.Net.Security
                 (callback, state) => ((SslStream)state).BeginShutdown(callback, state),
                 iar => ((SslStream)iar.AsyncState).EndShutdown(iar), 
                 this);
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
         #endregion
 
         public override bool IsAuthenticated

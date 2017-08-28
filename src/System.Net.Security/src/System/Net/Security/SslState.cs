@@ -580,7 +580,8 @@ namespace System.Net.Security
                 // Not aync so the connection is completed at this point.
                 if (lazyResult == null && NetEventSource.IsEnabled)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
+                    if (NetEventSource.IsEnabled)
+                        NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
                         SslProtocol,
                         CipherAlgorithm,
                         CipherStrength,
@@ -714,7 +715,8 @@ namespace System.Net.Security
             // Connection is completed at this point.
             if (NetEventSource.IsEnabled)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
                     SslProtocol,
                     CipherAlgorithm,
                     CipherStrength,
@@ -1014,7 +1016,8 @@ namespace System.Net.Security
         //
         private bool CompleteHandshake(ref ProtocolToken alertToken)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this);
 
             Context.ProcessHandshakeSuccess();
 
@@ -1023,14 +1026,16 @@ namespace System.Net.Security
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
 
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, false);
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Exit(this, false);
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, true);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Exit(this, true);
             return true;
         }
 
@@ -1088,7 +1093,8 @@ namespace System.Net.Security
 
         private static void PartialFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1112,7 +1118,8 @@ namespace System.Net.Security
         //
         private static void ReadFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1183,22 +1190,7 @@ namespace System.Net.Security
                 }
 
                 _lockReadState = LockRead;
-                object obj = _queuedReadStateRequest;
-                if (obj == null)
-                {
-                    // Other thread did not get under the lock yet.
-                    return;
-                }
-
-                _queuedReadStateRequest = null;
-                if (obj is LazyAsyncResult)
-                {
-                    ((LazyAsyncResult)obj).InvokeCallback();
-                }
-                else
-                {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(CompleteRequestWaitCallback), obj);
-                }
+                ProcessPendingWrite();
             }
         }
 
@@ -1279,10 +1271,30 @@ namespace System.Net.Security
             }
         }
 
-        // Returns: 
-        // true  - operation queued
-        // false - operation can proceed
-        internal bool CheckEnqueueWrite(AsyncProtocolRequest asyncRequest)
+        internal Task CheckEnqueueWriteAsync()
+        {
+            //Clear previous request.
+            int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockWrite, LockNone);
+            if (lockState != LockHandshake)
+            {
+                return Task.CompletedTask;
+            }
+            lock (this)
+            {
+                if (_lockWriteState != LockHandshake)
+                {
+                    CheckThrow(true);
+                    return Task.CompletedTask;
+                }
+
+                _lockWriteState = LockPendingWrite;
+                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
+                _queuedWriteStateRequest = completionSource;
+                return completionSource.Task;
+            }
+        }
+
+        internal void CheckEnqueueWrite()
         {
             // Clear previous request.
             _queuedWriteStateRequest = null;
@@ -1290,7 +1302,7 @@ namespace System.Net.Security
             if (lockState != LockHandshake)
             {
                 // Proceed with write.
-                return false;
+                return;
             }
 
             LazyAsyncResult lazyResult = null;
@@ -1300,17 +1312,10 @@ namespace System.Net.Security
                 {
                     // Handshake has completed before we grabbed the lock.
                     CheckThrow(true);
-                    return false;
+                    return;
                 }
 
                 _lockWriteState = LockPendingWrite;
-
-                // Still pending, wait or enqueue.
-                if (asyncRequest != null)
-                {
-                    _queuedWriteStateRequest = asyncRequest;
-                    return true;
-                }
 
                 lazyResult = new LazyAsyncResult(null, null, /*must be */null);
                 _queuedWriteStateRequest = lazyResult;
@@ -1319,7 +1324,7 @@ namespace System.Net.Security
             // Need to exit from lock before waiting.
             lazyResult.InternalWaitForCompletion();
             CheckThrow(true);
-            return false;
+            return;
         }
 
         internal void FinishWrite()
@@ -1333,24 +1338,8 @@ namespace System.Net.Security
             lock (this)
             {
                 object obj = _queuedWriteStateRequest;
-                if (obj == null)
-                {
-                    // A repeated call.
-                    return;
-                }
-
                 _queuedWriteStateRequest = null;
-                if (obj is LazyAsyncResult)
-                {
-                    // Sync handshake is waiting on other thread.
-                    ((LazyAsyncResult)obj).InvokeCallback();
-                }
-                else
-                {
-                    // Async handshake is pending, start it on other thread.
-                    // Consider: we could start it in on this thread but that will delay THIS write completion
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncResumeHandshake), obj);
-                }
+                ProcessPendingWrite();
             }
         }
 
@@ -1411,26 +1400,8 @@ namespace System.Net.Security
                     }
 
                     _lockWriteState = LockWrite;
-                    object obj = _queuedWriteStateRequest;
-                    if (obj == null)
-                    {
-                        // We finished before Write has grabbed the lock.
-                        return;
-                    }
-
-                    _queuedWriteStateRequest = null;
-
-                    if (obj is LazyAsyncResult)
-                    {
-                        // Sync write is waiting on other thread.
-                        ((LazyAsyncResult)obj).InvokeCallback();
-                    }
-                    else
-                    {
-                        // Async write is pending, start it on other thread.
-                        // Consider: we could start it in on this thread but that will delay THIS handshake completion
-                        ThreadPool.QueueUserWorkItem(new WaitCallback(CompleteRequestWaitCallback), obj);
-                    }
+                    ProcessPendingWrite();
+                    return;
                 }
             }
             finally
@@ -1446,6 +1417,33 @@ namespace System.Net.Security
                         asyncRequest.CompleteUser();
                     }
                 }
+            }
+        }
+
+        private void ProcessPendingWrite()
+        {
+            object obj = _queuedWriteStateRequest;
+            _queuedWriteStateRequest = null;
+
+            switch (obj)
+            {
+                case null:
+                    // We finished before Write has grabbed the lock.
+                    return;
+                case LazyAsyncResult lazy:
+                    // Sync write is waiting on other thread.
+                    lazy.InvokeCallback();
+                    return;
+                case TaskCompletionSource<int> completionSource:
+                    //Async write is pending, should it be started on another thread?
+                    //Or is it fine to do it here
+                    completionSource.SetResult(0);
+                    return;
+                default:
+                    // Async write is pending, start it on other thread.
+                    // Consider: we could start it in on this thread but that will delay THIS handshake completion
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(CompleteRequestWaitCallback), obj);
+                    return;
             }
         }
 
@@ -1665,7 +1663,8 @@ namespace System.Net.Security
         // This is called from SslStream class too.
         internal int GetRemainingFrameSize(byte[] buffer, int offset, int dataSize)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, buffer, offset, dataSize);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this, buffer, offset, dataSize);
 
             int payloadSize = -1;
             switch (_Framing)
@@ -1705,7 +1704,8 @@ namespace System.Net.Security
                     break;
             }
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, payloadSize);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Exit(this, payloadSize);
             return payloadSize;
         }
 
@@ -1827,7 +1827,7 @@ namespace System.Net.Security
 
         internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
-            CheckThrow(authSuccessCheck:true, shutdownCheck:true);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
 
             ProtocolToken message = Context.CreateShutdownToken();
             return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
@@ -1835,7 +1835,7 @@ namespace System.Net.Security
 
         internal void EndShutdown(IAsyncResult result)
         {
-            CheckThrow(authSuccessCheck: true, shutdownCheck:true);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
 
             TaskToApm.End(result);
             _shutdown = true;
