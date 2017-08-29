@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
@@ -111,20 +112,13 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void GetValidationResult_ValueGenericICollection_ThrowsInvalidCastException()
         {
-            Assert.Throws<InvalidCastException>(() => new MaxLengthAttribute().GetValidationResult(new GenericICollectionClass(), new ValidationContext(new object())));
+            Assert.Throws<InvalidCastException>(() => new MaxLengthAttribute().GetValidationResult(new GenericIEnumerableClass(), new ValidationContext(new object())));
         }
     }
 
-    class GenericICollectionClass : ICollection<int>
+    class GenericIEnumerableClass : IEnumerable<int>
     {
-        public int Count { get; set; }
-        public bool IsReadOnly => false;
-        public void Add(int item) { }
-        public void Clear() { }
-        public bool Contains(int item) => false;
-        public void CopyTo(int[] array, int arrayIndex) { }
-        public IEnumerator<int> GetEnumerator() => new List<int>(new int[Count]).GetEnumerator();
-        public bool Remove(int item) => false;
-        IEnumerator IEnumerable.GetEnumerator() => new List<int>(new int[Count]).GetEnumerator();
+        public IEnumerator<int> GetEnumerator() => Enumerable.Empty<int>().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

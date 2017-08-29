@@ -100,7 +100,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void GetValidationResult_ValueGenericICollection_ThrowsInvalidCastException()
         {
-            Assert.Throws<InvalidCastException>(() => new MinLengthAttribute(0).GetValidationResult(new GenericICollectionClass(), new ValidationContext(new object())));
+            Assert.Throws<InvalidCastException>(() => new MinLengthAttribute(0).GetValidationResult(new GenericIEnumerableClass(), new ValidationContext(new object())));
         }
     }
 }

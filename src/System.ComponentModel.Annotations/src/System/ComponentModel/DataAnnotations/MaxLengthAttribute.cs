@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -76,11 +78,16 @@ namespace System.ComponentModel.DataAnnotations
             {
                 length = str.Length;
             }
+            else if (value is ICollection collection)
+            {
+                length = collection.Count;
+            }
             else
             {
-                if (value is ICollection collection)
+                Type genericCol = value.GetType().GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+                if (genericCol != null)
                 {
-                    length = collection.Count;
+                    length = (int)genericCol.GetProperty("Count").GetValue(value);
                 }
                 else
                 {
