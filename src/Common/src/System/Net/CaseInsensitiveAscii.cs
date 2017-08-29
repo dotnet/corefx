@@ -85,46 +85,39 @@ namespace System.Net
             return result;
         }
 
-        // ASCII string case insensitive hash function
-        private int FastGetHashCode(string myString)
-        {
-            int myHashCode = myString.Length;
-            if (myHashCode != 0)
-            {
-                myHashCode ^= AsciiToLower[(byte)myString[0]] << 24 ^ AsciiToLower[(byte)myString[myHashCode - 1]] << 16;
-            }
-            return myHashCode;
-        }
-
         // ASCII string case insensitive comparer
         public new bool Equals(object firstObject, object secondObject)
         {
             string firstString = firstObject as string;
             string secondString = secondObject as string;
-            if (firstString == null)
+            if ((object)firstString == (object)secondString)
             {
-                return secondString == null;
+                return true;
             }
-            if (secondString != null)
+
+            if (firstString == null | secondString == null)
             {
-                int index = firstString.Length;
-                if (index == secondString.Length)
+                return false;
+            }
+
+            int index = firstString.Length;
+            if (index == secondString.Length)
+            {
+                if (index == 0 || AsciiToLower[firstString[0]] == AsciiToLower[secondString[0]])
                 {
-                    if (FastGetHashCode(firstString) == FastGetHashCode(secondString))
+                    while (index > 1)
                     {
-                        int comparisons = firstString.Length;
-                        while (index > 0)
+                        index--;
+                        if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
                         {
-                            index--;
-                            if (AsciiToLower[firstString[index]] != AsciiToLower[secondString[index]])
-                            {
-                                return false;
-                            }
+                            return false;
                         }
-                        return true;
                     }
+
+                    return true;
                 }
             }
+
             return false;
         }
     }
