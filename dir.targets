@@ -22,9 +22,10 @@
 
     <BinPlaceRef Condition="'$(BinPlaceRef)' == '' And ('$(IsReferenceAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRef>
     <BinPlaceRuntime Condition="'$(BinPlaceRuntime)' == '' And ('$(IsRuntimeAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRuntime>
+    <BinPlaceTest Condition="'$(BinPlaceTest)' == '' And '$(IsTestProject)' == 'true'">true</BinPlaceTest>
   </PropertyGroup>
 
-  <ItemGroup Condition="'@(BinPlaceConfiguration)' == ''">
+  <ItemGroup Condition="'@(BinPlaceConfiguration)' == '' AND '$(IsTestProject)' != 'true'">
     <!-- binplace to directories for the target vertical -->
     <BinPlaceConfiguration Include="$(_bc_TargetGroup)-$(_bc_OSGroup)">
       <RefPath>$(BuildConfigurationRefPath)</RefPath>
@@ -79,6 +80,13 @@
     <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
+    </BinPlaceConfiguration>
+  </ItemGroup>
+
+  <!-- For tests we want to separate the bin directory and the working directory to have a working directory per build configuration. -->
+  <ItemGroup Condition="'@(BinPlaceConfiguration)' == '' AND '$(BinPlaceTest)' == 'true'">
+    <BinPlaceConfiguration Include="$(_bc_TargetGroup)-$(_bc_OSGroup)">
+      <TestWorkingPath>$(TestWorkingDir)$(MSBuildProjectName)/$(BuildConfiguration)/</TestWorkingPath>
     </BinPlaceConfiguration>
   </ItemGroup>
 
