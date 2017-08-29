@@ -15,7 +15,7 @@
     <PackageFile Include=".\build\Microsoft.XmlSerializer.Generator.targets">
       <TargetPath>build\</TargetPath>
     </PackageFile>
-    <PackageFile Include=".\build\Microsoft.XmlSerializer.Generator.runtimeconfig.json">
+    <PackageFile Include=".\build\dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json">
       <TargetPath>\lib\netstandard2.0\</TargetPath>
     </PackageFile>
   </ItemGroup>

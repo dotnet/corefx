@@ -244,7 +244,8 @@ namespace Microsoft.XmlSerializer.Generator
                     throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
-                bool success;
+                bool success = false;
+                bool toDeleteFile = true;
 
                 try
                 {
@@ -253,23 +254,22 @@ namespace Microsoft.XmlSerializer.Generator
                         File.Delete(codePath);
                     }
 
-                    using (MemoryStream ms = new MemoryStream())
+                    using (FileStream fs = File.Create(codePath))
                     {
-                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, ms);
-                        if (success)
-                        {
-                            ms.Position = 0;
-                            using (FileStream fs = File.Create(codePath))
-                            {
-                                fs.Write(ms.ToArray(), 0, ms.ToArray().Length);
-                                fs.Flush();
-                            }
-                        }
+                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
                     }
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    toDeleteFile = false;
                     throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, outputDirectory));
+                }
+                finally
+                {
+                    if (!success && toDeleteFile && File.Exists(codePath))
+                    {
+                        File.Delete(codePath);
+                    }
                 }
 
                 if (success)
