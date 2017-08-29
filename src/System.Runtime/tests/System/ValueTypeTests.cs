@@ -17,6 +17,20 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void StructWithDoubleFieldNotTightlyPackedZeroCompareTest()
+        {
+            StructWithDoubleFieldNotTightlyPacked obj1 = new StructWithDoubleFieldNotTightlyPacked();
+            obj1.value1 = 1;
+            obj1.value2 = 0.0;
+
+            StructWithDoubleFieldNotTightlyPacked obj2 = new StructWithDoubleFieldNotTightlyPacked();
+            obj2.value1 = 1;
+            obj2.value2 = -0.0;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
         public static void StructWithDoubleFieldTightlyPackedZeroCompareTest()
         {
@@ -27,6 +41,20 @@ namespace System.Tests
             StructWithDoubleFieldTightlyPacked obj2 = new StructWithDoubleFieldTightlyPacked();
             obj2.value1 = 1;
             obj2.value2 = -0.0;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        public static void StructWithDoubleFieldNotTightlyPackedNaNCompareTest()
+        {
+            StructWithDoubleFieldNotTightlyPacked obj1 = new StructWithDoubleFieldNotTightlyPacked();
+            obj1.value1 = 1;
+            obj1.value2 = double.NaN;
+
+            StructWithDoubleFieldNotTightlyPacked obj2 = new StructWithDoubleFieldNotTightlyPacked();
+            obj2.value1 = 1;
+            obj2.value2 = -double.NaN;
 
             Assert.Equal(true, obj1.Equals(obj2));
         }
@@ -47,14 +75,13 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
-        public static void StructWithNestedDoubleFieldZeroCompareTest()
+        public static void StructWithNestedDoubleFieldNotTightlyPackedZeroCompareTest()
         {
-            StructWithDoubleFieldNested obj1 = new StructWithDoubleFieldNested();
+            StructWithDoubleFieldNestedNotTightlyPacked obj1 = new StructWithDoubleFieldNestedNotTightlyPacked();
             obj1.value1.value1 = 1;
             obj1.value2.value2 = 0.0;
 
-            StructWithDoubleFieldNested obj2 = new StructWithDoubleFieldNested();
+            StructWithDoubleFieldNestedNotTightlyPacked obj2 = new StructWithDoubleFieldNestedNotTightlyPacked();
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -0.0;
 
@@ -63,15 +90,58 @@ namespace System.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
-        public static void StructWithNestedDoubleFieldNaNCompareTest()
+        public static void StructWithNestedDoubleFieldTightlyPackedZeroCompareTest()
         {
-            StructWithDoubleFieldNested obj1 = new StructWithDoubleFieldNested();
+            StructWithDoubleFieldNestedTightlyPacked obj1 = new StructWithDoubleFieldNestedTightlyPacked();
+            obj1.value1.value1 = 1;
+            obj1.value2.value2 = 0.0;
+
+            StructWithDoubleFieldNestedTightlyPacked obj2 = new StructWithDoubleFieldNestedTightlyPacked();
+            obj2.value1.value1 = 1;
+            obj2.value2.value2 = -0.0;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        public static void StructWithNestedDoubleFieldNotTightlyPackedNaNCompareTest()
+        {
+            StructWithDoubleFieldNestedNotTightlyPacked obj1 = new StructWithDoubleFieldNestedNotTightlyPacked();
             obj1.value1.value1 = 1;
             obj1.value2.value2 = double.NaN;
 
-            StructWithDoubleFieldNested obj2 = new StructWithDoubleFieldNested();
+            StructWithDoubleFieldNestedNotTightlyPacked obj2 = new StructWithDoubleFieldNestedNotTightlyPacked();
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -double.NaN;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
+        public static void StructWithNestedDoubleFieldTightlyPackedNaNCompareTest()
+        {
+            StructWithDoubleFieldNestedTightlyPacked obj1 = new StructWithDoubleFieldNestedTightlyPacked();
+            obj1.value1.value1 = 1;
+            obj1.value2.value2 = double.NaN;
+
+            StructWithDoubleFieldNestedTightlyPacked obj2 = new StructWithDoubleFieldNestedTightlyPacked();
+            obj2.value1.value1 = 1;
+            obj2.value2.value2 = -double.NaN;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        public static void StructWithFloatFieldNotTightlyPackedZeroCompareTest()
+        {
+            StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
+            obj1.value1 = 1;
+            obj1.value2 = 0.0f;
+
+            StructWithFloatFieldNotTightlyPacked obj2 = new StructWithFloatFieldNotTightlyPacked();
+            obj2.value1 = 1;
+            obj2.value2 = -0.0f;
 
             Assert.Equal(true, obj1.Equals(obj2));
         }
@@ -92,6 +162,20 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void StructWithFloatFieldNotTightlyPackedNaNCompareTest()
+        {
+            StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
+            obj1.value1 = 1;
+            obj1.value2 = float.NaN;
+
+            StructWithFloatFieldNotTightlyPacked obj2 = new StructWithFloatFieldNotTightlyPacked();
+            obj2.value1 = 1;
+            obj2.value2 = -float.NaN;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
         public static void StructWithFloatFieldTightlyPackedNaNCompareTest()
         {
@@ -107,14 +191,13 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
-        public static void StructWithNestedFloatFieldZeroCompareTest()
+        public static void StructWithNestedFloatFieldNotTightlyPackedZeroCompareTest()
         {
-            StructWithFloatFieldNested obj1 = new StructWithFloatFieldNested();
+            StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
             obj1.value1.value1 = 1;
             obj1.value2.value2 = 0.0f;
 
-            StructWithFloatFieldNested obj2 = new StructWithFloatFieldNested();
+            StructWithFloatFieldNestedNotTightlyPacked obj2 = new StructWithFloatFieldNestedNotTightlyPacked();
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -0.0f;
 
@@ -123,15 +206,58 @@ namespace System.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
-        public static void StructWithNestedFloatFieldNaNCompareTest()
+        public static void StructWithNestedFloatFieldTightlyPackedZeroCompareTest()
         {
-            StructWithFloatFieldNested obj1 = new StructWithFloatFieldNested();
+            StructWithFloatFieldNestedTightlyPacked obj1 = new StructWithFloatFieldNestedTightlyPacked();
+            obj1.value1.value1 = 1;
+            obj1.value2.value2 = 0.0f;
+
+            StructWithFloatFieldNestedTightlyPacked obj2 = new StructWithFloatFieldNestedTightlyPacked();
+            obj2.value1.value1 = 1;
+            obj2.value2.value2 = -0.0f;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        public static void StructWithNestedFloatFieldNotTightlyPackedNaNCompareTest()
+        {
+            StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
             obj1.value1.value1 = 1;
             obj1.value2.value2 = float.NaN;
 
-            StructWithFloatFieldNested obj2 = new StructWithFloatFieldNested();
+            StructWithFloatFieldNestedNotTightlyPacked obj2 = new StructWithFloatFieldNestedNotTightlyPacked();
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -float.NaN;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/11452")]
+        public static void StructWithNestedFloatFieldTightlyPackedNaNCompareTest()
+        {
+            StructWithFloatFieldNestedTightlyPacked obj1 = new StructWithFloatFieldNestedTightlyPacked();
+            obj1.value1.value1 = 1;
+            obj1.value2.value2 = float.NaN;
+
+            StructWithFloatFieldNestedTightlyPacked obj2 = new StructWithFloatFieldNestedTightlyPacked();
+            obj2.value1.value1 = 1;
+            obj2.value2.value2 = -float.NaN;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
+        [Fact]
+        public static void StructWithoutNestedOverriddenEqualsCompareTest()
+        {
+            StructWithoutNestedOverriddenEqualsAndGetHashCode obj1 = new StructWithoutNestedOverriddenEqualsAndGetHashCode();
+            obj1.value1.value = 1;
+            obj1.value2.value = 2;
+
+            StructWithoutNestedOverriddenEqualsAndGetHashCode obj2 = new StructWithoutNestedOverriddenEqualsAndGetHashCode();
+            obj2.value1.value = 1;
+            obj2.value2.value = 2;
 
             Assert.Equal(true, obj1.Equals(obj2));
         }
@@ -151,10 +277,30 @@ namespace System.Tests
             Assert.Equal(false, obj1.Equals(obj2));
         }
 
+        [Fact]
+        public static void StructContainsPointerCompareTest()
+        {
+            StructContainsPointer obj1 = new StructContainsPointer();
+            obj1.value1 = 1;
+            obj1.value2 = 0.0;
+
+            StructContainsPointer obj2 = new StructContainsPointer();
+            obj2.value1 = 1;
+            obj2.value2 = -0.0;
+
+            Assert.Equal(true, obj1.Equals(obj2));
+        }
+
         public struct S
         {
             public int x;
             public int y;
+        }
+
+        public struct StructWithDoubleFieldNotTightlyPacked
+        {
+            public int value1;
+            public double value2;
         }
 
         public struct StructWithDoubleFieldTightlyPacked
@@ -163,10 +309,22 @@ namespace System.Tests
             public double value2;
         }
 
-        public struct StructWithDoubleFieldNested
+        public struct StructWithDoubleFieldNestedNotTightlyPacked
+        {
+            public StructWithDoubleFieldNotTightlyPacked value1;
+            public StructWithDoubleFieldNotTightlyPacked value2;
+        }
+
+        public struct StructWithDoubleFieldNestedTightlyPacked
         {
             public StructWithDoubleFieldTightlyPacked value1;
             public StructWithDoubleFieldTightlyPacked value2;
+        }
+
+        public struct StructWithFloatFieldNotTightlyPacked
+        {
+            public long value1;
+            public float value2;
         }
 
         public struct StructWithFloatFieldTightlyPacked
@@ -175,10 +333,21 @@ namespace System.Tests
             public float value2;
         }
 
-        public struct StructWithFloatFieldNested
+        public struct StructWithFloatFieldNestedNotTightlyPacked
+        {
+            public StructWithFloatFieldNotTightlyPacked value1;
+            public StructWithFloatFieldNotTightlyPacked value2;
+        }
+
+        public struct StructWithFloatFieldNestedTightlyPacked
         {
             public StructWithFloatFieldTightlyPacked value1;
             public StructWithFloatFieldTightlyPacked value2;
+        }
+
+        public struct StructNonOverriddenEqualsOrGetHasCode
+        {
+            public byte value;
         }
 
         public struct StructNeverEquals
@@ -196,10 +365,23 @@ namespace System.Tests
             }
         }
 
+        public struct StructWithoutNestedOverriddenEqualsAndGetHashCode
+        {
+            public StructNonOverriddenEqualsOrGetHasCode value1;
+            public StructNonOverriddenEqualsOrGetHasCode value2;
+        }
+
         public struct StructWithNestedOverriddenEqualsAndGetHashCode
         {
             public StructNeverEquals value1;
             public StructNeverEquals value2;
+        }
+
+        public struct StructContainsPointer
+        {
+            public String s;
+            public double value1;
+            public double value2;
         }
     }
 }
