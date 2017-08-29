@@ -2225,7 +2225,7 @@ namespace System.Drawing
                 return rect.ToRectangleF();
             }
         }
- 
+
         [MonoTODO]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public object GetContextInfo()
