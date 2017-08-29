@@ -335,6 +335,7 @@ namespace System.Reflection.Emit
         public override System.Reflection.GenericParameterAttributes GenericParameterAttributes { get { throw null; } }
         public override int GenericParameterPosition { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
+        public override bool IsByRefLike { get { throw null; } }
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsGenericParameter { get { throw null; } }
         public override bool IsGenericType { get { throw null; } }
