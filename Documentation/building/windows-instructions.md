@@ -77,7 +77,7 @@ For more details, or to test an individual project, see the [developer guide top
 
 1. Open solution of interest
 2. Right click test project and select 'Set as startup project'
-3. Ctrl+F5 (Run)
+3. F5 (Run)
 
 ### Debugging tests in Visual Studio
 
