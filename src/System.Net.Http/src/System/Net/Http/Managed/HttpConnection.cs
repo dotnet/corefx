@@ -27,7 +27,9 @@ namespace System.Net.Http
         private const int Expect100TimeoutMilliseconds = 1000;
 
         private static readonly byte[] s_contentLength0NewlineAsciiBytes = Encoding.ASCII.GetBytes("Content-Length: 0\r\n");
+        private static readonly byte[] s_spaceHttp10NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.0\r\n");
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
+        private static readonly byte[] s_spaceHttp20NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/2.0\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
 
         private readonly HttpConnectionPool _pool;
@@ -193,13 +195,6 @@ namespace System.Net.Http
                 // Send the request.
                 if (NetEventSource.IsEnabled) Trace($"Sending request: {request}");
 
-                if (request.Version.Major != 1 || request.Version.Minor != 1)
-                {
-                    // TODO #23132: Support 1.0
-                    // TODO #23134: Support 2.0
-                    throw new PlatformNotSupportedException($"Only HTTP 1.1 supported -- request.Version was {request.Version}");
-                }
-
                 // Add headers to define content transfer, if not present
                 if (request.Content != null &&
                     (!request.HasHeaders || request.Headers.TransferEncodingChunked != true) &&
@@ -209,13 +204,26 @@ namespace System.Net.Http
                     request.Headers.TransferEncodingChunked = true;
                 }
 
+                if (request.Version.Major != 1)
+                {
+                    // TODO #23134: Support 2.0
+                    throw new PlatformNotSupportedException($"Only HTTP 1.0 supported -- request.Version was {request.Version}");
+                }
+                else if (request.Version.Minor == 0 && request.Headers.TransferEncodingChunked == true)
+                {
+                    // HTTP 1.0 does not support chunking
+                    throw new NotSupportedException($"HTTP 1.0 does not support chunking.");
+                }
+
                 // Write request line
                 await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
                 await WriteStringAsync(
                     _usingProxy ? request.RequestUri.AbsoluteUri : request.RequestUri.PathAndQuery,
                     cancellationToken).ConfigureAwait(false);
-                await WriteBytesAsync(s_spaceHttp11NewlineAsciiBytes, cancellationToken).ConfigureAwait(false);
+                await WriteBytesAsync(
+                    request.Version.Minor == 1 ? s_spaceHttp11NewlineAsciiBytes : s_spaceHttp10NewlineAsciiBytes,
+                    cancellationToken).ConfigureAwait(false);
 
                 // Write request headers
                 if (request.HasHeaders)
