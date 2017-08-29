@@ -226,7 +226,10 @@ namespace System.Tests
                 yield return new object[] { theT, false };
                 yield return new object[] { typeof(int[]), false };
                 yield return new object[] { typeof(int[,]), false };
-                yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false };
+                if (PlatformDetection.IsWindows) // GetTypeFromCLSID is Windows only
+                {
+                    yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false };
+                }
             }
         }
 
