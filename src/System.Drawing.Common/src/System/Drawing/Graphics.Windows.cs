@@ -3323,11 +3323,11 @@ namespace System.Drawing
                 {
                     return ppGraphics.VisibleClipBounds;
                 }
-		
+
                 var rect = new GPRECTF();		
                 int status = SafeNativeMethods.Gdip.GdipGetVisibleClipBounds(new HandleRef(this, NativeGraphics), ref rect);
                 SafeNativeMethods.Gdip.CheckStatus(status);
-		
+
                 return rect.ToRectangleF();
             }
         }
