@@ -27,7 +27,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="Microsoft.XmlSerializer.Generator" />
+    <ReferenceFromRuntime Include="dotnet-Microsoft.XmlSerializer.Generator" />
   </ItemGroup>
   <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition=" '$(SkipTestsOnPlatform)' != 'true' " >
     <PropertyGroup>
