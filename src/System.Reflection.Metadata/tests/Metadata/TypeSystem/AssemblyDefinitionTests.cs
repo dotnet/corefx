@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace System.Reflection.Metadata.Tests
@@ -26,10 +24,12 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(assembly.Version, assemblyName.Version);
                 Assert.Equal(assembly.Name, assemblyName.Name);
                 Assert.Equal(assembly.ContentType, assemblyName.ContentType);
-
-                ValidateDefinitionAssemblyNameDefaults(assemblyName, hasDefaultCulture: false);
                 Assert.Equal(assembly.Culture, assemblyName.CultureName);
-
+                Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
+                Assert.Null(assemblyName.GetPublicKey());
+                Assert.Null(assemblyName.GetPublicKeyToken());
+                Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
+                
                 ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
 
                 Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
@@ -52,8 +52,8 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(assembly.Version, assemblyName.Version);
                 Assert.Equal(assembly.Name, assemblyName.Name);
                 Assert.Equal(assembly.ContentType, assemblyName.ContentType);
-
-                ValidateDefinitionAssemblyNameDefaults(assemblyName, hasDefaultCulture: true, hasDefaultHashAlgorithm: true, hasDefaultPublicKey: false, hasDefaultFlags: false);
+                Assert.Null(assemblyName.CultureName);
+                Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
                 Assert.Equal(assembly.Flags, assemblyName.Flags);
                 Assert.NotNull(assemblyName.GetPublicKeyToken());
                 Assert.NotNull(assemblyName.GetPublicKey());
@@ -88,45 +88,16 @@ namespace System.Reflection.Metadata.Tests
                     Assert.Equal(item.Version, assemblyName.Version);
                     Assert.Equal(item.Name, assemblyName.Name);
                     Assert.Equal(item.ContentType, assemblyName.ContentType);
+                    Assert.Null(assemblyName.CultureName);
+                    Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
+                    Assert.Null(assemblyName.GetPublicKey());
+                    Assert.Null(assemblyName.GetPublicKeyToken());
+                    Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
 
-                    ValidateDefinitionAssemblyNameDefaults(assemblyName);
                     ValidateDefinitionAssemblyNameAgainst(assemblyName, reader, assemblyDef);
 
                     Assert.NotEqual(reader.GetString(assemblyRef.Name), assemblyName.Name);
                 }
-            }
-        }
-
-        private void ValidateDefinitionAssemblyNameDefaults(
-            AssemblyName assemblyName,
-            bool hasDefaultCulture = true, 
-            bool hasDefaultHashAlgorithm = true, 
-            bool hasDefaultPublicKey = true, 
-            bool hasDefaultFlags = true)
-        {
-            // Culture
-            if (hasDefaultCulture)
-            {
-                Assert.Null(assemblyName.CultureName);
-            }
-
-            // HashAlgorithm
-            if (hasDefaultHashAlgorithm)
-            {
-                Assert.Equal(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, assemblyName.HashAlgorithm);
-            }
-
-            // PublicKey
-            if (hasDefaultPublicKey)
-            {
-                Assert.Null(assemblyName.GetPublicKey());
-                Assert.Null(assemblyName.GetPublicKeyToken());
-            }
-
-            // Flags
-            if (hasDefaultFlags)
-            {
-                Assert.Equal(AssemblyNameFlags.None, assemblyName.Flags);
             }
         }
 
