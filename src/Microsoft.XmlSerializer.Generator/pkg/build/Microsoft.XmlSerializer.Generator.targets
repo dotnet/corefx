@@ -10,7 +10,7 @@
     <SGenWarningText>SGEN : warning SGEN1: Fail to generate the serializer for $(AssemblyName).dll. Please check the build log for the details.</SGenWarningText>
   </PropertyGroup>
   <Target Name="GenerateSerializationAssembly" AfterTargets="Build">
-    <Delete Condition="Exists('$(SerializerCsImmediatePath)') == 'true'" Files="$(SerializerDllImmediatePath)" />
+    <Delete Condition="Exists('$(SerializerDllImmediatePath)') == 'true'" Files="$(SerializerDllImmediatePath)" />
     <Delete Condition="Exists('$(SerializerPdbImmediatePath)') == 'true'" Files="$(SerializerPdbImmediatePath)" />
     <Delete Condition="Exists('$(SerializerCsImmediatePath)') == 'true'"  Files="$(SerializerCsImmediatePath)" />
     <Message Text="Running Serialization Tool" Importance="normal" />
