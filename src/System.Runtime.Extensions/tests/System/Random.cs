@@ -194,7 +194,6 @@ namespace System.Tests
             {
                 return Sample();
             }
-
         }
     }
 }
