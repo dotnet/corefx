@@ -51,7 +51,7 @@ namespace System.Drawing.Tests
 
         public static object[] Font(Func<Font> getFont, string systemFontName, string windowsFontName) => new object[] { getFont, systemFontName, windowsFontName };
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(SystemFonts_WindowsNames_TestData))]
         public void SystemFont_Get_ReturnsExpected_WindowsNames(Func<Font> getFont, string systemFontName, string windowsFontName)
