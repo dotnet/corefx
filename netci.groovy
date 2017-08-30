@@ -21,7 +21,6 @@ def osGroupMap = ['Ubuntu14.04':'Linux',
                   'OSX':'OSX',
                   'Windows_NT':'Windows_NT',
                   'CentOS7.1': 'Linux',
-                  'OpenSUSE42.1': 'Linux',
                   'RHEL7.2': 'Linux',
                   'LinuxARMEmulator': 'Linux']
 
@@ -33,7 +32,6 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'Fedora24' : 'fedora.24-x64',
                              'Debian8.4' : 'debian.8-x64',
                              'CentOS7.1' : 'centos.7-x64',
-                             'OpenSUSE42.1' : 'opensuse.42.1-x64',
                              'RHEL7.2': 'rhel.7-x64']
 
 def osShortName = ['Windows 7' : 'win7',
@@ -44,7 +42,6 @@ def osShortName = ['Windows 7' : 'win7',
                    'Ubuntu16.10' : 'ubuntu16.10',
                    'CentOS7.1' : 'centos7.1',
                    'Debian8.4' : 'debian8.4',
-                   'OpenSUSE42.1' : 'opensuse42.1',
                    'Fedora24' : 'fedora42',
                    'RHEL7.2' : 'rhel7.2']
 
@@ -121,7 +118,7 @@ def osShortName = ['Windows 7' : 'win7',
 // Define outerloop testing for OSes that can build and run.  Run locally on each machine.
 // **************************
 [true, false].each { isPR ->
-    ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'OpenSUSE42.1', 'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX'].each { osName ->
+    ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1', 'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX'].each { osName ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def newJobName = "outerloop_${osShortName[osName]}_${configurationGroup.toLowerCase()}"
@@ -176,7 +173,7 @@ def osShortName = ['Windows 7' : 'win7',
 // **************************
 [true, false].each { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
-        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'Debian8.4', 'CentOS7.1', 'OpenSUSE42.1', 'Fedora24', 'RHEL7.2', 'OSX'].each { osName ->
+        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'Debian8.4', 'CentOS7.1', 'Fedora24', 'RHEL7.2', 'OSX'].each { osName ->
             def osGroup = osGroupMap[osName]
             def newJobName = "${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
