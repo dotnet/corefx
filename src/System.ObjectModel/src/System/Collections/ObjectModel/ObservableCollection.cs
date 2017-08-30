@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace System.Collections.ObjectModel
@@ -72,6 +74,8 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentNullException"> list is a null reference </exception>
         public ObservableCollection(List<T> list) : base(CreateCopy(list, nameof(list))) { }
 
+        // Note: If we're gonna introduce new constructors not using a List<T>, 
+        // review ReplaceRange(index, collection) and RemoveRange(index, count).
         private static List<T> CreateCopy(IEnumerable<T> collection, string paramName)
         {
             if (collection == null)
@@ -97,6 +101,255 @@ namespace System.Collections.ObjectModel
         public void Move(int oldIndex, int newIndex)
         {
             MoveItem(oldIndex, newIndex);
+        }
+
+
+        /// <summary>
+        /// Adds the elements of the specified collection to the end of the <see cref="ObservableCollection{T}"/>.
+        /// </summary>
+        /// <param name="collection">
+        /// The collection whose elements should be added to the end of the <see cref="ObservableCollection{T}"/>.
+        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.
+        /// </param>
+        public void AddRange(IEnumerable<T> collection)
+        {
+            InsertRange(Count, collection);
+        }
+
+        /// <summary>
+        /// Inserts the elements of a collection into the <see cref="ObservableCollection{T}"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
+        /// <param name="collection">The collection whose elements should be inserted into the List<T>.
+        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>
+        public void InsertRange(int index, IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
+            if (index > Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            if (collection is ICollection<T> list)
+            {
+                if (list.Count == 0)
+                {
+                    return;
+                }
+                if (!(list is IList))
+                {
+                    list = new List<T>(list);
+                }
+            }
+            else if (!ContainsAny(collection))
+            {
+                return;
+            }
+            else
+            {
+                list = new List<T>(collection);
+            }
+
+            if (list.Count == 1)
+            {
+                InsertItem(Count, ((IList<T>)list)[0]);
+                return;
+            }
+
+            CheckReentrancy();
+
+            /// expand the following couple of lines when adding more constructors that skip calling CreateCopy.
+            var target = (List<T>)Items;
+            target.InsertRange(index, collection);
+
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (IList)list, index));
+        }
+
+
+        /// <summary>
+        /// <summary> 
+        /// Removes the first occurence of each item in the specified collection from ObservableCollection(Of T).
+        /// </summary>
+        /// <param name="collection">The items to remove.</param>
+        public void RemoveRange(IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
+            if (Count == 0)
+            {
+                return;
+            }
+            else if (collection is ICollection<T> list)
+            {
+                if (list.Count == 0)
+                    return;
+                else if (list.Count == 1)
+                {
+                    using (IEnumerator<T> enumerator = list.GetEnumerator())
+                    {
+                        enumerator.MoveNext();
+                        InsertItem(Count, enumerator.Current);
+                    }
+                }
+            }
+            else if (!(ContainsAny(collection)))
+            {
+                return;
+            }
+
+            CheckReentrancy();
+
+            var removed = new Dictionary<int, List<T>>();
+            var curSegmentIndex = -1;
+            foreach (T item in collection)
+            {
+                var index = IndexOf(item);
+                if (index < 0)
+                    continue;
+
+                Items.RemoveAt(index);
+
+                if (!removed.TryGetValue(index - 1, out var segment) && !removed.TryGetValue(index, out segment))
+                {
+                    curSegmentIndex = index;
+                    removed[index] = new List<T> { item };
+                }
+                else
+                {
+                    segment.Add(item);
+                }
+            }
+
+            OnCountPropertyChanged();
+            OnIndexerPropertyChanged();
+
+            if (Count == 0)
+                OnCollectionReset();
+            else
+                foreach (KeyValuePair<int, List<T>> segment in removed)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, segment.Value, segment.Key));
+        }
+
+        /// <summary>
+        /// Removes a range of elements from the <see cref="ObservableCollection{T}"/>>.
+        /// </summary>
+        /// <param name="index">The zero-based starting index of the range of elements to remove.</param>
+        /// <param name="count">The number of elements to remove.</param>
+        public void RemoveRange(int index, int count)
+        {
+            if (index < 0 || (index + count) < Count)
+                throw new ArgumentOutOfRangeException();
+
+            if (count == 0)
+                return;
+
+            if (count == 1)
+            {
+                RemoveItem(index);
+                return;
+            }
+
+            var items = (List<T>)Items;
+            List<T> removedItems = items.GetRange(index, count);
+
+            CheckReentrancy();
+            items.RemoveRange(index, count);
+
+            OnCountPropertyChanged();
+            OnIndexerPropertyChanged();
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems, index));
+        }
+
+        /// <summary> 
+        /// Clears the current collection and replaces it with the specified collection. 
+        /// </summary>         
+        public void ReplaceRange(IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
+            if (collection is ICollection<T> gCollection)
+            {
+                if (gCollection.Count == 0)
+                {
+                    Clear();
+                    return;
+                }
+                else if (gCollection.Count == 1)
+                {
+                    using (IEnumerator<T> enumerator = gCollection.GetEnumerator())
+                    {
+                        enumerator.MoveNext();
+                        T current = enumerator.Current;
+                        var index = IndexOf(current);
+                        if (index > -1)
+                        {
+                            SetItem(index, current);
+                            return;
+                        }
+                    }
+                }
+            }
+            else if (!ContainsAny(collection))
+            {
+                Clear();
+                return;
+            }
+            else
+                gCollection = new List<T>(collection);
+
+            var oldCount = Count;
+            var lCount = gCollection.Count;
+
+            var max = Count >= lCount ? Count : lCount;
+
+            if (!(gCollection is IList<T> list))
+                list = new List<T>(gCollection);
+
+            using (BlockReentrancy())
+            {
+                for (int i = 0; i < max; i++)
+                {
+                    if (i < Count && i < lCount)
+                    {
+                        T old = this[i], @new = list[i];
+                        if (Equals(old, @new))
+                            continue;
+                        else
+                        {
+                            Items[i] = @new;
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, @old, i));
+                        }
+                    }
+                    else if (Count > lCount)
+                    {
+                        var removed = new Stack<T>();
+                        for (var j = Count - 1; j >= i; j--)
+                        {
+                            removed.Push(this[j]);
+                            Items.RemoveAt(j);
+                        }
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(removed), i));
+                        break;
+                    }
+                    else
+                    {
+                        var added = new List<T>();
+                        for (int j = i; j < gCollection.Count; j++)
+                        {
+                            T @new = list[j];
+                            Items.Add(@new);
+                            added.Add(@new);
+                        }
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
+                        break;
+                    }
+                }
+
+                OnCountPropertyChanged();
+                OnIndexerPropertyChanged();
+            }
         }
 
         #endregion Public Methods
@@ -157,6 +410,9 @@ namespace System.Collections.ObjectModel
         /// </summary>
         protected override void ClearItems()
         {
+            if (Count == 0)
+                return;
+
             CheckReentrancy();
             base.ClearItems();
             OnCountPropertyChanged();
@@ -168,6 +424,9 @@ namespace System.Collections.ObjectModel
         /// Called by base class Collection&lt;T&gt; when an item is removed from list;
         /// raises a CollectionChanged event to any listeners.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is not in the collection range.
+        /// </exception>
         protected override void RemoveItem(int index)
         {
             CheckReentrancy();
@@ -200,6 +459,9 @@ namespace System.Collections.ObjectModel
         /// </summary>
         protected override void SetItem(int index, T item)
         {
+            if (Equals(this[index], item))
+                return;
+
             CheckReentrancy();
             T originalItem = this[index];
             base.SetItem(index, item);
@@ -312,6 +574,18 @@ namespace System.Collections.ObjectModel
         //------------------------------------------------------
 
         #region Private Methods
+
+        /// <summary>
+        /// Helper function to determine if a collection contains any elements.
+        /// </summary>
+        /// <param name="collection">The collection to evaluate.</param>
+        /// <returns></returns>
+        private static bool ContainsAny(IEnumerable<T> collection)
+        {
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+                return enumerator.MoveNext();
+        }
+
         /// <summary>
         /// Helper to raise a PropertyChanged event for the Count property
         /// </summary>
