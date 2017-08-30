@@ -1,9 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
-    <SerializerDllName>$(SerializerName).dll</SerializerDllName>
-    <SerializerPdbName>$(SerializerName).pdb</SerializerPdbName>
-    <SerializerCsName>$(SerializerName).cs</SerializerCsName>
     <SerializerDllImmediatePath>$(IntermediateOutputPath)$(SerializerName).dll</SerializerDllImmediatePath>
     <SerializerPdbImmediatePath>$(IntermediateOutputPath)$(SerializerName).pdb</SerializerPdbImmediatePath>
     <SerializerCsImmediatePath>$(IntermediateOutputPath)$(SerializerName).cs</SerializerCsImmediatePath>
