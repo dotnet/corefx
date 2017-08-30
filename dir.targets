@@ -25,11 +25,13 @@
     <BinPlaceTest Condition="'$(BinPlaceTest)' == '' And '$(IsTestProject)' == 'true'">true</BinPlaceTest>
   </PropertyGroup>
 
-  <ItemGroup Condition="'@(BinPlaceConfiguration)' == '' AND '$(IsTestProject)' != 'true'">
+  <ItemGroup Condition="'@(BinPlaceConfiguration)' == ''">
     <!-- binplace to directories for the target vertical -->
     <BinPlaceConfiguration Include="$(_bc_TargetGroup)-$(_bc_OSGroup)">
       <RefPath>$(BuildConfigurationRefPath)</RefPath>
       <RuntimePath>$(RuntimePath)</RuntimePath>
+      <!-- we want to bin place the test output into the working directory -->
+      <TestWorkingPath>$(TestPath)</TestWorkingPath>
     </BinPlaceConfiguration>
     <!-- binplace to directories for packages -->
     <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
@@ -80,13 +82,6 @@
     <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
-    </BinPlaceConfiguration>
-  </ItemGroup>
-
-  <!-- For tests we want to separate the bin directory and the working directory to have a working directory per build configuration. -->
-  <ItemGroup Condition="'@(BinPlaceConfiguration)' == '' AND '$(BinPlaceTest)' == 'true'">
-    <BinPlaceConfiguration Include="$(_bc_TargetGroup)-$(_bc_OSGroup)">
-      <TestWorkingPath>$(TestWorkingDir)$(MSBuildProjectName)/$(BuildConfiguration)/</TestWorkingPath>
     </BinPlaceConfiguration>
   </ItemGroup>
 
