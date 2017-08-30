@@ -6,12 +6,12 @@ namespace System.Reflection.Metadata
 {
     public sealed partial class MetadataReader
     {
-        internal AssemblyName GetAssemblyName(StringHandle nameHandle, Version version, StringHandle cultureHandle, BlobHandle publicKeyHandle, AssemblyHashAlgorithm assemblyHashAlgorithm, AssemblyFlags flags)
+        internal AssemblyName GetAssemblyName(StringHandle nameHandle, Version version, StringHandle cultureHandle, BlobHandle publicKeyOrTokenHandle, AssemblyHashAlgorithm assemblyHashAlgorithm, AssemblyFlags flags)
         {
             string name = GetString(nameHandle);
             string cultureName = (!cultureHandle.IsNil) ? GetString(cultureHandle) : null;
             var hashAlgorithm = (Configuration.Assemblies.AssemblyHashAlgorithm)assemblyHashAlgorithm;
-            byte[] publicKeyOrToken = !publicKeyHandle.IsNil ? GetBlobBytes(publicKeyHandle) : null;
+            byte[] publicKeyOrToken = !publicKeyOrTokenHandle.IsNil ? GetBlobBytes(publicKeyOrTokenHandle) : null;
 
             var assemblyName = new AssemblyName(name)
             {
