@@ -27,7 +27,7 @@ namespace System.Tests
             obj2.value1 = 1;
             obj2.value2 = -0.0;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace System.Tests
             obj2.value1 = 1;
             obj2.value2 = -0.0;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace System.Tests
             obj2.value1 = 1;
             obj2.value2 = -double.NaN;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace System.Tests
             obj2.value1 = 1;
             obj2.value2 = -double.NaN;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace System.Tests
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -0.0;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace System.Tests
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -0.0;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace System.Tests
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -double.NaN;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -129,21 +129,21 @@ namespace System.Tests
             obj2.value1.value1 = 1;
             obj2.value2.value2 = -double.NaN;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
         public static void StructWithFloatFieldNotTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
-            obj1.value1 = 1;
-            obj1.value2 = 0.0f;
+            obj1.value1 = 0.0f;
+            obj1.value2 = 1;
 
             StructWithFloatFieldNotTightlyPacked obj2 = new StructWithFloatFieldNotTightlyPacked();
-            obj2.value1 = 1;
-            obj2.value2 = -0.0f;
+            obj2.value1 = -0.0f;
+            obj2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -151,28 +151,28 @@ namespace System.Tests
         public static void StructWithFloatFieldTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldTightlyPacked obj1 = new StructWithFloatFieldTightlyPacked();
-            obj1.value1 = 1;
-            obj1.value2 = 0.0f;
+            obj1.value1 = 0.0f;
+            obj1.value2 = 1;
 
             StructWithFloatFieldTightlyPacked obj2 = new StructWithFloatFieldTightlyPacked();
-            obj2.value1 = 1;
-            obj2.value2 = -0.0f;
+            obj2.value1 = -0.0f;
+            obj2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
         public static void StructWithFloatFieldNotTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
-            obj1.value1 = 1;
-            obj1.value2 = float.NaN;
+            obj1.value1 = float.NaN;
+            obj1.value2 = 1;
 
             StructWithFloatFieldNotTightlyPacked obj2 = new StructWithFloatFieldNotTightlyPacked();
-            obj2.value1 = 1;
-            obj2.value2 = -float.NaN;
+            obj2.value1 = -float.NaN;
+            obj2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -180,28 +180,28 @@ namespace System.Tests
         public static void StructWithFloatFieldTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldTightlyPacked obj1 = new StructWithFloatFieldTightlyPacked();
-            obj1.value1 = 1;
-            obj1.value2 = float.NaN;
+            obj1.value1 = float.NaN;
+            obj1.value2 = 1;
 
             StructWithFloatFieldTightlyPacked obj2 = new StructWithFloatFieldTightlyPacked();
-            obj2.value1 = 1;
-            obj2.value2 = -float.NaN;
+            obj2.value1 = -float.NaN;
+            obj2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
         public static void StructWithNestedFloatFieldNotTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
-            obj1.value1.value1 = 1;
-            obj1.value2.value2 = 0.0f;
+            obj1.value1.value1 = 0.0f;
+            obj1.value2.value2 = 1;
 
             StructWithFloatFieldNestedNotTightlyPacked obj2 = new StructWithFloatFieldNestedNotTightlyPacked();
-            obj2.value1.value1 = 1;
-            obj2.value2.value2 = -0.0f;
+            obj2.value1.value1 = -0.0f;
+            obj2.value2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -209,28 +209,28 @@ namespace System.Tests
         public static void StructWithNestedFloatFieldTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldNestedTightlyPacked obj1 = new StructWithFloatFieldNestedTightlyPacked();
-            obj1.value1.value1 = 1;
-            obj1.value2.value2 = 0.0f;
+            obj1.value1.value1 = 0.0f;
+            obj1.value2.value2 = 1;
 
             StructWithFloatFieldNestedTightlyPacked obj2 = new StructWithFloatFieldNestedTightlyPacked();
-            obj2.value1.value1 = 1;
-            obj2.value2.value2 = -0.0f;
+            obj2.value1.value1 = -0.0f;
+            obj2.value2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
         public static void StructWithNestedFloatFieldNotTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
-            obj1.value1.value1 = 1;
-            obj1.value2.value2 = float.NaN;
+            obj1.value1.value1 = float.NaN;
+            obj1.value2.value2 = 1;
 
             StructWithFloatFieldNestedNotTightlyPacked obj2 = new StructWithFloatFieldNestedNotTightlyPacked();
-            obj2.value1.value1 = 1;
-            obj2.value2.value2 = -float.NaN;
+            obj2.value1.value1 = -float.NaN;
+            obj2.value2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -238,14 +238,14 @@ namespace System.Tests
         public static void StructWithNestedFloatFieldTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldNestedTightlyPacked obj1 = new StructWithFloatFieldNestedTightlyPacked();
-            obj1.value1.value1 = 1;
-            obj1.value2.value2 = float.NaN;
+            obj1.value1.value1 = float.NaN;
+            obj1.value2.value2 = 1;
 
             StructWithFloatFieldNestedTightlyPacked obj2 = new StructWithFloatFieldNestedTightlyPacked();
-            obj2.value1.value1 = 1;
-            obj2.value2.value2 = -float.NaN;
+            obj2.value1.value1 = -float.NaN;
+            obj2.value2.value2 = 1;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -259,7 +259,7 @@ namespace System.Tests
             obj2.value1.value = 1;
             obj2.value2.value = 2;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -274,7 +274,7 @@ namespace System.Tests
             obj2.value1.value = 1;
             obj2.value2.value = 2;
 
-            Assert.Equal(false, obj1.Equals(obj2));
+            Assert.False(obj1.Equals(obj2));
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace System.Tests
             obj2.value1 = 1;
             obj2.value2 = -0.0;
 
-            Assert.Equal(true, obj1.Equals(obj2));
+            Assert.True(obj1.Equals(obj2));
         }
 
         public struct S
@@ -323,8 +323,8 @@ namespace System.Tests
 
         public struct StructWithFloatFieldNotTightlyPacked
         {
-            public long value1;
-            public float value2;
+            public float value1;
+            public long value2;
         }
 
         public struct StructWithFloatFieldTightlyPacked
@@ -379,7 +379,7 @@ namespace System.Tests
 
         public struct StructContainsPointer
         {
-            public String s;
+            public string s;
             public double value1;
             public double value2;
         }
