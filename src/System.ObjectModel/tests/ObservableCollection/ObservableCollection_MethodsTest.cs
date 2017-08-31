@@ -29,6 +29,36 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         /// <summary>
+        /// Tests that it's possible to add a range to the end of a collection
+        /// - Empty collection
+        /// - Collection already containing elements
+        /// - Trying to add an empty collection should not raise any events
+        /// </summary>
+        [Fact]
+        public static void AddRangeTest()
+        {
+            string[] anArray = { "one", "two", "three" };
+            var col = new ObservableCollection<string>();
+            var helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, anArray, null);
+
+            helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, anArray, null);
+
+            helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, anArray, 0);
+
+            helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, new[] { "single item" }, null);
+
+            helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, new[] { "single item" }, 0);
+
+            helper = new CollectionAndPropertyChangedTester();
+            helper.AddOrInsertRangeTest(col, new string[] { }, null);
+        }
+
+        /// <summary>
         /// Tests that it is possible to remove an item from the collection.
         /// - Removing an item from the collection results in a false.
         /// - Removing null from collection returns a false.
@@ -72,6 +102,7 @@ namespace System.Collections.ObjectModel.Tests
 
         /// <summary>
         /// Tests that a collection can be cleared.
+        /// Verifies that no events are raised if the collection was already empty.
         /// </summary>
         [Fact]
         public static void ClearTest()
@@ -88,6 +119,9 @@ namespace System.Collections.ObjectModel.Tests
             //tests that the collectionChanged events are fired.
             CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             col = new ObservableCollection<string>(anArray);
+            helper.ClearTest(col);
+            //tests that nothing is raised or changed if collection already empty.
+            helper = new CollectionAndPropertyChangedTester();
             helper.ClearTest(col);
         }
 
@@ -533,11 +567,17 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
+        public void AddOrInsertRangeTest(ObservableCollection<string> col, string[] itemsToAdd, int? insertIndex)
+        {
+
+        }
+
         /// <summary>
         /// Clears the given Collection.
         /// </summary>
         public void ClearTest(ObservableCollection<string> collection)
         {
+            bool isEmpty = collection.Count == 0;
             INotifyPropertyChanged collectionPropertyChanged = collection;
             collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
             _expectedPropertyChanged = new[]
@@ -547,8 +587,12 @@ namespace System.Collections.ObjectModel.Tests
             };
 
             collection.CollectionChanged += Collection_CollectionChanged;
-            ExpectedCollectionChangedFired++;
-            ExpectedAction = NotifyCollectionChangedAction.Reset;
+
+            if (!isEmpty)
+            {
+                ExpectedCollectionChangedFired++;
+                ExpectedAction = NotifyCollectionChangedAction.Reset;
+            }
             ExpectedNewItems = null;
             ExpectedNewStartingIndex = -1;
             ExpectedOldItems = null;
@@ -559,7 +603,12 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(ExpectedCollectionChangedFired, NumCollectionChangedFired);
 
             foreach (var item in _expectedPropertyChanged)
-                Assert.True(item.IsFound, "The propertychanged event should have fired for" + item.Name + ", since we just cleared the collection");
+            {
+                if (isEmpty)
+                    Assert.True(!item.IsFound, "The propertychanged event should not be fired for" + item.Name + ", since the collection was already empty");
+                else
+                    Assert.True(item.IsFound, "The propertychanged event should have fired for" + item.Name + ", since we just cleared the collection");
+            }
 
             collection.CollectionChanged -= Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
