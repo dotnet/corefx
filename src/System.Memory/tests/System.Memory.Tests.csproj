@@ -75,5 +75,11 @@
     <Compile Include="ReadOnlySpan\TestHelpers.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Memory\CtorArray.cs" />
+    <Compile Include="Memory\CtorArrayIntInt.cs" />
+    <Compile Include="Memory\Empty.cs" />
+    <Compile Include="Memory\TestHelpers.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

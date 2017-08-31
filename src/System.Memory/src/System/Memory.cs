@@ -117,7 +117,7 @@ namespace System
 #if !netstandard10
             Array.Empty<T>();
 #else
-            T[0];
+            new T[0];
 #endif
 
         /// <summary>
