@@ -224,6 +224,7 @@ namespace BasicEventSourceTests
                         // so that is (2 + 14) * 2 = 32
                         Assert.True(8 <= evts.Count, $"FAILURE: 8 <= {evts.Count}");
                         Assert.True(evts.Count <= 32, $"FAILURE: {evts.Count} <= 32");
+                        Assert.Equal(4, 3);     // Force a failure
                     }));
 
 
