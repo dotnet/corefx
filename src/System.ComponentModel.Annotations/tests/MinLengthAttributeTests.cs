@@ -33,9 +33,9 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new object[] { new MinLengthAttribute(12), new List<int>(new int[14]) };
             yield return new object[] { new MinLengthAttribute(16), new List<string>(new string[16]) };
 
-            yield return new object[] { new MaxLengthAttribute(0), new HashSet<int>() };
-            yield return new object[] { new MaxLengthAttribute(12), new HashSet<int>(Enumerable.Range(1, 14)) };
-            yield return new object[] { new MaxLengthAttribute(16), new HashSet<string>(Enumerable.Range(1, 16).Select(i => i.ToString())) };
+            yield return new object[] { new MinLengthAttribute(0), new HashSet<int>() };
+            yield return new object[] { new MinLengthAttribute(12), new HashSet<int>(Enumerable.Range(1, 14)) };
+            yield return new object[] { new MinLengthAttribute(16), new HashSet<string>(Enumerable.Range(1, 16).Select(i => i.ToString())) };
         }
 
         protected override IEnumerable<TestCase> InvalidValues()
