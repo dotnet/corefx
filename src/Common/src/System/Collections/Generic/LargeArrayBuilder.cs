@@ -46,6 +46,15 @@ namespace System.Collections.Generic
         /// Gets a string suitable for display in the debugger.
         /// </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
+
+        public CopyPosition NormalizeEnds(int endColumn)
+        {
+            Debug.Assert(Column <= endColumn);
+
+            return Column == endColumn ?
+                new CopyPosition(Row + 1, 0) :
+                this;
+        }
     }
 
     /// <summary>
@@ -197,6 +206,24 @@ namespace System.Collections.Generic
         /// <returns>The position in this builder that was copied up to.</returns>
         public CopyPosition CopyTo(CopyPosition position, T[] array, int arrayIndex, int count)
         {
+            int CopyToCore(T[] sourceBuffer, int sourceIndex)
+            {
+                Debug.Assert(sourceBuffer.Length != sourceIndex);
+
+                // Copy until we satisfy `count` or reach the end of the current buffer.
+                int copyCount = Math.Min(sourceBuffer.Length - sourceIndex, count);
+
+                if (copyCount > 0)
+                {
+                    Array.Copy(sourceBuffer, sourceIndex, array, arrayIndex, copyCount);
+
+                    arrayIndex += copyCount;
+                    count -= copyCount;
+                }
+
+                return copyCount;
+            }
+
             Debug.Assert(arrayIndex >= 0);
             Debug.Assert(count >= 0 && count <= Count);
             Debug.Assert(array?.Length - arrayIndex >= count);
@@ -207,34 +234,30 @@ namespace System.Collections.Generic
             /*
              * Visual representation:
              * 
-             *       C0   C1   C2 ..  C31 ..   C63
-             * R0:  [0]  [1]  [2] .. [31]
-             * R1: [32] [33] [34] .. [63]
-             * R2: [64] [65] [66] .. [95] .. [127]
+             *       C0   C1   C2 ..   C7 ..  C15
+             * R0:  [0]  [1]  [2] ..  [7]
+             * R1:  [8]  [9] [10] .. [15]
+             * R2: [16] [17] [18] .. [23] .. [31]
              */
 
             int row = position.Row;
             int column = position.Column;
 
-            for (; count > 0; row++, column = 0)
+            T[] buffer = GetBuffer(row);
+            int copied = CopyToCore(buffer, column);
+            if (count == 0)
             {
-                T[] buffer = GetBuffer(index: row);
-
-                // During this iteration, copy until we satisfy `count` or reach the
-                // end of the current buffer.
-                int copyCount = Math.Min(buffer.Length, count);
-
-                if (copyCount > 0)
-                {
-                    Array.Copy(buffer, column, array, arrayIndex, copyCount);
-
-                    arrayIndex += copyCount;
-                    count -= copyCount;
-                    column += copyCount;
-                }
+                return new CopyPosition(row, column + copied).NormalizeEnds(buffer.Length);
             }
 
-            return new CopyPosition(row: row, column: column);
+            do
+            {
+                buffer = GetBuffer(++row);
+                copied = CopyToCore(buffer, 0);
+            }
+            while (count > 0);
+
+            return new CopyPosition(row, copied).NormalizeEnds(buffer.Length);
         }
 
         /// <summary>
