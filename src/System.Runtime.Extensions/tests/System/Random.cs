@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class RandomTests
+    public static partial class RandomTests
     {
         [Fact]
         public static void Unseeded()
@@ -46,30 +46,6 @@ namespace System.Tests
                 Assert.Equal(b1[i], b2[i]);
             }
             for (int i = 0; i < b1.Length; i++)
-            {
-                int x1 = r1.Next();
-                int x2 = r2.Next();
-                Assert.Equal(x1, x2);
-            }
-        }
-
-        [Fact]
-        public static void Seeded_Span()
-        {
-            int seed = Environment.TickCount;
-
-            Random r1 = new Random(seed);
-            Random r2 = new Random(seed);
-
-            Span<byte> s1 = new Span<byte>(new byte[1000]);
-            r1.NextBytes(s1);
-            Span<byte> s2 = new Span<byte>(new byte[1000]);
-            r2.NextBytes(s2);
-            for (int i = 0; i < s1.Length; i++)
-            {
-                Assert.Equal(s1[i], s2[i]);
-            }
-            for (int i = 0; i < s1.Length; i++)
             {
                 int x1 = r1.Next();
                 int x2 = r2.Next();
@@ -148,19 +124,6 @@ namespace System.Tests
                 new byte[] { 0x55, 0x8B, 0x1, 0xDC, 0x3E, 0xF9, 0xDA, 0xF2, 0xD5, 0x26 }
             };
             return (expectedValues);
-        }
-
-        [Fact]
-        public static void ExpectedValues_NextBytesSpan()
-        {
-            byte[][] expectedValues = ByteValues();
-            for (int seed = 0; seed < expectedValues.Length; seed++)
-            {
-                byte[] actualValues = new byte[expectedValues[seed].Length];
-                var r = new Random(seed);
-                r.NextBytes(new Span<byte>(actualValues));
-                Assert.Equal(expectedValues[seed], actualValues);
-            }
         }
 
         [Fact]
