@@ -16,13 +16,10 @@ namespace System.Net.Security
     //
     internal class SslStreamInternal
     {
-        private static readonly AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
-        private static readonly AsyncProtocolCallback s_resumeAsyncWriteCallback = new AsyncProtocolCallback(ResumeAsyncWriteCallback);
         private static readonly AsyncProtocolCallback s_resumeAsyncReadCallback = new AsyncProtocolCallback(ResumeAsyncReadCallback);
         private static readonly AsyncProtocolCallback s_readHeaderCallback = new AsyncProtocolCallback(ReadHeaderCallback);
         private static readonly AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
-        private static readonly Action<Task, object> s_freeWriteBufferCallback = FreeWriteBuffer;
-
+        
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
@@ -30,8 +27,7 @@ namespace System.Net.Security
         private int _nestedWrite;
         private int _nestedRead;
         private AsyncProtocolRequest _readProtocolRequest; // cached, reusable AsyncProtocolRequest used for read operations
-        private AsyncProtocolRequest _writeProtocolRequest; // cached, reusable AsyncProtocolRequest used for write operations
-
+        
         // Never updated directly, special properties are used.  This is the read buffer.
         private byte[] _internalBuffer;
 
@@ -48,13 +44,7 @@ namespace System.Net.Security
             _decryptedBytesOffset = 0;
             _decryptedBytesCount = 0;
         }
-
-        private static void FreeWriteBuffer(Task t, object buffer)
-        {
-            ArrayPool<byte>.Shared.Return((byte[])buffer);
-            t.GetAwaiter().GetResult();
-        }
-
+        
         //We will only free the read buffer if it
         //actually contains no decrypted or encrypted bytes
         private void ReturnReadBufferIfEmpty()
@@ -121,7 +111,33 @@ namespace System.Net.Security
 
         internal void Write(byte[] buffer, int offset, int count)
         {
-            ProcessWrite(buffer, offset, count, null);
+            _sslState.CheckThrow(authSuccessCheck: true, shutdownCheck: true);
+            ValidateParameters(buffer, offset, count);
+
+            if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
+            }
+
+            try
+            {
+                ProcessWrite(buffer, offset, count);
+            }
+            catch (Exception e)
+            {
+                _sslState.FinishWrite();
+
+                if (e is IOException)
+                {
+                    throw;
+                }
+
+                throw new IOException(SR.net_io_write, e);
+            }
+            finally
+            {
+                _nestedWrite = 0;
+            }
         }
 
         internal IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
@@ -167,40 +183,154 @@ namespace System.Net.Security
 
         internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            var lazyResult = new LazyAsyncResult(this, asyncState, asyncCallback);
-            ProcessWrite(buffer, offset, count, lazyResult);
-            return lazyResult;
+            return TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
         }
 
-        internal void EndWrite(IAsyncResult asyncResult)
+        internal void EndWrite(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
+
+        internal Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            if (asyncResult == null)
+            _sslState.CheckThrow(authSuccessCheck: true, shutdownCheck: true);
+            ValidateParameters(buffer, offset, count);
+
+            if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
             {
-                throw new ArgumentNullException(nameof(asyncResult));
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "WriteAsync", "write"));
+            }
+            if (count == 0 && !SslStreamPal.CanEncryptEmptyMessage)
+            {
+                // If it's an empty message and the PAL doesn't support that,
+                // we're done.
+                _nestedWrite = 0;
+                return Task.CompletedTask;
+            }
+            if (count <= _sslState.MaxDataSize)
+            {
+                //Single write
+                Task t = WriteSingleChunk(buffer, offset, count, cancellationToken);
+                if (t.IsCompleted)
+                {
+                    _nestedWrite = 0;
+
+                    return t;
+                }
+                else
+                {
+                    return ExitWriteAsync(t);
+                }
+            }
+            else
+            {
+                //Loop
+                return WriteAsyncChunked(buffer, offset, count, cancellationToken);
             }
 
-            LazyAsyncResult lazyResult = asyncResult as LazyAsyncResult;
-            if (lazyResult == null)
+            async Task ExitWriteAsync(Task task)
             {
-                throw new ArgumentException(SR.Format(SR.net_io_async_result, asyncResult.GetType().FullName), nameof(asyncResult));
+                try
+                {
+                    await task.ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    _sslState.FinishWrite();
+
+                    if (e is IOException)
+                    {
+                        throw;
+                    }
+
+                    throw new IOException(SR.net_io_write, e);
+                }
+                finally
+                {
+                    _nestedWrite = 0;
+                }
+            }
+        }
+
+        private async Task WaitForWriteIOSlot(Task lockTask, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await lockTask.ConfigureAwait(false);
+            await WriteSingleChunk(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+        }
+
+        internal Task WriteSingleChunk(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            // Request a write IO slot.
+            Task ioSlot = _sslState.CheckEnqueueWriteAsync();
+            if (!ioSlot.IsCompletedSuccessfully)
+            {
+                // Operation is async and has been queued, return.
+                return WaitForWriteIOSlot(ioSlot, buffer, offset, count, cancellationToken);
             }
 
-            if (Interlocked.Exchange(ref _nestedWrite, 0) == 0)
+            byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(count + FrameOverhead);
+            byte[] outBuffer = rentedBuffer;
+
+            SecurityStatusPal status = _sslState.EncryptData(buffer, offset, count, ref outBuffer, out int encryptedBytes);
+
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
-                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndWrite"));
+                // Re-handshake status is not supported.
+                ProtocolToken message = new ProtocolToken(null, status);
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                throw new IOException(SR.net_io_encrypt, message.GetException());
             }
 
-            // No "artificial" timeouts implemented so far, InnerStream controls timeout.
-            lazyResult.InternalWaitForCompletion();
-
-            if (lazyResult.Result is Exception e)
+            Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes, cancellationToken);
+            if (t.IsCompleted)
             {
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                _sslState.FinishWrite();
+                return t;
+            }
+            else
+            {
+                return CompleteAsync(t, rentedBuffer);
+            }
+
+            async Task CompleteAsync(Task writeTask, byte[] bufferToReturn)
+            {
+                try
+                {
+                    await writeTask.ConfigureAwait(false);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(bufferToReturn);
+                    _sslState.FinishWrite();
+                }
+            }
+        }
+
+        internal async Task WriteAsyncChunked(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            try
+            {
+                do
+                {
+                    int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
+                    await WriteSingleChunk(buffer, offset, chunkBytes, cancellationToken).ConfigureAwait(false);
+                    offset += chunkBytes;
+                    count -= chunkBytes;
+
+                } while (count != 0);
+            }
+            catch (Exception e)
+            {
+                _sslState.FinishWrite();
+
                 if (e is IOException)
                 {
-                    ExceptionDispatchInfo.Throw(e);
+                    throw;
                 }
 
                 throw new IOException(SR.net_io_write, e);
+            }
+            finally
+            {
+                _nestedWrite = 0;
             }
         }
 
@@ -268,57 +398,8 @@ namespace System.Net.Security
             return request;
         }
 
-        //
-        // Sync write method.
-        //
-        private void ProcessWrite(byte[] buffer, int offset, int count, LazyAsyncResult asyncResult)
+        private void ProcessWrite(byte[] buffer, int offset, int count)
         {
-            _sslState.CheckThrow(authSuccessCheck: true, shutdownCheck: true);
-            ValidateParameters(buffer, offset, count);
-
-            if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
-            {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
-            }
-
-            // If this is an async operation, get the AsyncProtocolRequest to use.
-            // We do this only after we verify we're the sole write operation in flight.
-            AsyncProtocolRequest asyncRequest = GetOrCreateProtocolRequest(ref _writeProtocolRequest, asyncResult);
-
-            bool failed = false;
-
-            try
-            {
-                StartWriting(buffer, offset, count, asyncRequest);
-            }
-            catch (Exception e)
-            {
-                _sslState.FinishWrite();
-
-                failed = true;
-                if (e is IOException)
-                {
-                    throw;
-                }
-
-                throw new IOException(SR.net_io_write, e);
-            }
-            finally
-            {
-                if (asyncRequest == null || failed)
-                {
-                    _nestedWrite = 0;
-                }
-            }
-        }
-
-        private void StartWriting(byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest)
-        {
-            if (asyncRequest != null)
-            {
-                asyncRequest.SetNextRequest(buffer, offset, count, s_resumeAsyncWriteCallback);
-            }
-
             // We loop to this method from the callback.
             // If the last chunk was just completed from async callback (count < 0), we complete user request.
             if (count >= 0)
@@ -333,11 +414,7 @@ namespace System.Net.Security
                     }
 
                     // Request a write IO slot.
-                    if (_sslState.CheckEnqueueWrite(asyncRequest))
-                    {
-                        // Operation is async and has been queued, return.
-                        return;
-                    }
+                    _sslState.CheckEnqueueWrite();
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(chunkBytes + FrameOverhead);
@@ -345,6 +422,7 @@ namespace System.Net.Security
                     int encryptedBytes = 0;
 
                     SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+
                     if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
@@ -353,37 +431,13 @@ namespace System.Net.Security
                         throw new IOException(SR.net_io_encrypt, message.GetException());
                     }
 
-                    if (asyncRequest != null)
+                    try
                     {
-                        // Prepare for the next request.
-                        asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, s_resumeAsyncWriteCallback);
-                        Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
-                        if (t.IsCompleted)
-                        {
-                            ArrayPool<byte>.Shared.Return(rentedBuffer);
-                            t.GetAwaiter().GetResult();
-                        }
-                        else
-                        {
-                            t = t.ContinueWith(s_freeWriteBufferCallback, rentedBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-                            IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
-                            if (!ar.CompletedSynchronously)
-                            {
-                                return;
-                            }
-                            TaskToApm.End(ar);
-                        }
+                        _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
                     }
-                    else
+                    finally
                     {
-                        try
-                        {
-                            _sslState.InnerStream.Write(outBuffer, 0, encryptedBytes);
-                        }
-                        finally
-                        {
-                            ArrayPool<byte>.Shared.Return(rentedBuffer);
-                        }
+                        ArrayPool<byte>.Shared.Return(rentedBuffer);
                     }
 
                     offset += chunkBytes;
@@ -393,11 +447,6 @@ namespace System.Net.Security
                     _sslState.FinishWrite();
 
                 } while (count != 0);
-            }
-
-            if (asyncRequest != null)
-            {
-                asyncRequest.CompleteUser();
             }
         }
 
@@ -752,13 +801,11 @@ namespace System.Net.Security
         private int ProcessReadErrorCode(SecurityStatusPal status, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
             ProtocolToken message = new ProtocolToken(null, status);
-            if (NetEventSource.IsEnabled)
-                NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
 
             if (message.Renegotiate)
             {
                 _sslState.ReplyOnReAuthentication(extraBuffer);
-
                 // Loop on read.
                 return -1;
             }
@@ -773,49 +820,7 @@ namespace System.Net.Security
 
             throw new IOException(SR.net_io_decrypt, message.GetException());
         }
-
-        private static void WriteCallback(IAsyncResult transportResult)
-        {
-            if (transportResult.CompletedSynchronously)
-            {
-                return;
-            }
-
-            if (!(transportResult.AsyncState is AsyncProtocolRequest))
-            {
-                NetEventSource.Fail(transportResult, "State type is wrong, expected AsyncProtocolRequest.");
-            }
-
-            AsyncProtocolRequest asyncRequest = (AsyncProtocolRequest)transportResult.AsyncState;
-
-            var sslStream = (SslStreamInternal)asyncRequest.AsyncObject;
-
-            try
-            {
-                TaskToApm.End(transportResult);
-                sslStream._sslState.FinishWrite();
-
-                if (asyncRequest.Count == 0)
-                {
-                    // This was the last chunk.
-                    asyncRequest.Count = -1;
-                }
-
-                sslStream.StartWriting(asyncRequest.Buffer, asyncRequest.Offset, asyncRequest.Count, asyncRequest);
-            }
-            catch (Exception e)
-            {
-                if (asyncRequest.IsUserCompleted)
-                {
-                    // This will throw on a worker thread.
-                    throw;
-                }
-
-                sslStream._sslState.FinishWrite();
-                asyncRequest.CompleteUserWithError(e);
-            }
-        }
-
+                
         //
         // This is used in a rare situation when async Read is resumed from completed handshake.
         //
@@ -835,28 +840,6 @@ namespace System.Net.Security
 
                 ((SslStreamInternal)request.AsyncObject)._sslState.FinishRead(null);
                 request.CompleteUserWithError(e);
-            }
-        }
-
-        //
-        // This is used in a rare situation when async Write is resumed from completed handshake.
-        //
-        private static void ResumeAsyncWriteCallback(AsyncProtocolRequest asyncRequest)
-        {
-            try
-            {
-                ((SslStreamInternal)asyncRequest.AsyncObject).StartWriting(asyncRequest.Buffer, asyncRequest.Offset, asyncRequest.Count, asyncRequest);
-            }
-            catch (Exception e)
-            {
-                if (asyncRequest.IsUserCompleted)
-                {
-                    // This will throw on a worker thread.
-                    throw;
-                }
-
-                ((SslStreamInternal)asyncRequest.AsyncObject)._sslState.FinishWrite();
-                asyncRequest.CompleteUserWithError(e);
             }
         }
 
