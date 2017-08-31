@@ -31,9 +31,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new object[] { new MaxLengthAttribute(-1), new Collection<int>(new int[20]) };
             yield return new object[] { new MaxLengthAttribute(15), new Collection<string>(new string[14]) };
             yield return new object[] { new MaxLengthAttribute(16), new Collection<string>(new string[16]) };
+
             yield return new object[] { new MaxLengthAttribute(-1), new List<int>(new int[20]) };
             yield return new object[] { new MaxLengthAttribute(15), new List<string>(new string[14]) };
             yield return new object[] { new MaxLengthAttribute(16), new List<string>(new string[16]) };
+
+            yield return new object[] { new MaxLengthAttribute(-1), new HashSet<int>(Enumerable.Range(1, 20)) };
+            yield return new object[] { new MaxLengthAttribute(15), new HashSet<string>(Enumerable.Range(1, 14).Select(i => i.ToString())) };
+            yield return new object[] { new MaxLengthAttribute(16), new HashSet<string>(Enumerable.Range(1, 16).Select(i => i.ToString())) };
         }
 
         protected override IEnumerable<TestCase> InvalidValues()
@@ -48,6 +53,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             yield return new object[] { new MaxLengthAttribute(12), new Collection<byte>(new byte[13]) };
             yield return new object[] { new MaxLengthAttribute(12), new List<byte>(new byte[13]) };
+            yield return new object[] { new MaxLengthAttribute(12), new HashSet<int>(Enumerable.Range(1, 13)) };
         }
 
         [Fact]
@@ -110,7 +116,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
-        public static void GetValidationResult_ValueGenericICollection_ThrowsInvalidCastException()
+        public static void GetValidationResult_ValueGenericIEnumerable_ThrowsInvalidCastException()
         {
             Assert.Throws<InvalidCastException>(() => new MaxLengthAttribute().GetValidationResult(new GenericIEnumerableClass(), new ValidationContext(new object())));
         }

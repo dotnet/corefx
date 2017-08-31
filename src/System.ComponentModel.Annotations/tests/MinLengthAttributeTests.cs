@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
@@ -31,6 +32,10 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new object[] { new MinLengthAttribute(0), new List<int>(new int[0]) };
             yield return new object[] { new MinLengthAttribute(12), new List<int>(new int[14]) };
             yield return new object[] { new MinLengthAttribute(16), new List<string>(new string[16]) };
+
+            yield return new object[] { new MaxLengthAttribute(0), new HashSet<int>() };
+            yield return new object[] { new MaxLengthAttribute(12), new HashSet<int>(Enumerable.Range(1, 14)) };
+            yield return new object[] { new MaxLengthAttribute(16), new HashSet<string>(Enumerable.Range(1, 16).Select(i => i.ToString())) };
         }
 
         protected override IEnumerable<TestCase> InvalidValues()
@@ -98,7 +103,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
-        public static void GetValidationResult_ValueGenericICollection_ThrowsInvalidCastException()
+        public static void GetValidationResult_ValueGenericIEnumerable_ThrowsInvalidCastException()
         {
             Assert.Throws<InvalidCastException>(() => new MinLengthAttribute(0).GetValidationResult(new GenericIEnumerableClass(), new ValidationContext(new object())));
         }
