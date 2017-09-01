@@ -382,7 +382,7 @@
     <value>The SSL connection could not be established, see inner exception.</value>
   </data>
   <data name="net_http_unsupported_version" xml:space="preserve">
-    <value>Only HTTP 1.x is supported. request.Version was {0}.{1}.</value>
+    <value>Only HTTP 1.x is supported. Version requested was {0}.{1}.</value>
   </data>
   <data name="net_http_unsupported_chunking" xml:space="preserve">
     <value>HTTP 1.0 does not support chunking.</value>
