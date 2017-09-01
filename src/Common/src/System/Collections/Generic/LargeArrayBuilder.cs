@@ -47,6 +47,11 @@ namespace System.Collections.Generic
         /// </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
 
+        /// <summary>
+        /// If this position is at the end of the current buffer, returns the position
+        /// at the start of the next buffer. Otherwise, returns this position.
+        /// </summary>
+        /// <param name="endColumn">The length of the current buffer.</param>
         public CopyPosition Normalize(int endColumn)
         {
             Debug.Assert(Column <= endColumn);
@@ -184,7 +189,7 @@ namespace System.Collections.Generic
             for (int i = 0; count > 0; i++)
             {
                 // Find the buffer we're copying from.
-                T[] buffer = GetBuffer(index: i);
+                T[] buffer = GetBuffer(i);
 
                 // Copy until we satisfy count, or we reach the end of the buffer.
                 int toCopy = Math.Min(count, buffer.Length);
@@ -208,7 +213,7 @@ namespace System.Collections.Generic
         {
             int CopyToCore(T[] sourceBuffer, int sourceIndex)
             {
-                Debug.Assert(sourceBuffer.Length != sourceIndex);
+                Debug.Assert(sourceBuffer.Length > sourceIndex);
 
                 // Copy until we satisfy `count` or reach the end of the current buffer.
                 int copyCount = Math.Min(sourceBuffer.Length - sourceIndex, count);
