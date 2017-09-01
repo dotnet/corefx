@@ -47,7 +47,7 @@ namespace System.Collections.Generic
         /// </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
 
-        public CopyPosition NormalizeEnds(int endColumn)
+        public CopyPosition Normalize(int endColumn)
         {
             Debug.Assert(Column <= endColumn);
 
@@ -247,7 +247,7 @@ namespace System.Collections.Generic
             int copied = CopyToCore(buffer, column);
             if (count == 0)
             {
-                return new CopyPosition(row, column + copied).NormalizeEnds(buffer.Length);
+                return new CopyPosition(row, column + copied).Normalize(buffer.Length);
             }
 
             do
@@ -257,7 +257,7 @@ namespace System.Collections.Generic
             }
             while (count > 0);
 
-            return new CopyPosition(row, copied).NormalizeEnds(buffer.Length);
+            return new CopyPosition(row, copied).Normalize(buffer.Length);
         }
 
         /// <summary>
