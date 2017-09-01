@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -31,7 +32,6 @@ namespace System.IO
         private Stream _stream;
         private Encoding _encoding;
         private Encoder _encoder;
-        private byte[] _byteBuffer;
         private char[] _charBuffer;
         private int _charPos;
         private int _charLen;
@@ -151,7 +151,6 @@ namespace System.IO
             }
 
             _charBuffer = new char[bufferSize];
-            _byteBuffer = new byte[_encoding.GetMaxByteCount(bufferSize)];
             _charLen = bufferSize;
             // If we're appending to a Stream that already has data, don't write
             // the preamble.
@@ -208,7 +207,6 @@ namespace System.IO
                     finally
                     {
                         _stream = null;
-                        _byteBuffer = null;
                         _charBuffer = null;
                         _encoding = null;
                         _encoder = null;
@@ -253,12 +251,22 @@ namespace System.IO
                 }
             }
 
-            int count = _encoder.GetBytes(_charBuffer, 0, _charPos, _byteBuffer, 0, flushEncoder);
-            _charPos = 0;
-            if (count > 0)
+            int count = 0;
+            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(_encoding.GetMaxByteCount(_charPos));
+            try
             {
-                _stream.Write(_byteBuffer, 0, count);
+                count = _encoder.GetBytes(_charBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
+                _charPos = 0;
+                if (count > 0)
+                {
+                    _stream.Write(byteBuffer, 0, count);
+                }
             }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(byteBuffer);
+            }
+
             // By definition, calling Flush should flush the stream, but this is
             // only necessary if we passed in true for flushStream.  The Web
             // Services guys have some perf tests where flushing needlessly hurts.
@@ -989,7 +997,7 @@ namespace System.IO
             }
 
             Task flushTask = FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, _haveWrittenPreamble,
-                                                _encoding, _encoder, _byteBuffer, _stream);
+                                                _encoding, _encoder, _stream);
 
             _charPos = 0;
             return flushTask;
@@ -1000,7 +1008,7 @@ namespace System.IO
         // to ensure performant access inside the state machine that corresponds this async method.
         private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
                                                      char[] charBuffer, int charPos, bool haveWrittenPreamble,
-                                                     Encoding encoding, Encoder encoder, Byte[] byteBuffer, Stream stream)
+                                                     Encoding encoding, Encoder encoder, Stream stream)
         {
             if (!haveWrittenPreamble)
             {
@@ -1012,10 +1020,19 @@ namespace System.IO
                 }
             }
 
-            int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
-            if (count > 0)
+            int count = 0;
+            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(encoding.GetMaxByteCount(charPos));
+            try
             {
-                await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
+                count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
+                if (count > 0)
+                {
+                    await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(byteBuffer);
             }
 
             // By definition, calling Flush should flush the stream, but this is
