@@ -207,12 +207,12 @@ namespace System.Net.Http
                 if (request.Version.Major != 1)
                 {
                     // TODO #23134: Support 2.0
-                    throw new PlatformNotSupportedException($"Only HTTP 1.0 supported -- request.Version was {request.Version}");
+                    throw new PlatformNotSupportedException(SR.net_http_unsupported_version);
                 }
-                else if (request.Version.Minor == 0 && request.Headers.TransferEncodingChunked == true)
+                else if (request.Version.Minor == 0 && request.HasHeaders && request.Headers.TransferEncodingChunked == true)
                 {
                     // HTTP 1.0 does not support chunking
-                    throw new NotSupportedException($"HTTP 1.0 does not support chunking.");
+                    throw new NotSupportedException(SR.net_http_unsupported_chunking);
                 }
 
                 // Write request line
@@ -222,7 +222,7 @@ namespace System.Net.Http
                     _usingProxy ? request.RequestUri.AbsoluteUri : request.RequestUri.PathAndQuery,
                     cancellationToken).ConfigureAwait(false);
                 await WriteBytesAsync(
-                    request.Version.Minor == 1 ? s_spaceHttp11NewlineAsciiBytes : s_spaceHttp10NewlineAsciiBytes,
+                    request.Version.Minor == 0 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
                     cancellationToken).ConfigureAwait(false);
 
                 // Write request headers
