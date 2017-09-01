@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -68,10 +69,10 @@ namespace System.ComponentModel.DataAnnotations
             }
             else
             {
-                Type genericCol = value.GetType().GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+                Type genericCol = value.GetType().GetTypeInfo().ImplementedInterfaces.Select(t => t.GetTypeInfo()).FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
                 if (genericCol != null)
                 {
-                    length = (int)genericCol.GetProperty("Count").GetValue(value);
+                    length = (int)genericCol.GetTypeInfo().GetProperty("Count").GetValue(value);
                 }
                 else
                 {
