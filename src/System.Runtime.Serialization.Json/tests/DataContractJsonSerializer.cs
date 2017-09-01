@@ -246,7 +246,7 @@ public static partial class DataContractJsonSerializerTests
             new { value = "\u000B", baseline = "\\u000b" }, // LINE TABULATION
             new { value = "\u000C", baseline = "\\f" }, // FORM FEED (FF)
             new { value = "\u000D", baseline = "\\r" }, // CARRIAGE RETURN (CR)
-            new { value = "\u000E", baseline = "\\u000e" }, // SHIFT IN
+            new { value = "\u000E", baseline = "\\u000e" },
             new { value = "\u000F", baseline = "\\u000f" }, // SHIFT IN
             new { value = "\u0010", baseline = "\\u0010" },
             new { value = "\u0011", baseline = "\\u0011" },
