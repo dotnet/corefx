@@ -204,12 +204,8 @@ namespace System.Net.Http
                     request.Headers.TransferEncodingChunked = true;
                 }
 
-                if (request.Version.Major != 1)
-                {
-                    // TODO #23134: Support 2.0
-                    throw new PlatformNotSupportedException(SR.net_http_unsupported_version);
-                }
-                else if (request.Version.Minor == 0 && request.HasHeaders && request.Headers.TransferEncodingChunked == true)
+                if (request.Version.Major == 1 && request.Version.Minor == 0 &&
+                        request.HasHeaders && request.Headers.TransferEncodingChunked == true)
                 {
                     // HTTP 1.0 does not support chunking
                     throw new NotSupportedException(SR.net_http_unsupported_chunking);
@@ -221,9 +217,10 @@ namespace System.Net.Http
                 await WriteStringAsync(
                     _usingProxy ? request.RequestUri.AbsoluteUri : request.RequestUri.PathAndQuery,
                     cancellationToken).ConfigureAwait(false);
-                await WriteBytesAsync(
-                    request.Version.Minor == 0 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
-                    cancellationToken).ConfigureAwait(false);
+
+                // fall-back to 1.1 for all versions other than 1.0
+                await WriteBytesAsync( request.Version.Major == 1 && request.Version.Minor == 0 ?
+                        s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes, cancellationToken).ConfigureAwait(false);
 
                 // Write request headers
                 if (request.HasHeaders)
@@ -233,7 +230,7 @@ namespace System.Net.Http
 
                 if (request.Content == null)
                 {
-                    // Write out Content-Length: 0 header to indicate no body, 
+                    // Write out Content-Length: 0 header to indicate no body,
                     // unless this is a method that never has a body.
                     if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head)
                     {
