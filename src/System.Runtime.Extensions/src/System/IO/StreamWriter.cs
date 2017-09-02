@@ -27,6 +27,7 @@ namespace System.IO
         private const int MinBufferSize = 128;
 
         private const int DontCopyOnWriteLineThreshold = 512;
+        private const int RentFromPoolThreshold = 64;
 
         // Bit bucket - Null has no backing store. Non closable.
         public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, UTF8NoBOM, MinBufferSize, true);
@@ -257,20 +258,14 @@ namespace System.IO
                 }
             }
 
-            int count = 0;
-            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(_encoding.GetMaxByteCount(_charPos));
-            try
+            int maxByteCount = _encoding.GetMaxByteCount(_charPos);
+            if (maxByteCount < RentFromPoolThreshold)
             {
-                count = _encoder.GetBytes(CharBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
-                _charPos = 0;
-                if (count > 0)
-                {
-                    _stream.Write(byteBuffer, 0, count);
-                }
+                FlushViaStack(maxByteCount, flushEncoder);
             }
-            finally
+            else
             {
-                ArrayPool<byte>.Shared.Return(byteBuffer);
+                FlushViaPool(maxByteCount, flushEncoder);
             }
 
             // By definition, calling Flush should flush the stream, but this is
@@ -280,6 +275,39 @@ namespace System.IO
             {
                 _stream.Flush();
                 ReturnCharBuffer();
+            }
+        }
+
+        private unsafe void FlushViaStack(int maxByteCount, bool flushEncoder)
+        {
+            byte* bytes = stackalloc byte[maxByteCount];
+            Span<byte> byteSpan = new Span<byte>(bytes, maxByteCount);
+            int count = _encoder.GetBytes(new ReadOnlySpan<char>(CharBuffer, 0, _charPos), byteSpan, flushEncoder);
+            _charPos = 0;
+            if (count > 0)
+            {
+                _stream.Write(byteSpan.Slice(0, count));
+            }
+        }
+
+        private void FlushViaPool(int maxByteCount, bool flushEncoder)
+        {
+            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
+            try
+            {
+                var count = _encoder.GetBytes(CharBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
+                _charPos = 0;
+                if (count > 0)
+                {
+                    _stream.Write(byteBuffer, 0, count);
+                }
+            }
+            finally
+            {
+                if (byteBuffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(byteBuffer);
+                }
             }
         }
 
