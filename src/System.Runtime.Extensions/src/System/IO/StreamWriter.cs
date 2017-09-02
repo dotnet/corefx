@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
@@ -209,7 +210,12 @@ namespace System.IO
                         _stream = null;
                         _encoding = null;
                         _encoder = null;
-                        ReturnCharBuffer();
+                        if (_rentedCharBuffer != null)
+                        {
+                            // If earlier Flush threw an exception we may still have a rented buffer
+                            // return it now
+                            ReturnCharBuffer();
+                        }
                         _charLen = 0;
                         base.Dispose(disposing);
                     }
@@ -1051,18 +1057,20 @@ namespace System.IO
         }
         #endregion
 
-        private char[] CharBuffer => _rentedCharBuffer ?? RentCharBuffer();
+        private char[] CharBuffer
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get => _rentedCharBuffer ?? RentCharBuffer();
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private char[] RentCharBuffer() => _rentedCharBuffer = ArrayPool<char>.Shared.Rent(_charLen);
 
         private void ReturnCharBuffer()
         {
-            char[] charBuffer = _rentedCharBuffer;
+            char[] charBuffer = Interlocked.Exchange(ref _rentedCharBuffer, null);
             if (charBuffer != null)
             {
-                _rentedCharBuffer = null;
-
                 ArrayPool<char>.Shared.Return(charBuffer);
             }
         }
