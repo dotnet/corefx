@@ -15,7 +15,7 @@ namespace System.MemoryTests
     public static partial class MemoryTests
     {
         [Fact]
-        public static void CtorArray1()
+        public static void CtorArrayInt()
         {
             int[] a = { 91, 92, -93, 94 };
             Memory<int> memory;
@@ -28,7 +28,7 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void CtorArray2()
+        public static void CtorArrayLong()
         {
             long[] a = { 91, -92, 93, 94, -95 };
             Memory<long> memory;
@@ -41,7 +41,7 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void CtorArray3()
+        public static void CtorArrayObject()
         {
             object o1 = new object();
             object o2 = new object();
@@ -49,10 +49,10 @@ namespace System.MemoryTests
             Memory<object> memory;
 
             memory = new Memory<object>(a);
-            memory.Validate(o1, o2);
+            memory.ValidateReferenceType(o1, o2);
 
             memory = new Memory<object>(a, 0, a.Length);
-            memory.Validate(o1, o2);
+            memory.ValidateReferenceType(o1, o2);
         }
 
         [Fact]

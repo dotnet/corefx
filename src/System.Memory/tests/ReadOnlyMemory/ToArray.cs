@@ -4,16 +4,16 @@
 
 using Xunit;
 
-namespace System.SpanTests
+namespace System.MemoryTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlyMemoryTests
     {
         [Fact]
         public static void ToArray1()
         {
             int[] a = { 91, 92, 93 };
-            Span<int> span = new Span<int>(a);
-            int[] copy = span.ToArray();
+            var memory = new ReadOnlyMemory<int>(a);
+            int[] copy = memory.ToArray();
             Assert.Equal<int>(a, copy);
             Assert.NotSame(a, copy);
         }
@@ -21,8 +21,8 @@ namespace System.SpanTests
         [Fact]
         public static void ToArrayEmpty()
         {
-            Span<int> span = Span<int>.Empty;
-            int[] copy = span.ToArray();
+            ReadOnlyMemory<int> memory = ReadOnlyMemory<int>.Empty;
+            int[] copy = memory.ToArray();
             Assert.Equal(0, copy.Length);
         }
     }

@@ -14,7 +14,7 @@ namespace System
 {
     /// <summary>
     /// ReadOnlyMemory represents a contiguous region of arbitrary similar to ReadOnlySpan.
-    /// Unlike ReadOnlySpan, it is not a stack-only type.
+    /// Unlike ReadOnlySpan, it is not a byref-like type.
     /// </summary>
     public struct ReadOnlyMemory<T>
     {

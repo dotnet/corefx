@@ -6,12 +6,12 @@ using Xunit;
 
 namespace System.MemoryTests
 {
-    public static partial class MemoryTests
+    public static partial class ReadOnlyMemoryTests
     {
         [Fact]
         public static void Empty()
         {
-            Memory<int> empty = Memory<int>.Empty;
+            ReadOnlyMemory<int> empty = ReadOnlyMemory<int>.Empty;
             Assert.True(empty.IsEmpty);
             Assert.Equal(0, empty.Length);
         }
@@ -19,7 +19,7 @@ namespace System.MemoryTests
         [Fact]
         public static void IsEmpty()
         {
-            Memory<int> empty = new int[0];
+            ReadOnlyMemory<int> empty = new int[0];
             Assert.True(empty.IsEmpty);
             Assert.Equal(0, empty.Length);
         }

@@ -8,17 +8,19 @@ using System.Runtime.CompilerServices;
 namespace System.Buffers
 {
     /// <summary>
-    /// Provides a mechanism to make sure objects only get disposed when intended.
+    /// Provides a mechanism for manual lifetime management.
     /// </summary>
     public interface IRetainable
     {
         /// <summary>
-        /// Do not dispose the object until the object owner calls Release.
+        /// Call this method to indicate that the IRetainable object is in use.
+        /// Do not dispose until Release is called.
         /// </summary>
         void Retain();
 
         /// <summary>
-        /// The object can now be disposed. If the object owner called Retain, they must also call Release.
+        /// Call this method to indicate that the IRetainable object is no longer in use.
+        /// The object can now be disposed.
         /// </summary>
         bool Release();
     }

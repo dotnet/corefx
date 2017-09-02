@@ -8,8 +8,7 @@
 #pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
 namespace System
 {
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct ReadOnlySpan<T>
+    public struct ReadOnlySpan<T>
     {
         public static ReadOnlySpan<T> Empty { get { throw null; } }
         public ReadOnlySpan(T[] array) { throw null;}
@@ -37,8 +36,7 @@ namespace System
         public bool TryCopyTo(Span<T> destination) { throw null; }
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct Span<T>
+    public struct Span<T>
     {
         public static Span<T> Empty { get { throw null; } }
         public Span(T[] array) { throw null;}
@@ -118,7 +116,6 @@ namespace System
         public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct ReadOnlyMemory<T>
     {
         public static ReadOnlyMemory<T> Empty { get { throw null; } }
@@ -143,7 +140,6 @@ namespace System
         public bool DangerousTryGetArray(out ArraySegment<T> arraySegment) { throw null; }
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct Memory<T>
     {
         public static Memory<T> Empty { get { throw null; } }
@@ -171,7 +167,6 @@ namespace System
 
 namespace System.Buffers
 {
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public unsafe struct MemoryHandle : IDisposable 
     {
         public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }

@@ -14,7 +14,7 @@ namespace System
 {
     /// <summary>
     /// Memory represents a contiguous region of arbitrary memory similar to Span.
-    /// Unlike Span, it is not a stack-only type.
+    /// Unlike Span, it is not a byref-like type.
     /// </summary>
     public struct Memory<T>
     {

@@ -28,7 +28,7 @@ namespace System.Buffers
         /// Returns a Memory<typeparamref name="T"/> if the underlying memory has not been freed.
         /// </summary>
         /// <exception cref="System.ObjectDisposedException">
-        /// Throw when the memory has been disposed.
+        /// Thrown when the underlying memory has already been disposed.
         /// </exception>
         public Memory<T> AsMemory
         {
@@ -48,7 +48,7 @@ namespace System.Buffers
         public abstract MemoryHandle Pin();
 
         /// <summary>
-        /// Returns an array segment if the underlying memory has not been freed.
+        /// Returns an array segment.
         /// </summary>
         protected internal abstract bool TryGetArray(out ArraySegment<T> arraySegment);
 
