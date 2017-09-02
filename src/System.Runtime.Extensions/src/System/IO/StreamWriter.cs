@@ -258,14 +258,17 @@ namespace System.IO
                 }
             }
 
-            int maxByteCount = _encoding.GetMaxByteCount(_charPos);
-            if (maxByteCount < RentFromPoolThreshold)
+            int maxByteCount = _encoding.GetMaxByteCount(_charPos + FallbackBufferRemaining(flushEncoder));
+            if (maxByteCount > 0)
             {
-                FlushViaStack(maxByteCount, flushEncoder);
-            }
-            else
-            {
-                FlushViaPool(maxByteCount, flushEncoder);
+                if (maxByteCount < RentFromPoolThreshold)
+                {
+                    FlushViaStack(maxByteCount, flushEncoder);
+                }
+                else
+                {
+                    FlushViaPool(maxByteCount, flushEncoder);
+                }
             }
 
             // By definition, calling Flush should flush the stream, but this is
@@ -277,6 +280,11 @@ namespace System.IO
                 ReturnCharBuffer();
             }
         }
+
+        // To not allocate on checking this wants to be: 
+        // _encoder.InternalHasFallbackBuffer ? _encoder.FallbackBuffer.Remaining : 0
+        // However the property is internal to coreclr, so we'll use max 2 char in fallback if flushing encoder
+        private int FallbackBufferRemaining(bool flushEncoder) => flushEncoder ? _encoding.GetMaxByteCount(2) : 0;
 
         private unsafe void FlushViaStack(int maxByteCount, bool flushEncoder)
         {
@@ -1059,19 +1067,22 @@ namespace System.IO
                 }
             }
 
-            int count = 0;
-            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(encoding.GetMaxByteCount(charPos));
-            try
+            int maxByteCount = encoding.GetMaxByteCount(charPos + _this.FallbackBufferRemaining(flushEncoder));
+            if (maxByteCount > 0)
             {
-                count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
-                if (count > 0)
+                byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
+                try
                 {
-                    await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
+                    int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
+                    if (count > 0)
+                    {
+                        await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
+                    }
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(byteBuffer);
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(byteBuffer);
+                }
             }
 
             // By definition, calling Flush should flush the stream, but this is
