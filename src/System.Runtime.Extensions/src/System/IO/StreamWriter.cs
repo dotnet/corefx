@@ -304,8 +304,8 @@ namespace System.IO
             // Services guys have some perf tests where flushing needlessly hurts.
             if (flushStream)
             {
-                _stream.Flush();
                 ReturnCharBuffer();
+                _stream.Flush();
             }
         }
 
@@ -1111,8 +1111,8 @@ namespace System.IO
             // Services guys have some perf tests where flushing needlessly hurts.
             if (flushStream)
             {
-                await stream.FlushAsync().ConfigureAwait(false);
                 _this.ReturnCharBuffer();
+                await stream.FlushAsync().ConfigureAwait(false);
             }
         }
         #endregion
