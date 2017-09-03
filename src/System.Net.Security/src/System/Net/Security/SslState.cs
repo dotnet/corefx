@@ -390,13 +390,9 @@ namespace System.Net.Security
             }
         }
 
-        internal int HeaderSize
-        {
-            get
-            {
-                return Context.HeaderSize;
-            }
-        }
+        internal int HeaderSize => Context.HeaderSize;
+
+        internal int FrameOverhead => Context.FrameOverhead;
 
         internal int MaxDataSize
         {
@@ -479,10 +475,10 @@ namespace System.Net.Security
             }
         }
 
-        internal SecurityStatusPal EncryptData(byte[] buffer, int offset, int count, ref byte[] outBuffer, out int outSize)
+        internal SecurityStatusPal EncryptData(byte[] buffer, int offset, int count, byte[] outBuffer, out int outSize)
         {
             CheckThrow(true);
-            return Context.Encrypt(buffer, offset, count, ref outBuffer, out outSize);
+            return Context.Encrypt(buffer, offset, count, outBuffer, out outSize);
         }
 
         internal SecurityStatusPal DecryptData(byte[] buffer, ref int offset, ref int count)

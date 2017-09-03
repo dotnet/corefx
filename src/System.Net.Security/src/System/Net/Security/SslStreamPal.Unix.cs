@@ -53,15 +53,15 @@ namespace System.Net.Security
             return new SafeFreeSslCredentials(certificate, protocols, policy);
         }
 
-        public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, byte[] input, int offset, int size, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
+        public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, byte[] input, int offset, int size, int headerSize, int trailerSize, byte[] output, out int resultSize)
         {
-            return EncryptDecryptHelper(securityContext, input, offset, size, true, ref output, out resultSize);
+            return EncryptDecryptHelper(securityContext, input, offset, size, true, output, out resultSize);
         }
 
         public static SecurityStatusPal DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
         {
             int resultSize;
-            SecurityStatusPal retVal = EncryptDecryptHelper(securityContext, buffer, offset, count, false, ref buffer, out resultSize);
+            SecurityStatusPal retVal = EncryptDecryptHelper(securityContext, buffer, offset, count, false, buffer, out resultSize);
             if (retVal.ErrorCode == SecurityStatusPalErrorCode.OK || 
                 retVal.ErrorCode == SecurityStatusPalErrorCode.Renegotiate)
             {
@@ -140,7 +140,7 @@ namespace System.Net.Security
             }
         }
 
-        private static SecurityStatusPal EncryptDecryptHelper(SafeDeleteContext securityContext, byte[] input, int offset, int size, bool encrypt, ref byte[] output, out int resultSize)
+        private static SecurityStatusPal EncryptDecryptHelper(SafeDeleteContext securityContext, byte[] input, int offset, int size, bool encrypt, byte[] output, out int resultSize)
         {
             resultSize = 0;
             try
@@ -150,7 +150,7 @@ namespace System.Net.Security
 
                 if (encrypt)
                 {
-                    resultSize = Interop.OpenSsl.Encrypt(scHandle, input, offset, size, ref output, out errorCode);
+                    resultSize = Interop.OpenSsl.Encrypt(scHandle, input, offset, size, output, out errorCode);
                 }
                 else
                 {

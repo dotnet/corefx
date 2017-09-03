@@ -8,8 +8,8 @@ using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 
-using PAL_TlsHandshakeState=Interop.AppleCrypto.PAL_TlsHandshakeState;
-using PAL_TlsIo=Interop.AppleCrypto.PAL_TlsIo;
+using PAL_TlsHandshakeState = Interop.AppleCrypto.PAL_TlsHandshakeState;
+using PAL_TlsIo = Interop.AppleCrypto.PAL_TlsIo;
 
 namespace System.Net.Security
 {
@@ -81,7 +81,7 @@ namespace System.Net.Security
             int size,
             int headerSize,
             int trailerSize,
-            ref byte[] output,
+            byte[] output,
             out int resultSize)
         {
             resultSize = 0;
@@ -107,15 +107,8 @@ namespace System.Net.Security
                                 Interop.AppleCrypto.CreateExceptionForOSStatus((int)status));
                         }
 
-                        if (sslContext.BytesReadyForConnection <= output?.Length)
-                        {
-                            resultSize = sslContext.ReadPendingWrites(output, 0, output.Length);
-                        }
-                        else
-                        {
-                            output = sslContext.ReadPendingWrites();
-                            resultSize = output.Length;
-                        }
+                        Debug.Assert(output?.Length >= sslContext.BytesReadyForConnection);
+                        resultSize = sslContext.ReadPendingWrites(output, 0, output.Length);
 
                         switch (status)
                         {
