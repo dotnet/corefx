@@ -42,6 +42,8 @@ namespace System.IO
         private bool _haveWrittenPreamble;
         private bool _closable;
 
+        private int _maxFallbackBufferCount;
+
         // We don't guarantee thread safety on StreamWriter, but we should at 
         // least prevent users from trying to write anything while an Async
         // write from the same thread is in progress.
@@ -55,7 +57,16 @@ namespace System.IO
             Task t = _asyncWriteTask;
 
             if (t != null && !t.IsCompleted)
-                throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
+            {
+                // Use void returning throw helper to shink this method and allow it to inline
+                // rather than throwing directly and calling SR for message
+                ThrowInvalidOperation_AsyncIOInProgress();
+            }
+        }
+
+        private void ThrowInvalidOperation_AsyncIOInProgress()
+        {
+            throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
         }
 
         // The high level goal is to be tolerant of encoding errors when we read and very strict 
@@ -148,12 +159,8 @@ namespace System.IO
             _stream = streamArg;
             _encoding = encodingArg;
             _encoder = _encoding.GetEncoder();
-            if (bufferSize < MinBufferSize)
-            {
-                bufferSize = MinBufferSize;
-            }
-
-            _charLen = bufferSize;
+            _charLen = bufferSize > MinBufferSize ? bufferSize : MinBufferSize;
+            _maxFallbackBufferCount = _encoding.GetMaxByteCount(2);
             // If we're appending to a Stream that already has data, don't write
             // the preamble.
             if (_stream.CanSeek && _stream.Position > 0)
@@ -250,24 +257,45 @@ namespace System.IO
 
             if (!_haveWrittenPreamble)
             {
-                _haveWrittenPreamble = true;
-                ReadOnlySpan<byte> preamble = _encoding.Preamble;
-                if (preamble.Length > 0)
-                {
-                    _stream.Write(preamble);
-                }
+                WritePreamble();
             }
 
-            int maxByteCount = _encoding.GetMaxByteCount(_charPos + FallbackBufferRemaining(flushEncoder));
-            if (maxByteCount > 0)
+            int count = _encoding.GetMaxByteCount(_charPos + FallbackBufferRemaining(flushEncoder));
+            if (count > 0)
             {
-                if (maxByteCount < RentFromPoolThreshold)
+                if (count < RentFromPoolThreshold)
                 {
-                    FlushViaStack(maxByteCount, flushEncoder);
+                    unsafe
+                    {
+                        byte* bytes = stackalloc byte[count];
+                        Span<byte> byteSpan = new Span<byte>(bytes, count);
+                        count = _encoder.GetBytes(new ReadOnlySpan<char>(CharBuffer, 0, _charPos), byteSpan, flushEncoder);
+                        _charPos = 0;
+                        if (count > 0)
+                        {
+                            _stream.Write(byteSpan.Slice(0, count));
+                        }
+                    }
                 }
                 else
                 {
-                    FlushViaPool(maxByteCount, flushEncoder);
+                    byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(count);
+                    try
+                    {
+                        count = _encoder.GetBytes(CharBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
+                        _charPos = 0;
+                        if (count > 0)
+                        {
+                            _stream.Write(byteBuffer, 0, count);
+                        }
+                    }
+                    finally
+                    {
+                        if (byteBuffer != null)
+                        {
+                            ArrayPool<byte>.Shared.Return(byteBuffer);
+                        }
+                    }
                 }
             }
 
@@ -281,43 +309,20 @@ namespace System.IO
             }
         }
 
+        private void WritePreamble()
+        {
+            _haveWrittenPreamble = true;
+            ReadOnlySpan<byte> preamble = _encoding.Preamble;
+            if (preamble.Length > 0)
+            {
+                _stream.Write(preamble);
+            }
+        }
+
         // To not allocate on checking this wants to be: 
         // _encoder.InternalHasFallbackBuffer ? _encoder.FallbackBuffer.Remaining : 0
         // However the property is internal to coreclr, so we'll use max 2 char in fallback if flushing encoder
-        private int FallbackBufferRemaining(bool flushEncoder) => flushEncoder ? _encoding.GetMaxByteCount(2) : 0;
-
-        private unsafe void FlushViaStack(int maxByteCount, bool flushEncoder)
-        {
-            byte* bytes = stackalloc byte[maxByteCount];
-            Span<byte> byteSpan = new Span<byte>(bytes, maxByteCount);
-            int count = _encoder.GetBytes(new ReadOnlySpan<char>(CharBuffer, 0, _charPos), byteSpan, flushEncoder);
-            _charPos = 0;
-            if (count > 0)
-            {
-                _stream.Write(byteSpan.Slice(0, count));
-            }
-        }
-
-        private void FlushViaPool(int maxByteCount, bool flushEncoder)
-        {
-            byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
-            try
-            {
-                var count = _encoder.GetBytes(CharBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
-                _charPos = 0;
-                if (count > 0)
-                {
-                    _stream.Write(byteBuffer, 0, count);
-                }
-            }
-            finally
-            {
-                if (byteBuffer != null)
-                {
-                    ArrayPool<byte>.Shared.Return(byteBuffer);
-                }
-            }
-        }
+        private int FallbackBufferRemaining(bool flushEncoder) => flushEncoder ? _maxFallbackBufferCount : 0;
 
         public virtual bool AutoFlush
         {
@@ -1098,7 +1103,7 @@ namespace System.IO
 
         private char[] CharBuffer
         {
-            [MethodImpl(MethodImplOptions.NoInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _rentedCharBuffer ?? RentCharBuffer();
         }
 
