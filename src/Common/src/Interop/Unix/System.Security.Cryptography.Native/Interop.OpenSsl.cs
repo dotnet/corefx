@@ -220,7 +220,7 @@ internal static partial class Interop
             else
             {
                 int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
-
+                capacityNeeded = Math.Min(capacityNeeded, output.Length);
                 Debug.Assert(output != null && output.Length >= capacityNeeded);
 
                 retVal = BioRead(context.OutputBio, output, capacityNeeded);
