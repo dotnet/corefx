@@ -192,7 +192,7 @@ namespace System.IO
                     {
                         CheckAsyncTaskInProgress();
 
-                        Flush(true, true);
+                        Flush(flushStream: true, flushEncoder: true);
                     }
                 }
             }
@@ -235,7 +235,7 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            Flush(true, true);
+            Flush(flushStream: true, flushEncoder: true);
         }
 
         private void Flush(bool flushStream, bool flushEncoder)
@@ -335,7 +335,7 @@ namespace System.IO
                 _autoFlush = value;
                 if (value)
                 {
-                    Flush(true, false);
+                    Flush(flushStream: true, flushEncoder: false);
                 }
             }
         }
@@ -366,14 +366,14 @@ namespace System.IO
 
             if (_charPos == _charLen)
             {
-                Flush(false, false);
+                Flush(flushStream: false, flushEncoder: false);
             }
 
             CharBuffer[_charPos] = value;
             _charPos++;
             if (_autoFlush)
             {
-                Flush(true, false);
+                Flush(flushStream: true, flushEncoder: false);
             }
         }
 
@@ -399,7 +399,7 @@ namespace System.IO
                     if (charPos == charLen)
                     {
                         _charPos = charPos;
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -419,7 +419,7 @@ namespace System.IO
                 {
                     if (_charPos == _charLen)
                     {
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                     }
 
                     int n = _charLen - _charPos;
@@ -438,7 +438,7 @@ namespace System.IO
 
             if (_autoFlush)
             {
-                Flush(true, false);
+                Flush(flushStream: true, flushEncoder: false);
             }
         }
 
@@ -474,7 +474,7 @@ namespace System.IO
                     if (charPos == charLen)
                     {
                         _charPos = charPos;
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -492,7 +492,7 @@ namespace System.IO
                 {
                     if (_charPos == _charLen)
                     {
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                     }
 
                     int n = _charLen - _charPos;
@@ -511,7 +511,7 @@ namespace System.IO
 
             if (_autoFlush)
             {
-                Flush(true, false);
+                Flush(flushStream: true, flushEncoder: false);
             }
         }
 
@@ -535,7 +535,7 @@ namespace System.IO
                     if (charPos == charLen)
                     {
                         _charPos = charPos;
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -554,7 +554,7 @@ namespace System.IO
                 {
                     if (_charPos == _charLen)
                     {
-                        Flush(false, false);
+                        Flush(flushStream: false, flushEncoder: false);
                     }
 
                     int n = _charLen - _charPos;
@@ -573,7 +573,7 @@ namespace System.IO
 
             if (_autoFlush)
             {
-                Flush(true, false);
+                Flush(flushStream: true, flushEncoder: false);
             }
         }
 
@@ -597,7 +597,7 @@ namespace System.IO
             {
                 if (_charPos == _charLen)
                 {
-                    Flush(false, false);
+                    Flush(flushStream: false, flushEncoder: false);
                 }
 
                 int n = _charLen - _charPos;
@@ -618,7 +618,7 @@ namespace System.IO
             {
                 if (_charPos == _charLen)
                 {
-                    Flush(false, false);
+                    Flush(flushStream: false, flushEncoder: false);
                 }
 
                 charBuffer[_charPos] = coreNewLine[i];
@@ -627,7 +627,7 @@ namespace System.IO
 
             if (_autoFlush)
             {
-                Flush(true, false);
+                Flush(flushStream: true, flushEncoder: false);
             }
         }
 
