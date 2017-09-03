@@ -22,9 +22,9 @@ namespace System.Net
 
         public StreamSizes()
         {
-            Header = 0;
+            Header = 32;
             Trailer = 0;
-            MaximumMessage = 32 * 1024;
+            MaximumMessage = 16 * 1024;
         }
     }
 }

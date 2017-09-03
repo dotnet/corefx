@@ -131,7 +131,7 @@ namespace System.Net.Security
             return AcquireCredentialsHandle(direction, secureCredential);
         }
 
-        public static unsafe SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, byte[] input, int offset, int size, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
+        public static unsafe SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, byte[] input, int offset, int size, int headerSize, int trailerSize, byte[] output, out int resultSize)
         {
             // Ensure that there is sufficient space for the message output.
             int bufferSizeNeeded;
@@ -144,18 +144,18 @@ namespace System.Net.Security
                 NetEventSource.Fail(securityContext, "Arguments out of range");
                 throw;
             }
-            if (output == null || output.Length < bufferSizeNeeded)
-            {
-                output = new byte[bufferSizeNeeded];
-            }
 
+            Debug.Assert(output?.Length >= bufferSizeNeeded);
+            
             // Copy the input into the output buffer to prepare for SCHANNEL's expectations
             Buffer.BlockCopy(input, offset, output, headerSize, size);
 
             const int NumSecBuffers = 4; // header + data + trailer + empty
-            var unmanagedBuffer = stackalloc Interop.SspiCli.SecBuffer[NumSecBuffers];
-            var sdcInOut = new Interop.SspiCli.SecBufferDesc(NumSecBuffers);
-            sdcInOut.pBuffers = unmanagedBuffer;
+            Interop.SspiCli.SecBuffer* unmanagedBuffer = stackalloc Interop.SspiCli.SecBuffer[NumSecBuffers];
+            var sdcInOut = new Interop.SspiCli.SecBufferDesc(NumSecBuffers)
+            {
+                pBuffers = unmanagedBuffer
+            };
             fixed (byte* outputPtr = output)
             {
                 Interop.SspiCli.SecBuffer* headerSecBuffer = &unmanagedBuffer[0];

@@ -150,6 +150,8 @@ namespace System.Net.Security
             }
         }
 
+        internal int FrameOverhead => _headerSize + _trailerSize;
+        
         internal int MaxDataSize
         {
             get
@@ -869,7 +871,7 @@ namespace System.Net.Security
                 {
                     _headerSize = streamSizes.Header;
                     _trailerSize = streamSizes.Trailer;
-                    _maxDataSize = checked(streamSizes.MaximumMessage - (_headerSize + _trailerSize));
+                    _maxDataSize = streamSizes.MaximumMessage;
 
                     Debug.Assert(_maxDataSize > 0, "_maxDataSize > 0");
                 }
@@ -897,15 +899,13 @@ namespace System.Net.Security
                 size   -
                 output - Encrypted bytes
         --*/
-        internal SecurityStatusPal Encrypt(byte[] buffer, int offset, int size, ref byte[] output, out int resultSize)
+        internal SecurityStatusPal Encrypt(byte[] buffer, int offset, int size, byte[] output, out int resultSize)
         {
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Enter(this, buffer, offset, size);
                 NetEventSource.DumpBuffer(this, buffer, 0, Math.Min(buffer.Length, 128));
             }
-
-            byte[] writeBuffer = output;
 
             try
             {
@@ -934,7 +934,7 @@ namespace System.Net.Security
                 size,
                 _headerSize,
                 _trailerSize,
-                ref writeBuffer,
+                output,
                 out resultSize);
 
             if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
@@ -943,7 +943,6 @@ namespace System.Net.Security
             }
             else
             {
-                output = writeBuffer;
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"OK data size:{resultSize}");
             }
 

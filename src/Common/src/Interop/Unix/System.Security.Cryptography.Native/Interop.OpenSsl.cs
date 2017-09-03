@@ -181,7 +181,7 @@ internal static partial class Interop
             return stateOk;
         }
 
-        internal static int Encrypt(SafeSslHandle context, byte[] input, int offset, int count, ref byte[] output, out Ssl.SslErrorCode errorCode)
+        internal static int Encrypt(SafeSslHandle context, byte[] input, int offset, int count, byte[] output, out Ssl.SslErrorCode errorCode)
         {
             Debug.Assert(input != null);
             Debug.Assert(offset >= 0);
@@ -221,10 +221,7 @@ internal static partial class Interop
             {
                 int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
 
-                if (output == null || output.Length < capacityNeeded)
-                {
-                    output = new byte[capacityNeeded];
-                }
+                Debug.Assert(output != null && output.Length >= capacityNeeded);
 
                 retVal = BioRead(context.OutputBio, output, capacityNeeded);
             }

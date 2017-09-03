@@ -342,16 +342,14 @@ namespace System.Net.Security
                     }
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
-                    byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(chunkBytes + FrameOverhead);
-                    byte[] outBuffer = rentedBuffer;
-                    int encryptedBytes = 0;
-
-                    SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+                    byte[] outBuffer = ArrayPool<byte>.Shared.Rent(chunkBytes + _sslState.FrameOverhead);
+                    
+                    SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, outBuffer, out int encryptedBytes);
                     if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
                         ProtocolToken message = new ProtocolToken(null, status);
-                        ArrayPool<byte>.Shared.Return(rentedBuffer);
+                        ArrayPool<byte>.Shared.Return(outBuffer);
                         throw new IOException(SR.net_io_encrypt, message.GetException());
                     }
 
@@ -362,12 +360,12 @@ namespace System.Net.Security
                         Task t = _sslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
                         if (t.IsCompleted)
                         {
-                            ArrayPool<byte>.Shared.Return(rentedBuffer);
+                            ArrayPool<byte>.Shared.Return(outBuffer);
                             t.GetAwaiter().GetResult();
                         }
                         else
                         {
-                            t = t.ContinueWith(s_freeWriteBufferCallback, rentedBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+                            t = t.ContinueWith(s_freeWriteBufferCallback, outBuffer, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                             IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
                             if (!ar.CompletedSynchronously)
                             {
@@ -384,7 +382,7 @@ namespace System.Net.Security
                         }
                         finally
                         {
-                            ArrayPool<byte>.Shared.Return(rentedBuffer);
+                            ArrayPool<byte>.Shared.Return(outBuffer);
                         }
                     }
 
