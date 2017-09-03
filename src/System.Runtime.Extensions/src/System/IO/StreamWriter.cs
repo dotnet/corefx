@@ -192,7 +192,8 @@ namespace System.IO
                     {
                         CheckAsyncTaskInProgress();
 
-                        Flush(flushStream: true, flushEncoder: true);
+                        char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
+                        Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
                     }
                 }
             }
@@ -235,10 +236,11 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            Flush(flushStream: true, flushEncoder: true);
+            char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
+            Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
         }
 
-        private void Flush(bool flushStream, bool flushEncoder)
+        private void Flush(char[] charBuffer, int offset, int length, bool flushStream, bool flushEncoder)
         {
             // flushEncoder should be true at the end of the file and if
             // the user explicitly calls Flush (though not if AutoFlush is true).
@@ -250,7 +252,7 @@ namespace System.IO
             }
 
             // Perf boost for Flush on non-dirty writers.
-            if (_charPos == 0 && !flushStream && !flushEncoder)
+            if (length == 0 && !flushStream && !flushEncoder)
             {
                 return;
             }
@@ -260,7 +262,7 @@ namespace System.IO
                 WritePreamble();
             }
 
-            int count = _encoding.GetMaxByteCount(_charPos + FallbackBufferRemaining(flushEncoder));
+            int count = _encoding.GetMaxByteCount(length + FallbackBufferRemaining(flushEncoder));
             if (count > 0)
             {
                 if (count <= RentFromPoolThreshold)
@@ -269,7 +271,7 @@ namespace System.IO
                     {
                         byte* bytes = stackalloc byte[count];
                         Span<byte> byteSpan = new Span<byte>(bytes, count);
-                        count = _encoder.GetBytes(new ReadOnlySpan<char>(CharBuffer, 0, _charPos), byteSpan, flushEncoder);
+                        count = _encoder.GetBytes(new ReadOnlySpan<char>(charBuffer, offset, length), byteSpan, flushEncoder);
                         _charPos = 0;
                         if (count > 0)
                         {
@@ -282,7 +284,7 @@ namespace System.IO
                     byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(count);
                     try
                     {
-                        count = _encoder.GetBytes(CharBuffer, 0, _charPos, byteBuffer, 0, flushEncoder);
+                        count = _encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
                         _charPos = 0;
                         if (count > 0)
                         {
@@ -335,7 +337,8 @@ namespace System.IO
                 _autoFlush = value;
                 if (value)
                 {
-                    Flush(flushStream: true, flushEncoder: false);
+                    char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
+                    Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
                 }
             }
         }
@@ -364,16 +367,20 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            if (_charPos == _charLen)
+            int charPos = _charPos;
+            char[] charBuffer = CharBuffer;
+            if (charPos == _charLen)
             {
-                Flush(flushStream: false, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                charPos = 0;
             }
 
-            CharBuffer[_charPos] = value;
-            _charPos++;
+            charBuffer[charPos] = value;
+            charPos++;
+            _charPos = charPos;
             if (_autoFlush)
             {
-                Flush(flushStream: true, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
             }
         }
 
@@ -390,20 +397,19 @@ namespace System.IO
 
             // Threshold of 4 was chosen after running perf tests
             char[] charBuffer = CharBuffer;
+            int charPos = _charPos;
+            int charLen = _charLen;
             if (buffer.Length <= 4)
             {
-                int charPos = _charPos;
-                int charLen = _charLen;
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     if (charPos == charLen)
                     {
-                        _charPos = charPos;
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
+                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
                     charBuffer[charPos] = buffer[i];
                     charPos++;
                 }
@@ -417,28 +423,31 @@ namespace System.IO
                 int index = 0;
                 while (count > 0)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        charPos = 0;
                     }
 
-                    int n = _charLen - _charPos;
+                    int n = charLen - charPos;
                     if (n > count)
                     {
                         n = count;
                     }
 
                     Debug.Assert(n > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, _charPos * sizeof(char), n * sizeof(char));
-                    _charPos += n;
+                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
+                    charPos += n;
                     index += n;
                     count -= n;
                 }
+
+                _charPos = charPos;
             }
 
             if (_autoFlush)
             {
-                Flush(flushStream: true, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
             }
         }
 
@@ -465,53 +474,56 @@ namespace System.IO
 
             // Threshold of 4 was chosen after running perf tests
             char[] charBuffer = CharBuffer;
+            int charPos = _charPos;
+            int charLen = _charLen;
             if (count <= 4)
             {
-                int charPos = _charPos;
-                int charLen = _charLen;
                 while (count > 0)
                 {
                     if (charPos == charLen)
                     {
-                        _charPos = charPos;
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
+                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
                     charBuffer[charPos] = buffer[index];
                     charPos++;
                     index++;
                     count--;
                 }
+
                 _charPos = charPos;
             }
             else
             {
                 while (count > 0)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        charPos = 0;
                     }
 
-                    int n = _charLen - _charPos;
+                    int n = charLen - charPos;
                     if (n > count)
                     {
                         n = count;
                     }
 
                     Debug.Assert(n > 0, "StreamWriter::Write(char[], int, int) isn't making progress!  This is most likely a race condition in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, _charPos * sizeof(char), n * sizeof(char));
-                    _charPos += n;
+                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
+                    charPos += n;
                     index += n;
                     count -= n;
                 }
+
+                _charPos = charPos;
             }
 
             if (_autoFlush)
             {
-                Flush(flushStream: true, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
             }
         }
 
@@ -526,20 +538,19 @@ namespace System.IO
 
             // Threshold of 4 was chosen after running perf tests
             char[] charBuffer = CharBuffer;
+            int charPos = _charPos;
+            int charLen = _charLen;
             if (value.Length <= 4)
             {
-                int charPos = _charPos;
-                int charLen = _charLen;
                 foreach(char ch in value)
                 {
                     if (charPos == charLen)
                     {
-                        _charPos = charPos;
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
                     charBuffer[charPos] = ch;
                     charPos++;
                 }
@@ -552,28 +563,31 @@ namespace System.IO
                 int index = 0;
                 while (count > 0)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
-                        Flush(flushStream: false, flushEncoder: false);
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        charPos = 0;
                     }
 
-                    int n = _charLen - _charPos;
+                    int n = charLen - charPos;
                     if (n > count)
                     {
                         n = count;
                     }
 
                     Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    value.CopyTo(index, charBuffer, _charPos, n);
-                    _charPos += n;
+                    value.CopyTo(index, charBuffer, charPos, n);
+                    charPos += n;
                     index += n;
                     count -= n;
                 }
+
+                _charPos = charPos;
             }
 
             if (_autoFlush)
             {
-                Flush(flushStream: true, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
             }
         }
 
@@ -590,44 +604,71 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            int count = value.Length;
-            int index = 0;
+            // Threshold of 4 was chosen after running perf tests
             char[] charBuffer = CharBuffer;
-            while (count > 0)
+            int charPos = _charPos;
+            int charLen = _charLen;
+            if (value.Length <= 4)
             {
-                if (_charPos == _charLen)
+                foreach (char ch in value)
                 {
-                    Flush(flushStream: false, flushEncoder: false);
+                    if (charPos == charLen)
+                    {
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        charPos = 0;
+                    }
+
+                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                    charBuffer[charPos] = ch;
+                    charPos++;
                 }
 
-                int n = _charLen - _charPos;
-                if (n > count)
+                _charPos = charPos;
+            }
+            else
+            {
+                int count = value.Length;
+                int index = 0;
+                while (count > 0)
                 {
-                    n = count;
-                }
+                    if (charPos == charLen)
+                    {
+                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        charPos = 0;
+                    }
 
-                Debug.Assert(n > 0, "StreamWriter::WriteLine(String) isn't making progress!  This is most likely a race condition in user code.");
-                value.CopyTo(index, charBuffer, _charPos, n);
-                _charPos += n;
-                index += n;
-                count -= n;
+                    int n = charLen - charPos;
+                    if (n > count)
+                    {
+                        n = count;
+                    }
+
+                    Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                    value.CopyTo(index, charBuffer, charPos, n);
+                    charPos += n;
+                    index += n;
+                    count -= n;
+                }
             }
 
             char[] coreNewLine = CoreNewLine;
             for (int i = 0; i < coreNewLine.Length; i++)   // Expect 2 iterations, no point calling BlockCopy
             {
-                if (_charPos == _charLen)
+                if (charPos == charLen)
                 {
-                    Flush(flushStream: false, flushEncoder: false);
+                    Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                    charPos = 0;
                 }
 
-                charBuffer[_charPos] = coreNewLine[i];
-                _charPos++;
+                charBuffer[charPos] = coreNewLine[i];
+                charPos++;
             }
+
+            _charPos = charPos;
 
             if (_autoFlush)
             {
-                Flush(flushStream: true, flushEncoder: false);
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
             }
         }
 
