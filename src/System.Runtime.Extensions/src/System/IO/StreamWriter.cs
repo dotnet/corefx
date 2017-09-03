@@ -263,7 +263,7 @@ namespace System.IO
             int count = _encoding.GetMaxByteCount(_charPos + FallbackBufferRemaining(flushEncoder));
             if (count > 0)
             {
-                if (count < RentFromPoolThreshold)
+                if (count <= RentFromPoolThreshold)
                 {
                     unsafe
                     {
@@ -392,17 +392,23 @@ namespace System.IO
             char[] charBuffer = CharBuffer;
             if (buffer.Length <= 4)
             {
+                int charPos = _charPos;
+                int charLen = _charLen;
                 for (int i = 0; i < buffer.Length; i++)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
+                        _charPos = charPos;
                         Flush(false, false);
+                        charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    charBuffer[_charPos] = buffer[i];
-                    _charPos++;
+                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
+                    charBuffer[charPos] = buffer[i];
+                    charPos++;
                 }
+
+                _charPos = charPos;
             }
             else
             {
@@ -461,19 +467,24 @@ namespace System.IO
             char[] charBuffer = CharBuffer;
             if (count <= 4)
             {
+                int charPos = _charPos;
+                int charLen = _charLen;
                 while (count > 0)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
+                        _charPos = charPos;
                         Flush(false, false);
+                        charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    charBuffer[_charPos] = buffer[index];
-                    _charPos++;
+                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
+                    charBuffer[charPos] = buffer[index];
+                    charPos++;
                     index++;
                     count--;
                 }
+                _charPos = charPos;
             }
             else
             {
@@ -513,26 +524,31 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            int count = value.Length;
-
             // Threshold of 4 was chosen after running perf tests
             char[] charBuffer = CharBuffer;
-            if (count <= 4)
+            if (value.Length <= 4)
             {
-                for (int i = 0; i < count; i++)
+                int charPos = _charPos;
+                int charLen = _charLen;
+                foreach(char ch in value)
                 {
-                    if (_charPos == _charLen)
+                    if (charPos == charLen)
                     {
+                        _charPos = charPos;
                         Flush(false, false);
+                        charPos = 0;
                     }
 
-                    Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    charBuffer[_charPos] = value[i];
-                    _charPos++;
+                    Debug.Assert(_charLen - charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                    charBuffer[charPos] = ch;
+                    charPos++;
                 }
+
+                _charPos = charPos;
             }
             else
             {
+                int count = value.Length;
                 int index = 0;
                 while (count > 0)
                 {
