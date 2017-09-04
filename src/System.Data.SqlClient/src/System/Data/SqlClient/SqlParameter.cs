@@ -112,6 +112,31 @@ namespace System.Data.SqlClient
 
         public SqlParameter(
             string parameterName,
+            SqlDbType dbType,
+            int size,
+            ParameterDirection direction,
+            bool isNullable,
+            byte precision,
+            byte scale,
+            string sourceColumn,
+            DataRowVersion sourceVersion,
+            object value
+        ) : this()
+        {
+            this.ParameterName = parameterName;
+            this.SqlDbType = dbType;
+            this.Size = size;
+            this.Direction = direction;
+            this.IsNullable = isNullable;
+            this.Precision = precision;
+            this.Scale = scale;
+            this.SourceColumn = sourceColumn;
+            this.SourceVersion = sourceVersion;
+            this.Value = value;
+        }
+
+        public SqlParameter(
+            string parameterName,
             SqlDbType dbType, 
             int size,
             ParameterDirection direction,
