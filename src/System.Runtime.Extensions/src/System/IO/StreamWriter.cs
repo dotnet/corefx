@@ -511,65 +511,12 @@ namespace System.IO
 
         public override void Write(string value)
         {
-            if (value == null)
-            {
-                return;
-            }
-
-            CheckAsyncTaskInProgress();
-
-            // Threshold of 4 was chosen after running perf tests
-            char[] charBuffer = CharBuffer;
-            int charPos = _charPos;
-            int charLen = _charLen;
-            if (value.Length <= 4)
-            {
-                foreach(char ch in value)
-                {
-                    if (charPos == charLen)
-                    {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
-                        charPos = 0;
-                    }
-
-                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    charBuffer[charPos] = ch;
-                    charPos++;
-                }
-
-                _charPos = charPos;
-            }
-            else
-            {
-                int count = value.Length;
-                int index = 0;
-                while (count > 0)
-                {
-                    if (charPos == charLen)
-                    {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
-                        charPos = 0;
-                    }
-
-                    int n = charLen - charPos;
-                    if (n > count)
-                    {
-                        n = count;
-                    }
-
-                    Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    value.CopyTo(index, charBuffer, charPos, n);
-                    charPos += n;
-                    index += n;
-                    count -= n;
-                }
-
-                _charPos = charPos;
-            }
+            WriteInternal(value);
 
             if (_autoFlush)
             {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+                Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
+                Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
             }
         }
 
@@ -579,9 +526,39 @@ namespace System.IO
         //
         public override void WriteLine(string value)
         {
+            WriteInternal(value);
+
+            // Threshold of 4 was chosen after running perf tests
+            char[] charBuffer = CharBuffer;
+            int charPos = _charPos;
+            int charLen = _charLen;
+
+            char[] coreNewLine = CoreNewLine;
+            for (int i = 0; i < coreNewLine.Length; i++)   // Expect 2 iterations, no point calling BlockCopy
+            {
+                if (charPos == charLen)
+                {
+                    Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                    charPos = 0;
+                }
+
+                charBuffer[charPos] = coreNewLine[i];
+                charPos++;
+            }
+
+            _charPos = charPos;
+
+            if (_autoFlush)
+            {
+                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+            }
+        }
+
+        private void WriteInternal(string value)
+        {
             if (value == null)
             {
-                value = String.Empty;
+                return;
             }
 
             CheckAsyncTaskInProgress();
@@ -631,26 +608,8 @@ namespace System.IO
                     index += n;
                     count -= n;
                 }
-            }
 
-            char[] coreNewLine = CoreNewLine;
-            for (int i = 0; i < coreNewLine.Length; i++)   // Expect 2 iterations, no point calling BlockCopy
-            {
-                if (charPos == charLen)
-                {
-                    Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
-                    charPos = 0;
-                }
-
-                charBuffer[charPos] = coreNewLine[i];
-                charPos++;
-            }
-
-            _charPos = charPos;
-
-            if (_autoFlush)
-            {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+                _charPos = charPos;
             }
         }
 
