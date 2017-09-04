@@ -853,7 +853,6 @@ namespace System.Net.Sockets.Tests
                     using (Socket acceptSocket = await AcceptAsync(server))
                     {
                         // send data as segmentCount (> IOV_MAX) 1-byte segments.
-
                         var sendSegments = new List<ArraySegment<byte>>();
                         for (int i = 0; i < segmentCount; i++)
                         {
