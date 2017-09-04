@@ -36,8 +36,10 @@ namespace System.IO
         private Encoding _encoding;
         private Encoder _encoder;
         private char[] _rentedCharBuffer;
+        private byte[] _rentedByteBuffer;
         private int _charPos;
         private int _charLen;
+        private int _byteLen;
         private bool _autoFlush;
         private bool _haveWrittenPreamble;
         private bool _closable;
@@ -160,6 +162,7 @@ namespace System.IO
             _encoding = encodingArg;
             _encoder = _encoding.GetEncoder();
             _charLen = bufferSize > MinBufferSize ? bufferSize : MinBufferSize;
+            _byteLen = encodingArg.GetMaxByteCount(_charLen);
             _maxFallbackBufferCount = _encoding.GetMaxByteCount(2);
             // If we're appending to a Stream that already has data, don't write
             // the preamble.
@@ -219,11 +222,11 @@ namespace System.IO
                         _stream = null;
                         _encoding = null;
                         _encoder = null;
-                        if (_rentedCharBuffer != null)
+                        if (_rentedCharBuffer != null || _rentedByteBuffer != null)
                         {
                             // If earlier Flush threw an exception we may still have a rented buffer
                             // return it now
-                            ReturnCharBuffer();
+                            ReturnBuffers();
                         }
                         _charLen = 0;
                         base.Dispose(disposing);
@@ -262,10 +265,10 @@ namespace System.IO
                 WritePreamble();
             }
 
-            int count = _encoding.GetMaxByteCount(length + FallbackBufferRemaining(flushEncoder));
-            if (count > 0)
+            int count;
+            if (_rentedByteBuffer == null && (count = _encoding.GetMaxByteCount(length + FallbackBufferRemaining(flushEncoder))) <= RentFromPoolThreshold)
             {
-                if (count <= RentFromPoolThreshold)
+                if (count > 0)
                 {
                     unsafe
                     {
@@ -279,25 +282,15 @@ namespace System.IO
                         }
                     }
                 }
-                else
+            }
+            else
+            {
+                byte[] byteBuffer = ByteBuffer;
+                count = _encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
+                _charPos = 0;
+                if (count > 0)
                 {
-                    byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(count);
-                    try
-                    {
-                        count = _encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
-                        _charPos = 0;
-                        if (count > 0)
-                        {
-                            _stream.Write(byteBuffer, 0, count);
-                        }
-                    }
-                    finally
-                    {
-                        if (byteBuffer != null)
-                        {
-                            ArrayPool<byte>.Shared.Return(byteBuffer);
-                        }
-                    }
+                    _stream.Write(byteBuffer, 0, count);
                 }
             }
 
@@ -306,7 +299,7 @@ namespace System.IO
             // Services guys have some perf tests where flushing needlessly hurts.
             if (flushStream)
             {
-                ReturnCharBuffer();
+                ReturnBuffers();
                 _stream.Flush();
             }
         }
@@ -1079,22 +1072,11 @@ namespace System.IO
                 }
             }
 
-            int maxByteCount = encoding.GetMaxByteCount(charPos + _this.FallbackBufferRemaining(flushEncoder));
-            if (maxByteCount > 0)
+            byte[] byteBuffer = _this.ByteBuffer;
+            int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
+            if (count > 0)
             {
-                byte[] byteBuffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
-                try
-                {
-                    int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
-                    if (count > 0)
-                    {
-                        await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
-                    }
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(byteBuffer);
-                }
+                await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
             }
 
             // By definition, calling Flush should flush the stream, but this is
@@ -1102,7 +1084,7 @@ namespace System.IO
             // Services guys have some perf tests where flushing needlessly hurts.
             if (flushStream)
             {
-                _this.ReturnCharBuffer();
+                _this.ReturnBuffers();
                 await stream.FlushAsync().ConfigureAwait(false);
             }
         }
@@ -1114,11 +1096,25 @@ namespace System.IO
             get => _rentedCharBuffer ?? RentCharBuffer();
         }
 
+        private byte[] ByteBuffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _rentedByteBuffer ?? RentByteBuffer();
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private char[] RentCharBuffer() => _rentedCharBuffer = ArrayPool<char>.Shared.Rent(_charLen);
 
-        private void ReturnCharBuffer()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private byte[] RentByteBuffer() => _rentedByteBuffer = ArrayPool<byte>.Shared.Rent(_byteLen);
+
+        private void ReturnBuffers()
         {
+            byte[] byteBuffer = Interlocked.Exchange(ref _rentedByteBuffer, null);
+            if (byteBuffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(byteBuffer);
+            }
             char[] charBuffer = Interlocked.Exchange(ref _rentedCharBuffer, null);
             if (charBuffer != null)
             {
