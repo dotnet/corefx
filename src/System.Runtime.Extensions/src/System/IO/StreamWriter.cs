@@ -26,11 +26,14 @@ namespace System.IO
         private const int DefaultFileStreamBufferSize = 4096;
         private const int MinBufferSize = 128;
 
-        private const int DontCopyOnWriteLineThreshold = 512;
+        private const int DontCopyOnWriteThreshold = 512;
         private const int RentFromPoolThreshold = 64;
 
         // Bit bucket - Null has no backing store. Non closable.
         public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, UTF8NoBOM, MinBufferSize, true);
+
+        // EncoderNLS.GetBytes allocates if given an empty input array
+        public static readonly char[] SingleCharArray = new char[1];
 
         private Stream _stream;
         private Encoding _encoding;
@@ -195,8 +198,8 @@ namespace System.IO
                     {
                         CheckAsyncTaskInProgress();
 
-                        char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
-                        Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
+                        Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
+                        Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
                     }
                 }
             }
@@ -239,8 +242,8 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
-            Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
+            Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
+            Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
         }
 
         private void Flush(char[] charBuffer, int offset, int length, bool flushStream, bool flushEncoder)
@@ -263,6 +266,12 @@ namespace System.IO
             if (!_haveWrittenPreamble)
             {
                 WritePreamble();
+            }
+
+            if (charBuffer == null)
+            {
+                Debug.Assert(length == 0);
+                charBuffer = SingleCharArray;
             }
 
             int count;
@@ -330,8 +339,8 @@ namespace System.IO
                 _autoFlush = value;
                 if (value)
                 {
-                    char[] charBuffer = _rentedCharBuffer ?? Array.Empty<char>();
-                    Flush(charBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
+                    Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
+                    Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
                 }
             }
         }
@@ -416,11 +425,12 @@ namespace System.IO
             CheckAsyncTaskInProgress();
 
             // Threshold of 4 was chosen after running perf tests
-            char[] charBuffer = CharBuffer;
             int charPos = _charPos;
             int charLen = _charLen;
+            char[] charBuffer = null;
             if (count <= 4)
             {
+                charBuffer = CharBuffer;
                 while (count > 0)
                 {
                     if (charPos == charLen)
@@ -440,26 +450,55 @@ namespace System.IO
             }
             else
             {
-                while (count > 0)
+                // Loop entry checked by if
+                do
                 {
                     if (charPos == charLen)
                     {
+                        if (charBuffer == null)
+                        {
+                            // Haven't rented buffer yet, get it now.
+                            charBuffer = CharBuffer;
+                        }
                         Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
-                    int n = charLen - charPos;
-                    if (n > count)
+                    int n;
+                    if (charPos == 0 && count >= DontCopyOnWriteThreshold)
                     {
+                        // Flush using input buffer directly
                         n = count;
+                        if (n > charLen)
+                        {
+                            // Don't flush more than the byteBuffer can hold
+                            n = charLen;
+                        }
+
+                        Flush(buffer, index, n, flushStream: false, flushEncoder: false);
+                    }
+                    else
+                    {
+                        if (charBuffer == null)
+                        {
+                            // Haven't rented buffer yet, get it now.
+                            charBuffer = CharBuffer;
+                        }
+                        
+                        n = charLen - charPos;
+                        if (n > count)
+                        {
+                            n = count;
+                        }
+
+                        Debug.Assert(n > 0, "StreamWriter::Write(char[], int, int) isn't making progress!  This is most likely a race condition in user code.");
+                        Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
+                        charPos += n;
                     }
 
-                    Debug.Assert(n > 0, "StreamWriter::Write(char[], int, int) isn't making progress!  This is most likely a race condition in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
-                    charPos += n;
                     index += n;
                     count -= n;
-                }
+                } while (count > 0);
 
                 _charPos = charPos;
             }
