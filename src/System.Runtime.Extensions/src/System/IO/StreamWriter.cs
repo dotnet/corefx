@@ -199,7 +199,7 @@ namespace System.IO
                         CheckAsyncTaskInProgress();
 
                         Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
-                        Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
+                        Flush(new ReadOnlySpan<char>(_rentedCharBuffer ?? SingleCharArray, 0, _charPos), flushStream: true, flushEncoder: true);
                     }
                 }
             }
@@ -243,10 +243,10 @@ namespace System.IO
             CheckAsyncTaskInProgress();
 
             Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
-            Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: true);
+            Flush(new ReadOnlySpan<char>(_rentedCharBuffer ?? SingleCharArray, 0, _charPos), flushStream: true, flushEncoder: true);
         }
 
-        private void Flush(char[] charBuffer, int offset, int length, bool flushStream, bool flushEncoder)
+        private void Flush(ReadOnlySpan<char> charSpan, bool flushStream, bool flushEncoder)
         {
             // flushEncoder should be true at the end of the file and if
             // the user explicitly calls Flush (though not if AutoFlush is true).
@@ -257,6 +257,7 @@ namespace System.IO
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
             }
 
+            int length = charSpan.Length;
             // Perf boost for Flush on non-dirty writers.
             if (length == 0 && !flushStream && !flushEncoder)
             {
@@ -268,12 +269,6 @@ namespace System.IO
                 WritePreamble();
             }
 
-            if (charBuffer == null)
-            {
-                Debug.Assert(length == 0);
-                charBuffer = SingleCharArray;
-            }
-
             int count;
             if (_rentedByteBuffer == null && (count = _encoding.GetMaxByteCount(length + FallbackBufferRemaining(flushEncoder))) <= RentFromPoolThreshold)
             {
@@ -283,7 +278,7 @@ namespace System.IO
                     {
                         byte* bytes = stackalloc byte[count];
                         Span<byte> byteSpan = new Span<byte>(bytes, count);
-                        count = _encoder.GetBytes(new ReadOnlySpan<char>(charBuffer, offset, length), byteSpan, flushEncoder);
+                        count = _encoder.GetBytes(charSpan, byteSpan, flushEncoder);
                         _charPos = 0;
                         if (count > 0)
                         {
@@ -295,7 +290,7 @@ namespace System.IO
             else
             {
                 byte[] byteBuffer = ByteBuffer;
-                count = _encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
+                count = _encoder.GetBytes(charSpan, new Span<byte>(byteBuffer), flushEncoder);
                 _charPos = 0;
                 if (count > 0)
                 {
@@ -340,7 +335,7 @@ namespace System.IO
                 if (value)
                 {
                     Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
-                    Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
+                    Flush(new ReadOnlySpan<char>(_rentedCharBuffer ?? SingleCharArray, 0, _charPos), flushStream: true, flushEncoder: false);
                 }
             }
         }
@@ -373,7 +368,7 @@ namespace System.IO
             char[] charBuffer = CharBuffer;
             if (charPos == _charLen)
             {
-                Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                 charPos = 0;
             }
 
@@ -382,7 +377,7 @@ namespace System.IO
             _charPos = charPos;
             if (_autoFlush)
             {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+                Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: true, flushEncoder: false);
             }
         }
 
@@ -435,7 +430,7 @@ namespace System.IO
                 {
                     if (charPos == charLen)
                     {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -445,8 +440,6 @@ namespace System.IO
                     index++;
                     count--;
                 }
-
-                _charPos = charPos;
             }
             else
             {
@@ -460,7 +453,8 @@ namespace System.IO
                             // Haven't rented buffer yet, get it now.
                             charBuffer = CharBuffer;
                         }
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+
+                        Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -475,7 +469,7 @@ namespace System.IO
                             n = charLen;
                         }
 
-                        Flush(buffer, index, n, flushStream: false, flushEncoder: false);
+                        Flush(new ReadOnlySpan<char>(buffer, index, n), flushStream: false, flushEncoder: false);
                     }
                     else
                     {
@@ -499,13 +493,14 @@ namespace System.IO
                     index += n;
                     count -= n;
                 } while (count > 0);
-
-                _charPos = charPos;
             }
+
+            _charPos = charPos;
 
             if (_autoFlush)
             {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+                Debug.Assert(charBuffer != null || charPos == 0);
+                Flush(new ReadOnlySpan<char>(charBuffer ?? SingleCharArray, 0, charPos), flushStream: true, flushEncoder: false);
             }
         }
 
@@ -516,7 +511,7 @@ namespace System.IO
             if (_autoFlush)
             {
                 Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
-                Flush(_rentedCharBuffer, 0, _charPos, flushStream: true, flushEncoder: false);
+                Flush(new ReadOnlySpan<char>(_rentedCharBuffer ?? SingleCharArray, 0, _charPos), flushStream: true, flushEncoder: false);
             }
         }
 
@@ -538,7 +533,7 @@ namespace System.IO
             {
                 if (charPos == charLen)
                 {
-                    Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                    Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                     charPos = 0;
                 }
 
@@ -550,7 +545,8 @@ namespace System.IO
 
             if (_autoFlush)
             {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
+                Debug.Assert(charBuffer != null || charPos == 0);
+                Flush(new ReadOnlySpan<char>(charBuffer ?? SingleCharArray, 0, charPos), flushStream: true, flushEncoder: false);
             }
         }
 
@@ -564,16 +560,17 @@ namespace System.IO
             CheckAsyncTaskInProgress();
 
             // Threshold of 4 was chosen after running perf tests
-            char[] charBuffer = CharBuffer;
             int charPos = _charPos;
             int charLen = _charLen;
+            char[] charBuffer = null;
             if (value.Length <= 4)
             {
+                charBuffer = CharBuffer;
                 foreach (char ch in value)
                 {
                     if (charPos == charLen)
                     {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
@@ -581,36 +578,64 @@ namespace System.IO
                     charBuffer[charPos] = ch;
                     charPos++;
                 }
-
-                _charPos = charPos;
             }
             else
             {
                 int count = value.Length;
                 int index = 0;
-                while (count > 0)
+                do
                 {
+                    // Loop entry checked by if
                     if (charPos == charLen)
                     {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
+                        if (charBuffer == null)
+                        {
+                            // Haven't rented buffer yet, get it now.
+                            charBuffer = CharBuffer;
+                        }
+
+                        Flush(new ReadOnlySpan<char>(charBuffer, 0, charPos), flushStream: false, flushEncoder: false);
                         charPos = 0;
                     }
 
-                    int n = charLen - charPos;
-                    if (n > count)
+                    int n;
+                    if (charPos == 0 && count >= DontCopyOnWriteThreshold)
                     {
+                        // Flush using input string directly
                         n = count;
+                        if (n > charLen)
+                        {
+                            // Don't flush more than the byteBuffer can hold
+                            n = charLen;
+                        }
+
+                        Flush(value.AsReadOnlySpan().Slice(index, n), flushStream: false, flushEncoder: false);
+                    }
+                    else
+                    {
+                        if (charBuffer == null)
+                        {
+                            // Haven't rented buffer yet, get it now.
+                            charBuffer = CharBuffer;
+                        }
+
+                        n = charLen - charPos;
+                        if (n > count)
+                        {
+                            n = count;
+                        }
+
+                        Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                        value.CopyTo(index, charBuffer, charPos, n);
+                        charPos += n;
                     }
 
-                    Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    value.CopyTo(index, charBuffer, charPos, n);
-                    charPos += n;
                     index += n;
                     count -= n;
-                }
-
-                _charPos = charPos;
+                } while (count > 0);
             }
+
+            _charPos = charPos;
         }
 
         #region Task based Async APIs
