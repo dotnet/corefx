@@ -393,62 +393,7 @@ namespace System.IO
                 return;
             }
 
-            CheckAsyncTaskInProgress();
-
-            // Threshold of 4 was chosen after running perf tests
-            char[] charBuffer = CharBuffer;
-            int charPos = _charPos;
-            int charLen = _charLen;
-            if (buffer.Length <= 4)
-            {
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    if (charPos == charLen)
-                    {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
-                        charPos = 0;
-                    }
-
-                    Debug.Assert(charLen - charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    charBuffer[charPos] = buffer[i];
-                    charPos++;
-                }
-
-                _charPos = charPos;
-            }
-            else
-            {
-                int count = buffer.Length;
-
-                int index = 0;
-                while (count > 0)
-                {
-                    if (charPos == charLen)
-                    {
-                        Flush(charBuffer, 0, charPos, flushStream: false, flushEncoder: false);
-                        charPos = 0;
-                    }
-
-                    int n = charLen - charPos;
-                    if (n > count)
-                    {
-                        n = count;
-                    }
-
-                    Debug.Assert(n > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
-                    charPos += n;
-                    index += n;
-                    count -= n;
-                }
-
-                _charPos = charPos;
-            }
-
-            if (_autoFlush)
-            {
-                Flush(charBuffer, 0, charPos, flushStream: true, flushEncoder: false);
-            }
+            WriteInternal(buffer, 0, buffer.Length);
         }
 
         public override void Write(char[] buffer, int index, int count)
@@ -470,6 +415,11 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
+            WriteInternal(buffer, index, count);
+        }
+
+        private void WriteInternal(char[] buffer, int index, int count)
+        {
             CheckAsyncTaskInProgress();
 
             // Threshold of 4 was chosen after running perf tests
