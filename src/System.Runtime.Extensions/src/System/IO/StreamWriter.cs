@@ -1175,14 +1175,52 @@ namespace System.IO
 
         // We pass in private instance fields of this MarshalByRefObject-derived type as local params
         // to ensure performant access inside the state machine that corresponds this async method.
-        private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
+        private static Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
                                                      char[] charBuffer, int offset, int length, bool haveWrittenPreamble,
                                                      Encoding encoding, Encoder encoder, Stream stream)
         {
             if (!haveWrittenPreamble)
             {
-                await WritePreambleAsync(_this, encoding, stream);
+                Task preambleTask = WritePreambleAsync(_this, encoding, stream);
+                if (!preambleTask.IsCompletedSuccessfully)
+                {
+                    return FlushAsyncInternalAwaitPreamble(preambleTask, _this, flushStream, flushEncoder,
+                                             charBuffer, offset, length, haveWrittenPreamble,
+                                             encoding, encoder, stream);
+                }
             }
+
+            byte[] byteBuffer = _this.ByteBuffer;
+            int count = encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
+            Task writeTask = Task.CompletedTask;
+            if (count > 0)
+            {
+                writeTask = stream.WriteAsync(byteBuffer, 0, count);
+            }
+
+            // By definition, calling Flush should flush the stream, but this is
+            // only necessary if we passed in true for flushStream.  The Web
+            // Services guys have some perf tests where flushing needlessly hurts.
+            if (flushStream)
+            {
+                if (writeTask.IsCompletedSuccessfully)
+                {
+                    _this.ReturnBuffers();
+                    return stream.FlushAsync();
+                }
+                else
+                {
+                    return FlushAsyncInternalAwaitWrite(writeTask, _this, stream);
+                }
+            }
+
+            return writeTask;
+        }
+        private static async Task FlushAsyncInternalAwaitPreamble(Task preambleTask, StreamWriter _this, bool flushStream, bool flushEncoder,
+                                             char[] charBuffer, int offset, int length, bool haveWrittenPreamble,
+                                             Encoding encoding, Encoder encoder, Stream stream)
+        {
+            await preambleTask.ConfigureAwait(false);
 
             byte[] byteBuffer = _this.ByteBuffer;
             int count = encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
@@ -1201,14 +1239,53 @@ namespace System.IO
             }
         }
 
-        private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
+        private static Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
                                              string value, int offset, int length, bool haveWrittenPreamble,
                                              Encoding encoding, Encoder encoder, Stream stream)
         {
             if (!haveWrittenPreamble)
             {
-                await WritePreambleAsync(_this, encoding, stream);
+                Task preambleTask = WritePreambleAsync(_this, encoding, stream);
+                if (!preambleTask.IsCompletedSuccessfully)
+                {
+                    return FlushAsyncInternalAwaitPreamble(preambleTask, _this, flushStream, flushEncoder,
+                                             value, offset, length, haveWrittenPreamble,
+                                             encoding, encoder, stream);
+                }
             }
+
+            byte[] byteBuffer = _this.ByteBuffer;
+            int count = EncodeStringBytes(value, offset, length, byteBuffer, encoder, flushEncoder);
+            Task writeTask = Task.CompletedTask;
+            if (count > 0)
+            {
+                writeTask = stream.WriteAsync(byteBuffer, 0, count);
+            }
+
+            // By definition, calling Flush should flush the stream, but this is
+            // only necessary if we passed in true for flushStream.  The Web
+            // Services guys have some perf tests where flushing needlessly hurts.
+            if (flushStream)
+            {
+                if (writeTask.IsCompletedSuccessfully)
+                {
+                    _this.ReturnBuffers();
+                    return stream.FlushAsync();
+                }
+                else
+                {
+                    return FlushAsyncInternalAwaitWrite(writeTask, _this, stream);
+                }
+            }
+
+            return writeTask;
+        }
+
+        private static async Task FlushAsyncInternalAwaitPreamble(Task preambleTask, StreamWriter _this, bool flushStream, bool flushEncoder,
+                                             string value, int offset, int length, bool haveWrittenPreamble,
+                                             Encoding encoding, Encoder encoder, Stream stream)
+        {
+            await preambleTask.ConfigureAwait(false);
 
             byte[] byteBuffer = _this.ByteBuffer;
             int count = EncodeStringBytes(value, offset, length, byteBuffer, encoder, flushEncoder);
@@ -1227,13 +1304,21 @@ namespace System.IO
             }
         }
 
-        private static Task WritePreamble(StreamWriter _this, Encoding encoding, Stream stream)
+        private static async Task FlushAsyncInternalAwaitWrite(Task writeTask, StreamWriter _this, Stream stream)
+        {
+            await writeTask.ConfigureAwait(false);
+
+            _this.ReturnBuffers();
+            await stream.FlushAsync().ConfigureAwait(false);
+        }
+
+        private static Task WritePreambleAsync(StreamWriter _this, Encoding encoding, Stream stream)
         {
             _this.HaveWrittenPreamble_Prop = true;
             byte[] preamble = encoding.GetPreamble();
             if (preamble.Length > 0)
             {
-                return stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
+                return stream.WriteAsync(preamble, 0, preamble.Length);
             }
 
             return Task.CompletedTask;
