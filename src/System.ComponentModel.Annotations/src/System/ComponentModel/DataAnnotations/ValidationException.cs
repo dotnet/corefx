@@ -46,7 +46,6 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <remarks>The long form of this constructor is preferred because it gives better error reporting.</remarks>
         public ValidationException()
-            : base()
         {
         }
 
