@@ -631,7 +631,7 @@ nameof(value));
 
             internal ValidationResult ValidationResult { get; }
 
-            internal Exception ThrowValidationException() => throw new ValidationException(ValidationResult, _validationAttribute, _value);
+            internal void ThrowValidationException() => throw new ValidationException(ValidationResult, _validationAttribute, _value);
         }
     }
 }
