@@ -66,15 +66,8 @@ namespace System.ComponentModel.DataAnnotations
 
         public override int GetHashCode() => _implementation.GetHashCode();
 
-        public override bool Equals(object obj)
-        {
-            var otherAttribute = obj as UIHintAttribute;
-            if (otherAttribute == null)
-            {
-                return false;
-            }
-            return _implementation.Equals(otherAttribute._implementation);
-        }
+        public override bool Equals(object obj) =>
+            obj is UIHintAttribute otherAttribute && _implementation.Equals(otherAttribute._implementation);
 
         internal class UIHintImplementation
         {
@@ -203,8 +196,7 @@ namespace System.ComponentModel.DataAnnotations
                                 i));
                     }
 
-                    var keyString = key as string;
-                    if (keyString == null)
+                    if (!(key is string keyString))
                     {
                         throw new InvalidOperationException(
                             string.Format(

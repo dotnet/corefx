@@ -98,12 +98,7 @@ namespace System.ComponentModel.DataAnnotations
             SetupConversion();
 
             // Automatically pass if value is null or empty. RequiredAttribute should be used to assert a value is not empty.
-            if (value == null)
-            {
-                return true;
-            }
-            var s = value as string;
-            if (s?.Length == 0)
+            if (value == null || (value as string)?.Length == 0)
             {
                 return true;
             }
