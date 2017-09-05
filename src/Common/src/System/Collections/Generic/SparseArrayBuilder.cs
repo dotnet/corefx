@@ -149,8 +149,11 @@ namespace System.Collections.Generic
                 count -= reservedCount;
             }
 
-            // Finish copying after the final marker.
-            _builder.CopyTo(position, array, arrayIndex, count);
+            if (count > 0)
+            {
+                // Finish copying after the final marker.
+                _builder.CopyTo(position, array, arrayIndex, count);
+            }
         }
 
         /// <summary>

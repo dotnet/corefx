@@ -198,7 +198,7 @@ namespace System.Collections.Generic
         public CopyPosition CopyTo(CopyPosition position, T[] array, int arrayIndex, int count)
         {
             Debug.Assert(arrayIndex >= 0);
-            Debug.Assert(count >= 0 && count <= Count);
+            Debug.Assert(count > 0 && count <= Count);
             Debug.Assert(array?.Length - arrayIndex >= count);
 
             // Go through each buffer, which contains one 'row' of items.
@@ -216,25 +216,36 @@ namespace System.Collections.Generic
             int row = position.Row;
             int column = position.Column;
 
-            for (; count > 0; row++, column = 0)
-            {
-                T[] buffer = GetBuffer(index: row);
+            T[] buffer = GetBuffer(row);
+            int copied = CopyToCore(buffer, column);
 
-                // During this iteration, copy until we satisfy `count` or reach the
-                // end of the current buffer.
-                int copyCount = Math.Min(buffer.Length, count);
+            while (count > 0)
+            {
+                buffer = GetBuffer(++row);
+                copied = CopyToCore(buffer, 0);
+            }
+
+            return copied == buffer.Length
+                ? new CopyPosition(row + 1, 0)
+                : new CopyPosition(row, copied);
+
+            int CopyToCore(T[] sourceBuffer, int sourceIndex)
+            {
+                Debug.Assert(sourceBuffer.Length > sourceIndex);
+
+                // Copy until we satisfy `count` or reach the end of the current buffer.
+                int copyCount = Math.Min(sourceBuffer.Length - sourceIndex, count);
 
                 if (copyCount > 0)
                 {
-                    Array.Copy(buffer, column, array, arrayIndex, copyCount);
+                    Array.Copy(sourceBuffer, sourceIndex, array, arrayIndex, copyCount);
 
                     arrayIndex += copyCount;
                     count -= copyCount;
-                    column += copyCount;
                 }
-            }
 
-            return new CopyPosition(row: row, column: column);
+                return copyCount;
+            }
         }
 
         /// <summary>
