@@ -472,7 +472,7 @@ nameof(value));
                 else
                 {
                     // only validate the Required attributes
-                    var reqAttr = attributes.FirstOrDefault(a => a is RequiredAttribute) as RequiredAttribute;
+                    var reqAttr = attributes.OfType<RequiredAttribute>().FirstOrDefault();
                     if (reqAttr != null)
                     {
                         // Note: we let the [Required] attribute do its own null testing,
@@ -553,7 +553,7 @@ nameof(value));
             ValidationError validationError;
 
             // Get the required validator if there is one and test it first, aborting on failure
-            var required = attributes.FirstOrDefault(a => a is RequiredAttribute) as RequiredAttribute;
+            var required = attributes.OfType<RequiredAttribute>().FirstOrDefault();
             if (required != null)
             {
                 if (!TryValidate(value, validationContext, required, out validationError))
