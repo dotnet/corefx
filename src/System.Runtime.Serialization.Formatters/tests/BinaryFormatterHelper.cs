@@ -136,7 +136,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 // different blobs at runtime for some obscure reason. Excluding those from the check.
                 !(obj is WeakReference<Point>) &&
                 !(obj is Collections.Specialized.HybridDictionary) &&
-                !(obj is TimeZoneInfo.AdjustmentRule))
+                // Temporary disabled until TimeZoneInfo is converged. Issue #23804
+                !(obj is TimeZoneInfo.AdjustmentRule) &&
+                // Exceptions in Net Native can't be reflected and therefore skipping blob sanity check
+                !(obj is Exception && PlatformDetection.IsNetNative))
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
 
