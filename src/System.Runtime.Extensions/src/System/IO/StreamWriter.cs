@@ -169,7 +169,7 @@ namespace System.IO
             _maxFallbackBufferCount = _encoding.GetMaxByteCount(2);
             // If we're appending to a Stream that already has data, don't write
             // the preamble.
-            if (_stream.CanSeek && _stream.Position > 0)
+            if ((_stream.CanSeek && _stream.Position > 0) || _encoding.Preamble.Length == 0)
             {
                 _haveWrittenPreamble = true;
             }
@@ -1181,12 +1181,7 @@ namespace System.IO
         {
             if (!haveWrittenPreamble)
             {
-                _this.HaveWrittenPreamble_Prop = true;
-                byte[] preamble = encoding.GetPreamble();
-                if (preamble.Length > 0)
-                {
-                    await stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
-                }
+                await WritePreambleAsync(_this, encoding, stream);
             }
 
             byte[] byteBuffer = _this.ByteBuffer;
@@ -1212,12 +1207,7 @@ namespace System.IO
         {
             if (!haveWrittenPreamble)
             {
-                _this.HaveWrittenPreamble_Prop = true;
-                byte[] preamble = encoding.GetPreamble();
-                if (preamble.Length > 0)
-                {
-                    await stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
-                }
+                await WritePreambleAsync(_this, encoding, stream);
             }
 
             byte[] byteBuffer = _this.ByteBuffer;
@@ -1235,6 +1225,18 @@ namespace System.IO
                 _this.ReturnBuffers();
                 await stream.FlushAsync().ConfigureAwait(false);
             }
+        }
+
+        private static Task WritePreamble(StreamWriter _this, Encoding encoding, Stream stream)
+        {
+            _this.HaveWrittenPreamble_Prop = true;
+            byte[] preamble = encoding.GetPreamble();
+            if (preamble.Length > 0)
+            {
+                return stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
+            }
+
+            return Task.CompletedTask;
         }
 
         private static int EncodeStringBytes(string value, int offset, int length, byte[] byteBuffer, Encoder encoder, bool flushEncoder)
