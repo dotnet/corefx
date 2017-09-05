@@ -38,7 +38,7 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
             var stringValue = value as string;
-            if (stringValue != null && string.IsNullOrEmpty(stringValue))
+            if (stringValue?.Length == 0)
             {
                 return true;
             }

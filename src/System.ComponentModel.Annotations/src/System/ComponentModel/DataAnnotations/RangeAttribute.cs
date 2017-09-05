@@ -103,7 +103,7 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
             var s = value as string;
-            if (s != null && string.IsNullOrEmpty(s))
+            if (s?.Length == 0)
             {
                 return true;
             }
