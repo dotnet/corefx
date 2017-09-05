@@ -618,21 +618,20 @@ nameof(value));
         /// </summary>
         private class ValidationError
         {
+            private readonly object _value;
+            private readonly ValidationAttribute _validationAttribute;
+
             internal ValidationError(ValidationAttribute validationAttribute, object value,
                 ValidationResult validationResult)
             {
-                ValidationAttribute = validationAttribute;
+                _validationAttribute = validationAttribute;
                 ValidationResult = validationResult;
-                Value = value;
+                _value = value;
             }
-
-            internal object Value { get; }
-
-            internal ValidationAttribute ValidationAttribute { get; }
 
             internal ValidationResult ValidationResult { get; }
 
-            internal Exception ThrowValidationException() => throw new ValidationException(ValidationResult, ValidationAttribute, Value);
+            internal Exception ThrowValidationException() => throw new ValidationException(ValidationResult, _validationAttribute, _value);
         }
     }
 }
