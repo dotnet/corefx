@@ -672,7 +672,7 @@ namespace System.IO
         {
             if (charPos == charLen)
             {
-                await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                 Debug.Assert(_this._charPos == 0);
                 charPos = 0;
             }
@@ -686,7 +686,7 @@ namespace System.IO
                 {
                     if (charPos == charLen)
                     {
-                        await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                        await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                         Debug.Assert(_this._charPos == 0);
                         charPos = 0;
                     }
@@ -698,7 +698,8 @@ namespace System.IO
 
             if (autoFlush)
             {
-                await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+                Debug.Assert(charBuffer != null || charPos == 0);
+                await _this.FlushAsyncInternal(true, false, charBuffer ?? SingleCharArray, 0, charPos).ConfigureAwait(false);
                 Debug.Assert(_this._charPos == 0);
                 charPos = 0;
             }
@@ -753,7 +754,7 @@ namespace System.IO
             {
                 if (charPos == charLen)
                 {
-                    await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                    await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                     Debug.Assert(_this._charPos == 0);
                     charPos = 0;
                 }
@@ -779,7 +780,7 @@ namespace System.IO
                 {
                     if (charPos == charLen)
                     {
-                        await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                        await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                         Debug.Assert(_this._charPos == 0);
                         charPos = 0;
                     }
@@ -791,7 +792,8 @@ namespace System.IO
 
             if (autoFlush)
             {
-                await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+                Debug.Assert(charBuffer != null || charPos == 0);
+                await _this.FlushAsyncInternal(true, false, charBuffer ?? SingleCharArray, 0, charPos).ConfigureAwait(false);
                 Debug.Assert(_this._charPos == 0);
                 charPos = 0;
             }
@@ -834,7 +836,7 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            Task task = WriteAsyncInternal(this, buffer, index, count, CharBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: false);
+            Task task = WriteAsyncInternal(this, buffer, index, count, CoreNewLine, _autoFlush, appendNewLine: false);
             _asyncWriteTask = task;
 
             return task;
@@ -844,45 +846,82 @@ namespace System.IO
         // to ensure performant access inside the state machine that corresponds this async method.
         // Fields that are written to must be assigned at the end of the method *and* before instance invocations.
         private static async Task WriteAsyncInternal(StreamWriter _this, char[] buffer, int index, int count,
-                                                     char[] charBuffer, int charPos, int charLen, char[] coreNewLine,
-                                                     bool autoFlush, bool appendNewLine)
+                                                     char[] coreNewLine, bool autoFlush, bool appendNewLine)
         {
             Debug.Assert(count == 0 || (count > 0 && buffer != null));
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0);
             Debug.Assert(buffer == null || (buffer != null && buffer.Length - index >= count));
 
+            int charPos = _this._charPos;
+            int charLen = _this._charLen;
+            char[] charBuffer = null;
             while (count > 0)
             {
                 if (charPos == charLen)
                 {
-                    await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                    if (charBuffer == null)
+                    {
+                        // Haven't rented buffer yet, get it now.
+                        charBuffer = _this.CharBuffer;
+                    }
+
+                    await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                     Debug.Assert(_this._charPos == 0);
                     charPos = 0;
                 }
 
-                int n = charLen - charPos;
-                if (n > count)
+                int n;
+                if (charPos == 0 && count >= DontCopyOnWriteThreshold)
                 {
+                    // Flush using input buffer directly
                     n = count;
+                    if (n > charLen)
+                    {
+                        // Don't flush more than the byteBuffer can hold
+                        n = charLen;
+                    }
+
+                    await _this.FlushAsyncInternal(false, false, buffer, index, n).ConfigureAwait(false);
+                }
+                else
+                {
+                    if (charBuffer == null)
+                    {
+                        // Haven't rented buffer yet, get it now.
+                        charBuffer = _this.CharBuffer;
+                    }
+
+                    n = charLen - charPos;
+                    if (n > count)
+                    {
+                        n = count;
+                    }
+
+                    Debug.Assert(n > 0, "StreamWriter::WriteAsyncInternal(StreamWriter, char[], int, int, char[], bool, bool) isn't making progress!  This is most likely a race condition in user code.");
+
+                    Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
+
+                    charPos += n;
                 }
 
-                Debug.Assert(n > 0, "StreamWriter::Write(char[], int, int) isn't making progress!  This is most likely a race condition in user code.");
-
-                Buffer.BlockCopy(buffer, index * sizeof(char), charBuffer, charPos * sizeof(char), n * sizeof(char));
-
-                charPos += n;
                 index += n;
                 count -= n;
             }
 
             if (appendNewLine)
             {
+                if (charBuffer == null)
+                {
+                    // Haven't rented buffer yet, get it now.
+                    charBuffer = _this.CharBuffer;
+                }
+
                 for (int i = 0; i < coreNewLine.Length; i++)   // Expect 2 iterations, no point calling BlockCopy
                 {
                     if (charPos == charLen)
                     {
-                        await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+                        await _this.FlushAsyncInternal(false, false, charBuffer, 0, charPos).ConfigureAwait(false);
                         Debug.Assert(_this._charPos == 0);
                         charPos = 0;
                     }
@@ -894,7 +933,8 @@ namespace System.IO
 
             if (autoFlush)
             {
-                await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+                Debug.Assert(charBuffer != null || charPos == 0);
+                await _this.FlushAsyncInternal(true, false, charBuffer ?? SingleCharArray, 0, charPos).ConfigureAwait(false);
                 Debug.Assert(_this._charPos == 0);
                 charPos = 0;
             }
@@ -920,7 +960,7 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            Task task = WriteAsyncInternal(this, null, 0, 0, CharBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true);
+            Task task = WriteAsyncInternal(this, null, 0, 0, CoreNewLine, _autoFlush, appendNewLine: true);
             _asyncWriteTask = task;
 
             return task;
@@ -1017,7 +1057,7 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            Task task = WriteAsyncInternal(this, buffer, index, count, CharBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true);
+            Task task = WriteAsyncInternal(this, buffer, index, count, CoreNewLine, _autoFlush, appendNewLine: true);
             _asyncWriteTask = task;
 
             return task;
@@ -1046,7 +1086,8 @@ namespace System.IO
 
             CheckAsyncTaskInProgress();
 
-            Task task = FlushAsyncInternal(true, true, CharBuffer, _charPos);
+            Debug.Assert(_rentedCharBuffer != null || _charPos == 0);
+            Task task = FlushAsyncInternal(true, true, _rentedCharBuffer ?? SingleCharArray, 0, _charPos);
             _asyncWriteTask = task;
 
             return task;
@@ -1063,15 +1104,15 @@ namespace System.IO
         }
 
         private Task FlushAsyncInternal(bool flushStream, bool flushEncoder,
-                                        char[] sCharBuffer, int sCharPos)
+                                        char[] sCharBuffer, int offset, int length)
         {
             // Perf boost for Flush on non-dirty writers.
-            if (sCharPos == 0 && !flushStream && !flushEncoder)
+            if (length == 0 && !flushStream && !flushEncoder)
             {
                 return Task.CompletedTask;
             }
 
-            Task flushTask = FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, _haveWrittenPreamble,
+            Task flushTask = FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, offset, length, _haveWrittenPreamble,
                                                 _encoding, _encoder, _stream);
 
             _charPos = 0;
@@ -1082,7 +1123,7 @@ namespace System.IO
         // We pass in private instance fields of this MarshalByRefObject-derived type as local params
         // to ensure performant access inside the state machine that corresponds this async method.
         private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
-                                                     char[] charBuffer, int charPos, bool haveWrittenPreamble,
+                                                     char[] charBuffer, int offset, int length, bool haveWrittenPreamble,
                                                      Encoding encoding, Encoder encoder, Stream stream)
         {
             if (!haveWrittenPreamble)
@@ -1096,7 +1137,7 @@ namespace System.IO
             }
 
             byte[] byteBuffer = _this.ByteBuffer;
-            int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
+            int count = encoder.GetBytes(charBuffer, offset, length, byteBuffer, 0, flushEncoder);
             if (count > 0)
             {
                 await stream.WriteAsync(byteBuffer, 0, count).ConfigureAwait(false);
