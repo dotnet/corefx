@@ -208,7 +208,6 @@ namespace System.Data.ProviderBase
                                     bool addResult = _poolCollection.TryAdd(currentIdentity, newPool);
                                     Debug.Assert(addResult, "No other pool with current identity should exist at this point");
                                     pool = newPool;
-                                    newPool = null;
                                 }
                                 else
                                 {
