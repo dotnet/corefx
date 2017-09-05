@@ -92,17 +92,8 @@ namespace System.ComponentModel.DataAnnotations
         /// <value>
         ///     This property will never be null.
         /// </value>
-        public ValidationResult ValidationResult
-        {
-            get
-            {
-                if (_validationResult == null)
-                {
-                    _validationResult = new ValidationResult(Message);
-                }
-                return _validationResult;
-            }
-        }
+        public ValidationResult ValidationResult =>
+            _validationResult ?? (_validationResult = new ValidationResult(Message));
 
         /// <summary>
         ///     Gets the value that caused the validating attribute to trigger the exception

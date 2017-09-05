@@ -95,20 +95,11 @@ namespace System.ComponentModel.DataAnnotations
             /// </summary>
             public string PresentationLayer { get; }
 
-            public IDictionary<string, object> ControlParameters
-            {
-                get
-                {
-                    if (_controlParameters == null)
-                    {
-                        // Lazy load the dictionary. It's fine if this method executes multiple times in stress scenarios.
-                        // If the method throws (indicating that the input params are invalid) this property will throw
-                        // every time it's accessed.
-                        _controlParameters = BuildControlParametersDictionary();
-                    }
-                    return _controlParameters;
-                }
-            }
+            // Lazy load the dictionary. It's fine if this method executes multiple times in stress scenarios.
+            // If the method throws (indicating that the input params are invalid) this property will throw
+            // every time it's accessed.
+            public IDictionary<string, object> ControlParameters =>
+                _controlParameters ?? (_controlParameters = BuildControlParametersDictionary());
 
             /// <summary>
             ///     Returns the hash code for this UIHintAttribute.
