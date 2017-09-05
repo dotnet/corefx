@@ -108,7 +108,7 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
 
-            object convertedValue = null;
+            object convertedValue;
 
             try
             {
