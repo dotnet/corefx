@@ -40,6 +40,11 @@ namespace System
         public static bool IsWindowsNanoServer => false;
         public static bool IsWindowsAndElevated => false;
 
+        public static bool IsRedHat => IsDistroAndVersion("rhel") || IsDistroAndVersion("rhl");
+        public static bool IsNotRedHat => !IsRedHat;
+        public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
+        public static bool IsNotRedHat69 => !IsRedHat69;
+
         public static Version OSXKernelVersion { get; } = GetOSXKernelVersion();
 
         public static string GetDistroVersionString()
