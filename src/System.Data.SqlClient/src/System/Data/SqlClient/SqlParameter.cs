@@ -121,16 +121,12 @@ namespace System.Data.SqlClient
             string sourceColumn,
             DataRowVersion sourceVersion,
             object value
-        ) : this()
+        ) : this(parameterName, dbType, size, sourceColumn)
         {
-            this.ParameterName = parameterName;
-            this.SqlDbType = dbType;
-            this.Size = size;
             this.Direction = direction;
             this.IsNullable = isNullable;
             this.Precision = precision;
             this.Scale = scale;
-            this.SourceColumn = sourceColumn;
             this.SourceVersion = sourceVersion;
             this.Value = value;
         }
