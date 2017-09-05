@@ -98,6 +98,20 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
         [CheckConnStrSetupFact]
+        public static void Test_SqlParameter_Constructor()
+        {
+            using (var conn = new SqlConnection(s_connString))
+            {
+                conn.Open();
+                var cmd = new SqlCommand("select @input as 'test'", conn);
+                var sqlParameter = new SqlParameter("@input", SqlDbType.Int, 1, ParameterDirection.Input, false, 1, 0, "test", DataRowVersion.Current, MyEnum.A);
+                cmd.Parameters.Add(sqlParameter);
+                object value = cmd.ExecuteScalar();
+                Assert.Equal((MyEnum)value, MyEnum.A);
+            }
+        }
+
+        [CheckConnStrSetupFact]
         public static void Test_WithEnumValue_ShouldInferToUnderlyingType()
         {
             using (var conn = new SqlConnection(s_connString))
