@@ -421,5 +421,18 @@ namespace System.Linq.Tests
                 Assert.Equal(0xf00, en.Current);
             }
         }
+
+        [Fact]
+        public void CollectionInterleavedWithLazyEnumerables_ToArray_Regression()
+        {
+            var results = new TestEnumerable<int>(new[] { 1 })
+                .Concat(new[] { 2 })
+                .Concat(new TestEnumerable<int>(new[] { 3 }))
+                // Do not omit this ToArray()! There was a previous bug where the ToArray() implementation
+                // was incorrect, while iterating with foreach produced the correct results.
+                .ToArray();
+
+            Assert.Equal(new[] { 1, 2, 3 }, results);
+        }
     }
 }

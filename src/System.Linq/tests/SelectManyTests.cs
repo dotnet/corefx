@@ -477,5 +477,19 @@ namespace System.Linq.Tests
             IEnumerable<int> iterator = counts.SelectMany(c => Enumerable.Range(1, c));
             Assert.Throws<OverflowException>(() => iterator.Count());
         }
+
+        [Fact]
+        public void CollectionInterleavedWithLazyEnumerables_ToArray_Regression()
+        {
+            var results = new[] { 4, 5, 6 }
+                .SelectMany(i => i == 5 ?
+                    (IEnumerable<int>)new List<int>() { i } :
+                    new TestEnumerable<int>(new int[] { i }))
+                // Do not omit this ToArray()! There was a previous bug where the ToArray() implementation
+                // was incorrect, while iterating with foreach produced the correct results.
+                .ToArray();
+
+            Assert.Equal(new[] { 4, 5, 6 }, results);
+        }
     }
 }
