@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
+
+#if !netstandard11
+using System.Numerics;
+#endif
 
 namespace System
 {
@@ -72,7 +75,7 @@ namespace System
             uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
                 unchecked
@@ -82,6 +85,7 @@ namespace System
                 }
             }
         SequentialScan:
+#endif
             while ((byte*)nLength >= (byte*)8)
             {
                 nLength -= 8;
@@ -131,7 +135,7 @@ namespace System
 
                 index += 1;
             }
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && ((int)(byte*)index < length))
             {
                 nLength = (IntPtr)(uint)((length - (uint)index) & ~(Vector<byte>.Count - 1));
@@ -158,6 +162,7 @@ namespace System
                     goto SequentialScan;
                 }
             }
+#endif
             return -1;
         Found: // Workaround for https://github.com/dotnet/coreclr/issues/13549
             return (int)(byte*)index;
@@ -185,7 +190,7 @@ namespace System
             uint uValue1 = value1; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
                 unchecked
@@ -195,6 +200,7 @@ namespace System
                 }
             }
         SequentialScan:
+#endif
             uint lookUp;
             while ((byte*)nLength >= (byte*)8)
             {
@@ -258,7 +264,7 @@ namespace System
 
                 index += 1;
             }
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && ((int)(byte*)index < length))
             {
                 nLength = (IntPtr)(uint)((length - (uint)index) & ~(Vector<byte>.Count - 1));
@@ -290,6 +296,7 @@ namespace System
                     goto SequentialScan;
                 }
             }
+#endif
             return -1;
         Found: // Workaround for https://github.com/dotnet/coreclr/issues/13549
             return (int)(byte*)index;
@@ -318,7 +325,7 @@ namespace System
             uint uValue2 = value2; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
                 unchecked
@@ -328,6 +335,7 @@ namespace System
                 }
             }
         SequentialScan:
+#endif
             uint lookUp;
             while ((byte*)nLength >= (byte*)8)
             {
@@ -391,7 +399,7 @@ namespace System
 
                 index += 1;
             }
-
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && ((int)(byte*)index < length))
             {
                 nLength = (IntPtr)(uint)((length - (uint)index) & ~(Vector<byte>.Count - 1));
@@ -427,6 +435,7 @@ namespace System
                     goto SequentialScan;
                 }
             }
+#endif
             return -1;
         Found: // Workaround for https://github.com/dotnet/coreclr/issues/13549
             return (int)(byte*)index;
@@ -456,6 +465,7 @@ namespace System
             IntPtr i = (IntPtr)0; // Use IntPtr and byte* for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr n = (IntPtr)length;
 
+#if !netstandard11
             if (Vector.IsHardwareAccelerated && (byte*)n >= (byte*)Vector<byte>.Count)
             {
                 n -= Vector<byte>.Count;
@@ -471,6 +481,7 @@ namespace System
                 return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, n)) ==
                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, n));
             }
+#endif
 
             if ((byte*)n >= (byte*)sizeof(UIntPtr))
             {
@@ -502,6 +513,7 @@ namespace System
             return false;
         }
 
+#if !netstandard11
         // Vector sub-search adapted from https://github.com/aspnet/KestrelHttpServer/pull/1138
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateFirstFoundByte(Vector<byte> match)
@@ -522,7 +534,9 @@ namespace System
             // Single LEA instruction with jitted const (using function result)
             return i * 8 + LocateFirstFoundByte(candidate);
         }
+#endif
 
+#if !netstandard11
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateFirstFoundByte(ulong match)
         {
@@ -531,10 +545,12 @@ namespace System
                 // Flag least significant power of two bit
                 var powerOfTwoFlag = match ^ (match - 1);
                 // Shift all powers of two into the high byte and extract
-                return (int)((powerOfTwoFlag * xorPowerOfTwoToHighByte) >> 57);
+                return (int)((powerOfTwoFlag * XorPowerOfTwoToHighByte) >> 57);
             }
         }
+#endif
 
+#if !netstandard11
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector<byte> GetVector(byte vectorByte)
         {
@@ -547,13 +563,16 @@ namespace System
             return new Vector<byte>(vectorByte);
 #endif
         }
+#endif
 
-        private const ulong xorPowerOfTwoToHighByte = (0x07ul       |
-                                                       0x06ul <<  8 |
+#if !netstandard11
+        private const ulong XorPowerOfTwoToHighByte = (0x07ul |
+                                                       0x06ul << 8 |
                                                        0x05ul << 16 |
                                                        0x04ul << 24 |
                                                        0x03ul << 32 |
                                                        0x02ul << 40 |
                                                        0x01ul << 48) + 1;
+#endif
     }
 }

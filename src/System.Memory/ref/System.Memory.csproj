@@ -22,5 +22,9 @@
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.InteropServices" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

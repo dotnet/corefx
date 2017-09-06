@@ -8,6 +8,7 @@
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IsPartialFacadeAssembly>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.1'">$(DefineConstants);netstandard11</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -44,8 +45,10 @@
     <Reference Include="System.Reflection" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Numerics.Vectors" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Numerics.Vectors" />
+    <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Runtime.CompilerServices.Unsafe" />
+    <ProjectReference Condition="'$(TargetGroup)' == 'netstandard1.1'" Include="..\..\System.Runtime.CompilerServices.Unsafe\ref\System.Runtime.CompilerServices.Unsafe.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <Compile Include="System\SpanExtensions.Fast.cs" />

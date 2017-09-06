@@ -114,7 +114,7 @@ namespace System
         /// Returns an empty <see cref="Memory{T}"/>
         /// </summary>
         public static Memory<T> Empty { get; } =
-#if !netstandard10
+#if !netstandard11
             Array.Empty<T>();
 #else
             new T[0];
