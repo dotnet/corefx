@@ -835,10 +835,10 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public void SendRecvIovMax_Success()
+        public void SendRecvIovMaxTcp_Success()
         {
             // sending/receiving more than IOV_MAX segments causes EMSGSIZE on some platforms.
-            // This is handled internally so this error shouldn't surface.
+            // This is handled internally for stream sockets so this error shouldn't surface.
 
             // Use more than IOV_MAX (1024 on Linux & macOS) segments.
             const int segmentCount = 2400;
@@ -896,6 +896,122 @@ namespace System.Net.Sockets.Tests
                     Assert.Equal(sendBuffer, receiveBuffer);
                 }
             }
+        }
+
+        [Fact]
+        public void SendIovMaxUdp_SuccessOrMessageSize()
+        {
+            // sending more than IOV_MAX segments causes EMSGSIZE on some platforms.
+            // We handle this for stream sockets by truncating.
+            // This test verifies we are not truncating non-stream sockets.
+
+            // Use more than IOV_MAX (1024 on Linux & macOS) segments
+            // and less than Ethernet MTU.
+            const int segmentCount = 1200;
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                socket.BindToAnonymousPort(IPAddress.Loopback);
+                // Use our own address as destination.
+                socket.Connect(socket.LocalEndPoint);
+
+                var sendBuffer = new byte[segmentCount];
+                var sendSegments = new List<ArraySegment<byte>>();
+                for (int i = 0; i < segmentCount; i++)
+                {
+                    sendBuffer[i] = (byte)i;
+                    sendSegments.Add(new ArraySegment<byte>(sendBuffer, i, 1));
+                }
+
+                SocketError error;
+                // send data as segmentCount (> IOV_MAX) 1-byte segments.
+                int bytesSent = socket.Send(sendSegments, SocketFlags.None, out error);
+                if (error == SocketError.Success)
+                {
+                    // platform sent message with > IOV_MAX segments
+                    Assert.Equal(segmentCount, bytesSent);
+                }
+                else
+                {
+                    // platform returns EMSGSIZE
+                    Assert.Equal(SocketError.MessageSize, error);
+                    Assert.Equal(0, bytesSent);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task ReceiveIovMaxUdp_SuccessOrMessageSize()
+        {
+            // receiving more than IOV_MAX segments causes EMSGSIZE on some platforms.
+            // We handle this for stream sockets by truncating.
+            // This test verifies we are not truncating non-stream sockets.
+
+            // Use more than IOV_MAX (1024 on Linux & macOS) segments
+            // and less than Ethernet MTU.
+            const int segmentCount = 1200;
+            var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            receiver.BindToAnonymousPort(IPAddress.Loopback);
+            Task receiveTask = Task.Run(() =>
+            {
+                using (receiver)
+                {
+                    var receiveBuffer = new byte[segmentCount];
+                    var receiveSegments = new List<ArraySegment<byte>>();
+                    for (int i = 0; i < segmentCount; i++)
+                    {
+                        receiveSegments.Add(new ArraySegment<byte>(receiveBuffer, i, 1));
+                    }
+                    // receive data as segmentCount (> IOV_MAX) 1-byte segments.
+                    EventWaitHandle completed = new ManualResetEvent(false);
+                    var socketEvent = new SocketAsyncEventArgs();
+                    socketEvent.UserToken = completed;
+                    socketEvent.BufferList = receiveSegments;
+                    socketEvent.Completed += OnCompleted;
+                    if (receiver.ReceiveAsync(socketEvent))
+                    {
+                        completed.WaitOne();
+                    }
+
+                    SocketError error = socketEvent.SocketError;
+                    int bytesReceived = socketEvent.BytesTransferred;
+                    if (error == SocketError.Success)
+                    {
+                        // Linux sometimes returns EMSGSIZE and sometimes fills a single segment and sets MSG_TRUNC.
+                        // The latter is unexpected, MSG_TRUNC should only be set when there is insufficient buffer space.
+                        bool truncated = (socketEvent.SocketFlags & SocketFlags.Truncated) != SocketFlags.None;
+                        if (!truncated)
+                        {
+                            // platform received message in > IOV_MAX segments
+                            Assert.Equal(segmentCount, bytesReceived);
+                        }
+                    }
+                    else
+                    {
+                        // platform returns EMSGSIZE
+                        Assert.Equal(SocketError.MessageSize, error);
+                        Assert.Equal(0, bytesReceived);
+                    }
+                }
+            });
+
+            using (var sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                sender.Connect(receiver.LocalEndPoint);
+                var sendBuffer = new byte[segmentCount];
+                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
+                {
+                    int bytesSent = sender.Send(sendBuffer);
+                    Assert.Equal(segmentCount, bytesSent);
+                }
+            }
+
+            await receiveTask;
+        }
+
+        private static void OnCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            EventWaitHandle handle = (EventWaitHandle)e.UserToken;
+            handle.Set();
         }
     }
 
