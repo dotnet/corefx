@@ -46,103 +46,10 @@ namespace System.Drawing
                 GdipFree_ptr = LoadFunction<GdipFree_delegate>("GdipFree");
                 GdipDeleteBrush_ptr = LoadFunction<GdipDeleteBrush_delegate>("GdipDeleteBrush");
                 GdipGetBrushType_ptr = LoadFunction<GdipGetBrushType_delegate>("GdipGetBrushType");
-                GdipCreateRegion_ptr = LoadFunction<GdipCreateRegion_delegate>("GdipCreateRegion");
-                GdipCreateRegionRgnData_ptr = LoadFunction<GdipCreateRegionRgnData_delegate>("GdipCreateRegionRgnData");
-                GdipDeleteRegion_ptr = LoadFunction<GdipDeleteRegion_delegate>("GdipDeleteRegion");
-                GdipCloneRegion_ptr = LoadFunction<GdipCloneRegion_delegate>("GdipCloneRegion");
-                GdipCreateRegionRect_ptr = LoadFunction<GdipCreateRegionRect_delegate>("GdipCreateRegionRect");
-                GdipCreateRegionRectI_ptr = LoadFunction<GdipCreateRegionRectI_delegate>("GdipCreateRegionRectI");
-                GdipCreateRegionPath_ptr = LoadFunction<GdipCreateRegionPath_delegate>("GdipCreateRegionPath");
-                GdipTranslateRegion_ptr = LoadFunction<GdipTranslateRegion_delegate>("GdipTranslateRegion");
-                GdipTranslateRegionI_ptr = LoadFunction<GdipTranslateRegionI_delegate>("GdipTranslateRegionI");
-                GdipIsVisibleRegionPoint_ptr = LoadFunction<GdipIsVisibleRegionPoint_delegate>("GdipIsVisibleRegionPoint");
-                GdipIsVisibleRegionPointI_ptr = LoadFunction<GdipIsVisibleRegionPointI_delegate>("GdipIsVisibleRegionPointI");
-                GdipIsVisibleRegionRect_ptr = LoadFunction<GdipIsVisibleRegionRect_delegate>("GdipIsVisibleRegionRect");
-                GdipIsVisibleRegionRectI_ptr = LoadFunction<GdipIsVisibleRegionRectI_delegate>("GdipIsVisibleRegionRectI");
-                GdipCombineRegionRect_ptr = LoadFunction<GdipCombineRegionRect_delegate>("GdipCombineRegionRect");
-                GdipCombineRegionRectI_ptr = LoadFunction<GdipCombineRegionRectI_delegate>("GdipCombineRegionRectI");
-                GdipCombineRegionPath_ptr = LoadFunction<GdipCombineRegionPath_delegate>("GdipCombineRegionPath");
-                GdipGetRegionBounds_ptr = LoadFunction<GdipGetRegionBounds_delegate>("GdipGetRegionBounds");
-                GdipSetInfinite_ptr = LoadFunction<GdipSetInfinite_delegate>("GdipSetInfinite");
-                GdipSetEmpty_ptr = LoadFunction<GdipSetEmpty_delegate>("GdipSetEmpty");
-                GdipIsEmptyRegion_ptr = LoadFunction<GdipIsEmptyRegion_delegate>("GdipIsEmptyRegion");
-                GdipIsInfiniteRegion_ptr = LoadFunction<GdipIsInfiniteRegion_delegate>("GdipIsInfiniteRegion");
-                GdipCombineRegionRegion_ptr = LoadFunction<GdipCombineRegionRegion_delegate>("GdipCombineRegionRegion");
-                GdipIsEqualRegion_ptr = LoadFunction<GdipIsEqualRegion_delegate>("GdipIsEqualRegion");
-                GdipGetRegionDataSize_ptr = LoadFunction<GdipGetRegionDataSize_delegate>("GdipGetRegionDataSize");
-                GdipGetRegionData_ptr = LoadFunction<GdipGetRegionData_delegate>("GdipGetRegionData");
-                GdipGetRegionScansCount_ptr = LoadFunction<GdipGetRegionScansCount_delegate>("GdipGetRegionScansCount");
-                GdipGetRegionScans_ptr = LoadFunction<GdipGetRegionScans_delegate>("GdipGetRegionScans");
-                GdipTransformRegion_ptr = LoadFunction<GdipTransformRegion_delegate>("GdipTransformRegion");
-                GdipFillRegion_ptr = LoadFunction<GdipFillRegion_delegate>("GdipFillRegion");
-                GdipGetRegionHRgn_ptr = LoadFunction<GdipGetRegionHRgn_delegate>("GdipGetRegionHRgn");
-                GdipCreateRegionHrgn_ptr = LoadFunction<GdipCreateRegionHrgn_delegate>("GdipCreateRegionHrgn");
-                GdipCreatePathGradientFromPath_ptr = LoadFunction<GdipCreatePathGradientFromPath_delegate>("GdipCreatePathGradientFromPath");
-                GdipCreatePathGradientI_ptr = LoadFunction<GdipCreatePathGradientI_delegate>("GdipCreatePathGradientI");
-                GdipCreatePathGradient_ptr = LoadFunction<GdipCreatePathGradient_delegate>("GdipCreatePathGradient");
-                GdipGetPathGradientBlendCount_ptr = LoadFunction<GdipGetPathGradientBlendCount_delegate>("GdipGetPathGradientBlendCount");
-                GdipGetPathGradientBlend_ptr = LoadFunction<GdipGetPathGradientBlend_delegate>("GdipGetPathGradientBlend");
-                GdipSetPathGradientBlend_ptr = LoadFunction<GdipSetPathGradientBlend_delegate>("GdipSetPathGradientBlend");
-                GdipGetPathGradientCenterColor_ptr = LoadFunction<GdipGetPathGradientCenterColor_delegate>("GdipGetPathGradientCenterColor");
-                GdipSetPathGradientCenterColor_ptr = LoadFunction<GdipSetPathGradientCenterColor_delegate>("GdipSetPathGradientCenterColor");
-                GdipGetPathGradientCenterPoint_ptr = LoadFunction<GdipGetPathGradientCenterPoint_delegate>("GdipGetPathGradientCenterPoint");
-                GdipSetPathGradientCenterPoint_ptr = LoadFunction<GdipSetPathGradientCenterPoint_delegate>("GdipSetPathGradientCenterPoint");
-                GdipGetPathGradientFocusScales_ptr = LoadFunction<GdipGetPathGradientFocusScales_delegate>("GdipGetPathGradientFocusScales");
-                GdipSetPathGradientFocusScales_ptr = LoadFunction<GdipSetPathGradientFocusScales_delegate>("GdipSetPathGradientFocusScales");
-                GdipGetPathGradientPresetBlendCount_ptr = LoadFunction<GdipGetPathGradientPresetBlendCount_delegate>("GdipGetPathGradientPresetBlendCount");
-                GdipGetPathGradientPresetBlend_ptr = LoadFunction<GdipGetPathGradientPresetBlend_delegate>("GdipGetPathGradientPresetBlend");
-                GdipSetPathGradientPresetBlend_ptr = LoadFunction<GdipSetPathGradientPresetBlend_delegate>("GdipSetPathGradientPresetBlend");
-                GdipGetPathGradientRect_ptr = LoadFunction<GdipGetPathGradientRect_delegate>("GdipGetPathGradientRect");
-                GdipGetPathGradientSurroundColorCount_ptr = LoadFunction<GdipGetPathGradientSurroundColorCount_delegate>("GdipGetPathGradientSurroundColorCount");
-                GdipGetPathGradientSurroundColorsWithCount_ptr = LoadFunction<GdipGetPathGradientSurroundColorsWithCount_delegate>("GdipGetPathGradientSurroundColorsWithCount");
-                GdipSetPathGradientSurroundColorsWithCount_ptr = LoadFunction<GdipSetPathGradientSurroundColorsWithCount_delegate>("GdipSetPathGradientSurroundColorsWithCount");
-                GdipGetPathGradientTransform_ptr = LoadFunction<GdipGetPathGradientTransform_delegate>("GdipGetPathGradientTransform");
-                GdipSetPathGradientTransform_ptr = LoadFunction<GdipSetPathGradientTransform_delegate>("GdipSetPathGradientTransform");
-                GdipGetPathGradientWrapMode_ptr = LoadFunction<GdipGetPathGradientWrapMode_delegate>("GdipGetPathGradientWrapMode");
-                GdipSetPathGradientWrapMode_ptr = LoadFunction<GdipSetPathGradientWrapMode_delegate>("GdipSetPathGradientWrapMode");
-                GdipSetPathGradientLinearBlend_ptr = LoadFunction<GdipSetPathGradientLinearBlend_delegate>("GdipSetPathGradientLinearBlend");
-                GdipSetPathGradientSigmaBlend_ptr = LoadFunction<GdipSetPathGradientSigmaBlend_delegate>("GdipSetPathGradientSigmaBlend");
-                GdipMultiplyPathGradientTransform_ptr = LoadFunction<GdipMultiplyPathGradientTransform_delegate>("GdipMultiplyPathGradientTransform");
-                GdipResetPathGradientTransform_ptr = LoadFunction<GdipResetPathGradientTransform_delegate>("GdipResetPathGradientTransform");
-                GdipRotatePathGradientTransform_ptr = LoadFunction<GdipRotatePathGradientTransform_delegate>("GdipRotatePathGradientTransform");
-                GdipScalePathGradientTransform_ptr = LoadFunction<GdipScalePathGradientTransform_delegate>("GdipScalePathGradientTransform");
-                GdipTranslatePathGradientTransform_ptr = LoadFunction<GdipTranslatePathGradientTransform_delegate>("GdipTranslatePathGradientTransform");
-                GdipCreateLineBrushI_ptr = LoadFunction<GdipCreateLineBrushI_delegate>("GdipCreateLineBrushI");
-                GdipCreateLineBrush_ptr = LoadFunction<GdipCreateLineBrush_delegate>("GdipCreateLineBrush");
-                GdipCreateLineBrushFromRectI_ptr = LoadFunction<GdipCreateLineBrushFromRectI_delegate>("GdipCreateLineBrushFromRectI");
-                GdipCreateLineBrushFromRect_ptr = LoadFunction<GdipCreateLineBrushFromRect_delegate>("GdipCreateLineBrushFromRect");
-                GdipCreateLineBrushFromRectWithAngleI_ptr = LoadFunction<GdipCreateLineBrushFromRectWithAngleI_delegate>("GdipCreateLineBrushFromRectWithAngleI");
-                GdipCreateLineBrushFromRectWithAngle_ptr = LoadFunction<GdipCreateLineBrushFromRectWithAngle_delegate>("GdipCreateLineBrushFromRectWithAngle");
-                GdipGetLineBlendCount_ptr = LoadFunction<GdipGetLineBlendCount_delegate>("GdipGetLineBlendCount");
-                GdipSetLineBlend_ptr = LoadFunction<GdipSetLineBlend_delegate>("GdipSetLineBlend");
-                GdipGetLineBlend_ptr = LoadFunction<GdipGetLineBlend_delegate>("GdipGetLineBlend");
-                GdipSetLineGammaCorrection_ptr = LoadFunction<GdipSetLineGammaCorrection_delegate>("GdipSetLineGammaCorrection");
-                GdipGetLineGammaCorrection_ptr = LoadFunction<GdipGetLineGammaCorrection_delegate>("GdipGetLineGammaCorrection");
-                GdipGetLinePresetBlendCount_ptr = LoadFunction<GdipGetLinePresetBlendCount_delegate>("GdipGetLinePresetBlendCount");
-                GdipSetLinePresetBlend_ptr = LoadFunction<GdipSetLinePresetBlend_delegate>("GdipSetLinePresetBlend");
-                GdipGetLinePresetBlend_ptr = LoadFunction<GdipGetLinePresetBlend_delegate>("GdipGetLinePresetBlend");
-                GdipSetLineColors_ptr = LoadFunction<GdipSetLineColors_delegate>("GdipSetLineColors");
-                GdipGetLineColors_ptr = LoadFunction<GdipGetLineColors_delegate>("GdipGetLineColors");
-                GdipGetLineRectI_ptr = LoadFunction<GdipGetLineRectI_delegate>("GdipGetLineRectI");
-                GdipGetLineRect_ptr = LoadFunction<GdipGetLineRect_delegate>("GdipGetLineRect");
-                GdipSetLineTransform_ptr = LoadFunction<GdipSetLineTransform_delegate>("GdipSetLineTransform");
-                GdipGetLineTransform_ptr = LoadFunction<GdipGetLineTransform_delegate>("GdipGetLineTransform");
-                GdipSetLineWrapMode_ptr = LoadFunction<GdipSetLineWrapMode_delegate>("GdipSetLineWrapMode");
-                GdipGetLineWrapMode_ptr = LoadFunction<GdipGetLineWrapMode_delegate>("GdipGetLineWrapMode");
-                GdipSetLineLinearBlend_ptr = LoadFunction<GdipSetLineLinearBlend_delegate>("GdipSetLineLinearBlend");
-                GdipSetLineSigmaBlend_ptr = LoadFunction<GdipSetLineSigmaBlend_delegate>("GdipSetLineSigmaBlend");
-                GdipMultiplyLineTransform_ptr = LoadFunction<GdipMultiplyLineTransform_delegate>("GdipMultiplyLineTransform");
-                GdipResetLineTransform_ptr = LoadFunction<GdipResetLineTransform_delegate>("GdipResetLineTransform");
-                GdipRotateLineTransform_ptr = LoadFunction<GdipRotateLineTransform_delegate>("GdipRotateLineTransform");
-                GdipScaleLineTransform_ptr = LoadFunction<GdipScaleLineTransform_delegate>("GdipScaleLineTransform");
-                GdipTranslateLineTransform_ptr = LoadFunction<GdipTranslateLineTransform_delegate>("GdipTranslateLineTransform");
                 GdipCreateFromHDC_ptr = LoadFunction<GdipCreateFromHDC_delegate>("GdipCreateFromHDC");
                 GdipDeleteGraphics_ptr = LoadFunction<GdipDeleteGraphics_delegate>("GdipDeleteGraphics");
                 GdipRestoreGraphics_ptr = LoadFunction<GdipRestoreGraphics_delegate>("GdipRestoreGraphics");
                 GdipSaveGraphics_ptr = LoadFunction<GdipSaveGraphics_delegate>("GdipSaveGraphics");
-                GdipMultiplyWorldTransform_ptr = LoadFunction<GdipMultiplyWorldTransform_delegate>("GdipMultiplyWorldTransform");
-                GdipRotateWorldTransform_ptr = LoadFunction<GdipRotateWorldTransform_delegate>("GdipRotateWorldTransform");
-                GdipTranslateWorldTransform_ptr = LoadFunction<GdipTranslateWorldTransform_delegate>("GdipTranslateWorldTransform");
                 GdipDrawArc_ptr = LoadFunction<GdipDrawArc_delegate>("GdipDrawArc");
                 GdipDrawArcI_ptr = LoadFunction<GdipDrawArcI_delegate>("GdipDrawArcI");
                 GdipDrawBezier_ptr = LoadFunction<GdipDrawBezier_delegate>("GdipDrawBezier");
@@ -180,10 +87,6 @@ namespace System.Drawing
                 GdipSetRenderingOrigin_ptr = LoadFunction<GdipSetRenderingOrigin_delegate>("GdipSetRenderingOrigin");
                 GdipCloneBitmapArea_ptr = LoadFunction<GdipCloneBitmapArea_delegate>("GdipCloneBitmapArea");
                 GdipCloneBitmapAreaI_ptr = LoadFunction<GdipCloneBitmapAreaI_delegate>("GdipCloneBitmapAreaI");
-                GdipResetWorldTransform_ptr = LoadFunction<GdipResetWorldTransform_delegate>("GdipResetWorldTransform");
-                GdipSetWorldTransform_ptr = LoadFunction<GdipSetWorldTransform_delegate>("GdipSetWorldTransform");
-                GdipGetWorldTransform_ptr = LoadFunction<GdipGetWorldTransform_delegate>("GdipGetWorldTransform");
-                GdipScaleWorldTransform_ptr = LoadFunction<GdipScaleWorldTransform_delegate>("GdipScaleWorldTransform");
                 GdipGraphicsClear_ptr = LoadFunction<GdipGraphicsClear_delegate>("GdipGraphicsClear");
                 GdipDrawClosedCurve_ptr = LoadFunction<GdipDrawClosedCurve_delegate>("GdipDrawClosedCurve");
                 GdipDrawClosedCurveI_ptr = LoadFunction<GdipDrawClosedCurveI_delegate>("GdipDrawClosedCurveI");
@@ -195,14 +98,6 @@ namespace System.Drawing
                 GdipDrawCurve2I_ptr = LoadFunction<GdipDrawCurve2I_delegate>("GdipDrawCurve2I");
                 GdipDrawCurve3_ptr = LoadFunction<GdipDrawCurve3_delegate>("GdipDrawCurve3");
                 GdipDrawCurve3I_ptr = LoadFunction<GdipDrawCurve3I_delegate>("GdipDrawCurve3I");
-                GdipSetClipRect_ptr = LoadFunction<GdipSetClipRect_delegate>("GdipSetClipRect");
-                GdipSetClipRectI_ptr = LoadFunction<GdipSetClipRectI_delegate>("GdipSetClipRectI");
-                GdipSetClipPath_ptr = LoadFunction<GdipSetClipPath_delegate>("GdipSetClipPath");
-                GdipSetClipRegion_ptr = LoadFunction<GdipSetClipRegion_delegate>("GdipSetClipRegion");
-                GdipSetClipGraphics_ptr = LoadFunction<GdipSetClipGraphics_delegate>("GdipSetClipGraphics");
-                GdipResetClip_ptr = LoadFunction<GdipResetClip_delegate>("GdipResetClip");
-                GdipEndContainer_ptr = LoadFunction<GdipEndContainer_delegate>("GdipEndContainer");
-                GdipGetClip_ptr = LoadFunction<GdipGetClip_delegate>("GdipGetClip");
                 GdipFillClosedCurve_ptr = LoadFunction<GdipFillClosedCurve_delegate>("GdipFillClosedCurve");
                 GdipFillClosedCurveI_ptr = LoadFunction<GdipFillClosedCurveI_delegate>("GdipFillClosedCurveI");
                 GdipFillClosedCurve2_ptr = LoadFunction<GdipFillClosedCurve2_delegate>("GdipFillClosedCurve2");
@@ -211,15 +106,8 @@ namespace System.Drawing
                 GdipFillPieI_ptr = LoadFunction<GdipFillPieI_delegate>("GdipFillPieI");
                 GdipFillPath_ptr = LoadFunction<GdipFillPath_delegate>("GdipFillPath");
                 GdipGetNearestColor_ptr = LoadFunction<GdipGetNearestColor_delegate>("GdipGetNearestColor");
-                GdipIsVisiblePoint_ptr = LoadFunction<GdipIsVisiblePoint_delegate>("GdipIsVisiblePoint");
-                GdipIsVisiblePointI_ptr = LoadFunction<GdipIsVisiblePointI_delegate>("GdipIsVisiblePointI");
-                GdipIsVisibleRect_ptr = LoadFunction<GdipIsVisibleRect_delegate>("GdipIsVisibleRect");
-                GdipIsVisibleRectI_ptr = LoadFunction<GdipIsVisibleRectI_delegate>("GdipIsVisibleRectI");
                 GdipTransformPoints_ptr = LoadFunction<GdipTransformPoints_delegate>("GdipTransformPoints");
                 GdipTransformPointsI_ptr = LoadFunction<GdipTransformPointsI_delegate>("GdipTransformPointsI");
-                GdipTranslateClip_ptr = LoadFunction<GdipTranslateClip_delegate>("GdipTranslateClip");
-                GdipTranslateClipI_ptr = LoadFunction<GdipTranslateClipI_delegate>("GdipTranslateClipI");
-                GdipGetClipBounds_ptr = LoadFunction<GdipGetClipBounds_delegate>("GdipGetClipBounds");
                 GdipSetCompositingMode_ptr = LoadFunction<GdipSetCompositingMode_delegate>("GdipSetCompositingMode");
                 GdipGetCompositingMode_ptr = LoadFunction<GdipGetCompositingMode_delegate>("GdipGetCompositingMode");
                 GdipSetCompositingQuality_ptr = LoadFunction<GdipSetCompositingQuality_delegate>("GdipSetCompositingQuality");
@@ -228,8 +116,6 @@ namespace System.Drawing
                 GdipGetInterpolationMode_ptr = LoadFunction<GdipGetInterpolationMode_delegate>("GdipGetInterpolationMode");
                 GdipGetDpiX_ptr = LoadFunction<GdipGetDpiX_delegate>("GdipGetDpiX");
                 GdipGetDpiY_ptr = LoadFunction<GdipGetDpiY_delegate>("GdipGetDpiY");
-                GdipIsClipEmpty_ptr = LoadFunction<GdipIsClipEmpty_delegate>("GdipIsClipEmpty");
-                GdipIsVisibleClipEmpty_ptr = LoadFunction<GdipIsVisibleClipEmpty_delegate>("GdipIsVisibleClipEmpty");
                 GdipGetPageUnit_ptr = LoadFunction<GdipGetPageUnit_delegate>("GdipGetPageUnit");
                 GdipGetPageScale_ptr = LoadFunction<GdipGetPageScale_delegate>("GdipGetPageScale");
                 GdipSetPageUnit_ptr = LoadFunction<GdipSetPageUnit_delegate>("GdipSetPageUnit");
@@ -242,15 +128,12 @@ namespace System.Drawing
                 GdipGetTextContrast_ptr = LoadFunction<GdipGetTextContrast_delegate>("GdipGetTextContrast");
                 GdipSetTextRenderingHint_ptr = LoadFunction<GdipSetTextRenderingHint_delegate>("GdipSetTextRenderingHint");
                 GdipGetTextRenderingHint_ptr = LoadFunction<GdipGetTextRenderingHint_delegate>("GdipGetTextRenderingHint");
-                GdipGetVisibleClipBounds_ptr = LoadFunction<GdipGetVisibleClipBounds_delegate>("GdipGetVisibleClipBounds");
                 GdipFlush_ptr = LoadFunction<GdipFlush_delegate>("GdipFlush");
                 GdipAddPathString_ptr = LoadFunction<GdipAddPathString_delegate>("GdipAddPathString");
                 GdipAddPathStringI_ptr = LoadFunction<GdipAddPathStringI_delegate>("GdipAddPathStringI");
                 GdipCreateFromHWND_ptr = LoadFunction<GdipCreateFromHWND_delegate>("GdipCreateFromHWND");
                 GdipMeasureString_ptr = LoadFunction<GdipMeasureString_delegate>("GdipMeasureString");
                 GdipMeasureCharacterRanges_ptr = LoadFunction<GdipMeasureCharacterRanges_delegate>("GdipMeasureCharacterRanges");
-                GdipSetStringFormatMeasurableCharacterRanges_ptr = LoadFunction<GdipSetStringFormatMeasurableCharacterRanges_delegate>("GdipSetStringFormatMeasurableCharacterRanges");
-                GdipGetStringFormatMeasurableCharacterRangeCount_ptr = LoadFunction<GdipGetStringFormatMeasurableCharacterRangeCount_delegate>("GdipGetStringFormatMeasurableCharacterRangeCount");
                 GdipCreateBitmapFromScan0_ptr = LoadFunction<GdipCreateBitmapFromScan0_delegate>("GdipCreateBitmapFromScan0");
                 GdipCreateBitmapFromGraphics_ptr = LoadFunction<GdipCreateBitmapFromGraphics_delegate>("GdipCreateBitmapFromGraphics");
                 GdipBitmapLockBits_ptr = LoadFunction<GdipBitmapLockBits_delegate>("GdipBitmapLockBits");
@@ -300,9 +183,6 @@ namespace System.Drawing
                 GdipDrawImageI_ptr = LoadFunction<GdipDrawImageI_delegate>("GdipDrawImageI");
                 GdipGetImageGraphicsContext_ptr = LoadFunction<GdipGetImageGraphicsContext_delegate>("GdipGetImageGraphicsContext");
                 GdipDrawImage_ptr = LoadFunction<GdipDrawImage_delegate>("GdipDrawImage");
-                GdipBeginContainer_ptr = LoadFunction<GdipBeginContainer_delegate>("GdipBeginContainer");
-                GdipBeginContainerI_ptr = LoadFunction<GdipBeginContainerI_delegate>("GdipBeginContainerI");
-                GdipBeginContainer2_ptr = LoadFunction<GdipBeginContainer2_delegate>("GdipBeginContainer2");
                 GdipDrawImagePoints_ptr = LoadFunction<GdipDrawImagePoints_delegate>("GdipDrawImagePoints");
                 GdipDrawImagePointsI_ptr = LoadFunction<GdipDrawImagePointsI_delegate>("GdipDrawImagePointsI");
                 GdipDrawImageRectRectI_ptr = LoadFunction<GdipDrawImageRectRectI_delegate>("GdipDrawImageRectRectI");
@@ -312,34 +192,12 @@ namespace System.Drawing
                 GdipDrawImageRect_ptr = LoadFunction<GdipDrawImageRect_delegate>("GdipDrawImageRect");
                 GdipDrawImagePointRect_ptr = LoadFunction<GdipDrawImagePointRect_delegate>("GdipDrawImagePointRect");
                 GdipDrawImagePointRectI_ptr = LoadFunction<GdipDrawImagePointRectI_delegate>("GdipDrawImagePointRectI");
-                GdipCreateStringFormat_ptr = LoadFunction<GdipCreateStringFormat_delegate>("GdipCreateStringFormat");
                 GdipCreateHBITMAPFromBitmap_ptr = LoadFunction<GdipCreateHBITMAPFromBitmap_delegate>("GdipCreateHBITMAPFromBitmap");
                 GdipCreateBitmapFromFile_ptr = LoadFunction<GdipCreateBitmapFromFile_delegate>("GdipCreateBitmapFromFile");
                 GdipCreateBitmapFromFileICM_ptr = LoadFunction<GdipCreateBitmapFromFileICM_delegate>("GdipCreateBitmapFromFileICM");
                 GdipCreateHICONFromBitmap_ptr = LoadFunction<GdipCreateHICONFromBitmap_delegate>("GdipCreateHICONFromBitmap");
                 GdipCreateBitmapFromHICON_ptr = LoadFunction<GdipCreateBitmapFromHICON_delegate>("GdipCreateBitmapFromHICON");
                 GdipCreateBitmapFromResource_ptr = LoadFunction<GdipCreateBitmapFromResource_delegate>("GdipCreateBitmapFromResource");
-                GdipCreateMatrix_ptr = LoadFunction<GdipCreateMatrix_delegate>("GdipCreateMatrix");
-                GdipCreateMatrix2_ptr = LoadFunction<GdipCreateMatrix2_delegate>("GdipCreateMatrix2");
-                GdipCreateMatrix3_ptr = LoadFunction<GdipCreateMatrix3_delegate>("GdipCreateMatrix3");
-                GdipCreateMatrix3I_ptr = LoadFunction<GdipCreateMatrix3I_delegate>("GdipCreateMatrix3I");
-                GdipDeleteMatrix_ptr = LoadFunction<GdipDeleteMatrix_delegate>("GdipDeleteMatrix");
-                GdipCloneMatrix_ptr = LoadFunction<GdipCloneMatrix_delegate>("GdipCloneMatrix");
-                GdipSetMatrixElements_ptr = LoadFunction<GdipSetMatrixElements_delegate>("GdipSetMatrixElements");
-                GdipGetMatrixElements_ptr = LoadFunction<GdipGetMatrixElements_delegate>("GdipGetMatrixElements");
-                GdipMultiplyMatrix_ptr = LoadFunction<GdipMultiplyMatrix_delegate>("GdipMultiplyMatrix");
-                GdipTranslateMatrix_ptr = LoadFunction<GdipTranslateMatrix_delegate>("GdipTranslateMatrix");
-                GdipScaleMatrix_ptr = LoadFunction<GdipScaleMatrix_delegate>("GdipScaleMatrix");
-                GdipRotateMatrix_ptr = LoadFunction<GdipRotateMatrix_delegate>("GdipRotateMatrix");
-                GdipShearMatrix_ptr = LoadFunction<GdipShearMatrix_delegate>("GdipShearMatrix");
-                GdipInvertMatrix_ptr = LoadFunction<GdipInvertMatrix_delegate>("GdipInvertMatrix");
-                GdipTransformMatrixPoints_ptr = LoadFunction<GdipTransformMatrixPoints_delegate>("GdipTransformMatrixPoints");
-                GdipTransformMatrixPointsI_ptr = LoadFunction<GdipTransformMatrixPointsI_delegate>("GdipTransformMatrixPointsI");
-                GdipVectorTransformMatrixPoints_ptr = LoadFunction<GdipVectorTransformMatrixPoints_delegate>("GdipVectorTransformMatrixPoints");
-                GdipVectorTransformMatrixPointsI_ptr = LoadFunction<GdipVectorTransformMatrixPointsI_delegate>("GdipVectorTransformMatrixPointsI");
-                GdipIsMatrixInvertible_ptr = LoadFunction<GdipIsMatrixInvertible_delegate>("GdipIsMatrixInvertible");
-                GdipIsMatrixIdentity_ptr = LoadFunction<GdipIsMatrixIdentity_delegate>("GdipIsMatrixIdentity");
-                GdipIsMatrixEqual_ptr = LoadFunction<GdipIsMatrixEqual_delegate>("GdipIsMatrixEqual");
                 GdipCreatePath_ptr = LoadFunction<GdipCreatePath_delegate>("GdipCreatePath");
                 GdipCreatePath2_ptr = LoadFunction<GdipCreatePath2_delegate>("GdipCreatePath2");
                 GdipCreatePath2I_ptr = LoadFunction<GdipCreatePath2I_delegate>("GdipCreatePath2I");
@@ -406,10 +264,6 @@ namespace System.Drawing
                 GdipCreateFontFromDC_ptr = LoadFunction<GdipCreateFontFromDC_delegate>("GdipCreateFontFromDC");
                 GdipCreateFontFromLogfont_ptr = LoadFunction<GdipCreateFontFromLogfont_delegate>("GdipCreateFontFromLogfontW");
                 GdipCreateFontFromHfont_ptr = LoadFunction<GdipCreateFontFromHfont_delegate>("GdipCreateFontFromHfontA");
-                GdipNewPrivateFontCollection_ptr = LoadFunction<GdipNewPrivateFontCollection_delegate>("GdipNewPrivateFontCollection");
-                GdipDeletePrivateFontCollection_ptr = LoadFunction<GdipDeletePrivateFontCollection_delegate>("GdipDeletePrivateFontCollection");
-                GdipPrivateAddFontFile_ptr = LoadFunction<GdipPrivateAddFontFile_delegate>("GdipPrivateAddFontFile");
-                GdipPrivateAddMemoryFont_ptr = LoadFunction<GdipPrivateAddMemoryFont_delegate>("GdipPrivateAddMemoryFont");
                 GdipCreateFontFamilyFromName_ptr = LoadFunction<GdipCreateFontFamilyFromName_delegate>("GdipCreateFontFamilyFromName");
                 GdipGetFamilyName_ptr = LoadFunction<GdipGetFamilyName_delegate>("GdipGetFamilyName");
                 GdipGetGenericFontFamilySansSerif_ptr = LoadFunction<GdipGetGenericFontFamilySansSerif_delegate>("GdipGetGenericFontFamilySansSerif");
@@ -424,26 +278,6 @@ namespace System.Drawing
                 GdipGetFontSize_ptr = LoadFunction<GdipGetFontSize_delegate>("GdipGetFontSize");
                 GdipGetFontHeight_ptr = LoadFunction<GdipGetFontHeight_delegate>("GdipGetFontHeight");
                 GdipGetFontHeightGivenDPI_ptr = LoadFunction<GdipGetFontHeightGivenDPI_delegate>("GdipGetFontHeightGivenDPI");
-                GdipCreateStringFormat2_ptr = LoadFunction<GdipCreateStringFormat2_delegate>("GdipCreateStringFormat");
-                GdipStringFormatGetGenericDefault_ptr = LoadFunction<GdipStringFormatGetGenericDefault_delegate>("GdipStringFormatGetGenericDefault");
-                GdipStringFormatGetGenericTypographic_ptr = LoadFunction<GdipStringFormatGetGenericTypographic_delegate>("GdipStringFormatGetGenericTypographic");
-                GdipDeleteStringFormat_ptr = LoadFunction<GdipDeleteStringFormat_delegate>("GdipDeleteStringFormat");
-                GdipCloneStringFormat_ptr = LoadFunction<GdipCloneStringFormat_delegate>("GdipCloneStringFormat");
-                GdipSetStringFormatFlags_ptr = LoadFunction<GdipSetStringFormatFlags_delegate>("GdipSetStringFormatFlags");
-                GdipGetStringFormatFlags_ptr = LoadFunction<GdipGetStringFormatFlags_delegate>("GdipGetStringFormatFlags");
-                GdipSetStringFormatAlign_ptr = LoadFunction<GdipSetStringFormatAlign_delegate>("GdipSetStringFormatAlign");
-                GdipGetStringFormatAlign_ptr = LoadFunction<GdipGetStringFormatAlign_delegate>("GdipGetStringFormatAlign");
-                GdipSetStringFormatLineAlign_ptr = LoadFunction<GdipSetStringFormatLineAlign_delegate>("GdipSetStringFormatLineAlign");
-                GdipGetStringFormatLineAlign_ptr = LoadFunction<GdipGetStringFormatLineAlign_delegate>("GdipGetStringFormatLineAlign");
-                GdipSetStringFormatTrimming_ptr = LoadFunction<GdipSetStringFormatTrimming_delegate>("GdipSetStringFormatTrimming");
-                GdipGetStringFormatTrimming_ptr = LoadFunction<GdipGetStringFormatTrimming_delegate>("GdipGetStringFormatTrimming");
-                GdipSetStringFormatHotkeyPrefix_ptr = LoadFunction<GdipSetStringFormatHotkeyPrefix_delegate>("GdipSetStringFormatHotkeyPrefix");
-                GdipGetStringFormatHotkeyPrefix_ptr = LoadFunction<GdipGetStringFormatHotkeyPrefix_delegate>("GdipGetStringFormatHotkeyPrefix");
-                GdipSetStringFormatTabStops_ptr = LoadFunction<GdipSetStringFormatTabStops_delegate>("GdipSetStringFormatTabStops");
-                GdipGetStringFormatDigitSubstitution_ptr = LoadFunction<GdipGetStringFormatDigitSubstitution_delegate>("GdipGetStringFormatDigitSubstitution");
-                GdipSetStringFormatDigitSubstitution_ptr = LoadFunction<GdipSetStringFormatDigitSubstitution_delegate>("GdipSetStringFormatDigitSubstitution");
-                GdipGetStringFormatTabStopCount_ptr = LoadFunction<GdipGetStringFormatTabStopCount_delegate>("GdipGetStringFormatTabStopCount");
-                GdipGetStringFormatTabStops_ptr = LoadFunction<GdipGetStringFormatTabStops_delegate>("GdipGetStringFormatTabStops");
                 GdipCreateMetafileFromFile_ptr = LoadFunction<GdipCreateMetafileFromFile_delegate>("GdipCreateMetafileFromFile");
                 GdipCreateMetafileFromEmf_ptr = LoadFunction<GdipCreateMetafileFromEmf_delegate>("GdipCreateMetafileFromEmf");
                 GdipCreateMetafileFromWmf_ptr = LoadFunction<GdipCreateMetafileFromWmf_delegate>("GdipCreateMetafileFromWmf");
@@ -501,367 +335,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetBrushType_delegate> GdipGetBrushType_ptr;
             internal static Status GdipGetBrushType(IntPtr brush, out BrushType type) => GdipGetBrushType_ptr.Delegate(brush, out type);
 
-            private delegate Status GdipCreateRegion_delegate(out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegion_delegate> GdipCreateRegion_ptr;
-            internal static Status GdipCreateRegion(out IntPtr region) => GdipCreateRegion_ptr.Delegate(out region);
-
-            private delegate Status GdipCreateRegionRgnData_delegate(byte[] data, int size, out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegionRgnData_delegate> GdipCreateRegionRgnData_ptr;
-            internal static Status GdipCreateRegionRgnData(byte[] data, int size, out IntPtr region) => GdipCreateRegionRgnData_ptr.Delegate(data, size, out region);
-
-            private delegate Status GdipDeleteRegion_delegate(IntPtr region);
-            private static FunctionWrapper<GdipDeleteRegion_delegate> GdipDeleteRegion_ptr;
-            internal static Status GdipDeleteRegion(IntPtr region) => GdipDeleteRegion_ptr.Delegate(region);
-            internal static int IntGdipDeleteRegion(HandleRef region) => (int)GdipDeleteRegion_ptr.Delegate(region.Handle);
-
-            private delegate Status GdipCloneRegion_delegate(IntPtr region, out IntPtr cloned);
-            private static FunctionWrapper<GdipCloneRegion_delegate> GdipCloneRegion_ptr;
-            internal static Status GdipCloneRegion(IntPtr region, out IntPtr cloned) => GdipCloneRegion_ptr.Delegate(region, out cloned);
-
-            private delegate Status GdipCreateRegionRect_delegate(ref RectangleF rect, out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegionRect_delegate> GdipCreateRegionRect_ptr;
-            internal static Status GdipCreateRegionRect(ref RectangleF rect, out IntPtr region) => GdipCreateRegionRect_ptr.Delegate(ref rect, out region);
-
-            private delegate Status GdipCreateRegionRectI_delegate(ref Rectangle rect, out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegionRectI_delegate> GdipCreateRegionRectI_ptr;
-            internal static Status GdipCreateRegionRectI(ref Rectangle rect, out IntPtr region) => GdipCreateRegionRectI_ptr.Delegate(ref rect, out region);
-
-            private delegate Status GdipCreateRegionPath_delegate(IntPtr path, out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegionPath_delegate> GdipCreateRegionPath_ptr;
-            internal static Status GdipCreateRegionPath(IntPtr path, out IntPtr region) => GdipCreateRegionPath_ptr.Delegate(path, out region);
-
-            private delegate Status GdipTranslateRegion_delegate(IntPtr region, float dx, float dy);
-            private static FunctionWrapper<GdipTranslateRegion_delegate> GdipTranslateRegion_ptr;
-            internal static Status GdipTranslateRegion(IntPtr region, float dx, float dy) => GdipTranslateRegion_ptr.Delegate(region, dx, dy);
-
-            private delegate Status GdipTranslateRegionI_delegate(IntPtr region, int dx, int dy);
-            private static FunctionWrapper<GdipTranslateRegionI_delegate> GdipTranslateRegionI_ptr;
-            internal static Status GdipTranslateRegionI(IntPtr region, int dx, int dy) => GdipTranslateRegionI_ptr.Delegate(region, dx, dy);
-
-            private delegate Status GdipIsVisibleRegionPoint_delegate(IntPtr region, float x, float y, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRegionPoint_delegate> GdipIsVisibleRegionPoint_ptr;
-            internal static Status GdipIsVisibleRegionPoint(IntPtr region, float x, float y, IntPtr graphics, out bool result) => GdipIsVisibleRegionPoint_ptr.Delegate(region, x, y, graphics, out result);
-
-            private delegate Status GdipIsVisibleRegionPointI_delegate(IntPtr region, int x, int y, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRegionPointI_delegate> GdipIsVisibleRegionPointI_ptr;
-            internal static Status GdipIsVisibleRegionPointI(IntPtr region, int x, int y, IntPtr graphics, out bool result) => GdipIsVisibleRegionPointI_ptr.Delegate(region, x, y, graphics, out result);
-
-            private delegate Status GdipIsVisibleRegionRect_delegate(IntPtr region, float x, float y, float width, float height, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRegionRect_delegate> GdipIsVisibleRegionRect_ptr;
-            internal static Status GdipIsVisibleRegionRect(IntPtr region, float x, float y, float width, float height, IntPtr graphics, out bool result) => GdipIsVisibleRegionRect_ptr.Delegate(region, x, y, width, height, graphics, out result);
-
-            private delegate Status GdipIsVisibleRegionRectI_delegate(IntPtr region, int x, int y, int width, int height, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRegionRectI_delegate> GdipIsVisibleRegionRectI_ptr;
-            internal static Status GdipIsVisibleRegionRectI(IntPtr region, int x, int y, int width, int height, IntPtr graphics, out bool result) => GdipIsVisibleRegionRectI_ptr.Delegate(region, x, y, width, height, graphics, out result);
-
-            private delegate Status GdipCombineRegionRect_delegate(IntPtr region, ref RectangleF rect, CombineMode combineMode);
-            private static FunctionWrapper<GdipCombineRegionRect_delegate> GdipCombineRegionRect_ptr;
-            internal static Status GdipCombineRegionRect(IntPtr region, ref RectangleF rect, CombineMode combineMode) => GdipCombineRegionRect_ptr.Delegate(region, ref rect, combineMode);
-
-            private delegate Status GdipCombineRegionRectI_delegate(IntPtr region, ref Rectangle rect, CombineMode combineMode);
-            private static FunctionWrapper<GdipCombineRegionRectI_delegate> GdipCombineRegionRectI_ptr;
-            internal static Status GdipCombineRegionRectI(IntPtr region, ref Rectangle rect, CombineMode combineMode) => GdipCombineRegionRectI_ptr.Delegate(region, ref rect, combineMode);
-
-            private delegate Status GdipCombineRegionPath_delegate(IntPtr region, IntPtr path, CombineMode combineMode);
-            private static FunctionWrapper<GdipCombineRegionPath_delegate> GdipCombineRegionPath_ptr;
-            internal static Status GdipCombineRegionPath(IntPtr region, IntPtr path, CombineMode combineMode) => GdipCombineRegionPath_ptr.Delegate(region, path, combineMode);
-
-            private delegate Status GdipGetRegionBounds_delegate(IntPtr region, IntPtr graphics, ref RectangleF rect);
-            private static FunctionWrapper<GdipGetRegionBounds_delegate> GdipGetRegionBounds_ptr;
-            internal static Status GdipGetRegionBounds(IntPtr region, IntPtr graphics, ref RectangleF rect) => GdipGetRegionBounds_ptr.Delegate(region, graphics, ref rect);
-
-            private delegate Status GdipSetInfinite_delegate(IntPtr region);
-            private static FunctionWrapper<GdipSetInfinite_delegate> GdipSetInfinite_ptr;
-            internal static Status GdipSetInfinite(IntPtr region) => GdipSetInfinite_ptr.Delegate(region);
-
-            private delegate Status GdipSetEmpty_delegate(IntPtr region);
-            private static FunctionWrapper<GdipSetEmpty_delegate> GdipSetEmpty_ptr;
-            internal static Status GdipSetEmpty(IntPtr region) => GdipSetEmpty_ptr.Delegate(region);
-
-            private delegate Status GdipIsEmptyRegion_delegate(IntPtr region, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsEmptyRegion_delegate> GdipIsEmptyRegion_ptr;
-            internal static Status GdipIsEmptyRegion(IntPtr region, IntPtr graphics, out bool result) => GdipIsEmptyRegion_ptr.Delegate(region, graphics, out result);
-
-            private delegate Status GdipIsInfiniteRegion_delegate(IntPtr region, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsInfiniteRegion_delegate> GdipIsInfiniteRegion_ptr;
-            internal static Status GdipIsInfiniteRegion(IntPtr region, IntPtr graphics, out bool result) => GdipIsInfiniteRegion_ptr.Delegate(region, graphics, out result);
-
-            private delegate Status GdipCombineRegionRegion_delegate(IntPtr region, IntPtr region2, CombineMode combineMode);
-            private static FunctionWrapper<GdipCombineRegionRegion_delegate> GdipCombineRegionRegion_ptr;
-            internal static Status GdipCombineRegionRegion(IntPtr region, IntPtr region2, CombineMode combineMode) => GdipCombineRegionRegion_ptr.Delegate(region, region2, combineMode);
-
-            private delegate Status GdipIsEqualRegion_delegate(IntPtr region, IntPtr region2, IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsEqualRegion_delegate> GdipIsEqualRegion_ptr;
-            internal static Status GdipIsEqualRegion(IntPtr region, IntPtr region2, IntPtr graphics, out bool result) => GdipIsEqualRegion_ptr.Delegate(region, region2, graphics, out result);
-
-            private delegate Status GdipGetRegionDataSize_delegate(IntPtr region, out int bufferSize);
-            private static FunctionWrapper<GdipGetRegionDataSize_delegate> GdipGetRegionDataSize_ptr;
-            internal static Status GdipGetRegionDataSize(IntPtr region, out int bufferSize) => GdipGetRegionDataSize_ptr.Delegate(region, out bufferSize);
-
-            private delegate Status GdipGetRegionData_delegate(IntPtr region, byte[] buffer, int bufferSize, out int sizeFilled);
-            private static FunctionWrapper<GdipGetRegionData_delegate> GdipGetRegionData_ptr;
-            internal static Status GdipGetRegionData(IntPtr region, byte[] buffer, int bufferSize, out int sizeFilled) => GdipGetRegionData_ptr.Delegate(region, buffer, bufferSize, out sizeFilled);
-
-            private delegate Status GdipGetRegionScansCount_delegate(IntPtr region, out int count, IntPtr matrix);
-            private static FunctionWrapper<GdipGetRegionScansCount_delegate> GdipGetRegionScansCount_ptr;
-            internal static Status GdipGetRegionScansCount(IntPtr region, out int count, IntPtr matrix) => GdipGetRegionScansCount_ptr.Delegate(region, out count, matrix);
-
-            private delegate Status GdipGetRegionScans_delegate(IntPtr region, IntPtr rects, out int count, IntPtr matrix);
-            private static FunctionWrapper<GdipGetRegionScans_delegate> GdipGetRegionScans_ptr;
-            internal static Status GdipGetRegionScans(IntPtr region, IntPtr rects, out int count, IntPtr matrix) => GdipGetRegionScans_ptr.Delegate(region, rects, out count, matrix);
-
-            private delegate Status GdipTransformRegion_delegate(IntPtr region, IntPtr matrix);
-            private static FunctionWrapper<GdipTransformRegion_delegate> GdipTransformRegion_ptr;
-            internal static Status GdipTransformRegion(IntPtr region, IntPtr matrix) => GdipTransformRegion_ptr.Delegate(region, matrix);
-
-            private delegate Status GdipFillRegion_delegate(IntPtr graphics, IntPtr brush, IntPtr region);
-            private static FunctionWrapper<GdipFillRegion_delegate> GdipFillRegion_ptr;
-            internal static Status GdipFillRegion(IntPtr graphics, IntPtr brush, IntPtr region) => GdipFillRegion_ptr.Delegate(graphics, brush, region);
-
-            private delegate Status GdipGetRegionHRgn_delegate(IntPtr region, IntPtr graphics, ref IntPtr hRgn);
-            private static FunctionWrapper<GdipGetRegionHRgn_delegate> GdipGetRegionHRgn_ptr;
-            internal static Status GdipGetRegionHRgn(IntPtr region, IntPtr graphics, ref IntPtr hRgn) => GdipGetRegionHRgn_ptr.Delegate(region, graphics, ref hRgn);
-
-            private delegate Status GdipCreateRegionHrgn_delegate(IntPtr hRgn, out IntPtr region);
-            private static FunctionWrapper<GdipCreateRegionHrgn_delegate> GdipCreateRegionHrgn_ptr;
-            internal static Status GdipCreateRegionHrgn(IntPtr hRgn, out IntPtr region) => GdipCreateRegionHrgn_ptr.Delegate(hRgn, out region);
-
-            private delegate Status GdipCreatePathGradientFromPath_delegate(IntPtr path, out IntPtr brush);
-            private static FunctionWrapper<GdipCreatePathGradientFromPath_delegate> GdipCreatePathGradientFromPath_ptr;
-            internal static Status GdipCreatePathGradientFromPath(IntPtr path, out IntPtr brush) => GdipCreatePathGradientFromPath_ptr.Delegate(path, out brush);
-
-            private delegate Status GdipCreatePathGradientI_delegate(Point[] points, int count, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreatePathGradientI_delegate> GdipCreatePathGradientI_ptr;
-            internal static Status GdipCreatePathGradientI(Point[] points, int count, WrapMode wrapMode, out IntPtr brush) => GdipCreatePathGradientI_ptr.Delegate(points, count, wrapMode, out brush);
-
-            private delegate Status GdipCreatePathGradient_delegate(PointF[] points, int count, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreatePathGradient_delegate> GdipCreatePathGradient_ptr;
-            internal static Status GdipCreatePathGradient(PointF[] points, int count, WrapMode wrapMode, out IntPtr brush) => GdipCreatePathGradient_ptr.Delegate(points, count, wrapMode, out brush);
-
-            private delegate Status GdipGetPathGradientBlendCount_delegate(IntPtr brush, out int count);
-            private static FunctionWrapper<GdipGetPathGradientBlendCount_delegate> GdipGetPathGradientBlendCount_ptr;
-            internal static Status GdipGetPathGradientBlendCount(IntPtr brush, out int count) => GdipGetPathGradientBlendCount_ptr.Delegate(brush, out count);
-
-            private delegate Status GdipGetPathGradientBlend_delegate(IntPtr brush, float[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipGetPathGradientBlend_delegate> GdipGetPathGradientBlend_ptr;
-            internal static Status GdipGetPathGradientBlend(IntPtr brush, float[] blend, float[] positions, int count) => GdipGetPathGradientBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipSetPathGradientBlend_delegate(IntPtr brush, float[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipSetPathGradientBlend_delegate> GdipSetPathGradientBlend_ptr;
-            internal static Status GdipSetPathGradientBlend(IntPtr brush, float[] blend, float[] positions, int count) => GdipSetPathGradientBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipGetPathGradientCenterColor_delegate(IntPtr brush, out int color);
-            private static FunctionWrapper<GdipGetPathGradientCenterColor_delegate> GdipGetPathGradientCenterColor_ptr;
-            internal static Status GdipGetPathGradientCenterColor(IntPtr brush, out int color) => GdipGetPathGradientCenterColor_ptr.Delegate(brush, out color);
-
-            private delegate Status GdipSetPathGradientCenterColor_delegate(IntPtr brush, int color);
-            private static FunctionWrapper<GdipSetPathGradientCenterColor_delegate> GdipSetPathGradientCenterColor_ptr;
-            internal static Status GdipSetPathGradientCenterColor(IntPtr brush, int color) => GdipSetPathGradientCenterColor_ptr.Delegate(brush, color);
-
-            private delegate Status GdipGetPathGradientCenterPoint_delegate(IntPtr brush, out PointF point);
-            private static FunctionWrapper<GdipGetPathGradientCenterPoint_delegate> GdipGetPathGradientCenterPoint_ptr;
-            internal static Status GdipGetPathGradientCenterPoint(IntPtr brush, out PointF point) => GdipGetPathGradientCenterPoint_ptr.Delegate(brush, out point);
-
-            private delegate Status GdipSetPathGradientCenterPoint_delegate(IntPtr brush, ref PointF point);
-            private static FunctionWrapper<GdipSetPathGradientCenterPoint_delegate> GdipSetPathGradientCenterPoint_ptr;
-            internal static Status GdipSetPathGradientCenterPoint(IntPtr brush, ref PointF point) => GdipSetPathGradientCenterPoint_ptr.Delegate(brush, ref point);
-
-            private delegate Status GdipGetPathGradientFocusScales_delegate(IntPtr brush, out float xScale, out float yScale);
-            private static FunctionWrapper<GdipGetPathGradientFocusScales_delegate> GdipGetPathGradientFocusScales_ptr;
-            internal static Status GdipGetPathGradientFocusScales(IntPtr brush, out float xScale, out float yScale) => GdipGetPathGradientFocusScales_ptr.Delegate(brush, out xScale, out yScale);
-
-            private delegate Status GdipSetPathGradientFocusScales_delegate(IntPtr brush, float xScale, float yScale);
-            private static FunctionWrapper<GdipSetPathGradientFocusScales_delegate> GdipSetPathGradientFocusScales_ptr;
-            internal static Status GdipSetPathGradientFocusScales(IntPtr brush, float xScale, float yScale) => GdipSetPathGradientFocusScales_ptr.Delegate(brush, xScale, yScale);
-
-            private delegate Status GdipGetPathGradientPresetBlendCount_delegate(IntPtr brush, out int count);
-            private static FunctionWrapper<GdipGetPathGradientPresetBlendCount_delegate> GdipGetPathGradientPresetBlendCount_ptr;
-            internal static Status GdipGetPathGradientPresetBlendCount(IntPtr brush, out int count) => GdipGetPathGradientPresetBlendCount_ptr.Delegate(brush, out count);
-
-            private delegate Status GdipGetPathGradientPresetBlend_delegate(IntPtr brush, int[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipGetPathGradientPresetBlend_delegate> GdipGetPathGradientPresetBlend_ptr;
-            internal static Status GdipGetPathGradientPresetBlend(IntPtr brush, int[] blend, float[] positions, int count) => GdipGetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipSetPathGradientPresetBlend_delegate(IntPtr brush, int[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipSetPathGradientPresetBlend_delegate> GdipSetPathGradientPresetBlend_ptr;
-            internal static Status GdipSetPathGradientPresetBlend(IntPtr brush, int[] blend, float[] positions, int count) => GdipSetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipGetPathGradientRect_delegate(IntPtr brush, out RectangleF rect);
-            private static FunctionWrapper<GdipGetPathGradientRect_delegate> GdipGetPathGradientRect_ptr;
-            internal static Status GdipGetPathGradientRect(IntPtr brush, out RectangleF rect) => GdipGetPathGradientRect_ptr.Delegate(brush, out rect);
-
-            private delegate Status GdipGetPathGradientSurroundColorCount_delegate(IntPtr brush, out int count);
-            private static FunctionWrapper<GdipGetPathGradientSurroundColorCount_delegate> GdipGetPathGradientSurroundColorCount_ptr;
-            internal static Status GdipGetPathGradientSurroundColorCount(IntPtr brush, out int count) => GdipGetPathGradientSurroundColorCount_ptr.Delegate(brush, out count);
-
-            private delegate Status GdipGetPathGradientSurroundColorsWithCount_delegate(IntPtr brush, int[] color, ref int count);
-            private static FunctionWrapper<GdipGetPathGradientSurroundColorsWithCount_delegate> GdipGetPathGradientSurroundColorsWithCount_ptr;
-            internal static Status GdipGetPathGradientSurroundColorsWithCount(IntPtr brush, int[] color, ref int count) => GdipGetPathGradientSurroundColorsWithCount_ptr.Delegate(brush, color, ref count);
-
-            private delegate Status GdipSetPathGradientSurroundColorsWithCount_delegate(IntPtr brush, int[] color, ref int count);
-            private static FunctionWrapper<GdipSetPathGradientSurroundColorsWithCount_delegate> GdipSetPathGradientSurroundColorsWithCount_ptr;
-            internal static Status GdipSetPathGradientSurroundColorsWithCount(IntPtr brush, int[] color, ref int count) => GdipSetPathGradientSurroundColorsWithCount_ptr.Delegate(brush, color, ref count);
-
-            private delegate Status GdipGetPathGradientTransform_delegate(IntPtr brush, IntPtr matrix);
-            private static FunctionWrapper<GdipGetPathGradientTransform_delegate> GdipGetPathGradientTransform_ptr;
-            internal static Status GdipGetPathGradientTransform(IntPtr brush, IntPtr matrix) => GdipGetPathGradientTransform_ptr.Delegate(brush, matrix);
-
-            private delegate Status GdipSetPathGradientTransform_delegate(IntPtr brush, IntPtr matrix);
-            private static FunctionWrapper<GdipSetPathGradientTransform_delegate> GdipSetPathGradientTransform_ptr;
-            internal static Status GdipSetPathGradientTransform(IntPtr brush, IntPtr matrix) => GdipSetPathGradientTransform_ptr.Delegate(brush, matrix);
-
-            private delegate Status GdipGetPathGradientWrapMode_delegate(IntPtr brush, out WrapMode wrapMode);
-            private static FunctionWrapper<GdipGetPathGradientWrapMode_delegate> GdipGetPathGradientWrapMode_ptr;
-            internal static Status GdipGetPathGradientWrapMode(IntPtr brush, out WrapMode wrapMode) => GdipGetPathGradientWrapMode_ptr.Delegate(brush, out wrapMode);
-
-            private delegate Status GdipSetPathGradientWrapMode_delegate(IntPtr brush, WrapMode wrapMode);
-            private static FunctionWrapper<GdipSetPathGradientWrapMode_delegate> GdipSetPathGradientWrapMode_ptr;
-            internal static Status GdipSetPathGradientWrapMode(IntPtr brush, WrapMode wrapMode) => GdipSetPathGradientWrapMode_ptr.Delegate(brush, wrapMode);
-
-            private delegate Status GdipSetPathGradientLinearBlend_delegate(IntPtr brush, float focus, float scale);
-            private static FunctionWrapper<GdipSetPathGradientLinearBlend_delegate> GdipSetPathGradientLinearBlend_ptr;
-            internal static Status GdipSetPathGradientLinearBlend(IntPtr brush, float focus, float scale) => GdipSetPathGradientLinearBlend_ptr.Delegate(brush, focus, scale);
-
-            private delegate Status GdipSetPathGradientSigmaBlend_delegate(IntPtr brush, float focus, float scale);
-            private static FunctionWrapper<GdipSetPathGradientSigmaBlend_delegate> GdipSetPathGradientSigmaBlend_ptr;
-            internal static Status GdipSetPathGradientSigmaBlend(IntPtr brush, float focus, float scale) => GdipSetPathGradientSigmaBlend_ptr.Delegate(brush, focus, scale);
-
-            private delegate Status GdipMultiplyPathGradientTransform_delegate(IntPtr texture, IntPtr matrix, MatrixOrder order);
-            private static FunctionWrapper<GdipMultiplyPathGradientTransform_delegate> GdipMultiplyPathGradientTransform_ptr;
-            internal static Status GdipMultiplyPathGradientTransform(IntPtr texture, IntPtr matrix, MatrixOrder order) => GdipMultiplyPathGradientTransform_ptr.Delegate(texture, matrix, order);
-
-            private delegate Status GdipResetPathGradientTransform_delegate(IntPtr brush);
-            private static FunctionWrapper<GdipResetPathGradientTransform_delegate> GdipResetPathGradientTransform_ptr;
-            internal static Status GdipResetPathGradientTransform(IntPtr brush) => GdipResetPathGradientTransform_ptr.Delegate(brush);
-
-            private delegate Status GdipRotatePathGradientTransform_delegate(IntPtr brush, float angle, MatrixOrder order);
-            private static FunctionWrapper<GdipRotatePathGradientTransform_delegate> GdipRotatePathGradientTransform_ptr;
-            internal static Status GdipRotatePathGradientTransform(IntPtr brush, float angle, MatrixOrder order) => GdipRotatePathGradientTransform_ptr.Delegate(brush, angle, order);
-
-            private delegate Status GdipScalePathGradientTransform_delegate(IntPtr brush, float sx, float sy, MatrixOrder order);
-            private static FunctionWrapper<GdipScalePathGradientTransform_delegate> GdipScalePathGradientTransform_ptr;
-            internal static Status GdipScalePathGradientTransform(IntPtr brush, float sx, float sy, MatrixOrder order) => GdipScalePathGradientTransform_ptr.Delegate(brush, sx, sy, order);
-
-            private delegate Status GdipTranslatePathGradientTransform_delegate(IntPtr brush, float dx, float dy, MatrixOrder order);
-            private static FunctionWrapper<GdipTranslatePathGradientTransform_delegate> GdipTranslatePathGradientTransform_ptr;
-            internal static Status GdipTranslatePathGradientTransform(IntPtr brush, float dx, float dy, MatrixOrder order) => GdipTranslatePathGradientTransform_ptr.Delegate(brush, dx, dy, order);
-
-            private delegate Status GdipCreateLineBrushI_delegate(ref Point point1, ref Point point2, int color1, int color2, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrushI_delegate> GdipCreateLineBrushI_ptr;
-            internal static Status GdipCreateLineBrushI(ref Point point1, ref Point point2, int color1, int color2, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrushI_ptr.Delegate(ref point1, ref point2, color1, color2, wrapMode, out brush);
-
-            private delegate Status GdipCreateLineBrush_delegate(ref PointF point1, ref PointF point2, int color1, int color2, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrush_delegate> GdipCreateLineBrush_ptr;
-            internal static Status GdipCreateLineBrush(ref PointF point1, ref PointF point2, int color1, int color2, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrush_ptr.Delegate(ref point1, ref point2, color1, color2, wrapMode, out brush);
-
-            private delegate Status GdipCreateLineBrushFromRectI_delegate(ref Rectangle rect, int color1, int color2, LinearGradientMode linearGradientMode, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrushFromRectI_delegate> GdipCreateLineBrushFromRectI_ptr;
-            internal static Status GdipCreateLineBrushFromRectI(ref Rectangle rect, int color1, int color2, LinearGradientMode linearGradientMode, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrushFromRectI_ptr.Delegate(ref rect, color1, color2, linearGradientMode, wrapMode, out brush);
-
-            private delegate Status GdipCreateLineBrushFromRect_delegate(ref RectangleF rect, int color1, int color2, LinearGradientMode linearGradientMode, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrushFromRect_delegate> GdipCreateLineBrushFromRect_ptr;
-            internal static Status GdipCreateLineBrushFromRect(ref RectangleF rect, int color1, int color2, LinearGradientMode linearGradientMode, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrushFromRect_ptr.Delegate(ref rect, color1, color2, linearGradientMode, wrapMode, out brush);
-
-            private delegate Status GdipCreateLineBrushFromRectWithAngleI_delegate(ref Rectangle rect, int color1, int color2, float angle, bool isAngleScaleable, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrushFromRectWithAngleI_delegate> GdipCreateLineBrushFromRectWithAngleI_ptr;
-            internal static Status GdipCreateLineBrushFromRectWithAngleI(ref Rectangle rect, int color1, int color2, float angle, bool isAngleScaleable, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrushFromRectWithAngleI_ptr.Delegate(ref rect, color1, color2, angle, isAngleScaleable, wrapMode, out brush);
-
-            private delegate Status GdipCreateLineBrushFromRectWithAngle_delegate(ref RectangleF rect, int color1, int color2, float angle, bool isAngleScaleable, WrapMode wrapMode, out IntPtr brush);
-            private static FunctionWrapper<GdipCreateLineBrushFromRectWithAngle_delegate> GdipCreateLineBrushFromRectWithAngle_ptr;
-            internal static Status GdipCreateLineBrushFromRectWithAngle(ref RectangleF rect, int color1, int color2, float angle, bool isAngleScaleable, WrapMode wrapMode, out IntPtr brush) => GdipCreateLineBrushFromRectWithAngle_ptr.Delegate(ref rect, color1, color2, angle, isAngleScaleable, wrapMode, out brush);
-
-            private delegate Status GdipGetLineBlendCount_delegate(IntPtr brush, out int count);
-            private static FunctionWrapper<GdipGetLineBlendCount_delegate> GdipGetLineBlendCount_ptr;
-            internal static Status GdipGetLineBlendCount(IntPtr brush, out int count) => GdipGetLineBlendCount_ptr.Delegate(brush, out count);
-
-            private delegate Status GdipSetLineBlend_delegate(IntPtr brush, float[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipSetLineBlend_delegate> GdipSetLineBlend_ptr;
-            internal static Status GdipSetLineBlend(IntPtr brush, float[] blend, float[] positions, int count) => GdipSetLineBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipGetLineBlend_delegate(IntPtr brush, float[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipGetLineBlend_delegate> GdipGetLineBlend_ptr;
-            internal static Status GdipGetLineBlend(IntPtr brush, float[] blend, float[] positions, int count) => GdipGetLineBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipSetLineGammaCorrection_delegate(IntPtr brush, bool useGammaCorrection);
-            private static FunctionWrapper<GdipSetLineGammaCorrection_delegate> GdipSetLineGammaCorrection_ptr;
-            internal static Status GdipSetLineGammaCorrection(IntPtr brush, bool useGammaCorrection) => GdipSetLineGammaCorrection_ptr.Delegate(brush, useGammaCorrection);
-
-            private delegate Status GdipGetLineGammaCorrection_delegate(IntPtr brush, out bool useGammaCorrection);
-            private static FunctionWrapper<GdipGetLineGammaCorrection_delegate> GdipGetLineGammaCorrection_ptr;
-            internal static Status GdipGetLineGammaCorrection(IntPtr brush, out bool useGammaCorrection) => GdipGetLineGammaCorrection_ptr.Delegate(brush, out useGammaCorrection);
-
-            private delegate Status GdipGetLinePresetBlendCount_delegate(IntPtr brush, out int count);
-            private static FunctionWrapper<GdipGetLinePresetBlendCount_delegate> GdipGetLinePresetBlendCount_ptr;
-            internal static Status GdipGetLinePresetBlendCount(IntPtr brush, out int count) => GdipGetLinePresetBlendCount_ptr.Delegate(brush, out count);
-
-            private delegate Status GdipSetLinePresetBlend_delegate(IntPtr brush, int[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipSetLinePresetBlend_delegate> GdipSetLinePresetBlend_ptr;
-            internal static Status GdipSetLinePresetBlend(IntPtr brush, int[] blend, float[] positions, int count) => GdipSetLinePresetBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipGetLinePresetBlend_delegate(IntPtr brush, int[] blend, float[] positions, int count);
-            private static FunctionWrapper<GdipGetLinePresetBlend_delegate> GdipGetLinePresetBlend_ptr;
-            internal static Status GdipGetLinePresetBlend(IntPtr brush, int[] blend, float[] positions, int count) => GdipGetLinePresetBlend_ptr.Delegate(brush, blend, positions, count);
-
-            private delegate Status GdipSetLineColors_delegate(IntPtr brush, int color1, int color2);
-            private static FunctionWrapper<GdipSetLineColors_delegate> GdipSetLineColors_ptr;
-            internal static Status GdipSetLineColors(IntPtr brush, int color1, int color2) => GdipSetLineColors_ptr.Delegate(brush, color1, color2);
-
-            private delegate Status GdipGetLineColors_delegate(IntPtr brush, int[] colors);
-            private static FunctionWrapper<GdipGetLineColors_delegate> GdipGetLineColors_ptr;
-            internal static Status GdipGetLineColors(IntPtr brush, int[] colors) => GdipGetLineColors_ptr.Delegate(brush, colors);
-
-            private delegate Status GdipGetLineRectI_delegate(IntPtr brush, out Rectangle rect);
-            private static FunctionWrapper<GdipGetLineRectI_delegate> GdipGetLineRectI_ptr;
-            internal static Status GdipGetLineRectI(IntPtr brush, out Rectangle rect) => GdipGetLineRectI_ptr.Delegate(brush, out rect);
-
-            private delegate Status GdipGetLineRect_delegate(IntPtr brush, out RectangleF rect);
-            private static FunctionWrapper<GdipGetLineRect_delegate> GdipGetLineRect_ptr;
-            internal static Status GdipGetLineRect(IntPtr brush, out RectangleF rect) => GdipGetLineRect_ptr.Delegate(brush, out rect);
-
-            private delegate Status GdipSetLineTransform_delegate(IntPtr brush, IntPtr matrix);
-            private static FunctionWrapper<GdipSetLineTransform_delegate> GdipSetLineTransform_ptr;
-            internal static Status GdipSetLineTransform(IntPtr brush, IntPtr matrix) => GdipSetLineTransform_ptr.Delegate(brush, matrix);
-
-            private delegate Status GdipGetLineTransform_delegate(IntPtr brush, IntPtr matrix);
-            private static FunctionWrapper<GdipGetLineTransform_delegate> GdipGetLineTransform_ptr;
-            internal static Status GdipGetLineTransform(IntPtr brush, IntPtr matrix) => GdipGetLineTransform_ptr.Delegate(brush, matrix);
-
-            private delegate Status GdipSetLineWrapMode_delegate(IntPtr brush, WrapMode wrapMode);
-            private static FunctionWrapper<GdipSetLineWrapMode_delegate> GdipSetLineWrapMode_ptr;
-            internal static Status GdipSetLineWrapMode(IntPtr brush, WrapMode wrapMode) => GdipSetLineWrapMode_ptr.Delegate(brush, wrapMode);
-
-            private delegate Status GdipGetLineWrapMode_delegate(IntPtr brush, out WrapMode wrapMode);
-            private static FunctionWrapper<GdipGetLineWrapMode_delegate> GdipGetLineWrapMode_ptr;
-            internal static Status GdipGetLineWrapMode(IntPtr brush, out WrapMode wrapMode) => GdipGetLineWrapMode_ptr.Delegate(brush, out wrapMode);
-
-            private delegate Status GdipSetLineLinearBlend_delegate(IntPtr brush, float focus, float scale);
-            private static FunctionWrapper<GdipSetLineLinearBlend_delegate> GdipSetLineLinearBlend_ptr;
-            internal static Status GdipSetLineLinearBlend(IntPtr brush, float focus, float scale) => GdipSetLineLinearBlend_ptr.Delegate(brush, focus, scale);
-
-            private delegate Status GdipSetLineSigmaBlend_delegate(IntPtr brush, float focus, float scale);
-            private static FunctionWrapper<GdipSetLineSigmaBlend_delegate> GdipSetLineSigmaBlend_ptr;
-            internal static Status GdipSetLineSigmaBlend(IntPtr brush, float focus, float scale) => GdipSetLineSigmaBlend_ptr.Delegate(brush, focus, scale);
-
-            private delegate Status GdipMultiplyLineTransform_delegate(IntPtr brush, IntPtr matrix, MatrixOrder order);
-            private static FunctionWrapper<GdipMultiplyLineTransform_delegate> GdipMultiplyLineTransform_ptr;
-            internal static Status GdipMultiplyLineTransform(IntPtr brush, IntPtr matrix, MatrixOrder order) => GdipMultiplyLineTransform_ptr.Delegate(brush, matrix, order);
-
-            private delegate Status GdipResetLineTransform_delegate(IntPtr brush);
-            private static FunctionWrapper<GdipResetLineTransform_delegate> GdipResetLineTransform_ptr;
-            internal static Status GdipResetLineTransform(IntPtr brush) => GdipResetLineTransform_ptr.Delegate(brush);
-
-            private delegate Status GdipRotateLineTransform_delegate(IntPtr brush, float angle, MatrixOrder order);
-            private static FunctionWrapper<GdipRotateLineTransform_delegate> GdipRotateLineTransform_ptr;
-            internal static Status GdipRotateLineTransform(IntPtr brush, float angle, MatrixOrder order) => GdipRotateLineTransform_ptr.Delegate(brush, angle, order);
-
-            private delegate Status GdipScaleLineTransform_delegate(IntPtr brush, float sx, float sy, MatrixOrder order);
-            private static FunctionWrapper<GdipScaleLineTransform_delegate> GdipScaleLineTransform_ptr;
-            internal static Status GdipScaleLineTransform(IntPtr brush, float sx, float sy, MatrixOrder order) => GdipScaleLineTransform_ptr.Delegate(brush, sx, sy, order);
-
-            private delegate Status GdipTranslateLineTransform_delegate(IntPtr brush, float dx, float dy, MatrixOrder order);
-            private static FunctionWrapper<GdipTranslateLineTransform_delegate> GdipTranslateLineTransform_ptr;
-            internal static Status GdipTranslateLineTransform(IntPtr brush, float dx, float dy, MatrixOrder order) => GdipTranslateLineTransform_ptr.Delegate(brush, dx, dy, order);
-
             private delegate Status GdipCreateFromHDC_delegate(IntPtr hDC, out IntPtr graphics);
             private static FunctionWrapper<GdipCreateFromHDC_delegate> GdipCreateFromHDC_ptr;
             internal static Status GdipCreateFromHDC(IntPtr hDC, out IntPtr graphics) => GdipCreateFromHDC_ptr.Delegate(hDC, out graphics);
@@ -878,18 +351,6 @@ namespace System.Drawing
             private delegate Status GdipSaveGraphics_delegate(IntPtr graphics, out uint state);
             private static FunctionWrapper<GdipSaveGraphics_delegate> GdipSaveGraphics_ptr;
             internal static Status GdipSaveGraphics(IntPtr graphics, out uint state) => GdipSaveGraphics_ptr.Delegate(graphics, out state);
-
-            private delegate Status GdipMultiplyWorldTransform_delegate(IntPtr graphics, IntPtr matrix, MatrixOrder order);
-            private static FunctionWrapper<GdipMultiplyWorldTransform_delegate> GdipMultiplyWorldTransform_ptr;
-            internal static Status GdipMultiplyWorldTransform(IntPtr graphics, IntPtr matrix, MatrixOrder order) => GdipMultiplyWorldTransform_ptr.Delegate(graphics, matrix, order);
-
-            private delegate Status GdipRotateWorldTransform_delegate(IntPtr graphics, float angle, MatrixOrder order);
-            private static FunctionWrapper<GdipRotateWorldTransform_delegate> GdipRotateWorldTransform_ptr;
-            internal static Status GdipRotateWorldTransform(IntPtr graphics, float angle, MatrixOrder order) => GdipRotateWorldTransform_ptr.Delegate(graphics, angle, order);
-
-            private delegate Status GdipTranslateWorldTransform_delegate(IntPtr graphics, float dx, float dy, MatrixOrder order);
-            private static FunctionWrapper<GdipTranslateWorldTransform_delegate> GdipTranslateWorldTransform_ptr;
-            internal static Status GdipTranslateWorldTransform(IntPtr graphics, float dx, float dy, MatrixOrder order) => GdipTranslateWorldTransform_ptr.Delegate(graphics, dx, dy, order);
 
             private delegate Status GdipDrawArc_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height, float startAngle, float sweepAngle);
             private static FunctionWrapper<GdipDrawArc_delegate> GdipDrawArc_ptr;
@@ -1040,22 +501,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipCloneBitmapAreaI_delegate> GdipCloneBitmapAreaI_ptr;
             internal static Status GdipCloneBitmapAreaI(int x, int y, int width, int height, PixelFormat format, IntPtr original, out IntPtr bitmap) => GdipCloneBitmapAreaI_ptr.Delegate(x, y, width, height, format, original, out bitmap);
 
-            private delegate Status GdipResetWorldTransform_delegate(IntPtr graphics);
-            private static FunctionWrapper<GdipResetWorldTransform_delegate> GdipResetWorldTransform_ptr;
-            internal static Status GdipResetWorldTransform(IntPtr graphics) => GdipResetWorldTransform_ptr.Delegate(graphics);
-
-            private delegate Status GdipSetWorldTransform_delegate(IntPtr graphics, IntPtr matrix);
-            private static FunctionWrapper<GdipSetWorldTransform_delegate> GdipSetWorldTransform_ptr;
-            internal static Status GdipSetWorldTransform(IntPtr graphics, IntPtr matrix) => GdipSetWorldTransform_ptr.Delegate(graphics, matrix);
-
-            private delegate Status GdipGetWorldTransform_delegate(IntPtr graphics, IntPtr matrix);
-            private static FunctionWrapper<GdipGetWorldTransform_delegate> GdipGetWorldTransform_ptr;
-            internal static Status GdipGetWorldTransform(IntPtr graphics, IntPtr matrix) => GdipGetWorldTransform_ptr.Delegate(graphics, matrix);
-
-            private delegate Status GdipScaleWorldTransform_delegate(IntPtr graphics, float sx, float sy, MatrixOrder order);
-            private static FunctionWrapper<GdipScaleWorldTransform_delegate> GdipScaleWorldTransform_ptr;
-            internal static Status GdipScaleWorldTransform(IntPtr graphics, float sx, float sy, MatrixOrder order) => GdipScaleWorldTransform_ptr.Delegate(graphics, sx, sy, order);
-
             private delegate Status GdipGraphicsClear_delegate(IntPtr graphics, int argb);
             private static FunctionWrapper<GdipGraphicsClear_delegate> GdipGraphicsClear_ptr;
             internal static Status GdipGraphicsClear(IntPtr graphics, int argb) => GdipGraphicsClear_ptr.Delegate(graphics, argb);
@@ -1100,38 +545,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipDrawCurve3I_delegate> GdipDrawCurve3I_ptr;
             internal static Status GdipDrawCurve3I(IntPtr graphics, IntPtr pen, Point[] points, int count, int offset, int numberOfSegments, float tension) => GdipDrawCurve3I_ptr.Delegate(graphics, pen, points, count, offset, numberOfSegments, tension);
 
-            private delegate Status GdipSetClipRect_delegate(IntPtr graphics, float x, float y, float width, float height, CombineMode combineMode);
-            private static FunctionWrapper<GdipSetClipRect_delegate> GdipSetClipRect_ptr;
-            internal static Status GdipSetClipRect(IntPtr graphics, float x, float y, float width, float height, CombineMode combineMode) => GdipSetClipRect_ptr.Delegate(graphics, x, y, width, height, combineMode);
-
-            private delegate Status GdipSetClipRectI_delegate(IntPtr graphics, int x, int y, int width, int height, CombineMode combineMode);
-            private static FunctionWrapper<GdipSetClipRectI_delegate> GdipSetClipRectI_ptr;
-            internal static Status GdipSetClipRectI(IntPtr graphics, int x, int y, int width, int height, CombineMode combineMode) => GdipSetClipRectI_ptr.Delegate(graphics, x, y, width, height, combineMode);
-
-            private delegate Status GdipSetClipPath_delegate(IntPtr graphics, IntPtr path, CombineMode combineMode);
-            private static FunctionWrapper<GdipSetClipPath_delegate> GdipSetClipPath_ptr;
-            internal static Status GdipSetClipPath(IntPtr graphics, IntPtr path, CombineMode combineMode) => GdipSetClipPath_ptr.Delegate(graphics, path, combineMode);
-
-            private delegate Status GdipSetClipRegion_delegate(IntPtr graphics, IntPtr region, CombineMode combineMode);
-            private static FunctionWrapper<GdipSetClipRegion_delegate> GdipSetClipRegion_ptr;
-            internal static Status GdipSetClipRegion(IntPtr graphics, IntPtr region, CombineMode combineMode) => GdipSetClipRegion_ptr.Delegate(graphics, region, combineMode);
-
-            private delegate Status GdipSetClipGraphics_delegate(IntPtr graphics, IntPtr srcgraphics, CombineMode combineMode);
-            private static FunctionWrapper<GdipSetClipGraphics_delegate> GdipSetClipGraphics_ptr;
-            internal static Status GdipSetClipGraphics(IntPtr graphics, IntPtr srcgraphics, CombineMode combineMode) => GdipSetClipGraphics_ptr.Delegate(graphics, srcgraphics, combineMode);
-
-            private delegate Status GdipResetClip_delegate(IntPtr graphics);
-            private static FunctionWrapper<GdipResetClip_delegate> GdipResetClip_ptr;
-            internal static Status GdipResetClip(IntPtr graphics) => GdipResetClip_ptr.Delegate(graphics);
-
-            private delegate Status GdipEndContainer_delegate(IntPtr graphics, uint state);
-            private static FunctionWrapper<GdipEndContainer_delegate> GdipEndContainer_ptr;
-            internal static Status GdipEndContainer(IntPtr graphics, uint state) => GdipEndContainer_ptr.Delegate(graphics, state);
-
-            private delegate Status GdipGetClip_delegate(IntPtr graphics, IntPtr region);
-            private static FunctionWrapper<GdipGetClip_delegate> GdipGetClip_ptr;
-            internal static Status GdipGetClip(IntPtr graphics, IntPtr region) => GdipGetClip_ptr.Delegate(graphics, region);
-
             private delegate Status GdipFillClosedCurve_delegate(IntPtr graphics, IntPtr brush, PointF[] points, int count);
             private static FunctionWrapper<GdipFillClosedCurve_delegate> GdipFillClosedCurve_ptr;
             internal static Status GdipFillClosedCurve(IntPtr graphics, IntPtr brush, PointF[] points, int count) => GdipFillClosedCurve_ptr.Delegate(graphics, brush, points, count);
@@ -1164,22 +577,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetNearestColor_delegate> GdipGetNearestColor_ptr;
             internal static Status GdipGetNearestColor(IntPtr graphics, out int argb) => GdipGetNearestColor_ptr.Delegate(graphics, out argb);
 
-            private delegate Status GdipIsVisiblePoint_delegate(IntPtr graphics, float x, float y, out bool result);
-            private static FunctionWrapper<GdipIsVisiblePoint_delegate> GdipIsVisiblePoint_ptr;
-            internal static Status GdipIsVisiblePoint(IntPtr graphics, float x, float y, out bool result) => GdipIsVisiblePoint_ptr.Delegate(graphics, x, y, out result);
-
-            private delegate Status GdipIsVisiblePointI_delegate(IntPtr graphics, int x, int y, out bool result);
-            private static FunctionWrapper<GdipIsVisiblePointI_delegate> GdipIsVisiblePointI_ptr;
-            internal static Status GdipIsVisiblePointI(IntPtr graphics, int x, int y, out bool result) => GdipIsVisiblePointI_ptr.Delegate(graphics, x, y, out result);
-
-            private delegate Status GdipIsVisibleRect_delegate(IntPtr graphics, float x, float y, float width, float height, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRect_delegate> GdipIsVisibleRect_ptr;
-            internal static Status GdipIsVisibleRect(IntPtr graphics, float x, float y, float width, float height, out bool result) => GdipIsVisibleRect_ptr.Delegate(graphics, x, y, width, height, out result);
-
-            private delegate Status GdipIsVisibleRectI_delegate(IntPtr graphics, int x, int y, int width, int height, out bool result);
-            private static FunctionWrapper<GdipIsVisibleRectI_delegate> GdipIsVisibleRectI_ptr;
-            internal static Status GdipIsVisibleRectI(IntPtr graphics, int x, int y, int width, int height, out bool result) => GdipIsVisibleRectI_ptr.Delegate(graphics, x, y, width, height, out result);
-
             private delegate Status GdipTransformPoints_delegate(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
             private static FunctionWrapper<GdipTransformPoints_delegate> GdipTransformPoints_ptr;
             internal static Status GdipTransformPoints(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count) => GdipTransformPoints_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
@@ -1187,18 +584,6 @@ namespace System.Drawing
             private delegate Status GdipTransformPointsI_delegate(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
             private static FunctionWrapper<GdipTransformPointsI_delegate> GdipTransformPointsI_ptr;
             internal static Status GdipTransformPointsI(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count) => GdipTransformPointsI_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
-
-            private delegate Status GdipTranslateClip_delegate(IntPtr graphics, float dx, float dy);
-            private static FunctionWrapper<GdipTranslateClip_delegate> GdipTranslateClip_ptr;
-            internal static Status GdipTranslateClip(IntPtr graphics, float dx, float dy) => GdipTranslateClip_ptr.Delegate(graphics, dx, dy);
-
-            private delegate Status GdipTranslateClipI_delegate(IntPtr graphics, int dx, int dy);
-            private static FunctionWrapper<GdipTranslateClipI_delegate> GdipTranslateClipI_ptr;
-            internal static Status GdipTranslateClipI(IntPtr graphics, int dx, int dy) => GdipTranslateClipI_ptr.Delegate(graphics, dx, dy);
-
-            private delegate Status GdipGetClipBounds_delegate(IntPtr graphics, out RectangleF rect);
-            private static FunctionWrapper<GdipGetClipBounds_delegate> GdipGetClipBounds_ptr;
-            internal static Status GdipGetClipBounds(IntPtr graphics, out RectangleF rect) => GdipGetClipBounds_ptr.Delegate(graphics, out rect);
 
             private delegate Status GdipSetCompositingMode_delegate(IntPtr graphics, CompositingMode compositingMode);
             private static FunctionWrapper<GdipSetCompositingMode_delegate> GdipSetCompositingMode_ptr;
@@ -1231,14 +616,6 @@ namespace System.Drawing
             private delegate Status GdipGetDpiY_delegate(IntPtr graphics, out float dpi);
             private static FunctionWrapper<GdipGetDpiY_delegate> GdipGetDpiY_ptr;
             internal static Status GdipGetDpiY(IntPtr graphics, out float dpi) => GdipGetDpiY_ptr.Delegate(graphics, out dpi);
-
-            private delegate Status GdipIsClipEmpty_delegate(IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsClipEmpty_delegate> GdipIsClipEmpty_ptr;
-            internal static Status GdipIsClipEmpty(IntPtr graphics, out bool result) => GdipIsClipEmpty_ptr.Delegate(graphics, out result);
-
-            private delegate Status GdipIsVisibleClipEmpty_delegate(IntPtr graphics, out bool result);
-            private static FunctionWrapper<GdipIsVisibleClipEmpty_delegate> GdipIsVisibleClipEmpty_ptr;
-            internal static Status GdipIsVisibleClipEmpty(IntPtr graphics, out bool result) => GdipIsVisibleClipEmpty_ptr.Delegate(graphics, out result);
 
             private delegate Status GdipGetPageUnit_delegate(IntPtr graphics, out GraphicsUnit unit);
             private static FunctionWrapper<GdipGetPageUnit_delegate> GdipGetPageUnit_ptr;
@@ -1288,10 +665,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetTextRenderingHint_delegate> GdipGetTextRenderingHint_ptr;
             internal static Status GdipGetTextRenderingHint(IntPtr graphics, out TextRenderingHint mode) => GdipGetTextRenderingHint_ptr.Delegate(graphics, out mode);
 
-            private delegate Status GdipGetVisibleClipBounds_delegate(IntPtr graphics, out RectangleF rect);
-            private static FunctionWrapper<GdipGetVisibleClipBounds_delegate> GdipGetVisibleClipBounds_ptr;
-            internal static Status GdipGetVisibleClipBounds(IntPtr graphics, out RectangleF rect) => GdipGetVisibleClipBounds_ptr.Delegate(graphics, out rect);
-
             private delegate Status GdipFlush_delegate(IntPtr graphics, FlushIntention intention);
             private static FunctionWrapper<GdipFlush_delegate> GdipFlush_ptr;
             internal static Status GdipFlush(IntPtr graphics, FlushIntention intention) => GdipFlush_ptr.Delegate(graphics, intention);
@@ -1315,14 +688,6 @@ namespace System.Drawing
             private delegate Status GdipMeasureCharacterRanges_delegate(IntPtr graphics, [MarshalAs(UnmanagedType.LPWStr)]string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, int regcount, out IntPtr regions);
             private static FunctionWrapper<GdipMeasureCharacterRanges_delegate> GdipMeasureCharacterRanges_ptr;
             internal static Status GdipMeasureCharacterRanges(IntPtr graphics, string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, int regcount, out IntPtr regions) => GdipMeasureCharacterRanges_ptr.Delegate(graphics, str, length, font, ref layoutRect, stringFormat, regcount, out regions);
-
-            private delegate Status GdipSetStringFormatMeasurableCharacterRanges_delegate(IntPtr native, int cnt, CharacterRange[] range);
-            private static FunctionWrapper<GdipSetStringFormatMeasurableCharacterRanges_delegate> GdipSetStringFormatMeasurableCharacterRanges_ptr;
-            internal static Status GdipSetStringFormatMeasurableCharacterRanges(IntPtr native, int cnt, CharacterRange[] range) => GdipSetStringFormatMeasurableCharacterRanges_ptr.Delegate(native, cnt, range);
-
-            private delegate Status GdipGetStringFormatMeasurableCharacterRangeCount_delegate(IntPtr native, out int cnt);
-            private static FunctionWrapper<GdipGetStringFormatMeasurableCharacterRangeCount_delegate> GdipGetStringFormatMeasurableCharacterRangeCount_ptr;
-            internal static Status GdipGetStringFormatMeasurableCharacterRangeCount(IntPtr native, out int cnt) => GdipGetStringFormatMeasurableCharacterRangeCount_ptr.Delegate(native, out cnt);
 
             private delegate Status GdipCreateBitmapFromScan0_delegate(int width, int height, int stride, PixelFormat format, IntPtr scan0, out IntPtr bmp);
             private static FunctionWrapper<GdipCreateBitmapFromScan0_delegate> GdipCreateBitmapFromScan0_ptr;
@@ -1521,18 +886,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipDrawImage_delegate> GdipDrawImage_ptr;
             internal static Status GdipDrawImage(IntPtr graphics, IntPtr image, float x, float y) => GdipDrawImage_ptr.Delegate(graphics, image, x, y);
 
-            private delegate Status GdipBeginContainer_delegate(IntPtr graphics, ref RectangleF dstrect, ref RectangleF srcrect, GraphicsUnit unit, out uint state);
-            private static FunctionWrapper<GdipBeginContainer_delegate> GdipBeginContainer_ptr;
-            internal static Status GdipBeginContainer(IntPtr graphics, ref RectangleF dstrect, ref RectangleF srcrect, GraphicsUnit unit, out uint state) => GdipBeginContainer_ptr.Delegate(graphics, ref dstrect, ref srcrect, unit, out state);
-
-            private delegate Status GdipBeginContainerI_delegate(IntPtr graphics, ref Rectangle dstrect, ref Rectangle srcrect, GraphicsUnit unit, out uint state);
-            private static FunctionWrapper<GdipBeginContainerI_delegate> GdipBeginContainerI_ptr;
-            internal static Status GdipBeginContainerI(IntPtr graphics, ref Rectangle dstrect, ref Rectangle srcrect, GraphicsUnit unit, out uint state) => GdipBeginContainerI_ptr.Delegate(graphics, ref dstrect, ref srcrect, unit, out state);
-
-            private delegate Status GdipBeginContainer2_delegate(IntPtr graphics, out uint state);
-            private static FunctionWrapper<GdipBeginContainer2_delegate> GdipBeginContainer2_ptr;
-            internal static Status GdipBeginContainer2(IntPtr graphics, out uint state) => GdipBeginContainer2_ptr.Delegate(graphics, out state);
-
             private delegate Status GdipDrawImagePoints_delegate(IntPtr graphics, IntPtr image, PointF[] destPoints, int count);
             private static FunctionWrapper<GdipDrawImagePoints_delegate> GdipDrawImagePoints_ptr;
             internal static Status GdipDrawImagePoints(IntPtr graphics, IntPtr image, PointF[] destPoints, int count) => GdipDrawImagePoints_ptr.Delegate(graphics, image, destPoints, count);
@@ -1569,10 +922,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipDrawImagePointRectI_delegate> GdipDrawImagePointRectI_ptr;
             internal static Status GdipDrawImagePointRectI(IntPtr graphics, IntPtr image, int x, int y, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit) => GdipDrawImagePointRectI_ptr.Delegate(graphics, image, x, y, srcx, srcy, srcwidth, srcheight, srcUnit);
 
-            private delegate Status GdipCreateStringFormat_delegate(StringFormatFlags formatAttributes, int language, out IntPtr native);
-            private static FunctionWrapper<GdipCreateStringFormat_delegate> GdipCreateStringFormat_ptr;
-            internal static Status GdipCreateStringFormat(StringFormatFlags formatAttributes, int language, out IntPtr native) => GdipCreateStringFormat_ptr.Delegate(formatAttributes, language, out native);
-
             private delegate Status GdipCreateHBITMAPFromBitmap_delegate(IntPtr bmp, out IntPtr HandleBmp, int clrbackground);
             private static FunctionWrapper<GdipCreateHBITMAPFromBitmap_delegate> GdipCreateHBITMAPFromBitmap_ptr;
             internal static Status GdipCreateHBITMAPFromBitmap(IntPtr bmp, out IntPtr HandleBmp, int clrbackground) => GdipCreateHBITMAPFromBitmap_ptr.Delegate(bmp, out HandleBmp, clrbackground);
@@ -1596,91 +945,6 @@ namespace System.Drawing
             private delegate Status GdipCreateBitmapFromResource_delegate(IntPtr hInstance, [MarshalAs(UnmanagedType.LPWStr)]string lpBitmapName, out IntPtr bitmap);
             private static FunctionWrapper<GdipCreateBitmapFromResource_delegate> GdipCreateBitmapFromResource_ptr;
             internal static Status GdipCreateBitmapFromResource(IntPtr hInstance, string lpBitmapName, out IntPtr bitmap) => GdipCreateBitmapFromResource_ptr.Delegate(hInstance, lpBitmapName, out bitmap);
-
-            private delegate Status GdipCreateMatrix_delegate(out IntPtr matrix);
-            private static FunctionWrapper<GdipCreateMatrix_delegate> GdipCreateMatrix_ptr;
-            internal static Status GdipCreateMatrix(out IntPtr matrix) => GdipCreateMatrix_ptr.Delegate(out matrix);
-
-            private delegate Status GdipCreateMatrix2_delegate(float m11, float m12, float m21, float m22, float dx, float dy, out IntPtr matrix);
-            private static FunctionWrapper<GdipCreateMatrix2_delegate> GdipCreateMatrix2_ptr;
-            internal static Status GdipCreateMatrix2(float m11, float m12, float m21, float m22, float dx, float dy, out IntPtr matrix) => GdipCreateMatrix2_ptr.Delegate(m11, m12, m21, m22, dx, dy, out matrix);
-
-            private delegate Status GdipCreateMatrix3_delegate(ref RectangleF rect, PointF[] dstplg, out IntPtr matrix);
-            private static FunctionWrapper<GdipCreateMatrix3_delegate> GdipCreateMatrix3_ptr;
-            internal static Status GdipCreateMatrix3(ref RectangleF rect, PointF[] dstplg, out IntPtr matrix) => GdipCreateMatrix3_ptr.Delegate(ref rect, dstplg, out matrix);
-
-            private delegate Status GdipCreateMatrix3I_delegate(ref Rectangle rect, Point[] dstplg, out IntPtr matrix);
-            private static FunctionWrapper<GdipCreateMatrix3I_delegate> GdipCreateMatrix3I_ptr;
-            internal static Status GdipCreateMatrix3I(ref Rectangle rect, Point[] dstplg, out IntPtr matrix) => GdipCreateMatrix3I_ptr.Delegate(ref rect, dstplg, out matrix);
-
-            private delegate Status GdipDeleteMatrix_delegate(IntPtr matrix);
-            private static FunctionWrapper<GdipDeleteMatrix_delegate> GdipDeleteMatrix_ptr;
-            internal static Status GdipDeleteMatrix(IntPtr matrix) => GdipDeleteMatrix_ptr.Delegate(matrix);
-            internal static int IntGdipDeleteMatrix(HandleRef matrix) => (int)GdipDeleteMatrix_ptr.Delegate(matrix.Handle);
-
-            private delegate Status GdipCloneMatrix_delegate(IntPtr matrix, out IntPtr cloneMatrix);
-            private static FunctionWrapper<GdipCloneMatrix_delegate> GdipCloneMatrix_ptr;
-            internal static Status GdipCloneMatrix(IntPtr matrix, out IntPtr cloneMatrix) => GdipCloneMatrix_ptr.Delegate(matrix, out cloneMatrix);
-
-            private delegate Status GdipSetMatrixElements_delegate(IntPtr matrix, float m11, float m12, float m21, float m22, float dx, float dy);
-            private static FunctionWrapper<GdipSetMatrixElements_delegate> GdipSetMatrixElements_ptr;
-            internal static Status GdipSetMatrixElements(IntPtr matrix, float m11, float m12, float m21, float m22, float dx, float dy) => GdipSetMatrixElements_ptr.Delegate(matrix, m11, m12, m21, m22, dx, dy);
-
-            private delegate Status GdipGetMatrixElements_delegate(IntPtr matrix, IntPtr matrixOut);
-            private static FunctionWrapper<GdipGetMatrixElements_delegate> GdipGetMatrixElements_ptr;
-            internal static Status GdipGetMatrixElements(IntPtr matrix, IntPtr matrixOut) => GdipGetMatrixElements_ptr.Delegate(matrix, matrixOut);
-
-            private delegate Status GdipMultiplyMatrix_delegate(IntPtr matrix, IntPtr matrix2, MatrixOrder order);
-            private static FunctionWrapper<GdipMultiplyMatrix_delegate> GdipMultiplyMatrix_ptr;
-            internal static Status GdipMultiplyMatrix(IntPtr matrix, IntPtr matrix2, MatrixOrder order) => GdipMultiplyMatrix_ptr.Delegate(matrix, matrix2, order);
-
-            private delegate Status GdipTranslateMatrix_delegate(IntPtr matrix, float offsetX, float offsetY, MatrixOrder order);
-            private static FunctionWrapper<GdipTranslateMatrix_delegate> GdipTranslateMatrix_ptr;
-            internal static Status GdipTranslateMatrix(IntPtr matrix, float offsetX, float offsetY, MatrixOrder order) => GdipTranslateMatrix_ptr.Delegate(matrix, offsetX, offsetY, order);
-
-            private delegate Status GdipScaleMatrix_delegate(IntPtr matrix, float scaleX, float scaleY, MatrixOrder order);
-            private static FunctionWrapper<GdipScaleMatrix_delegate> GdipScaleMatrix_ptr;
-            internal static Status GdipScaleMatrix(IntPtr matrix, float scaleX, float scaleY, MatrixOrder order) => GdipScaleMatrix_ptr.Delegate(matrix, scaleX, scaleY, order);
-
-            private delegate Status GdipRotateMatrix_delegate(IntPtr matrix, float angle, MatrixOrder order);
-            private static FunctionWrapper<GdipRotateMatrix_delegate> GdipRotateMatrix_ptr;
-            internal static Status GdipRotateMatrix(IntPtr matrix, float angle, MatrixOrder order) => GdipRotateMatrix_ptr.Delegate(matrix, angle, order);
-
-            private delegate Status GdipShearMatrix_delegate(IntPtr matrix, float shearX, float shearY, MatrixOrder order);
-            private static FunctionWrapper<GdipShearMatrix_delegate> GdipShearMatrix_ptr;
-            internal static Status GdipShearMatrix(IntPtr matrix, float shearX, float shearY, MatrixOrder order) => GdipShearMatrix_ptr.Delegate(matrix, shearX, shearY, order);
-
-            private delegate Status GdipInvertMatrix_delegate(IntPtr matrix);
-            private static FunctionWrapper<GdipInvertMatrix_delegate> GdipInvertMatrix_ptr;
-            internal static Status GdipInvertMatrix(IntPtr matrix) => GdipInvertMatrix_ptr.Delegate(matrix);
-
-            private delegate Status GdipTransformMatrixPoints_delegate(IntPtr matrix, [In] [Out] PointF[] pts, int count);
-            private static FunctionWrapper<GdipTransformMatrixPoints_delegate> GdipTransformMatrixPoints_ptr;
-            internal static Status GdipTransformMatrixPoints(IntPtr matrix, [In] [Out] PointF[] pts, int count) => GdipTransformMatrixPoints_ptr.Delegate(matrix, pts, count);
-
-            private delegate Status GdipTransformMatrixPointsI_delegate(IntPtr matrix, [In] [Out] Point[] pts, int count);
-            private static FunctionWrapper<GdipTransformMatrixPointsI_delegate> GdipTransformMatrixPointsI_ptr;
-            internal static Status GdipTransformMatrixPointsI(IntPtr matrix, [In] [Out] Point[] pts, int count) => GdipTransformMatrixPointsI_ptr.Delegate(matrix, pts, count);
-
-            private delegate Status GdipVectorTransformMatrixPoints_delegate(IntPtr matrix, [In] [Out] PointF[] pts, int count);
-            private static FunctionWrapper<GdipVectorTransformMatrixPoints_delegate> GdipVectorTransformMatrixPoints_ptr;
-            internal static Status GdipVectorTransformMatrixPoints(IntPtr matrix, [In] [Out] PointF[] pts, int count) => GdipVectorTransformMatrixPoints_ptr.Delegate(matrix, pts, count);
-
-            private delegate Status GdipVectorTransformMatrixPointsI_delegate(IntPtr matrix, [In] [Out] Point[] pts, int count);
-            private static FunctionWrapper<GdipVectorTransformMatrixPointsI_delegate> GdipVectorTransformMatrixPointsI_ptr;
-            internal static Status GdipVectorTransformMatrixPointsI(IntPtr matrix, [In] [Out] Point[] pts, int count) => GdipVectorTransformMatrixPointsI_ptr.Delegate(matrix, pts, count);
-
-            private delegate Status GdipIsMatrixInvertible_delegate(IntPtr matrix, out bool result);
-            private static FunctionWrapper<GdipIsMatrixInvertible_delegate> GdipIsMatrixInvertible_ptr;
-            internal static Status GdipIsMatrixInvertible(IntPtr matrix, out bool result) => GdipIsMatrixInvertible_ptr.Delegate(matrix, out result);
-
-            private delegate Status GdipIsMatrixIdentity_delegate(IntPtr matrix, out bool result);
-            private static FunctionWrapper<GdipIsMatrixIdentity_delegate> GdipIsMatrixIdentity_ptr;
-            internal static Status GdipIsMatrixIdentity(IntPtr matrix, out bool result) => GdipIsMatrixIdentity_ptr.Delegate(matrix, out result);
-
-            private delegate Status GdipIsMatrixEqual_delegate(IntPtr matrix, IntPtr matrix2, out bool result);
-            private static FunctionWrapper<GdipIsMatrixEqual_delegate> GdipIsMatrixEqual_ptr;
-            internal static Status GdipIsMatrixEqual(IntPtr matrix, IntPtr matrix2, out bool result) => GdipIsMatrixEqual_ptr.Delegate(matrix, matrix2, out result);
 
             private delegate Status GdipCreatePath_delegate(FillMode brushMode, out IntPtr path);
             private static FunctionWrapper<GdipCreatePath_delegate> GdipCreatePath_ptr;
@@ -1950,22 +1214,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipCreateFontFromHfont_delegate> GdipCreateFontFromHfont_ptr;
             internal static Status GdipCreateFontFromHfont(IntPtr hdc, out IntPtr font, ref LOGFONT lf) => GdipCreateFontFromHfont_ptr.Delegate(hdc, out font, ref lf);
 
-            private delegate Status GdipNewPrivateFontCollection_delegate(out IntPtr collection);
-            private static FunctionWrapper<GdipNewPrivateFontCollection_delegate> GdipNewPrivateFontCollection_ptr;
-            internal static Status GdipNewPrivateFontCollection(out IntPtr collection) => GdipNewPrivateFontCollection_ptr.Delegate(out collection);
-
-            private delegate Status GdipDeletePrivateFontCollection_delegate(ref IntPtr collection);
-            private static FunctionWrapper<GdipDeletePrivateFontCollection_delegate> GdipDeletePrivateFontCollection_ptr;
-            internal static int IntGdipDeletePrivateFontCollection(ref IntPtr collection) => (int)GdipDeletePrivateFontCollection_ptr.Delegate(ref collection);
-
-            private delegate Status GdipPrivateAddFontFile_delegate(IntPtr collection, [MarshalAs(UnmanagedType.LPWStr)]string fileName);
-            private static FunctionWrapper<GdipPrivateAddFontFile_delegate> GdipPrivateAddFontFile_ptr;
-            internal static Status GdipPrivateAddFontFile(IntPtr collection, string fileName) => GdipPrivateAddFontFile_ptr.Delegate(collection, fileName);
-
-            private delegate Status GdipPrivateAddMemoryFont_delegate(IntPtr collection, IntPtr mem, int length);
-            private static FunctionWrapper<GdipPrivateAddMemoryFont_delegate> GdipPrivateAddMemoryFont_ptr;
-            internal static Status GdipPrivateAddMemoryFont(IntPtr collection, IntPtr mem, int length) => GdipPrivateAddMemoryFont_ptr.Delegate(collection, mem, length);
-
             [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Auto)]
             private delegate Status GdipCreateFontFamilyFromName_delegate([MarshalAs(UnmanagedType.LPWStr)]string fName, IntPtr collection, out IntPtr fontFamily);
             private static FunctionWrapper<GdipCreateFontFamilyFromName_delegate> GdipCreateFontFamilyFromName_ptr;
@@ -2033,87 +1281,6 @@ namespace System.Drawing
             private delegate Status GdipGetFontHeightGivenDPI_delegate(IntPtr font, float dpi, out float height);
             private static FunctionWrapper<GdipGetFontHeightGivenDPI_delegate> GdipGetFontHeightGivenDPI_ptr;
             internal static Status GdipGetFontHeightGivenDPI(IntPtr font, float dpi, out float height) => GdipGetFontHeightGivenDPI_ptr.Delegate(font, dpi, out height);
-
-            private delegate Status GdipCreateStringFormat2_delegate(int formatAttributes, int language, out IntPtr format);
-            private static FunctionWrapper<GdipCreateStringFormat2_delegate> GdipCreateStringFormat2_ptr;
-            internal static Status GdipCreateStringFormat(int formatAttributes, int language, out IntPtr format) => GdipCreateStringFormat2_ptr.Delegate(formatAttributes, language, out format);
-
-            private delegate Status GdipStringFormatGetGenericDefault_delegate(out IntPtr format);
-            private static FunctionWrapper<GdipStringFormatGetGenericDefault_delegate> GdipStringFormatGetGenericDefault_ptr;
-            internal static Status GdipStringFormatGetGenericDefault(out IntPtr format) => GdipStringFormatGetGenericDefault_ptr.Delegate(out format);
-
-            private delegate Status GdipStringFormatGetGenericTypographic_delegate(out IntPtr format);
-            private static FunctionWrapper<GdipStringFormatGetGenericTypographic_delegate> GdipStringFormatGetGenericTypographic_ptr;
-            internal static Status GdipStringFormatGetGenericTypographic(out IntPtr format) => GdipStringFormatGetGenericTypographic_ptr.Delegate(out format);
-
-            private delegate Status GdipDeleteStringFormat_delegate(IntPtr format);
-            private static FunctionWrapper<GdipDeleteStringFormat_delegate> GdipDeleteStringFormat_ptr;
-            internal static Status GdipDeleteStringFormat(IntPtr format) => GdipDeleteStringFormat_ptr.Delegate(format);
-            internal static int IntGdipDeleteStringFormat(HandleRef format) => (int)GdipDeleteStringFormat_ptr.Delegate(format.Handle);
-
-            private delegate Status GdipCloneStringFormat_delegate(IntPtr srcformat, out IntPtr format);
-            private static FunctionWrapper<GdipCloneStringFormat_delegate> GdipCloneStringFormat_ptr;
-            internal static Status GdipCloneStringFormat(IntPtr srcformat, out IntPtr format) => GdipCloneStringFormat_ptr.Delegate(srcformat, out format);
-
-            private delegate Status GdipSetStringFormatFlags_delegate(IntPtr format, StringFormatFlags flags);
-            private static FunctionWrapper<GdipSetStringFormatFlags_delegate> GdipSetStringFormatFlags_ptr;
-            internal static Status GdipSetStringFormatFlags(IntPtr format, StringFormatFlags flags) => GdipSetStringFormatFlags_ptr.Delegate(format, flags);
-
-            private delegate Status GdipGetStringFormatFlags_delegate(IntPtr format, out StringFormatFlags flags);
-            private static FunctionWrapper<GdipGetStringFormatFlags_delegate> GdipGetStringFormatFlags_ptr;
-            internal static Status GdipGetStringFormatFlags(IntPtr format, out StringFormatFlags flags) => GdipGetStringFormatFlags_ptr.Delegate(format, out flags);
-
-            private delegate Status GdipSetStringFormatAlign_delegate(IntPtr format, StringAlignment align);
-            private static FunctionWrapper<GdipSetStringFormatAlign_delegate> GdipSetStringFormatAlign_ptr;
-            internal static Status GdipSetStringFormatAlign(IntPtr format, StringAlignment align) => GdipSetStringFormatAlign_ptr.Delegate(format, align);
-
-            private delegate Status GdipGetStringFormatAlign_delegate(IntPtr format, out StringAlignment align);
-            private static FunctionWrapper<GdipGetStringFormatAlign_delegate> GdipGetStringFormatAlign_ptr;
-            internal static Status GdipGetStringFormatAlign(IntPtr format, out StringAlignment align) => GdipGetStringFormatAlign_ptr.Delegate(format, out align);
-
-            private delegate Status GdipSetStringFormatLineAlign_delegate(IntPtr format, StringAlignment align);
-            private static FunctionWrapper<GdipSetStringFormatLineAlign_delegate> GdipSetStringFormatLineAlign_ptr;
-            internal static Status GdipSetStringFormatLineAlign(IntPtr format, StringAlignment align) => GdipSetStringFormatLineAlign_ptr.Delegate(format, align);
-
-            private delegate Status GdipGetStringFormatLineAlign_delegate(IntPtr format, out StringAlignment align);
-            private static FunctionWrapper<GdipGetStringFormatLineAlign_delegate> GdipGetStringFormatLineAlign_ptr;
-            internal static Status GdipGetStringFormatLineAlign(IntPtr format, out StringAlignment align) => GdipGetStringFormatLineAlign_ptr.Delegate(format, out align);
-
-            private delegate Status GdipSetStringFormatTrimming_delegate(IntPtr format, StringTrimming trimming);
-            private static FunctionWrapper<GdipSetStringFormatTrimming_delegate> GdipSetStringFormatTrimming_ptr;
-            internal static Status GdipSetStringFormatTrimming(IntPtr format, StringTrimming trimming) => GdipSetStringFormatTrimming_ptr.Delegate(format, trimming);
-
-            private delegate Status GdipGetStringFormatTrimming_delegate(IntPtr format, out StringTrimming trimming);
-            private static FunctionWrapper<GdipGetStringFormatTrimming_delegate> GdipGetStringFormatTrimming_ptr;
-            internal static Status GdipGetStringFormatTrimming(IntPtr format, out StringTrimming trimming) => GdipGetStringFormatTrimming_ptr.Delegate(format, out trimming);
-
-            private delegate Status GdipSetStringFormatHotkeyPrefix_delegate(IntPtr format, HotkeyPrefix hotkeyPrefix);
-            private static FunctionWrapper<GdipSetStringFormatHotkeyPrefix_delegate> GdipSetStringFormatHotkeyPrefix_ptr;
-            internal static Status GdipSetStringFormatHotkeyPrefix(IntPtr format, HotkeyPrefix hotkeyPrefix) => GdipSetStringFormatHotkeyPrefix_ptr.Delegate(format, hotkeyPrefix);
-
-            private delegate Status GdipGetStringFormatHotkeyPrefix_delegate(IntPtr format, out HotkeyPrefix hotkeyPrefix);
-            private static FunctionWrapper<GdipGetStringFormatHotkeyPrefix_delegate> GdipGetStringFormatHotkeyPrefix_ptr;
-            internal static Status GdipGetStringFormatHotkeyPrefix(IntPtr format, out HotkeyPrefix hotkeyPrefix) => GdipGetStringFormatHotkeyPrefix_ptr.Delegate(format, out hotkeyPrefix);
-
-            private delegate Status GdipSetStringFormatTabStops_delegate(IntPtr format, float firstTabOffset, int count, float[] tabStops);
-            private static FunctionWrapper<GdipSetStringFormatTabStops_delegate> GdipSetStringFormatTabStops_ptr;
-            internal static Status GdipSetStringFormatTabStops(IntPtr format, float firstTabOffset, int count, float[] tabStops) => GdipSetStringFormatTabStops_ptr.Delegate(format, firstTabOffset, count, tabStops);
-
-            private delegate Status GdipGetStringFormatDigitSubstitution_delegate(IntPtr format, int language, out StringDigitSubstitute substitute);
-            private static FunctionWrapper<GdipGetStringFormatDigitSubstitution_delegate> GdipGetStringFormatDigitSubstitution_ptr;
-            internal static Status GdipGetStringFormatDigitSubstitution(IntPtr format, int language, out StringDigitSubstitute substitute) => GdipGetStringFormatDigitSubstitution_ptr.Delegate(format, language, out substitute);
-
-            private delegate Status GdipSetStringFormatDigitSubstitution_delegate(IntPtr format, int language, StringDigitSubstitute substitute);
-            private static FunctionWrapper<GdipSetStringFormatDigitSubstitution_delegate> GdipSetStringFormatDigitSubstitution_ptr;
-            internal static Status GdipSetStringFormatDigitSubstitution(IntPtr format, int language, StringDigitSubstitute substitute) => GdipSetStringFormatDigitSubstitution_ptr.Delegate(format, language, substitute);
-
-            private delegate Status GdipGetStringFormatTabStopCount_delegate(IntPtr format, out int count);
-            private static FunctionWrapper<GdipGetStringFormatTabStopCount_delegate> GdipGetStringFormatTabStopCount_ptr;
-            internal static Status GdipGetStringFormatTabStopCount(IntPtr format, out int count) => GdipGetStringFormatTabStopCount_ptr.Delegate(format, out count);
-
-            private delegate Status GdipGetStringFormatTabStops_delegate(IntPtr format, int count, out float firstTabOffset, [In] [Out] float[] tabStops);
-            private static FunctionWrapper<GdipGetStringFormatTabStops_delegate> GdipGetStringFormatTabStops_ptr;
-            internal static Status GdipGetStringFormatTabStops(IntPtr format, int count, out float firstTabOffset, [In] [Out] float[] tabStops) => GdipGetStringFormatTabStops_ptr.Delegate(format, count, out firstTabOffset, tabStops);
 
             private delegate Status GdipCreateMetafileFromFile_delegate([MarshalAs(UnmanagedType.LPWStr)]string filename, out IntPtr metafile);
             private static FunctionWrapper<GdipCreateMetafileFromFile_delegate> GdipCreateMetafileFromFile_ptr;

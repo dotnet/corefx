@@ -1,4 +1,4 @@
-﻿# DiagnosticSource Users Guide
+# DiagnosticSource Users Guide
 
 This document describes DiagnosticSource, a simple module that allows code 
 to be instrumented for production-time logging of **rich data payloads** for 
@@ -104,7 +104,7 @@ Perhaps confusingly you make a DiagnosticSource by creating a DiagnosticListener
 	static DiagnosticSource mySource = new DiagnosticListener("System.Net.Http");
 
 Basically a DiagnosticListener is a named place where a source sends its information (events).  
-From an implementation point of view, DiagnosticSource is a abstract class that has the two
+From an implementation point of view, DiagnosticSource is an abstract class that has the two
 instrumentation methods, and DiagnosticListener is something that implements that abstract class.
 Thus every DiagnosticListener is a DiagnosticSource, and by making a DiagnosticListener you 
 implicitly make a DiagnosticSource as well. 
@@ -125,7 +125,7 @@ Thus the event names only need to be unique within a component.
    most important scenarios involve turning on whole listeners and not needing to filter
    for particular events.    You may need to split
    a source into multiple smaller ones to achieve this, and this is OK.   For example there
-   are both incomming Http request and outgoing Http requests and you may only need one 
+   are both incoming HTTP requests and outgoing HTTP requests and you may only need one 
    or the other, so having a System.Net.Http.Incomming and System.Net.Http.OutGoing for
    each sub-case is good.  
 
@@ -151,7 +151,7 @@ Thus the event names only need to be unique within a component.
 
 #### EventNames 
 
- * DO - keep the names reasonably short (< 16 characters).   Keep in mind that that event names 
+ * DO - keep the names reasonably short (< 16 characters).   Keep in mind that event names 
    are already qualified by the Listener so the name only needs to be unique within a listener. 
    Short names make the 'IsEnabled' faster.  
 
@@ -406,7 +406,7 @@ And consumers may use such properties to filter events more precisely.
 ```
 
 Note that producer is not aware of filter consumer has provided. DiagnosticListener 
-will invoke provided filter ommiting additional arguments if necessary, thus the filter
+will invoke provided filter omitting additional arguments if necessary, thus the filter
 should expect to receive null context.
 Producers should enclose IsEnabled call with event name and context with pure IsEnabled
 call for event name, so consumers must ensure that filter allows events without context
