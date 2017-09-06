@@ -1735,43 +1735,37 @@ namespace System.Collections.Concurrent
                     return;
                 }
 
-
                 // Compute the new table size. We find the smallest integer larger than twice the previous table size, and not divisible by
                 // 2,3,5 or 7. We can consider a different table-sizing policy in the future.
-                int newLength = 0;
-                bool maximizeTableSize = false;
+                int newLength = MaxArrayLength;
                 try
                 {
                     checked
                     {
                         // Double the size of the buckets table and add one, so that we have an odd integer.
-                        newLength = tables._buckets.Length * 2 + 1;
+                        int newLengthTmp = tables._buckets.Length * 2 + 1;
 
                         // Now, we only need to check odd integers, and find the first that is not divisible
                         // by 3, 5 or 7.
-                        while (newLength % 3 == 0 || newLength % 5 == 0 || newLength % 7 == 0)
+                        while (newLengthTmp % 3 == 0 || newLengthTmp % 5 == 0 || newLengthTmp % 7 == 0)
                         {
-                            newLength += 2;
+                            newLengthTmp += 2;
                         }
 
-                        Debug.Assert(newLength % 2 != 0);
+                        newLength = newLengthTmp;
 
-                        if (newLength > MaxArrayLength)
-                        {
-                            maximizeTableSize = true;
-                        }
+                        Debug.Assert(newLengthTmp % 2 != 0);
                     }
                 }
                 catch (OverflowException)
                 {
-                    maximizeTableSize = true;
                 }
 
-                if (maximizeTableSize)
+                if (newLength >= MaxArrayLength)
                 {
                     newLength = MaxArrayLength;
-
-                    // We want to make sure that GrowTable will not be called again, since table is at the maximum size.
+                    
+                    // We want to make sure that GrowTable will not be called again, since table will be at the maximum size.
                     // To achieve that, we set the budget to int.MaxValue.
                     //
                     // (There is one special case that would allow GrowTable() to be called in the future: 
@@ -1786,14 +1780,14 @@ namespace System.Collections.Concurrent
 
                 // Add more locks
                 if (_growLockArray && tables._locks.Length < MaxLockNumber)
-                {
-                    newLocks = new object[tables._locks.Length * 2];
-                    Array.Copy(tables._locks, 0, newLocks, 0, tables._locks.Length);
-                    for (int i = tables._locks.Length; i < newLocks.Length; i++)
                     {
-                        newLocks[i] = new object();
+                        newLocks = new object[tables._locks.Length * 2];
+                        Array.Copy(tables._locks, 0, newLocks, 0, tables._locks.Length);
+                        for (int i = tables._locks.Length; i < newLocks.Length; i++)
+                        {
+                            newLocks[i] = new object();
+                        }
                     }
-                }
 
                 Node[] newBuckets = new Node[newLength];
                 int[] newCountPerLock = new int[newLocks.Length];
