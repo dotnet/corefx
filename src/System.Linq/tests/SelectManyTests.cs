@@ -478,18 +478,55 @@ namespace System.Linq.Tests
             Assert.Throws<OverflowException>(() => iterator.Count());
         }
 
-        [Fact]
-        public void CollectionInterleavedWithLazyEnumerables_ToArray_Regression()
+        [Theory]
+        [MemberData(nameof(GetToArrayDataSources))]
+        public void CollectionInterleavedWithLazyEnumerables_ToArray(IEnumerable<int>[] arrays)
         {
-            var results = new[] { 4, 5, 6 }
-                .SelectMany(i => i == 5 ?
-                    (IEnumerable<int>)new List<int>() { i } :
-                    new TestEnumerable<int>(new int[] { i }))
-                // Do not omit this ToArray()! There was a previous bug where the ToArray() implementation
-                // was incorrect, while iterating with foreach produced the correct results.
-                .ToArray();
+            // See https://github.com/dotnet/corefx/issues/23680
 
-            Assert.Equal(new[] { 4, 5, 6 }, results);
+            var results = arrays.SelectMany(ar => ar).ToArray();
+
+            for (int i = 0; i < results.Length; i++)
+            {
+                Assert.Equal(i, results[i]);
+            }
+        }
+
+        private static IEnumerable<object[]> GetToArrayDataSources()
+        {
+            // Case of small arrays (same LAB row)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new int[] { 1 },
+                    new TestEnumerable<int>(new int[] { 2 }),
+                }
+            };
+
+            // Case of large arrays (many LAB rows)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(Enumerable.Range(0, 100).ToArray()),
+                    Enumerable.Range(100, 100).ToArray(),
+                    new TestEnumerable<int>(Enumerable.Range(200, 100).ToArray()),
+                }
+            };
+
+            // Marker at the end
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new int[] { 3 },
+                }
+            };
         }
     }
 }

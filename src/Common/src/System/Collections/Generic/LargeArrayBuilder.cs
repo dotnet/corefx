@@ -197,9 +197,10 @@ namespace System.Collections.Generic
         /// <returns>The position in this builder that was copied up to.</returns>
         public CopyPosition CopyTo(CopyPosition position, T[] array, int arrayIndex, int count)
         {
+            Debug.Assert(array != null);
             Debug.Assert(arrayIndex >= 0);
             Debug.Assert(count > 0 && count <= Count);
-            Debug.Assert(array?.Length - arrayIndex >= count);
+            Debug.Assert(array.Length - arrayIndex >= count);
 
             // Go through each buffer, which contains one 'row' of items.
             // The index in each buffer is referred to as the 'column'.
@@ -235,14 +236,10 @@ namespace System.Collections.Generic
 
                 // Copy until we satisfy `count` or reach the end of the current buffer.
                 int copyCount = Math.Min(sourceBuffer.Length - sourceIndex, count);
+                Array.Copy(sourceBuffer, sourceIndex, array, arrayIndex, copyCount);
 
-                if (copyCount > 0)
-                {
-                    Array.Copy(sourceBuffer, sourceIndex, array, arrayIndex, copyCount);
-
-                    arrayIndex += copyCount;
-                    count -= copyCount;
-                }
+                arrayIndex += copyCount;
+                count -= copyCount;
 
                 return copyCount;
             }
