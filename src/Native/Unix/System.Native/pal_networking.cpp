@@ -1148,9 +1148,8 @@ static bool IsStreamSocket(int socket)
 {
     int type;
     socklen_t length = sizeof(int);
-    return socket != -1
-            && getsockopt(socket, SOL_SOCKET, SO_TYPE, &type, &length) == 0
-            && type == SOCK_STREAM;
+    return getsockopt(socket, SOL_SOCKET, SO_TYPE, &type, &length) == 0
+           && type == SOCK_STREAM;
 }
 
 static void ConvertMessageHeaderToMsghdr(msghdr* header, const MessageHeader& messageHeader, int socket = -1)
