@@ -143,11 +143,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationGeneratedCode.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationReader.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationWriter.cs" />
@@ -165,8 +160,5 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <Target Name="CopyLatestJsonFile" AfterTargets="Build" >
-    <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
-  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
