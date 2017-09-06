@@ -57,3 +57,14 @@ simpleNode('OSX10.12','latest') {
         }
     }
 }
+
+stage ('Execute Tests') {
+    def contextBase
+    if (params.TestOuter) {
+        contextBase = "OSX x64 Tests w/outer - ${params.CGroup}"
+    }
+    else {
+        contextBase = "OSX x64 Tests - ${params.CGroup}"
+    }
+    waitForHelixRuns(submittedHelixJson, contextBase)
+}
