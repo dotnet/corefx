@@ -234,7 +234,7 @@ namespace System.Collections.Generic
             T[] buffer = GetBuffer(row);
             int copied = CopyToCore(buffer, column);
 
-            if(count == 0)
+            if (count == 0)
             {
                 return new CopyPosition(row, column + copied).Normalize(buffer.Length);
             }

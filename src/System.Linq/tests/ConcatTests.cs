@@ -428,14 +428,14 @@ namespace System.Linq.Tests
         {
             // See https://github.com/dotnet/corefx/issues/23680
 
-            var concats = arrays[0];
+            IEnumerable<int> concats = arrays[0];
 
             for (int i = 1; i < arrays.Length; i++)
             {
                 concats = concats.Concat(arrays[i]);
             }
 
-            var results = concats.ToArray();
+            int[] results = concats.ToArray();
 
             for (int i = 0; i < results.Length; i++)
             {
@@ -445,7 +445,31 @@ namespace System.Linq.Tests
 
         private static IEnumerable<object[]> GetToArrayDataSources()
         {
-            // Case of small arrays (same LAB row)
+            // Marker at the end
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new int[] { 3 },
+                }
+            };
+
+            // Marker at beginning
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new TestEnumerable<int>(new int[] { 3 }),
+                }
+            };
+
+            // Marker in middle
             yield return new object[]
             {
                 new IEnumerable<int>[]
@@ -456,7 +480,18 @@ namespace System.Linq.Tests
                 }
             };
 
-            // Case of large arrays (many LAB rows)
+            // Non-marker in middle
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new int[] { 2 },
+                }
+            };
+
+            // Big arrays (marker in middle)
             yield return new object[]
             {
                 new IEnumerable<int>[]
@@ -467,15 +502,14 @@ namespace System.Linq.Tests
                 }
             };
 
-            // Marker at the end
+            // Big arrays (non-marker in middle)
             yield return new object[]
             {
                 new IEnumerable<int>[]
                 {
-                    new TestEnumerable<int>(new int[] { 0 }),
-                    new TestEnumerable<int>(new int[] { 1 }),
-                    new TestEnumerable<int>(new int[] { 2 }),
-                    new int[] { 3 },
+                    Enumerable.Range(0, 100).ToArray(),
+                    new TestEnumerable<int>(Enumerable.Range(100, 100).ToArray()),
+                    Enumerable.Range(200, 100).ToArray(),
                 }
             };
 
