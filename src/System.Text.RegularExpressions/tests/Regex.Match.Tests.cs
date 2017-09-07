@@ -333,12 +333,11 @@ namespace System.Text.RegularExpressions.Tests
         {
             RemoteInvoke(() =>
             {
-                const string DefaultMatchTimeout_ConfigKeyName = "REGEX_DEFAULT_MATCH_TIMEOUT";
-                const string Pattern = @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@(([0-9a-zA-Z])+([-\w]*[0-9a-zA-Z])*\.)+[a-zA-Z]{2,9})$"; // 723 msec
-                const string Input = "aaaaaaaaaaaaaaaaaaaa@a.a";
+                const string Pattern = @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@(([0-9a-zA-Z])+([-\w]*[0-9a-zA-Z])*\.)+[a-zA-Z]{2,9})$";
+                string input = new string('a', 50) + "@a.a";
 
-                AppDomain.CurrentDomain.SetData(DefaultMatchTimeout_ConfigKeyName, TimeSpan.FromMilliseconds(100));
-                Assert.Throws<RegexMatchTimeoutException>(() => new Regex(Pattern).Match(Input));
+                AppDomain.CurrentDomain.SetData(RegexHelpers.DefaultMatchTimeout_ConfigKeyName, TimeSpan.FromMilliseconds(100));
+                Assert.Throws<RegexMatchTimeoutException>(() => new Regex(Pattern).Match(input));
 
                 return SuccessExitCode;
             });
