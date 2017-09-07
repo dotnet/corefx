@@ -34,6 +34,13 @@ namespace System
         public static bool IsNotWinRT => !IsWinRT;
         public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
         public static bool IsNotWinRTSupported => !IsWinRTSupported;
+        public static bool IsNotMacOsHighSierraOrHigher => !IsMacOsHighSierraOrHigher;
+
+        // Officially, .Net Native only supports processes running in an AppContainer. However, the majority of tests still work fine 
+        // in a normal Win32 process and we often do so as running in an AppContainer imposes a substantial tax in debuggability
+        // and investigatability. This predicate is used in ConditionalFacts to disable the specific tests that really need to be
+        // running in AppContainer when running on .NetNative.
+        public static bool IsNotNetNativeRunningAsConsoleApp => !(IsNetNative && !IsWinRT);
 
         private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
 
@@ -60,9 +67,6 @@ namespace System
 
             return false;
         }
-
-        // If we need this long-term hopefully we can come up with a better detection than the kernel verison.
-        public static bool IsMacOsHighSierra { get; } = IsOSX && RuntimeInformation.OSDescription.StartsWith("Darwin 17.0.0");
 
         public static bool IsNonZeroLowerBoundArraySupported
         {

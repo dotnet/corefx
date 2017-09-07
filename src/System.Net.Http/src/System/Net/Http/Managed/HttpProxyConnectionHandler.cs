@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,9 +21,11 @@ namespace System.Net.Http
         public HttpProxyConnectionHandler(HttpConnectionSettings settings, HttpMessageHandler innerHandler)
         {
             Debug.Assert(innerHandler != null);
+            Debug.Assert(settings._useProxy);
+            Debug.Assert(settings._proxy != null || s_proxyFromEnvironment.Value != null);
 
             _innerHandler = innerHandler;
-            _proxy = (settings._useProxy && settings._proxy != null) ? settings._proxy : new PassthroughWebProxy(s_proxyFromEnvironment.Value);
+            _proxy = settings._proxy ?? new PassthroughWebProxy(s_proxyFromEnvironment.Value);
             _defaultCredentials = settings._defaultProxyCredentials;
             _connectionPools = new HttpConnectionPools(settings._maxConnectionsPerServer);
         }
@@ -55,7 +56,7 @@ namespace System.Net.Http
         {
             if (proxyUri.Scheme != UriScheme.Http)
             {
-                throw new InvalidOperationException($"invalid scheme {proxyUri.Scheme} for proxy");
+                throw new InvalidOperationException(SR.net_http_invalid_proxy_scheme);
             }
 
             if (request.RequestUri.Scheme == UriScheme.Https)

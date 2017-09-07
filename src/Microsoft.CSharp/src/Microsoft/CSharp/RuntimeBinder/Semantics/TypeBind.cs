@@ -141,31 +141,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static bool CheckSingleConstraint(CSemanticChecker checker, ErrorHandling errHandling, Symbol symErr, TypeParameterType var, CType arg, TypeArray typeArgsCls, TypeArray typeArgsMeth, CheckConstraintsFlags flags)
         {
+            Debug.Assert(!(arg is PointerType));
+            Debug.Assert(!arg.isStaticClass());
+
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
             if (arg is ErrorType)
             {
                 // Error should have been reported previously.
-                return false;
-            }
-
-            if (arg is PointerType)
-            {
-                if (fReportErrors)
-                {
-                    throw errHandling.Error(ErrorCode.ERR_BadTypeArgument, arg);
-                }
-
-                return false;
-            }
-
-            if (arg.isStaticClass())
-            {
-                if (fReportErrors)
-                {
-                    checker.ReportStaticClassError(null, arg, ErrorCode.ERR_GenericArgIsStaticClass);
-                }
-
                 return false;
             }
 
@@ -193,18 +176,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // To check whether or not its a nullable type, we need to get the resolved
                 // bound from the type argument and check against that.
 
-                bool bIsValueType = arg.IsValType();
-                bool bIsNullable = arg is NullableType;
-                if (bIsValueType && arg is TypeParameterType typeArg)
-                {
-                    TypeArray pArgBnds = typeArg.GetBounds();
-                    if (pArgBnds.Count > 0)
-                    {
-                        bIsNullable = pArgBnds[0] is NullableType;
-                    }
-                }
-
-                if (!bIsValueType || bIsNullable)
+                if (!arg.IsValType() || arg is NullableType)
                 {
                     if (fReportErrors)
                     {
@@ -269,12 +241,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 error = ErrorCode.ERR_GenericConstraintNotSatisfiedNullableInterface;
                             }
                         }
-                        else if (arg is TypeParameterType)
-                        {
-                            // Type variables can satisfy bounds through boxing and type variable conversions
-                            Debug.Assert(!arg.IsRefType());
-                            error = ErrorCode.ERR_GenericConstraintNotSatisfiedTyVar;
-                        }
                         else
                         {
                             // Value types can only satisfy bounds through boxing conversions.
@@ -309,10 +275,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return !fError;
                 }
-            }
-            else if (arg is TypeParameterType typeArg && typeArg.HasNewConstraint())
-            {
-                return !fError;
             }
 
             if (fReportErrors)

@@ -47,13 +47,15 @@ namespace System
         public static bool IsFedora { get { throw null; } }
         public static bool IsFullFramework { get { throw null; } }
         public static bool IsInvokingStaticConstructorsSupported { get { throw null; } }
-        public static bool IsMacOsHighSierra { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public static bool IsMacOsHighSierraOrHigher { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public static bool IsNetBSD { get { throw null; } }
         public static bool IsNetCore { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
         public static bool IsNotFedoraOrRedHatOrCentos { get { throw null; } }
+        public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
+        public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } } 
         public static bool IsNotOneCoreUAP { get { throw null; } }
         public static bool IsNotWindows8x { get { throw null; } }
         public static bool IsNotWindowsIoTCore { get { throw null; } }
@@ -65,7 +67,12 @@ namespace System
         public static bool IsOSX { get { throw null; } }
         public static bool IsSuperUser { get { throw null; } }
         public static bool IsTizen { get { throw null; } }
+        public static bool IsRedHat { get { throw null; } }
+        public static bool IsNotRedHat { get { throw null; } }
+        public static bool IsRedHat69 { get { throw null; } }
+        public static bool IsNotRedHat69 { get { throw null; } }
         public static bool IsUap { get { throw null; } }
+        public static Version ICUVersion { get { return null; } }
         public static bool IsUbuntu { get { throw null; } }
         public static bool IsUbuntu1404 { get { throw null; } }
         public static bool IsWindows { get { throw null; } }

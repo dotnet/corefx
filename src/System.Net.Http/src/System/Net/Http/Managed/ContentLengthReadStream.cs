@@ -18,16 +18,8 @@ namespace System.Net.Http
             public ContentLengthReadStream(HttpConnection connection, ulong contentLength)
                 : base(connection)
             {
-                if (contentLength == 0)
-                {
-                    _connection = null;
-                    _contentBytesRemaining = 0;
-                    connection.ReturnConnectionToPool();
-                }
-                else
-                {
-                    _contentBytesRemaining = contentLength;
-                }
+                Debug.Assert(contentLength > 0, "Caller should have checked for 0.");
+                _contentBytesRemaining = contentLength;
             }
 
             public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -52,7 +44,7 @@ namespace System.Net.Http
                 if (bytesRead <= 0)
                 {
                     // Unexpected end of response stream
-                    throw new IOException("Unexpected end of content stream");
+                    throw new IOException(SR.net_http_invalid_response);
                 }
 
                 Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
@@ -81,7 +73,7 @@ namespace System.Net.Http
                     return;
                 }
 
-                await _connection.CopyChunkToAsync(destination, _contentBytesRemaining, cancellationToken).ConfigureAwait(false);
+                await _connection.CopyToAsync(destination, _contentBytesRemaining, cancellationToken).ConfigureAwait(false);
 
                 _contentBytesRemaining = 0;
                 _connection.ReturnConnectionToPool();

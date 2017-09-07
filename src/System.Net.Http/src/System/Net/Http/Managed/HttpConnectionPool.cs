@@ -250,8 +250,8 @@ namespace System.Net.Http
                 }
 
                 // Pool the connection by adding it to the list.
-                if (NetEventSource.IsEnabled) connection.Trace("Returning connection to pool.");
                 list.Add(new CachedConnection(connection));
+                if (NetEventSource.IsEnabled) connection.Trace("Stored connection in pool.");
             }
         }
 
@@ -398,7 +398,7 @@ namespace System.Net.Http
             public bool IsUsable() => !_connection.ReadAheadCompleted;
 
             /// <summary>Gets whether the connection is currently usable, factoring in expiration time.</summary>
-            /// <param name="now">The current time.  Passed in to ammortize the cost of calling DateTime.UtcNow.</param>
+            /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
             /// <returns>
             /// true if we believe the connection can be reused; otherwise, false.  There is an inherent race condition here,
             /// in that the server could terminate the connection or otherwise make it unusable immediately after we check it,
@@ -454,7 +454,7 @@ namespace System.Net.Http
         /// </summary>
         /// <remarks>
         /// Implemented as a non-generic base type with a generic derived type to support
-        /// passing in arbitrary funcs and associated state while mininimizing allocations.
+        /// passing in arbitrary funcs and associated state while minimizing allocations.
         /// The <see cref="CreateConnectionAsync"/> method will be implemented on the derived
         /// type that is able to work with the supplied state generically.
         /// </remarks>

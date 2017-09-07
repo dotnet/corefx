@@ -526,18 +526,13 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(23769)]
         [ActiveIssue(22707, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
         {
-            if (ManagedHandlerTestHelpers.IsEnabled)
-            {
-                // TODO #22700: Managed handler not following RFC rules for method rewrites.
-                return;
-            }
-
             var handler = new HttpClientHandler() { AllowAutoRedirect = true };
             using (var client = new HttpClient(handler))
             {
@@ -1575,6 +1570,40 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [InlineData(null)]
+        public async Task PostAsync_ExpectContinue_Success(bool? expectContinue)
+        {
+            using (var client = new HttpClient())
+            {
+                var req = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer)
+                {
+                    Content = new StringContent("Test String", Encoding.UTF8)
+                };
+                req.Headers.ExpectContinue = expectContinue;
+
+                using (HttpResponseMessage response = await client.SendAsync(req))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    if (ManagedHandlerTestHelpers.IsEnabled)
+                    {
+                        const string ExpectedReqHeader = "\"Expect\": \"100-continue\"";
+                        if (expectContinue == true)
+                        {
+                            Assert.Contains(ExpectedReqHeader, await response.Content.ReadAsStringAsync());
+                        }
+                        else
+                        {
+                            Assert.DoesNotContain(ExpectedReqHeader, await response.Content.ReadAsStringAsync());
+                        }
+                    }
+                }
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public async Task PostAsync_Redirect_ResultingGetFormattedCorrectly(bool secure)
         {
             const string ContentString = "This is the content string.";
@@ -1595,6 +1624,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(23768)]
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // takes several seconds
         [Fact]
@@ -1867,6 +1897,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
+        [ActiveIssue(23770, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
@@ -1926,7 +1957,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22735)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
