@@ -976,14 +976,8 @@ namespace System.Net.Sockets.Tests
                     int bytesReceived = socketEvent.BytesTransferred;
                     if (error == SocketError.Success)
                     {
-                        // Linux sometimes returns EMSGSIZE and sometimes fills a single segment and sets MSG_TRUNC.
-                        // The latter is unexpected, MSG_TRUNC should only be set when there is insufficient buffer space.
-                        bool truncated = (socketEvent.SocketFlags & SocketFlags.Truncated) != SocketFlags.None;
-                        if (!truncated)
-                        {
-                            // platform received message in > IOV_MAX segments
-                            Assert.Equal(segmentCount, bytesReceived);
-                        }
+                        // platform received message in > IOV_MAX segments
+                        Assert.Equal(segmentCount, bytesReceived);
                     }
                     else
                     {
