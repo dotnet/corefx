@@ -177,7 +177,7 @@ namespace System.IO.Tests
         {
             using (var stream = CreateStream())
             {
-                stream.Write(Encoding.ASCII.GetBytes(source, 0, source.Length));
+                stream.Write(Encoding.ASCII.GetBytes(source), 0, source.Length);
                 stream.Position = 0;
 
                 using (var reader = new BinaryReader(stream))
