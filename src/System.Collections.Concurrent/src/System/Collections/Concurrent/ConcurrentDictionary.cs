@@ -56,7 +56,7 @@ namespace System.Collections.Concurrent
 
         private volatile Tables _tables; // Internal tables of the dictionary
         private IEqualityComparer<TKey> _comparer; // Key equality comparer
-        private readonly bool _growLockArray; // Whether to dynamically increase the size of the striped lock
+        private bool _growLockArray; // Whether to dynamically increase the size of the striped lock
         private int _budget; // The maximum number of elements per lock before a resize operation is triggered
 
         // The default capacity, i.e. the initial # of buckets. When choosing this value, we are making
@@ -1785,13 +1785,20 @@ namespace System.Collections.Concurrent
                 object[] newLocks = tables._locks;
 
                 // Add more locks
-                if (_growLockArray && tables._locks.Length < MaxLockNumber)
+                if (_growLockArray)
                 {
-                    newLocks = new object[tables._locks.Length * 2];
-                    Array.Copy(tables._locks, 0, newLocks, 0, tables._locks.Length);
-                    for (int i = tables._locks.Length; i < newLocks.Length; i++)
+                    if (tables._locks.Length < MaxLockNumber)
                     {
-                        newLocks[i] = new object();
+                        newLocks = new object[tables._locks.Length * 2];
+                        Array.Copy(tables._locks, 0, newLocks, 0, tables._locks.Length);
+                        for (int i = tables._locks.Length; i < newLocks.Length; i++)
+                        {
+                            newLocks[i] = new object();
+                        }
+                    }
+                    else
+                    {
+                        _growLockArray = false; // from now on we will not grow the lock array any bigger
                     }
                 }
 
