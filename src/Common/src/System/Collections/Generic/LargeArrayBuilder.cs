@@ -43,6 +43,20 @@ namespace System.Collections.Generic
         internal int Column { get; }
 
         /// <summary>
+        /// If this position is at the end of the current buffer, returns the position
+        /// at the start of the next buffer. Otherwise, returns this position.
+        /// </summary>
+        /// <param name="endColumn">The length of the current buffer.</param>
+        public CopyPosition Normalize(int endColumn)
+        {
+            Debug.Assert(Column <= endColumn);
+
+            return Column == endColumn ?
+                new CopyPosition(Row + 1, 0) :
+                this;
+        }
+
+        /// <summary>
         /// Gets a string suitable for display in the debugger.
         /// </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
@@ -220,15 +234,18 @@ namespace System.Collections.Generic
             T[] buffer = GetBuffer(row);
             int copied = CopyToCore(buffer, column);
 
-            while (count > 0)
+            if(count == 0)
+            {
+                return new CopyPosition(row, column + copied).Normalize(buffer.Length);
+            }
+
+            do
             {
                 buffer = GetBuffer(++row);
                 copied = CopyToCore(buffer, 0);
-            }
+            } while (count > 0);
 
-            return copied == buffer.Length
-                ? new CopyPosition(row + 1, 0)
-                : new CopyPosition(row, copied);
+            return new CopyPosition(row, copied).Normalize(buffer.Length);
 
             int CopyToCore(T[] sourceBuffer, int sourceIndex)
             {

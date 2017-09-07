@@ -527,6 +527,32 @@ namespace System.Linq.Tests
                     new int[] { 3 },
                 }
             };
+
+            // Interleaved (first marker)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new int[] { 2 },
+                    new TestEnumerable<int>(new int[] { 3 }),
+                    new int[] { 4 },
+                }
+            };
+
+            // Interleaved (first non-marker)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new int[] { 1 },
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new int[] { 3 },
+                    new TestEnumerable<int>(new int[] { 4 }),
+                }
+            };
         }
     }
 }
