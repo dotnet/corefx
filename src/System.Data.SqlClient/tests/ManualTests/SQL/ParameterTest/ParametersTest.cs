@@ -102,12 +102,30 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         {
             using (var conn = new SqlConnection(s_connString))
             {
-                conn.Open();
-                var cmd = new SqlCommand("select @input as 'test'", conn);
-                var sqlParameter = new SqlParameter("@input", SqlDbType.Int, 1, ParameterDirection.Input, false, 1, 0, "test", DataRowVersion.Current, MyEnum.A);
-                cmd.Parameters.Add(sqlParameter);
-                object value = cmd.ExecuteScalar();
-                Assert.Equal((MyEnum)value, MyEnum.A);
+                var dataTable = new DataTable();
+                var adapter = new SqlDataAdapter();
+
+                adapter.SelectCommand = new SqlCommand("SELECT CustomerID, ContactTitle FROM dbo.Customers WHERE ContactTitle = @ContactTitle", conn);
+                var selectParam = new SqlParameter("@ContactTitle", SqlDbType.NVarChar, 30, ParameterDirection.Input, true, 0, 0, "ContactTitle", DataRowVersion.Current, "Owner");
+                adapter.SelectCommand.Parameters.Add(selectParam);
+
+                adapter.UpdateCommand = new SqlCommand("UPDATE dbo.Customers SET ContactTitle = @ContactTitle WHERE CustomerID = @CustomerID", conn);
+                var titleParam = new SqlParameter("@ContactTitle", SqlDbType.NVarChar, 30, ParameterDirection.Input, true, 0, 0, "ContactTitle", DataRowVersion.Current, null);
+                var idParam = new SqlParameter("@CustomerID", SqlDbType.NChar, 5, ParameterDirection.Input, false, 0, 0, "CustomerID", DataRowVersion.Current, null);
+                adapter.UpdateCommand.Parameters.Add(titleParam);
+                adapter.UpdateCommand.Parameters.Add(idParam);
+
+                adapter.Fill(dataTable);
+                object titleData = dataTable.Rows[0]["ContactTitle"];
+                Assert.Equal("Owner", (string)titleData);
+
+                titleData = "Test Data";
+                adapter.Update(dataTable);
+                adapter.Fill(dataTable);
+                Assert.Equal("Test Data", (string)titleData);
+
+                titleData = "Owner";
+                adapter.Update(dataTable);
             }
         }
 
