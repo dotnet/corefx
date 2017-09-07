@@ -35,7 +35,7 @@
     <Exec Command="$(ToolsDir)\dotnetcli\dotnet $(RuntimePath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive"  />
     <Message Text="Complete Serialization tool" Importance="high" />
     <Warning Condition="Exists('$(OutputPath)$(SerializerName).cs') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).cs"/>
-    <Message Text="Compile the generated code" Importance="high" />
+    <Message Text="Compile the generated code." Importance="high" />
     <Csc Condition="Exists('$(OutputPath)$(SerializerName).cs') == 'true'"
          OutputAssembly="$(OutputPath)$(SerializerName).dll" 
          References="@(ReferencePath);@(IntermediateAssembly)" 
