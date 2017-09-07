@@ -956,6 +956,7 @@ namespace System.Net.Sockets.Tests
             sender.BindToAnonymousPort(IPAddress.Loopback);
             var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             receiver.Connect(sender.LocalEndPoint); // only receive from sender
+            EndPoint receiverEndPoint = receiver.LocalEndPoint;
 
             Task receiveTask = Task.Run(() =>
             {
@@ -987,7 +988,7 @@ namespace System.Net.Sockets.Tests
 
             using (sender)
             {
-                sender.Connect(receiver.LocalEndPoint);
+                sender.Connect(receiverEndPoint);
                 var sendBuffer = new byte[SegmentCount];
                 for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                 {
