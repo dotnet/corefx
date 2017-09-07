@@ -39,6 +39,10 @@ public static partial class XmlSerializerTests
             {
                 method.Invoke(null, new object[] { 3 });
             }
+            else
+            {
+                throw new FileNotFoundException(string.Format("{0} not found", serializerPath));
+            }
 #endif
         }
     }
