@@ -57,6 +57,12 @@ namespace System.Xml
         // read-only flag
         private bool _isReadOnly;
 
+        // Creation of validating readers is hidden behind a delegate which is only initialized if the ValidationType
+        // property is set. This is for AOT builds where the tree shaker can reduce the validating readers away
+        // if nobody calls the ValidationType setter. Might also help with non-AOT build when ILLinker is used.
+        delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
+        private AddValidationFunc _addValidationFunc;
+
         //
         // Constructor
         //
@@ -317,6 +323,10 @@ namespace System.Xml
             {
                 CheckReadOnly("ValidationType");
 
+                // This introduces a dependency on the validation readers and along with that
+                // on XmlSchema and so on. For AOT builds this brings in a LOT of code
+                // which we would like to avoid unless it's needed. So the first approximation
+                // is to only reference this method when somebody explicitly sets the ValidationType.
                 _addValidationFunc = AddValidationInternal;
 
                 if ((uint)value > (uint)ValidationType.Schema)
@@ -601,9 +611,6 @@ namespace System.Xml
 
             return _addValidationFunc(reader, resolver, addConformanceWrapper: true);
         }
-
-        delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
-        private AddValidationFunc _addValidationFunc;
 
         private XmlReader AddValidationInternal(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper)
         {

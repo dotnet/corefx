@@ -115,6 +115,10 @@ namespace System.Xml.Serialization
         public virtual XmlSerializer GetSerializer(Type type) { throw new NotSupportedException(); }
     }
 
+    // This enum is intentionally kept outside of the XmlSerializer class since if it would be a subclass
+    // of XmlSerializer, then any access to this enum would be treated by AOT compilers as access to the XmlSerializer
+    // as well, which has a large static ctor which brings in a lot of code. So keeping the enum separate
+    // makes sure that using just the enum itself doesn't bring in the whole of serialization code base.
 #if FEATURE_SERIALIZATION_UAPAOT
     public enum SerializationMode
 #else
