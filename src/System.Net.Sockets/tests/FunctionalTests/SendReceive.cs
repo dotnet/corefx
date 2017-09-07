@@ -833,7 +833,10 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(e.SocketErrorCode, SocketError.InvalidArgument);
             }
         }
+    }
 
+    public class SendReceive
+    {
         [Fact]
         public void SendRecvIovMaxTcp_Success()
         {
@@ -848,9 +851,9 @@ namespace System.Net.Sockets.Tests
                 server.Listen(1);
 
                 var sendBuffer = new byte[SegmentCount];
-                Task serverProcessingTask = Task.Run(async () =>
+                Task serverProcessingTask = Task.Run(() =>
                 {
-                    using (Socket acceptSocket = await AcceptAsync(server))
+                    using (Socket acceptSocket = server.Accept())
                     {
                         // send data as SegmentCount (> IOV_MAX) 1-byte segments.
                         var sendSegments = new List<ArraySegment<byte>>();
