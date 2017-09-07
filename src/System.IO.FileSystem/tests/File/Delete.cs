@@ -123,7 +123,7 @@ namespace System.IO.Tests
             Delete(Path.Combine(TestDirectory, GetTestFileName(), "C"));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), "IsNotRedHat69")]
         [OuterLoop("Needs sudo access")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
@@ -135,7 +135,7 @@ namespace System.IO.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), "IsNotRedHat69")]
         [OuterLoop("Needs sudo access")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
