@@ -962,18 +962,9 @@ namespace System.Net.Sockets.Tests
                         receiveSegments.Add(new ArraySegment<byte>(receiveBuffer, i, 1));
                     }
                     // receive data as segmentCount (> IOV_MAX) 1-byte segments.
-                    EventWaitHandle completed = new ManualResetEvent(false);
-                    var socketEvent = new SocketAsyncEventArgs();
-                    socketEvent.UserToken = completed;
-                    socketEvent.BufferList = receiveSegments;
-                    socketEvent.Completed += OnCompleted;
-                    if (receiver.ReceiveAsync(socketEvent))
-                    {
-                        completed.WaitOne();
-                    }
+                    SocketError error;
+                    int bytesReceived = receiver.Receive(receiveSegments, SocketFlags.None, out error);
 
-                    SocketError error = socketEvent.SocketError;
-                    int bytesReceived = socketEvent.BytesTransferred;
                     if (error == SocketError.Success)
                     {
                         // platform received message in > IOV_MAX segments
@@ -1000,12 +991,6 @@ namespace System.Net.Sockets.Tests
             }
 
             await receiveTask;
-        }
-
-        private static void OnCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            EventWaitHandle handle = (EventWaitHandle)e.UserToken;
-            handle.Set();
         }
     }
 
