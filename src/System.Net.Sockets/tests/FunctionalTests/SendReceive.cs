@@ -952,8 +952,11 @@ namespace System.Net.Sockets.Tests
             // Use more than IOV_MAX (1024 on Linux & macOS) segments
             // and less than Ethernet MTU.
             const int SegmentCount = 1200;
+            var sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            sender.BindToAnonymousPort(IPAddress.Loopback);
             var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            receiver.BindToAnonymousPort(IPAddress.Loopback);
+            receiver.Connect(sender.LocalEndPoint); // only receive from sender
+
             Task receiveTask = Task.Run(() =>
             {
                 using (receiver)
@@ -982,7 +985,7 @@ namespace System.Net.Sockets.Tests
                 }
             });
 
-            using (var sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            using (sender)
             {
                 sender.Connect(receiver.LocalEndPoint);
                 var sendBuffer = new byte[SegmentCount];
