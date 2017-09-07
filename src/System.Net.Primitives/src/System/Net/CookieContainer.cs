@@ -223,7 +223,7 @@ namespace System.Net
 
             if (cookie.Domain.Length == 0)
             {
-                throw new ArgumentException(SR.net_emptystringcall, "cookie.Domain");
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "cookie.Domain"), "cookie.Domain");
             }
 
             Uri uri;
