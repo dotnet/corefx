@@ -841,20 +841,20 @@ namespace System.Net.Sockets.Tests
             // This is handled internally for stream sockets so this error shouldn't surface.
 
             // Use more than IOV_MAX (1024 on Linux & macOS) segments.
-            const int segmentCount = 2400;
+            const int SegmentCount = 2400;
             using (var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 server.BindToAnonymousPort(IPAddress.Loopback);
                 server.Listen(1);
 
-                var sendBuffer = new byte[segmentCount];
+                var sendBuffer = new byte[SegmentCount];
                 Task serverProcessingTask = Task.Run(async () =>
                 {
                     using (Socket acceptSocket = await AcceptAsync(server))
                     {
-                        // send data as segmentCount (> IOV_MAX) 1-byte segments.
+                        // send data as SegmentCount (> IOV_MAX) 1-byte segments.
                         var sendSegments = new List<ArraySegment<byte>>();
-                        for (int i = 0; i < segmentCount; i++)
+                        for (int i = 0; i < SegmentCount; i++)
                         {
                             sendBuffer[i] = (byte)i;
                             sendSegments.Add(new ArraySegment<byte>(sendBuffer, i, 1));
@@ -863,7 +863,7 @@ namespace System.Net.Sockets.Tests
                         // Send blocks until all segments are sent.
                         int bytesSent = acceptSocket.Send(sendSegments, SocketFlags.None, out error);
 
-                        Assert.Equal(segmentCount, bytesSent);
+                        Assert.Equal(SegmentCount, bytesSent);
                         Assert.Equal(SocketError.Success, error);
                     }
                 });
@@ -873,9 +873,9 @@ namespace System.Net.Sockets.Tests
                     client.Connect(server.LocalEndPoint);
 
                     // receive data as 1-byte segments.
-                    var receiveBuffer = new byte[segmentCount];
+                    var receiveBuffer = new byte[SegmentCount];
                     var receiveSegments = new List<ArraySegment<byte>>();
-                    for (int i = 0; i < segmentCount; i++)
+                    for (int i = 0; i < SegmentCount; i++)
                     {
                         receiveSegments.Add(new ArraySegment<byte>(receiveBuffer, i, 1));
                     }
@@ -891,7 +891,7 @@ namespace System.Net.Sockets.Tests
 
                         Assert.NotEqual(0, bytesReceived);
                         Assert.Equal(SocketError.Success, error);
-                    } while (bytesReceivedTotal != segmentCount);
+                    } while (bytesReceivedTotal != SegmentCount);
 
                     Assert.Equal(sendBuffer, receiveBuffer);
                 }
@@ -907,28 +907,28 @@ namespace System.Net.Sockets.Tests
 
             // Use more than IOV_MAX (1024 on Linux & macOS) segments
             // and less than Ethernet MTU.
-            const int segmentCount = 1200;
+            const int SegmentCount = 1200;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 socket.BindToAnonymousPort(IPAddress.Loopback);
                 // Use our own address as destination.
                 socket.Connect(socket.LocalEndPoint);
 
-                var sendBuffer = new byte[segmentCount];
+                var sendBuffer = new byte[SegmentCount];
                 var sendSegments = new List<ArraySegment<byte>>();
-                for (int i = 0; i < segmentCount; i++)
+                for (int i = 0; i < SegmentCount; i++)
                 {
                     sendBuffer[i] = (byte)i;
                     sendSegments.Add(new ArraySegment<byte>(sendBuffer, i, 1));
                 }
 
                 SocketError error;
-                // send data as segmentCount (> IOV_MAX) 1-byte segments.
+                // send data as SegmentCount (> IOV_MAX) 1-byte segments.
                 int bytesSent = socket.Send(sendSegments, SocketFlags.None, out error);
                 if (error == SocketError.Success)
                 {
                     // platform sent message with > IOV_MAX segments
-                    Assert.Equal(segmentCount, bytesSent);
+                    Assert.Equal(SegmentCount, bytesSent);
                 }
                 else
                 {
@@ -948,27 +948,27 @@ namespace System.Net.Sockets.Tests
 
             // Use more than IOV_MAX (1024 on Linux & macOS) segments
             // and less than Ethernet MTU.
-            const int segmentCount = 1200;
+            const int SegmentCount = 1200;
             var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             receiver.BindToAnonymousPort(IPAddress.Loopback);
             Task receiveTask = Task.Run(() =>
             {
                 using (receiver)
                 {
-                    var receiveBuffer = new byte[segmentCount];
+                    var receiveBuffer = new byte[SegmentCount];
                     var receiveSegments = new List<ArraySegment<byte>>();
-                    for (int i = 0; i < segmentCount; i++)
+                    for (int i = 0; i < SegmentCount; i++)
                     {
                         receiveSegments.Add(new ArraySegment<byte>(receiveBuffer, i, 1));
                     }
-                    // receive data as segmentCount (> IOV_MAX) 1-byte segments.
+                    // receive data as SegmentCount (> IOV_MAX) 1-byte segments.
                     SocketError error;
                     int bytesReceived = receiver.Receive(receiveSegments, SocketFlags.None, out error);
 
                     if (error == SocketError.Success)
                     {
                         // platform received message in > IOV_MAX segments
-                        Assert.Equal(segmentCount, bytesReceived);
+                        Assert.Equal(SegmentCount, bytesReceived);
                     }
                     else
                     {
@@ -982,11 +982,11 @@ namespace System.Net.Sockets.Tests
             using (var sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 sender.Connect(receiver.LocalEndPoint);
-                var sendBuffer = new byte[segmentCount];
+                var sendBuffer = new byte[SegmentCount];
                 for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                 {
                     int bytesSent = sender.Send(sendBuffer);
-                    Assert.Equal(segmentCount, bytesSent);
+                    Assert.Equal(SegmentCount, bytesSent);
                 }
             }
 
