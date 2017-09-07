@@ -22,7 +22,7 @@
     <Project Include="src\packages.builds" Condition="'$(BuildPackages)'=='true'" />
   </ItemGroup>
 
-  <Import Project="dir.targets" />
+  <!--<Import Project="dir.targets" />-->
 
   <Import Project="dir.traversal.targets" />
 
