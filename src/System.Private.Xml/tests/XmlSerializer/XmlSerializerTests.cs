@@ -41,7 +41,7 @@ public static partial class XmlSerializerTests
             }
             else
             {
-                throw new FileNotFoundException(string.Format("{0} not found", serializerPath));
+                throw new FileNotFoundException(string.Format("{0} not found, the current assembly location is {1}", serializerPath, typeof(XmlSerializerTests).Assembly.Location));
             }
 #endif
         }
