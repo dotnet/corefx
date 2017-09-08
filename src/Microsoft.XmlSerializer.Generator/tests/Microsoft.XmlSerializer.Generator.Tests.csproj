@@ -33,9 +33,10 @@
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
-    <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(RuntimePath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
+    <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
     <Message Text="Running Serialization Tool and generating the code $(OutputPath)$(SerializerName).cs" Importance="high" />
-    <Exec Command="$(ToolsDir)\dotnetcli\dotnet $(RuntimePath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive"  />
+    <Warning Condition="Exists('$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll') != 'true'" Text="dotnet-Microsoft.XmlSerializer.Generator.dll not exit under $(OutputPath)"/>
+    <Exec Command="$(ToolsDir)\dotnetcli\dotnet $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive"  />
     <Warning Condition="Exists('$(OutputPath)$(SerializerName).cs') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).cs"/>
     <Message Text="Compile the serializer assembly under $(OutputPath)$(SerializerName).dll " Importance="high" />
     <Csc Condition="Exists('$(OutputPath)$(SerializerName).cs') == 'true'"
