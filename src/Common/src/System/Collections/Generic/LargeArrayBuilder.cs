@@ -200,7 +200,7 @@ namespace System.Collections.Generic
                 arrayIndex += toCopy;
             }
         }
-        
+
         /// <summary>
         /// Copies the contents of this builder to the specified array.
         /// </summary>
@@ -232,7 +232,13 @@ namespace System.Collections.Generic
             int column = position.Column;
 
             T[] buffer = GetBuffer(row);
-            int copied = CopyToCore(buffer, column);
+            Debug.Assert(buffer.Length > column);
+
+            int copied = Math.Min(buffer.Length - column, count);
+            Array.Copy(buffer, column, array, arrayIndex, copied);
+
+            arrayIndex += copied;
+            count -= copied;
 
             if (count == 0)
             {
@@ -242,24 +248,16 @@ namespace System.Collections.Generic
             do
             {
                 buffer = GetBuffer(++row);
-                copied = CopyToCore(buffer, 0);
+                Debug.Assert(buffer.Length > 0);
+
+                copied = Math.Min(buffer.Length, count);
+                Array.Copy(buffer, 0, array, arrayIndex, copied);
+
+                arrayIndex += copied;
+                count -= copied;
             } while (count > 0);
 
             return new CopyPosition(row, copied).Normalize(buffer.Length);
-
-            int CopyToCore(T[] sourceBuffer, int sourceIndex)
-            {
-                Debug.Assert(sourceBuffer.Length > sourceIndex);
-
-                // Copy until we satisfy `count` or reach the end of the current buffer.
-                int copyCount = Math.Min(sourceBuffer.Length - sourceIndex, count);
-                Array.Copy(sourceBuffer, sourceIndex, array, arrayIndex, copyCount);
-
-                arrayIndex += copyCount;
-                count -= copyCount;
-
-                return copyCount;
-            }
         }
 
         /// <summary>
