@@ -52,6 +52,10 @@
          UseSharedCompilation="true" />
     <Message Text="Complete compile" Importance="high" />
     <Warning Condition="Exists('$(OutputPath)$(SerializerName).dll') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).dll"/>
+    <Message Text="Test Path is $(TestPath)" Importance="high" />
+    <Warning Condition="Exists('$(TestPath)') != 'true'" Text="TestPath not exist"/>
+    <Copy Condition="Exists('$(TestPath)') == 'true'" SourceFiles="$(OutputPath)$(SerializerName).dll" DestinationFiles="$(TestPath)$(SerializerName).dll" />
+    <Message Text="Copied to TestPath" Importance="high" />
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
