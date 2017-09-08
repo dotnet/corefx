@@ -5,8 +5,6 @@
     <!-- this assembly is not versioned, it only contains type forwards and will never be referenced by another assembly -->
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <AssemblyKey>Open</AssemblyKey>
-    <!-- this assembly only appears in ref -->
-    <IsNetFxNETStandard>false</IsNetFxNETStandard>
-    <IsNetFxNETStandardRef>true</IsNetFxNETStandardRef>
+    <IsNetFxNETStandard>true</IsNetFxNETStandard>
   </PropertyGroup>
 </Project>

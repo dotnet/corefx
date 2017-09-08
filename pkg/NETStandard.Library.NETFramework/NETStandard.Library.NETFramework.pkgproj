@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.0.1</PackageVersion>
     <TargetFrameworkName>net</TargetFrameworkName>
     <TargetFrameworkVersion>461</TargetFrameworkVersion>
     <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
@@ -12,6 +12,7 @@
     <LibBinDir>$(NetFxPackageRuntimePath)</LibBinDir>
 
     <IsFrameworkPackage>true</IsFrameworkPackage>
+    <IncludeReferenceFiles>false</IncludeReferenceFiles>
     <IncludeLibFiles>true</IncludeLibFiles>
 
     <!-- ValidatePackage doesn't evaluate our targets/props so it does
@@ -41,24 +42,19 @@
 
   <Target Name="IncludeNETStandardShims">
     <ItemGroup>
-      <_refFileNames Include="@(RefFile->'%(FileName)')" Condition="'%(Extension)' == '.dll'" />
       <_libFileNames Include="@(LibFile->'%(FileName)')" Condition="'%(Extension)' == '.dll'" />
 
       <!-- remove any targeting pack assemblies that we build ourselves -->
-      <_netFxReference Include="@(NetFxReference)" Exclude="@(_refFileNames);@(_libFileNames)" />
+      <_netFxReference Include="@(NetFxReference)" Exclude="@(_libFileNames)" />
 
       <!-- ignore any assemblies we expect to come from the targeting pack -->
       <IgnoredReference Include="@(_netFxReference)" />
       <SuppressNETStandardMissingFile Include="@(_netFxReference)" />
 
       <!-- don't include shims for anything from the targeting pack or built explicitly -->
-      <_excludeShimsRef Include="@(_netFxReference);@(_refFileNames)"/>
       <_excludeShimsLib Include="@(_netFxReference);@(_libFileNames)"/>
 
       <!-- fill in with netstandard.dll-based shims -->
-      <RefFile Include="$(NETStandardPackageRefPath)\*.dll" Exclude="@(_excludeShimsRef->'$(NETStandardPackageRefPath)\%(Identity).dll')">
-        <TargetFramework>$(TargetFramework)</TargetFramework>
-      </RefFile>
       <LibFile Include="$(NETStandardPackageRefPath)\*.dll" Exclude="@(_excludeShimsLib->'$(NETStandardPackageRefPath)\%(Identity).dll')">
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </LibFile>
@@ -99,19 +95,10 @@
   <Target Name="AddFrameworkClosureFiles" AfterTargets="ExpandClosureFilesByTargetFramework">
     <ItemGroup>
       <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)netfx/%(Identity).dll')" >
-        <FileSet>reference-net461</FileSet>
-      </FrameworkClosureFile>
-      <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)netfx/%(Identity).dll')" >
         <FileSet>runtime-net461</FileSet>
       </FrameworkClosureFile>
       <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)net462/%(Identity).dll')" >
-        <FileSet>reference-net462</FileSet>
-      </FrameworkClosureFile>
-      <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)net462/%(Identity).dll')" >
         <FileSet>runtime-net462</FileSet>
-      </FrameworkClosureFile>
-      <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)net47/%(Identity).dll')" >
-        <FileSet>reference-net47</FileSet>
       </FrameworkClosureFile>
       <FrameworkClosureFile Include="@(NetFxReference->'$(RefRootPath)net47/%(Identity).dll')" >
         <FileSet>runtime-net47</FileSet>
@@ -163,10 +150,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <!-- Include refs -->
-      <File Include="@(RefFile)">
-        <TargetPath Condition="'%(RefFile.TargetPath)' == ''">build/%(RefFile.TargetFramework)/ref%(RefFile.SubFolder)</TargetPath>
-      </File>
 
       <!-- Include lib -->
       <File Include="@(LibFile)">
