@@ -20,7 +20,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void ValidateBasicObjectsRoundtrip(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
             object clone = BinaryFormatterHelpers.Clone(obj, null, assemblyFormat, filterLevel, typeFormat);
-            if (!ReferenceEquals(obj, string.Empty)) // "" is interned and will roundtrip as the same object
+            if (!ReferenceEquals(obj, string.Empty) && !(obj is DBNull)) // "" is interned and will roundtrip as the same object
             {
                 Assert.NotSame(obj, clone);
             }
