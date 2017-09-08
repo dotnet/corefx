@@ -990,13 +990,19 @@ namespace System.Net.Sockets.Tests
             {
                 sender.Connect(receiverEndPoint);
                 var sendBuffer = new byte[SegmentCount];
-                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
+                for (int i = 0; i < 10; i++) // UDPRedundancy
                 {
                     int bytesSent = sender.Send(sendBuffer);
                     Assert.Equal(SegmentCount, bytesSent);
+                    await Task.WhenAny(receiveTask, Task.Delay(1));
+                    if (receiveTask.IsCompleted)
+                    {
+                        break;
+                    }
                 }
             }
 
+            Assert.True(receiveTask.IsCompleted);
             await receiveTask;
         }
     }
