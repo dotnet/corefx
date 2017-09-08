@@ -30,7 +30,7 @@
     <Dependency Include="@(_buildRIDWithMetadata->'runtime.%(Identity).$(Id)')" />
 
     <Dependency Include="Microsoft.NETCore.Platforms">
-      <Version>$(PlatformPackageVersion)</Version>
+      <Version>2.0.0</Version>
       <TargetFramework>$(TargetFramework)</TargetFramework>
     </Dependency>
 
