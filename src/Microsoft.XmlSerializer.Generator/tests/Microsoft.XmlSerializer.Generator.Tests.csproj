@@ -37,7 +37,7 @@
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
-    <!--<Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />-->
+    <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
     <Message Text="Running Serialization Tool and generating the code $(OutputPath)$(SerializerName).cs" Importance="high" />
     <Warning Condition="Exists('$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll') != 'true'" Text="dotnet-Microsoft.XmlSerializer.Generator.dll not exit under $(OutputPath)" />
     <Exec Command="$(TestHostRootPath)\dotnet $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive" />
