@@ -27,9 +27,6 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\NETStandard.Library.NETFramework\NETStandard.Library.NETFramework.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)\System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
