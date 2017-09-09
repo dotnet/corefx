@@ -517,10 +517,8 @@ namespace System.Web.Util
         //  Helper to encode the non-ASCII url characters only
         private static string UrlEncodeNonAscii(string str, Encoding e)
         {
-            if (string.IsNullOrEmpty(str))
-                return str;
-            if (e == null)
-                e = Encoding.UTF8;
+            Debug.Assert(!string.IsNullOrEmpty(str));
+            Debug.Assert(e != null);
             byte[] bytes = e.GetBytes(str);
             byte[] encodedBytes = UrlEncodeNonAscii(bytes, 0, bytes.Length);
             return Encoding.ASCII.GetString(encodedBytes);
