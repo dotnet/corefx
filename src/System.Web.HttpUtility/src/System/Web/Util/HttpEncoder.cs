@@ -478,7 +478,7 @@ namespace System.Web.Util
                 }
                 else
                 {
-                    var subarray = new byte[count];
+                    byte[] subarray = new byte[count];
                     Buffer.BlockCopy(bytes, offset, subarray, 0, count);
                     return subarray;
                 }

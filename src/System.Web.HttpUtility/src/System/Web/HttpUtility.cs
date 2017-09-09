@@ -247,7 +247,7 @@ namespace System.Web
                 return null;
             }
 
-            var bytes = e.GetBytes(str);
+            byte[] bytes = e.GetBytes(str);
             return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
         }
 
@@ -286,7 +286,7 @@ namespace System.Web
 
         public static string JavaScriptStringEncode(string value, bool addDoubleQuotes)
         {
-            var encoded = HttpEncoder.JavaScriptStringEncode(value);
+            string encoded = HttpEncoder.JavaScriptStringEncode(value);
             return addDoubleQuotes ? "\"" + encoded + "\"" : encoded;
         }
     }
