@@ -349,6 +349,14 @@ namespace System.Web.Tests
             Assert.Equal("\"" + encoded + "\"", HttpUtility.JavaScriptStringEncode(decoded, true));
         }
 
+
+        [Theory]
+        [MemberData(nameof(JavaScriptStringEncodeData))]
+        public void JavaScriptStringEncode_ExplicitDontAddQuotes(string decoded, string encoded)
+        {
+            Assert.Equal(encoded, HttpUtility.JavaScriptStringEncode(decoded, false));
+        }
+
         #endregion JavaScriptStringEncode
 
         #region ParseQueryString
