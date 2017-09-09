@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace System.IO
 {
@@ -446,6 +447,21 @@ namespace System.IO
             }
         }
 
+        public override void Write(ReadOnlySpan<char> source)
+        {
+            char[] buffer = ArrayPool<char>.Shared.Rent(source.Length);
+
+            try
+            {
+                source.CopyTo(new Span<char>(buffer));
+                Write(buffer, 0, source.Length);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(buffer);
+            }
+        }
+
         public override void Write(string value)
         {
             if (value == null)
@@ -553,6 +569,11 @@ namespace System.IO
             {
                 Flush(true, false);
             }
+        }
+
+        public override void WriteLine(ReadOnlySpan<char> source)
+        {
+            WriteLine(new string(source.ToArray()));
         }
 
         #region Task based Async APIs
