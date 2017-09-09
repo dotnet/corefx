@@ -17,6 +17,8 @@ namespace System
     /// </summary>
     [DebuggerTypeProxy(typeof(SpanDebugView<>))]
     [DebuggerDisplay("Length = {Length}")]
+    [IsReadOnly]
+    [IsByRefLike]
     public struct Span<T>
     {
         /// <summary>
