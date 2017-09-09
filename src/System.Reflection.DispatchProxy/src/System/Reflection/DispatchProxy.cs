@@ -40,5 +40,20 @@ namespace System.Reflection
         {
             return (T)DispatchProxyGenerator.CreateProxyInstance(typeof(TProxy), typeof(T));
         }
+
+        /// <summary>
+        /// Creates an object instance that derives from class <typeparamref name="TProxy"/>
+        /// and implements interface <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="TProxy">The base class to use for the proxy class.</typeparam>
+        /// <param name="T">The interface the proxy should implement.</typeparam>
+        /// <returns>An object instance that implements <typeparamref name="T"/>.</returns>
+        /// <exception cref="System.ArgumentException"><typeparamref name="T"/> is a class, 
+        /// or <typeparamref name="TProxy"/> is sealed or does not have a parameterless constructor</exception>
+        public static T Create<TProxy>(Type T)
+            where TProxy : DispatchProxy
+        {
+            return (T)DispatchProxyGenerator.CreateProxyInstance(typeof(TProxy), T);
+        }
     }
 }
