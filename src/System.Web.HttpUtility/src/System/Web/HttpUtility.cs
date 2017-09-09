@@ -65,7 +65,6 @@ namespace System.Web
             var decoded = HtmlDecode(query);
             var decodedLength = decoded.Length;
             var namePos = 0;
-            var first = true;
             while (namePos <= decodedLength)
             {
                 int valuePos = -1, valueEnd = -1;
@@ -79,13 +78,6 @@ namespace System.Web
                         valueEnd = q;
                         break;
                     }
-
-                if (first)
-                {
-                    first = false;
-                    if (decoded[namePos] == '?')
-                        namePos++;
-                }
 
                 string name;
                 if (valuePos == -1)
