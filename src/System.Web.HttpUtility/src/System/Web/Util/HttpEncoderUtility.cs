@@ -20,7 +20,7 @@ namespace System.Web.Util
         {
             Debug.Assert(n < 0x10);
 
-            return n <= 9 ? (char)(n + (int)'0') : (char)(n - 10 + (int)'a');
+            return n <= 9 ? (char)(n + '0') : (char)(n - 10 + 'a');
         }
 
         // Set of safe chars, from RFC 1738.4 minus '+'
