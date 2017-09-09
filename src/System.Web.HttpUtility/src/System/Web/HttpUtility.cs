@@ -179,7 +179,6 @@ namespace System.Web
             return UrlEncode(str, Encoding.UTF8);
         }
 
-
         public static string UrlPathEncode(string str)
         {
             return HttpEncoder.UrlPathEncode(str);
