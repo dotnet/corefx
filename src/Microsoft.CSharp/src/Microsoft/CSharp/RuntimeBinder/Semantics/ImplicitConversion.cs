@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (_typeDest.GetTypeKind())
                 {
                     case TypeKind.TK_ErrorType:
-                        Debug.Assert(((ErrorType)_typeDest).HasParent());
+                        Debug.Assert(((ErrorType)_typeDest).HasParent);
                         if (_typeSrc != _typeDest)
                         {
                             return false;
@@ -115,7 +115,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         return true;
                     case TypeKind.TK_MethodGroupType:
-                        VSFAIL("Something is wrong with Type.IsNeverSameType()");
+                        Debug.Fail("Something is wrong with Type.IsNeverSameType()");
                         return false;
                     case TypeKind.TK_ArgumentListType:
                         return _typeSrc == _typeDest;
@@ -168,17 +168,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (_typeSrc.GetTypeKind())
                 {
                     default:
-                        VSFAIL("Bad type symbol kind");
+                        Debug.Fail($"Bad type symbol kind: {_typeSrc.GetTypeKind()}");
                         break;
-                    case TypeKind.TK_MethodGroupType:
-                        if (_exprSrc is ExprMemberGroup memGrp)
-                        {
-                            ExprCall outExpr;
-                            bool retVal = _binder.BindGrpConversion(memGrp, _typeDest, _needsExprDest, out outExpr, false);
-                            _exprDest = outExpr;
-                            return retVal;
-                        }
-                        return false;
                     case TypeKind.TK_VoidType:
                     case TypeKind.TK_ErrorType:
                     case TypeKind.TK_ParameterModifierType:
@@ -416,18 +407,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Expr arg1 = _binder.mustCast(_exprSrc, typeSrcBase);
                     ExprClass arg2 = GetExprFactory().CreateClass(typeDstBase);
 
-                    bool convertible;
-                    if (0 != (_flags & CONVERTTYPE.ISEXPLICIT))
-                    {
-                        convertible = _binder.BindExplicitConversion(arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC);
-                    }
-                    else
-                    {
-                        convertible = _binder.BindImplicitConversion(arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC);
-                    }
+                    bool convertible = (_flags & CONVERTTYPE.ISEXPLICIT) != 0
+                        ? _binder.BindExplicitConversion(
+                            arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC)
+                        : _binder.BindImplicitConversion(
+                            arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC);
+
                     if (!convertible)
                     {
-                        VSFAIL("bind(Im|Ex)plicitConversion failed unexpectedly");
+                        Debug.Fail("bind(Im|Ex)plicitConversion failed unexpectedly");
                         return false;
                     }
 
