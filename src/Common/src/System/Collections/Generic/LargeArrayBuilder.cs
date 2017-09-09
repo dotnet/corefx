@@ -43,6 +43,20 @@ namespace System.Collections.Generic
         internal int Column { get; }
 
         /// <summary>
+        /// If this position is at the end of the current buffer, returns the position
+        /// at the start of the next buffer. Otherwise, returns this position.
+        /// </summary>
+        /// <param name="endColumn">The length of the current buffer.</param>
+        public CopyPosition Normalize(int endColumn)
+        {
+            Debug.Assert(Column <= endColumn);
+
+            return Column == endColumn ?
+                new CopyPosition(Row + 1, 0) :
+                this;
+        }
+
+        /// <summary>
         /// Gets a string suitable for display in the debugger.
         /// </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
@@ -186,7 +200,7 @@ namespace System.Collections.Generic
                 arrayIndex += toCopy;
             }
         }
-        
+
         /// <summary>
         /// Copies the contents of this builder to the specified array.
         /// </summary>
@@ -197,9 +211,10 @@ namespace System.Collections.Generic
         /// <returns>The position in this builder that was copied up to.</returns>
         public CopyPosition CopyTo(CopyPosition position, T[] array, int arrayIndex, int count)
         {
+            Debug.Assert(array != null);
             Debug.Assert(arrayIndex >= 0);
-            Debug.Assert(count >= 0 && count <= Count);
-            Debug.Assert(array?.Length - arrayIndex >= count);
+            Debug.Assert(count > 0 && count <= Count);
+            Debug.Assert(array.Length - arrayIndex >= count);
 
             // Go through each buffer, which contains one 'row' of items.
             // The index in each buffer is referred to as the 'column'.
@@ -216,25 +231,33 @@ namespace System.Collections.Generic
             int row = position.Row;
             int column = position.Column;
 
-            for (; count > 0; row++, column = 0)
+            T[] buffer = GetBuffer(row);
+            Debug.Assert(buffer.Length > column);
+
+            int copied = Math.Min(buffer.Length - column, count);
+            Array.Copy(buffer, column, array, arrayIndex, copied);
+
+            arrayIndex += copied;
+            count -= copied;
+
+            if (count == 0)
             {
-                T[] buffer = GetBuffer(index: row);
-
-                // During this iteration, copy until we satisfy `count` or reach the
-                // end of the current buffer.
-                int copyCount = Math.Min(buffer.Length, count);
-
-                if (copyCount > 0)
-                {
-                    Array.Copy(buffer, column, array, arrayIndex, copyCount);
-
-                    arrayIndex += copyCount;
-                    count -= copyCount;
-                    column += copyCount;
-                }
+                return new CopyPosition(row, column + copied).Normalize(buffer.Length);
             }
 
-            return new CopyPosition(row: row, column: column);
+            do
+            {
+                buffer = GetBuffer(++row);
+                Debug.Assert(buffer.Length > 0);
+
+                copied = Math.Min(buffer.Length, count);
+                Array.Copy(buffer, 0, array, arrayIndex, copied);
+
+                arrayIndex += copied;
+                count -= copied;
+            } while (count > 0);
+
+            return new CopyPosition(row, copied).Normalize(buffer.Length);
         }
 
         /// <summary>
