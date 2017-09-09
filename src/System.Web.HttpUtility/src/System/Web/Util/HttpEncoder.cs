@@ -119,34 +119,31 @@ namespace System.Web.Util
 
         internal static string HtmlDecode(string value)
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-
-            return WebUtility.HtmlDecode(value);
+            return string.IsNullOrEmpty(value) ? value : WebUtility.HtmlDecode(value);
         }
 
         internal static void HtmlDecode(string value, TextWriter output)
         {
             if (output == null)
+            {
                 throw new ArgumentNullException(nameof(output));
+            }
+
             output.Write(WebUtility.HtmlDecode(value));
         }
 
         internal static string HtmlEncode(string value)
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-            return WebUtility.HtmlEncode(value);
+            return string.IsNullOrEmpty(value) ? value : WebUtility.HtmlEncode(value);
         }
 
         internal static void HtmlEncode(string value, TextWriter output)
         {
             if (output == null)
+            {
                 throw new ArgumentNullException(nameof(output));
+            }
+
             output.Write(WebUtility.HtmlEncode(value));
         }
 
@@ -462,9 +459,13 @@ namespace System.Web.Util
                 char ch = (char)bytes[offset + i];
 
                 if (ch == ' ')
+                {
                     cSpaces++;
+                }
                 else if (!HttpEncoderUtility.IsUrlSafeChar(ch))
+                {
                     cUnsafe++;
+                }
             }
 
             // nothing to expand?
@@ -529,12 +530,16 @@ namespace System.Web.Util
             for (int i = 0; i < count; i++)
             {
                 if (IsNonAsciiByte(bytes[offset + i]))
+                {
                     cNonAscii++;
+                }
             }
 
             // nothing to expand?
             if (cNonAscii == 0)
+            {
                 return bytes;
+            }
 
             // expand not 'safe' characters into %XX, spaces to +s
             byte[] expandedBytes = new byte[count + cNonAscii * 2];
@@ -644,7 +649,9 @@ namespace System.Web.Util
             // recurse in case there is a query string
             int i = value.IndexOf('?');
             if (i >= 0)
+            {
                 return UrlPathEncodeImpl(value.Substring(0, i)) + value.Substring(i);
+            }
 
             // encode DBCS characters and spaces only
             return HttpEncoderUtility.UrlEncodeSpaces(UrlEncodeNonAscii(value, Encoding.UTF8));
@@ -653,7 +660,10 @@ namespace System.Web.Util
         private static bool ValidateUrlEncodingParameters(byte[] bytes, int offset, int count)
         {
             if (bytes == null && count == 0)
+            {
                 return false;
+            }
+
             if (bytes == null)
             {
                 throw new ArgumentNullException(nameof(bytes));
@@ -707,7 +717,9 @@ namespace System.Web.Util
             internal void AddChar(char ch)
             {
                 if (_numBytes > 0)
+                {
                     FlushBytes();
+                }
 
                 _charBuffer[_numChars++] = ch;
             }
@@ -724,7 +736,9 @@ namespace System.Web.Util
                 */
                 {
                     if (_byteBuffer == null)
+                    {
                         _byteBuffer = new byte[_bufferSize];
+                    }
 
                     _byteBuffer[_numBytes++] = b;
                 }
@@ -733,12 +747,11 @@ namespace System.Web.Util
             internal string GetString()
             {
                 if (_numBytes > 0)
+                {
                     FlushBytes();
+                }
 
-                if (_numChars > 0)
-                    return new string(_charBuffer, 0, _numChars);
-                else
-                    return string.Empty;
+                return _numChars > 0 ? new string(_charBuffer, 0, _numChars) : "";
             }
         }
     }

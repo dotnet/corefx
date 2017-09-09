@@ -20,17 +20,16 @@ namespace System.Web.Util
         {
             Debug.Assert(n < 0x10);
 
-            if (n <= 9)
-                return (char)(n + (int)'0');
-            else
-                return (char)(n - 10 + (int)'a');
+            return n <= 9 ? (char)(n + (int)'0') : (char)(n - 10 + (int)'a');
         }
 
         // Set of safe chars, from RFC 1738.4 minus '+'
         public static bool IsUrlSafeChar(char ch)
         {
             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9'))
+            {
                 return true;
+            }
 
             switch (ch)
             {
@@ -51,7 +50,10 @@ namespace System.Web.Util
         internal static string UrlEncodeSpaces(string str)
         {
             if (str != null && str.IndexOf(' ') >= 0)
+            {
                 str = str.Replace(" ", "%20");
+            }
+
             return str;
         }
     }

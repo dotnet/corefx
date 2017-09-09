@@ -51,7 +51,10 @@ namespace System.Web
             {
                 int count = Count;
                 if (count == 0)
+                {
                     return "";
+                }
+
                 StringBuilder sb = new StringBuilder();
                 string[] keys = AllKeys;
                 for (int i = 0; i < count; i++)
@@ -148,10 +151,7 @@ namespace System.Web
 
         public static string HtmlEncode(object value)
         {
-            if (value == null)
-                return null;
-
-            return HtmlEncode(Convert.ToString(value, CultureInfo.CurrentCulture));
+            return value == null ? null : HtmlEncode(Convert.ToString(value, CultureInfo.CurrentCulture));
         }
 
 
@@ -174,9 +174,7 @@ namespace System.Web
 
         public static string UrlEncode(string str)
         {
-            if (str == null)
-                return null;
-            return UrlEncode(str, Encoding.UTF8);
+            return str == null ? null : UrlEncode(str, Encoding.UTF8);
         }
 
         public static string UrlPathEncode(string str)
@@ -186,37 +184,27 @@ namespace System.Web
 
         public static string UrlEncode(string str, Encoding e)
         {
-            if (str == null)
-                return null;
-            return Encoding.ASCII.GetString(UrlEncodeToBytes(str, e));
+            return str == null ? null : Encoding.ASCII.GetString(UrlEncodeToBytes(str, e));
         }
 
         public static string UrlEncode(byte[] bytes)
         {
-            if (bytes == null)
-                return null;
-            return Encoding.ASCII.GetString(UrlEncodeToBytes(bytes));
+            return bytes == null ? null : Encoding.ASCII.GetString(UrlEncodeToBytes(bytes));
         }
 
         public static string UrlEncode(byte[] bytes, int offset, int count)
         {
-            if (bytes == null)
-                return null;
-            return Encoding.ASCII.GetString(UrlEncodeToBytes(bytes, offset, count));
+            return bytes == null ? null : Encoding.ASCII.GetString(UrlEncodeToBytes(bytes, offset, count));
         }
 
         public static byte[] UrlEncodeToBytes(string str)
         {
-            if (str == null)
-                return null;
-            return UrlEncodeToBytes(str, Encoding.UTF8);
+            return str == null ? null : UrlEncodeToBytes(str, Encoding.UTF8);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] bytes)
         {
-            if (bytes == null)
-                return null;
-            return UrlEncodeToBytes(bytes, 0, bytes.Length);
+            return bytes == null ? null : UrlEncodeToBytes(bytes, 0, bytes.Length);
         }
 
         [Obsolete(
@@ -224,50 +212,41 @@ namespace System.Web
          )]
         public static byte[] UrlEncodeUnicodeToBytes(string str)
         {
-            if (str == null)
-                return null;
-            return Encoding.ASCII.GetBytes(UrlEncodeUnicode(str));
+            return str == null ? null : Encoding.ASCII.GetBytes(UrlEncodeUnicode(str));
         }
 
         public static string UrlDecode(string str)
         {
-            if (str == null)
-                return null;
-            return UrlDecode(str, Encoding.UTF8);
+            return str == null ? null : UrlDecode(str, Encoding.UTF8);
         }
 
         public static string UrlDecode(byte[] bytes, Encoding e)
         {
-            if (bytes == null)
-                return null;
-            return UrlDecode(bytes, 0, bytes.Length, e);
+            return bytes == null ? null : UrlDecode(bytes, 0, bytes.Length, e);
         }
 
         public static byte[] UrlDecodeToBytes(string str)
         {
-            if (str == null)
-                return null;
-            return UrlDecodeToBytes(str, Encoding.UTF8);
+            return str == null ? null : UrlDecodeToBytes(str, Encoding.UTF8);
         }
 
         public static byte[] UrlDecodeToBytes(string str, Encoding e)
         {
-            if (str == null)
-                return null;
-            return UrlDecodeToBytes(e.GetBytes(str));
+            return str == null ? null : UrlDecodeToBytes(e.GetBytes(str));
         }
 
         public static byte[] UrlDecodeToBytes(byte[] bytes)
         {
-            if (bytes == null)
-                return null;
-            return UrlDecodeToBytes(bytes, 0, bytes.Length);
+            return bytes == null ? null : UrlDecodeToBytes(bytes, 0, bytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(string str, Encoding e)
         {
             if (str == null)
+            {
                 return null;
+            }
+
             var bytes = e.GetBytes(str);
             return HttpEncoder.UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
         }
