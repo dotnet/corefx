@@ -19,9 +19,8 @@ namespace System.Web.Util
             builder.Append(((int)c).ToString("x4", CultureInfo.InvariantCulture));
         }
 
-        private static bool CharRequiresJavaScriptEncoding(char c)
-        {
-            return c < 0x20 // control chars always have to be encoded
+        private static bool CharRequiresJavaScriptEncoding(char c) =>
+            c < 0x20 // control chars always have to be encoded
                 || c == '\"' // chars which must be encoded per JSON spec
                 || c == '\\'
                 || c == '\'' // HTML-sensitive chars encoded for safety
@@ -31,7 +30,6 @@ namespace System.Web.Util
                 || c == '\u0085' // newline chars (see Unicode 6.2, Table 5-1 [http://www.unicode.org/versions/Unicode6.2.0/ch05.pdf]) have to be encoded
                 || c == '\u2028'
                 || c == '\u2029';
-        }
 
         internal static string HtmlAttributeEncode(string value)
         {
@@ -117,10 +115,7 @@ namespace System.Web.Util
             }
         }
 
-        internal static string HtmlDecode(string value)
-        {
-            return string.IsNullOrEmpty(value) ? value : WebUtility.HtmlDecode(value);
-        }
+        internal static string HtmlDecode(string value) => string.IsNullOrEmpty(value) ? value : WebUtility.HtmlDecode(value);
 
         internal static void HtmlDecode(string value, TextWriter output)
         {
@@ -132,10 +127,7 @@ namespace System.Web.Util
             output.Write(WebUtility.HtmlDecode(value));
         }
 
-        internal static string HtmlEncode(string value)
-        {
-            return string.IsNullOrEmpty(value) ? value : WebUtility.HtmlEncode(value);
-        }
+        internal static string HtmlEncode(string value) => string.IsNullOrEmpty(value) ? value : WebUtility.HtmlEncode(value);
 
         internal static void HtmlEncode(string value, TextWriter output)
         {
@@ -173,10 +165,7 @@ namespace System.Web.Util
             return -1;
         }
 
-        private static bool IsNonAsciiByte(byte b)
-        {
-            return (b >= 0x7F || b < 0x20);
-        }
+        private static bool IsNonAsciiByte(byte b) => b >= 0x7F || b < 0x20;
 
         internal static string JavaScriptStringEncode(string value)
         {

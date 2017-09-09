@@ -8,13 +8,14 @@ namespace System.Web.Util
 {
     internal static class HttpEncoderUtility
     {
-        public static int HexToInt(char h)
-        {
-            return (h >= '0' && h <= '9') ? h - '0' :
-                (h >= 'a' && h <= 'f') ? h - 'a' + 10 :
-                    (h >= 'A' && h <= 'F') ? h - 'A' + 10 :
-                        -1;
-        }
+        public static int HexToInt(char h) =>
+            h >= '0' && h <= '9'
+                ? h - '0'
+                : h >= 'a' && h <= 'f'
+                    ? h - 'a' + 10
+                    : h >= 'A' && h <= 'F'
+                        ? h - 'A' + 10
+                        : -1;
 
         public static char IntToHex(int n)
         {
@@ -47,14 +48,6 @@ namespace System.Web.Util
         }
 
         //  Helper to encode spaces only
-        internal static string UrlEncodeSpaces(string str)
-        {
-            if (str != null && str.IndexOf(' ') >= 0)
-            {
-                str = str.Replace(" ", "%20");
-            }
-
-            return str;
-        }
+        internal static string UrlEncodeSpaces(string str) => str != null && str.IndexOf(' ') >= 0 ? str.Replace(" ", "%20") : str;
     }
 }
