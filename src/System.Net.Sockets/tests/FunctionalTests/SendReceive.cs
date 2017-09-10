@@ -858,7 +858,7 @@ namespace System.Net.Sockets.Tests
         }
     }
 
-    public class SendReceive
+    public class SendReceiveGeneral
     {
         [Fact]
         public void SendRecvIovMaxTcp_Success()
