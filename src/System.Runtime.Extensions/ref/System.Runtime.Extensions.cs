@@ -907,6 +907,7 @@ namespace System
         public virtual int Next(int maxValue) { throw null; }
         public virtual int Next(int minValue, int maxValue) { throw null; }
         public virtual void NextBytes(byte[] buffer) { }
+        public virtual void NextBytes(Span<byte> buffer) { }
         public virtual double NextDouble() { throw null; }
         protected virtual double Sample() { throw null; }
     }
@@ -1280,6 +1281,8 @@ namespace System.IO
         public virtual void Write(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void Write(ulong value) { }
+        public virtual void Write(ReadOnlySpan<byte> span) { }
+        public virtual void Write(ReadOnlySpan<char> span) { }
         protected void Write7BitEncodedInt(int value) { }
     }
     public sealed partial class BufferedStream : System.IO.Stream

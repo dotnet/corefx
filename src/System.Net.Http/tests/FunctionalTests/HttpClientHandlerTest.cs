@@ -526,6 +526,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(23769)]
         [ActiveIssue(22707, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
@@ -808,16 +809,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {
-            if (ManagedHandlerTestHelpers.IsEnabled)
-            {
-                // TODO #23129: The managed handler is currently getting Ok when it should be getting Unauthorized.
-                return;
-            }
-
             var handler = new HttpClientHandler();
             handler.Credentials = _credential;
             using (var client = new HttpClient(handler))
@@ -1623,6 +1617,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(23768)]
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // takes several seconds
         [Fact]
@@ -1895,6 +1890,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
+        [ActiveIssue(23770, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
@@ -1954,7 +1950,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22735)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]

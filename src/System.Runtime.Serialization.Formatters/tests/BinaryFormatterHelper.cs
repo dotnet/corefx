@@ -129,14 +129,23 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         private static void SanityCheckBlob(object obj, string[] blobs)
         {
+            // These types are unstable during serialization and produce different blobs.
+            if (obj is WeakReference<Point> ||
+                obj is Collections.Specialized.HybridDictionary ||
+                obj is TimeZoneInfo.AdjustmentRule)
+            {
+                return;
+            }
+
+            // Exceptions in Net Native can't be reflected and therefore skipping blob sanity check
+            if (obj is Exception && PlatformDetection.IsNetNative)
+            {
+                return;
+            }
+
             // Check if runtime generated blob is the same as the stored one
             int frameworkBlobNumber = PlatformDetection.IsFullFramework ? 1 : 0;
-            if (frameworkBlobNumber < blobs.Length &&
-                // WeakReference<Point> and HybridDictionary with default constructor are generating
-                // different blobs at runtime for some obscure reason. Excluding those from the check.
-                !(obj is WeakReference<Point>) &&
-                !(obj is Collections.Specialized.HybridDictionary) &&
-                !(obj is TimeZoneInfo.AdjustmentRule))
+            if (frameworkBlobNumber < blobs.Length)
             {
                 string runtimeBlob = SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full);
 
@@ -144,7 +153,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 string runtimeComparableBlob = CreateComparableBlobInfo(runtimeBlob);
 
                 Assert.True(storedComparableBlob == runtimeComparableBlob,
-                    $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}Stored blob: {blobs[frameworkBlobNumber]}{Environment.NewLine}Generated runtime blob: {runtimeBlob}");
+                    $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}{Environment.NewLine}" +
+                    $"-------------------- Stored blob ---------------------{Environment.NewLine}" +
+                    $"Encoded: {blobs[frameworkBlobNumber]}{Environment.NewLine}" +
+                    $"Decoded: {storedComparableBlob}{Environment.NewLine}{Environment.NewLine}" +
+                    $"--------------- Runtime generated blob ---------------{Environment.NewLine}" +
+                    $"Encoded: {runtimeBlob}{Environment.NewLine}" +
+                    $"Decoded: {runtimeComparableBlob}");
             }
         }
 
@@ -292,38 +307,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             byte[] raw = Convert.FromBase64String(base64Str);
             return DeserializeRawToObject(raw, assemblyStyle);
-        }
-
-        private static T FormatterClone<T>(
-            T obj,
-            ISerializationSurrogate surrogate = null,
-            FormatterAssemblyStyle assemblyFormat = FormatterAssemblyStyle.Full,
-            TypeFilterLevel filterLevel = TypeFilterLevel.Full,
-            FormatterTypeStyle typeFormat = FormatterTypeStyle.TypesAlways)
-        {
-            BinaryFormatter f;
-            if (surrogate == null)
-            {
-                f = new BinaryFormatter();
-            }
-            else
-            {
-                var c = new StreamingContext();
-                var s = new SurrogateSelector();
-                s.AddSurrogate(obj.GetType(), c, surrogate);
-                f = new BinaryFormatter(s, c);
-            }
-            f.AssemblyFormat = assemblyFormat;
-            f.FilterLevel = filterLevel;
-            f.TypeFormat = typeFormat;
-
-            using (var s = new MemoryStream())
-            {
-                f.Serialize(s, obj);
-                Assert.NotEqual(0, s.Position);
-                s.Position = 0;
-                return (T)(f.Deserialize(s));
-            }
         }
 
         private class DelegateBinder : SerializationBinder

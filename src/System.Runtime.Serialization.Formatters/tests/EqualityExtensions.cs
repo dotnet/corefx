@@ -903,6 +903,30 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.MinorRevision == other.MinorRevision;
         }
 
+        public static bool IsEqual(this Exception @this, Exception other)
+        {
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace &&
+                @this.ToString() == other.ToString())) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.Data, other.Data) &&
+                @this.Message == other.Message &&
+                @this.Source == other.Source &&
+                // On Net Native we can't reflect on Exceptions and change its HResult
+                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                BinaryFormatterTests.CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this AggregateException @this, AggregateException other)
+        {
+            return IsEqual(@this as Exception, other as Exception) &&
+                BinaryFormatterTests.CheckSequenceEquals(@this.InnerExceptions, other.InnerExceptions);
+        }
+
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
         {
             public bool Equals(T x, T y)

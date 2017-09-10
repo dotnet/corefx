@@ -26,6 +26,11 @@ namespace System
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && !File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")));
         public static int WindowsVersion => GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
+        public static Version ICUVersion => new Version(0, 0, 0, 0);
+        public static bool IsRedHat => false;
+        public static bool IsNotRedHat => true;
+        public static bool IsRedHat69 => false;
+        public static bool IsNotRedHat69 => true;
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
@@ -288,7 +293,7 @@ namespace System
         private static extern bool CloseHandle(IntPtr handle);
 
         [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccesss, out IntPtr TokenHandle);
+        private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
 
         // The process handle does NOT need closing
         [DllImport("kernel32.dll", ExactSpelling = true)]
