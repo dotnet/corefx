@@ -398,8 +398,34 @@ namespace System.IO
             {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteCore(new ReadOnlySpan<char>(buffer, index, count));
+            }
+            else
+            {
+                base.Write(buffer, index, count);
+            }
+        }
 
+        public override void Write(ReadOnlySpan<char> source)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteCore(source);
+            }
+            else
+            {
+                base.Write(source);
+            }
+        }
+
+        private void WriteCore(ReadOnlySpan<char> source)
+        {
             CheckAsyncTaskInProgress();
+
+            int count = source.Length;
+            int index = 0;
 
             // Threshold of 4 was chosen after running perf tests
             if (count <= 4)
@@ -412,7 +438,7 @@ namespace System.IO
                     }
 
                     Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    _charBuffer[_charPos] = buffer[index];
+                    _charBuffer[_charPos] = source[index];
                     _charPos++;
                     index++;
                     count--;
@@ -434,7 +460,7 @@ namespace System.IO
                     }
 
                     Debug.Assert(n > 0, "StreamWriter::Write(char[], int, int) isn't making progress!  This is most likely a race condition in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), _charBuffer, _charPos * sizeof(char), n * sizeof(char));
+                    source.Slice(index, n).CopyTo(new Span<char>(_charBuffer, _charPos, n));
                     _charPos += n;
                     index += n;
                     count -= n;
@@ -444,21 +470,6 @@ namespace System.IO
             if (_autoFlush)
             {
                 Flush(true, false);
-            }
-        }
-
-        public override void Write(ReadOnlySpan<char> source)
-        {
-            char[] buffer = ArrayPool<char>.Shared.Rent(source.Length);
-
-            try
-            {
-                source.CopyTo(new Span<char>(buffer));
-                Write(buffer, 0, source.Length);
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer);
             }
         }
 
@@ -529,6 +540,31 @@ namespace System.IO
                 value = String.Empty;
             }
 
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteLineCore(value.AsSpan());
+            }
+            else
+            {
+                base.WriteLine(value);
+            }
+        }
+
+        public override void WriteLine(ReadOnlySpan<char> source)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteLineCore(source);
+            }
+            else
+            {
+                base.WriteLine(source);
+            }
+
+        }
+
+        private void WriteLineCore(ReadOnlySpan<char> value)
+        {
             CheckAsyncTaskInProgress();
 
             int count = value.Length;
@@ -547,7 +583,7 @@ namespace System.IO
                 }
 
                 Debug.Assert(n > 0, "StreamWriter::WriteLine(String) isn't making progress!  This is most likely a race condition in user code.");
-                value.CopyTo(index, _charBuffer, _charPos, n);
+                value.Slice(index, n).CopyTo(new Span<char>(_charBuffer, _charPos, n));
                 _charPos += n;
                 index += n;
                 count -= n;
@@ -569,11 +605,6 @@ namespace System.IO
             {
                 Flush(true, false);
             }
-        }
-
-        public override void WriteLine(ReadOnlySpan<char> source)
-        {
-            WriteLine(new string(source.ToArray()));
         }
 
         #region Task based Async APIs
