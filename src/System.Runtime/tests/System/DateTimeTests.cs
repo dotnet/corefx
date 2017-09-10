@@ -969,34 +969,34 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Parse_ValidInput_Suceeds_MemberData()
         {
-            yield return new object[] { "1234 12", null, new DateTime(1234, 12, 1, 0, 0, 0) };
-            yield return new object[] { "12 1234", null, new DateTime(1234, 12, 1, 0, 0, 0) };
-            yield return new object[] { "12 1234 11", null, new DateTime(1234, 12, 11, 0, 0, 0) };
-            yield return new object[] { "1234 12 13", null, new DateTime(1234, 12, 13, 0, 0, 0) };
-            yield return new object[] { "12 13 1234", null, new DateTime(1234, 12, 13, 0, 0, 0) };
-            yield return new object[] { "1 1 1", null, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "2 2 2Z", null, null };
-            yield return new object[] { "#10/10/2095#\0", null, new DateTime(2095, 10, 10, 0, 0, 0) };
+            yield return new object[] { "1234 12", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
+            yield return new object[] { "12 1234", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
+            yield return new object[] { "12 1234 11", CultureInfo.InvariantCulture, new DateTime(1234, 12, 11, 0, 0, 0) };
+            yield return new object[] { "1234 12 13", CultureInfo.InvariantCulture, new DateTime(1234, 12, 13, 0, 0, 0) };
+            yield return new object[] { "12 13 1234", CultureInfo.InvariantCulture, new DateTime(1234, 12, 13, 0, 0, 0) };
+            yield return new object[] { "1 1 1", CultureInfo.InvariantCulture, new DateTime(2001, 1, 1, 0, 0, 0) };
+            yield return new object[] { "2 2 2Z", CultureInfo.InvariantCulture, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(2002, 2, 2, 0, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+            yield return new object[] { "#10/10/2095#\0", CultureInfo.InvariantCulture, new DateTime(2095, 10, 10, 0, 0, 0) };
 
             DateTime today = DateTime.Today;
 
-            var hebrewCulture = new CultureInfo("he-IL");
-            hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
-            yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
+            if (PlatformDetection.IsWindows) // [ActiveIssue(23923)]
+            {
+                var hebrewCulture = new CultureInfo("he-IL");
+                hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
+                yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
+            }
 
-            var mongolianCulture = new CultureInfo("mn-MN");
-            yield return new object[] { today.ToString(mongolianCulture.DateTimeFormat.FullDateTimePattern, mongolianCulture), mongolianCulture, today };
+            // [ActiveIssue(23922)] // This is failing on Windows 8.1
+            //var mongolianCulture = new CultureInfo("mn-MN");
+            //yield return new object[] { today.ToString(mongolianCulture.DateTimeFormat.FullDateTimePattern, mongolianCulture), mongolianCulture, today };
         }
 
         [Theory]
         [MemberData(nameof(Parse_ValidInput_Suceeds_MemberData))]
         public static void Parse_ValidInput_Suceeds(string input, CultureInfo culture, DateTime? expected)
         {
-            DateTime result = DateTime.Parse(input, culture);
-            if (expected != null)
-            {
-                Assert.Equal(expected.Value, result);
-            }
+            Assert.Equal(expected, DateTime.Parse(input, culture));
         }
 
         public static IEnumerable<object[]> ParseExact_ValidInput_Succeeds_MemberData()
@@ -1024,19 +1024,20 @@ namespace System.Tests
             yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 10, 11, 1, 23, 45) };
             yield return new object[] { "9/8/2017 10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 10, 11, 12) };
             yield return new object[] { "9/8/2017 20:11:12 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 20, 11, 12) };
-            yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0500", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, null };
+            yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0000", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, new DateTime(2017, 9, 8, 11, 18, 19, DateTimeKind.Utc) };
             yield return new object[] { "1234-05-06T07:00:00.8Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, null };
-            yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, null };
+            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+            yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
 
             var hebrewCulture = new CultureInfo("he-IL");
             hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
+            DateTime today = DateTime.Today;
             foreach (string pattern in hebrewCulture.DateTimeFormat.GetAllDateTimePatterns())
             {
-                yield return new object[] { DateTime.Today.ToString(pattern, hebrewCulture), pattern, hebrewCulture, DateTimeStyles.None, null };
+                yield return new object[] { today.ToString(pattern, hebrewCulture), pattern, hebrewCulture, DateTimeStyles.None, null };
             }
         }
 
@@ -1053,55 +1054,66 @@ namespace System.Tests
             Assert.Equal(result1, result2);
             Assert.Equal(result1, result3);
             Assert.Equal(result1, result4);
-            if (expected != null)
+
+            if (expected != null) // some inputs don't roundtrip well
             {
+                // Normalize values to make comparison easier
+                if (expected.Value.Kind != DateTimeKind.Utc)
+                {
+                    expected = expected.Value.ToUniversalTime();
+                }
+                if (result1.Kind != DateTimeKind.Utc)
+                {
+                    result1 = result1.ToUniversalTime();
+                }
+
                 Assert.Equal(expected, result1);
             }
         }
 
         public static IEnumerable<object[]> ParseExact_InvalidInputs_Fail_MemberData()
         {
-            yield return new object[] { "6/28/2004 13:00:00 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "6/28/2004 03:00:00 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "6/28/2004 13:00:00 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "6/28/2004 03:00:00 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "mm", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "ss", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "Fep", "MMM", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "Jantember", "MMMM", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "Fep", "MMM", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "Jantember", "MMMM", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "123", "YY", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "12345", "YYYY", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "123", "YY", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "12345", "YYYY", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "99", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "99", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "hh", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "1", "ff", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123", "ff", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "123456", "fffff", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "1234", "fffff", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "1", "ff", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123", "ff", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "123456", "fffff", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "1234", "fffff", CultureInfo.InvariantCulture, DateTimeStyles.None };
 
-            yield return new object[] { "AM", "t", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "PM", "t", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "PM", "ttt", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "AAM", "tt", CultureInfo.InvariantCulture, DateTimeStyles.None, };
-            yield return new object[] { "CM", "tt", CultureInfo.InvariantCulture, DateTimeStyles.None, };
+            yield return new object[] { "AM", "t", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "PM", "t", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "PM", "ttt", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "AAM", "tt", CultureInfo.InvariantCulture, DateTimeStyles.None };
+            yield return new object[] { "CM", "tt", CultureInfo.InvariantCulture, DateTimeStyles.None };
         }
 
         [Theory]
