@@ -1630,6 +1630,29 @@ namespace System
         public MemberAccessException(string message, System.Exception inner) { }
         protected MemberAccessException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
+    public struct Memory<T>
+    {
+        public static Memory<T> Empty { get { throw null; } }
+        public Memory(T[] array) { throw null;}
+        public Memory(T[] array, int start, int length) { throw null;}
+        internal Memory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
+        public bool IsEmpty { get { throw null; } }
+        public int Length { get { throw null; } }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(Memory<T> other) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public override int GetHashCode() { throw null; }
+        public static implicit operator Memory<T>(T[] array) { throw null; }
+        public static implicit operator Memory<T>(ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) { throw null; }
+        public Memory<T> Slice(int start) { throw null; }
+        public Memory<T> Slice(int start, int length) { throw null; }
+        public Span<T> Span { get { throw null; } }
+        public unsafe Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
+        public T[] ToArray() { throw null; }
+        public bool TryGetArray(out ArraySegment<T> arraySegment) { throw null; }
+    }
     public partial class MethodAccessException : System.MemberAccessException
     {
         public MethodAccessException() { }
@@ -1830,6 +1853,29 @@ namespace System
         public RankException(string message) { }
         public RankException(string message, System.Exception innerException) { }
         protected RankException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+    public struct ReadOnlyMemory<T>
+    {
+        public static ReadOnlyMemory<T> Empty { get { throw null; } }
+        public ReadOnlyMemory(T[] array) { throw null;}
+        public ReadOnlyMemory(T[] array, int start, int length) { throw null;}
+        internal ReadOnlyMemory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
+        public bool IsEmpty { get { throw null; } }
+        public int Length { get { throw null; } }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ReadOnlyMemory<T> other) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public override int GetHashCode() { throw null; }
+        public static implicit operator ReadOnlyMemory<T>(T[] array) { throw null; }
+        public static implicit operator ReadOnlyMemory<T>(ArraySegment<T> arraySegment) { throw null; }
+        public ReadOnlyMemory<T> Slice(int start) { throw null; }
+        public ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
+        public ReadOnlySpan<T> Span { get { throw null; } }
+        public unsafe Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
+        public T[] ToArray() { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public bool DangerousTryGetArray(out ArraySegment<T> arraySegment) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ReadOnlySpan<T>
@@ -2323,20 +2369,27 @@ namespace System
         public static System.TimeSpan operator +(System.TimeSpan t) { throw null; }
         public static System.TimeSpan Parse(string s) { throw null; }
         public static System.TimeSpan Parse(string input, System.IFormatProvider formatProvider) { throw null; }
+        public static System.TimeSpan Parse(System.ReadOnlySpan<char> input, System.IFormatProvider formatProvider = null) { throw null; }
         public static System.TimeSpan ParseExact(string input, string format, System.IFormatProvider formatProvider) { throw null; }
         public static System.TimeSpan ParseExact(string input, string format, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles) { throw null; }
+        public static System.TimeSpan ParseExact(ReadOnlySpan<char> input, string format, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
         public static System.TimeSpan ParseExact(string input, string[] formats, System.IFormatProvider formatProvider) { throw null; }
         public static System.TimeSpan ParseExact(string input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles) { throw null; }
+        public static System.TimeSpan ParseExact(System.ReadOnlySpan<char> input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
         public System.TimeSpan Subtract(System.TimeSpan ts) { throw null; }
         public override string ToString() { throw null; }
         public string ToString(string format) { throw null; }
         public string ToString(string format, System.IFormatProvider formatProvider) { throw null; }
+        public bool TryFormat(System.Span<char> destination, out int charsWritten, string format = null, System.IFormatProvider provider = null) { throw null; }
         public static bool TryParse(string input, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> input, out System.TimeSpan result, System.IFormatProvider formatProvider = null) { throw null; }
         public static bool TryParse(string s, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string format, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string format, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string format, System.IFormatProvider formatProvider, out System.TimeSpan result, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
     }
     [ObsoleteAttribute("System.TimeZone has been deprecated.  Please investigate the use of System.TimeZoneInfo instead.")]
     public abstract partial class TimeZone
@@ -2729,6 +2782,7 @@ namespace System
         public virtual bool IsSecuritySafeCritical { get { throw null; } }
         public virtual bool IsSecurityTransparent { get { throw null; } }
         public virtual bool IsSerializable { get { throw null; } }
+        public virtual bool IsSignatureType { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
         public virtual bool IsTypeDefinition { get { throw null; } }
         public virtual bool IsSZArray { get { throw null; } }
@@ -2790,6 +2844,11 @@ namespace System
         public System.Reflection.MethodInfo GetMethod(string name, System.Type[] types) { throw null; }
         public System.Reflection.MethodInfo GetMethod(string name, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { throw null; }
         protected abstract System.Reflection.MethodInfo GetMethodImpl(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        public System.Reflection.MethodInfo GetMethod(string name, int genericParameterCount, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { throw null; }
+        public System.Reflection.MethodInfo GetMethod(string name, int genericParameterCount, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { throw null; }
+        public System.Reflection.MethodInfo GetMethod(string name, int genericParameterCount, System.Type[] types) { throw null; }
+        public System.Reflection.MethodInfo GetMethod(string name, int genericParameterCount, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { throw null; }
+        protected virtual System.Reflection.MethodInfo GetMethodImpl(string name, int genericParameterCount, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { throw null; }
         public System.Reflection.MethodInfo[] GetMethods() { throw null; }
         public abstract System.Reflection.MethodInfo[] GetMethods(System.Reflection.BindingFlags bindingAttr);
         public System.Type GetNestedType(string name) { throw null; }
@@ -2848,6 +2907,7 @@ namespace System
         public virtual System.Type MakeByRefType() { throw null; }
         public virtual System.Type MakeGenericType(params System.Type[] typeArguments) { throw null; }
         public virtual System.Type MakePointerType() { throw null; }
+        public static Type MakeGenericMethodParameter(int position) { throw null; }
         public static System.Type ReflectionOnlyGetType(System.String typeName, bool throwIfNotFound, bool ignoreCase) { throw null; }
         public override string ToString() { throw null; }
     }
@@ -3759,6 +3819,38 @@ namespace System.Runtime.CompilerServices
             [System.Security.SecurityCriticalAttribute]
             public void UnsafeOnCompleted(System.Action continuation) { }
         }
+    }
+}
+namespace System.Buffers
+{
+    public unsafe struct MemoryHandle : IDisposable 
+    {
+        [System.CLSCompliantAttribute(false)]
+        public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public void* PinnedPointer { get { throw null; } }
+        public void Dispose()  { throw null; }
+    }
+
+    public interface IRetainable 
+    {
+        bool Release();
+        void Retain();
+    }
+    
+    public abstract class OwnedMemory<T> : IDisposable, IRetainable 
+    {
+        public Memory<T> AsMemory { get { throw null; } }
+        public abstract bool IsDisposed { get; }
+        protected abstract bool IsRetained { get; }
+        public abstract int Length { get; }
+        public abstract Span<T> AsSpan();
+        public void Dispose() { throw null; }
+        protected abstract void Dispose(bool disposing);
+        public abstract MemoryHandle Pin();
+        public abstract bool Release();
+        public abstract void Retain();
+        protected internal abstract bool TryGetArray(out ArraySegment<T> arraySegment);
     }
 }
 namespace System.Collections
@@ -5434,6 +5526,7 @@ namespace System.Reflection
         CreateInstance = 512,
         DeclaredOnly = 2,
         Default = 0,
+        DoNotWrapExceptions = 33554432, 
         ExactBinding = 65536,
         FlattenHierarchy = 64,
         GetField = 1024,
@@ -6730,6 +6823,31 @@ namespace System.Runtime.InteropServices
     {
         public FieldOffsetAttribute(int offset) { }
         public int Value { get { throw null; } }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct GCHandle
+    {
+        public bool IsAllocated { get { throw null; } }
+        public object Target {get { throw null; } set { } }
+        public System.IntPtr AddrOfPinnedObject() { throw null; }
+        public static System.Runtime.InteropServices.GCHandle Alloc(object value) { throw null; }
+        public static System.Runtime.InteropServices.GCHandle Alloc(object value, System.Runtime.InteropServices.GCHandleType type) { throw null; }
+        public override bool Equals(object o) { throw null; }
+        public void Free() { }
+        public static System.Runtime.InteropServices.GCHandle FromIntPtr(System.IntPtr value) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static bool operator ==(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { throw null; }
+        public static explicit operator System.Runtime.InteropServices.GCHandle(System.IntPtr value) { throw null; }
+        public static explicit operator System.IntPtr(System.Runtime.InteropServices.GCHandle value) { throw null; }
+        public static bool operator !=(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { throw null; }
+        public static System.IntPtr ToIntPtr(System.Runtime.InteropServices.GCHandle value) { throw null; }
+    }
+    public enum GCHandleType
+    {
+        Normal = 2,
+        Pinned = 3,
+        Weak = 0,
+        WeakTrackResurrection = 1,
     }
     public enum LayoutKind
     {
