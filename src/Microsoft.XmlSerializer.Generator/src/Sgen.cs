@@ -82,6 +82,7 @@ namespace Microsoft.XmlSerializer.Generator
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
                         }
+
                         assembly = value;
                     }
                     else
