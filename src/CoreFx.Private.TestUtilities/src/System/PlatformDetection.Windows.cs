@@ -120,18 +120,22 @@ namespace System
 
         public static string GetDistroVersionString() { return ""; }
 
-        private static int s_isWinRT = -1;
+        private static int s_isInAppContainer = -1;
 
-        public static bool IsWinRT
+        public static bool IsInAppContainer
         {
+            // This actually checks whether code is running in a modern app. 
+            // Currently this is the only situation where we run in app container.
+            // If we want to distinguish the two cases in future,
+            // EnvironmentHelpers.IsAppContainerProcess in desktop code shows how to check for the AC token.
             get
             {
-                if (s_isWinRT != -1)
-                    return s_isWinRT == 1;
+                if (s_isInAppContainer != -1)
+                    return s_isInAppContainer == 1;
 
                 if (!IsWindows || IsWindows7)
                 {
-                    s_isWinRT = 0;
+                    s_isInAppContainer = 0;
                     return false;
                 }
 
@@ -143,7 +147,7 @@ namespace System
                     switch (result)
                     {
                         case 15703: // APPMODEL_ERROR_NO_APPLICATION
-                            s_isWinRT = 0;
+                            s_isInAppContainer = 0;
                             break;
                         case 0:     // ERROR_SUCCESS
                         case 122:   // ERROR_INSUFFICIENT_BUFFER
@@ -151,7 +155,7 @@ namespace System
                                     // not NO_APPLICATION and we're not actually giving a buffer here. The
                                     // API will always return NO_APPLICATION if we're not running under a
                                     // WinRT process, no matter what size the buffer is.
-                            s_isWinRT = 1;
+                            s_isInAppContainer = 1;
                             break;
                         default:
                             throw new InvalidOperationException($"Failed to get AppId, result was {result}.");
@@ -164,7 +168,7 @@ namespace System
                     if (e.GetType().FullName.Equals("System.EntryPointNotFoundException", StringComparison.Ordinal))
                     {
                         // API doesn't exist, likely pre Win8
-                        s_isWinRT = 0;
+                        s_isInAppContainer = 0;
                     }
                     else
                     {
@@ -172,7 +176,7 @@ namespace System
                     }
                 }
 
-                return s_isWinRT == 1;
+                return s_isInAppContainer == 1;
             }
         }
 
@@ -185,7 +189,7 @@ namespace System
                 if (s_isWindowsElevated != -1)
                     return s_isWindowsElevated == 1;
 
-                if (!IsWindows || IsWinRT)
+                if (!IsWindows || IsInAppContainer)
                 {
                     s_isWindowsElevated = 0;
                     return false;
