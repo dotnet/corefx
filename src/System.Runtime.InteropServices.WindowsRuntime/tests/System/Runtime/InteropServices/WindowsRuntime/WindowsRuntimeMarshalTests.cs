@@ -257,7 +257,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime.Tests
             AssertExtensions.Throws<ArgumentNullException>("removeMethod", () => WindowsRuntimeMarshal.RemoveAllEventHandlers(null));
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsInAppContainerSupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWinRTSupported))]
         [InlineData("")]
         [InlineData("HString")]
         public void StringToHString_PtrToHString_ReturnsExpected(string s)
@@ -281,7 +281,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsInAppContainerSupported))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWinRTSupported))]
         public void StringToHString_NullString_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("s", () => WindowsRuntimeMarshal.StringToHString(null));
