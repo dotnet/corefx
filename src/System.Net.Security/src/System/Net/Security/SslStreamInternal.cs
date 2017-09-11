@@ -249,7 +249,7 @@ namespace System.Net.Security
 
             if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
             {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "WriteAsync", "write"));
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(WriteAsync), "write"));
             }
 
             if (count <= _sslState.MaxDataSize)
