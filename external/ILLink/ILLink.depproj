@@ -8,7 +8,7 @@
     <EnableBinPlacing>false</EnableBinPlacing>
     <NugetRuntimeIdentifier>$(ToolRuntimeRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
-    <ILLinkTasksPackageId>ILLink.Tasks</ILLinkTasksPackageId>
+    <ILLinkTasksPackageId>illink.tasks</ILLinkTasksPackageId>
     <ILLinkTasksPackageVersion>0.1.4-preview-981901</ILLinkTasksPackageVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -20,9 +20,17 @@
   <Target Name="IncludeToolsFiles"
           AfterTargets="ResolveNuGetPackages">
     <ItemGroup>
+      <ReferenceCopyLocalPaths Include="$(PackagesDir)\$(ILLinkTasksPackageId)\$(ILLinkTasksPackageVersion)\tools\netcoreapp2.0\*.*">
+        <NuGetPackageId>$(ILLinkTasksPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(ILLinkTasksPackageVersion)</NuGetPackageVersion>
+        <SubFolder>/netcoreapp2.0/</SubFolder>
+      </ReferenceCopyLocalPaths>
+    </ItemGroup>
+    <ItemGroup>
       <ReferenceCopyLocalPaths Include="$(PackagesDir)\$(ILLinkTasksPackageId)\$(ILLinkTasksPackageVersion)\tools\net46\*.*">
         <NuGetPackageId>$(ILLinkTasksPackageId)</NuGetPackageId>
         <NuGetPackageVersion>$(ILLinkTasksPackageVersion)</NuGetPackageVersion>
+        <SubFolder>/net46/</SubFolder>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
   </Target>
