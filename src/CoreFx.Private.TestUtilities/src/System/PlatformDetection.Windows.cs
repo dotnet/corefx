@@ -59,6 +59,7 @@ namespace System
             }
         }
 
+        public static bool IsWindows => true;
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
 
