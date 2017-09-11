@@ -1832,9 +1832,7 @@ namespace System
         protected RankException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    [System.Runtime.CompilerServices.IsReadOnly]
-    [System.Runtime.CompilerServices.IsByRefLike]
-    public partial struct ReadOnlySpan<T>
+    public readonly ref struct ReadOnlySpan<T>
     {
         public static ReadOnlySpan<T> Empty { get { throw null; } }
         public ReadOnlySpan(T[] array) { throw null; }
@@ -2019,9 +2017,7 @@ namespace System
         public static bool TryParse(ReadOnlySpan<char> s, out float result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    [System.Runtime.CompilerServices.IsReadOnly]
-    [System.Runtime.CompilerServices.IsByRefLike]
-    public partial struct Span<T>
+    public readonly ref struct Span<T>
     {
         public static Span<T> Empty { get { throw null; } }
         public Span(T[] array) { throw null; }

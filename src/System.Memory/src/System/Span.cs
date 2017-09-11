@@ -17,9 +17,7 @@ namespace System
     /// </summary>
     [DebuggerTypeProxy(typeof(SpanDebugView<>))]
     [DebuggerDisplay("Length = {Length}")]
-    [IsReadOnly]
-    [IsByRefLike]
-    public struct Span<T>
+    public readonly ref struct Span<T>
     {
         /// <summary>
         /// Creates a new span over the entirety of the target array.
