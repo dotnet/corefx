@@ -24,7 +24,7 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)\System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\NETStandard.Library.NETFramework\NETStandard.Library.NETFramework.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>

@@ -49,7 +49,6 @@
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="('$(IsNetFxNETStandard)' == 'true' OR '$(IsNetFxNETStandardRef)' == 'true') AND '$(BuildingNETFxVertical)' == 'true'"
                            Include="netfx-$(_bc_OSGroup);net462-$(_bc_OSGroup);net47-$(_bc_OSGroup)">
-      <PackageFileRefPath Condition="'$(IsNetFxNETStandardRef)'=='true'">$(NetFxPackageRefPath)</PackageFileRefPath>
       <PackageFileRuntimePath Condition="'$(IsNetFxNETStandard)'=='true'">$(NetFxPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
 
