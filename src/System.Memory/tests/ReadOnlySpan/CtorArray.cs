@@ -41,7 +41,7 @@ namespace System.SpanTests
             span.Validate(91, -92, 93, 94, -95);
         }
 
-        [ActiveIssue(20884, TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(23952, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public static void CtorArray3()
         {
@@ -93,7 +93,7 @@ namespace System.SpanTests
             span.Validate(42, -1);
         }
 
-        [ActiveIssue(20884, TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(23952, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public static void CtorVariantArrayType()
         {

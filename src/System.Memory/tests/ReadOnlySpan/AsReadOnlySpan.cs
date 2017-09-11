@@ -24,7 +24,7 @@ namespace System.SpanTests
             spanLong.Validate(1, -3, 7, -15, 31);
         }
 
-        [ActiveIssue(20884, TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(23952, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public static void ObjectArrayAsReadOnlySpan()
         {
@@ -69,7 +69,7 @@ namespace System.SpanTests
             spanLong.Validate(-3, 7, -15);
         }
 
-        [ActiveIssue(20884, TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(23952, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public static void ObjectArraySegmentAsSpan()
         {
