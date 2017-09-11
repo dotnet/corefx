@@ -129,5 +129,9 @@
     <Exec Command="$(_GenAPICmd)" />
     <Message Text="Generated reference assembly source code: $(_RefSourceFileOutputPath)" />
   </Target>
+  
+  <!-- HACK: Removing Pri file generation for building of tests -->
+  <Target Name="MakeCommonResourcesPriFile" />
+  <Target Name="MakeTestSpecificResourcesPriFile" />
 
 </Project>
