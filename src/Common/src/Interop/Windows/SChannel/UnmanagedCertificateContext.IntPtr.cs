@@ -15,6 +15,11 @@ namespace System.Net
         {
             X509Certificate2Collection result = new X509Certificate2Collection();
 
+            if (certContext == IntPtr.Zero)
+            {
+                return result;
+            }
+
             Interop.Crypt32.CERT_CONTEXT context =
                 Marshal.PtrToStructure<Interop.Crypt32.CERT_CONTEXT>(certContext);
 
