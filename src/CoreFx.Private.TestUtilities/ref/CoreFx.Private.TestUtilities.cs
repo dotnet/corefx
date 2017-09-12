@@ -85,6 +85,7 @@ namespace System
         public static bool IsWindowsAndElevated { get { throw null; } }
         public static bool IsWindowsIoTCore { get { throw null; } }
         public static bool IsWindowsNanoServer { get { throw null; } }
+        public static bool IsWindowsServerCore { get { throw null; } }
         public static bool IsWindowsSubsystemForLinux { get { throw null; } }
         public static bool IsInAppContainer { get { throw null; } }
         public static bool IsWinRTSupported { get { throw null; } }
