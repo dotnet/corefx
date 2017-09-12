@@ -60,6 +60,7 @@ namespace System
         public static bool IsNotWindows8x { get { throw null; } }
         public static bool IsNotWindowsIoTCore { get { throw null; } }
         public static bool IsNotWindowsNanoServer { get { throw null; } }
+        public static bool IsNotWindowsServerCore { get { throw null; } }
         public static bool IsNotWindowsSubsystemForLinux { get { throw null; } }
         public static bool IsNotInAppContainer { get { throw null; } }
         public static bool IsNotWinRTSupported { get { throw null; } }
