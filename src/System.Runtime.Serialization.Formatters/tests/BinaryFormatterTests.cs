@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
@@ -21,8 +22,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [MemberData(nameof(BasicObjectsRoundtrip_MemberData))]
         public void ValidateBasicObjectsRoundtrip(object obj, FormatterAssemblyStyle assemblyFormat, TypeFilterLevel filterLevel, FormatterTypeStyle typeFormat)
         {
-            object clone = FormatterClone(obj, null, assemblyFormat, filterLevel, typeFormat);
-            if (!ReferenceEquals(obj, string.Empty) && !(obj is DBNull)) // "" is interned and will roundtrip as the same object
+            object clone = BinaryFormatterHelpers.Clone(obj, null, assemblyFormat, filterLevel, typeFormat);
+            // string.Empty and DBNull are both singletons
+            if (!ReferenceEquals(obj, string.Empty) && !(obj is DBNull)) 
             {
                 Assert.NotSame(obj, clone);
             }
@@ -35,8 +37,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
-            IEnumerable<object[]> coreTypeRecords = GetCoreTypeRecords();
-            string[] coreTypeBlobs = GetCoreTypeBlobs(coreTypeRecords, FormatterAssemblyStyle.Full).ToArray();
+            string[] coreTypeBlobs = SerializableEqualityComparers_MemberData()
+                .Concat(SerializableObjects_MemberData())
+                .Select(record => BinaryFormatterHelpers.ToBase64String(record[0]))
+                .ToArray();
 
             var (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs) = UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
             Console.WriteLine($"{numberOfBlobs} existing blobs" +
@@ -46,7 +50,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
-        public void ValidateAgainstBlobs(object obj, string[] blobs)
+        public void ValidateAgainstBlobs(object obj, string[] blobs) 
+            => ValidateAndRoundtrip(obj, blobs, false);
+
+        [Theory]
+        [MemberData(nameof(SerializableEqualityComparers_MemberData))]
+        public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
+            => ValidateAndRoundtrip(obj, blobs, true);
+
+        private static void ValidateAndRoundtrip(object obj, string[] blobs, bool isEqualityComparer)
         {
             if (obj == null)
             {
@@ -56,7 +68,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             if (blobs == null || blobs.Length == 0)
             {
                 throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
-                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
+                    BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full));
             }
 
             SanityCheckBlob(obj, blobs);
@@ -72,18 +84,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             foreach (string blob in blobs)
             {
-                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
-                CheckForAnyEquals(obj, DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
+                if (isEqualityComparer)
+                {
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
+                }
+                else
+                {
+                    CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
+                    CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
+                }
             }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
-        public void UnitySerializationHolderWithAssemblySingleton()
-        {
-            const string UnitySerializationHolderAssemblyBase64String = "AAEAAAD/////AQAAAAAAAAAEAQAAAB9TeXN0ZW0uVW5pdHlTZXJpYWxpemF0aW9uSG9sZGVyAwAAAAREYXRhCVVuaXR5VHlwZQxBc3NlbWJseU5hbWUBAAEIBgIAAABLbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BgAAAAkCAAAACw==";
-            AssertExtensions.ThrowsIf<ArgumentException>(!PlatformDetection.IsFullFramework, 
-                () => DeserializeBlobToObject(UnitySerializationHolderAssemblyBase64String, FormatterAssemblyStyle.Full));
         }
 
         [Fact]
@@ -94,8 +105,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             object obj = new ArraySegment<int>();
             string corefxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
             string netfxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
-            CheckForAnyEquals(obj, DeserializeBlobToObject(corefxBlob, FormatterAssemblyStyle.Full));
-            CheckForAnyEquals(obj, DeserializeBlobToObject(netfxBlob, FormatterAssemblyStyle.Full));
+            CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(corefxBlob, FormatterAssemblyStyle.Full));
+            CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(netfxBlob, FormatterAssemblyStyle.Full));
         }
 
         [Fact]
@@ -106,7 +117,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             var obj = new SomeType() { SomeField = 7 };
             string serializedObj = @"AAEAAAD/////AQAAAAAAAAAMAgAAAHNTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAA2U3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlNvbWVUeXBlAQAAAAlTb21lRmllbGQACAIAAAAHAAAACw==";
 
-            var deserialized = (SomeType)DeserializeBlobToObject(serializedObj, FormatterAssemblyStyle.Simple);
+            var deserialized = (SomeType)BinaryFormatterHelpers.FromBase64String(serializedObj, FormatterAssemblyStyle.Simple);
             Assert.Equal(obj, deserialized);
         }
 
@@ -118,32 +129,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             var obj = new GenericTypeWithArg<SomeType>() { Test = new SomeType() { SomeField = 9 } };
             string serializedObj = @"AAEAAAD/////AQAAAAAAAAAMAgAAAHNTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAADxAVN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5HZW5lcmljVHlwZVdpdGhBcmdgMVtbU3lzdGVtLlJ1bnRpbWUuU2VyaWFsaXphdGlvbi5Gb3JtYXR0ZXJzLlRlc3RzLlNvbWVUeXBlLCBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249OS45OC43Ljk4NywgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViXV0BAAAABFRlc3QENlN5c3RlbS5SdW50aW1lLlNlcmlhbGl6YXRpb24uRm9ybWF0dGVycy5UZXN0cy5Tb21lVHlwZQIAAAACAAAACQMAAAAFAwAAADZTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMuU29tZVR5cGUBAAAACVNvbWVGaWVsZAAIAgAAAAkAAAAL";
 
-            var deserialized = (GenericTypeWithArg<SomeType>)DeserializeBlobToObject(serializedObj, FormatterAssemblyStyle.Simple);
+            var deserialized = (GenericTypeWithArg<SomeType>)BinaryFormatterHelpers.FromBase64String(serializedObj, FormatterAssemblyStyle.Simple);
             Assert.Equal(obj, deserialized);
-        }
-
-        [Theory]
-        [MemberData(nameof(SerializableEqualityComparers_MemberData))]
-        public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException("The serializable object must not be null", nameof(obj));
-            }
-
-            if (blobs == null || blobs.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
-                    SerializeObjectToBlob(obj, FormatterAssemblyStyle.Full));
-            }
-
-            SanityCheckBlob(obj, blobs);
-
-            foreach (string blob in blobs)
-            {
-                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Simple));
-                ValidateEqualityComparer(DeserializeBlobToObject(blob, FormatterAssemblyStyle.Full));
-            }
         }
 
         [Fact]
@@ -406,7 +393,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void Deserialize_FuzzInput(object obj, Random rand)
         {
             // Get the serialized data for the object
-            byte[] data = SerializeObjectToRaw(obj, FormatterAssemblyStyle.Simple);
+            byte[] data = BinaryFormatterHelpers.ToByteArray(obj, FormatterAssemblyStyle.Simple);
 
             // Make some "random" changes to it
             for (int i = 1; i < rand.Next(1, 100); i++)
@@ -417,7 +404,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // Try to deserialize that.
             try
             {
-                DeserializeRawToObject(data, FormatterAssemblyStyle.Simple);
+                BinaryFormatterHelpers.FromByteArray(data, FormatterAssemblyStyle.Simple);
                 // Since there's no checksum, it's possible we changed data that didn't corrupt the instance
             }
             catch (ArgumentOutOfRangeException) { }
