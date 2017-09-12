@@ -709,9 +709,9 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetPathGradientBlendCount_delegate> GdipGetPathGradientBlendCount_ptr;
             internal static int GdipGetPathGradientBlendCount(HandleRef brush, out int count) => GdipGetPathGradientBlendCount_ptr.Delegate(brush, out count);
 
-            private delegate int GdipGetPathGradientBlend_delegate(HandleRef brush, IntPtr blend, IntPtr positions, int count);
+            private delegate int GdipGetPathGradientBlend_delegate(HandleRef brush, float[] blend, float[] positions, int count);
             private static FunctionWrapper<GdipGetPathGradientBlend_delegate> GdipGetPathGradientBlend_ptr;
-            internal static int GdipGetPathGradientBlend(HandleRef brush, IntPtr blend, IntPtr positions, int count) => GdipGetPathGradientBlend_ptr.Delegate(brush, blend, positions, count);
+            internal static int GdipGetPathGradientBlend(HandleRef brush, float[] blend, float[] positions, int count) => GdipGetPathGradientBlend_ptr.Delegate(brush, blend, positions, count);
 
             private delegate int GdipSetPathGradientBlend_delegate(HandleRef brush, HandleRef blend, HandleRef positions, int count);
             private static FunctionWrapper<GdipSetPathGradientBlend_delegate> GdipSetPathGradientBlend_ptr;
@@ -721,13 +721,13 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetPathGradientPresetBlendCount_delegate> GdipGetPathGradientPresetBlendCount_ptr;
             internal static int GdipGetPathGradientPresetBlendCount(HandleRef brush, out int count) => GdipGetPathGradientPresetBlendCount_ptr.Delegate(brush, out count);
 
-            private delegate int GdipGetPathGradientPresetBlend_delegate(HandleRef brush, IntPtr blend, IntPtr positions, int count);
+            private delegate int GdipGetPathGradientPresetBlend_delegate(HandleRef brush, int[] blend, float[] positions, int count);
             private static FunctionWrapper<GdipGetPathGradientPresetBlend_delegate> GdipGetPathGradientPresetBlend_ptr;
-            internal static int GdipGetPathGradientPresetBlend(HandleRef brush, IntPtr blend, IntPtr positions, int count) => GdipGetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
+            internal static int GdipGetPathGradientPresetBlend(HandleRef brush, int[] blend, float[] positions, int count) => GdipGetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
 
-            private delegate int GdipSetPathGradientPresetBlend_delegate(HandleRef brush, HandleRef blend, HandleRef positions, int count);
+            private delegate int GdipSetPathGradientPresetBlend_delegate(HandleRef brush, int[] blend, float[] positions, int count);
             private static FunctionWrapper<GdipSetPathGradientPresetBlend_delegate> GdipSetPathGradientPresetBlend_ptr;
-            internal static int GdipSetPathGradientPresetBlend(HandleRef brush, HandleRef blend, HandleRef positions, int count) => GdipSetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
+            internal static int GdipSetPathGradientPresetBlend(HandleRef brush, int[] blend, float[] positions, int count) => GdipSetPathGradientPresetBlend_ptr.Delegate(brush, blend, positions, count);
 
             private delegate int GdipSetPathGradientSigmaBlend_delegate(HandleRef brush, float focus, float scale);
             private static FunctionWrapper<GdipSetPathGradientSigmaBlend_delegate> GdipSetPathGradientSigmaBlend_ptr;
@@ -1171,9 +1171,9 @@ namespace System.Drawing
             private static FunctionWrapper<GdipGetPenDashCount_delegate> GdipGetPenDashCount_ptr;
             internal static int GdipGetPenDashCount(HandleRef pen, out int dashcount) => GdipGetPenDashCount_ptr.Delegate(pen, out dashcount);
 
-            private delegate int GdipGetPenDashArray_delegate(HandleRef pen, IntPtr memorydash, int count);
+            private delegate int GdipGetPenDashArray_delegate(HandleRef pen, float[] memorydash, int count);
             private static FunctionWrapper<GdipGetPenDashArray_delegate> GdipGetPenDashArray_ptr;
-            internal static int GdipGetPenDashArray(HandleRef pen, IntPtr memorydash, int count) => GdipGetPenDashArray_ptr.Delegate(pen, memorydash, count);
+            internal static int GdipGetPenDashArray(HandleRef pen, float[] memorydash, int count) => GdipGetPenDashArray_ptr.Delegate(pen, memorydash, count);
 
             private delegate int GdipGetPenCompoundCount_delegate(HandleRef pen, out int count);
             private static FunctionWrapper<GdipGetPenCompoundCount_delegate> GdipGetPenCompoundCount_ptr;

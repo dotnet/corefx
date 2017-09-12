@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using Xunit;
 
@@ -49,8 +51,7 @@ namespace System
         {
             get
             {
-                int productType;
-                Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out productType));
+                int productType = GetWindowsProductType();
                 if ((productType == PRODUCT_IOTUAPCOMMERCIAL) ||
                     (productType == PRODUCT_IOTUAP))
                 {
@@ -118,20 +119,24 @@ namespace System
             return null;
         }
 
-        public static string GetDistroVersionString() { return ""; }
+        public static string GetDistroVersionString() { return "ProductType=" + GetWindowsProductType() + "InstallationType=" + GetInstallationType(); }
 
-        private static int s_isWinRT = -1;
+        private static int s_isInAppContainer = -1;
 
-        public static bool IsWinRT
+        public static bool IsInAppContainer
         {
+            // This actually checks whether code is running in a modern app. 
+            // Currently this is the only situation where we run in app container.
+            // If we want to distinguish the two cases in future,
+            // EnvironmentHelpers.IsAppContainerProcess in desktop code shows how to check for the AC token.
             get
             {
-                if (s_isWinRT != -1)
-                    return s_isWinRT == 1;
+                if (s_isInAppContainer != -1)
+                    return s_isInAppContainer == 1;
 
                 if (!IsWindows || IsWindows7)
                 {
-                    s_isWinRT = 0;
+                    s_isInAppContainer = 0;
                     return false;
                 }
 
@@ -143,7 +148,7 @@ namespace System
                     switch (result)
                     {
                         case 15703: // APPMODEL_ERROR_NO_APPLICATION
-                            s_isWinRT = 0;
+                            s_isInAppContainer = 0;
                             break;
                         case 0:     // ERROR_SUCCESS
                         case 122:   // ERROR_INSUFFICIENT_BUFFER
@@ -151,7 +156,7 @@ namespace System
                                     // not NO_APPLICATION and we're not actually giving a buffer here. The
                                     // API will always return NO_APPLICATION if we're not running under a
                                     // WinRT process, no matter what size the buffer is.
-                            s_isWinRT = 1;
+                            s_isInAppContainer = 1;
                             break;
                         default:
                             throw new InvalidOperationException($"Failed to get AppId, result was {result}.");
@@ -164,7 +169,7 @@ namespace System
                     if (e.GetType().FullName.Equals("System.EntryPointNotFoundException", StringComparison.Ordinal))
                     {
                         // API doesn't exist, likely pre Win8
-                        s_isWinRT = 0;
+                        s_isInAppContainer = 0;
                     }
                     else
                     {
@@ -172,7 +177,7 @@ namespace System
                     }
                 }
 
-                return s_isWinRT == 1;
+                return s_isInAppContainer == 1;
             }
         }
 
@@ -185,7 +190,7 @@ namespace System
                 if (s_isWindowsElevated != -1)
                     return s_isWindowsElevated == 1;
 
-                if (!IsWindows || IsWinRT)
+                if (!IsWindows || IsInAppContainer)
                 {
                     s_isWindowsElevated = 0;
                     return false;
@@ -212,30 +217,42 @@ namespace System
             }
         }
 
-        private static int GetWindowsMinorVersion()
+        private static string GetInstallationType()
         {
-            if (IsWindows)
+            string key = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+            string value = "";
+
+            try
             {
-                RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-                osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-                Assert.Equal(0, RtlGetVersion(out osvi));
-                return (int)osvi.dwMinorVersion;
+                value = (string)Registry.GetValue(key, "InstallationType", defaultValue: "");
+            }
+            catch (Exception e) when (e is SecurityException || e is InvalidCastException || e is PlatformNotSupportedException /* UAP */)
+            {
             }
 
-            return -1;
+            return value;
+        }
+
+        private static int GetWindowsProductType()
+        {
+            Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out int productType));
+            return productType;
+        }
+
+        private static int GetWindowsMinorVersion()
+        {
+            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
+            Assert.Equal(0, RtlGetVersion(out osvi));
+            return (int)osvi.dwMinorVersion;
         }
 
         private static int GetWindowsBuildNumber()
         {
-            if (IsWindows)
-            {
-                RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-                osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-                Assert.Equal(0, RtlGetVersion(out osvi));
-                return (int)osvi.dwBuildNumber;
-            }
-
-            return -1;
+            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
+            Assert.Equal(0, RtlGetVersion(out osvi));
+            return (int)osvi.dwBuildNumber;
         }
 
         private const uint TokenElevation = 20;

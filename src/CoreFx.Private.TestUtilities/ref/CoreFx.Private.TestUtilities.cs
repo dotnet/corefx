@@ -61,7 +61,7 @@ namespace System
         public static bool IsNotWindowsIoTCore { get { throw null; } }
         public static bool IsNotWindowsNanoServer { get { throw null; } }
         public static bool IsNotWindowsSubsystemForLinux { get { throw null; } }
-        public static bool IsNotWinRT { get { throw null; } }
+        public static bool IsNotInAppContainer { get { throw null; } }
         public static bool IsNotWinRTSupported { get { throw null; } }
         public static bool IsOpenSUSE { get { throw null; } }
         public static bool IsOSX { get { throw null; } }
@@ -86,7 +86,7 @@ namespace System
         public static bool IsWindowsIoTCore { get { throw null; } }
         public static bool IsWindowsNanoServer { get { throw null; } }
         public static bool IsWindowsSubsystemForLinux { get { throw null; } }
-        public static bool IsWinRT { get { throw null; } }
+        public static bool IsInAppContainer { get { throw null; } }
         public static bool IsWinRTSupported { get { throw null; } }
         public static bool IsXmlDsigXsltTransformSupported { get { throw null; } }
         public static System.Version OSXKernelVersion { get { throw null; } }
