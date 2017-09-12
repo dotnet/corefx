@@ -8,6 +8,8 @@ namespace System.Runtime.InteropServices
     {
         private readonly string _osPlatform;
 
+        public static OSPlatform FreeBSD { get; } = new OSPlatform("FREEBSD");
+
         public static OSPlatform Linux { get; } = new OSPlatform("LINUX");
 
         public static OSPlatform OSX { get; } = new OSPlatform("OSX");
@@ -18,7 +20,7 @@ namespace System.Runtime.InteropServices
         {
             if (osPlatform == null) throw new ArgumentNullException(nameof(osPlatform));
             if (osPlatform.Length == 0) throw new ArgumentException(SR.Argument_EmptyValue, nameof(osPlatform));
-            
+
             _osPlatform = osPlatform;
         }
 
