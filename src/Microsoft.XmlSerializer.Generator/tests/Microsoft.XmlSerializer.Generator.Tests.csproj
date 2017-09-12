@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -22,32 +22,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".\AlwaysPassTest.cs" />
-    <Content Include="dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="dotnet-Microsoft.XmlSerializer.Generator" />
+    <ReferenceFromRuntime Include="dotnet-Microsoft.XmlSerializer.Generator">
+      <Private>true</Private>
+    </ReferenceFromRuntime>
   </ItemGroup>
-  <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition=" '$(SkipTestsOnPlatform)' != 'true' " >
+  <ItemGroup>
+    <Content Include="dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Target Name="GenerateSerializationAssembly" AfterTargets="Build" Condition=" '$(SkipTestsOnPlatform)' != 'true' ">
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
-    <Copy SourceFiles="$(ToolsDir)\csc.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
-    <Message Text="Running Serialization Tool" Importance="normal" />
-    <Exec ContinueOnError="true" Command="$(ToolsDir)\dotnetcli\dotnet $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive"  />
-    <Warning Condition="Exists('$(OutputPath)$(SerializerName).cs') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).cs"/>
-    <Csc Condition="Exists('$(OutputPath)$(SerializerName).cs') == 'true'" ContinueOnError="true" 
-         OutputAssembly="$(OutputPath)$(SerializerName).dll" 
-         References="@(ReferencePath);@(IntermediateAssembly)" 
-         EmitDebugInformation="$(DebugSymbols)"  
-         Sources="$(OutputPath)$(SerializerName).cs" 
-         TargetType="Library" 
-         ToolExe="$(CscToolExe)" 
-         ToolPath="$(CscToolPath)" 
-         DisabledWarnings="$(NoWarn), 219" 
-         UseSharedCompilation="true" />
-    <Warning Condition="Exists('$(OutputPath)$(SerializerName).dll') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).dll"/>
+    <Copy SourceFiles="$(ToolsDir)\xunit.console.netcore.runtimeconfig.json" DestinationFiles="$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json" />
+    <Message Text="Running Serialization Tool and generating the code $(OutputPath)$(SerializerName).cs" Importance="high" />
+    <Warning Condition="Exists('$(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll') != 'true'" Text="dotnet-Microsoft.XmlSerializer.Generator.dll not exit under $(OutputPath)" />
+    <Exec Command="$(TestHostRootPath)\dotnet $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll /force /casesensitive" />
+    <Warning Condition="Exists('$(OutputPath)$(SerializerName).cs') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).cs" />
+    <Message Text="Compile the serializer assembly under $(OutputPath)$(SerializerName).dll " Importance="high" />
+    <Csc Condition="Exists('$(OutputPath)$(SerializerName).cs') == 'true'" OutputAssembly="$(OutputPath)$(SerializerName).dll" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)" Sources="$(OutputPath)$(SerializerName).cs" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" DisabledWarnings="$(NoWarn), 219" UseSharedCompilation="true" />
+    <Warning Condition="Exists('$(OutputPath)$(SerializerName).dll') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).dll" />
+    <Message Text="Copy from $(OutputPath)$(SerializerName).dll to $(TestPath)$(SerializerName).dll" Importance="high" />
+    <Copy Condition="Exists('$(TestPath)') == 'true'" SourceFiles="$(OutputPath)$(SerializerName).dll" DestinationFiles="$(TestPath)$(SerializerName).dll" />
+    <Warning Condition="Exists('$(TestPath)$(SerializerName).dll') != 'true'" Text="Fail to copy the assembly under $(TestPath)" />
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
