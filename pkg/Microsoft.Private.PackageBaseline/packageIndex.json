@@ -26,7 +26,8 @@
         "1.0.0",
         "1.0.1",
         "1.0.2",
-        "1.1.0"
+        "1.1.0",
+        "1.1.1"
       ],
       "BaselineVersion": "1.1.0"
     },
@@ -332,7 +333,8 @@
     "runtime.debian.8-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -354,7 +356,9 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -368,7 +372,8 @@
     "runtime.fedora.23-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -390,7 +395,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -411,7 +417,8 @@
     "runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.1.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -433,7 +440,8 @@
       "StableVersions": [
         "4.0.0",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -447,7 +455,8 @@
     "runtime.opensuse.13.2-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -469,7 +478,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -483,7 +493,8 @@
     "runtime.osx.10.10-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -505,7 +516,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -519,7 +531,8 @@
     "runtime.rhel.7-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -541,7 +554,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -555,7 +569,8 @@
     "runtime.ubuntu.14.04-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -577,7 +592,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -591,7 +607,8 @@
     "runtime.ubuntu.16.04-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -613,7 +630,8 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -724,7 +742,8 @@
     },
     "runtime.win10-x86-aot.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.0.1"
+        "4.0.1",
+        "4.3.1"
       ]
     },
     "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
@@ -736,7 +755,8 @@
     "runtime.win7-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -749,7 +769,8 @@
     "runtime.win7-x86.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -764,7 +785,8 @@
     "runtime.win8-arm.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -1230,7 +1252,8 @@
     "System.IO.FileSystem.DriveInfo": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1380,7 +1403,8 @@
         "4.1.1",
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1408,7 +1432,8 @@
         "4.0.0",
         "4.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1489,7 +1514,8 @@
       "StableVersions": [
         "4.0.0",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -2094,7 +2120,8 @@
     "System.Security.Cryptography.X509Certificates": {
       "StableVersions": [
         "4.1.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -2440,12 +2467,14 @@
     },
     "runtime.win10-arm-aot.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.0.1"
+        "4.0.1",
+        "4.3.1"
       ]
     },
     "runtime.win10-x64-aot.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.0.1"
+        "4.0.1",
+        "4.3.1"
       ]
     },
     "System.Composition.AttributedModel": {
@@ -2530,34 +2559,39 @@
     },
     "runtime.native.System.Security.Cryptography.Apple": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.1"
     },
     "runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.24-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2582,27 +2616,31 @@
     "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2627,54 +2665,62 @@
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.1"
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2699,14 +2745,16 @@
     "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2715,7 +2763,8 @@
     },
     "runtime.win10-arm64.runtime.native.System.IO.Compression": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     }
