@@ -87,6 +87,7 @@
     <RunApiCompat>true</RunApiCompat>
     <!-- Build as portable by default -->
     <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
+    <LangVersion Condition="'$(MSBuildProjectExtension)' == '.csproj'">7.2</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(Configuration)' != ''">
