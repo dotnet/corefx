@@ -87,14 +87,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
-        public void UnitySerializationHolderWithAssemblySingleton()
-        {
-            const string UnitySerializationHolderAssemblyBase64String = "AAEAAAD/////AQAAAAAAAAAEAQAAAB9TeXN0ZW0uVW5pdHlTZXJpYWxpemF0aW9uSG9sZGVyAwAAAAREYXRhCVVuaXR5VHlwZQxBc3NlbWJseU5hbWUBAAEIBgIAAABLbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BgAAAAkCAAAACw==";
-            AssertExtensions.ThrowsIf<ArgumentException>(!PlatformDetection.IsFullFramework, 
-                () => DeserializeBlobToObject(UnitySerializationHolderAssemblyBase64String, FormatterAssemblyStyle.Full));
-        }
-
-        [Fact]
         public void ArraySegmentDefaultCtor()
         {
             // This is workaround for Xunit bug which tries to pretty print test case name and enumerate this object.
