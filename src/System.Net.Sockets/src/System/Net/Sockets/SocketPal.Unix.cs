@@ -714,11 +714,11 @@ namespace System.Net.Sockets
 
         public static bool TryCompleteSendTo(SafeCloseSocket socket, ReadOnlySpan<byte> buffer, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
+            bool successfulSend = false;
             for (;;)
             {
                 int sent;
                 Interop.Error errno;
-                bool successfulSend = false;
                 try
                 {
                     sent = buffers != null ?
