@@ -1029,7 +1029,7 @@ namespace System.Net.Sockets.Tests
                     int bytesSent = socket.Send(data, 0, data.Length, SocketFlags.None, out error);
 
                     Assert.Equal(SocketError.Success, error);
-                    Assert.InRange(bytesSent, 0, data.Length);
+                    Assert.InRange(bytesSent, 1, data.Length - 1);
                 }
             }
         }
