@@ -16,6 +16,8 @@ namespace System.Net.Http
             _content = content;
             if (content.DangerousTryGetArray(out ArraySegment<byte> array))
             {
+                // If we have an array, allow HttpClient to take optimized paths by just
+                // giving it the array content to use as its already buffered data.
                 SetBuffer(array.Array, array.Offset, array.Count);
             }
         }

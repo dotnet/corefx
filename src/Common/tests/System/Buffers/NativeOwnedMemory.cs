@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace System.IO.Tests
 {
@@ -21,6 +19,12 @@ namespace System.IO.Tests
         {
             _length = length;
             _ptr = Marshal.AllocHGlobal(length);
+        }
+
+        ~NativeOwnedMemory()
+        {
+            Debug.WriteLine($"{nameof(NativeOwnedMemory)} being finalized");
+            Dispose(false);
         }
 
         public override bool IsDisposed

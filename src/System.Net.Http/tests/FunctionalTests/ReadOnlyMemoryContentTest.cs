@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Tests;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,13 +14,25 @@ namespace System.Net.Http.Functional.Tests
 {
     public class ReadOnlyMemoryContentTest
     {
+        public static IEnumerable<object[]> ContentLengthsAndUseArrays()
+        {
+            foreach (int length in new[] { 0, 1, 4096 })
+            {
+                foreach (bool useArray in new[] { true, false })
+                {
+                    yield return new object[] { length, useArray };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> TrueFalse()
+        {
+            yield return new object[] { true };
+            yield return new object[] { false };
+        }
+
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(1024, false)]
-        [InlineData(0, true)]
-        [InlineData(1, true)]
-        [InlineData(1024, true)]
+        [MemberData(nameof(ContentLengthsAndUseArrays))]
         public void ContentLength_LengthMatchesArrayLength(int contentLength, bool useArray)
         {
             Memory<byte> memory;
@@ -31,8 +45,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MemberData(nameof(TrueFalse))]
         public async Task ReadAsStreamAsync_TrivialMembersHaveExpectedValuesAndBehavior(bool useArray)
         {
             const int ContentLength = 42;
@@ -50,7 +63,7 @@ namespace System.Net.Http.Functional.Tests
                 Assert.False(stream.CanWrite);
 
                 // not supported
-                Assert.Throws<NotSupportedException>(() => stream.SetLength(42));
+                Assert.Throws<NotSupportedException>(() => stream.SetLength(12345));
                 Assert.Throws<NotSupportedException>(() => stream.WriteByte(0));
                 Assert.Throws<NotSupportedException>(() => stream.Write(new byte[1], 0, 1));
                 Assert.Throws<NotSupportedException>(() => stream.Write(new ReadOnlySpan<byte>(new byte[1])));
@@ -66,8 +79,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MemberData(nameof(TrueFalse))]
         public async Task ReadAsStreamAsync_Seek(bool useArray)
         {
             const int ContentLength = 42;
@@ -131,12 +143,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(1024, false)]
-        [InlineData(0, true)]
-        [InlineData(1, true)]
-        [InlineData(1024, true)]
+        [MemberData(nameof(ContentLengthsAndUseArrays))]
         public async Task ReadAsStreamAsync_ReadByte_MatchesInput(int contentLength, bool useArray)
         {
             Memory<byte> memory;
@@ -158,8 +165,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MemberData(nameof(TrueFalse))]
         public async Task ReadAsStreamAsync_Read_InvalidArguments(bool useArray)
         {
             const int ContentLength = 42;
@@ -240,12 +246,62 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(1024*4, false)]
-        [InlineData(0, true)]
-        [InlineData(1, true)]
-        [InlineData(1024 * 4, true)]
+        [MemberData(nameof(TrueFalse))]
+        public async Task ReadAsStreamAsync_ReadWithCancelableToken_MatchesInput(bool useArray)
+        {
+            const int ContentLength = 100;
+
+            Memory<byte> memory;
+            OwnedMemory<byte> ownedMemory;
+            ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
+
+            var buffer = new byte[1];
+            var cts = new CancellationTokenSource();
+            int bytesRead;
+
+            using (Stream stream = await content.ReadAsStreamAsync())
+            {
+                for (int i = 0; i < ContentLength; i++)
+                {
+                    switch (i % 2)
+                    {
+                        case 0:
+                            bytesRead = await stream.ReadAsync(buffer, 0, 1, cts.Token);
+                            break;
+                        default:
+                            bytesRead = await stream.ReadAsync(new Memory<byte>(buffer), cts.Token);
+                            break;
+                    }
+                    Assert.Equal(1, bytesRead);
+                    Assert.Equal(memory.Span[i], buffer[0]);
+                }
+            }
+
+            ownedMemory?.Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(TrueFalse))]
+        public async Task ReadAsStreamAsync_ReadWithCanceledToken_MatchesInput(bool useArray)
+        {
+            const int ContentLength = 2;
+
+            Memory<byte> memory;
+            OwnedMemory<byte> ownedMemory;
+            ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
+
+            using (Stream stream = await content.ReadAsStreamAsync())
+            {
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => stream.ReadAsync(new byte[1], 0, 1, new CancellationToken(true)));
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await stream.ReadAsync(new Memory<byte>(new byte[1]), new CancellationToken(true)));
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await stream.CopyToAsync(new MemoryStream(), 1, new CancellationToken(true)));
+            }
+
+            ownedMemory?.Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(ContentLengthsAndUseArrays))]
         public async Task CopyToAsync_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;
@@ -261,12 +317,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(1024 * 4, false)]
-        [InlineData(0, true)]
-        [InlineData(1, true)]
-        [InlineData(1024 * 4, true)]
+        [MemberData(nameof(ContentLengthsAndUseArrays))]
         public async Task ReadAsStreamAsync_CopyTo_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;
@@ -285,12 +336,36 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(1024 * 4, false)]
-        [InlineData(0, true)]
-        [InlineData(1, true)]
-        [InlineData(1024 * 4, true)]
+        [MemberData(nameof(TrueFalse))]
+        public async Task ReadAsStreamAsync_CopyTo_InvalidArguments(bool useArray)
+        {
+            const int ContentLength = 42;
+            Memory<byte> memory;
+            OwnedMemory<byte> ownedMemory;
+            ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
+
+            using (Stream s = await content.ReadAsStreamAsync())
+            {
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => s.CopyTo(null));
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { s.CopyToAsync(null); });
+
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => s.CopyTo(new MemoryStream(), 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), 0); });
+
+                Assert.Throws<NotSupportedException>(() => s.CopyTo(new MemoryStream(new byte[1], writable:false)));
+                Assert.Throws<NotSupportedException>(() => { s.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
+
+                var disposedDestination = new MemoryStream();
+                disposedDestination.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => s.CopyTo(disposedDestination));
+                Assert.Throws<ObjectDisposedException>(() => { s.CopyToAsync(disposedDestination); });
+            }
+
+            ownedMemory?.Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(ContentLengthsAndUseArrays))]
         public async Task ReadAsStreamAsync_CopyToAsync_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;

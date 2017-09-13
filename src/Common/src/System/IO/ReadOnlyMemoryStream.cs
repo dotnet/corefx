@@ -95,13 +95,13 @@ namespace System.IO
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             ValidateReadArrayArguments(buffer, offset, count);
-            return cancellationToken.CanBeCanceled ?
+            return cancellationToken.IsCancellationRequested ?
                 Task.FromCanceled<int>(cancellationToken) :
                 Task.FromResult(Read(new Span<byte>(buffer, offset, count)));
         }
 
         public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken)) =>
-            cancellationToken.CanBeCanceled ?
+            cancellationToken.IsCancellationRequested ?
                 new ValueTask<int>(Task.FromCanceled<int>(cancellationToken)) :
                 new ValueTask<int>(Read(destination.Span));
 
@@ -113,6 +113,7 @@ namespace System.IO
 
         public override void CopyTo(Stream destination, int bufferSize)
         {
+            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
             if (_content.Length > _position)
             {
                 destination.Write(_content.Span.Slice(_position));
