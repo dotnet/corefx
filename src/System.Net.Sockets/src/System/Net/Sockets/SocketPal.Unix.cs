@@ -718,6 +718,7 @@ namespace System.Net.Sockets
             {
                 int sent;
                 Interop.Error errno;
+                bool successfulSend = false;
                 try
                 {
                     sent = buffers != null ?
@@ -733,7 +734,7 @@ namespace System.Net.Sockets
 
                 if (sent == -1)
                 {
-                    if (errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
+                    if (!successfulSend && errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
                     {
                         errorCode = GetSocketErrorForErrorCode(errno);
                         return true;
@@ -743,6 +744,7 @@ namespace System.Net.Sockets
                     return false;
                 }
 
+                successfulSend = true;
                 bytesSent += sent;
 
                 bool isComplete = sent == 0 ||
