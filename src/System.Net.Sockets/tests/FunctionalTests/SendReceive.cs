@@ -1024,7 +1024,7 @@ namespace System.Net.Sockets.Tests
                     // A chunck will be sent, attempts to send more will return SocketError.WouldBlock.
                     // Socket.Send must return the success of the partial send.
                     socket.Blocking = false;
-                    var data = new byte[100_000_000];
+                    var data = new byte[5_000_000];
                     SocketError error;
                     int bytesSent = socket.Send(data, 0, data.Length, SocketFlags.None, out error);
 
