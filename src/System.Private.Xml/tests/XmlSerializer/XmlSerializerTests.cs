@@ -39,6 +39,26 @@ public static partial class XmlSerializerTests
             {
                 method.Invoke(null, new object[] { 3 });
             }
+            else
+            {
+                string p = Directory.GetCurrentDirectory();
+                string testpath = Path.GetFullPath(typeof(TypeWithDateTimeStringProperty).Assembly.GetName().Name);
+                bool testassemblyexist = false;
+                if(File.Exists(testpath))
+                {
+                    testassemblyexist = true;
+                }
+
+                bool serializerexist = false;
+                string serializerpath = Path.GetFullPath(serializername);
+                if (File.Exists(serializerPath))
+                {
+                    serializerexist = true;
+                }
+
+                string message = string.Format("The current path is {0}, the testpath is {1}, the testpathexist return {2}, the serializerpath is {3}, the serializerpathexist return {4}", p, testpath, testassemblyexist, serializerPath, serializerexist);
+                throw new FileNotFoundException(string.Format("{0} not found, the current assembly location is {1}, other message {2}", serializerPath, typeof(XmlSerializerTests).Assembly.Location, message));
+            }
 #endif
         }
     }

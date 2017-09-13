@@ -11,7 +11,7 @@ namespace Microsoft.XmlSerializer.Generator.Tests
 {
     public static class SgenTests
     {
-        [Fact]
+        //[Fact]
         public static void SgenCommandTest()
         {
             string codefile = "Microsoft.XmlSerializer.Generator.Tests.XmlSerializers.cs";
