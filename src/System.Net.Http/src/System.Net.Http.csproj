@@ -28,6 +28,7 @@
   </PropertyGroup>
   <!-- Common -->
   <ItemGroup>
+    <Compile Include="System\Net\Http\ReadOnlyMemoryContent.cs" />
     <Compile Include="System\Net\Http\ByteArrayContent.cs" />
     <Compile Include="System\Net\Http\ByteArrayHelpers.cs" />
     <Compile Include="System\Net\Http\ClientCertificateOption.cs" />
@@ -106,6 +107,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\DelegatingStream.cs">
       <Link>Common\System\IO\DelegatingStream.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\ReadOnlyMemoryStream.cs">
+      <Link>Common\System\IO\ReadOnlyMemoryStream.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
