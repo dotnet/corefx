@@ -157,7 +157,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
             if (newTitle.Length > 513 && PlatformDetection.IsWindowsRedStone2)
             {
-                // RS2 has a bug when getting the windnow title when the title length is longer than 513 character
+                // RS2 has a bug when getting the window title when the title length is longer than 513 character
                 Assert.Throws<IOException>(() => Console.Title);
             }
             else
