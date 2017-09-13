@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -63,21 +59,13 @@ namespace System.ComponentModel.DataAnnotations
             {
                 length = str.Length;
             }
-            else if (value is ICollection collection)
+            else if (CountPropertyHelper.TryGetCount(value, out var count))
             {
-                length = collection.Count;
+                length = count;
             }
             else
             {
-                Type genericCol = value.GetType().GetTypeInfo().ImplementedInterfaces.Select(t => t.GetTypeInfo()).FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
-                if (genericCol != null)
-                {
-                    length = (int)genericCol.GetTypeInfo().GetProperty("Count").GetValue(value);
-                }
-                else
-                {
-                    throw new InvalidCastException(SR.Format(SR.LengthAttribute_InvalidValueType, value.GetType()));
-                }
+                throw new InvalidCastException(SR.Format(SR.LengthAttribute_InvalidValueType, value.GetType()));
             }
 
             return length >= Length;
