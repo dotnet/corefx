@@ -346,7 +346,6 @@ namespace Microsoft.XmlSerializer.Generator
             Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
             Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
             Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
-            Console.Out.WriteLine(SR.Format(SR.HelpDebug, "/debug", "/d"));
             Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
             Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
 

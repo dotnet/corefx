@@ -3424,10 +3424,6 @@ Usage: dotnet {0} [[/assembly:&lt;assembly name&gt;] | [&lt;assembly file locati
     <value>     {0}       Generate code for serialization/deserialization of the
                   specified type from the input assembly. Short form is '{1}'.</value>
   </data>
-  <data name="HelpDebug" xml:space="preserve">
-    <value>     {0}       Generate image which can be used under a debugger.
-                  Short form is '{1}'.</value>
-  </data>
   <data name="HelpForce" xml:space="preserve">
     <value>     {0}       Forces overwrite of a previously generated assembly.
                   Short form is '{1}'.</value>
