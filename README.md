@@ -1,9 +1,3 @@
-### Latest News and Announcements
-
-* [Announcement: Driving towards zero 2.0 bugs by **2017/5/10** (ZBB)](https://github.com/dotnet/corefx/issues/17619)
-
-
-
 # .NET Core Libraries (CoreFX)
 
 This repo contains the library implementation (called "CoreFX") for .NET Core. It includes System.Collections, System.IO, System.Xml, and many other components.
@@ -14,7 +8,7 @@ Runtime-specific library code ([mscorlib](https://github.com/dotnet/coreclr/tree
 
 ## .NET Core
 
-Great starting page: http://dotnet.github.io
+Official Starting Page: http://dotnet.github.io
 
 * [How to use .NET Core](https://github.com/dotnet/core/#get-started) (with VS, VS Code, command-line CLI)
   * [Install official releases](https://www.microsoft.com/net/core)
@@ -69,7 +63,7 @@ Also see info about related [Microsoft .NET Core and ASP.NET Core Bug Bounty Pro
 
 ## License
 
-.NET Core (including the corefx repo) is licensed under the [MIT license](LICENSE).
+.NET Core (including the corefx repo) is licensed under the [MIT license](LICENSE.TXT).
 
 
 

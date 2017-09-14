@@ -427,6 +427,9 @@
   <data name="SQL_KerberosTicketMissingError" xml:space="preserve">
     <value>Cannot access Kerberos ticket. Ensure Kerberos has been initialized with 'kinit'.</value>
   </data>
+  <data name="SQL_SqlServerBrowserNotAccessible" xml:space="preserve">
+    <value>Cannot connect to SQL Server Browser. Ensure SQL Server Browser has been started.</value>
+  </data>
   <data name="SQL_InvalidSSPIPacketSize" xml:space="preserve">
     <value>Invalid SSPI packet size.</value>
   </data>
@@ -928,7 +931,7 @@
   <data name="Snix_Connect" xml:space="preserve">
     <value>A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections.</value>
   </data>
-  <data name="Snix_PreLoginBeforeSuccessfullWrite" xml:space="preserve">
+  <data name="Snix_PreLoginBeforeSuccessfulWrite" xml:space="preserve">
     <value>The client was unable to establish a connection because of an error during connection initialization process before login. Possible causes include the following:  the client tried to connect to an unsupported version of SQL Server; the server was too busy to accept new connections; or there was a resource limitation (insufficient memory or maximum allowed connections) on the server.</value>
   </data>
   <data name="Snix_PreLogin" xml:space="preserve">
@@ -1118,7 +1121,7 @@
     <value>'{0}' is not a supported handle type.</value>
   </data>
   <data name="LocalDBNotSupported" xml:space="preserve">
-    <value>LocalDB is not supported on this Platform.</value>
+    <value>LocalDB is not supported on this platform.</value>
   </data>
   <data name="PlatformNotSupported_DataSqlClient" xml:space="preserve">
     <value>System.Data.SqlClient is not supported on this platform.</value>
@@ -1176,8 +1179,5 @@
   </data>
   <data name="MDF_UnableToBuildCollection" xml:space="preserve">
     <value>Unable to build schema collection '{0}';</value>
-  </data>
-  <data name="AmbientTransactionsNotSupported" xml:space="preserve">
-    <value>Enlisting in Ambient transactions is not supported.</value>
   </data>
 </root>

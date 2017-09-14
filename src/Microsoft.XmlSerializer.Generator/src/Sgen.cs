@@ -17,8 +17,7 @@ namespace Microsoft.XmlSerializer.Generator
         public static int Main(string[] args)
         {
             Sgen sgen = new Sgen();
-            sgen.Run(args);
-            return 0;
+            return sgen.Run(args);
         }
 
         private int Run(string[] args)
@@ -34,13 +33,11 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 for (int i = 0; i < args.Length; i++)
                 {
-                    bool argument = false;
                     string arg = args[i];
                     string value = string.Empty;
 
                     if (arg.StartsWith("/") || arg.StartsWith("-"))
                     {
-                        argument = true;
                         int colonPos = arg.IndexOf(":");
                         if (colonPos != -1)
                         {
@@ -49,21 +46,14 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
+                    string originalArg = arg;
                     arg = arg.ToLower(CultureInfo.InvariantCulture);
+
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
                         WriteHeader();
                         WriteHelp();
                         return 0;
-                    }
-                    else if (!argument && (arg.EndsWith(".dll") || arg.EndsWith(".exe")))
-                    {
-                        if (assembly != null)
-                        {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
-                        }
-
-                        assembly = arg;
                     }
                     else if (ArgumentMatch(arg, "force"))
                     {
@@ -86,10 +76,30 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         types.Add(value);
                     }
+                    else if (ArgumentMatch(arg, "assembly"))
+                    {
+                        if (assembly != null)
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                        }
+
+                        assembly = value;
+                    }
                     else
                     {
-                        errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
-                        continue;
+                        if (arg.EndsWith(".dll") || arg.EndsWith(".exe"))
+                        {
+                            if (assembly != null)
+                            {
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                            }
+
+                            assembly = originalArg;
+                        }
+                        else
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
                     }
                 }
 
@@ -121,6 +131,7 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
+                WriteError(e);
                 return 1;
             }
 
@@ -227,7 +238,8 @@ namespace Microsoft.XmlSerializer.Generator
                     throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
-                bool success;
+                bool success = false;
+                bool toDeleteFile = true;
 
                 try
                 {
@@ -243,18 +255,30 @@ namespace Microsoft.XmlSerializer.Generator
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    toDeleteFile = false;
                     throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, outputDirectory));
+                }
+                finally
+                {
+                    if (!success && toDeleteFile && File.Exists(codePath))
+                    {
+                        File.Delete(codePath);
+                    }
                 }
 
                 if (success)
                 {
-                    Console.Out.WriteLine(SR.Format(SR.InfoAssemblyName, codePath));
-                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedAssembly, assembly.Location, codePath));
+                    Console.Out.WriteLine(SR.Format(SR.InfoFileName, codePath));
+                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedFile, assembly.Location, codePath));
                 }
                 else
                 {
                     Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
                 }
+            }
+            else
+            {
+                Console.Out.WriteLine(FormatMessage(true, SR.Format(SR.InfoNoSerializableTypes, assembly.Location)));
             }
         }
 
@@ -299,6 +323,11 @@ namespace Microsoft.XmlSerializer.Generator
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
             assembly = Assembly.LoadFile(path);
+            if (assembly == null)
+            {
+                throw new InvalidOperationException(SR.Format(SR.ErrLoadAssembly, assemblyName));
+            }
+
             return assembly;
         }
 
@@ -309,7 +338,7 @@ namespace Microsoft.XmlSerializer.Generator
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
-        void WriteHelp()
+        private void WriteHelp()
         {
             //TBD
             Console.WriteLine("In Development");
@@ -323,6 +352,15 @@ namespace Microsoft.XmlSerializer.Generator
         private static string FormatMessage(bool warning, string code, string message)
         {
             return "SGEN: " + (warning ? "warning " : "error ") + code + ": " + message;
+        }
+
+        private static void WriteError(Exception e)
+        {
+            Console.Error.WriteLine(FormatMessage(false, e.Message));
+            if (e.InnerException != null)
+            {
+                WriteError(e.InnerException);
+            }
         }
     }
 }

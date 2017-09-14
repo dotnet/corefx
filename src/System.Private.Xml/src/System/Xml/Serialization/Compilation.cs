@@ -172,9 +172,10 @@ namespace System.Xml.Serialization
                 name.Name = serializerName;
                 name.CodeBase = null;
                 name.CultureInfo = CultureInfo.InvariantCulture;
+                string serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
                 try
                 {
-                    serializer = Assembly.LoadFile(Path.GetFullPath(serializerName) + ".dll");
+                    serializer = Assembly.LoadFile(serializerPath);
                 }
                 catch (Exception e)
                 {
@@ -420,7 +421,7 @@ namespace System.Xml.Serialization
 
             string assemblyName = "Microsoft.GeneratedCode";
             AssemblyBuilder assemblyBuilder = CodeGenerator.CreateAssemblyBuilder(assemblyName);
-            // Add AssemblyVersion attribute to match parent accembly version
+            // Add AssemblyVersion attribute to match parent assembly version
             if (types != null && types.Length > 0 && types[0] != null)
             {
                 ConstructorInfo AssemblyVersionAttribute_ctor = typeof(AssemblyVersionAttribute).GetConstructor(
