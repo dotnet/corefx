@@ -241,16 +241,10 @@ namespace System.Diagnostics
             string[] envp = CreateEnvp(startInfo);
             string cwd = !string.IsNullOrWhiteSpace(startInfo.WorkingDirectory) ? startInfo.WorkingDirectory : null;
 
-            filename = ResolvePath(startInfo.FileName);
-            argv = ParseArgv(startInfo);
-
             if (!startInfo.UseShellExecute)
             {
-                if (string.IsNullOrEmpty(filename))
-                {
-                    throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
-                }
-
+                filename = ResolvePath(startInfo.FileName);
+                argv = ParseArgv(startInfo);
                 if (Directory.Exists(startInfo.FileName))
                 {
                     throw new Win32Exception(SR.DirectoryNotValidAsInput);
@@ -258,14 +252,14 @@ namespace System.Diagnostics
             }
             else
             {
-                if (string.IsNullOrEmpty(filename))
-                {
-                    filename = startInfo.FileName; // is url
-                }
-
                 // use default program to open file/url
                 filename = GetPathToOpenFile();
                 argv = ParseArgv(startInfo, filename);
+            }
+
+            if (string.IsNullOrEmpty(filename))
+            {
+                throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
             }
 
             // Invoke the shim fork/execve routine.  It will create pipes for all requested
