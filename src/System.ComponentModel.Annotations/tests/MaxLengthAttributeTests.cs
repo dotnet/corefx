@@ -36,9 +36,18 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new object[] { new MaxLengthAttribute(15), new List<string>(new string[14]) };
             yield return new object[] { new MaxLengthAttribute(16), new List<string>(new string[16]) };
 
+            //ICollection<T> but not ICollection
             yield return new object[] { new MaxLengthAttribute(-1), new HashSet<int>(Enumerable.Range(1, 20)) };
             yield return new object[] { new MaxLengthAttribute(15), new HashSet<string>(Enumerable.Range(1, 14).Select(i => i.ToString())) };
             yield return new object[] { new MaxLengthAttribute(16), new HashSet<string>(Enumerable.Range(1, 16).Select(i => i.ToString())) };
+
+            //ICollection but not ICollection<T>
+            yield return new object[] { new MaxLengthAttribute(-1), new ArrayList(new int[20]) };
+            yield return new object[] { new MaxLengthAttribute(15), new ArrayList(new string[14]) };
+            yield return new object[] { new MaxLengthAttribute(16), new ArrayList(new string[16]) };
+
+            //Multi ICollection<T>
+            yield return new object[] { new MaxLengthAttribute(1), new MultiCollection() };
         }
 
         protected override IEnumerable<TestCase> InvalidValues()
@@ -126,5 +135,26 @@ namespace System.ComponentModel.DataAnnotations.Tests
     {
         public IEnumerator<int> GetEnumerator() => Enumerable.Empty<int>().GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class MultiCollection : Collection<string>, ICollection<int>, ICollection<uint>
+    {
+        int ICollection<int>.Count => 0;
+        int ICollection<uint>.Count => 0;
+        bool ICollection<int>.IsReadOnly => throw new NotSupportedException();
+        bool ICollection<uint>.IsReadOnly => throw new NotSupportedException();
+        void ICollection<int>.Add(int item) => throw new NotSupportedException();
+        void ICollection<uint>.Add(uint item) => throw new NotSupportedException();
+        void ICollection<int>.Clear() => throw new NotSupportedException();
+        void ICollection<uint>.Clear() => throw new NotSupportedException();
+        bool ICollection<int>.Contains(int item) => throw new NotSupportedException();
+        bool ICollection<uint>.Contains(uint item) => throw new NotSupportedException();
+        void ICollection<int>.CopyTo(int[] array, int arrayIndex) => throw new NotSupportedException();
+        void ICollection<uint>.CopyTo(uint[] array, int arrayIndex) => throw new NotSupportedException();
+        IEnumerator<int> IEnumerable<int>.GetEnumerator() => throw new NotSupportedException();
+        IEnumerator IEnumerable.GetEnumerator() => throw new NotSupportedException();
+        IEnumerator<uint> IEnumerable<uint>.GetEnumerator() => throw new NotSupportedException();
+        bool ICollection<int>.Remove(int item) => throw new NotSupportedException();
+        bool ICollection<uint>.Remove(uint item) => throw new NotSupportedException();
     }
 }
