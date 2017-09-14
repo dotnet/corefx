@@ -44,12 +44,11 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
-    // TODO #23139: Tests on this class fail when the associated condition is enabled.
-    //public sealed class ManagedHandler_HttpClientEKUTest : HttpClientEKUTest, IDisposable
-    //{
-    //    public ManagedHandler_HttpClientEKUTest() => ManagedHandlerTestHelpers.SetEnvVar();
-    //    public void Dispose() => ManagedHandlerTestHelpers.RemoveEnvVar();
-    //}
+    public sealed class ManagedHandler_HttpClientEKUTest : HttpClientEKUTest, IDisposable
+    {
+        public ManagedHandler_HttpClientEKUTest() => ManagedHandlerTestHelpers.SetEnvVar();
+        public void Dispose() => ManagedHandlerTestHelpers.RemoveEnvVar();
+    }
 
     public sealed class ManagedHandler_HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test : HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test, IDisposable
     {
@@ -123,13 +122,6 @@ namespace System.Net.Http.Functional.Tests
         public void Dispose() => ManagedHandlerTestHelpers.RemoveEnvVar();
     }
 
-    // TODO #23140:
-    //public sealed class ManagedHandler_DefaultCredentialsTest : DefaultCredentialsTest, IDisposable
-    //{
-    //    public ManagedHandler_DefaultCredentialsTest(ITestOutputHelper output) : base(output) => ManagedHandlerTestHelpers.SetEnvVar();
-    //    public void Dispose() => ManagedHandlerTestHelpers.RemoveEnvVar();
-    //}
-
     public sealed class ManagedHandler_HttpClientHandlerTest : HttpClientHandlerTest, IDisposable
     {
         public ManagedHandler_HttpClientHandlerTest(ITestOutputHelper output) : base(output) => ManagedHandlerTestHelpers.SetEnvVar();
@@ -138,6 +130,12 @@ namespace System.Net.Http.Functional.Tests
             ManagedHandlerTestHelpers.RemoveEnvVar();
             base.Dispose();
         }
+    }
+
+    public sealed class ManagedHandler_DefaultCredentialsTest : DefaultCredentialsTest, IDisposable
+    {
+        public ManagedHandler_DefaultCredentialsTest(ITestOutputHelper output) : base(output) => ManagedHandlerTestHelpers.SetEnvVar();
+        public void Dispose() => ManagedHandlerTestHelpers.RemoveEnvVar();
     }
 
     // TODO #23141: Socket's don't support canceling individual operations, so ReadStream on NetworkStream
