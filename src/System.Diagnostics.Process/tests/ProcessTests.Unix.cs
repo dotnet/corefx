@@ -16,7 +16,7 @@ namespace System.Diagnostics.Tests
 {
     public partial class ProcessTests : ProcessTestBase
     {
-        private const int EXIT_CODE_KILL = 137;  // using exit code 137 to show the process was killed
+        private const int ExitCodeKill  = 137;  // using exit code 137 to show the process was killed
 
         [Fact]
         private void TestWindowApisUnix()
@@ -63,7 +63,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(1, p.Id);
         }
 
-        [Theory, InlineData(true), InlineData(false)] // Expected behavior varies on Windows and Unix. Refer to #23969
+        [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled(bool isFolder)
         {
@@ -90,7 +90,7 @@ namespace System.Diagnostics.Tests
                         break;
                     }
                 }
-                if (string.IsNullOrEmpty(programToOpen))
+                if (programToOpen == null)
                 {
                     Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", allowedProgramsToRun)}.");
                     Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
@@ -112,7 +112,7 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(EXIT_CODE_KILL, px.ExitCode);
+                Assert.Equal(ExitCodeKill , px.ExitCode);
             }
         }
 
@@ -131,7 +131,7 @@ namespace System.Diagnostics.Tests
                     px.Kill();
                     px.WaitForExit();
                     Assert.True(px.HasExited);
-                    Assert.Equal(EXIT_CODE_KILL, px.ExitCode);
+                    Assert.Equal(ExitCodeKill , px.ExitCode);
                 }
             }
             else
@@ -154,7 +154,7 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(EXIT_CODE_KILL, px.ExitCode);
+                Assert.Equal(ExitCodeKill , px.ExitCode);
             }
         }
 
@@ -169,7 +169,7 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(EXIT_CODE_KILL, px.ExitCode);
+                Assert.Equal(ExitCodeKill , px.ExitCode);
             }
         }
 
@@ -185,7 +185,7 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(EXIT_CODE_KILL, px.ExitCode);
+                Assert.Equal(ExitCodeKill , px.ExitCode);
             }
         }
 
