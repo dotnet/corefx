@@ -58,6 +58,20 @@ namespace System.Tests
             Assert.Equal("a", result);
         }
 
+        [Fact]
+        public static void Create_ClearsMemory()
+        {
+            const int Length = 10;
+            string result = string.Create(Length, (object)null, (span, state) =>
+            {
+                for (int i = 0; i < span.Length; i++)
+                {
+                    Assert.Equal('\0', span[i]);
+                }
+            });
+            Assert.Equal(new string('\0', Length), result);
+        }
+
         [Theory]
         [InlineData("a")]
         [InlineData("this is a test")]
