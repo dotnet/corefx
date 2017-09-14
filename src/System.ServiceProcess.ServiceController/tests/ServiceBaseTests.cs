@@ -69,6 +69,7 @@ namespace System.ServiceProcess.Tests
             }
         }
 
+        [ActiveIssue(23388)]
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
