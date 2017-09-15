@@ -63,9 +63,21 @@ namespace System.Diagnostics.Tests
             Assert.Equal(1, p.Id);
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public void ProcessStart_UseShellExecute_OnLinux_ThrowsIfNoProgramInstalled()
+        {
+            List<string> allowedProgramsToRun = GetAllowedProgramsToRun();
+            if (!allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
+            {
+                Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", allowedProgramsToRun)}.");
+                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory }));
+            }
+        }
+
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
-        public void ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled(bool isFolder)
+        public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
         {
             string fileToOpen;
             string programToOpen = null;
@@ -78,44 +90,29 @@ namespace System.Diagnostics.Tests
                 fileToOpen = GetTestFilePath() + ".txt";
                 File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled)}");
             }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                string[] allowedProgramsToRun = { "xdg-open", "gnome-open", "kfmclient" };
-                foreach (var program in allowedProgramsToRun)
-                {
-                    if (IsProgramInstalled(program))
-                    {
-                        programToOpen = program;
-                        break;
-                    }
-                }
-                if (programToOpen == null)
-                {
-                    Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", allowedProgramsToRun)}.");
-                    Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
-                }
-            }
             
-            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || GetAllowedProgramsToRun().Any(program => IsProgramInstalled(program)))
             {
-                Assert.NotNull(px); // on Windows px is null for some reason
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
-                    Assert.Equal(programToOpen, px.ProcessName);
+                    Assert.NotNull(px); // on Windows px is null for some reason
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
+                        Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
+                    }
+                    else
+                    {
+                        Assert.Equal(programToOpen, px.ProcessName);
+                    }
+                    px.Kill();
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                    Assert.Equal(ExitCodeKill, px.ExitCode);
                 }
-                else
-                {
-                    // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
-                    Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
-                }
-                px.Kill();
-                px.WaitForExit();
-                Assert.True(px.HasExited);
-                Assert.Equal(ExitCodeKill, px.ExitCode);
             }
         }
-
+        
         [Theory, InlineData("nano"), InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
@@ -266,6 +263,8 @@ namespace System.Diagnostics.Tests
 
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
+
+        private List<string> GetAllowedProgramsToRun() => new List<string> { "xdg-open", "gnome-open", "kfmclient" };
 
         /// <summary>
         /// Checks if the program is installed
