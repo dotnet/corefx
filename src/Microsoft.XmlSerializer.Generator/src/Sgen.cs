@@ -129,7 +129,7 @@ namespace Microsoft.XmlSerializer.Generator
 
                 if(disableRun)
                 {
-                    Console.WriteLine("You are not supposed to run this tool directly!!!");
+                    Console.WriteLine("This tool is not intended to be used directly.");
                     Console.WriteLine("The feature is still under development.");
                     Console.WriteLine("Please refer to https://go.microsoft.com/fwlink/?linkid=858539 for more detail.");
                     return 0;
