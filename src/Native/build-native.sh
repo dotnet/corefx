@@ -162,6 +162,7 @@ __ClangMajorVersion=0
 __ClangMinorVersion=0
 __StaticLibLink=0
 __PortableBuild=0
+__OSGroupSet=0
 
 CPUName=$(uname -p)
 # Some Linux platforms report unknown for platform, but the arch for machine.
@@ -246,11 +247,22 @@ while :; do
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
+        -osgroup*)
+             __BuildOS=`echo $1 | cut -d '=' -f2`
+             __OSGroupSet=1
+             ;;
+        --osgroup*)
+            # msbuild adds extra - for -OSGroup
+            __BuildOS=`echo $1 | cut -d '=' -f2`
+            __OSGroupSet=1
+            ;;
         freebsd)
             __BuildOS=FreeBSD
             ;;
         linux)
-            __BuildOS=Linux
+            if [ $__OSGroupSet -eq 0 ]; then
+                __BuildOS=Linux
+            fi
             ;;
         netbsd)
             __BuildOS=NetBSD
