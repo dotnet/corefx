@@ -65,10 +65,10 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)]
         public void ProcessStart_UseShellExecute_OnLinux_ThrowsIfNoProgramInstalled()
         {
-            if (!_allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
+            if (!s_allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
             {
-                Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", _allowedProgramsToRun)}.");
-                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory }));
+                Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", s_allowedProgramsToRun)}.");
+                Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory }));
             }
         }
 
@@ -76,8 +76,8 @@ namespace System.Diagnostics.Tests
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
         {
+            string programToOpen = s_allowedProgramsToRun.FirstOrDefault(program => IsProgramInstalled(program));
             string fileToOpen;
-            string programToOpen = null;
             if (isFolder)
             {
                 fileToOpen = Environment.CurrentDirectory;
@@ -87,12 +87,12 @@ namespace System.Diagnostics.Tests
                 fileToOpen = GetTestFilePath() + ".txt";
                 File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled)}");
             }
-            
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || _allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || programToOpen != null)
             {
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
-                    Assert.NotNull(px); // on Windows px is null for some reason
+                    Assert.NotNull(px);
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
@@ -256,7 +256,7 @@ namespace System.Diagnostics.Tests
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
 
-        private readonly string[] _allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
+        private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
 
         /// <summary>
         /// Checks if the program is installed
