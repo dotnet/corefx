@@ -196,7 +196,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "https://github.com/dotnet/corefx/issues/22174")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Retrieving information about local processes is not supported on uap")]
         public void TestEnvironmentOfChildProcess()
         {
             const string ItemSeparator = "CAFF9451396B4EEF8A5155A15BDC2080"; // random string that shouldn't be in any env vars; used instead of newline to separate env var strings
@@ -323,7 +323,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory, InlineData(true), InlineData(false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "https://github.com/dotnet/corefx/issues/22174")]
         public void TestCreateNoWindowProperty(bool value)
         {
             Process testProcess = CreateProcessLong();
@@ -344,7 +343,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "https://github.com/dotnet/corefx/issues/22174")]
         public void TestWorkingDirectoryProperty()
         {
             CreateDefaultProcess();
@@ -503,9 +501,9 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "https://github.com/dotnet/corefx/issues/22174")]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Verbs_GetWithExeExtension_ReturnsExpected()
         {
             var psi = new ProcessStartInfo { FileName = $"{Process.GetCurrentProcess().ProcessName}.exe" };
@@ -959,10 +957,11 @@ namespace System.Diagnostics.Tests
             Process.Start(info); // Returns null after navigating browser
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
         [MemberData(nameof(UseShellExecute))]
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WaitForInputIdle, ProcessName, and MainWindowTitle are not supported on UAP")]
         public void StartInfo_NotepadWithContent(bool useShellExecute)
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -985,15 +984,8 @@ namespace System.Diagnostics.Tests
                     process.WaitForInputIdle(); // Give the file a chance to load
                     Assert.Equal("notepad", process.ProcessName);
 
-                    if (PlatformDetection.IsUap)
-                    {
-                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
-                    }
-                    else
-                    {
-                        // On some Windows versions, the file extension is not included in the title
-                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
-                    }
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
                 }
                 finally
                 {
@@ -1002,9 +994,8 @@ namespace System.Diagnostics.Tests
                 }
             }
         }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer),  // Nano does not support UseShellExecute
-                         nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindows8x))]   // https://github.com/dotnet/corefx/issues/20388
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), // Nano does not support UseShellExecute
+                                                    nameof(PlatformDetection.IsNotWindows8x))] // https://github.com/dotnet/corefx/issues/20388
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
         // Re-enabling with extra diagnostic info
@@ -1095,7 +1086,7 @@ namespace System.Diagnostics.Tests
         }
 
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))] 
         public void ShellExecute_Nano_Fails_Start()
         {
             string tempFile = GetTestFilePath() + ".txt";

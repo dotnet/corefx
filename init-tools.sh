@@ -19,7 +19,7 @@ if [ -z "$__DOTNET_PKG" ]; then
     if [ "$(uname -m | grep "i[3456]86")" = "i686" ]; then
         echo "Warning: build not supported on 32 bit Unix"
     fi
-OSName=$(uname -s)
+    OSName=$(uname -s)
     case $OSName in
         Darwin)
             OS=OSX
@@ -36,6 +36,21 @@ OSName=$(uname -s)
         Linux)
             __DOTNET_PKG=dotnet-dev-linux-x64
             OS=Linux
+			
+            if [ -e /etc/os-release ]; then
+                source /etc/os-release
+                if [[ $ID == "alpine" ]]; then
+                    # remove the last version digit
+                    VERSION_ID=${VERSION_ID%.*}
+                    __DOTNET_PKG=dotnet-dev-alpine.$VERSION_ID-x64
+                fi
+            elif [ -e /etc/redhat-release ]; then
+                redhatRelease=$(</etc/redhat-release)
+                if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
+                    __DOTNET_PKG=dotnet-dev-rhel.6-x64
+                fi
+            fi			
+			
             ;;
 
         *)
@@ -73,11 +88,10 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
             __DOTNET_LOCATION="https://dotnetcli.azureedge.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
             # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
             echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
-            which curl > /dev/null 2> /dev/null
-            if [ $? -ne 0 ]; then
-                wget -q -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
-            else
+            if command -v curl > /dev/null; then
                 curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
+            else
+                wget -q -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
             fi
             cd $__DOTNET_PATH
             tar -xf $__DOTNET_PATH/dotnet.tar
@@ -113,7 +127,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         chmod +x $__BUILD_TOOLS_PATH/init-tools.sh
         $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
         if [ "$?" != "0" ]; then
-            echo "ERROR: An error occured when trying to initialize the tools." 1>&2
+            echo "ERROR: An error occurred when trying to initialize the tools." 1>&2
             display_error_message
             exit 1
         fi

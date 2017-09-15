@@ -4,8 +4,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Security;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -69,7 +71,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (ManagedHandlerTestHelpers.IsEnabled)
             {
-                return; // TODO #21452: SSL proxy tunneling not yet implemented in ManagedHandler
+                return; // TODO #23136: SSL proxy tunneling not yet implemented in ManagedHandler
             }
 
             int port;
@@ -154,7 +156,15 @@ namespace System.Net.Http.Functional.Tests
                 handler.ServerCertificateCustomValidationCallback = (request, cert, chain, errors) => {
                     callbackCalled = true;
                     Assert.NotNull(request);
-                    Assert.Equal(SslPolicyErrors.None, errors);
+
+                    X509ChainStatusFlags flags = chain.ChainStatus.Aggregate(X509ChainStatusFlags.NoError, (cur, status) => cur | status.Status);
+                    bool ignoreErrors = // https://github.com/dotnet/corefx/issues/21922#issuecomment-315555237
+                        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
+                        checkRevocation &&
+                        errors == SslPolicyErrors.RemoteCertificateChainErrors &&
+                        flags == X509ChainStatusFlags.RevocationStatusUnknown;
+                    Assert.True(ignoreErrors || errors == SslPolicyErrors.None, $"Expected {SslPolicyErrors.None}, got {errors} with chain status {flags}");
+
                     Assert.True(chain.ChainElements.Count > 0);
                     Assert.NotEmpty(cert.Subject);
 
@@ -302,7 +312,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(chain);
                     if (!ManagedHandlerTestHelpers.IsEnabled)
                     {
-                        // TODO #21452: This test is failing with the managed handler on the exact value of the managed errors,
+                        // TODO #23137: This test is failing with the managed handler on the exact value of the managed errors,
                         // e.g. reporting "RemoteCertificateNameMismatch, RemoteCertificateChainErrors" when we only expect
                         // "RemoteCertificateChainErrors"
                         Assert.Equal(expectedErrors, errors);

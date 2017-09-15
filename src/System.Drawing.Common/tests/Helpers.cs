@@ -1,18 +1,50 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using System.Drawing.Printing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 using Xunit.Sdk;
 
-namespace System.Drawing.Tests
+namespace System.Drawing
 {
     public static class Helpers
-    {
+    {        
+        public const string GdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetGdiplusIsAvailable);
+        public const string AnyInstalledPrinters = nameof(Helpers) + "." + nameof(IsAnyInstalledPrinters);
+
+        public static bool GetGdiplusIsAvailable()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return PlatformDetection.IsNotWindowsNanoServer && PlatformDetection.IsNotWindowsServerCore;
+            }
+            else
+            {
+                IntPtr nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                if (nativeLib == IntPtr.Zero)
+                {
+                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                }
+
+                return nativeLib != IntPtr.Zero;
+            }
+        }
+
+        public static bool IsAnyInstalledPrinters()
+        {
+            return PrinterSettings.InstalledPrinters.Count > 0;
+        }
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        public const int RTLD_NOW = 0x002;
+
         public static string GetTestBitmapPath(string fileName) => GetTestPath("bitmaps", fileName);
         public static string GetTestFontPath(string fileName) => GetTestPath("fonts", fileName);
+        public static string GetTestColorProfilePath(string fileName) => GetTestPath("colorProfiles", fileName);
 
         private static string GetTestPath(string directoryName, string fileName) => Path.Combine(AppContext.BaseDirectory, directoryName, fileName);
 
@@ -141,6 +173,24 @@ namespace System.Drawing.Tests
             public int Top;
             public int Right;
             public int Bottom;
+        }
+
+        public static void VerifyBitmapNotBlank(Bitmap bmp)
+        {
+            Color emptyColor = Color.FromArgb(0);
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    Color pixel = bmp.GetPixel(x, y);
+                    if (!pixel.Equals(emptyColor))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            throw new XunitException("The entire image was blank.");
         }
     }
 }

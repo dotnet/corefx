@@ -2,12 +2,9 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
-    <NugetRuntimeIdentifier Condition="'$(OSGroup)' == 'Windows_NT' AND '$(RunningOnUnix)' == 'true'">win-x64</NugetRuntimeIdentifier>
-    <NugetRuntimeIdentifier Condition="'$(OSGroup)' == 'Unix' AND '$(RunningOnUnix)' != 'true'">linux-x64</NugetRuntimeIdentifier>
-    <NugetRuntimeIdentifier Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</NugetRuntimeIdentifier>
-    <NugetRuntimeIdentifier Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</NugetRuntimeIdentifier>
+    <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
+    <CoreClrPackageVersion Condition="'$(TargetGroup)' == 'netcoreapp2.0'">2.0.0</CoreClrPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <!-- Temporarily Override restore moniker since NETNative's targeting pack still uses uap10.1 moniker -->
@@ -40,10 +37,10 @@
       <Version>$(PackageVersion)-$(CoreFxExpectedPrerelease)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.DotNetHost">
-      <Version>2.0.0-preview2-25310-02</Version>
+      <Version>2.0.1-servicing-25615-03</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>2.0.0-preview2-25310-02</Version>
+      <Version>2.0.1-servicing-25615-03</Version>
     </PackageReference>
   </ItemGroup>
 
@@ -72,6 +69,7 @@
           SkipUnchangedFiles="true"
           UseHardlinksIfPossible="true" />
 
+    <Exec Command="chmod +x $(TestHostRootPath)dotnet" Condition="'$(RunningOnUnix)' == 'true'"/>
   </Target>
 
   <Target Name="OverrideRuntime"

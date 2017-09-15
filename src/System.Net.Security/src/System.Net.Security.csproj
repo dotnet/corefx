@@ -18,7 +18,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\PinnableBufferCache.cs" />
     <Compile Include="System\Net\CertificateValidationPal.cs" />
     <Compile Include="System\Net\FixedSizeReader.cs" />
     <Compile Include="System\Net\HelperAsyncResults.cs" />
@@ -162,6 +161,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\UnmanagedCertificateContext.cs">
       <Link>Common\Interop\Windows\SChannel\UnmanagedCertificateContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\UnmanagedCertificateContext.IntPtr.cs">
+      <Link>Common\Interop\Windows\SChannel\UnmanagedCertificateContext.IntPtr.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_Bindings.cs">
       <Link>Common\Interop\Windows\sspicli\SecPkgContext_Bindings.cs</Link>
@@ -386,6 +388,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
