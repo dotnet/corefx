@@ -172,16 +172,12 @@ namespace System.Diagnostics.Tests
                 }
                 else
                 {
-                    if (px != null)
+                    if (px != null) // sometimes process is null: tracked by #24048
                     {
                         Assert.Equal("notepad", px.ProcessName);
 
                         px.Kill();
                         Assert.True(px.WaitForExit(WaitInMS));
-                    }
-                    else
-                    {
-                        // sometimes process is null: tracked by #24048
                     }
                 }
             }
