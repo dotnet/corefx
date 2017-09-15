@@ -65,10 +65,9 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)]
         public void ProcessStart_UseShellExecute_OnLinux_ThrowsIfNoProgramInstalled()
         {
-            IEnumerable<string> allowedProgramsToRun = _allowedProgramsToRun;
-            if (!allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
+            if (!_allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
             {
-                Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", allowedProgramsToRun)}.");
+                Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", _allowedProgramsToRun)}.");
                 Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory }));
             }
         }
@@ -257,7 +256,7 @@ namespace System.Diagnostics.Tests
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
 
-        private readonly IEnumerable<string> _allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
+        private readonly string[] _allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
 
         /// <summary>
         /// Checks if the program is installed
