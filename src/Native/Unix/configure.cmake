@@ -43,10 +43,7 @@ check_c_source_compiles(
     #include <${SOCKET_INCLUDES}>
     int main()
     {
-        int ifi;
-        struct in_pktinfo p;
-        memset(p, 0, sizeof(p));
-        ifi=p.ipi_ifindex;
+        struct in_pktinfo p = {};
         return 0;
     }
     "
