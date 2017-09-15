@@ -16,8 +16,6 @@ namespace System.Diagnostics.Tests
 {
     public partial class ProcessTests : ProcessTestBase
     {
-        private const int ExitCodeKill = 137;  // using exit code 137 to show the process was killed
-
         [Fact]
         private void TestWindowApisUnix()
         {
@@ -67,7 +65,7 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)]
         public void ProcessStart_UseShellExecute_OnLinux_ThrowsIfNoProgramInstalled()
         {
-            List<string> allowedProgramsToRun = GetAllowedProgramsToRun();
+            IEnumerable<string> allowedProgramsToRun = _allowedProgramsToRun;
             if (!allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
             {
                 Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", allowedProgramsToRun)}.");
@@ -88,10 +86,10 @@ namespace System.Diagnostics.Tests
             else
             {
                 fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled)}");
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled)}");
             }
             
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || GetAllowedProgramsToRun().Any(program => IsProgramInstalled(program)))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || _allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
             {
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
@@ -99,7 +97,7 @@ namespace System.Diagnostics.Tests
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
-                        Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_ThrowsIfNoProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
+                        Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
                     }
                     else
                     {
@@ -108,11 +106,10 @@ namespace System.Diagnostics.Tests
                     px.Kill();
                     px.WaitForExit();
                     Assert.True(px.HasExited);
-                    Assert.Equal(ExitCodeKill, px.ExitCode);
                 }
             }
         }
-        
+
         [Theory, InlineData("nano"), InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
@@ -128,7 +125,6 @@ namespace System.Diagnostics.Tests
                     px.Kill();
                     px.WaitForExit();
                     Assert.True(px.HasExited);
-                    Assert.Equal(ExitCodeKill, px.ExitCode);
                 }
             }
             else
@@ -151,7 +147,6 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(ExitCodeKill, px.ExitCode);
             }
         }
 
@@ -166,7 +161,6 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(ExitCodeKill, px.ExitCode);
             }
         }
 
@@ -182,7 +176,6 @@ namespace System.Diagnostics.Tests
                 px.Kill();
                 px.WaitForExit();
                 Assert.True(px.HasExited);
-                Assert.Equal(ExitCodeKill, px.ExitCode);
             }
         }
 
@@ -264,7 +257,7 @@ namespace System.Diagnostics.Tests
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
 
-        private List<string> GetAllowedProgramsToRun() => new List<string> { "xdg-open", "gnome-open", "kfmclient" };
+        private readonly IEnumerable<string> _allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
 
         /// <summary>
         /// Checks if the program is installed
