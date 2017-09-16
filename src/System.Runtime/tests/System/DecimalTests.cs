@@ -1299,16 +1299,16 @@ namespace System.Tests
         [Fact]
         public static void RandomBigInteger_Compare()
         {
-            var values = GetRandomData(out var bigValues);
-            for (int i = 0, b = 0; i < values.Length; i++)
+            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+            for (int i = 0; i < decimalValues.Length; i++)
             {
-                var d1 = values[i];
-                var b1 = bigValues[i];
-                for (int j = 0; j < values.Length; j++, b++)
+                decimal d1 = decimalValues[i];
+                BigDecimal b1 = bigDecimals[i];
+                for (int j = 0; j < decimalValues.Length; j++)
                 {
-                    var d2 = values[j];
-                    var expected = b1.CompareTo(bigValues[j]);
-                    var actual = d1.CompareTo(d2);
+                    decimal d2 = decimalValues[j];
+                    int expected = b1.CompareTo(bigDecimals[j]);
+                    int actual = d1.CompareTo(d2);
                     if (expected != actual)
                         throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " CMP " + d2);
                 }
@@ -1318,23 +1318,23 @@ namespace System.Tests
         [Fact]
         public static void RandomBigInteger_Add()
         {
-            var overflowBudget = 1000;
-            var values = GetRandomData(out var bigValues);
-            for (int i = 0, b = 0; i < values.Length; i++)
+            int overflowBudget = 1000;
+            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+            for (int i = 0; i < decimalValues.Length; i++)
             {
-                var d1 = values[i];
-                var b1 = bigValues[i];
-                for (int j = 0; j < values.Length; j++, b++)
+                decimal d1 = decimalValues[i];
+                BigDecimal b1 = bigDecimals[i];
+                for (int j = 0; j < decimalValues.Length; j++)
                 {
-                    var d2 = values[j];
-                    var expected = b1.Add(bigValues[j], out var expectedOF);
-                    if (expectedOF)
+                    decimal d2 = decimalValues[j];
+                    BigDecimal expected = b1.Add(bigDecimals[j], out bool expectedOverflow);
+                    if (expectedOverflow)
                     {
                         if (--overflowBudget < 0)
                             continue;
                         try
                         {
-                            var actual = d1 + d2;
+                            decimal actual = d1 + d2;
                             throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " + " + d2);
                         }
                         catch (OverflowException) { }
@@ -1342,7 +1342,7 @@ namespace System.Tests
                     else
                         unsafe
                         {
-                            var actual = d1 + d2;
+                            decimal actual = d1 + d2;
                             if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
                                 throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " + " + d2);
                         }
@@ -1353,23 +1353,23 @@ namespace System.Tests
         [Fact]
         public static void RandomBigInteger_Mul()
         {
-            var overflowBudget = 1000;
-            var values = GetRandomData(out var bigValues);
-            for (int i = 0, b = 0; i < values.Length; i++)
+            int overflowBudget = 1000;
+            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+            for (int i = 0; i < decimalValues.Length; i++)
             {
-                var d1 = values[i];
-                var b1 = bigValues[i];
-                for (int j = 0; j < values.Length; j++, b++)
+                decimal d1 = decimalValues[i];
+                BigDecimal b1 = bigDecimals[i];
+                for (int j = 0; j < decimalValues.Length; j++)
                 {
-                    var d2 = values[j];
-                    var expected = b1.Mul(bigValues[j], out var expectedOF);
-                    if (expectedOF)
+                    decimal d2 = decimalValues[j];
+                    BigDecimal expected = b1.Mul(bigDecimals[j], out bool expectedOverflow);
+                    if (expectedOverflow)
                     {
                         if (--overflowBudget < 0)
                             continue;
                         try
                         {
-                            var actual = d1 * d2;
+                            decimal actual = d1 * d2;
                             throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " * " + d2);
                         }
                         catch (OverflowException) { }
@@ -1377,7 +1377,7 @@ namespace System.Tests
                     else
                         unsafe
                         {
-                            var actual = d1 * d2;
+                            decimal actual = d1 * d2;
                             if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
                                 throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " * " + d2);
                         }
@@ -1388,25 +1388,25 @@ namespace System.Tests
         [Fact]
         public static void RandomBigInteger_Div()
         {
-            var overflowBudget = 1000;
-            var values = GetRandomData(out var bigValues);
-            for (int i = 0, b = 0; i < values.Length; i++)
+            int overflowBudget = 1000;
+            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+            for (int i = 0; i < decimalValues.Length; i++)
             {
-                var d1 = values[i];
-                var b1 = bigValues[i];
-                for (int j = 0; j < values.Length; j++, b++)
+                decimal d1 = decimalValues[i];
+                BigDecimal b1 = bigDecimals[i];
+                for (int j = 0; j < decimalValues.Length; j++)
                 {
-                    var d2 = values[j];
+                    decimal d2 = decimalValues[j];
                     if (Math.Sign(d2) == 0)
                         continue;
-                    var expected = b1.Div(bigValues[j], out var expectedOF);
-                    if (expectedOF)
+                    BigDecimal expected = b1.Div(bigDecimals[j], out bool expectedOverflow);
+                    if (expectedOverflow)
                     {
                         if (--overflowBudget < 0)
                             continue;
                         try
                         {
-                            var actual = d1 / d2;
+                            decimal actual = d1 / d2;
                             throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " / " + d2);
                         }
                         catch (OverflowException) { }
@@ -1414,7 +1414,7 @@ namespace System.Tests
                     else
                         unsafe
                         {
-                            var actual = d1 / d2;
+                            decimal actual = d1 / d2;
                             if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
                                 throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " / " + d2);
                         }
@@ -1442,10 +1442,12 @@ namespace System.Tests
                                 continue; // skip duplicates
                             list.Add(d);
                         }
-            var data = list.ToArray();
-            bigDecimals = Array.ConvertAll(data, d => new BigDecimal(d));
-            return data;
+            decimal[] decimalValues = list.ToArray();
+            bigDecimals = Array.ConvertAll(decimalValues, d => new BigDecimal(d));
+            return decimalValues;
 
+            // While the decimals are random in general,
+            // they are particularly focused on numbers starting or ending at bits 0-3, 30-34, 62-66, 94-96 to focus more on the corner cases around uint32 boundaries.
             int IncBitLimits(int i)
             {
                 switch (i)
@@ -1461,9 +1463,10 @@ namespace System.Tests
                 }
             }
 
+            // Generates a random number, only bits between low and high can be set.
             int GetDigits(int low, int high)
             {
-                if (high <= 0 || low > 32)
+                if (high <= 0 || low >= 32)
                     return 0;
                 uint res = 0;
                 if (high <= 32)
@@ -1475,6 +1478,9 @@ namespace System.Tests
             }
         }
 
+        /// <summary>
+        /// Decimal implementation roughly based on the oleaut32 native decimal code (especially ScaleResult), but optimized for simplicity instead of speed
+        /// </summary>
         struct BigDecimal
         {
             public readonly BigInteger Integer;
@@ -1517,7 +1523,7 @@ namespace System.Tests
                     return Integer.CompareTo(value.Integer);
             }
 
-            public BigDecimal Add(BigDecimal value, out bool of)
+            public BigDecimal Add(BigDecimal value, out bool overflow)
             {
                 int sd = Scale - value.Scale;
                 BigInteger a = Integer, b = value.Integer;
@@ -1528,17 +1534,17 @@ namespace System.Tests
 
                 var res = a + b;
                 int scale = Math.Max(Scale, value.Scale);
-                of = ScaleResult(ref res, ref scale);
+                overflow = ScaleResult(ref res, ref scale);
                 return new BigDecimal(res, (byte)scale);
             }
 
-            public BigDecimal Mul(BigDecimal value, out bool of)
+            public BigDecimal Mul(BigDecimal value, out bool overflow)
             {
                 var res = Integer * value.Integer;
                 int scale = Scale + value.Scale;
                 if (res.IsZero)
                 {
-                    of = false;
+                    overflow = false;
                     // VarDecMul quirk: multipling by zero results in a scaled zero (e.g., 0.000) only if the intermediate scale is <=47 and both inputs fit in 32 bits!
                     if (scale <= 47 && BigInteger.Abs(Integer) <= MaxInteger32 && BigInteger.Abs(value.Integer) <= MaxInteger32)
                         scale = Math.Min(scale, 28);
@@ -1547,7 +1553,7 @@ namespace System.Tests
                 }
                 else
                 {
-                    of = ScaleResult(ref res, ref scale);
+                    overflow = ScaleResult(ref res, ref scale);
                     // VarDecMul quirk: rounding to zero results in a scaled zero (e.g., 0.000), except if the intermediate scale is >47 and both inputs fit in 32 bits!
                     if (res.IsZero && scale == 28 && Scale + value.Scale > 47 && BigInteger.Abs(Integer) <= MaxInteger32 && BigInteger.Abs(value.Integer) <= MaxInteger32)
                         scale = 0;
@@ -1555,7 +1561,7 @@ namespace System.Tests
                 return new BigDecimal(res, (byte)scale);
             }
 
-            public BigDecimal Div(BigDecimal value, out bool of)
+            public BigDecimal Div(BigDecimal value, out bool overflow)
             {
                 int scale = Scale - value.Scale;
                 BigInteger dividend = BigInteger.Abs(Integer), divisor = BigInteger.Abs(value.Integer);
@@ -1568,6 +1574,8 @@ namespace System.Tests
                 var quo = BigInteger.DivRem(dividend, divisor, out var remainder);
                 if (!remainder.IsZero)
                 {
+                    // We have computed a quotient based on the natural scale ( <dividend scale> - <divisor scale> ).
+                    // We have a non-zero remainder, so now we should increase the scale if possible to include more quotient bits.
                     do
                     {
                         if (scale == 28 || quo > MaxIntegerDiv10)
@@ -1588,6 +1596,7 @@ namespace System.Tests
                     }
                     while (!remainder.IsZero);
 
+                    // If the result doesn't fit in 96 bits, but is scaled, then round it down.
                     if (scale > 0 && quo > MaxInteger)
                     {
                         scale--;
@@ -1596,6 +1605,7 @@ namespace System.Tests
                             quo++;
                     }
 
+                    // Unscale the result (removes extra zeroes).
                     while (scale > 0 && quo.IsEven)
                     {
                         var tmp = BigInteger.DivRem(quo, 10, out remainder);
@@ -1606,7 +1616,7 @@ namespace System.Tests
                     }
                 }
 
-                of = quo > MaxInteger;
+                overflow = quo > MaxInteger;
                 if (Integer.Sign * value.Integer.Sign < 0)
                     quo = -quo;
                 return new BigDecimal(quo, (byte)scale);
@@ -1617,27 +1627,41 @@ namespace System.Tests
             static readonly BigInteger MaxInteger32 = uint.MaxValue;
             static readonly double Log2To10 = Math.Log(2) / Math.Log(10);
 
+            /// <summary>
+            /// Returns Log10 for the given number, offset by 96bits.
+            /// </summary>
             static int ScaleOverMaxInteger(BigInteger abs) => abs.IsZero ? -28 : (int)(((int)BigInteger.Log(abs, 2) - 95) * Log2To10);
 
+            /// <summary>
+            /// See if we need to scale the result to fit it in 96 bits.
+            /// Perform needed scaling. Adjust scale factor accordingly.
+            /// </summary>
             static bool ScaleResult(ref BigInteger res, ref int scale)
             {
                 int newScale = 0;
                 var abs = BigInteger.Abs(res);
                 if (abs > MaxInteger)
                 {
+                    // Find the min scale factor to make the result to fit it in 96 bits, 0 - 29.
+                    // This reduces the scale factor of the result. If it exceeds the current scale of the result, we'll overflow.
                     newScale = Math.Max(1, ScaleOverMaxInteger(abs));
                     if (newScale > scale)
                         return true;
                 }
+                // Make sure we scale by enough to bring the current scale factor into valid range.
                 newScale = Math.Max(newScale, scale - 28);
+
                 if (newScale != 0)
                 {
+                    // Scale by the power of 10 given by newScale.
+                    // This is not guaranteed to bring the number within 96 bits -- it could be 1 power of 10 short.
                     scale -= newScale;
                     var pow = Pow10[newScale];
                     var sticky = false;
                     while (true)
                     {
                         abs = BigInteger.DivRem(abs, pow, out var remainder);
+                        // If we didn't scale enough, divide by 10 more.
                         if (abs > MaxInteger)
                         {
                             if (scale == 0)
@@ -1648,12 +1672,15 @@ namespace System.Tests
                             continue;
                         }
 
+                        // Round final result.  See if remainder >= 1/2 of divisor.
+                        // If remainder == 1/2 divisor, round up if odd or sticky bit set.
                         pow >>= 1;
                         if (remainder < pow || remainder == pow && !sticky && abs.IsEven)
                             break;
                         if (++abs <= MaxInteger)
                             break;
 
+                        // The rounding caused us to carry beyond 96 bits. Scale by 10 more.
                         if (scale == 0)
                             return true;
                         pow = 10;
