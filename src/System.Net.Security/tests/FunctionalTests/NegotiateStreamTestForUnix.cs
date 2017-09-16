@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Principal;
 using System.Text;
