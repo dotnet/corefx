@@ -72,15 +72,31 @@ namespace System.Net.Security.Tests
             }
 
             // Clear the credentials
-            var startInfo = new ProcessStartInfo(KDestroyCmd);
-            startInfo.UseShellExecute = true;
-            startInfo.CreateNoWindow = true;
-            startInfo.Arguments = "-A";
-            using (Process clearCreds = Process.Start(startInfo))
+            try
             {
-                clearCreds.WaitForExit();
-                output.WriteLine("kdestroy returned {0}", clearCreds.ExitCode);
-                return (clearCreds.ExitCode == 0);
+                var startInfo = new ProcessStartInfo(KDestroyCmd);
+                startInfo.UseShellExecute = true;
+                startInfo.CreateNoWindow = true;
+                startInfo.Arguments = "-A";
+                using (Process clearCreds = Process.Start(startInfo))
+                {
+                    clearCreds.WaitForExit();
+                    output.WriteLine("kdestroy returned {0}", clearCreds.ExitCode);
+                    return (clearCreds.ExitCode == 0);
+                }
+            }
+            catch (Win32Exception)
+            {
+                // https://github.com/dotnet/corefx/issues/24000
+                // on these distros right now
+                Assert.True(PlatformDetection.IsUbuntu1704 ||
+                            PlatformDetection.IsUbuntu1710 ||
+                            PlatformDetection.IsOpenSUSE   ||
+                            PlatformDetection.IsFedora     ||
+                            PlatformDetection.IsDebian     ||
+                            PlatformDetection.IsCentos7);
+
+                return false;
             }
         }
 
@@ -115,7 +131,6 @@ namespace System.Net.Security.Tests
     }
 
     [PlatformSpecific(TestPlatforms.Linux)]
-    [ActiveIssue(24000)]
     [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
     public class NegotiateStreamTest : IDisposable, IClassFixture<KDCSetup>
     {
