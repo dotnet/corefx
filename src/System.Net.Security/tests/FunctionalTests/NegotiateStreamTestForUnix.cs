@@ -115,6 +115,7 @@ namespace System.Net.Security.Tests
     }
 
     [PlatformSpecific(TestPlatforms.Linux)]
+    [ActiveIssue(24000)]
     [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
     public class NegotiateStreamTest : IDisposable, IClassFixture<KDCSetup>
     {
