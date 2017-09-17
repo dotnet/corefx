@@ -55,13 +55,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public OpenTypePlaceholderType CreateUnit()
-        {
-            OpenTypePlaceholderType type = new OpenTypePlaceholderType();
-            type.SetTypeKind(TypeKind.TK_OpenTypePlaceholderType);
-            return type;
-        }
-
         public MethodGroupType CreateMethodGroup()
         {
             MethodGroupType type = new MethodGroupType();
@@ -78,8 +71,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ErrorType CreateError(
             Name name,
-            CType parent,
-            AssemblyQualifiedNamespaceSymbol pParentNS,
             Name nameText,
             TypeArray typeArgs)
         {
@@ -87,8 +78,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             e.SetName(name);
             e.nameText = nameText;
             e.typeArgs = typeArgs;
-            e.SetTypeParent(parent);
-            e.SetNSParent(pParentNS);
 
             e.SetTypeKind(TypeKind.TK_ErrorType);
             return e;

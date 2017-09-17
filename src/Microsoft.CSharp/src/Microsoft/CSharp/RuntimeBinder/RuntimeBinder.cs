@@ -32,11 +32,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private SymbolTable _symbolTable;
         private CSemanticChecker _semanticChecker;
-        private SymbolLoader SymbolLoader { get { return _semanticChecker.GetSymbolLoader(); } }
+        private SymbolLoader SymbolLoader => _semanticChecker.SymbolLoader;
+
         private ExprFactory _exprFactory;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
-        private RuntimeBinderController _controller;
 
         private readonly object _bindLock = new object();
 
@@ -51,8 +51,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void Reset()
         {
-            _controller = new RuntimeBinderController();
-            _semanticChecker = new LangCompiler(_controller, new NameManager());
+            _semanticChecker = new CSemanticChecker();
 
             BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
             NameManager nameManager = _semanticChecker.GetNameManager();
@@ -69,7 +68,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymbolLoader.getPredefinedMembers().RuntimeBinderSymbolTable = _symbolTable;
             SymbolLoader.SetSymbolTable(_symbolTable);
 
-            _exprFactory = new ExprFactory(_semanticChecker.GetSymbolLoader().GetGlobalSymbolContext());
+            _exprFactory = new ExprFactory(_semanticChecker.SymbolLoader.GetGlobalSymbolContext());
             _bindingContext = new BindingContext(_semanticChecker, _exprFactory);
             _binder = new ExpressionBinder(_bindingContext);
         }
@@ -118,7 +117,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // In order to make this work, we have to reset the symbol table and begin
                 // the second binding over again when we detect the collision. So this is
                 // something like a longjmp to the beginning of binding. For a single binding,
-                // if we have to do this more than once, we give an ICE--this would be a
+                // if we have to do this more than once, we give an RBE--this would be a
                 // scenario that needs to know about both N.T's simultaneously to work.
 
                 // See SymbolTable.LoadSymbolsFromType for more information.
@@ -137,8 +136,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     catch (ResetBindException)
                     {
                         Reset();
-                        Debug.Assert(false, "More than one symbol table name collision in a single binding");
-                        throw Error.InternalCompilerError();
+                        throw Error.BindingNameCollision();
                     }
                 }
             }
@@ -185,7 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             //    Linq expression tree for the whole thing and return it.
 
             // (1) - Create the locals
-            Scope pScope = _semanticChecker.GetGlobalMiscSymFactory().CreateScope(null);
+            Scope pScope = _semanticChecker.GetGlobalSymbolFactory().CreateScope(null);
             LocalVariableSymbol[] locals = PopulateLocalScope(payload, pScope, arguments, parameters);
 
             // (1.5) - Check to see if we need to defer.
@@ -225,7 +223,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CSharpInvokeMemberBinder callPayload = payload as CSharpInvokeMemberBinder;
             if (callPayload != null)
             {
-                int arity = callPayload.TypeArguments?.Count ?? 0;
+                int arity = callPayload.TypeArguments?.Length ?? 0;
                 MemberLookup mem = new MemberLookup();
                 Expr callingObject = CreateCallingObjectForCall(callPayload, arguments, locals);
 
@@ -616,7 +614,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private ExprMemberGroup CreateMemberGroupEXPR(
             string Name,
-            IList<Type> typeArguments,
+            Type[] typeArguments,
             Expr callingObject,
             SYMKIND kind)
         {
@@ -626,18 +624,16 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType callingObjectType = callingObject.Type;
             if (callingObjectType is ArrayType)
             {
-                callingType = _semanticChecker.GetSymbolLoader().GetPredefindType(PredefinedType.PT_ARRAY);
+                callingType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ARRAY);
             }
             else if (callingObjectType is NullableType callingNub)
             {
-                callingType = callingNub.GetAts(_semanticChecker.GetSymbolLoader().GetErrorContext());
+                callingType = callingNub.GetAts();
             }
             else
             {
                 callingType = (AggregateType)callingObjectType;
             }
-
-            List<CType> callingTypes = new List<CType>();
 
             // The C# binder expects that only the base virtual method is inserted
             // into the list of candidates, and only the type containing the base
@@ -645,7 +641,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             // don't want to do all the logic, we're just going to insert every type
             // that has a member of the given name, and allow the C# binder to filter
             // out all overrides.
-            //
+
+            // CONSIDER: using a hashset to filter out duplicate interface types.
+            // Adopt a smarter algorithm to filter types before creating the exception.
+            HashSet<CType> distinctCallingTypes = new HashSet<CType>();
+            List<CType> callingTypes = new List<CType>();
+
             // Find that set of types now.
             symbmask_t mask = symbmask_t.MASK_MethodSymbol;
             switch (kind)
@@ -666,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -686,7 +687,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask))
+                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }
@@ -713,7 +714,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             TypeArray typeArgumentsAsTypeArray = BSYMMGR.EmptyTypeArray();
-            if (typeArguments != null && typeArguments.Count > 0)
+            if (typeArguments != null && typeArguments.Length > 0)
             {
                 typeArgumentsAsTypeArray = _semanticChecker.getBSymmgr().AllocParams(
                     _symbolTable.GetCTypeArrayFromTypes(typeArguments));
@@ -768,7 +769,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expr CreateArray(Expr callingObject, Expr optionalIndexerArguments)
         {
-            return _binder.BindArrayIndexCore(0, callingObject, optionalIndexerArguments);
+            return _binder.BindArrayIndexCore(callingObject, optionalIndexerArguments);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -846,7 +847,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.BindInvokeFailedNonDelegate();
             }
 
-            int arity = payload.TypeArguments?.Count ?? 0;
+            int arity = payload.TypeArguments?.Length ?? 0;
             MemberLookup mem = new MemberLookup();
 
             Debug.Assert(_bindingContext.ContextForMemberLookup != null);
@@ -860,8 +861,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     true);
             if (swt == null)
             {
-                mem.ReportErrors();
-                Debug.Assert(false, "Why didn't member lookup report an error?");
+                throw mem.ReportErrors();
             }
 
             if (swt.Sym.getKind() != SYMKIND.SK_MethodSymbol)
@@ -903,8 +903,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         true);
                 if (swtEvent == null)
                 {
-                    mem.ReportErrors();
-                    Debug.Assert(false, "Why didn't member lookup report an error?");
+                    throw mem.ReportErrors();
                 }
 
                 CType eventCType = null;
@@ -1002,7 +1001,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             _symbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
-            ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new List<Type> { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             Expr expr = _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
@@ -1361,18 +1360,19 @@ namespace Microsoft.CSharp.RuntimeBinder
                     int numIndexArguments = ExpressionIterator.Count(optionalIndexerArguments);
                     // We could have an array access here. See if its just an array.
                     Type type = argument.Type;
-                    if (type.IsArray || type == typeof(string))
+                    Debug.Assert(type != typeof(string));
+                    if (type.IsArray)
                     {
                         if (type.IsArray && type.GetArrayRank() != numIndexArguments)
                         {
-                            _semanticChecker.GetErrorContext().Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
+                            throw _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
-
+                        
+                        Debug.Assert(callingObject.Type is ArrayType);
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
                 }
-                mem.ReportErrors();
-                Debug.Assert(false, "Why didn't member lookup report an error?");
+                throw mem.ReportErrors();
             }
 
             switch (swt.Sym.getKind())
@@ -1435,12 +1435,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // user defined conversions (since the convert is guaranteed to return one of
                 // the primitive types), and we check for overflow since we don't want truncation.
 
-                CType pDestType = _binder.chooseArrayIndexType(argument);
-                if (null == pDestType)
-                {
-                    pDestType = SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
-                }
-
+                CType pDestType = _binder.ChooseArrayIndexType(argument);
                 return _binder.mustCast(
                     _binder.mustConvert(argument, pDestType),
                     destinationType,

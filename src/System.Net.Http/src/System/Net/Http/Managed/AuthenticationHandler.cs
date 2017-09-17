@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace System.Net.Http
     {
         private readonly HttpMessageHandler _innerHandler;
         private readonly bool _preAuthenticate;
-        private readonly ICredentials _credentials;
+        private ICredentials _credentials;
         private AuthenticationHelper.DigestResponse _digestResponse;
 
         public AuthenticationHandler(bool preAuthenticate, ICredentials credentials, HttpMessageHandler innerHandler)
@@ -33,7 +34,7 @@ namespace System.Net.Http
                 // Try using previous digest response WWWAuthenticate header
                 if (_digestResponse != null)
                 {
-                    await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse);
+                    await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse, HttpKnownHeaderNames.Authorization).ConfigureAwait(false);
                 }
                 else
                 {
@@ -43,7 +44,15 @@ namespace System.Net.Http
 
             HttpResponseMessage response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-            if (!_preAuthenticate && response.StatusCode == HttpStatusCode.Unauthorized)
+            // In case of redirection, ensure _credentials as CredentialCache
+            if (AutoRedirectHandler.RequestNeedsRedirect(response))
+            {
+                // Just as with WinHttpHandler and CurlHandler, for security reasons, we drop the server credential if it is
+                // anything other than a CredentialCache. We allow credentials in a CredentialCache since they
+                // are specifically tied to URIs.
+                _credentials = _credentials as CredentialCache;
+            }
+            else if (_credentials != null && !_preAuthenticate && response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 HttpHeaderValueCollection<AuthenticationHeaderValue> authenticateValues = response.Headers.WwwAuthenticate;
 
@@ -63,7 +72,7 @@ namespace System.Net.Http
                     {
                         // Update digest response with new parameter from WWWAuthenticate
                         _digestResponse = new AuthenticationHelper.DigestResponse(h.Parameter);
-                        if (await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse))
+                        if (await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse, HttpKnownHeaderNames.Authorization).ConfigureAwait(false))
                         {
                             response.Dispose();
                             response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -76,9 +85,8 @@ namespace System.Net.Http
                                     if (ahv.Scheme == AuthenticationHelper.Digest)
                                     {
                                         _digestResponse = new AuthenticationHelper.DigestResponse(ahv.Parameter);
-                                        string stale;
-                                        if (_digestResponse.Parameters.TryGetValue("stale", out stale) && stale == "true" &&
-                                            await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse))
+                                        if (AuthenticationHelper.IsServerNonceStale(_digestResponse) &&
+                                            await AuthenticationHelper.TrySetDigestAuthToken(request, _credentials, _digestResponse, HttpKnownHeaderNames.Authorization).ConfigureAwait(false))
                                         {
                                             response.Dispose();
                                             response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);

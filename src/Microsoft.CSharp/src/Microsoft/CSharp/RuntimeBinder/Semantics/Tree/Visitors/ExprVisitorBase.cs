@@ -122,8 +122,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return VisitCONSTANT(pExpr as ExprConstant);
                 case ExpressionKind.Class:
                     return VisitCLASS(pExpr as ExprClass);
-                case ExpressionKind.FunctionPointer:
-                    return VisitFUNCPTR(pExpr as ExprFuncPtr);
                 case ExpressionKind.Property:
                     return VisitPROP(pExpr as ExprProperty);
                 case ExpressionKind.Multi:
@@ -350,12 +348,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case ExpressionKind.ZeroInit:
-                    exprRet = Visit((pExpr as ExprZeroInit).OptionalArgument);
-                    (pExpr as ExprZeroInit).OptionalArgument = exprRet;
-
-                    // Used for when we zeroinit 0 parameter constructors for structs/enums.
-                    exprRet = Visit((pExpr as ExprZeroInit).OptionalConstructorCall);
-                    (pExpr as ExprZeroInit).OptionalConstructorCall = exprRet;
                     break;
 
                 case ExpressionKind.Block:
@@ -463,7 +455,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case ExpressionKind.Local:
                 case ExpressionKind.Class:
-                case ExpressionKind.FunctionPointer:
                 case ExpressionKind.MultiGet:
                 case ExpressionKind.Wrap:
                 case ExpressionKind.NoOp:
@@ -566,10 +557,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return VisitEXPR(pExpr);
         }
         protected virtual Expr VisitCONSTANT(ExprConstant pExpr)
-        {
-            return VisitEXPR(pExpr);
-        }
-        protected virtual Expr VisitFUNCPTR(ExprFuncPtr pExpr)
         {
             return VisitEXPR(pExpr);
         }

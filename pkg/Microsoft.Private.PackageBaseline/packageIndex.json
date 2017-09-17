@@ -123,6 +123,9 @@
       "BaselineVersion": "2.0.0",
       "InboxOn": {}
     },
+    "Microsoft.NETFramework.Compatibility": {
+      "InboxOn": {}
+    },
     "Microsoft.Phone": {
       "InboxOn": {
         "wp8": "8.0.0.0"
@@ -1100,9 +1103,12 @@
       }
     },
     "System.Data.DataSetExtensions": {
-      "InboxOn": {
-        "net45": "4.0.0.0"
-      }
+        "InboxOn": {
+            "net45":  "4.0.0.0"
+        },
+        "AssemblyVersionInPackageVersion": {
+            "4.0.0.0": "4.5.0"
+        }
     },
     "System.Data.Entity": {
       "InboxOn": {
@@ -1157,6 +1163,7 @@
         "net461": "4.1.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
+        "uap10.0.15138": "4.3.0.0",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
         "xamarintvos10": "Any",
@@ -1568,6 +1575,12 @@
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.3.0",
         "4.2.0.0": "4.5.0"
+      }
+    },
+    "System.Drawing.Common": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
       }
     },
     "System.Dynamic": {
@@ -2061,7 +2074,9 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn": {
+        "uap10.0.15138": "4.0.1.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0",
         "4.0.1.0": "4.5.0"
@@ -2275,7 +2290,10 @@
       }
     },
     "System.Memory": {
-      "InboxOn": {},
+      "InboxOn": {
+        "netcoreapp2.1": "4.0.1.0",
+        "uap10.0.15138": "4.0.1.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0",
         "4.0.1.0": "4.5.0"
@@ -3347,7 +3365,10 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn":  {
+        "netcoreapp2.1": "4.0.4.0",
+        "uap10.0.15138": "4.0.4.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.2.0": "4.3.0",
@@ -3549,6 +3570,12 @@
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.0.1",
         "4.0.2.0": "4.3.0"
+      }
+    },
+    "System.Runtime.Intrinsics.X86": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
       }
     },
     "System.Runtime.Loader": {
@@ -3848,7 +3875,9 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn": {
+        "uap10.0.15138": "4.1.1.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.3.0",
@@ -3913,7 +3942,9 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn": {
+        "uap10.0.15138": "4.3.1.0",
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.2.0",
         "4.1.0.0": "4.2.0",
@@ -4136,7 +4167,9 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn": {
+        "uap10.0.15138": "4.1.1.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.3.0",

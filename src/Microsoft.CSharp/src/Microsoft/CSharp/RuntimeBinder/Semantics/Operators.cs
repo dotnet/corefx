@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Errors;
@@ -154,11 +155,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(rgbofs != null);
 
-            int ibos;
-            int ibosMinLift;
-
-            ibosMinLift = GetSymbolLoader().FCanLift() ? 0 : g_binopSignatures.Length;
-            for (ibos = 0; ibos < g_binopSignatures.Length; ibos++)
+            int ibosMinLift = 0;
+            for (int ibos = 0; ibos < g_binopSignatures.Length; ibos++)
             {
                 BinOpSig bos = g_binopSignatures[ibos];
                 if ((bos.mask & info.mask) == 0)
@@ -178,7 +176,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (cv1)
                 {
                     default:
-                        VSFAIL("Shouldn't happen!");
+                        Debug.Fail("Shouldn't happen!");
                         continue;
 
                     case ConvKind.None:
@@ -261,7 +259,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (cv2)
                 {
                     default:
-                        VSFAIL("Shouldn't happen!");
+                        Debug.Fail("Shouldn't happen!");
                         continue;
                     case ConvKind.None:
                         continue;
@@ -504,7 +502,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Ambiguous.
 
-                    return ambiguousOperatorError(ek, arg1, arg2);
+                    throw AmbiguousOperatorError(ek, arg1, arg2);
                 }
             }
 
@@ -704,8 +702,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 pgrflt = LiftFlags.None;
-                if (!GetSymbolLoader().FCanLift())
-                    return false;
                 typeDst = GetSymbolLoader().GetTypeManager().GetNullable(typeDst);
                 if (!canConvert(info.arg1, typeDst))
                     return false;
@@ -740,8 +736,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 pgrflt = LiftFlags.None;
-                if (!GetSymbolLoader().FCanLift())
-                    return false;
                 typeDst = GetSymbolLoader().GetTypeManager().GetNullable(typeDst);
                 if (!canConvert(info.arg2, typeDst))
                     return false;
@@ -1116,35 +1110,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bt2 = WhichTypeIsBetter(bofs1.Type2(), bofs2.Type2(), type2);
             }
 
-            int res = 0;
+            int res;
 
+            Debug.Assert(Enum.IsDefined(typeof(BetterType), bt1));
+            Debug.Assert(Enum.IsDefined(typeof(BetterType), bt2));
             switch (bt1)
             {
-                default:
-                    VSFAIL("Shouldn't happen");
-                    break;
-                case BetterType.Same:
-                case BetterType.Neither:
-                    break;
                 case BetterType.Left:
-                    res--;
+                    res = -1;
                     break;
+
                 case BetterType.Right:
-                    res++;
+                    res = 1;
+                    break;
+
+                default:
+                    res = 0;
                     break;
             }
 
             switch (bt2)
             {
-                default:
-                    VSFAIL("Shouldn't happen");
-                    break;
-                case BetterType.Same:
-                case BetterType.Neither:
-                    break;
                 case BetterType.Left:
                     res--;
                     break;
+
                 case BetterType.Right:
                     res++;
                     break;
@@ -1233,7 +1223,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 default:
-                    VSFAIL("Bad op");
+                    Debug.Fail($"Bad op: {op}");
                     return false;
             }
             return true;
@@ -1315,7 +1305,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (nBestSignature < 0)
                         {
                             // Ambiguous.
-                            return ambiguousOperatorError(ek, pArgument, null);
+                            throw AmbiguousOperatorError(ek, pArgument, null);
                         }
 
                         // Verify that our answer works.
@@ -1327,7 +1317,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
                             if (WhichUofsIsBetter(pSignatures[nBestSignature], pSignatures[iuofs], type) >= 0)
                             {
-                                return ambiguousOperatorError(ek, pArgument, null);
+                                throw AmbiguousOperatorError(ek, pArgument, null);
                             }
                         }
                     }
@@ -1490,7 +1480,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pArgument != null);
             Debug.Assert(pArgument.Type != null);
 
-            long iuosMinLift = GetSymbolLoader().FCanLift() ? 0 : g_rguos.Length;
+            long iuosMinLift = 0;
 
             CType pArgumentType = pArgument.Type;
             CType pRawType = pArgumentType.StripNubs();
@@ -1511,7 +1501,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (cv)
                 {
                     default:
-                        VSFAIL("Shouldn't happen!");
+                        Debug.Fail("Shouldn't happen!");
                         continue;
 
                     case ConvKind.None:
@@ -1647,18 +1637,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bt = WhichTypeIsBetter(uofs1.GetType(), uofs2.GetType(), typeArg);
             }
 
+            Debug.Assert(Enum.IsDefined(typeof(BetterType), bt));
             switch (bt)
             {
-                default:
-                    VSFAIL("Shouldn't happen");
-                    return 0;
-                case BetterType.Same:
-                case BetterType.Neither:
-                    return 0;
                 case BetterType.Left:
                     return -1;
                 case BetterType.Right:
                     return +1;
+                default:
+                    return 0;
             }
         }
 
@@ -1877,7 +1864,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (ek)
             {
                 default:
-                    VSFAIL("Bad kind");
+                    Debug.Fail($"Bad kind: {ek}");
                     typeRet = null;
                     break;
                 case ExpressionKind.Add:
@@ -2333,7 +2320,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pBinopKind = BinOpKind.Equal;
                     break;
                 default:
-                    VSFAIL("Bad ek");
+                    Debug.Fail($"Bad ek: {ek}");
                     pBinopKind = BinOpKind.Add;
                     return false;
             }
@@ -2467,7 +2454,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
           Report an ambiguous operator types error.
          */
-        private ExprOperator ambiguousOperatorError(ExpressionKind ek, Expr op1, Expr op2)
+        private RuntimeBinderException AmbiguousOperatorError(ExpressionKind ek, Expr op1, Expr op2)
         {
             Debug.Assert(op1 != null);
 
@@ -2476,18 +2463,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             string strOp = op1.ErrorString;
 
             // Bad arg types - report error to user.
-            if (op2 != null)
-            {
-                GetErrorContext().Error(ErrorCode.ERR_AmbigBinaryOps, strOp, op1.Type, op2.Type);
-            }
-            else
-            {
-                GetErrorContext().Error(ErrorCode.ERR_AmbigUnaryOp, strOp, op1.Type);
-            }
-
-            ExprOperator rval = GetExprFactory().CreateOperator(ek, null, op1, op2);
-            rval.SetError();
-            return rval;
+            return op2 != null
+                ? GetErrorContext().Error(ErrorCode.ERR_AmbigBinaryOps, strOp, op1.Type, op2.Type)
+                : GetErrorContext().Error(ErrorCode.ERR_AmbigUnaryOp, strOp, op1.Type);
         }
 
         private Expr BindUserBoolOp(ExpressionKind kind, ExprCall pCall)
@@ -2503,12 +2481,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!GetTypes().SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[0], typeRet) ||
                 !GetTypes().SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[1], typeRet))
             {
-                MethWithInst mwi = new MethWithInst(null, null);
-                ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-                ExprCall pCallTF = GetExprFactory().CreateCall(0, null, null, pMemGroup, null);
-                pCallTF.SetError();
-                GetErrorContext().Error(ErrorCode.ERR_BadBoolOp, pCall.MethWithInst);
-                return GetExprFactory().CreateUserLogOpError(typeRet, pCallTF, pCall);
+                throw GetErrorContext().Error(ErrorCode.ERR_BadBoolOp, pCall.MethWithInst);
             }
 
             ExprList list = (ExprList)pCall.OptionalArguments;
@@ -2527,17 +2500,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pCallT == null || pCallF == null)
             {
-                Expr pCallTorF = pCallT != null ? pCallT : pCallF;
-                if (pCallTorF == null)
-                {
-                    MethWithInst mwi = new MethWithInst(null, null);
-                    ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-                    pCallTorF = GetExprFactory().CreateCall(0, null, pExprWrap, pMemGroup, null);
-                    pCall.SetError();
-                }
-                GetErrorContext().Error(ErrorCode.ERR_MustHaveOpTF, typeRet);
-                return GetExprFactory().CreateUserLogOpError(typeRet, pCallTorF, pCall);
+                throw GetErrorContext().Error(ErrorCode.ERR_MustHaveOpTF, typeRet);
             }
+
             pCallT = mustConvert(pCallT, GetPredefindType(PredefinedType.PT_BOOL));
             pCallF = mustConvert(pCallF, GetPredefindType(PredefinedType.PT_BOOL));
             return GetExprFactory().CreateUserLogOp(typeRet, kind == ExpressionKind.LogicalAnd ? pCallF : pCallT, pCall);
@@ -2652,8 +2617,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     false));
                 return true;
             }
-            if (fDontLift || !GetSymbolLoader().FCanLift() ||
-                !UserDefinedBinaryOperatorCanBeLifted(ek, method, ats, paramsCur))
+            if (fDontLift || !UserDefinedBinaryOperatorCanBeLifted(ek, method, ats, paramsCur))
             {
                 return false;
             }
@@ -2746,12 +2710,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pmethBest == null)
             {
                 // No winner, so its an ambiguous call...
-                GetErrorContext().Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
-
-                ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, pmethAmbig1.mpwi);
-                ExprCall rval = GetExprFactory().CreateCall(0, null, GetExprFactory().CreateList(arg1, arg2), pMemGroup, null);
-                rval.SetError();
-                return rval;
+                throw GetErrorContext().Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
             }
 
             ppmpwi = pmethBest.mpwi;

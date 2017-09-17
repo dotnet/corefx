@@ -351,7 +351,8 @@ namespace System.Net.Sockets.Tests
                     connectSaea.Completed += (s, e) => tcs.SetResult(e.SocketError);
                     connectSaea.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)listen.LocalEndPoint).Port);
 
-                    Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, connectSaea), $"ConnectAsync completed synchronously with SocketError == {connectSaea.SocketError}");
+                    bool pending = Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, connectSaea);
+                    if (!pending) tcs.SetResult(connectSaea.SocketError);
                     if (tcs.Task.IsCompleted)
                     {
                         Assert.NotEqual(SocketError.Success, tcs.Task.Result);
@@ -515,7 +516,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 Assert.True(
-                    accepted.WaitOne(TestSettings.PassingTestTimeout), "Test completed in alotted time");
+                    accepted.WaitOne(TestSettings.PassingTestTimeout), "Test completed in allotted time");
 
                 Assert.Equal(
                     SocketError.Success, acceptArgs.SocketError);

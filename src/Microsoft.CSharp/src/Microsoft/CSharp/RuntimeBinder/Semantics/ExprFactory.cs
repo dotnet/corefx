@@ -27,14 +27,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprField CreateField(CType type, Expr optionalObject, FieldWithType field, bool isLValue) => 
             new ExprField(type, optionalObject, field, isLValue);
 
-        public ExprFuncPtr CreateFunctionPointer(EXPRFLAG flags, CType type, Expr obj, MethWithInst method) => 
-            new ExprFuncPtr(type, flags, obj, method);
-
         public ExprArrayInit CreateArrayInit(CType type, Expr arguments, Expr argumentDimensions, int[] dimSizes, int dimSize) => 
             new ExprArrayInit(type, arguments, argumentDimensions, dimSizes, dimSize);
-
-        public ExprProperty CreateProperty(CType type, Expr optionalObject) => 
-            CreateProperty(type, null, null, CreateMemGroup(optionalObject, new MethPropWithInst()), null, null);
 
         public ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
@@ -95,13 +89,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
             new ExprUserLogicalOp(type, trueFalseCall, operatorCall);
 
-        public ExprUserLogicalOp CreateUserLogOpError(CType type, Expr trueFalseCall, ExprCall operatorCall)
-        {
-            ExprUserLogicalOp rval = CreateUserLogOp(type, trueFalseCall, operatorCall);
-            rval.SetError();
-            return rval;
-        }
-
         public ExprConcat CreateConcat(Expr first, Expr second) => new ExprConcat(first, second);
 
         public ExprConstant CreateStringConstant(string str) => 
@@ -121,13 +108,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // This returns a null for reference types and an EXPRZEROINIT for all others.
 
-        public Expr CreateZeroInit(CType type) => CreateZeroInit(CreateClass(type), null, false);
-
-        private Expr CreateZeroInit(ExprClass typeExpr, Expr originalConstructorCall, bool isConstructor)
+        public Expr CreateZeroInit(CType type)
         {
-            Debug.Assert(typeExpr != null);
-            CType type = typeExpr.Type;
-            bool isError = false;
+            Debug.Assert(type != null);
 
             if (type.isEnumType())
             {
@@ -136,52 +119,30 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return CreateConstant(type, ConstVal.Get(Activator.CreateInstance(type.AssociatedSystemType)));
             }
 
+            Debug.Assert(type.fundType() > FUNDTYPE.FT_NONE);
+            Debug.Assert(type.fundType() < FUNDTYPE.FT_COUNT);
             switch (type.fundType())
             {
                 case FUNDTYPE.FT_PTR:
                     {
-                        CType nullType = Types.GetNullType();
-
-                        // It looks like this if is always false ...
-                        if (nullType.fundType() == type.fundType())
-                        {
-                            // Create a constant here.
-                            return CreateConstant(type, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
-                        }
-
                         // Just allocate a new node and fill it in.
-                        return CreateCast(0, typeExpr, CreateNull());
+                        return CreateCast(0, CreateClass(type), CreateNull());
                     }
 
-                case FUNDTYPE.FT_REF:
-                case FUNDTYPE.FT_I1:
-                case FUNDTYPE.FT_U1:
-                case FUNDTYPE.FT_I2:
-                case FUNDTYPE.FT_U2:
-                case FUNDTYPE.FT_I4:
-                case FUNDTYPE.FT_U4:
-                case FUNDTYPE.FT_I8:
-                case FUNDTYPE.FT_U8:
-                case FUNDTYPE.FT_R4:
-                case FUNDTYPE.FT_R8:
-                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
                 case FUNDTYPE.FT_STRUCT:
                     if (type.isPredefType(PredefinedType.PT_DECIMAL))
                     {
-                        goto case FUNDTYPE.FT_R8;
+                        goto default;
                     }
 
-                    break;
+                    goto case FUNDTYPE.FT_VAR;
 
                 case FUNDTYPE.FT_VAR:
-                    break;
+                    return new ExprZeroInit(type);
 
                 default:
-                    isError = true;
-                    break;
+                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
             }
-
-            return new ExprZeroInit(type, originalConstructorCall, isConstructor, isError);
         }
 
         public ExprConstant CreateConstant(CType type, ConstVal constVal) => new ExprConstant(type, constVal);
@@ -194,20 +155,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
-        public ExprArrayIndex CreateArrayIndex(Expr array, Expr index)
-        {
-            CType type = array.Type;
-            if (type is ArrayType arr)
-            {
-                type = arr.GetElementType();
-            }
-            else if (type == null)
-            {
-                type = Types.GetPredefAgg(PredefinedType.PT_INT).getThisType();
-            }
-
-            return new ExprArrayIndex(type, array, index);
-        }
+        public ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
+            new ExprArrayIndex(type, array, index);
 
         public ExprBinOp CreateBinop(ExpressionKind exprKind, CType type, Expr left, Expr right) => 
             new ExprBinOp(exprKind, type, left, right);

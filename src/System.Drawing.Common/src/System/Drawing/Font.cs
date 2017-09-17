@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing.Internal;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
@@ -14,7 +15,7 @@ namespace System.Drawing
     /// Defines a particular format for text, including font face, size, and style attributes.
     /// </summary>
     [ComVisible(true)]
-    public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable
+    public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
         private const int LogFontCharSetOffset = 23;
         private const int LogFontNameOffset = 28;
@@ -105,7 +106,7 @@ namespace System.Drawing
         /// </summary>
         public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont)
         {
-            if (!float.IsFinite(emSize) || emSize <= 0)
+            if (float.IsNaN(emSize) || float.IsInfinity(emSize) || emSize <= 0)
             {
                 throw new ArgumentException(SR.Format(SR.InvalidBoundArgument, "emSize", emSize, 0, "System.Single.MaxValue"), "emSize");
             }
@@ -170,7 +171,7 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// Constructor to initialize fields from an exisiting native GDI+ object reference. Used by ToLogFont.
+        /// Constructor to initialize fields from an existing native GDI+ object reference. Used by ToLogFont.
         /// </summary>
         private Font(IntPtr nativeFont, byte gdiCharSet, bool gdiVerticalFont)
         {
@@ -222,7 +223,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(family));
             }
 
-            if (!float.IsFinite(emSize) || emSize <= 0)
+            if (float.IsNaN(emSize) || float.IsInfinity(emSize) || emSize <= 0)
             {
                 throw new ArgumentException(SR.Format(SR.InvalidBoundArgument, nameof(emSize), emSize, 0, "System.Single.MaxValue"), nameof(emSize));
             }
@@ -423,17 +424,17 @@ namespace System.Drawing
         /// be valid if this font was created from a classic GDI font definition,
         /// like a LOGFONT or HFONT, or it was passed into the constructor.
         ///
-        /// This is here for compatability with native Win32 intrinsic controls
+        /// This is here for compatibility with native Win32 intrinsic controls
         /// on non-Unicode platforms.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte GdiCharSet => _gdiCharSet;
 
         /// <summary>
-        /// Determines if this font was created to represt a GDI vertical font. This will only be valid if this font
+        /// Determines if this font was created to represent a GDI vertical font. This will only be valid if this font
         /// was created from a classic GDIfont definition, like a LOGFONT or HFONT, or it was passed into the constructor.
         ///
-        /// This is here for compatability with native Win32 intrinsic controls on non-Unicode platforms.
+        /// This is here for compatibility with native Win32 intrinsic controls on non-Unicode platforms.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool GdiVerticalFont => _gdiVerticalFont;
