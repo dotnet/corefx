@@ -229,7 +229,6 @@ internal static partial class Interop
                 case "ext4dev":
                 case "f2fs":
                 case "fat":
-                case "fuseblk":
                 case "fuseext2":
                 case "fusefat":
                 case "futexfs":
@@ -269,7 +268,6 @@ internal static partial class Interop
                 case "openprom":
                 case "overlay":
                 case "overlayfs":
-                case "ntfs":
                 case "proc":
                 case "pstorefs":
                 case "qnx4":
@@ -294,7 +292,6 @@ internal static partial class Interop
                 case "ubifs":
                 case "udf":
                 case "ufs":
-                case "ufs":
                 case "umsdos":
                 case "umview-mod-umfuseext2":
                 case "usbdevfs":
@@ -313,34 +310,54 @@ internal static partial class Interop
                     return DriveType.Fixed;
 
                 case "9p":
+                case "acfs":
+                case "afs":
+                case "aufs":
                 case "autofs":
                 case "autofs4":
                 case "beaglefs":
+                case "ceph":
                 case "cifs":
                 case "coda":
                 case "coherent":
                 case "curlftpfs":
                 case "davfs2":
                 case "dlm":
+                case "fhgfs":
                 case "flickrfs":
+                case "fuseblk":
+                case "fusectl":
                 case "fusedav":
                 case "fusesmb":
+                case "gfs/gfs2":
                 case "gfs2":
                 case "glusterfs-client":
                 case "gmailfs":
+                case "gpfs":
+                case "ibrix":
+                case "k-afs":
                 case "kafs":
                 case "ltspfs":
+                case "lustre":
                 case "ncpfs":
                 case "nfs":
                 case "nfs4":
+                case "nfsd":
+                case "novell":
                 case "obexfs":
+                case "panfs":
+                case "pipefs":
+                case "prl_fs":
                 case "s3ql":
                 case "smb":
+                case "smb2":
                 case "smbfs":
+                case "snfs":
                 case "sshfs":
                 case "sysfs":
                 case "sysv2":
                 case "sysv4":
+                case "vmhgfs":
                 case "vxfs":
                 case "wikipediafs":
                     return DriveType.Network;
