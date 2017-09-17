@@ -3393,8 +3393,7 @@ public static partial class DataContractSerializerTests
 
 
     [Fact]
-    [ActiveIssue(22776,TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_IncludeDataSet()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_DataSet()
     {
 
         TestObjectInObjectContainerWithSimpleResolver(new SerializationTestTypes.DCPublicDatasetPublic(true), @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data z:Id=""i1"" i:type=""a:SerializationTestTypes.DCPublicDatasetPublic***"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCPublicDatasetPublic***""><dataSet><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataSet><dataSet2><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataSet2><dataTable><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:MainDataTable=""MyTable"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataTable><dataTable2><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:MainDataTable=""MyTable"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataTable2></_data><_data2 z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></ObjectContainer>");
@@ -3437,8 +3436,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22777, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_InheritedFromIList()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_TypeInheritedFromIListT()
     {
         string assemblyName = typeof(DataContractSerializerTests).Assembly.FullName;
 
@@ -3452,8 +3450,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22778, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_InheritedFromIList_CanPassInReflectionOnly()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_InheritedFromIList()
     {
         TestObjectInObjectContainerWithSimpleResolver(new SerializationTestTypes.SampleListExplicitWithoutDC(true), @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.SampleListExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleListExplicitWithoutDC***""><anyType i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0001-01-01T00:00:00</anyType><anyType i:type=""b:duration"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">P10675199DT2H48M5.4775807S</anyType><anyType i:type=""b:string"" xmlns:b=""http://www.w3.org/2001/XMLSchema""/><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">1.7976931348623157E+308</anyType><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">-INF</anyType><anyType i:type=""b:guid"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb</anyType></_data><_data2 i:type=""a:SerializationTestTypes.SampleListExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleListExplicitWithoutDC***""><anyType i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0001-01-01T00:00:00</anyType><anyType i:type=""b:duration"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">P10675199DT2H48M5.4775807S</anyType><anyType i:type=""b:string"" xmlns:b=""http://www.w3.org/2001/XMLSchema""/><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">1.7976931348623157E+308</anyType><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">-INF</anyType><anyType i:type=""b:guid"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb</anyType></_data2></ObjectContainer>");
 
@@ -3492,7 +3489,7 @@ public static partial class DataContractSerializerTests
     }
 
     /// <summary>
-    /// This case is a part of DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes, but in thease scenarios it was not support in current version.
+    /// This case is a part of DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes, but in these scenarios it was not support in current version.
     /// </summary>
     [Fact]
     [ActiveIssue("Not support")]
@@ -3536,8 +3533,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22779, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_Collections_FailedInuapaot_InCollections()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_CollectionDataContract()
     {
         string assemblyName = typeof(DataContractSerializerTests).Assembly.FullName;
         string corelibAssemblyName = typeof(String).Assembly.FullName;

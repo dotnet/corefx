@@ -1804,6 +1804,7 @@ namespace System.Drawing.Tests
             yield return new object[] { 0, 0, 0, 0, new Size(-1, -1) };
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(CopyFromScreen_TestData))]
@@ -1821,6 +1822,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(0, 0, 0, 0, 10, 10)]
@@ -1880,6 +1882,7 @@ namespace System.Drawing.Tests
             yield return new object[] { CopyPixelOperation.CaptureBlt };
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(CopyPixelOperation_TestData))]
@@ -1894,6 +1897,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(CopyPixelOperation_TestData))]
@@ -1908,6 +1912,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(CopyPixelOperation.NoMirrorBitmap + 1)]
@@ -1937,6 +1942,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void CopyFromScreen_Busy_ThrowsInvalidOperationException()
@@ -1959,6 +1965,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void CopyFromScreen_Disposed_ThrowsArgumentException()
