@@ -191,60 +191,125 @@ internal static partial class Interop
                 case "umview-mod-umfuseiso9660":
                     return DriveType.CDRom;
 
+                case "aafs":
                 case "adfs":
                 case "affs":
+                case "anon-inode FS":
                 case "apfs":
+                case "autofs":
+                case "balloon-kvm-fs":
+                case "bdevfs":
                 case "befs":
                 case "bfs":
+                case "binfmt_misc":
+                case "bpf_fs":
                 case "btrfs":
+                case "btrfs_test":
+                case "cgroup2fs":
+                case "cgroupfs":
+                case "coh":
+                case "configfs":
+                case "cramfs":
+                case "cramfs-wend":
+                case "daxfs":
+                case "debugfs":
+                case "devfs":
+                case "devpts":
                 case "drvfs":
                 case "ecryptfs":
+                case "efivarfs":
                 case "efs":
+                case "exofs":
                 case "ext":
                 case "ext2":
                 case "ext2_old":
                 case "ext3":
+                case "ext2/ext3":
                 case "ext4":
                 case "ext4dev":
+                case "f2fs":
                 case "fat":
                 case "fuseblk":
                 case "fuseext2":
                 case "fusefat":
+                case "futexfs":
                 case "hfs":
+                case "hfs+":
                 case "hfsplus":
+                case "hfsx":
+                case "hostfs":
                 case "hpfs":
+                case "hugetlbfs":
+                case "inodefs":
+                case "inotifyfs":
+                case "isofs":
                 case "jbd":
                 case "jbd2":
-                case "jfs":
                 case "jffs":
                 case "jffs2":
+                case "jfs":
+                case "logfs":
                 case "lxfs":
+                case "minix (30 char.)":
+                case "minix v2 (30 char.)":
+                case "minix v2":
                 case "minix":
                 case "minix_old":
                 case "minix2":
                 case "minix2v2":
+                case "minix3":
+                case "mqueue":
+                case "mlfs":
                 case "msdos":
+                case "nilfs":
+                case "nsfs":
+                case "ntfs":
                 case "ocfs2":
                 case "omfs":
                 case "openprom":
                 case "overlay":
                 case "overlayfs":
                 case "ntfs":
+                case "proc":
+                case "pstorefs":
                 case "qnx4":
+                case "qnx6":
+                case "ramfs":
+                case "rdt":
                 case "reiserfs":
+                case "romfs":
+                case "rpc_pipefs":
+                case "securityfs":
+                case "selinux":
+                case "smackfs":
+                case "sockfs":
                 case "squashfs":
                 case "swap":
+                case "sysfs":
                 case "sysv":
+                case "sysv2":
+                case "sysv4":
+                case "tmpfs":
+                case "tracefs":
                 case "ubifs":
                 case "udf":
                 case "ufs":
+                case "ufs":
                 case "umsdos":
                 case "umview-mod-umfuseext2":
+                case "usbdevfs":
+                case "v9fs":
+                case "vzfs":
+                case "wslfs":
+                case "xenfs":
                 case "xenix":
                 case "xfs":
+                case "xia":
                 case "xiafs":
                 case "xmount":
+                case "zfs":
                 case "zfs-fuse":
+                case "zsmallocfs":
                     return DriveType.Fixed;
 
                 case "9p":
