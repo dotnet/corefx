@@ -194,6 +194,7 @@ internal static partial class Interop
                 case "aafs":
                 case "adfs":
                 case "affs":
+                case "anon-inode":
                 case "anon-inode FS":
                 case "apfs":
                 case "autofs":
