@@ -24,7 +24,7 @@ internal static partial class Interop
             adfs = 0XADF5,
             affs = 0XADFF,
             afs = 0X5346414F,
-            anon-inode = 0X09041934,
+            anoninode = 0X09041934,
             aufs = 0X61756673,
             autofs = 0X0187,
             befs = 0X42465331,
@@ -53,7 +53,7 @@ internal static partial class Interop
             fuseblk = 0X65735546,
             fusectl = 0X65735543,
             futexfs = 0X0BAD1DEA,
-            gfs/gfs2 = 0X1161970,
+            gfsgfs2 = 0X1161970,
             gpfs = 0X47504653,
             hfs = 0X4244,
             hpfs = 0XF995E849,
@@ -61,12 +61,12 @@ internal static partial class Interop
             inodefs = 0X11307854,
             inotifyfs = 0X2BAD1DEA,
             isofs = 0X9660,
-            isofs = 0X4004, // R_WIN
-            isofs = 0X4000, // WIN
+            // isofs = 0X4004, // R_WIN
+            // isofs = 0X4000, // WIN
             jffs = 0X07C0,
             jffs2 = 0X72B6,
             jfs = 0X3153464A,
-            k-afs = 0X6B414653,
+            kafs = 0X6B414653,
             lustre = 0X0BD00BD0,
             minix_old = 0X137F, /* orig. minix */
             minix = 0X138F, /* 30 char minix */
@@ -105,7 +105,7 @@ internal static partial class Interop
             tmpfs = 0X01021994,
             udf = 0X15013346,
             ufs = 0X00011954,
-            ufs = 0X54190100, // byteswapped
+            // ufs = 0X54190100, // byteswapped
             usbdevice = 0X9FA2,
             v9fs = 0X01021997,
             vmhgfs = 0XBACBACBC,
@@ -194,7 +194,7 @@ internal static partial class Interop
                 case "aafs":
                 case "adfs":
                 case "affs":
-                case "anon-inode":
+                case "anoninode":
                 case "anon-inode FS":
                 case "apfs":
                 case "autofs":
@@ -330,12 +330,14 @@ internal static partial class Interop
                 case "fusectl":
                 case "fusedav":
                 case "fusesmb":
+                case "gfsgfs2":
                 case "gfs/gfs2":
                 case "gfs2":
                 case "glusterfs-client":
                 case "gmailfs":
                 case "gpfs":
                 case "ibrix":
+                case "kafs":
                 case "k-afs":
                 case "kafs":
                 case "ltspfs":
