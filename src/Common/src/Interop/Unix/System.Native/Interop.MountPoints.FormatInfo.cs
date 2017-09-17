@@ -202,20 +202,14 @@ internal static partial class Interop
                 case "bdevfs":
                 case "befs":
                 case "bfs":
-                case "binfmt_misc":
                 case "bpf_fs":
                 case "btrfs":
                 case "btrfs_test":
                 case "cgroup2fs":
                 case "cgroupfs":
                 case "coh":
-                case "configfs":
-                case "cramfs":
                 case "cramfs-wend":
                 case "daxfs":
-                case "debugfs":
-                case "devfs":
-                case "devpts":
                 case "drvfs":
                 case "ecryptfs":
                 case "efivarfs":
@@ -239,10 +233,8 @@ internal static partial class Interop
                 case "hfsx":
                 case "hostfs":
                 case "hpfs":
-                case "hugetlbfs":
                 case "inodefs":
                 case "inotifyfs":
-                case "isofs":
                 case "jbd":
                 case "jbd2":
                 case "jffs":
@@ -258,7 +250,6 @@ internal static partial class Interop
                 case "minix2":
                 case "minix2v2":
                 case "minix3":
-                case "mqueue":
                 case "mlfs":
                 case "msdos":
                 case "nilfs":
@@ -269,26 +260,19 @@ internal static partial class Interop
                 case "openprom":
                 case "overlay":
                 case "overlayfs":
-                case "proc":
                 case "pstorefs":
                 case "qnx4":
                 case "qnx6":
-                case "ramfs":
-                case "rdt":
                 case "reiserfs":
-                case "romfs":
                 case "rpc_pipefs":
-                case "securityfs":
                 case "selinux":
                 case "smackfs":
-                case "sockfs":
                 case "squashfs":
                 case "swap":
                 case "sysfs":
                 case "sysv":
                 case "sysv2":
                 case "sysv4":
-                case "tmpfs":
                 case "tracefs":
                 case "ubifs":
                 case "udf":
@@ -314,7 +298,6 @@ internal static partial class Interop
                 case "acfs":
                 case "afs":
                 case "aufs":
-                case "autofs":
                 case "autofs4":
                 case "beaglefs":
                 case "ceph":
@@ -327,7 +310,6 @@ internal static partial class Interop
                 case "fhgfs":
                 case "flickrfs":
                 case "fuseblk":
-                case "fusectl":
                 case "fusedav":
                 case "fusesmb":
                 case "gfsgfs2":
@@ -337,7 +319,6 @@ internal static partial class Interop
                 case "gmailfs":
                 case "gpfs":
                 case "ibrix":
-                case "kafs":
                 case "k-afs":
                 case "kafs":
                 case "ltspfs":
@@ -349,7 +330,6 @@ internal static partial class Interop
                 case "novell":
                 case "obexfs":
                 case "panfs":
-                case "pipefs":
                 case "prl_fs":
                 case "s3ql":
                 case "smb":
@@ -357,9 +337,6 @@ internal static partial class Interop
                 case "smbfs":
                 case "snfs":
                 case "sshfs":
-                case "sysfs":
-                case "sysv2":
-                case "sysv4":
                 case "vmhgfs":
                 case "vxfs":
                 case "wikipediafs":
