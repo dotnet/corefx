@@ -127,19 +127,21 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
 
-            PropertyInfo property;
+            PropertyInfo property = null;
             try
             {
                 property = value.GetType().GetRuntimeProperty("Count");
-                if (property != null && property.CanRead && property.PropertyType == typeof(int))
-                {
-                    count = (int)property.GetValue(value);
-                    return true;
-                }
             }
             catch (TypeAccessException)
-            {                 
-            }  
+            {
+            }
+
+            if (property != null && property.CanRead && property.PropertyType == typeof(int))
+            {
+                count = (int)property.GetValue(value);
+                return true;
+            }
+
             count = -1;
             return false;
         }
