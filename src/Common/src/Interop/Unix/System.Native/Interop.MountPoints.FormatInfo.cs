@@ -208,6 +208,7 @@ internal static partial class Interop
                 case "cgroup2fs":
                 case "cgroupfs":
                 case "coh":
+                case "cramfs":
                 case "cramfs-wend":
                 case "daxfs":
                 case "drvfs":
@@ -349,7 +350,6 @@ internal static partial class Interop
                 case "binfmt_misc":
                 case "cgroup":
                 case "configfs":
-                case "cramfs":
                 case "cryptkeeper":
                 case "cpuset":
                 case "debugfs":
