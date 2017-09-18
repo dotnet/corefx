@@ -126,7 +126,7 @@ namespace System.ComponentModel.DataAnnotations
             try
             {
                 // On CoreRT, this property may not be enabled for reflection.
-                // Maybe it's possible to eliminate the exception by using direct reflection
+                // It may be possible to eliminate the exception by using direct reflection
                 // (i.e. not via the RuntimeReflectionExtensions or the new split TypeInfo format.
                 property = value.GetType().GetRuntimeProperty("Count");
             }
