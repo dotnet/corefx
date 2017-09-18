@@ -10,7 +10,7 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>ab762a3c35e208cd698988fb7761bc92be417be9</CoreFxCurrentRef>
-    <CoreClrCurrentRef>61426ad951c261a32f2e73e65023b6324138d3fe</CoreClrCurrentRef>
+    <CoreClrCurrentRef>4e0f5cb9b1420fa1d76af8f1bffb83e22b5b7b21</CoreClrCurrentRef>
     <CoreSetupCurrentRef>2a83ae1685d323e6bd206dd2596b953488479922</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>e878831ece0263a2d8efd4751e2f0c90666950cc</ProjectNTfsCurrentRef>
@@ -24,7 +24,7 @@
   <PropertyGroup>
     <PlatformPackageVersion>2.1.0-preview1-25712-02</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>preview1-25712-02</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-dev-di-25714-03</CoreClrPackageVersion>
+    <CoreClrPackageVersion>2.1.0-dev-di-25718-02</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-25714-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25714-00</ProjectNTfsTestILCExpectedPrerelease>
