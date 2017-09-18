@@ -28,6 +28,7 @@ namespace Microsoft.XmlSerializer.Generator
             var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
+            bool disableRun = true;
 
             try
             {
@@ -85,6 +86,10 @@ namespace Microsoft.XmlSerializer.Generator
 
                         assembly = value;
                     }
+                    else if (ArgumentMatch(arg, "quiet"))
+                    {
+                        disableRun = false;
+                    }
                     else
                     {
                         if (arg.EndsWith(".dll") || arg.EndsWith(".exe"))
@@ -119,6 +124,14 @@ namespace Microsoft.XmlSerializer.Generator
                     }
 
                     WriteHelp();
+                    return 0;
+                }
+
+                if(disableRun)
+                {
+                    Console.WriteLine("This tool is not intended to be used directly.");
+                    Console.WriteLine("The feature is still under development.");
+                    Console.WriteLine("Please refer to https://go.microsoft.com/fwlink/?linkid=858539 for more detail.");
                     return 0;
                 }
 
@@ -334,14 +347,23 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Framework, Version {0}]", TempAssembly.ThisAssembly.InformationalVersion));
+            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
         private void WriteHelp()
         {
-            //TBD
-            Console.WriteLine("In Development");
+            Console.Out.WriteLine(SR.Format(SR.HelpDescription));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name));
+            Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
+            Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
+
+            Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "/?", "/help"));
         }
 
         private static string FormatMessage(bool warning, string message)

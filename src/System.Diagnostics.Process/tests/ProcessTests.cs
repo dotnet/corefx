@@ -136,15 +136,50 @@ namespace System.Diagnostics.Tests
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
         }
         
-        [PlatformSpecific(TestPlatforms.Windows)] // Expected behavior varies on Windows and Unix. Refer to #23969
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
-        public void ProcessStart_TryOpenFolder_UseShellExecuteIsTrue_DoesNotThrow()
+        public void ProcessStart_UseShellExecuteTrue_OpenMissingFile_Throws()
         {
-            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Path.GetTempPath() }))
+            string fileToOpen = Path.Combine(Environment.CurrentDirectory, "_no_such_file.TXT");
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
+        [InlineData(true)]
+        [InlineData(false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        [OuterLoop("Launches File Explorer")]
+        public void ProcessStart_UseShellExecute_OnWindows_DoesNotThrow(bool isFolder)
+        {
+            string fileToOpen;
+            if (isFolder)
             {
-                Assert.Null(px); // Not sure why px returned is null. but the call does not throw and opens folder successfully.
+                fileToOpen = Environment.CurrentDirectory;
+            }
+            else
+            {
+                fileToOpen = GetTestFilePath() + ".txt";
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnWindows_DoesNotThrow)}");
+            }
+
+            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
+            {
+                if (isFolder)
+                {
+                    Assert.Null(px); // Not sure why px returned is null. but the call does not throw and opens folder successfully.
+                }
+                else
+                {
+                    if (px != null) // sometimes process is null: tracked by #24048
+                    {
+                        Assert.Equal("notepad", px.ProcessName);
+
+                        px.Kill();
+                        Assert.True(px.WaitForExit(WaitInMS));
+                    }
+                }
             }
         }
 
