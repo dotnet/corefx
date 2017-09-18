@@ -23,13 +23,14 @@ namespace System.Drawing
             }
             else
             {
+                return true;/*
                 IntPtr nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
                 if (nativeLib == IntPtr.Zero)
                 {
                     nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
                 }
 
-                return nativeLib != IntPtr.Zero;
+                return nativeLib != IntPtr.Zero; */
             }
         }
 
