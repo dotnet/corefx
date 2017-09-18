@@ -71,17 +71,18 @@ namespace System.DirectoryServices.Protocols
     public class SearchResultEntry
     {
         private DirectoryControl[] _resultControls = null;
+        private SearchResultAttributeCollection _attributes = new SearchResultAttributeCollection();
 
         internal SearchResultEntry(string dn) => DistinguishedName = dn;
 
         internal SearchResultEntry(string dn, SearchResultAttributeCollection attrs) : this(dn)
         {
-            Attributes = attrs;
+            _attributes = attrs;
         }
 
         public string DistinguishedName { get; internal set; }
 
-        public SearchResultAttributeCollection Attributes { get; }
+        public SearchResultAttributeCollection Attributes => _attributes;
 
         public DirectoryControl[] Controls
         {
