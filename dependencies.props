@@ -13,8 +13,8 @@
     <CoreClrCurrentRef>4e0f5cb9b1420fa1d76af8f1bffb83e22b5b7b21</CoreClrCurrentRef>
     <CoreSetupCurrentRef>2a83ae1685d323e6bd206dd2596b953488479922</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>e878831ece0263a2d8efd4751e2f0c90666950cc</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>e878831ece0263a2d8efd4751e2f0c90666950cc</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>568fb017cade704dcf611a1c991e7b8e2e27972b</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>568fb017cade704dcf611a1c991e7b8e2e27972b</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>7ad3a5fba96f1ad3032fe742bee5069b5167beca</StandardCurrentRef>
     <BuildToolsCurrentRef>2a83ae1685d323e6bd206dd2596b953488479922</BuildToolsCurrentRef>
@@ -26,12 +26,12 @@
     <CoreFxExpectedPrerelease>preview1-25712-02</CoreFxExpectedPrerelease>
     <CoreClrPackageVersion>2.1.0-dev-di-25718-02</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25714-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25714-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25714-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25715-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25715-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25715-00</ProjectNTfsTestILCPackageVersion>
     <NETStandardPackageVersion>2.1.0-preview1-25714-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25713-01</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25714-02</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0</SniPackageVersion>
   </PropertyGroup>
