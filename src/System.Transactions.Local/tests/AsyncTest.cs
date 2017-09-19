@@ -26,6 +26,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AsyncFail1()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -46,6 +47,7 @@ namespace System.Transactions.Tests
 
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AsyncFail2()
         {
             Assert.Throws<TransactionAbortedException>(() =>
@@ -93,6 +95,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AsyncFail3()
         {
             s_delayedException = null;
@@ -117,6 +120,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Async1()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -139,6 +143,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Async2()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -158,6 +163,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Async3()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -176,6 +182,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Async4()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -195,6 +202,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Async5()
         {
             IntResourceManager irm = new IntResourceManager(1);

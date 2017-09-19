@@ -25,6 +25,7 @@ namespace System.Transactions.Tests
         [InlineData(2, EnlistmentOptions.None, Phase1Vote.Prepared, SinglePhaseVote.Aborted, true, EnlistmentOutcome.Aborted, TransactionStatus.Aborted)]
         [InlineData(1, EnlistmentOptions.EnlistDuringPrepareRequired, Phase1Vote.Prepared, SinglePhaseVote.Committed, true, EnlistmentOutcome.Committed, TransactionStatus.Committed)]
         [InlineData(2, EnlistmentOptions.EnlistDuringPrepareRequired, Phase1Vote.Prepared, SinglePhaseVote.Committed, true, EnlistmentOutcome.Committed, TransactionStatus.Committed)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SinglePhaseDurable(int volatileCount, EnlistmentOptions volatileEnlistmentOption, Phase1Vote volatilePhase1Vote, SinglePhaseVote singlePhaseVote, bool commit, EnlistmentOutcome expectedVolatileOutcome, TransactionStatus expectedTxStatus)
         {
             Transaction tx = null;
@@ -126,6 +127,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(EnlistmentOptions.EnlistDuringPrepareRequired, EnlistmentOptions.None, Phase1Vote.Prepared, true, true, EnlistmentOutcome.Committed, TransactionStatus.Committed)]
         [InlineData(EnlistmentOptions.None, EnlistmentOptions.None, Phase1Vote.Prepared, false, true, EnlistmentOutcome.Committed, TransactionStatus.Committed)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void EnlistDuringPhase0(EnlistmentOptions enlistmentOption, EnlistmentOptions phase0EnlistmentOption, Phase1Vote phase1Vote, bool expectPhase0EnlistSuccess, bool commit, EnlistmentOutcome expectedOutcome, TransactionStatus expectedTxStatus)
         {
             Transaction tx = null;
@@ -162,6 +164,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(5, EnlistmentOptions.None, Phase1Vote.Prepared, Phase1Vote.Prepared, true, EnlistmentOutcome.Committed, TransactionStatus.Committed)]
         [InlineData(5, EnlistmentOptions.None, Phase1Vote.Prepared, Phase1Vote.ForceRollback, true, EnlistmentOutcome.Aborted, TransactionStatus.Aborted)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void EnlistVolatile(int volatileCount, EnlistmentOptions enlistmentOption, Phase1Vote volatilePhase1Vote, Phase1Vote lastPhase1Vote, bool commit, EnlistmentOutcome expectedEnlistmentOutcome, TransactionStatus expectedTxStatus)
         {
             AutoResetEvent[] outcomeEvents = null;

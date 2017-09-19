@@ -14,6 +14,7 @@ namespace System.Transactions.Tests
 
         /* Single volatile resource, SPC happens */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -28,6 +29,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0_2PC()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -43,6 +45,7 @@ namespace System.Transactions.Tests
 
         /* Single volatile resource, SPC happens */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0_Fail1()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -59,6 +62,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0_Fail2()
         {
             Assert.Throws<TransactionAbortedException>(() =>
@@ -77,6 +81,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0_Fail3()
         {
             Assert.Throws<TransactionAbortedException>(() =>
@@ -100,6 +105,7 @@ namespace System.Transactions.Tests
 
         /* >1 volatile, 2PC */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur0_SPC()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -123,6 +129,7 @@ namespace System.Transactions.Tests
         #region Vol0_Dur1
         /* 1 durable */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur1()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -144,6 +151,7 @@ namespace System.Transactions.Tests
 		 */
         [ActiveIssue(13532)] //Distributed transactions are not supported.
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur1_2PC()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -162,6 +170,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur1_Fail()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -188,6 +197,7 @@ namespace System.Transactions.Tests
         #region Vol2_Dur1
         /* >1vol + 1 durable */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur1()
         {
             IntResourceManager[] irm = new IntResourceManager[4];
@@ -221,6 +231,7 @@ namespace System.Transactions.Tests
 		 * Durable fails SPC
 		 */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur1_Fail1()
         {
             IntResourceManager[] irm = new IntResourceManager[4];
@@ -259,6 +270,7 @@ namespace System.Transactions.Tests
 		 * Volatile fails Prepare
 		 */
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur1_Fail3()
         {
             IntResourceManager[] irm = new IntResourceManager[4];
@@ -299,6 +311,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur1_Fail4()
         {
             IntResourceManager[] irm = new IntResourceManager[2];
@@ -331,6 +344,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Dur1_Fail5()
         {
             CommittableTransaction ct = new CommittableTransaction();
@@ -373,6 +387,7 @@ namespace System.Transactions.Tests
 
         #region Promotable Single Phase Enlistment
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur0_Pspe1()
         {
             IntResourceManager irm = new IntResourceManager(1);
@@ -387,6 +402,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Dur0_Pspe1()
         {
             IntResourceManager irm0 = new IntResourceManager(1);
@@ -403,6 +419,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur1_Pspe1()
         {
             IntResourceManager irm0 = new IntResourceManager(1);
@@ -423,6 +440,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur0_Pspe2()
         {
             IntResourceManager irm0 = new IntResourceManager(1);
@@ -449,6 +467,7 @@ namespace System.Transactions.Tests
 		 */
         [ActiveIssue(13532)] //Distributed transactions are not supported.
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol0_Dur2()
         {
             IntResourceManager[] irm = new IntResourceManager[2];
@@ -471,6 +490,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TransactionDispose()
         {
             CommittableTransaction ct = new CommittableTransaction();
@@ -482,6 +502,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TransactionDispose2()
         {
             CommittableTransaction ct = new CommittableTransaction();
@@ -504,6 +525,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TransactionDispose3()
         {
             CommittableTransaction ct = new CommittableTransaction();
@@ -528,6 +550,7 @@ namespace System.Transactions.Tests
 
         #region TransactionCompleted
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TransactionCompleted_Committed()
         {
             bool called = false;
@@ -542,6 +565,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TransactionCompleted_Rollback()
         {
             bool called = false;
@@ -559,6 +583,7 @@ namespace System.Transactions.Tests
         #region Success/Failure behavior tests
         #region Success/Failure behavior Vol1_Dur0 Cases
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1SPC_Committed()
         {
             bool called = false;
@@ -583,6 +608,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Committed()
         {
             bool called = false;
@@ -606,6 +632,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Rollback()
         {
             bool called = false;
@@ -630,6 +657,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1SPC_Throwing_On_Commit()
         {
             bool called = false;
@@ -669,6 +697,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Throwing_On_Commit()
         {
             bool called = false;
@@ -704,6 +733,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Throwing_On_Rollback()
         {
             bool called = false;
@@ -741,6 +771,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol1_Throwing_On_Prepare()
         {
             bool called = false;
@@ -781,6 +812,7 @@ namespace System.Transactions.Tests
 
         #region Success/Failure behavior Vol2_Dur0 Cases
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2SPC_Committed()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -815,6 +847,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Committed()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -844,6 +877,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Rollback()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -874,6 +908,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2SPC_Throwing_On_Commit()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -922,6 +957,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_Commit()
         {
             bool called = false;
@@ -965,6 +1001,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_Rollback()
         {
             bool called = false;
@@ -1009,6 +1046,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_First_Prepare()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -1055,6 +1093,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_Second_Prepare()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -1100,6 +1139,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_First_Prepare_And_Second_Rollback()
         {
             TransactionStatus status = TransactionStatus.Active;
@@ -1147,6 +1187,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Vol2_Throwing_On_First_Rollback_And_Second_Prepare()
         {
             TransactionStatus status = TransactionStatus.Active;
