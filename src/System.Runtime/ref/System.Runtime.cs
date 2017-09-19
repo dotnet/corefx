@@ -1298,6 +1298,7 @@ namespace System
     {
         public static readonly System.Guid Empty;
         public Guid(byte[] b) { throw null; }
+        public Guid(ReadOnlySpan<byte> b) { throw null; }
         public Guid(int a, short b, short c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k) { throw null; }
         public Guid(int a, short b, short c, byte[] d) { throw null; }
         public Guid(string g) { throw null; }
@@ -1314,9 +1315,11 @@ namespace System
         public static System.Guid Parse(string input) { throw null; }
         public static System.Guid ParseExact(string input, string format) { throw null; }
         public byte[] ToByteArray() { throw null; }
+        public bool TryWriteBytes(Span<byte> destination) { throw null; }
         public override string ToString() { throw null; }
         public string ToString(string format) { throw null; }
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
+        public bool TryFormat(Span<char> destination, out int charsWritten, string format) { throw null; }
         public static bool TryParse(string input, out System.Guid result) { throw null; }
         public static bool TryParseExact(string input, string format, out System.Guid result) { throw null; }
     }
@@ -1878,7 +1881,7 @@ namespace System
         public bool DangerousTryGetArray(out ArraySegment<T> arraySegment) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct ReadOnlySpan<T>
+    public readonly ref struct ReadOnlySpan<T>
     {
         public static ReadOnlySpan<T> Empty { get { throw null; } }
         public ReadOnlySpan(T[] array) { throw null; }
@@ -2065,7 +2068,7 @@ namespace System
         public static bool TryParse(ReadOnlySpan<char> s, out float result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct Span<T>
+    public readonly ref struct Span<T>
     {
         public static Span<T> Empty { get { throw null; } }
         public Span(T[] array) { throw null; }

@@ -7,6 +7,7 @@
     <NoWarn>1718</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
@@ -184,6 +185,7 @@
     <Compile Include="System\DecimalTests.netcoreapp.cs" />
     <Compile Include="System\EnumTests.netcoreapp.cs" />
     <Compile Include="System\GCTests.netcoreapp.cs" />
+    <Compile Include="System\GuidTests.netcoreapp.cs" />
     <Compile Include="System\Int16Tests.netcoreapp.cs" />
     <Compile Include="System\Int32Tests.netcoreapp.cs" />
     <Compile Include="System\Int64Tests.netcoreapp.cs" />
