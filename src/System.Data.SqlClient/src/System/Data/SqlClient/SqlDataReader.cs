@@ -2349,7 +2349,7 @@ namespace System.Data.SqlClient
             }
             else if (_typeSystem != SqlConnectionString.TypeSystem.SQLServer2000)
             {
-                // TypeSystem.SQLServer2005
+                // TypeSystem.SQLServer2005 and above
 
                 if (metaData.type == SqlDbType.Udt)
                 {
@@ -2535,7 +2535,7 @@ namespace System.Data.SqlClient
             }
             else if (_typeSystem != SqlConnectionString.TypeSystem.SQLServer2000)
             {
-                // TypeSystem.SQLServer2005
+                // TypeSystem.SQLServer2005 and above
 
                 if (metaData.type != SqlDbType.Udt)
                 {

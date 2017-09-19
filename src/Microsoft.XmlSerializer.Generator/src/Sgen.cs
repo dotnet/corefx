@@ -28,18 +28,10 @@ namespace Microsoft.XmlSerializer.Generator
             var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
-            bool caseSensitive = false;
+            bool disableRun = true;
 
             try
             {
-                if (args.Length > 0)
-                {
-                    if (args.Any(s => s.IndexOf("casesensitive", StringComparison.OrdinalIgnoreCase) >= 0))
-                    {
-                        caseSensitive = true;
-                    }
-                }
-
                 for (int i = 0; i < args.Length; i++)
                 {
                     string arg = args[i];
@@ -55,10 +47,8 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    if (!caseSensitive)
-                    {
-                        arg = arg.ToLower(CultureInfo.InvariantCulture);
-                    }
+                    string originalArg = arg;
+                    arg = arg.ToLower(CultureInfo.InvariantCulture);
 
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
@@ -87,9 +77,18 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         types.Add(value);
                     }
-                    else if (ArgumentMatch(arg, "casesensitive"))
+                    else if (ArgumentMatch(arg, "assembly"))
                     {
-                        continue;
+                        if (assembly != null)
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                        }
+
+                        assembly = value;
+                    }
+                    else if (ArgumentMatch(arg, "quiet"))
+                    {
+                        disableRun = false;
                     }
                     else
                     {
@@ -100,7 +99,7 @@ namespace Microsoft.XmlSerializer.Generator
                                 errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
                             }
 
-                            assembly = arg;
+                            assembly = originalArg;
                         }
                         else
                         {
@@ -125,6 +124,14 @@ namespace Microsoft.XmlSerializer.Generator
                     }
 
                     WriteHelp();
+                    return 0;
+                }
+
+                if(disableRun)
+                {
+                    Console.WriteLine("This tool is not intended to be used directly.");
+                    Console.WriteLine("The feature is still under development.");
+                    Console.WriteLine("Please refer to https://go.microsoft.com/fwlink/?linkid=858539 for more detail.");
                     return 0;
                 }
 
@@ -244,7 +251,8 @@ namespace Microsoft.XmlSerializer.Generator
                     throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
-                bool success;
+                bool success = false;
+                bool toDeleteFile = true;
 
                 try
                 {
@@ -260,13 +268,21 @@ namespace Microsoft.XmlSerializer.Generator
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    toDeleteFile = false;
                     throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, outputDirectory));
+                }
+                finally
+                {
+                    if (!success && toDeleteFile && File.Exists(codePath))
+                    {
+                        File.Delete(codePath);
+                    }
                 }
 
                 if (success)
                 {
-                    Console.Out.WriteLine(SR.Format(SR.InfoAssemblyName, codePath));
-                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedAssembly, assembly.Location, codePath));
+                    Console.Out.WriteLine(SR.Format(SR.InfoFileName, codePath));
+                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedFile, assembly.Location, codePath));
                 }
                 else
                 {
@@ -331,14 +347,23 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Framework, Version {0}]", TempAssembly.ThisAssembly.InformationalVersion));
+            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
         private void WriteHelp()
         {
-            //TBD
-            Console.WriteLine("In Development");
+            Console.Out.WriteLine(SR.Format(SR.HelpDescription));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name));
+            Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
+            Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
+
+            Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "/?", "/help"));
         }
 
         private static string FormatMessage(bool warning, string message)

@@ -40,6 +40,24 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
         [CheckConnStrSetupFact]
+        public static void GetValueTest()
+        {
+            using (SqlConnection conn = new SqlConnection(DataTestUtility.TcpConnStr))
+            using (SqlCommand cmd = new SqlCommand("select hierarchyid::Parse('/1/') as col0", conn))
+            {
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    Assert.True(reader.Read());
+
+                    Assert.Throws<PlatformNotSupportedException>(() => reader.GetValue(0));
+
+                    Assert.Throws<PlatformNotSupportedException>(() => reader.GetSqlValue(0));
+                }
+            }
+        }
+
+        [CheckConnStrSetupFact]
         public static void TestUdtSqlParameterThrowsPlatformNotSupportedException()
         {
             using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
