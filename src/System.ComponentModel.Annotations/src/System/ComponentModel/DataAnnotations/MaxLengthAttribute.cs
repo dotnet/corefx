@@ -112,6 +112,7 @@ namespace System.ComponentModel.DataAnnotations
 
     internal static class CountPropertyHelper
     {
+        private const string Count = nameof(Count);
         public static bool TryGetCount(object value, out int count)
         {
             Debug.Assert(value != null);
@@ -122,16 +123,19 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
 
+            var type = value.GetType();
             PropertyInfo property = null;
             try
             {
-                // On CoreRT, this property may not be enabled for reflection.
-                // It may be possible to eliminate the exception by using direct reflection
-                // (i.e. not via the RuntimeReflectionExtensions or the new split TypeInfo format.
-                property = value.GetType().GetRuntimeProperty("Count");
+                // On CoreRT, this property may not be enabled for reflection.                
+                property = type.GetRuntimeProperty(Count);
             }
-            catch (TypeAccessException)
+            catch (TypeAccessException ex)
             {
+                throw new MissingMemberException(
+                    $@"The property '{Count}' could not be found on type '{type.FullName}'.
+This could be because no such property exists, in which case the '{nameof(MinLengthAttribute)}' or '{nameof(MaxLengthAttribute)}' cannot be used with this type,
+or it could be because it was compiled out, in which case see the inner exception for more details.", ex);
             }
 
             if (property != null && property.CanRead && property.PropertyType == typeof(int))
