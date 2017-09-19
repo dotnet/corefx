@@ -19,14 +19,22 @@ namespace System.Drawing
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return PlatformDetection.IsNotWindowsNanoServer;
+                return PlatformDetection.IsNotWindowsNanoServer && PlatformDetection.IsNotWindowsServerCore;
             }
             else
             {
-                IntPtr nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
-                if (nativeLib == IntPtr.Zero)
+                IntPtr nativeLib;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+                }
+                else
+                {
+                    nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                    if (nativeLib == IntPtr.Zero)
+                    {
+                        nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    }
                 }
 
                 return nativeLib != IntPtr.Zero;
@@ -35,7 +43,7 @@ namespace System.Drawing
 
         public static bool IsAnyInstalledPrinters()
         {
-            return PrinterSettings.InstalledPrinters.Count == 0;
+            return PrinterSettings.InstalledPrinters.Count > 0;
         }
 
         [DllImport("libdl")]

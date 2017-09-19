@@ -25,7 +25,7 @@ namespace System
         public static bool IsNetfx462OrNewer() { return false; }
         public static bool IsNetfx470OrNewer() { return false; }
         public static bool IsNetfx471OrNewer() { return false; }
-        public static bool IsWinRT => false;
+        public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
 
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
@@ -33,12 +33,17 @@ namespace System
         public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
+        public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", "16.04");
+        public static bool IsUbuntu1704 => IsDistroAndVersion("ubuntu", "17.04");
+        public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", "17.10");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
+        public static bool IsWindowsServerCore => false;
         public static bool IsWindowsAndElevated => false;
+        public static bool IsWindowsRedStone2 => false; 
 
         public static bool IsRedHat => IsDistroAndVersion("rhel") || IsDistroAndVersion("rhl");
         public static bool IsNotRedHat => !IsRedHat;
@@ -49,9 +54,9 @@ namespace System
 
         public static string GetDistroVersionString()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return "";
+                return "OSX Version=" + s_osxProductVersion.ToString();
             }
 
             DistroInfo v = ParseOsReleaseFile();
