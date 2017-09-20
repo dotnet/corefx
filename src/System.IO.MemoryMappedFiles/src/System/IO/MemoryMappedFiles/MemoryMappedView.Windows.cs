@@ -132,11 +132,11 @@ namespace System.IO.MemoryMappedFiles
                             if (Interop.Kernel32.FlushViewOfFile((IntPtr)firstPagePtr, capacity))
                                 return;
 
-                            spinWait.SpinOnce();
-
                             error = Marshal.GetLastWin32Error();
                             if (error != Interop.Errors.ERROR_LOCK_VIOLATION)
                                 throw Win32Marshal.GetExceptionForWin32Error(error);
+
+                            spinWait.SpinOnce();
                         }
                     }
 
