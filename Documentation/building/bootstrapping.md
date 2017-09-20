@@ -68,7 +68,7 @@ copy corefx\bin\ref\System.Console\4.1.1.0\netcoreapp\System.Console.dll core-de
 2. Compile your application code with the C# Compiler against the required reference assemblies.
 ```
 cd core-demo
-csc /nostdlib /noconfig /r:ref\System.Runtime.dll /r:ref\System.Console.dll /out:runtime\Program.exe Program.cs
+csc /nostdlib /noconfig /r:ref\System.Runtime.dll /r:ref\System.Runtime.Extensions.dll /r:ref\System.Console.dll /out:runtime\Program.exe Program.cs
 ```
 
 ## Execution
