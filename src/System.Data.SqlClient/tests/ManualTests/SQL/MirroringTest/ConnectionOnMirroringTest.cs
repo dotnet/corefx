@@ -35,6 +35,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
                 else
                 {
+                    //thread.Abort() is not implemented yet in CoreFx.
                     childThread.Interrupt();
                     throw new Exception();
                 }
