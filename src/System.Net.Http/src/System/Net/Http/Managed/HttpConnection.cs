@@ -191,6 +191,8 @@ namespace System.Net.Http
             _currentRequest = request;
             try
             {
+                bool isHttp10 = request.Version.Major == 1 && request.Version.Minor == 0;
+
                 // Send the request.
                 if (NetEventSource.IsEnabled) Trace($"Sending request: {request}");
 
@@ -203,8 +205,7 @@ namespace System.Net.Http
                     request.Headers.TransferEncodingChunked = true;
                 }
 
-                if (request.Version.Major == 1 && request.Version.Minor == 0 &&
-                        request.HasHeaders && request.Headers.TransferEncodingChunked == true)
+                if (isHttp10 && request.HasHeaders && request.Headers.TransferEncodingChunked == true)
                 {
                     // HTTP 1.0 does not support chunking
                     throw new NotSupportedException(SR.net_http_unsupported_chunking);
@@ -218,8 +219,8 @@ namespace System.Net.Http
                     cancellationToken).ConfigureAwait(false);
 
                 // fall-back to 1.1 for all versions other than 1.0
-                await WriteBytesAsync( request.Version.Major == 1 && request.Version.Minor == 0 ?
-                        s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes, cancellationToken).ConfigureAwait(false);
+                await WriteBytesAsync(isHttp10 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
+                                      cancellationToken).ConfigureAwait(false);
 
                 // Write request headers
                 if (request.HasHeaders)
