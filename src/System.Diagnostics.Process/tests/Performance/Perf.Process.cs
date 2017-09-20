@@ -15,6 +15,7 @@ namespace System.Diagnostics.Tests
         public void Kill()
         {
             const int inneriterations = 500;
+            int ani = 2;
             foreach (var iteration in Benchmark.Iterations)
             {
                 // Create several processes to test on
