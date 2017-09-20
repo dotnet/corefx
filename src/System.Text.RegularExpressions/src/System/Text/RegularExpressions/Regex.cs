@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
 
@@ -213,9 +214,23 @@ namespace System.Text.RegularExpressions
                 capslist = cached._capslist;
                 capsize = cached._capsize;
                 _code = cached._code;
+                factory = cached._factory;
                 _runnerref = cached._runnerref;
                 _replref = cached._replref;
                 _refsInitialized = true;
+            }
+
+            // if the compile option is set, then compile the code if it's not already
+            if (UseOptionC() && factory == null)
+            {
+                factory = Compile(_code, roptions);
+
+                if (useCache && cached != null)
+                {
+                    cached.AddCompiled(factory);
+                }
+
+                _code = null;
             }
         }
 
@@ -276,6 +291,17 @@ namespace System.Text.RegularExpressions
             }
 
             throw new InvalidCastException(SR.Format(SR.IllegalDefaultRegexMatchTimeoutInAppDomain, DefaultMatchTimeout_ConfigKeyName, defaultMatchTimeoutObj));
+        }
+
+        /// <summary>
+        /// This method is here for perf reasons: if the call to RegexCompiler is NOT in the 
+        /// Regex constructor, we don't load RegexCompiler and its reflection classes when
+        /// instantiating a non-compiled regex.
+        /// </summary>
+        [MethodImplAttribute(MethodImplOptions.NoInlining)]
+        private RegexRunnerFactory Compile(RegexCode code, RegexOptions roptions)
+        {
+            return RegexCompiler.Compile(code, roptions);
         }
 
         /// <summary>
@@ -939,6 +965,8 @@ namespace System.Text.RegularExpressions
 
             if (runner == null)
             {
+                // Use the compiled RegexRunner factory if the code was compiled to MSIL
+
                 if (factory != null)
                     runner = factory.CreateInstance();
                 else
@@ -1108,6 +1136,7 @@ namespace System.Text.RegularExpressions
         internal Hashtable _caps;
         internal Hashtable _capnames;
         internal string[] _capslist;
+        internal RegexRunnerFactory _factory;
         internal int _capsize;
         internal ExclusiveReference _runnerref;
         internal SharedReference _replref;
@@ -1124,6 +1153,12 @@ namespace System.Text.RegularExpressions
 
             _runnerref = runner;
             _replref = repl;
+        }
+
+        internal void AddCompiled(RegexRunnerFactory factory)
+        {
+            _factory = factory;
+            _code = null;
         }
     }
 

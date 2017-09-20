@@ -11,6 +11,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\Text\RegularExpressions\CompiledRegexRunnerFactory.cs" />
+    <Compile Include="System\Text\RegularExpressions\CompiledRegexRunner.cs" />
     <Compile Include="System\Text\RegularExpressions\HashtableExtensions.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexBoyerMoore.cs" />
@@ -19,10 +21,13 @@
     <Compile Include="System\Text\RegularExpressions\RegexCharClass.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCode.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCollectionDebuggerProxy.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexCompilationInfo.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexCompiler.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexFCD.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexGroup.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexGroupCollection.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexInterpreter.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexLWCGCompiler.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexMatch.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexMatchCollection.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexMatchTimeoutException.cs" />
@@ -47,6 +52,9 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
+    <Reference Include="System.Reflection.Emit.Lightweight" />
+    <Reference Include="System.Reflection.Primitives" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
