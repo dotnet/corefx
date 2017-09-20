@@ -1153,7 +1153,13 @@ namespace System.Drawing.Tests
                 Assert.Equal(rectangle.Width, data.Width);
                 Assert.Equal(rectangle.Height, data.Height);
                 Assert.Equal(expectedStride, data.Stride);
-                Assert.Equal(expectedReserved, data.Reserved);
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // "Reserved" is documented as "Reserved. Do not use.", so it's not clear whether we actually need to test this in any unit tests.
+                    // Additionally, the values are not consistent accross Windows (GDI+) and Unix (libgdiplus)
+                    Assert.Equal(expectedReserved, data.Reserved);
+                }
 
                 // Locking with 16bppGrayscale succeeds, but the data can't be unlocked.
                 if (pixelFormat == PixelFormat.Format16bppGrayScale)
