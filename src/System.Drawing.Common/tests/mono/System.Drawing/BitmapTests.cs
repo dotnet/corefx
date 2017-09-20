@@ -65,66 +65,6 @@ namespace MonoTests.System.Drawing
             Assert.Equal(Color.FromArgb(255, 255, 0, 155), color2);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_32_32_NonIndexedWrite()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format32bppRgb, data.PixelFormat);
-                Assert.Equal(400, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_32_24_NonIndexedWrite()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format24bppRgb, data.PixelFormat);
-                Assert.Equal(300, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_24_24_NonIndexedWrite()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format24bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format24bppRgb, data.PixelFormat);
-                Assert.Equal(300, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_24_32_NonIndexedWrite()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format24bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format32bppRgb, data.PixelFormat);
-                Assert.Equal(400, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
         [ActiveIssue(20884)]
         public void LockBits_IndexedWrite_NonIndexed()
         {
@@ -146,21 +86,6 @@ namespace MonoTests.System.Drawing
 
                 // test to see if there's a leak or not in this case
                 Assert.Equal(IntPtr.Zero, bd.Scan0);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_IndexedWrite_SameIndexedFormat()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format8bppIndexed))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format8bppIndexed, data.PixelFormat);
-                Assert.Equal(100, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
             }
         }
 
@@ -201,97 +126,6 @@ namespace MonoTests.System.Drawing
                 {
                     bmp.UnlockBits(data);
                 }
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_Disposed()
-        {
-            Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb);
-            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            bmp.Dispose();
-            Assert.Throws<ArgumentException>(() => bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void UnlockBits_Null()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Assert.Throws<ArgumentException>(() => bmp.UnlockBits(null));
-            }
-        }
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_BitmapData_Null()
-        {
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                Assert.Throws<ArgumentException>(() => bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, null));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_32_32_BitmapData()
-        {
-            BitmapData data = new BitmapData();
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb, data);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format32bppRgb, data.PixelFormat);
-                Assert.Equal(400, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_32_24_BitmapData()
-        {
-            BitmapData data = new BitmapData();
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, data);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format24bppRgb, data.PixelFormat);
-                Assert.Equal(300, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_24_24_BitmapData()
-        {
-            BitmapData data = new BitmapData();
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format24bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, data);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format24bppRgb, data.PixelFormat);
-                Assert.Equal(300, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void LockBits_24_32_BitmapData()
-        {
-            BitmapData data = new BitmapData();
-            using (Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format24bppRgb))
-            {
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb, data);
-                Assert.Equal(100, data.Height);
-                Assert.Equal(PixelFormat.Format32bppRgb, data.PixelFormat);
-                Assert.Equal(400, data.Stride);
-                Assert.Equal(100, data.Width);
-                bmp.UnlockBits(data);
             }
         }
 

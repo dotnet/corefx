@@ -1142,7 +1142,6 @@ namespace System.Drawing.Tests
             yield return new object[] { new Bitmap(184, 184, PixelFormat.Format1bppIndexed), new Rectangle(0, 0, 184, 184), ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed, 24, 2 };
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(LockBits_TestData))]
         public void LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
