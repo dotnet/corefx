@@ -10,28 +10,28 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>ed8cf4ba3c0e143c142542aaf53a8cdaa6cb0023</CoreFxCurrentRef>
-    <CoreClrCurrentRef>ed8cf4ba3c0e143c142542aaf53a8cdaa6cb0023</CoreClrCurrentRef>
-    <CoreSetupCurrentRef>ed8cf4ba3c0e143c142542aaf53a8cdaa6cb0023</CoreSetupCurrentRef>
+    <CoreClrCurrentRef>8348f53f898e4716854727999cdefca3044596a3</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>8348f53f898e4716854727999cdefca3044596a3</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>568fb017cade704dcf611a1c991e7b8e2e27972b</ProjectNTfsCurrentRef>
     <ProjectNTfsTestILCCurrentRef>568fb017cade704dcf611a1c991e7b8e2e27972b</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
-    <StandardCurrentRef>ed8cf4ba3c0e143c142542aaf53a8cdaa6cb0023</StandardCurrentRef>
-    <BuildToolsCurrentRef>c56be50f50762d8fc3f889e695873a8bd67e73d2</BuildToolsCurrentRef>
+    <StandardCurrentRef>8348f53f898e4716854727999cdefca3044596a3</StandardCurrentRef>
+    <BuildToolsCurrentRef>8348f53f898e4716854727999cdefca3044596a3</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <PlatformPackageVersion>2.1.0-preview1-25718-03</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>preview1-25718-03</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-preview1-25718-02</CoreClrPackageVersion>
+    <CoreClrPackageVersion>2.1.0-preview1-25720-03</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-25715-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25715-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25715-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.1.0-preview1-25718-01</NETStandardPackageVersion>
+    <NETStandardPackageVersion>2.1.0-preview1-25719-02</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25717-02</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25719-04</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0</SniPackageVersion>
   </PropertyGroup>
