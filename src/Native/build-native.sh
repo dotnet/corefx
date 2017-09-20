@@ -240,10 +240,10 @@ while :; do
         arm64)
             __BuildArch=arm64
             ;;
-        debug)
+        debug|-debug)
             __BuildType=Debug
             ;;
-        release)
+        release|-release)
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
