@@ -252,20 +252,14 @@ namespace System.Net.Security
                 throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(WriteAsync), "write"));
             }
 
-            Task t;
-            if (count < _sslState.MaxDataSize)
+            Task t = count < _sslState.MaxDataSize ?
+                    WriteSingleChunk(writeAdapter, buffer, offset, count) :
+                    WriteAsyncChunked(writeAdapter, buffer, offset, count);
+
+            if (t.IsCompletedSuccessfully)
             {
-                // Single write
-                t = WriteSingleChunk(writeAdapter, buffer, offset, count);
-                if (t.IsCompletedSuccessfully)
-                {
-                    _nestedWrite = 0;
-                    return t;
-                }
-            }
-            else
-            {
-                t = WriteAsyncChunked(writeAdapter, buffer, offset, count);
+                _nestedWrite = 0;
+                return t;
             }
             return ExitWriteAsync(t);
 
