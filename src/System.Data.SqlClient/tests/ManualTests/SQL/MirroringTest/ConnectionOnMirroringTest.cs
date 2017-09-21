@@ -10,7 +10,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class ConnectionOnMirroringTest
     {
-        private static ManualResetEvent mre = new ManualResetEvent(false);
+        private static ManualResetEvent workerCompletedEvent = new ManualResetEvent(false);
 
         [CheckConnStrSetupFact]
         public static void TestMultipleConnectionToMirroredServer()
@@ -23,17 +23,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             string failoverPartnerName;
             bool isMirroring = GetMirroringInfo(connectionString, out mirroringStateDesc, out failoverPartnerName);
             bool isSynchronized = "SYNCHRONIZED".Equals(mirroringStateDesc, StringComparison.InvariantCultureIgnoreCase);
-            List<SqlConnection> list = new List<SqlConnection>();
             if (isMirroring && isSynchronized && !string.IsNullOrEmpty(failoverPartnerName))
             {
                 TestWorker worker = new TestWorker(connectionString);
                 Thread childThread = new Thread(() => worker.TestMultipleConnection());
                 childThread.Start();
 
-                mre.Reset();
-                mre.WaitOne(10000);
-
-                if (worker.IsDone)
+                if (workerCompletedEvent.WaitOne(10000))
                 {
                     childThread.Join();
                 }
@@ -73,15 +69,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private class TestWorker
         {
             private string _connectionString;
-            private bool _isDone;
 
             public TestWorker(string connectionString)
             {
                 _connectionString = connectionString;
-                _isDone = false;
             }
-
-            public bool IsDone { get => _isDone; }
 
             public void TestMultipleConnection()
             {
@@ -99,8 +91,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     conn.Dispose();
                 }
 
-                _isDone = true;
-                mre.Set();
+                workerCompletedEvent.Set();
             }
         }
     }
