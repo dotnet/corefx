@@ -10,24 +10,28 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class ConnectionOnMirroringTest
     {
+        private static ManualResetEvent mre = new ManualResetEvent(false);
+
         [CheckConnStrSetupFact]
         public static void TestMultipleConnectionToMirroredServer()
         {
-            string connectionString = DataTestUtility.TcpConnStr;
-            int mirroringState;
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+            builder.ConnectTimeout = 0;
+            string connectionString = builder.ConnectionString;
+
+            string mirroringStateDesc;
             string failoverPartnerName;
-            bool isMirroring = GetMirroringInfo(connectionString, out mirroringState, out failoverPartnerName);
+            bool isMirroring = GetMirroringInfo(connectionString, out mirroringStateDesc, out failoverPartnerName);
+            bool isSynchronized = "SYNCHRONIZED".Equals(mirroringStateDesc, StringComparison.InvariantCultureIgnoreCase);
             List<SqlConnection> list = new List<SqlConnection>();
-            if (isMirroring && mirroringState == 4 && !string.IsNullOrEmpty(failoverPartnerName))
+            if (isMirroring && isSynchronized && !string.IsNullOrEmpty(failoverPartnerName))
             {
-                Stopwatch stopWatch = new Stopwatch();
                 TestWorker worker = new TestWorker(connectionString);
                 Thread childThread = new Thread(() => worker.TestMultipleConnection());
-
-                stopWatch.Start();
                 childThread.Start();
-                while (!worker.IsDone && stopWatch.ElapsedMilliseconds <= 10000);
-                stopWatch.Stop();
+
+                mre.Reset();
+                mre.WaitOne(10000);
 
                 if (worker.IsDone)
                 {
@@ -35,41 +39,31 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
                 else
                 {
-                    //thread.Abort() is not implemented yet in CoreFx.
+                    // currently Thread.Abort() throws PlatformNotSupportedException in CoreFx.
                     childThread.Interrupt();
-                    throw new Exception();
+                    throw new Exception("SqlConnection could not open and close successfully in timely manner. Possibly connection hangs.");
                 }
             }
         }
 
-        private static bool GetMirroringInfo(string connectionString, out int mirroringState, out string failoverPartnerName)
+        private static bool GetMirroringInfo(string connectionString, out string mirroringStateDesc, out string failoverPartnerName)
         {
-            mirroringState = -1;
+            mirroringStateDesc = null;
             failoverPartnerName = null;
 
-            SqlConnectionStringBuilder existingConnStrBuilder = new SqlConnectionStringBuilder(connectionString);
-            SqlConnectionStringBuilder newConnStrBuilder = new SqlConnectionStringBuilder();
-            newConnStrBuilder.DataSource = existingConnStrBuilder.DataSource;
-            if (!string.IsNullOrEmpty(existingConnStrBuilder.UserID))
-            {
-                newConnStrBuilder.UserID = existingConnStrBuilder.UserID;
-            }
-            if (!string.IsNullOrEmpty(existingConnStrBuilder.Password))
-            {
-                newConnStrBuilder.Password = existingConnStrBuilder.Password;
-            }
-            if (existingConnStrBuilder.IntegratedSecurity)
-            {
-                newConnStrBuilder.IntegratedSecurity = true;
-            }
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+            string dbname = builder.InitialCatalog;
 
-            string dbname = existingConnStrBuilder.InitialCatalog;
-            DataTable dt = DataTestUtility.RunQuery(newConnStrBuilder.ConnectionString, $"select mirroring_state from sys.database_mirroring where database_id = DB_ID('{dbname}')");
-            bool isMirroring = Int32.TryParse(dt.Rows[0][0].ToString(), out mirroringState);
+            builder.Remove("Connection Timeout");
+            connectionString = builder.ConnectionString;
 
+            DataTable dt = DataTestUtility.RunQuery(connectionString, $"select mirroring_state_desc from sys.database_mirroring where database_id = DB_ID('{dbname}')");
+            mirroringStateDesc = dt.Rows[0][0].ToString();
+
+            bool isMirroring = !string.IsNullOrEmpty(mirroringStateDesc);
             if (isMirroring)
             {
-                dt = DataTestUtility.RunQuery(newConnStrBuilder.ConnectionString, $"select mirroring_partner_name from sys.database_mirroring where database_id = DB_ID('{dbname}')");
+                dt = DataTestUtility.RunQuery(connectionString, $"select mirroring_partner_name from sys.database_mirroring where database_id = DB_ID('{dbname}')");
                 failoverPartnerName = dt.Rows[0][0].ToString();
             }
 
@@ -106,6 +100,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
 
                 _isDone = true;
+                mre.Set();
             }
         }
     }
