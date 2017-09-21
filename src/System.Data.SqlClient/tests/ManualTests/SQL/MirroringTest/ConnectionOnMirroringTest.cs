@@ -50,7 +50,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
             string dbname = builder.InitialCatalog;
 
-            builder.Remove("Connection Timeout");
+            builder.ConnectTimeout = 5;
             connectionString = builder.ConnectionString;
 
             DataTable dt = DataTestUtility.RunQuery(connectionString, $"select mirroring_state_desc from sys.database_mirroring where database_id = DB_ID('{dbname}')");
