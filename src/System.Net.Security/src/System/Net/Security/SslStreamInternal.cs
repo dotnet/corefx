@@ -252,24 +252,22 @@ namespace System.Net.Security
                 throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(WriteAsync), "write"));
             }
 
-            if (count <= _sslState.MaxDataSize)
+            Task t;
+            if (count < _sslState.MaxDataSize)
             {
-                //Single write
-                Task t = WriteSingleChunk(writeAdapter, buffer, offset, count);
+                // Single write
+                t = WriteSingleChunk(writeAdapter, buffer, offset, count);
                 if (t.IsCompletedSuccessfully)
                 {
                     _nestedWrite = 0;
                     return t;
                 }
-                else
-                {
-                    return ExitWriteAsync(t);
-                }
             }
             else
             {
-                return ExitWriteAsync(WriteAsyncChunked(writeAdapter, buffer, offset, count));
+                t = WriteAsyncChunked(writeAdapter, buffer, offset, count);
             }
+            return ExitWriteAsync(t);
 
             async Task ExitWriteAsync(Task task)
             {
