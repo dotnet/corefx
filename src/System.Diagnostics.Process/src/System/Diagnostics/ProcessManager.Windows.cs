@@ -690,7 +690,7 @@ namespace System.Diagnostics
         private const int DefaultCachedBufferSize = 128 * 1024;
 #endif
 
-        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, int processId = AllProcessIds)
+        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, int processId)
         {
             // Use a dictionary to avoid duplicate entries if any
             // 60 is a reasonable number for processes on a normal machine.
