@@ -15,16 +15,16 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void TestMultipleConnectionToMirroredServer()
         {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
-            builder.ConnectTimeout = 0;
-            string connectionString = builder.ConnectionString;
-
             string mirroringStateDesc;
             string failoverPartnerName;
-            bool isMirroring = GetMirroringInfo(connectionString, out mirroringStateDesc, out failoverPartnerName);
+            bool isMirroring = GetMirroringInfo(DataTestUtility.TcpConnStr, out mirroringStateDesc, out failoverPartnerName);
             bool isSynchronized = "SYNCHRONIZED".Equals(mirroringStateDesc, StringComparison.InvariantCultureIgnoreCase);
             if (isMirroring && isSynchronized && !string.IsNullOrEmpty(failoverPartnerName))
             {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+                builder.ConnectTimeout = 0;
+                string connectionString = builder.ConnectionString;
+
                 TestWorker worker = new TestWorker(connectionString);
                 Thread childThread = new Thread(() => worker.TestMultipleConnection());
                 childThread.Start();
