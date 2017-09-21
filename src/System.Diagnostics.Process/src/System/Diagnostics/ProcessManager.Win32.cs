@@ -250,14 +250,16 @@ namespace System.Diagnostics
 
     internal static partial class NtProcessInfoHelper
     {
+        private const int AllProcessIds = -1;
+
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
 
-        public static ProcessInfo[] GetProcessInfos()
+        internal static ProcessInfo[] GetProcessInfos(int processId = AllProcessIds)
         {
             int requiredSize = 0;
             int status;
-
+            
             ProcessInfo[] processInfos;
             GCHandle bufferHandle = new GCHandle();
 
@@ -304,7 +306,7 @@ namespace System.Diagnostics
                 }
 
                 // Parse the data block to get process information
-                processInfos = GetProcessInfos(bufferHandle.AddrOfPinnedObject());
+                processInfos = GetProcessInfos(bufferHandle.AddrOfPinnedObject(), processId);
             }
             finally
             {
