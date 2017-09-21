@@ -29,7 +29,7 @@ namespace System.Text.RegularExpressions
         public string Pattern
         {
             get => _pattern;
-            set => _pattern = value ?? throw new ArgumentNullException("value");
+            set => _pattern = value ?? throw new ArgumentNullException(nameof(Pattern));
         }
 
         public RegexOptions Options { get; set; }
@@ -46,7 +46,7 @@ namespace System.Text.RegularExpressions
 
                 if (value.Length == 0)
                 {
-                    throw new ArgumentException(SR.Format(SR.InvalidNullEmptyArgument, nameof(value)), nameof(value));
+                    throw new ArgumentException(SR.Format(SR.InvalidNullEmptyArgument, nameof(Name)), nameof(Name));
                 }
 
                 _name = value;
@@ -58,7 +58,7 @@ namespace System.Text.RegularExpressions
             get => _nspace;
             set
             {
-                _nspace = value ?? throw new ArgumentNullException(nameof(value));
+                _nspace = value ?? throw new ArgumentNullException(nameof(Namespace));
             }
         }
 

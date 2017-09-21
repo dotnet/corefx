@@ -6,13 +6,13 @@ namespace System.Text.RegularExpressions
 {
     internal sealed class CompiledRegexRunner : RegexRunner
     {
-        private NoParamDelegate _goMethod;
-        private FindFirstCharDelegate _findFirstCharMethod;
-        private NoParamDelegate _initTrackCountMethod;
+        private Action<RegexRunner> _goMethod;
+        private Func<RegexRunner, bool> _findFirstCharMethod;
+        private Action<RegexRunner> _initTrackCountMethod;
 
         internal CompiledRegexRunner() { }
 
-        internal void SetDelegates(NoParamDelegate go, FindFirstCharDelegate firstChar, NoParamDelegate trackCount)
+        internal void SetDelegates(Action<RegexRunner> go, Func<RegexRunner,bool> firstChar, Action<RegexRunner> trackCount)
         {
             _goMethod = go;
             _findFirstCharMethod = firstChar;
@@ -34,7 +34,4 @@ namespace System.Text.RegularExpressions
             _initTrackCountMethod(this);
         }
     }
-
-    internal delegate void NoParamDelegate(RegexRunner r);
-    internal delegate bool FindFirstCharDelegate(RegexRunner r);
 }

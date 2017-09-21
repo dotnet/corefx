@@ -22,13 +22,11 @@ namespace System.Text.RegularExpressions
         protected internal override RegexRunner CreateInstance()
         {
             CompiledRegexRunner runner = new CompiledRegexRunner();
-            runner.SetDelegates((NoParamDelegate)_goMethod.CreateDelegate(typeof(NoParamDelegate)),
-                                (FindFirstCharDelegate)_findFirstCharMethod.CreateDelegate(typeof(FindFirstCharDelegate)),
-                                (NoParamDelegate)_initTrackCountMethod.CreateDelegate(typeof(NoParamDelegate)));
+            runner.SetDelegates((Action<RegexRunner>)_goMethod.CreateDelegate(typeof(Action<RegexRunner>)),
+                                (Func<RegexRunner, bool>)_findFirstCharMethod.CreateDelegate(typeof(Func<RegexRunner, bool>)),
+                                (Action<RegexRunner>)_initTrackCountMethod.CreateDelegate(typeof(Action<RegexRunner>)));
 
             return runner;
         }
     }
-
-    internal delegate RegexRunner CreateInstanceDelegate();
 }
