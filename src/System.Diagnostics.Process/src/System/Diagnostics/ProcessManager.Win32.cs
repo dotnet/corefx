@@ -259,7 +259,7 @@ namespace System.Diagnostics
         {
             int requiredSize = 0;
             int status;
-            
+
             ProcessInfo[] processInfos;
             GCHandle bufferHandle = new GCHandle();
 
