@@ -705,6 +705,7 @@ namespace System.Diagnostics
 
                 // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
                 var processInfoProcessId = pi.UniqueProcessId.ToInt32();
+                Debug.Assert(processInfoProcessId != AllProcessIds, "Any process ID is expected to be zero or greater.");
                 if (processId == AllProcessIds || processId == processInfoProcessId)
                 {
                     // get information for a process
