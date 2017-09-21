@@ -23,9 +23,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             {
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
                 builder.ConnectTimeout = 0;
-                string connectionString = builder.ConnectionString;
 
-                TestWorker worker = new TestWorker(connectionString);
+                TestWorker worker = new TestWorker(builder.ConnectionString);
                 Thread childThread = new Thread(() => worker.TestMultipleConnection());
                 childThread.Start();
 
