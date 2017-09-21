@@ -28,10 +28,10 @@ namespace System.IO.Ports.Tests
         private const int defaultCharOffset = 0;
         private const int defaultCharCount = 1;
 
-        //The maximum buffer size when a exception occurs
+        //The maximum buffer size when an exception occurs
         private const int maxBufferSizeForException = 255;
 
-        //The maximum buffer size when a exception is not expected
+        //The maximum buffer size when an exception is not expected
         private const int maxBufferSize = 8;
 
         public enum ReadDataFromEnum { NonBuffered, Buffered, BufferedAndNonBuffered };
@@ -434,7 +434,7 @@ namespace System.IO.Ports.Tests
                 char[] charXmitBuffer = TCSupport.GetRandomChars(1023, TCSupport.CharacterOptions.ASCII);
                 int readResult;
 
-                Debug.WriteLine("Verifying that Read(char[], int, int) will compact data in the buffer buffer");
+                Debug.WriteLine("Verifying that Read(char[], int, int) will compact data in the buffer");
 
                 com1.Encoding = Encoding.ASCII;
                 com2.Encoding = Encoding.ASCII;
