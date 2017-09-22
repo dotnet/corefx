@@ -161,6 +161,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttributeTests()
         {
             GroupCollection col = CreateCollection();
@@ -172,6 +173,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttributeTests_Null()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(GroupCollection), null));
