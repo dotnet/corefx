@@ -320,32 +320,20 @@ namespace MonoTests.System.Drawing
 
             sRslt = Path.GetFullPath(sSub);
 
-            if (Directory.Exists(sRslt) == false)
+            if (!Directory.Exists(sRslt))
+            {
                 sRslt = "Test/System.Drawing/" + sSub;
+            }
 
             if (sRslt.Length > 0)
+            {
                 if (sRslt[sRslt.Length - 1] != '\\' && sRslt[sRslt.Length - 1] != '/')
+                {
                     sRslt += "/";
+                }
+            }
 
             return sRslt;
-        }
-
-        // note: this test fails when saving (for the same reason) on Mono and MS.NET
-        //[ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void MakeTransparent()
-        {
-            string sInFile = Helpers.GetTestBitmapPath("maketransparent.bmp");
-            string sOutFile = getOutSubDir() + "transparent.bmp";
-
-            Bitmap bmp = new Bitmap(sInFile);
-
-            bmp.MakeTransparent();
-            bmp.Save(sOutFile);
-
-            Color color = bmp.GetPixel(1, 1);
-            Assert.Equal(Color.Black.R, color.R);
-            Assert.Equal(Color.Black.G, color.G);
-            Assert.Equal(Color.Black.B, color.B);
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
@@ -353,42 +341,44 @@ namespace MonoTests.System.Drawing
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
             Rectangle rect = new Rectangle(0, 0, 50, 50);
-            Bitmap bmp = new Bitmap(sInFile);
+            using (Bitmap bmp = new Bitmap(sInFile))
+            using (Bitmap bmpNew = bmp.Clone(rect, PixelFormat.Format32bppArgb))
+            {
+                Color colororg0 = bmp.GetPixel(0, 0);
+                Color colororg50 = bmp.GetPixel(49, 49);
+                Color colornew0 = bmpNew.GetPixel(0, 0);
+                Color colornew50 = bmpNew.GetPixel(49, 49);
 
-            Bitmap bmpNew = bmp.Clone(rect, PixelFormat.Format32bppArgb);
-            Color colororg0 = bmp.GetPixel(0, 0);
-            Color colororg50 = bmp.GetPixel(49, 49);
-            Color colornew0 = bmpNew.GetPixel(0, 0);
-            Color colornew50 = bmpNew.GetPixel(49, 49);
-
-            Assert.Equal(colororg0, colornew0);
-            Assert.Equal(colororg50, colornew50);
+                Assert.Equal(colororg0, colornew0);
+                Assert.Equal(colororg50, colornew50);
+            }
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void CloneImage()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
-            Bitmap bmp = new Bitmap(sInFile);
-
-            Bitmap bmpNew = (Bitmap)bmp.Clone();
-
-            Assert.Equal(bmp.Width, bmpNew.Width);
-            Assert.Equal(bmp.Height, bmpNew.Height);
-            Assert.Equal(bmp.PixelFormat, bmpNew.PixelFormat);
-
+            using (Bitmap bmp = new Bitmap(sInFile))
+            using (Bitmap bmpNew = (Bitmap)bmp.Clone())
+            {
+                Assert.Equal(bmp.Width, bmpNew.Width);
+                Assert.Equal(bmp.Height, bmpNew.Height);
+                Assert.Equal(bmp.PixelFormat, bmpNew.PixelFormat);
+            }
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Frames()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
-            Bitmap bmp = new Bitmap(sInFile);
-            int cnt = bmp.GetFrameCount(FrameDimension.Page);
-            int active = bmp.SelectActiveFrame(FrameDimension.Page, 0);
+            using (Bitmap bmp = new Bitmap(sInFile))
+            {
+                int cnt = bmp.GetFrameCount(FrameDimension.Page);
+                int active = bmp.SelectActiveFrame(FrameDimension.Page, 0);
 
-            Assert.Equal(1, cnt);
-            Assert.Equal(0, active);
+                Assert.Equal(1, cnt);
+                Assert.Equal(0, active);
+            }
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
@@ -399,9 +389,8 @@ namespace MonoTests.System.Drawing
 
         static string ByteArrayToString(byte[] arrInput)
         {
-            int i;
             StringBuilder sOutput = new StringBuilder(arrInput.Length);
-            for (i = 0; i < arrInput.Length - 1; i++)
+            for (int i = 0; i < arrInput.Length - 1; i++)
             {
                 sOutput.Append(arrInput[i].ToString("X2"));
             }
@@ -413,26 +402,27 @@ namespace MonoTests.System.Drawing
         {
             int width = 150, height = 150, index = 0;
             byte[] pixels = new byte[width * height * 3];
-            Bitmap bmp_rotate;
             byte[] hash;
             Color clr;
 
-            bmp_rotate = src.Clone(new RectangleF(0, 0, width, height), PixelFormat.Format32bppArgb);
-            bmp_rotate.RotateFlip(rotate);
-
-            for (int y = 0; y < height; y++)
+            using (Bitmap bmp_rotate = src.Clone(new RectangleF(0, 0, width, height), PixelFormat.Format32bppArgb))
             {
-                for (int x = 0; x < width; x++)
-                {
-                    clr = bmp_rotate.GetPixel(x, y);
-                    pixels[index++] = clr.R;
-                    pixels[index++] = clr.G;
-                    pixels[index++] = clr.B;
-                }
-            }
+                bmp_rotate.RotateFlip(rotate);
 
-            hash = MD5.Create().ComputeHash(pixels);
-            return ByteArrayToString(hash);
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        clr = bmp_rotate.GetPixel(x, y);
+                        pixels[index++] = clr.R;
+                        pixels[index++] = clr.G;
+                        pixels[index++] = clr.B;
+                    }
+                }
+
+                hash = MD5.Create().ComputeHash(pixels);
+                return ByteArrayToString(hash);
+            }
         }
         public string RotateIndexedBmp(Bitmap src, RotateFlipType type)
         {
@@ -454,75 +444,67 @@ namespace MonoTests.System.Drawing
                     throw new Exception("Cannot pass a bitmap of format " + src.PixelFormat + " to RotateIndexedBmp");
             }
 
-            Bitmap test = src.Clone() as Bitmap;
-
-            test.RotateFlip(type);
-
-            BitmapData data = null;
-            byte[] pixel_data;
-
-            try
+            using (Bitmap test = src.Clone() as Bitmap)
             {
-                data = test.LockBits(new Rectangle(0, 0, test.Width, test.Height), ImageLockMode.ReadOnly, test.PixelFormat);
+                test.RotateFlip(type);
 
-                int scan_size = (data.Width + pixels_per_byte - 1) / pixels_per_byte;
-                pixel_data = new byte[data.Height * scan_size];
+                BitmapData data = null;
+                byte[] pixel_data;
 
-                for (int y = 0; y < data.Height; y++)
+                try
                 {
-                    IntPtr src_ptr = (IntPtr)(y * data.Stride + data.Scan0.ToInt64());
-                    int dest_offset = y * scan_size;
-                    for (int x = 0; x < scan_size; x++)
-                        pixel_data[dest_offset + x] = Marshal.ReadByte(src_ptr, x);
+                    data = test.LockBits(new Rectangle(0, 0, test.Width, test.Height), ImageLockMode.ReadOnly, test.PixelFormat);
+
+                    int scan_size = (data.Width + pixels_per_byte - 1) / pixels_per_byte;
+                    pixel_data = new byte[data.Height * scan_size];
+
+                    for (int y = 0; y < data.Height; y++)
+                    {
+                        IntPtr src_ptr = (IntPtr)(y * data.Stride + data.Scan0.ToInt64());
+                        int dest_offset = y * scan_size;
+                        for (int x = 0; x < scan_size; x++)
+                            pixel_data[dest_offset + x] = Marshal.ReadByte(src_ptr, x);
+                    }
                 }
-            }
-            finally
-            {
-                if (test != null)
+                finally
                 {
-                    if (data != null)
+                    if (test != null && data != null)
+                    {
                         try
                         { test.UnlockBits(data); }
                         catch { }
-
-                    try
-                    { test.Dispose(); }
-                    catch { }
+                    }
                 }
+
+                if (pixel_data == null)
+                    return "--ERROR--";
+
+                byte[] hash = MD5.Create().ComputeHash(pixel_data);
+                return ByteArrayToString(hash);
             }
-
-            if (pixel_data == null)
-                return "--ERROR--";
-
-            byte[] hash = MD5.Create().ComputeHash(pixel_data);
-            return ByteArrayToString(hash);
         }
 
 
-        /*
-			Rotate bitmap in diffent ways, and check the result
-			pixels using MD5
-		*/
+        // Rotate bitmap in diffent ways, and check the result
+        // pixels using MD5
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Rotate()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
-            Bitmap bmp = new Bitmap(sInFile);
-
-            Assert.Equal("312958A3C67402E1299413794988A3", RotateBmp(bmp, RotateFlipType.Rotate90FlipNone));
-            Assert.Equal("BF70D8DA4F1545AEDD77D0296B47AE", RotateBmp(bmp, RotateFlipType.Rotate180FlipNone));
-            Assert.Equal("15AD2ADBDC7090C0EC744D0F7ACE2F", RotateBmp(bmp, RotateFlipType.Rotate270FlipNone));
-            Assert.Equal("2E10FEC1F4FD64ECC51D7CE68AEB18", RotateBmp(bmp, RotateFlipType.RotateNoneFlipX));
-            Assert.Equal("E63204779B566ED01162B90B49BD9E", RotateBmp(bmp, RotateFlipType.Rotate90FlipX));
-            Assert.Equal("B1ECB17B5093E13D04FF55CFCF7763", RotateBmp(bmp, RotateFlipType.Rotate180FlipX));
-            Assert.Equal("71A173882C16755D86F4BC26532374", RotateBmp(bmp, RotateFlipType.Rotate270FlipX));
-
+            using (Bitmap bmp = new Bitmap(sInFile))
+            {
+                Assert.Equal("312958A3C67402E1299413794988A3", RotateBmp(bmp, RotateFlipType.Rotate90FlipNone));
+                Assert.Equal("BF70D8DA4F1545AEDD77D0296B47AE", RotateBmp(bmp, RotateFlipType.Rotate180FlipNone));
+                Assert.Equal("15AD2ADBDC7090C0EC744D0F7ACE2F", RotateBmp(bmp, RotateFlipType.Rotate270FlipNone));
+                Assert.Equal("2E10FEC1F4FD64ECC51D7CE68AEB18", RotateBmp(bmp, RotateFlipType.RotateNoneFlipX));
+                Assert.Equal("E63204779B566ED01162B90B49BD9E", RotateBmp(bmp, RotateFlipType.Rotate90FlipX));
+                Assert.Equal("B1ECB17B5093E13D04FF55CFCF7763", RotateBmp(bmp, RotateFlipType.Rotate180FlipX));
+                Assert.Equal("71A173882C16755D86F4BC26532374", RotateBmp(bmp, RotateFlipType.Rotate270FlipX));
+            }
         }
 
-        /*
-			Rotate 1- and 4-bit bitmaps in different ways and check the
-			resulting pixels using MD5
-		*/
+        // Rotate 1- and 4-bit bitmaps in different ways and check the
+        // resulting pixels using MD5
         [ConditionalFact(Helpers.RecentGdiplusIsAvailable)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Rotate1bit4bit()
@@ -535,12 +517,20 @@ namespace MonoTests.System.Drawing
             StringBuilder md5s = new StringBuilder();
 
             foreach (string file in files)
+            {
                 using (Bitmap bmp = new Bitmap(file))
+                {
                     foreach (RotateFlipType type in Enum.GetValues(typeof(RotateFlipType)))
+                    {
                         md5s.Append(RotateIndexedBmp(bmp, type));
+                    }
+                }
+            }
 
             using (StreamWriter writer = new StreamWriter("/tmp/md5s.txt"))
+            {
                 writer.WriteLine(md5s);
+            }
 
             Assert.Equal(
                 "A4DAF507C92BDE10626BC7B34FEFE5" + // 1-bit RotateNoneFlipNone
@@ -667,11 +657,9 @@ namespace MonoTests.System.Drawing
             return MD5.Create().ComputeHash(pixels);
         }
 
-        /*
-			Tests the LockBitmap functions. Makes a hash of the block of pixels that it returns
-			firsts, changes them, and then using GetPixel does another check of the changes.
-			The results match the .Net framework
-		*/
+        //  Tests the LockBitmap functions. Makes a hash of the block of pixels that it returns
+        // firsts, changes them, and then using GetPixel does another check of the changes.
+        // The results match the .Net framework
         private static byte[] DefaultBitmapHash = new byte[] { 0xD8, 0xD3, 0x68, 0x9C, 0x86, 0x7F, 0xB6, 0xA0, 0x76, 0xD6, 0x00, 0xEF, 0xFF, 0xE5, 0x8E, 0x1B };
         private static byte[] FinalWholeBitmapHash = new byte[] { 0x5F, 0x52, 0x98, 0x37, 0xE3, 0x94, 0xE1, 0xA6, 0x06, 0x6C, 0x5B, 0xF1, 0xA9, 0xC2, 0xA9, 0x43 };
 
@@ -781,10 +769,8 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        /*
-			Tests the LockBitmap and UnlockBitmap functions, specifically the copying
-			of bitmap data in the directions indicated by the ImageLockMode.
-		*/
+        // Tests the LockBitmap and UnlockBitmap functions, specifically the copying
+        // of bitmap data in the directions indicated by the ImageLockMode.
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void LockUnlockBitmap()
         {
@@ -959,8 +945,8 @@ namespace MonoTests.System.Drawing
                         Assert.Equal(icon.Height, copy.Height);
                         Assert.Equal(icon.Width, copy.Width);
                         Assert.Equal(icon.PixelFormat, copy.PixelFormat);
-                        Assert.True(icon.RawFormat.Equals(ImageFormat.Icon));
-                        Assert.True(copy.RawFormat.Equals(ImageFormat.Png));
+                        Assert.Equal(icon.RawFormat, ImageFormat.Icon);
+                        Assert.Equal(copy.RawFormat, ImageFormat.Png);
                     }
                 }
             }
@@ -1441,7 +1427,7 @@ namespace MonoTests.System.Drawing
             Assert.Equal(0, b.Palette.Entries.Length);
             Assert.Equal(size, b.Height);
             Assert.Equal(size, b.Width);
-            Assert.True(b.RawFormat.Equals(ImageFormat.MemoryBmp));
+            Assert.Equal(b.RawFormat, ImageFormat.MemoryBmp);
             Assert.Equal(335888, b.Flags);
         }
 
@@ -1544,6 +1530,7 @@ namespace MonoTests.System.Drawing
                 Assert.True(bitmap.RawFormat.Equals(ImageFormat.Bmp));
                 hbitmap = bitmap.GetHbitmap();
             }
+
             // hbitmap survives original bitmap disposal
             using (Image image = Image.FromHbitmap(hbitmap))
             {
@@ -1552,7 +1539,7 @@ namespace MonoTests.System.Drawing
                 Assert.Equal(183, image.Height);
                 Assert.Equal(173, image.Width);
                 Assert.Equal(335888, image.Flags);
-                Assert.True(image.RawFormat.Equals(ImageFormat.MemoryBmp));
+                Assert.Equal(image.RawFormat, ImageFormat.MemoryBmp);
             }
         }
 
@@ -1568,7 +1555,7 @@ namespace MonoTests.System.Drawing
                 Assert.Equal(183, bitmap.Height);
                 Assert.Equal(173, bitmap.Width);
                 Assert.Equal(73744, bitmap.Flags);
-                Assert.True(bitmap.RawFormat.Equals(ImageFormat.Bmp));
+                Assert.Equal(bitmap.RawFormat, ImageFormat.Bmp);
                 hbitmap = bitmap.GetHbitmap();
             }
             // hbitmap survives original bitmap disposal
@@ -1579,7 +1566,7 @@ namespace MonoTests.System.Drawing
                 Assert.Equal(183, image.Height);
                 Assert.Equal(173, image.Width);
                 Assert.Equal(335888, image.Flags);
-                Assert.True(image.RawFormat.Equals(ImageFormat.MemoryBmp));
+                Assert.Equal(image.RawFormat, ImageFormat.MemoryBmp);
             }
             using (Image image2 = Image.FromHbitmap(hbitmap))
             {
@@ -1588,7 +1575,7 @@ namespace MonoTests.System.Drawing
                 Assert.Equal(183, image2.Height);
                 Assert.Equal(173, image2.Width);
                 Assert.Equal(335888, image2.Flags);
-                Assert.True(image2.RawFormat.Equals(ImageFormat.MemoryBmp));
+                Assert.Equal(image2.RawFormat, ImageFormat.MemoryBmp);
             }
         }
     }
