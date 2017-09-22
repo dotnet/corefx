@@ -45,7 +45,7 @@ namespace System.Text.RegularExpressions
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(Name));
                 }
 
                 if (value.Length == 0)
