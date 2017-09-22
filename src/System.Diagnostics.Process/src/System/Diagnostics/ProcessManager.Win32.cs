@@ -250,8 +250,6 @@ namespace System.Diagnostics
 
     internal static partial class NtProcessInfoHelper
     {
-        private const int AllProcessIds = -1;
-
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
 

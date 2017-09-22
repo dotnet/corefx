@@ -653,6 +653,8 @@ namespace System.Diagnostics
 
     internal static partial class NtProcessInfoHelper
     {
+        private const int AllProcessIds = -1;
+
         private static int GetNewBufferSize(int existingBufferSize, int requiredSize)
         {
             if (requiredSize == 0)
@@ -705,7 +707,7 @@ namespace System.Diagnostics
 
                 // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
                 var processInfoProcessId = pi.UniqueProcessId.ToInt32();
-                Debug.Assert(processInfoProcessId != AllProcessIds, "Any process ID is expected to be zero or greater.");
+                Debug.Assert(processInfoProcessId != AllProcessIds, $"Any process ID is expected to be zero or greater so it should never match our magic number {AllProcessIds}");
                 if (processId == AllProcessIds || processId == processInfoProcessId)
                 {
                     // get information for a process
