@@ -26,13 +26,17 @@ namespace System.Text.RegularExpressions
             MatchTimeout = matchTimeout;
         }
 
-        public string Pattern
-        {
-            get => _pattern;
-            set => _pattern = value ?? throw new ArgumentNullException(nameof(Pattern));
-        }
+        public bool IsPublic { get; set; }
 
-        public RegexOptions Options { get; set; }
+        public TimeSpan MatchTimeout
+        {
+            get => _matchTimeout;
+            set
+            {
+                Regex.ValidateMatchTimeout(value);
+                _matchTimeout = value;
+            }
+        }
 
         public string Name
         {
@@ -62,16 +66,12 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        public bool IsPublic { get; set; }
+        public RegexOptions Options { get; set; }
 
-        public TimeSpan MatchTimeout
+        public string Pattern
         {
-            get => _matchTimeout;
-            set
-            {
-                Regex.ValidateMatchTimeout(value);
-                _matchTimeout = value;
-            }
+            get => _pattern;
+            set => _pattern = value ?? throw new ArgumentNullException(nameof(Pattern));
         }
     }
 }
