@@ -16,6 +16,7 @@ namespace System
     /// Memory represents a contiguous region of arbitrary memory similar to Span.
     /// Unlike Span, it is not a byref-like type.
     /// </summary>
+    [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
     public struct Memory<T>
     {
         // The highest order bit of _index is used to discern whether _arrayOrOwnedMemory is an array or an owned memory
@@ -246,7 +247,20 @@ namespace System
         /// allocates, so should generally be avoided, however it is sometimes
         /// necessary to bridge the gap with APIs written in terms of arrays.
         /// </summary>
-        public T[] ToArray() => Span.ToArray();
+        public T[] ToArray()
+        {
+            if (_index < 0)
+            {
+                Span<T> span = ((OwnedMemory<T>)_arrayOrOwnedMemory).AsSpan().Slice(_index & RemoveOwnedFlagBitMask, _length);
+                return span.ToArray();
+            }
+            else
+            {
+                T[] result = new T[_length];
+                Array.Copy((T[])_arrayOrOwnedMemory, result, _length);
+                return result;
+            }
+        }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
