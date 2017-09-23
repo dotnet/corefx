@@ -1881,7 +1881,7 @@ namespace System
         public bool DangerousTryGetArray(out ArraySegment<T> arraySegment) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct ReadOnlySpan<T>
+    public readonly ref struct ReadOnlySpan<T>
     {
         public static ReadOnlySpan<T> Empty { get { throw null; } }
         public ReadOnlySpan(T[] array) { throw null; }
@@ -2068,7 +2068,7 @@ namespace System
         public static bool TryParse(ReadOnlySpan<char> s, out float result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct Span<T>
+    public readonly ref struct Span<T>
     {
         public static Span<T> Empty { get { throw null; } }
         public Span(T[] array) { throw null; }
@@ -2159,6 +2159,7 @@ namespace System
         public bool Contains(string value, StringComparison comparisonType) { throw null; }
         public static System.String Copy(System.String str) { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
+        public static string Create<TState>(int length, TState state, System.Buffers.SpanAction<char, TState> action) { throw null; }
         public bool EndsWith(char value) { throw null; }
         public bool EndsWith(string value) { throw null; }
         public bool EndsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
@@ -3847,11 +3848,11 @@ namespace System.Buffers
     
     public abstract class OwnedMemory<T> : IDisposable, IRetainable 
     {
-        public Memory<T> AsMemory { get { throw null; } }
+        public Memory<T> Memory { get { throw null; } }
         public abstract bool IsDisposed { get; }
         protected abstract bool IsRetained { get; }
         public abstract int Length { get; }
-        public abstract Span<T> AsSpan();
+        public abstract Span<T> Span { get; }
         public void Dispose() { throw null; }
         protected abstract void Dispose(bool disposing);
         public abstract MemoryHandle Pin();
@@ -3859,6 +3860,11 @@ namespace System.Buffers
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out ArraySegment<T> arraySegment);
     }
+}
+namespace System.Buffers
+{
+    public delegate void SpanAction<T, in TArg>(Span<T> span, TArg arg);
+    public delegate void ReadOnlySpanAction<T, in TArg>(ReadOnlySpan<T> span, TArg arg);
 }
 namespace System.Collections
 {

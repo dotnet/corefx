@@ -7,7 +7,7 @@
 
 namespace System
 {
-    public struct ReadOnlySpan<T>
+    public readonly ref struct ReadOnlySpan<T>
     {
         public static ReadOnlySpan<T> Empty { get { throw null; } }
         public ReadOnlySpan(T[] array) { throw null;}
@@ -39,7 +39,7 @@ namespace System
         public bool TryCopyTo(Span<T> destination) { throw null; }
     }
 
-    public struct Span<T>
+    public readonly ref struct Span<T>
     {
         public static Span<T> Empty { get { throw null; } }
         public Span(T[] array) { throw null;}
@@ -189,11 +189,11 @@ namespace System.Buffers
     
     public abstract class OwnedMemory<T> : IDisposable, IRetainable 
     {
-        public Memory<T> AsMemory { get { throw null; } }
+        public Memory<T> Memory { get { throw null; } }
         public abstract bool IsDisposed { get; }
         protected abstract bool IsRetained { get; }
         public abstract int Length { get; }
-        public abstract Span<T> AsSpan();
+        public abstract Span<T> Span { get; }
         public void Dispose() { throw null; }
         protected abstract void Dispose(bool disposing);
         public abstract MemoryHandle Pin();
