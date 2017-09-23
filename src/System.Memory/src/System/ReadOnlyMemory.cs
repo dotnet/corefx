@@ -235,7 +235,7 @@ namespace System
         {
             if (_index < 0)
             {
-                Span<T> span = ((OwnedMemory<T>)_arrayOrOwnedMemory).AsSpan().Slice(_index & RemoveOwnedFlagBitMask, _length);
+                Span<T> span = ((OwnedMemory<T>)_arrayOrOwnedMemory).Span.Slice(_index & RemoveOwnedFlagBitMask, _length);
                 return span.ToArray();
             }
             else
