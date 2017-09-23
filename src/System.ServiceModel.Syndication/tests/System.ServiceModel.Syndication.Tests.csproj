@@ -10,9 +10,9 @@
     <Compile Include="$(MsBuildThisFileDirectory)\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestFeeds\*.xml">
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.ServiceModel.Syndication">
