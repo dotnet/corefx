@@ -17,13 +17,12 @@ namespace System
             _memory = memory;
         }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Items
+        public MemoryDebugView(ReadOnlyMemory<T> memory)
         {
-            get
-            {
-                return _memory.ToArray();
-            }
+            _memory = memory;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public T[] Items => _memory.ToArray();
     }
 }

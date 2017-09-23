@@ -16,6 +16,7 @@ namespace System
     /// Memory represents a contiguous region of arbitrary memory similar to Span.
     /// Unlike Span, it is not a byref-like type.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
     public struct Memory<T>
     {
@@ -90,6 +91,8 @@ namespace System
             _length = length;
         }
 
+        private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
+
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Memory{T}"/>
         /// </summary>
@@ -114,12 +117,7 @@ namespace System
         /// <summary>
         /// Returns an empty <see cref="Memory{T}"/>
         /// </summary>
-        public static Memory<T> Empty { get; } =
-#if !netstandard11
-            Array.Empty<T>();
-#else
-            new T[0];
-#endif
+        public static Memory<T> Empty { get; } = SpanHelpers.PerTypeValues<T>.EmptyArray;
 
         /// <summary>
         /// The number of items in the memory.
@@ -256,8 +254,9 @@ namespace System
             }
             else
             {
+                if (_length == 0) return SpanHelpers.PerTypeValues<T>.EmptyArray;
                 T[] result = new T[_length];
-                Array.Copy((T[])_arrayOrOwnedMemory, result, _length);
+                Array.Copy((T[])_arrayOrOwnedMemory, _index, result, 0, _length);
                 return result;
             }
         }

@@ -16,7 +16,8 @@ namespace System
     /// ReadOnlyMemory represents a contiguous region of arbitrary similar to ReadOnlySpan.
     /// Unlike ReadOnlySpan, it is not a byref-like type.
     /// </summary>
-    [DebuggerTypeProxy(typeof(ReadOnlyMemoryDebugView<>))]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
     public struct ReadOnlyMemory<T>
     {
         // The highest order bit of _index is used to discern whether _arrayOrOwnedMemory is an array or an owned memory
@@ -86,6 +87,8 @@ namespace System
             _length = length;
         }
 
+        private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
+
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Memory{T}"/>
         /// </summary>
@@ -99,12 +102,7 @@ namespace System
         /// <summary>
         /// Returns an empty <see cref="Memory{T}"/>
         /// </summary>
-        public static ReadOnlyMemory<T> Empty { get; } =
-#if !netstandard11
-            Array.Empty<T>();
-#else
-            new T[0];
-#endif
+        public static ReadOnlyMemory<T> Empty { get; } = SpanHelpers.PerTypeValues<T>.EmptyArray;
 
         /// <summary>
         /// The number of items in the memory.
@@ -243,7 +241,7 @@ namespace System
             else
             {
                 T[] result = new T[_length];
-                Array.Copy((T[])_arrayOrOwnedMemory, result, _length);
+                Array.Copy((T[])_arrayOrOwnedMemory, _index, result, 0, _length);
                 return result;
             }
         }
