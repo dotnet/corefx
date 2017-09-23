@@ -142,13 +142,13 @@ namespace System.Net.Primitives.Functional.Tests
         {
             long l1 = (long)0x1350;
             long l2 = (long)0x5013000000000000;
-            long l3 = (long)0x0123456789ABCDEF;
-            long l4 = (long)0xFEDCBA9876543210;
+            long l3 = (long)0x1122334455667788;
+            long l4 = unchecked((long)0x8877665544332211);
 
             int i1 = (int)0x1350;
             int i2 = (int)0x50130000;
-            int i3 = (int)0x01234567;
-            int i4 = (int)0x76543210;
+            int i3 = (int)0x11223344;
+            int i4 = (int)0x44332211;
 
             short s1 = (short)0x1350;
             short s2 = (short)0x5013;
@@ -156,7 +156,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(l2, IPAddress.HostToNetworkOrder(l1));
             Assert.Equal(l4, IPAddress.HostToNetworkOrder(l3));
             Assert.Equal(i2, IPAddress.HostToNetworkOrder(i1));
-            Assert.Equal(l4, IPAddress.HostToNetworkOrder(l3));
+            Assert.Equal(i4, IPAddress.HostToNetworkOrder(i3));
             Assert.Equal(s2, IPAddress.HostToNetworkOrder(s1));
 
             Assert.Equal(l1, IPAddress.NetworkToHostOrder(l2));
