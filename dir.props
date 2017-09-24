@@ -210,13 +210,9 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   
-  <!-- Set up language configuration -->
+  <!-- Language configuration -->
   <PropertyGroup>
     <LangVersion>latest</LangVersion> <!-- default to allowing all language features -->
-  </PropertyGroup>
-  
-  <!-- Set up handling of build warnings -->
-  <PropertyGroup>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
