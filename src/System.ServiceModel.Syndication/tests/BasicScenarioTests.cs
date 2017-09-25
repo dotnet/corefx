@@ -21,7 +21,7 @@ namespace Microsoft.ServiceModel.Syndication.Tests
         public static void SyndicationFeed_CreateNewFeed()
         {
 
-            string filePath = "FirstFeedEver.xml";
+            string filePath = Path.GetTempFileName();
 
             try
             {
@@ -50,7 +50,7 @@ namespace Microsoft.ServiceModel.Syndication.Tests
         [Fact]
         public static void SyndicationFeed_Load_Write_RSS_Feed()
         {
-            string path = "SyndicationFeed-Load-Write.xml";
+            string path = Path.GetTempFileName();
 
             try
             {
@@ -80,14 +80,14 @@ namespace Microsoft.ServiceModel.Syndication.Tests
         [Fact]
         public static void SyndicationFeed_Load_Write_RSS_Feed_Async()
         {
-            string path = "SyndicationFeed-Load-Write-Async.xml";
+            string path = Path.GetTempFileName();
 
             try
             {
                 // *** SETUP *** \\\
                 XmlReaderSettings settingsReader = new XmlReaderSettings();
                 settingsReader.Async = true;
-                XmlReader xmlr = XmlReader.Create(@"RssSpecExample.xml",settingsReader);
+                XmlReader xmlr = XmlReader.Create(@"rssSpecExample.xml",settingsReader);
                 SyndicationFeed sf;
                 Task < SyndicationFeed > rss = null;
                 CancellationToken ct = new CancellationToken();
@@ -115,14 +115,14 @@ namespace Microsoft.ServiceModel.Syndication.Tests
             finally
             {
                 // *** CLEANUP *** \\
-                //File.Delete(path);
+                File.Delete(path);
             }
         }
         
         [Fact]
         public static void SyndicationFeed_Load_Write_Atom_Feed()
         {
-            string path = "SyndicationFeed-Load-Write-Atom.xml";
+            string path = Path.GetTempFileName();
 
             try
             {
@@ -154,7 +154,7 @@ namespace Microsoft.ServiceModel.Syndication.Tests
         [Fact]
         public static void SyndicationFeed_Load_Write_Atom_Feed_Async()
         {
-            string path = "SyndicationFeed-Load-Write-Atom-Async.xml";
+            string path = Path.GetTempFileName();
 
             try
             {
@@ -185,15 +185,15 @@ namespace Microsoft.ServiceModel.Syndication.Tests
             finally
             {
                 // *** CLEANUP *** \\
-                //File.Delete(path);
+                File.Delete(path);
             }
         }
 
         [Fact]
         public static void SyndicationFeed_Write_RSS_Atom()
         {
-            string RssPath = "RssFeedWriteTest.xml";
-            string AtomPath = "AtomFeedWriteTest.xml";
+            string RssPath = Path.GetTempFileName();
+            string AtomPath = Path.GetTempFileName();
 
             try
             {
@@ -278,7 +278,7 @@ namespace Microsoft.ServiceModel.Syndication.Tests
             SyndicationFeed sf = new SyndicationFeed();
             string feedTitle = "Feed title";
             string imageTitle = "Image title";
-            string resultPath = "Rss20CustomImageDataFeedWritten.xml";
+            string resultPath = Path.GetTempFileName();
 
             sf.Title = new TextSyndicationContent(feedTitle);
             sf.ImageTitle = new TextSyndicationContent(imageTitle);
@@ -700,10 +700,3 @@ namespace Microsoft.ServiceModel.Syndication.Tests
 
     }
 }
-
-#if TagsForTests
-// *** SETUP *** \\
-// *** EXECUTE *** \\
-// *** ASSERT *** \\
-// *** CLEANUP *** \\
-#endif
