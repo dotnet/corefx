@@ -34,6 +34,7 @@ namespace System.Tests
         public static void IList_GetSetItem_Invalid()
         {
             IList iList = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var x = iList[-1];
             Assert.Throws<IndexOutOfRangeException>(() => iList[-1]); // Index < 0
             Assert.Throws<IndexOutOfRangeException>(() => iList[iList.Count]); // Index >= list.Count
 
