@@ -9,7 +9,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if FEATURE_COMPILED
 using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.Serialization;
 using System.Threading;
 
@@ -214,12 +216,15 @@ namespace System.Text.RegularExpressions
                 capslist = cached._capslist;
                 capsize = cached._capsize;
                 _code = cached._code;
+#if FEATURE_COMPILED
                 factory = cached._factory;
+#endif
                 _runnerref = cached._runnerref;
                 _replref = cached._replref;
                 _refsInitialized = true;
             }
 
+#if FEATURE_COMPILED
             // if the compile option is set, then compile the code if it's not already
             if (UseOptionC() && factory == null)
             {
@@ -232,6 +237,7 @@ namespace System.Text.RegularExpressions
 
                 _code = null;
             }
+#endif
         }
 
         // Note: "&lt;" is the XML entity for smaller ("<").
@@ -293,6 +299,7 @@ namespace System.Text.RegularExpressions
             throw new InvalidCastException(SR.Format(SR.IllegalDefaultRegexMatchTimeoutInAppDomain, DefaultMatchTimeout_ConfigKeyName, defaultMatchTimeoutObj));
         }
 
+#if FEATURE_COMPILED
         /// <summary>
         /// This method is here for perf reasons: if the call to RegexCompiler is NOT in the 
         /// Regex constructor, we don't load RegexCompiler and its reflection classes when
@@ -303,6 +310,7 @@ namespace System.Text.RegularExpressions
         {
             return RegexCompiler.Compile(code, roptions);
         }
+#endif
 
         /// <summary>
         /// Escapes a minimal set of metacharacters (\, *, +, ?, |, {, [, (, ), ^, $, ., #, and
@@ -1136,7 +1144,9 @@ namespace System.Text.RegularExpressions
         internal Hashtable _caps;
         internal Hashtable _capnames;
         internal string[] _capslist;
+#if FEATURE_COMPILED
         internal RegexRunnerFactory _factory;
+#endif
         internal int _capsize;
         internal ExclusiveReference _runnerref;
         internal SharedReference _replref;
@@ -1155,11 +1165,13 @@ namespace System.Text.RegularExpressions
             _replref = repl;
         }
 
+#if FEATURE_COMPILED
         internal void AddCompiled(RegexRunnerFactory factory)
         {
             _factory = factory;
             _code = null;
         }
+#endif
     }
 
     /*

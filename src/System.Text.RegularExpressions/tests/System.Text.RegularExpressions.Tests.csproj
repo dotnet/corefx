@@ -29,12 +29,15 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
-    <Compile Include="CaptureCollectionTests.netcoreapp.cs" />
-    <Compile Include="GroupCollectionTests.netcoreapp.cs" />
-    <Compile Include="MatchCollectionTests.netcoreapp.cs" />
-    <Compile Include="PrecompiledRegexScenarioTest.cs" />
+  <!-- Test files dependent on compiled feature -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="RegexCompilationInfoTests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Compile Include="CaptureCollectionTests2.cs" />
+    <Compile Include="GroupCollectionTests2.cs" />
+    <Compile Include="MatchCollectionTests2.cs" />
+    <Compile Include="PrecompiledRegexScenarioTest.cs" />
     <Compile Include="RegexGroupNameTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>

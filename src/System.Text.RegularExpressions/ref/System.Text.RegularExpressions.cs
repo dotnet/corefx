@@ -196,17 +196,6 @@ namespace System.Text.RegularExpressions
         protected bool UseOptionR() { throw null; }
         protected internal static void ValidateMatchTimeout(System.TimeSpan matchTimeout) { }
     }
-    public partial class RegexCompilationInfo
-    {
-        public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic) { }
-        public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic, TimeSpan matchTimeout) { }
-        public bool IsPublic { get; set; }
-        public TimeSpan MatchTimeout { get; set; }
-        public string Name { get; set; }
-        public string Namespace { get; set; }
-        public RegexOptions Options { get; set; }
-        public string Pattern { get; set; }
-    }
     public partial class RegexMatchTimeoutException : System.TimeoutException, System.Runtime.Serialization.ISerializable
     {
         public RegexMatchTimeoutException() { }
