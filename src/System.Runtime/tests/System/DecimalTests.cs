@@ -1576,46 +1576,26 @@ namespace System.Tests
             public BigDecimal Div(BigDecimal value, out bool overflow)
             {
                 int scale = Scale - value.Scale;
-                BigInteger dividend = BigInteger.Abs(Integer), divisor = BigInteger.Abs(value.Integer);
+                var dividend = Integer;
                 if (scale < 0)
                 {
                     dividend *= Pow10[-scale];
                     scale = 0;
                 }
 
-                var quo = BigInteger.DivRem(dividend, divisor, out var remainder);
-                if (!remainder.IsZero)
+                var quo = BigInteger.DivRem(dividend, value.Integer, out var remainder);
+                if (remainder.IsZero)
+                    overflow = BigInteger.Abs(quo) > MaxInteger;
+                else
                 {
                     // We have computed a quotient based on the natural scale ( <dividend scale> - <divisor scale> ).
-                    // We have a non-zero remainder, so now we should increase the scale if possible to include more quotient bits.
-                    do
-                    {
-                        if (scale == 28 || quo > MaxIntegerDiv10)
-                        {
-                            remainder <<= 1;
-                            if (remainder > divisor || !quo.IsEven && remainder == divisor)
-                                quo++;
-                            break;
-                        }
+                    // We have a non-zero remainder, so now we increase the scale to DEC_SCALE_MAX+1 to include more quotient bits.
+                    var pow = Pow10[29 - scale];
+                    quo *= pow;
+                    quo += BigInteger.DivRem(remainder * pow, value.Integer, out remainder);
+                    scale = 29;
 
-                        var incScale = Math.Min(28 - scale, Math.Max(1, -ScaleOverMaxInteger(quo)));
-                        scale += incScale;
-                        var pow = Pow10[incScale];
-                        quo *= pow;
-                        quo += BigInteger.DivRem(remainder * pow, divisor, out remainder);
-                        if (quo > MaxInteger)
-                            break;
-                    }
-                    while (!remainder.IsZero);
-
-                    // If the result doesn't fit in 96 bits, but is scaled, then round it down.
-                    if (scale > 0 && quo > MaxInteger)
-                    {
-                        scale--;
-                        quo = BigInteger.DivRem(quo, 10, out var tmp);
-                        if (tmp > 5 || (!quo.IsEven || !remainder.IsZero) && tmp == 5)
-                            quo++;
-                    }
+                    overflow = ScaleResult(ref quo, ref scale, !remainder.IsZero);
 
                     // Unscale the result (removes extra zeroes).
                     while (scale > 0 && quo.IsEven)
@@ -1627,15 +1607,10 @@ namespace System.Tests
                         scale--;
                     }
                 }
-
-                overflow = quo > MaxInteger;
-                if (Integer.Sign * value.Integer.Sign < 0)
-                    quo = -quo;
                 return new BigDecimal(quo, (byte)scale);
             }
 
             static readonly BigInteger MaxInteger = (new BigInteger(ulong.MaxValue) << 32) | uint.MaxValue;
-            static readonly BigInteger MaxIntegerDiv10 = MaxInteger / 10;
             static readonly BigInteger MaxInteger32 = uint.MaxValue;
             static readonly double Log2To10 = Math.Log(2) / Math.Log(10);
 
@@ -1648,7 +1623,7 @@ namespace System.Tests
             /// See if we need to scale the result to fit it in 96 bits.
             /// Perform needed scaling. Adjust scale factor accordingly.
             /// </summary>
-            static bool ScaleResult(ref BigInteger res, ref int scale)
+            static bool ScaleResult(ref BigInteger res, ref int scale, bool sticky = false)
             {
                 int newScale = 0;
                 var abs = BigInteger.Abs(res);
@@ -1669,7 +1644,6 @@ namespace System.Tests
                     // This is not guaranteed to bring the number within 96 bits -- it could be 1 power of 10 short.
                     scale -= newScale;
                     var pow = Pow10[newScale];
-                    var sticky = false;
                     while (true)
                     {
                         abs = BigInteger.DivRem(abs, pow, out var remainder);
@@ -1680,7 +1654,7 @@ namespace System.Tests
                                 return true;
                             pow = 10;
                             scale--;
-                            sticky = !remainder.IsZero;
+                            sticky |= !remainder.IsZero;
                             continue;
                         }
 
