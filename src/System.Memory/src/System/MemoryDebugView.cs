@@ -21,6 +21,19 @@ namespace System
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Items => _memory.ToArray();
+        public T[] Items
+        {
+            // This is a work around since we cannot use _memory.ToArray() due to VSTS bug 286592
+            get
+            {
+                if (_memory.DangerousTryGetArray(out ArraySegment<T> segment))
+                {
+                    T[] array = new T[_memory.Length];
+                    Array.Copy(segment.Array, segment.Offset, array, 0, array.Length);
+                    return array;
+                }
+                return SpanHelpers.PerTypeValues<T>.EmptyArray;
+            }
+        }
     }
 }

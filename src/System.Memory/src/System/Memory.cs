@@ -91,6 +91,7 @@ namespace System
             _length = length;
         }
 
+        //Debugger Display = {T[length]}
         private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
 
         /// <summary>
@@ -245,21 +246,7 @@ namespace System
         /// allocates, so should generally be avoided, however it is sometimes
         /// necessary to bridge the gap with APIs written in terms of arrays.
         /// </summary>
-        public T[] ToArray()
-        {
-            if (_index < 0)
-            {
-                Span<T> span = ((OwnedMemory<T>)_arrayOrOwnedMemory).Span.Slice(_index & RemoveOwnedFlagBitMask, _length);
-                return span.ToArray();
-            }
-            else
-            {
-                if (_length == 0) return SpanHelpers.PerTypeValues<T>.EmptyArray;
-                T[] result = new T[_length];
-                Array.Copy((T[])_arrayOrOwnedMemory, _index, result, 0, _length);
-                return result;
-            }
-        }
+        public T[] ToArray() => Span.ToArray();
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
