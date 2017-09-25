@@ -1296,128 +1296,140 @@ namespace System.Tests
             Assert.Equal(expected, --d);
         }
 
-        [Fact]
-        public static void RandomBigInteger_Compare()
+        public static class BigIntegerCompare
         {
-            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
-            for (int i = 0; i < decimalValues.Length; i++)
+            [Fact]
+            public static void Test()
             {
-                decimal d1 = decimalValues[i];
-                BigDecimal b1 = bigDecimals[i];
-                for (int j = 0; j < decimalValues.Length; j++)
+                decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+                for (int i = 0; i < decimalValues.Length; i++)
                 {
-                    decimal d2 = decimalValues[j];
-                    int expected = b1.CompareTo(bigDecimals[j]);
-                    int actual = d1.CompareTo(d2);
-                    if (expected != actual)
-                        throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " CMP " + d2);
+                    decimal d1 = decimalValues[i];
+                    BigDecimal b1 = bigDecimals[i];
+                    for (int j = 0; j < decimalValues.Length; j++)
+                    {
+                        decimal d2 = decimalValues[j];
+                        int expected = b1.CompareTo(bigDecimals[j]);
+                        int actual = d1.CompareTo(d2);
+                        if (expected != actual)
+                            throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " CMP " + d2);
+                    }
                 }
             }
         }
 
-        [Fact]
-        public static void RandomBigInteger_Add()
+        public static class BigIntegerAdd
         {
-            int overflowBudget = 1000;
-            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
-            for (int i = 0; i < decimalValues.Length; i++)
+            [Fact]
+            public static void Test()
             {
-                decimal d1 = decimalValues[i];
-                BigDecimal b1 = bigDecimals[i];
-                for (int j = 0; j < decimalValues.Length; j++)
+                int overflowBudget = 1000;
+                decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+                for (int i = 0; i < decimalValues.Length; i++)
                 {
-                    decimal d2 = decimalValues[j];
-                    BigDecimal expected = b1.Add(bigDecimals[j], out bool expectedOverflow);
-                    if (expectedOverflow)
+                    decimal d1 = decimalValues[i];
+                    BigDecimal b1 = bigDecimals[i];
+                    for (int j = 0; j < decimalValues.Length; j++)
                     {
-                        if (--overflowBudget < 0)
-                            continue;
-                        try
+                        decimal d2 = decimalValues[j];
+                        BigDecimal expected = b1.Add(bigDecimals[j], out bool expectedOverflow);
+                        if (expectedOverflow)
                         {
-                            decimal actual = d1 + d2;
-                            throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " + " + d2);
+                            if (--overflowBudget < 0)
+                                continue;
+                            try
+                            {
+                                decimal actual = d1 + d2;
+                                throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " + " + d2);
+                            }
+                            catch (OverflowException) { }
                         }
-                        catch (OverflowException) { }
+                        else
+                            unsafe
+                            {
+                                decimal actual = d1 + d2;
+                                if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
+                                    throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " + " + d2);
+                            }
                     }
-                    else
-                        unsafe
-                        {
-                            decimal actual = d1 + d2;
-                            if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
-                                throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " + " + d2);
-                        }
                 }
             }
         }
 
-        [Fact]
-        public static void RandomBigInteger_Mul()
+        public static class BigIntegerMul
         {
-            int overflowBudget = 1000;
-            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
-            for (int i = 0; i < decimalValues.Length; i++)
+            [Fact]
+            public static void Test()
             {
-                decimal d1 = decimalValues[i];
-                BigDecimal b1 = bigDecimals[i];
-                for (int j = 0; j < decimalValues.Length; j++)
+                int overflowBudget = 1000;
+                decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+                for (int i = 0; i < decimalValues.Length; i++)
                 {
-                    decimal d2 = decimalValues[j];
-                    BigDecimal expected = b1.Mul(bigDecimals[j], out bool expectedOverflow);
-                    if (expectedOverflow)
+                    decimal d1 = decimalValues[i];
+                    BigDecimal b1 = bigDecimals[i];
+                    for (int j = 0; j < decimalValues.Length; j++)
                     {
-                        if (--overflowBudget < 0)
-                            continue;
-                        try
+                        decimal d2 = decimalValues[j];
+                        BigDecimal expected = b1.Mul(bigDecimals[j], out bool expectedOverflow);
+                        if (expectedOverflow)
                         {
-                            decimal actual = d1 * d2;
-                            throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " * " + d2);
+                            if (--overflowBudget < 0)
+                                continue;
+                            try
+                            {
+                                decimal actual = d1 * d2;
+                                throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " * " + d2);
+                            }
+                            catch (OverflowException) { }
                         }
-                        catch (OverflowException) { }
+                        else
+                            unsafe
+                            {
+                                decimal actual = d1 * d2;
+                                if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
+                                    throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " * " + d2);
+                            }
                     }
-                    else
-                        unsafe
-                        {
-                            decimal actual = d1 * d2;
-                            if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
-                                throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " * " + d2);
-                        }
                 }
             }
         }
 
-        [Fact]
-        public static void RandomBigInteger_Div()
+        public static class BigIntegerDiv
         {
-            int overflowBudget = 1000;
-            decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
-            for (int i = 0; i < decimalValues.Length; i++)
+            [Fact]
+            public static void Test()
             {
-                decimal d1 = decimalValues[i];
-                BigDecimal b1 = bigDecimals[i];
-                for (int j = 0; j < decimalValues.Length; j++)
+                int overflowBudget = 1000;
+                decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
+                for (int i = 0; i < decimalValues.Length; i++)
                 {
-                    decimal d2 = decimalValues[j];
-                    if (Math.Sign(d2) == 0)
-                        continue;
-                    BigDecimal expected = b1.Div(bigDecimals[j], out bool expectedOverflow);
-                    if (expectedOverflow)
+                    decimal d1 = decimalValues[i];
+                    BigDecimal b1 = bigDecimals[i];
+                    for (int j = 0; j < decimalValues.Length; j++)
                     {
-                        if (--overflowBudget < 0)
+                        decimal d2 = decimalValues[j];
+                        if (Math.Sign(d2) == 0)
                             continue;
-                        try
+                        BigDecimal expected = b1.Div(bigDecimals[j], out bool expectedOverflow);
+                        if (expectedOverflow)
                         {
-                            decimal actual = d1 / d2;
-                            throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " / " + d2);
+                            if (--overflowBudget < 0)
+                                continue;
+                            try
+                            {
+                                decimal actual = d1 / d2;
+                                throw new Xunit.Sdk.AssertActualExpectedException(typeof(OverflowException), actual, d1 + " / " + d2);
+                            }
+                            catch (OverflowException) { }
                         }
-                        catch (OverflowException) { }
+                        else
+                            unsafe
+                            {
+                                decimal actual = d1 / d2;
+                                if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
+                                    throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " / " + d2);
+                            }
                     }
-                    else
-                        unsafe
-                        {
-                            decimal actual = d1 / d2;
-                            if (expected.Scale != (byte)(*(uint*)&actual >> BigDecimal.ScaleShift) || expected.CompareTo(new BigDecimal(actual)) != 0)
-                                throw new Xunit.Sdk.AssertActualExpectedException(expected, actual, d1 + " / " + d2);
-                        }
                 }
             }
         }
