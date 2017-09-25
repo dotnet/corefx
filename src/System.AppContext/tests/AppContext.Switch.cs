@@ -10,6 +10,12 @@ namespace System.Tests
     public partial class AppContextTests
     {
         [Fact]
+        public void ForcedCrash()
+        {
+            Marshal.StructureToPtr(10, (IntPtr)10, true);
+        }
+
+        [Fact]
         public void SwitchNotFound()
         {
             string switchName = GetSwitchName();
