@@ -21,6 +21,9 @@ namespace System
         public static bool IsDebian => false;
         public static bool IsDebian8 => false;
         public static bool IsUbuntu1404 => false;
+        public static bool IsUbuntu1604 => false;
+        public static bool IsUbuntu1704 => false;
+        public static bool IsUbuntu1710 => false;
         public static bool IsCentos7 => false;
         public static bool IsTizen => false;
         public static bool IsNotFedoraOrRedHatOrCentos => true;
@@ -43,6 +46,8 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16215;
         public static bool IsWindows10Version16251OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16251;
+        public static bool IsWindowsRedStone2 => // Creators Update version 
+            GetWindowsVersion() == 10 && (GetWindowsBuildNumber() / 1000) == 15; // any build with 15xxx. e.g 15063
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  

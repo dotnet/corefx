@@ -39,6 +39,7 @@ namespace System
         public static bool IsReflectionEmitSupported;
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static System.PlatformDetection.Range[] FrameworkRanges { get { throw null; } }
+        public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
         public static bool IsCentos7 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
@@ -76,11 +77,15 @@ namespace System
         public static Version ICUVersion { get { return null; } }
         public static bool IsUbuntu { get { throw null; } }
         public static bool IsUbuntu1404 { get { throw null; } }
+        public static bool IsUbuntu1604 { get { throw null; } }
+        public static bool IsUbuntu1704 { get { throw null; } }
+        public static bool IsUbuntu1710 { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10InsiderPreviewBuild16215OrGreater { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } }
         public static bool IsWindows10Version16251OrGreater { get { throw null; } }
         public static bool IsWindows10Version1703OrGreater { get { throw null; } }
+        public static bool IsWindowsRedStone2 { get { throw null; } }
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
         public static bool IsWindowsAndElevated { get { throw null; } }
@@ -129,6 +134,7 @@ namespace System.Diagnostics
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, string arg5, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<System.Threading.Tasks.Task<int>> method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, System.Threading.Tasks.Task<int>> method, string arg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {

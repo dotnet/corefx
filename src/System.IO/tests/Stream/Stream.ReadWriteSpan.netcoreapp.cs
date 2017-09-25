@@ -117,7 +117,7 @@ namespace System.IO.Tests
 
             using (var totalNativeMemory = new NativeOwnedMemory(30))
             {
-                Memory<byte> totalMemory = totalNativeMemory.AsMemory;
+                Memory<byte> totalMemory = totalNativeMemory.Memory;
                 Memory<byte> targetMemory = totalMemory.Slice(5, 20);
 
                 Assert.Equal(10, await s.ReadAsync(targetMemory));
@@ -176,107 +176,13 @@ namespace System.IO.Tests
 
             using (var nativeMemory = new NativeOwnedMemory(10))
             {
-                Memory<byte> memory = nativeMemory.AsMemory;
+                Memory<byte> memory = nativeMemory.Memory;
                 memory.Span[2] = 0;
                 memory.Span[3] = 1;
                 memory.Span[4] = 2;
                 await s.WriteAsync(memory.Slice(2, 3));
                 Assert.True(writeInvoked);
                 writeInvoked = false;
-            }
-        }
-
-        private sealed class NativeOwnedMemory : OwnedMemory<byte>
-        {
-            private readonly int _length;
-            private IntPtr _ptr;
-            private int _retainedCount;
-            private bool _disposed;
-
-            public NativeOwnedMemory(int length)
-            {
-                _length = length;
-                _ptr = Marshal.AllocHGlobal(length);
-            }
-
-            public override bool IsDisposed
-            {
-                get
-                {
-                    lock (this)
-                    {
-                        return _disposed && _retainedCount == 0;
-                    }
-                }
-            }
-
-            public override int Length => _length;
-
-            protected override bool IsRetained
-            {
-                get
-                {
-                    lock (this)
-                    {
-                        return _retainedCount > 0;
-                    }
-                }
-            }
-
-            public override unsafe Span<byte> AsSpan() => new Span<byte>((void*)_ptr, _length);
-
-            public override unsafe MemoryHandle Pin() => new MemoryHandle(this, (void*)_ptr);
-
-            public override bool Release()
-            {
-                lock (this)
-                {
-                    if (_retainedCount > 0)
-                    {
-                        _retainedCount--;
-                        if (_retainedCount == 0)
-                        {
-                            if (_disposed)
-                            {
-                                Marshal.FreeHGlobal(_ptr);
-                                _ptr = IntPtr.Zero;
-                            }
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-
-            public override void Retain()
-            {
-                lock (this)
-                {
-                    if (_retainedCount == 0 && _disposed)
-                    {
-                        throw new Exception();
-                    }
-                    _retainedCount++;
-                }
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                lock (this)
-                {
-                    _disposed = true;
-                    if (_retainedCount == 0)
-                    {
-                        Marshal.FreeHGlobal(_ptr);
-                        _ptr = IntPtr.Zero;
-                    }
-                }
-            }
-
-            protected override bool TryGetArray(out ArraySegment<byte> arraySegment)
-            {
-                arraySegment = default(ArraySegment<byte>);
-                return false;
             }
         }
     }

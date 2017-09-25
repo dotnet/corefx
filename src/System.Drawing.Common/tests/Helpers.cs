@@ -13,6 +13,8 @@ namespace System.Drawing
     public static class Helpers
     {        
         public const string GdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetGdiplusIsAvailable);
+        public const string RecentGdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetRecentGdiPlusIsAvailable);
+        public const string GdiPlusIsAvailableNotRedhat73 = nameof(Helpers) + "." + nameof(GetGdiPlusIsAvailableNotRedhat73);
         public const string AnyInstalledPrinters = nameof(Helpers) + "." + nameof(IsAnyInstalledPrinters);
 
         public static bool GetGdiplusIsAvailable()
@@ -23,14 +25,43 @@ namespace System.Drawing
             }
             else
             {
-                IntPtr nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
-                if (nativeLib == IntPtr.Zero)
+                IntPtr nativeLib;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+                }
+                else
+                {
+                    nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                    if (nativeLib == IntPtr.Zero)
+                    {
+                        nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    }
                 }
 
                 return nativeLib != IntPtr.Zero;
             }
+        }
+
+        public static bool GetGdiPlusIsAvailableNotRedhat73()
+        {
+            if (PlatformDetection.IsRedHat)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
+        }
+
+        public static bool GetRecentGdiPlusIsAvailable()
+        {
+            // CentOS 7, RHEL 7 and Ubuntu 14.04 are running outdated versions of libgdiplus
+            if (PlatformDetection.IsCentos7 || PlatformDetection.IsRedHat || PlatformDetection.IsUbuntu1404)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
         }
 
         public static bool IsAnyInstalledPrinters()
