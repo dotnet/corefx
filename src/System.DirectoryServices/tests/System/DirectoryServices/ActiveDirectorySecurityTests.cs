@@ -13,6 +13,7 @@ namespace System.DirectoryServices.Tests
         public void Ctor_Default()
         {
             var security = new ActiveDirectorySecurity();
+            Assert.Equal(true, false);
             Assert.Equal(typeof(ActiveDirectoryRights), security.AccessRightType);
             Assert.Equal(typeof(ActiveDirectoryAccessRule), security.AccessRuleType);
             Assert.Equal(typeof(ActiveDirectoryAuditRule), security.AuditRuleType);

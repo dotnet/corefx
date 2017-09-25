@@ -75,6 +75,7 @@ namespace System.DirectoryServices.Tests
         [InlineData(1)]
         public void Ctor_InvalidAdsObject_ThrowsArgumentException(object adsObject)
         {
+            var x = new DirectoryEntry(adsObject);
             AssertExtensions.Throws<ArgumentException>(null, () => new DirectoryEntry(adsObject));
         }
 
