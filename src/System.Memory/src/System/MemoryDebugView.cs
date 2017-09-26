@@ -24,7 +24,7 @@ namespace System
         public T[] Items
         {
             // This is a work around since we cannot use _memory.ToArray() due to
-            // VSTS bug 286592: https://devdiv.visualstudio.com/DevDiv/_workitems?id=286592
+            // https://devdiv.visualstudio.com/DevDiv/_workitems?id=286592
             get
             {
                 if (_memory.DangerousTryGetArray(out ArraySegment<T> segment))
