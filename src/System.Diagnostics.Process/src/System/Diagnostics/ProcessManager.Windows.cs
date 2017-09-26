@@ -44,6 +44,16 @@ namespace System.Diagnostics
             return Array.IndexOf(GetProcessIds(machineName), processId) >= 0;
         }
 
+        /// <summary>Gets process infos for each process on the specified machine.</summary>
+        /// <param name="machineName">The target machine.</param>
+        /// <returns>An array of process infos, one per found process.</returns>
+        public static ProcessInfo[] GetProcessInfos(string machineName)
+        {
+            return IsRemoteMachine(machineName) ?
+                NtProcessManager.GetProcessInfos(machineName, isRemoteMachine: true) :
+                NtProcessInfoHelper.GetProcessInfos();
+        }
+
         /// <summary>Gets the ProcessInfo for the specified process ID on the specified machine.</summary>
         /// <param name="processId">The process ID.</param>
         /// <param name="machineName">The machine name.</param>
@@ -64,7 +74,7 @@ namespace System.Diagnostics
             }
             else
             {
-                // local case: we attempt to get the matching (by pid) process only
+                // local case: do not use performance counter and also attempt to get the matching (by pid) process only
                 ProcessInfo[] processInfos = NtProcessInfoHelper.GetProcessInfos(processId);
                 if (processInfos.Length == 1)
                 {
@@ -649,7 +659,6 @@ namespace System.Diagnostics
             ThreadWaitReason
         }
     }
-
 
     internal static partial class NtProcessInfoHelper
     {

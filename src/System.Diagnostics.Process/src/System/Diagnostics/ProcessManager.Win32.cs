@@ -18,16 +18,6 @@ namespace System.Diagnostics
             MainWindowFinder finder = new MainWindowFinder();
             return finder.FindMainWindow(processId);
         }
-
-        /// <summary>Gets process infos for each process on the specified machine.</summary>
-        /// <param name="machineName">The target machine.</param>
-        /// <returns>An array of process infos, one per found process.</returns>
-        public static ProcessInfo[] GetProcessInfos(string machineName)
-        {
-            return IsRemoteMachine(machineName) ?
-                NtProcessManager.GetProcessInfos(machineName, isRemoteMachine: true) :
-                NtProcessInfoHelper.GetProcessInfos(); // Do not use performance counter for local machine
-        }
     }
 
     internal sealed class MainWindowFinder 
