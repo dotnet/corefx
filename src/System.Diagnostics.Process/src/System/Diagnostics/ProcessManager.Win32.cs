@@ -253,7 +253,12 @@ namespace System.Diagnostics
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
 
-        public static ProcessInfo[] GetProcessInfos(int processId = AllProcessIds)
+        public static ProcessInfo[] GetProcessInfos()
+        {
+            return GetProcessInfos(AllProcessIds);
+        }
+
+        public static ProcessInfo[] GetProcessInfos(int processId)
         {
             int requiredSize = 0;
             int status;
