@@ -25,6 +25,7 @@
     <Compile Include="Regex.Split.Tests.cs" />
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
+    <Compile Include="RegexCompilationHelper.cs" />
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
