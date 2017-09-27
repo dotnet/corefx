@@ -1093,13 +1093,9 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => bitmap.SetResolution(1, 1));
         }
 
-        public static IEnumerable<object[]> LockBits_TestData()
+        public static IEnumerable<object[]> LockBits_NotUnix_TestData()
         {
             Bitmap bitmap() => new Bitmap(2, 2, PixelFormat.Format32bppArgb);
-            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb, 8, 1 };
-            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb, 8, 3 };
-            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb, 8, 2 };
-
             yield return new object[] { bitmap(), new Rectangle(1, 1, 1,1), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb, 8, 1 };
             yield return new object[] { bitmap(), new Rectangle(1, 1, 1, 1), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb, 8, 3 };
             yield return new object[] { bitmap(), new Rectangle(1, 1, 1, 1), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb, 8, 2 };
@@ -1108,6 +1104,18 @@ namespace System.Drawing.Tests
 
             yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.WriteOnly, PixelFormat.Format16bppGrayScale, 4, 65538 };
 
+            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed, 100, 65537 };
+            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed, 100, 65539 };
+            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed, 100, 65538 };
+        }
+
+        public static IEnumerable<object[]> LockBits_TestData()
+        {
+            Bitmap bitmap() => new Bitmap(2, 2, PixelFormat.Format32bppArgb);
+            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb, 8, 1 };
+            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb, 8, 3 };
+            yield return new object[] { bitmap(), new Rectangle(0, 0, 2, 2), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb, 8, 2 };
+
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb, 400, 1 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb, 400, 3 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb, 400, 2 };
@@ -1115,10 +1123,6 @@ namespace System.Drawing.Tests
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb, 300, 65537 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, 300, 65539 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb, 300, 65538 };
-
-            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed, 100, 65537 };
-            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed, 100, 65539 };
-            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed, 100, 65538 };
 
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format24bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb, 300, 1 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format24bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, 300, 3 };
@@ -1145,6 +1149,19 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(LockBits_TestData))]
         public void LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
+        {
+            Do_LockBits_Invoke_Success(bitmap, rectangle, lockMode, pixelFormat, expectedStride, expectedReserved);
+        }
+
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [MemberData(nameof(LockBits_NotUnix_TestData))]
+        public void LockBits_Invoke_Success_NotUnix(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
+        {
+            Do_LockBits_Invoke_Success(bitmap, rectangle, lockMode, pixelFormat, expectedStride, expectedReserved);
+        }
+
+        private void Do_LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
         {
             try
             {
