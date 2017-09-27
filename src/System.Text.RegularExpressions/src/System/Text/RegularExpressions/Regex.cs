@@ -154,16 +154,18 @@ namespace System.Text.RegularExpressions
             throw new PlatformNotSupportedException();
         }
 
-        private Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, bool useCache)
+        private Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, bool addToCache)
         {
-            RegexTree tree;
-            CachedCodeEntry cached = null;
-            string cultureKey = null;
-
             if (pattern == null)
+            {
                 throw new ArgumentNullException(nameof(pattern));
+            }
+
             if (options < RegexOptions.None || (((int)options) >> MaxOptionShift) != 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(options));
+            }
+
             if ((options & RegexOptions.ECMAScript) != 0
              && (options & ~(RegexOptions.ECMAScript |
                              RegexOptions.IgnoreCase |
@@ -174,29 +176,30 @@ namespace System.Text.RegularExpressions
                            | RegexOptions.Debug
 #endif
                                                )) != 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(options));
+            }
 
             ValidateMatchTimeout(matchTimeout);
 
-            // Try to look up this regex in the cache.  We do this regardless of whether useCache is true since there's
-            // really no reason not to.
+            string cultureKey;
             if ((options & RegexOptions.CultureInvariant) != 0)
-                cultureKey = CultureInfo.InvariantCulture.ToString(); // "English (United States)"
+                cultureKey = CultureInfo.InvariantCulture.ToString();
             else
                 cultureKey = CultureInfo.CurrentCulture.ToString();
 
+            // Try to look up this regex in the cache.
             var key = new CachedCodeEntryKey(options, cultureKey, pattern);
-            cached = LookupCachedAndUpdate(key);
+            CachedCodeEntry cached = LookupCachedAndUpdate(key);
 
             this.pattern = pattern;
             roptions = options;
-
             internalMatchTimeout = matchTimeout;
 
             if (cached == null)
             {
                 // Parse the input
-                tree = RegexParser.Parse(pattern, roptions);
+                RegexTree tree = RegexParser.Parse(pattern, roptions);
 
                 // Extract the relevant information
                 capnames = tree._capnames;
@@ -208,7 +211,7 @@ namespace System.Text.RegularExpressions
                 InitializeReferences();
 
                 tree = null;
-                if (useCache)
+                if (addToCache)
                     cached = CacheCode(key);
             }
             else
@@ -232,7 +235,7 @@ namespace System.Text.RegularExpressions
             {
                 factory = Compile(_code, roptions);
 
-                if (useCache && cached != null)
+                if (addToCache && cached != null)
                 {
                     cached.AddCompiled(factory);
                 }
