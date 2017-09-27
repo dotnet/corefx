@@ -1107,6 +1107,9 @@ namespace System.Drawing.Tests
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed, 100, 65537 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed, 100, 65539 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format32bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed, 100, 65538 };
+
+            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, 300, 65539 };
+            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb, 300, 65538 };
         }
 
         public static IEnumerable<object[]> LockBits_TestData()
@@ -1133,8 +1136,6 @@ namespace System.Drawing.Tests
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format24bppRgb), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb, 400, 65538 };
 
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb, 300, 65537 };
-            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb, 300, 65539 };
-            yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb, 300, 65538 };
 
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed, 100, 1 };
             yield return new object[] { new Bitmap(100, 100, PixelFormat.Format8bppIndexed), new Rectangle(0, 0, 100, 100), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed, 100, 3 };
