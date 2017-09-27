@@ -51,7 +51,7 @@ namespace System.Text.RegularExpressions.Tests
 
         [Theory]
         [MemberData(nameof(Split_NonCompiled_TestData))]
-        [MemberData(nameof(RegexCompilationHelper.TransformRegexOptions), nameof(Split_NonCompiled_TestData), 2, MemberType = typeof(RegexCompilationHelper))]
+        [MemberData(nameof(RegexCompilationHelper.TransformRegexOptions), nameof(RegexSplitTests.Split_NonCompiled_TestData), 2, MemberType = typeof(RegexCompilationHelper))]
         public void Split(string pattern, string input, RegexOptions options, int count, int start, string[] expected)
         {
             bool isDefaultStart = RegexHelpers.IsDefaultStart(input, options, start);
