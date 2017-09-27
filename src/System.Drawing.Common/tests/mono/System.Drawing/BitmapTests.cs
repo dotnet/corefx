@@ -1527,7 +1527,7 @@ namespace MonoTests.System.Drawing
                 Assert.Equal(183, bitmap.Height);
                 Assert.Equal(173, bitmap.Width);
                 Assert.Equal(73744, bitmap.Flags);
-                Assert.True(bitmap.RawFormat.Equals(ImageFormat.Bmp));
+                Assert.Equal(bitmap.RawFormat, ImageFormat.Bmp);
                 hbitmap = bitmap.GetHbitmap();
             }
 
