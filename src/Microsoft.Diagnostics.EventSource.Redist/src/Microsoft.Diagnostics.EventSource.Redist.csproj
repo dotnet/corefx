@@ -15,6 +15,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <!-- <Compile Include="..\..\System.Diagnostics.Tracing\src\System\Diagnostics\Tracing\EventCounter.cs" /> -->
+    <Compile Include="*.cs" />
     <Compile Include="..\shared\*.cs" />
     <Compile Include="..\shared\TraceLogging\*.cs" />
   </ItemGroup>
