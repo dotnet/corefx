@@ -10,6 +10,11 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexCompilationHelper
     {
+        /// <summary>
+        /// Adds RegexOptions.Compiled to the RegexOptions of each item in a given array of test data.
+        /// </summary>
+        /// <param name="regexOptionsArrayIndex">The index in the object array of the CompilationOptions enum.</param>
+        /// <returns></returns>
         public static IEnumerable<object[]> TransformRegexOptions(string testDataMethodName, int regexOptionsArrayIndex)
         {
             // On Uap or NetNative the compiled feature isn't currently enabled,
@@ -20,48 +25,28 @@ namespace System.Text.RegularExpressions.Tests
             }
 
             int splitIndex = testDataMethodName.IndexOf('.');
-            if (splitIndex > 0)
+            if (splitIndex <= 0)
             {
-                string typeName = testDataMethodName.Substring(0, splitIndex);
-                string methodName = testDataMethodName.Substring(splitIndex + 1);
-                Type testType = Assembly.GetExecutingAssembly().GetType(typeName);
-                return InvokeTransform(testType, methodName, regexOptionsArrayIndex, true);
+                throw new InvalidOperationException($"Invalid test data method expression: '{testDataMethodName}'");
             }
-            else
-            {
-                IEnumerable<Type> types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == typeof(RegexCompilationHelper).Namespace);
-                foreach (Type type in types)
-                {
-                    IEnumerable<object[]> result = InvokeTransform(type, testDataMethodName, regexOptionsArrayIndex, false);
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                }
 
-                throw new Exception($"Test method '{testDataMethodName}' not found");
-            }
-        }
+            string typeName = testDataMethodName.Substring(0, splitIndex);
+            string methodName = testDataMethodName.Substring(splitIndex + 1);
+            Type type = Assembly.GetExecutingAssembly().GetType(typeName);
 
-        private static IEnumerable<object[]> InvokeTransform(Type type, string methodName, int regexOptionsArrayIndex, bool shouldThrow)
-        {
             MethodInfo methodInfo = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
-            if (methodInfo != null) // the method doesn't exist
-            {
-                var data = methodInfo.Invoke(null, null) as IEnumerable<object[]>;
-                return data.Select(obj =>
-                {
-                    obj[regexOptionsArrayIndex] = (RegexOptions)obj[regexOptionsArrayIndex] | RegexOptions.Compiled;
-                    return obj;
-                });
-            }
-
-            if (shouldThrow)
+            if (methodInfo != null)
             {
                 throw new Exception($"Test data method '{methodName}' in type '{type}' not found");
             }
 
-            return null;
+            var data = methodInfo.Invoke(null, null) as IEnumerable<object[]>;
+
+            return data.Select(obj =>
+            {
+                obj[regexOptionsArrayIndex] = (RegexOptions)obj[regexOptionsArrayIndex] | RegexOptions.Compiled;
+                return obj;
+            });
         }
     }
 }

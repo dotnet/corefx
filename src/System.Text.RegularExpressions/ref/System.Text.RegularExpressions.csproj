@@ -20,5 +20,9 @@
     <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj" />
     <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
   </ItemGroup>
+  <!-- Required for CompileToAssembly API -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <ProjectReference Include="..\..\System.Reflection.Emit.ILGeneration\ref\System.Reflection.Emit.ILGeneration.csproj" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

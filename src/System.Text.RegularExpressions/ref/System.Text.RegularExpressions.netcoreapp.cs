@@ -8,15 +8,10 @@
 
 namespace System.Text.RegularExpressions
 {
-    public partial class RegexCompilationInfo
+    public partial class Regex
     {
-        public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic) { }
-        public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic, TimeSpan matchTimeout) { }
-        public bool IsPublic { get; set; }
-        public TimeSpan MatchTimeout { get; set; }
-        public string Name { get; set; }
-        public string Namespace { get; set; }
-        public RegexOptions Options { get; set; }
-        public string Pattern { get; set; }
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname) { }
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname, System.Reflection.Emit.CustomAttributeBuilder[] attributes) { }
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname, System.Reflection.Emit.CustomAttributeBuilder[] attributes, string resourceFile) { }
     }
 }

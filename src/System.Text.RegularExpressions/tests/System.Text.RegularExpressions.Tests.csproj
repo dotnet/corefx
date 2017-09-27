@@ -26,13 +26,10 @@
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
     <Compile Include="RegexCompilationHelper.cs" />
+    <Compile Include="RegexCompilationInfoTests.cs" />
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <!-- Test files dependent on compiled feature -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="RegexCompilationInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="CaptureCollectionTests2.cs" />

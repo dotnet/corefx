@@ -9,6 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection;
+using System.Reflection.Emit;
 #if FEATURE_COMPILED
 using System.Runtime.CompilerServices;
 #endif
@@ -929,8 +931,7 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// Splits the <paramref name="input"/> string at the position defined by a
-        /// previous pattern.
+        /// Splits the <paramref name="input"/> string at the position defined by a previous pattern.
         /// </summary>
         public string[] Split(string input, int count, int startat)
         {
@@ -939,6 +940,26 @@ namespace System.Text.RegularExpressions
 
             return RegexReplacement.Split(this, input, count, startat);
         }
+
+#if FEATURE_COMPILED
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname, CustomAttributeBuilder[] attributes)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
+        public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname, CustomAttributeBuilder[] attributes, string resourceFile)
+        {
+            throw new PlatformNotSupportedException();
+        }
+#endif
 
         protected void InitializeReferences()
         {

@@ -109,8 +109,8 @@
   <data name="InvalidGroupName" xml:space="preserve">
     <value>Invalid group name: Group names must begin with a word character.</value>
   </data>
-  <data name="InvalidNullEmptyArgument" xml:space="preserve">
-    <value>Argument {0} cannot be null or zero-length.</value>
+  <data name="InvalidEmptyArgument" xml:space="preserve">
+    <value>Argument {0} cannot be zero-length.</value>
   </data>
   <data name="LengthNotNegative" xml:space="preserve">
     <value>Length cannot be less than 0 or exceed input length.</value>
