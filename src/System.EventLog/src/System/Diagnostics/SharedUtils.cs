@@ -1,0 +1,336 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Diagnostics
+{
+    using System.Security.Permissions;
+    using System.Threading;
+    using System.Text;
+    using Microsoft.Win32;
+    using System.ComponentModel;
+    using System.Security.Principal;
+    using System.Security.AccessControl;
+    using System.Runtime.Versioning;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.ConstrainedExecution;
+    using System.Runtime.InteropServices;
+    using Microsoft.Win32.SafeHandles;
+
+    internal static class SharedUtils
+    {
+
+        internal const int UnknownEnvironment = 0;
+        internal const int W2kEnvironment = 1;
+        internal const int NtEnvironment = 2;
+        internal const int NonNtEnvironment = 3;
+        private static volatile int environment = UnknownEnvironment;
+
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
+        {
+            get
+            {
+                if (s_InternalSyncObject == null)
+                {
+                    Object o = new Object();
+                    Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
+                }
+                return s_InternalSyncObject;
+            }
+        }
+
+        internal static Win32Exception CreateSafeWin32Exception()
+        {
+            return CreateSafeWin32Exception(0);
+        }
+
+        internal static Win32Exception CreateSafeWin32Exception(int error)
+        {
+            Win32Exception newException = null;
+            SecurityPermission securityPermission = new SecurityPermission(PermissionState.Unrestricted);
+            securityPermission.Assert();
+            try
+            {
+                if (error == 0)
+                    newException = new Win32Exception();
+                else
+                    newException = new Win32Exception(error);
+            }
+            finally
+            {
+                SecurityPermission.RevertAssert();
+            }
+
+            return newException;
+        }
+
+        internal static int CurrentEnvironment
+        {
+            get
+            {
+                if (environment == UnknownEnvironment)
+                {
+                    lock (InternalSyncObject)
+                    {
+                        if (environment == UnknownEnvironment)
+                        {
+                            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                            {
+                                if (Environment.OSVersion.Version.Major >= 5)
+                                    environment = W2kEnvironment;
+                                else
+                                    environment = NtEnvironment;
+                            }
+                            else
+                                environment = NonNtEnvironment;
+                        }
+                    }
+                }
+
+                return environment;
+            }
+        }
+
+        internal static void CheckEnvironment()
+        {
+            if (CurrentEnvironment == NonNtEnvironment)
+                throw new PlatformNotSupportedException(SR.WinNTRequired);
+        }
+
+        internal static void CheckNtEnvironment()
+        {
+            if (CurrentEnvironment == NtEnvironment)
+                throw new PlatformNotSupportedException(SR.Win2000Required);
+        }
+
+        internal static void EnterMutex(string name, ref Mutex mutex)
+        {
+            string mutexName = null;
+            if (CurrentEnvironment == W2kEnvironment)
+                mutexName = "Global\\" + name;
+            else
+                mutexName = name;
+
+            EnterMutexWithoutGlobal(mutexName, ref mutex);
+        }
+
+        internal static void EnterMutexWithoutGlobal(string mutexName, ref Mutex mutex)
+        {
+            bool createdNew;
+            MutexSecurity sec = new MutexSecurity();
+            SecurityIdentifier everyoneSid = new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null);
+            //sec.AddAccessRule(new MutexAccessRule(everyoneSid, MutexRights.Synchronize | MutexRights.Modify, AccessControlType.Allow));
+            //Mutex tmpMutex = new Mutex(false, mutexName, out createdNew, sec);
+            Mutex tmpMutex = new Mutex(false, mutexName, out createdNew);
+            SafeWaitForMutex(tmpMutex, ref mutex);
+        }
+
+        private static bool SafeWaitForMutex(Mutex mutexIn, ref Mutex mutexOut)
+        {
+            Debug.Assert(mutexOut == null, "You must pass in a null ref Mutex");
+            while (true)
+            {
+                if (!SafeWaitForMutexOnce(mutexIn, ref mutexOut))
+                    return false;
+                if (mutexOut != null)
+                    return true;
+                Thread.Sleep(0);
+            }
+        }
+
+        [MethodImplAttribute(MethodImplOptions.NoInlining)]
+        private static bool SafeWaitForMutexOnce(Mutex mutexIn, ref Mutex mutexOut)
+        {
+            bool ret;
+            RuntimeHelpers.PrepareConstrainedRegions();
+            try { }
+            finally
+            {
+                Thread.BeginCriticalRegion();
+                Thread.BeginThreadAffinity();
+                int result = WaitForSingleObjectDontCallThis(mutexIn.SafeWaitHandle, 500);
+                switch (result)
+                {
+                    case NativeMethods.WAIT_OBJECT_0:
+                    case NativeMethods.WAIT_ABANDONED:
+                        mutexOut = mutexIn;
+                        ret = true;
+                        break;
+
+                    case NativeMethods.WAIT_TIMEOUT:
+                        ret = true;
+                        break;
+
+                    default:
+                        ret = false;
+                        break;
+                }
+                if (mutexOut == null)
+                {
+                    Thread.EndThreadAffinity();
+                    Thread.EndCriticalRegion();
+                }
+            }
+
+            return ret;
+        }
+
+        [DllImport(Interop.Libraries.Kernel32, ExactSpelling = true, SetLastError = true, EntryPoint = "WaitForSingleObject")]
+        private static extern int WaitForSingleObjectDontCallThis(SafeWaitHandle handle, int timeout);
+        internal static string GetLatestBuildDllDirectory(string machineName)
+        {
+            string dllDir = "";
+            RegistryKey baseKey = null;
+            RegistryKey complusReg = null;
+            RegistryPermission registryPermission = new RegistryPermission(PermissionState.Unrestricted);
+            registryPermission.Assert();
+
+            try
+            {
+                if (machineName.Equals("."))
+                {
+                    return GetLocalBuildDirectory();
+                }
+                else
+                {
+                    baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
+                }
+                if (baseKey == null)
+                    throw new InvalidOperationException(SR.Format(SR.RegKeyMissingShort, "HKEY_LOCAL_MACHINE", machineName));
+
+                complusReg = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\.NETFramework");
+                if (complusReg != null)
+                {
+                    string installRoot = (string)complusReg.GetValue("InstallRoot");
+                    if (installRoot != null && installRoot != String.Empty)
+                    {
+                        string versionPrefix = "v" + Environment.Version.Major + "." + Environment.Version.Minor;
+                        RegistryKey policyKey = complusReg.OpenSubKey("policy");
+
+                        string version = null;
+
+                        if (policyKey != null)
+                        {
+                            try
+                            {
+                                RegistryKey bestKey = policyKey.OpenSubKey(versionPrefix);
+
+                                if (bestKey != null)
+                                {
+                                    try
+                                    {
+                                        version = versionPrefix + "." + GetLargestBuildNumberFromKey(bestKey);
+                                    }
+                                    finally
+                                    {
+                                        bestKey.Close();
+                                    }
+                                }
+                                else
+                                {
+                                    string[] majorVersions = policyKey.GetSubKeyNames();
+                                    int[] largestVersion = new int[] { -1, -1, -1 };
+                                    for (int i = 0; i < majorVersions.Length; i++)
+                                    {
+
+                                        string majorVersion = majorVersions[i];
+                                        if (majorVersion.Length > 1 && majorVersion[0] == 'v' && majorVersion.Contains("."))
+                                        {
+                                            int[] currentVersion = new int[] { -1, -1, -1 };
+
+                                            string[] splitVersion = majorVersion.Substring(1).Split('.');
+
+                                            if (splitVersion.Length != 2)
+                                            {
+                                                continue;
+                                            }
+
+                                            if (!Int32.TryParse(splitVersion[0], out currentVersion[0]) || !Int32.TryParse(splitVersion[1], out currentVersion[1]))
+                                            {
+                                                continue;
+                                            }
+
+                                            RegistryKey k = policyKey.OpenSubKey(majorVersion);
+                                            if (k == null)
+                                            {
+                                                continue;
+                                            }
+                                            try
+                                            {
+                                                currentVersion[2] = GetLargestBuildNumberFromKey(k);
+
+                                                if (currentVersion[0] > largestVersion[0]
+                                                    || ((currentVersion[0] == largestVersion[0]) && (currentVersion[1] > largestVersion[1])))
+                                                {
+                                                    largestVersion = currentVersion;
+                                                }
+                                            }
+                                            finally
+                                            {
+                                                k.Close();
+                                            }
+                                        }
+                                    }
+
+                                    version = "v" + largestVersion[0] + "." + largestVersion[1] + "." + largestVersion[2];
+                                }
+                            }
+                            finally
+                            {
+                                policyKey.Close();
+                            }
+
+                            if (version != null && version != String.Empty)
+                            {
+                                StringBuilder installBuilder = new StringBuilder();
+                                installBuilder.Append(installRoot);
+                                if (!installRoot.EndsWith("\\", StringComparison.Ordinal))
+                                    installBuilder.Append("\\");
+                                installBuilder.Append(version);
+                                dllDir = installBuilder.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (complusReg != null)
+                    complusReg.Close();
+
+                if (baseKey != null)
+                    baseKey.Close();
+
+                RegistryPermission.RevertAssert();
+            }
+
+            return dllDir;
+        }
+
+        private static int GetLargestBuildNumberFromKey(RegistryKey rootKey)
+        {
+            int largestBuild = -1;
+
+            string[] minorVersions = rootKey.GetValueNames();
+            for (int i = 0; i < minorVersions.Length; i++)
+            {
+                int o;
+                if (Int32.TryParse(minorVersions[i], out o))
+                {
+                    largestBuild = (largestBuild > o) ? largestBuild : o;
+                }
+            }
+
+            return largestBuild;
+        }
+
+        private static string GetLocalBuildDirectory()
+        {
+            return RuntimeEnvironment.GetRuntimeDirectory();
+        }
+    }
+}

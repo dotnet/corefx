@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26919.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.EventLog.Tests", "System.EventLog.Tests.csproj", "{4259DCE9-3480-40BB-B08A-64A2D446264B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		netfx-Debug|Any CPU = netfx-Debug|Any CPU
+		netfx-Release|Any CPU = netfx-Release|Any CPU
+		netstandard-Windows_NT-Debug|Any CPU = netstandard-Windows_NT-Debug|Any CPU
+		netstandard-Windows_NT-Release|Any CPU = netstandard-Windows_NT-Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netfx-Debug|Any CPU.ActiveCfg = netfx-Debug|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netfx-Debug|Any CPU.Build.0 = netfx-Debug|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netfx-Release|Any CPU.ActiveCfg = netfx-Release|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netfx-Release|Any CPU.Build.0 = netfx-Release|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netstandard-Windows_NT-Debug|Any CPU.ActiveCfg = netstandard-Windows_NT-Debug|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netstandard-Windows_NT-Debug|Any CPU.Build.0 = netstandard-Windows_NT-Debug|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netstandard-Windows_NT-Release|Any CPU.ActiveCfg = netstandard-Windows_NT-Release|Any CPU
+		{4259DCE9-3480-40BB-B08A-64A2D446264B}.netstandard-Windows_NT-Release|Any CPU.Build.0 = netstandard-Windows_NT-Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C5D07FC3-445A-42A2-8D34-884646D5EE9B}
+	EndGlobalSection
+EndGlobal
