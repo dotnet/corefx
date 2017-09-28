@@ -17,7 +17,7 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     public abstract class NamedPipeTest_Simple : NamedPipeTestBase
     {
-        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotWinRTSupported || PlatformDetection.IsWindows10Version16256OrGreater;
+        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotInAppContainer || PlatformDetection.IsWindows10Version16256OrGreater;
 
         /// <summary>
         /// Yields every combination of testing options for the OneWayReadWrites test
