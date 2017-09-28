@@ -39,8 +39,8 @@ Global
 		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Debug|Any CPU.Build.0 = netstandard-Windows_NT-Debug|Any CPU
 		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Release|Any CPU.ActiveCfg = netstandard-Windows_NT-Release|Any CPU
 		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Release|Any CPU.Build.0 = netstandard-Windows_NT-Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.ActiveCfg = netcoreapp-OSX-Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.Build.0 = netcoreapp-OSX-Debug|Any CPU
+		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.ActiveCfg = netcoreapp-Unix-Debug|Any CPU
+		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.Build.0 = netcoreapp-Unix-Debug|Any CPU
 		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
 		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
 		{A7488FC0-9A8F-4EF9-BC3E-C5EBA47E13F8}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
